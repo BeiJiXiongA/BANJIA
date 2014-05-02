@@ -1,0 +1,375 @@
+//
+//  NotificationDetailViewController.m
+//  School
+//
+//  Created by TeekerZW on 14-2-18.
+//  Copyright (c) 2014年 TeekerZW. All rights reserved.
+//
+
+#import "NotificationDetailViewController.h"
+#import "Header.h"
+#import "NotificationDetailCell.h"
+#import "MemberDetailViewController.h"
+#import "StudentDetailViewController.h"
+#import "ParentsDetailViewController.h"
+#import "MemberDetailViewController.h"
+
+#define UnreadTabelTag 2000
+#define ReadTableTag  3000
+
+@interface NotificationDetailViewController ()<UITableViewDataSource,UITableViewDelegate,UIScrollViewDelegate>
+{
+    UITextView *contentTextView;
+    NSMutableArray *buttonNamesArray;
+    CGFloat buttonHeight;
+    
+    UIButton *readButton;
+    UIButton *unreadButton;
+    
+    UIScrollView *containerScrollView;
+    
+    UITableView *readedTableView;
+    UITableView *unreadTableView;
+    
+    NSMutableArray *readArray;
+    NSMutableArray *unreaderArray;
+    
+}
+@end
+
+@implementation NotificationDetailViewController
+@synthesize noticeContent,noticeID,c_read,classID;
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+    }
+    return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+	// Do any additional setup after loading the view.
+    
+    self.titleLabel.text = @"公告详情";
+    readArray = [[NSMutableArray alloc] initWithCapacity:0];
+    unreaderArray = [[NSMutableArray alloc] initWithCapacity:0];
+    
+    UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
+    UIImageView *inputBg = [[UIImageView alloc] initWithFrame:CGRectMake(4, UI_NAVIGATION_BAR_HEIGHT+5, SCREEN_WIDTH-8, 155)];
+    [inputBg setImage:inputImage];
+    [self.bgView addSubview:inputBg];
+    
+    contentTextView = [[UITextView alloc] initWithFrame:CGRectMake(8, UI_NAVIGATION_BAR_HEIGHT+8, SCREEN_WIDTH-16, 152)];
+    contentTextView.backgroundColor = [UIColor clearColor];
+    contentTextView.editable = NO;
+    contentTextView.contentInset = UIEdgeInsetsMake(0, 18.5, 18, 18.5);
+    contentTextView.textColor = TITLE_COLOR;
+    contentTextView.font = [UIFont systemFontOfSize:16];
+    contentTextView.text = noticeContent;
+    [self.bgView addSubview:contentTextView];
+
+    buttonNamesArray = [[NSMutableArray alloc] initWithCapacity:2];
+
+    buttonHeight = 38;
+    
+    UIImage *buttonImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
+    
+    readButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    readButton.frame = CGRectMake(0, contentTextView.frame.origin.y+contentTextView.frame.size.height, SCREEN_WIDTH/2, buttonHeight);
+    [readButton setBackgroundImage:buttonImage forState:UIControlStateNormal];
+    readButton.backgroundColor = [UIColor clearColor];
+    readButton.tag = 1000;
+    [readButton setTitleColor:LIGHT_BLUE_COLOR forState:UIControlStateNormal];
+    [readButton setTitle:[NSString stringWithFormat:@"已读(%d)",0] forState:UIControlStateNormal];
+    [readButton addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
+    [self.bgView addSubview:readButton];
+    
+    unreadButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    unreadButton.frame = CGRectMake(SCREEN_WIDTH/2, contentTextView.frame.origin.y+contentTextView.frame.size.height, SCREEN_WIDTH/2, buttonHeight);
+    unreadButton.backgroundColor = [UIColor clearColor];
+    unreadButton.tag = 1001;
+    [unreadButton setBackgroundImage:inputImage forState:UIControlStateNormal];
+    [unreadButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+    [unreadButton setTitle:[NSString stringWithFormat:@"未读(%d)",0] forState:UIControlStateNormal];
+    [unreadButton addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
+    [self.bgView addSubview:unreadButton];
+    
+    containerScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, readButton.frame.origin.y+readButton.frame.size.height, SCREEN_WIDTH,SCREEN_HEIGHT - readButton.frame.origin.y - readButton.frame.size.height)];
+    containerScrollView.backgroundColor = [UIColor clearColor];
+    containerScrollView.delegate = self;
+    containerScrollView.tag = 1000;
+    containerScrollView.bounces = NO;
+    containerScrollView.pagingEnabled = YES;
+    [self.bgView addSubview:containerScrollView];
+
+    readedTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, containerScrollView.frame.size.height) style:UITableViewStylePlain];
+    readedTableView.delegate = self;
+    readedTableView.tag = ReadTableTag;
+    readedTableView.dataSource = self;
+    readedTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    [containerScrollView addSubview:readedTableView];
+    
+    if ([c_read integerValue] == 1)
+    {
+        [self getViewList:@"read"];
+        [self getViewList:@"unread"];
+    }
+    else
+    {
+        unreadButton.hidden = YES;
+        readButton.hidden = YES;
+        contentTextView.frame = CGRectMake(8, UI_NAVIGATION_BAR_HEIGHT+8, SCREEN_WIDTH-16, SCREEN_HEIGHT-16-UI_NAVIGATION_BAR_HEIGHT);
+        inputBg.frame = CGRectMake(4, UI_NAVIGATION_BAR_HEIGHT+5, SCREEN_WIDTH-8, SCREEN_HEIGHT-10-UI_NAVIGATION_BAR_HEIGHT);
+        
+        containerScrollView.hidden = YES;
+    }
+
+    unreadTableView = [[UITableView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH, 0, SCREEN_WIDTH, containerScrollView.frame.size.height) style:UITableViewStylePlain];
+    unreadTableView.tag = UnreadTabelTag;
+    unreadTableView.delegate = self;
+    unreadTableView.dataSource = self;
+    unreadTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    [containerScrollView addSubview:unreadTableView];
+    
+    containerScrollView.contentSize = CGSizeMake(SCREEN_WIDTH*2, containerScrollView.frame.size.height);
+}
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+
+-(void)buttonClick:(UIButton *)button
+{
+    if (button.tag == 1000)
+    {
+        [readButton setTitleColor:LIGHT_BLUE_COLOR forState:UIControlStateNormal];
+        [unreadButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+    }
+    else if(button.tag == 1001)
+    {
+        [readButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+        [unreadButton setTitleColor:LIGHT_BLUE_COLOR forState:UIControlStateNormal];
+    }
+    [UIView animateWithDuration:0.2 animations:^{
+        containerScrollView.contentOffset = CGPointMake(SCREEN_WIDTH*(button.tag%1000), 0);
+    }];
+}
+
+#pragma mark - tableView
+
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    if (tableView.tag == ReadTableTag)
+    {
+        return [readArray count];
+    }
+    else if(tableView.tag == UnreadTabelTag)
+    {
+        return [unreaderArray count];
+    }
+    return 0;
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 47.5;
+}
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (tableView.tag == ReadTableTag)
+    {
+        static NSString *notificationDetailCell = @"notificationdetailcell";
+        NotificationDetailCell *cell = [tableView dequeueReusableCellWithIdentifier:notificationDetailCell];
+        if (cell == nil)
+        {
+            cell = [[NotificationDetailCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:notificationDetailCell];
+        }
+       
+        NSDictionary *dict = [readArray objectAtIndex:indexPath.row];
+        [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:@"header_pic.jpg"];
+        cell.headerImageView.frame = CGRectMake(14, 3.75, 40, 40);
+        [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:@"header_pic.jpg"];
+        cell.nameLabel.frame = CGRectMake(60, 8.75, 150, 30);
+        cell.nameLabel.text = [dict objectForKey:@"name"];
+        cell.nameLabel.backgroundColor = [UIColor clearColor];
+        cell.nameLabel.textColor = TITLE_COLOR;
+        cell.contactButton.hidden = YES;
+        [cell.contactButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+        [cell.contactButton setImage:[UIImage imageNamed:@"icon_comment"] forState:UIControlStateNormal];
+        cell.contactButton.titleLabel.font = [UIFont systemFontOfSize:18];
+        cell.contactButton.frame = CGRectMake( SCREEN_WIDTH-120, 8.75, 90, 30);
+        cell.contactButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentRight;
+        cell.contactButton.backgroundColor = [UIColor yellowColor];
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+//        cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"indicator"]];
+//        cell.accessoryView.frame = CGRectMake(SCREEN_WIDTH-30, 20, 15, 20);
+        UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
+        UIImageView *bgImageBG = [[UIImageView alloc] initWithImage:inputImage];
+        cell.backgroundView = bgImageBG;
+        return cell;
+    }
+    else if(tableView.tag == UnreadTabelTag)
+    {
+        static NSString *notificationDetailCell = @"notificationdetailcell";
+        NotificationDetailCell *cell = [tableView dequeueReusableCellWithIdentifier:notificationDetailCell];
+        if (cell == nil)
+        {
+            cell = [[NotificationDetailCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:notificationDetailCell];
+        }
+        NSDictionary *dict = [unreaderArray objectAtIndex:indexPath.row];
+        cell.headerImageView.frame = CGRectMake(14, 3.75, 40, 40);
+        [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:@"header_pic.jpg"];
+        cell.nameLabel.text = [dict objectForKey:@"name"];
+        cell.nameLabel.frame = CGRectMake(60, 8.75, 150, 30);
+        cell.nameLabel.backgroundColor = [UIColor clearColor];
+        cell.nameLabel.textColor = TITLE_COLOR;
+        cell.contactButton.hidden = NO;
+        [cell.contactButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+        [cell.contactButton setImage:[UIImage imageNamed:@"icon_comment"] forState:UIControlStateNormal];
+        
+//        [cell.contactButton setTitle:@"联系家长" forState:UIControlStateNormal];
+        cell.contactButton.titleLabel.font = [UIFont systemFontOfSize:18];
+        cell.contactButton.frame = CGRectMake( SCREEN_WIDTH-80, 8.85, 90, 30);
+        cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"indicator"]];
+        cell.accessoryView.frame = CGRectMake(SCREEN_WIDTH-30, 13.85, 10, 20);
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
+        UIImageView *bgImageBG = [[UIImageView alloc] initWithImage:inputImage];
+        cell.backgroundView = bgImageBG;
+        return cell;
+    }
+    return nil;
+}
+
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (tableView.tag == UnreadTabelTag)
+    {
+        NSDictionary *dict = [unreaderArray objectAtIndex:indexPath.row];
+        NSString *role = [dict objectForKey:@"role"];
+        DDLOG(@"%@===%@",role,[dict objectForKey:@"name"]);
+        if ([role isEqualToString:@"students"])
+        {
+            StudentDetailViewController *studentDetail = [[StudentDetailViewController alloc] init];
+            studentDetail.classID = classID;
+            studentDetail.studentID = [dict objectForKey:@"_id"];
+            studentDetail.studentName = [dict objectForKey:@"name"];
+            studentDetail.title = [dict objectForKey:@"title"];
+            studentDetail.headerImg = [dict objectForKey:@"img_icon"];
+            studentDetail.role = [dict objectForKey:@"role"];
+            studentDetail.classID = classID;
+            [studentDetail showSelfViewController:self];
+        }
+        else if([role isEqualToString:@"parents"])
+        {
+            ParentsDetailViewController *parentDetail = [[ParentsDetailViewController alloc] init];
+            parentDetail.parentID = [dict objectForKey:@"_id"];
+            parentDetail.parentName = [dict objectForKey:@"name"];
+            parentDetail.title = [dict objectForKey:@"title"];
+            parentDetail.headerImg = [dict objectForKey:@"img_icon"];
+            parentDetail.admin = NO;
+            parentDetail.classID = classID;
+            parentDetail.role = [dict objectForKey:@"role"];
+            [parentDetail showSelfViewController:self];
+        }
+        else if([role isEqualToString:@"teachers"])
+        {
+            MemberDetailViewController *teacherDetail = [[MemberDetailViewController alloc] init];
+            teacherDetail.teacherID = [dict objectForKey:@"_id"];
+            teacherDetail.teacherName = [dict objectForKey:@"name"];
+            teacherDetail.title = [dict objectForKey:@"title"];
+            teacherDetail.headerImg = [dict objectForKey:@"img_icon"];
+            teacherDetail.admin = NO;
+            teacherDetail.classID = classID;
+            teacherDetail.role = [dict objectForKey:@"role"];
+            [teacherDetail showSelfViewController:self];
+        }
+    }
+}
+
+#pragma mark - scrollview
+-(void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
+{
+    if(scrollView.tag == 1000)
+    {
+        CGFloat offsetX = scrollView.contentOffset.x;
+        if (offsetX/SCREEN_WIDTH == 0)
+        {
+            [readButton setTitleColor:LIGHT_BLUE_COLOR forState:UIControlStateNormal];
+            [unreadButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+        }
+        else
+        {
+            [readButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+            [unreadButton setTitleColor:LIGHT_BLUE_COLOR forState:UIControlStateNormal];
+        }
+    }
+    DDLOG(@"%f",scrollView.contentOffset.x);
+}
+
+#pragma mark - getViewList
+-(void)getViewList:(NSString *)listType
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"p_id":noticeID,
+                                                                      @"list_type":listType
+                                                                      } API:GETNOTICEVIEWLIST];
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+//            DDLOG(@"notice_view_list responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                [buttonNamesArray removeAllObjects];
+                if (![[[responseDict objectForKey:@"data"] objectForKey:@"read_num"] isEqual:[NSNull null]])
+                {
+                    [readButton setTitle:[NSString stringWithFormat:@"已读(%d)",[[[responseDict objectForKey:@"data"] objectForKey:@"read_num"] integerValue]] forState:UIControlStateNormal];
+                }
+                else
+                {
+                    [readButton setTitle:[NSString stringWithFormat:@"已读(%d)",0] forState:UIControlStateNormal];
+                }
+                if (![[[responseDict objectForKey:@"data"] objectForKey:@"unread_num"] isEqual:[NSNull null]])
+                {
+                    [unreadButton setTitle:[NSString stringWithFormat:@"未读(%d)",[[[responseDict objectForKey:@"data"] objectForKey:@"unread_num"] integerValue]] forState:UIControlStateNormal];
+                }
+                else
+                {
+                    [unreadButton setTitle:[NSString stringWithFormat:@"未读(%d)",0] forState:UIControlStateNormal];
+                }
+                
+                if ([[[responseDict objectForKey:@"data"] objectForKey:@"unread_list"] count]>0)
+                {
+                    [unreaderArray addObjectsFromArray:[[[responseDict objectForKey:@"data"] objectForKey:@"unread_list"] allValues]];
+                    [unreadTableView reloadData];
+                }
+                if ([[[responseDict objectForKey:@"data"] objectForKey:@"read_list"] count]>0)
+                {
+                    [readArray addObjectsFromArray:[[[responseDict objectForKey:@"data"] objectForKey:@"read_list"] allValues]];
+                    [readedTableView reloadData];
+                }
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:self];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+        }];
+        [request startAsynchronous];
+    }
+
+}
+@end
