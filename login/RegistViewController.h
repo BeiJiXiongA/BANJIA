@@ -9,5 +9,9 @@
 #import "XDContentViewController.h"
 
 @interface RegistViewController : XDContentViewController
-
+@property (nonatomic, strong) NSString *headerIcon;
+@property (nonatomic, strong) NSString *nickName;
+@property (nonatomic, strong) NSString *account;
+@property (nonatomic, strong) NSString *accountID;
+@property (nonatomic, strong) NSString *accountType;
 @end

@@ -12,13 +12,13 @@
 #import "UIView+URBMediaFocusViewController.h"
 #import "Header.h"
 
-static const CGFloat __overlayAlpha = 0.9f;						// opacity of the black overlay displayed below the focused image
+//static const CGFloat __overlayAlpha = 0.9f;						// opacity of the black overlay displayed below the focused image
 static const CGFloat __animationDuration = 0.18f;				// the base duration for present/dismiss animations (except physics-related ones)
 static const CGFloat __maximumDismissDelay = 0.5f;				// maximum time of delay (in seconds) between when image view is push out and dismissal animations begin
-static const CGFloat __resistance = 0.0f;						// linear resistance applied to the image’s dynamic item behavior
-static const CGFloat __density = 1.0f;							// relative mass density applied to the image's dynamic item behavior
+//static const CGFloat __resistance = 0.0f;						// linear resistance applied to the image’s dynamic item behavior
+//static const CGFloat __density = 1.0f;							// relative mass density applied to the image's dynamic item behavior
 static const CGFloat __velocityFactor = 1.0f;					// affects how quickly the view is pushed out of the view
-static const CGFloat __angularVelocityFactor = 1.0f;			// adjusts the amount of spin applied to the view during a push force, increases towards the view bounds
+//static const CGFloat __angularVelocityFactor = 1.0f;			// adjusts the amount of spin applied to the view during a push force, increases towards the view bounds
 static const CGFloat __minimumVelocityRequiredForPush = 50.0f;	// defines how much velocity is required for the push behavior to be applied
 
 /* parallax options */
@@ -488,8 +488,8 @@ static const CGFloat __blurTintColorAlpha = 0.2f;				// defines how much to tint
 #pragma mark - Gesture Methods
 
 - (void)handlePanGesture:(UIPanGestureRecognizer *)gestureRecognizer {
-	UIView *view = gestureRecognizer.view;
-	CGPoint location = [gestureRecognizer locationInView:self.view];
+//	UIView *view = gestureRecognizer.view;
+//	CGPoint location = [gestureRecognizer locationInView:self.view];
 	CGPoint boxLocation = [gestureRecognizer locationInView:self.imageView];
 	
 	if (gestureRecognizer.state == UIGestureRecognizerStateBegan) {

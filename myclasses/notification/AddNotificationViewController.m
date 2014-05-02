@@ -65,7 +65,7 @@ UITextViewDelegate>
     
     objectOpen = NO;
     
-    objectString = @"全体家长和学生";
+    objectString = [objectsArray firstObject];
     objectsValueString = @"all";
     
     contentHolder = [[UITextView alloc] initWithFrame:CGRectMake(18, UI_NAVIGATION_BAR_HEIGHT+8, 200, 30)];
@@ -109,37 +109,37 @@ UITextViewDelegate>
     objectsTableView.dataSource = self;
     [self.bgView addSubview:objectsTableView];
     
-    replayLabel = [[UILabel alloc] init];
-    replayLabel.frame = CGRectMake(15, objectsTableView.frame.size.height+objectsTableView.frame.origin.y+30, 200, 30);
-    replayLabel.text = @"需要回执";
+    
+    replayLabel = [[UILabel alloc] initWithFrame:CGRectMake(objectsTableView.frame.origin.x, objectsTableView.frame.origin.y+objectsTableView.frame.size.height+20, 150, 30)];
     replayLabel.textColor = TITLE_COLOR;
-    replayLabel.font = [UIFont systemFontOfSize:16];
     replayLabel.backgroundColor = [UIColor clearColor];
+    replayLabel.font = [UIFont systemFontOfSize:16];
+    replayLabel.text = @"是否需要回执";
     [self.bgView addSubview:replayLabel];
     
-    replaySwitch = [[MySwitchView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH-200, replayLabel.frame.origin.y, 80, 30)];
-    replaySwitch.selectView.frame = CGRectMake(replaySwitch.frame.size.width/2, 0, 40, replaySwitch.frame.size.height);
-    replaySwitch.mySwitchDel = self;
+    replaySwitch = [[MySwitchView alloc] initWithFrame:CGRectMake(replayLabel.frame.size.width+replaySwitch.frame.origin.x+20, replayLabel.frame.origin.y, 80, 30)];
     [self.bgView addSubview:replaySwitch];
-    
+    replaySwitch.selectView.backgroundColor = [UIColor whiteColor];
+    replaySwitch.selectView.frame = CGRectMake(replaySwitch.frame.size.width/2, 0, replaySwitch.frame.size.width/2, replaySwitch.frame.size.height);
+    replaySwitch.mySwitchDel = self;
     replaySwitch.leftView.layer.borderColor = [UIColor clearColor].CGColor;
     replaySwitch.rightView.layer.borderColor = [UIColor clearColor].CGColor;
     replaySwitch.selectView.layer.borderColor = [UIColor clearColor].CGColor;
     
     UILabel *leftLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 40, 30)];
     leftLabel.text = @"YES";
+    leftLabel.backgroundColor = [UIColor clearColor];
     leftLabel.font = [UIFont systemFontOfSize:14];
     leftLabel.textAlignment = NSTextAlignmentCenter;
     leftLabel.textColor = [UIColor whiteColor];
-    leftLabel.backgroundColor = [UIColor colorWithRed:22.00/255.00 green:157.00/255.00 blue:195.00/255.00 alpha:1.0f];
     [replaySwitch.leftView addSubview:leftLabel];
     
     UILabel *rightLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 40, 30)];
     rightLabel.text = @"NO";
+    rightLabel.backgroundColor = [UIColor clearColor];
     rightLabel.textColor = [UIColor whiteColor];
     rightLabel.font = [UIFont systemFontOfSize:14];
     rightLabel.textAlignment = NSTextAlignmentCenter;
-    rightLabel.backgroundColor = [UIColor colorWithRed:22.00/255.00 green:157.00/255.00 blue:195.00/255.00 alpha:1.0f];
     [replaySwitch.rightView addSubview:rightLabel];
     
     
@@ -147,9 +147,21 @@ UITextViewDelegate>
     sendButton.frame = CGRectMake(SCREEN_WIDTH-60, 6, 50, 35);
     [sendButton setTitle:@"发布" forState:UIControlStateNormal];
     [sendButton setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
-    [sendButton addTarget:self action:@selector(addNOtification) forControlEvents:UIControlEventTouchUpInside];
+    [sendButton addTarget:self action:@selector(addNotification) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:sendButton];
 }
+
+-(void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"PageOne"];
+}
+-(void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"PageOne"];
+}
+
 
 - (void)didReceiveMemoryWarning
 {
@@ -230,17 +242,17 @@ UITextViewDelegate>
 {
     if ([mySwitchView isOpen])
     {
-        replay = 1;
+        replay = 0;
         DDLOG(@"replaySwitch--on===%ld",(long)replay);
     }
     else
     {
-        replay = 0;
+        replay = 1;
         DDLOG(@"replaySwitch--off==%ld",(long)replay);
     }
 }
 
--(void)addNOtification
+-(void)addNotification
 {
     if([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] <= 0)
     {
@@ -253,6 +265,7 @@ UITextViewDelegate>
         [Tools showAlertView:@"请输入公告内容" delegateViewController:nil];
         return ;
     }
+    [BPush delTag:classID];
     
     if ([Tools NetworkReachable])
     {
@@ -262,22 +275,25 @@ UITextViewDelegate>
                                                                       @"content":contentTextView.text,
                                                                       @"view":objectsValueString,
                                                                       @"c_read":[NSNumber numberWithInteger:replay]
+//                                                                      @"role":[[NSUserDefaults standardUserDefaults] objectForKey:@"role"]
                                                                       } API:ADDNOTIFICATION];
         [request setCompletionBlock:^{
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"addNOti===%@",responseString);
+            DDLOG(@"addNoti===%@",responseString);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
+                [self readNotice:[responseDict objectForKey:@"data"]];
+                
                 if ([self.updel respondsToSelector:@selector(update:)])
                 {
+                    sleep(5);
                     [self.updel update:YES];
                 }
                 [self unShowSelfViewController];
             }
             else
             {
-                [responseString writeToFile:@"/Users/tike/Desktop/Schools/error.txt" atomically:YES encoding:NSUTF8StringEncoding error:nil];
                 [Tools dealRequestError:responseDict fromViewController:self];
             }
         }];
@@ -290,6 +306,38 @@ UITextViewDelegate>
     }
 }
 
+-(void)readNotice:(NSString *)noticeID
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"p_id":noticeID,
+                                                                      @"c_id":classID
+                                                                      } API:READNTICES];
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"classInfo responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                DDLOG(@"read success!");
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:self];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+        }];
+        [request startAsynchronous];
+    }
+}
+
+
 #pragma mark - textview
 -(void)textViewDidChange:(UITextView *)textView
 {
@@ -301,14 +349,14 @@ UITextViewDelegate>
     {
         contentHolder.text = @"请填写公告内容";
     }
+    if ([textView.text length]>200)
+    {
+        textView.text = [textView.text substringToIndex:201];
+        [Tools showAlertView:@"公告内容不能超多200字" delegateViewController:nil];
+    }
 }
 -(BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
 {
-    if ([textView.text length] > 200)
-    {
-        [Tools showAlertView:@"公告内容不能超多200字" delegateViewController:nil];
-        return NO;
-    }
     return YES;
 }
 @end

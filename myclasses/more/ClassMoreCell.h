@@ -7,9 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "KLSwitch.h"
 
 @interface ClassMoreCell : UITableViewCell
 @property (nonatomic, strong) UILabel *nameLabel;
 @property (nonatomic, strong) UILabel *contentLabel;
-@property (nonatomic, strong) UISwitch *switchView;
+@property (nonatomic, strong) KLSwitch *switchView;
+@property (nonatomic, strong) UIButton *button;
 @end

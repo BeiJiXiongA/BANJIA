@@ -9,5 +9,6 @@
 #import "XDContentViewController.h"
 
 @interface CreateSchoolViewController : XDContentViewController
-
+@property (nonatomic, strong) NSString *schoolName;
+@property (nonatomic, strong) NSString *classID;
 @end

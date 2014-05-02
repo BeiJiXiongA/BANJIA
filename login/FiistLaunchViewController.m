@@ -7,9 +7,13 @@
 //
 
 #import "FiistLaunchViewController.h"
+#import "WelcomeViewController.h"
 
-@interface FiistLaunchViewController ()
-
+@interface FiistLaunchViewController ()<UIScrollViewDelegate>
+{
+    UIScrollView *showScrollView;
+    UIPageControl *showPageControl;
+}
 @end
 
 @implementation FiistLaunchViewController
@@ -27,12 +31,81 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    
+    self.navigationBarView.hidden = YES;
+    
+    showScrollView = [[UIScrollView alloc] init];
+    showScrollView.delegate = self;
+    showScrollView.frame = CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    [self.bgView addSubview:showScrollView];
+    
+    NSArray *showImages = [NSArray arrayWithObjects:@"first",@"sec",@"third", nil];
+    for (int i=0 ; i<[showImages count]; i++)
+    {
+        UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH*i, 0, SCREEN_WIDTH, SCREEN_HEIGHT)];
+        [imageView setImage:[UIImage imageNamed:[showImages objectAtIndex:i]]];
+        [showScrollView addSubview:imageView];
+        
+        if (i==2)
+        {
+
+            imageView.userInteractionEnabled = YES;
+            
+            UISwipeGestureRecognizer *swipe = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(startBanJia)];
+            swipe.direction = UISwipeGestureRecognizerDirectionRight;
+            [imageView addGestureRecognizer:swipe];
+//
+//            showScrollView.userInteractionEnabled = YES;
+//            [showScrollView addGestureRecognizer:swipe];
+            
+//            UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(startBanJia)];
+//            [imageView addGestureRecognizer:tap];
+        }
+    }
+    showScrollView.pagingEnabled = YES;
+    showScrollView.bounces = NO;
+    showScrollView.showsHorizontalScrollIndicator = NO;
+    showScrollView.contentSize = CGSizeMake(SCREEN_WIDTH*[showImages count]+10, SCREEN_HEIGHT);
+    
+    showPageControl = [[UIPageControl alloc] initWithFrame:CGRectMake(SCREEN_WIDTH/2-50, SCREEN_HEIGHT-80, 100, 30)];
+    showPageControl.backgroundColor = [UIColor clearColor];
+    showPageControl.currentPage = 0;
+    showPageControl.numberOfPages = [showImages count];
+    showPageControl.pageIndicatorTintColor = [UIColor grayColor];
+    showPageControl.currentPageIndicatorTintColor = [UIColor redColor];
+    [self.bgView addSubview:showPageControl];
 }
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+-(void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
+{
+    showPageControl.currentPage = scrollView.contentOffset.x/SCREEN_WIDTH;
+}
+
+-(void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    if (scrollView.contentOffset.x > SCREEN_WIDTH*2)
+    {
+        WelcomeViewController *welcomeViewCOntroller = [[WelcomeViewController alloc]init];
+        [welcomeViewCOntroller showSelfViewController:self];
+        
+        [[NSUserDefaults standardUserDefaults] setObject:@"first" forKey:@"first"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+    }
+}
+
+-(void)startBanJia
+{
+    WelcomeViewController *welcomeViewCOntroller = [[WelcomeViewController alloc]init];
+    [welcomeViewCOntroller showSelfViewController:self];
+    
+    [[NSUserDefaults standardUserDefaults] setObject:@"first" forKey:@"first"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 /*

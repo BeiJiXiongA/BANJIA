@@ -11,7 +11,7 @@
 
 @implementation ClassMoreCell
 
-@synthesize nameLabel,contentLabel,switchView;
+@synthesize nameLabel,contentLabel,switchView,button;
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
@@ -33,9 +33,13 @@
         contentLabel.font = [UIFont systemFontOfSize:12];
         [self.contentView addSubview:contentLabel];
         
-        switchView = [[UISwitch alloc] initWithFrame:CGRectMake( SCREEN_WIDTH-80, 7, 60, 30)];
+        switchView = [[KLSwitch alloc] initWithFrame:CGRectMake( SCREEN_WIDTH-60, 7, 50, 30)];
+        [switchView setOnTintColor:LIGHT_BLUE_COLOR];
         [self.contentView addSubview:switchView];
         
+        button = [UIButton buttonWithType:UIButtonTypeCustom];
+        button.backgroundColor = [UIColor clearColor];
+        [self.contentView addSubview:button];
     }
     return self;
 }

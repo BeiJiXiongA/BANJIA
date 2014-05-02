@@ -40,22 +40,22 @@
     
     self.titleLabel.text = @"申请加入";
     
-    label = [[UILabel alloc] initWithFrame:CGRectMake(35, UI_NAVIGATION_BAR_HEIGHT+85, SCREEN_WIDTH-70, 40)];
-    label.numberOfLines = 2;
+    label = [[UILabel alloc] initWithFrame:CGRectMake(25, UI_NAVIGATION_BAR_HEIGHT+85, SCREEN_WIDTH-50, 80)];
+    label.numberOfLines = 3;
     label.textColor = TITLE_COLOR;
-    label.numberOfLines = 2;
     label.lineBreakMode = NSLineBreakByWordWrapping;
     label.backgroundColor = [UIColor clearColor];
     label.font = [UIFont systemFontOfSize:18];
     label.lineBreakMode = NSLineBreakByWordWrapping;
     label.textAlignment = NSTextAlignmentCenter;
+    label.text = [NSString stringWithFormat:@"%@，您希望加入%@-%@，您的身份是？",[Tools user_name],schoolName,className];
     [self.bgView addSubview:label];
     
     UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
     
     UIButton *studentButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [studentButton setTitle:@"我是老师" forState:UIControlStateNormal];
-    studentButton.frame = CGRectMake(39, UI_NAVIGATION_BAR_HEIGHT+166, SCREEN_WIDTH-78, 33);
+    studentButton.frame = CGRectMake(39, UI_NAVIGATION_BAR_HEIGHT+170, SCREEN_WIDTH-78, 33);
     [studentButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     studentButton.titleLabel.font = [UIFont systemFontOfSize:16];
     [studentButton addTarget:self action:@selector(applyForJoinClass:) forControlEvents:UIControlEventTouchUpInside];
@@ -81,7 +81,7 @@
     [teacherButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     [self.bgView addSubview:teacherButton];
     
-    [self getUserInfo];
+//    [self getUserInfo];
 }
 
 - (void)didReceiveMemoryWarning
@@ -184,7 +184,7 @@
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 real_name = [[responseDict objectForKey:@"data"] objectForKey:@"r_name"];
-                label.text = [NSString stringWithFormat:@"%@，您希望加入%@-%@，您的身份是？",real_name,schoolName,className];
+                
             }
             else
             {

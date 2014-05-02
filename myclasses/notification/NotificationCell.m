@@ -10,7 +10,7 @@
 #import "Header.h"
 
 @implementation NotificationCell
-@synthesize iconImageView,bgImageView,contentLabel,timeLabel,statusLabel,contentTextView;
+@synthesize iconImageView,bgImageView,contentLabel,timeLabel,statusLabel,contentTextView,nameLabel;
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
@@ -21,30 +21,25 @@
         iconImageView.backgroundColor = [UIColor clearColor];
         [self.contentView addSubview:iconImageView];
         
-        bgImageView = [[UIImageView alloc] initWithFrame:CGRectMake(50, 10, SCREEN_WIDTH-60, 100)];
+        bgImageView = [[UIImageView alloc] initWithFrame:CGRectMake(20, 10, SCREEN_WIDTH-30, 100)];
         bgImageView.backgroundColor = [UIColor clearColor];
-//        bgImageView.layer.cornerRadius = 5;
-//        bgImageView.layer.masksToBounds = YES;
-//        bgImageView.layer.borderColor = [UIColor grayColor].CGColor;
-//        bgImageView.layer.borderWidth = 1.0f;
         [self.contentView addSubview:bgImageView];
         
-        contentLabel = [[MyLabel alloc] initWithFrame:CGRectMake(55, 5,  SCREEN_WIDTH-70, 75)];
+        nameLabel = [[UILabel alloc] init];
+        nameLabel.font = [UIFont systemFontOfSize:16];
+        nameLabel.backgroundColor = [UIColor clearColor];
+        [self.contentView addSubview:nameLabel];
+        
+        contentLabel = [[MyLabel alloc] initWithFrame:CGRectMake(25, 20,  SCREEN_WIDTH-70, 75)];
         contentLabel.backgroundColor = [UIColor clearColor];
         contentLabel.font = [UIFont systemFontOfSize:14];
         contentLabel.numberOfLines = 3;
         contentLabel.lineBreakMode = NSLineBreakByWordWrapping|NSLineBreakByTruncatingTail;
         [self.contentView addSubview:contentLabel];
         
-//        contentTextView = [[UITextView alloc] init];
-//        contentTextView.backgroundColor = [UIColor clearColor];
-//        contentTextView.editable = NO;
-//        contentTextView.frame = CGRectMake(55, 8,  SCREEN_WIDTH-70, 75);
-//        [self.contentView addSubview:contentTextView];
-        
-        timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(SCREEN_WIDTH - 180, 75, 165, 15)];
+        timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(25, 15, 165, 20)];
         timeLabel.backgroundColor = [UIColor clearColor];
-        timeLabel.font = [UIFont systemFontOfSize:10];
+        timeLabel.font = [UIFont systemFontOfSize:18];
         timeLabel.textAlignment = NSTextAlignmentRight;
         [self.contentView addSubview:timeLabel];
         

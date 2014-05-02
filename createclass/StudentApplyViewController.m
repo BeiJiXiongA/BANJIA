@@ -15,6 +15,7 @@
 @interface StudentApplyViewController ()<UIAlertViewDelegate>
 {
     UILabel *tipLabel;
+    MyTextField *nameTextField;
 }
 @end
 
@@ -35,12 +36,28 @@
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"学生申请加入";
     
-    tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT+110, SCREEN_WIDTH-20, 60)];
-    tipLabel.numberOfLines = 3;
+//    UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
+//    nameTextField = [[MyTextField alloc] initWithFrame:CGRectMake(27.5, UI_NAVIGATION_BAR_HEIGHT+75, SCREEN_WIDTH-55, 35)];
+//    nameTextField.backgroundColor = [UIColor clearColor];
+//    nameTextField.tag = 1000;
+//    nameTextField.background = inputImage;
+//    nameTextField.placeholder = @"请确认您的姓名";
+//    nameTextField.text = [Tools user_name];
+//    nameTextField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
+//    nameTextField.keyboardType = UIKeyboardAppearanceDefault;
+//    nameTextField.textColor = TITLE_COLOR;
+//    nameTextField.returnKeyType = UIReturnKeyDone;
+//    nameTextField.font = [UIFont systemFontOfSize:14];
+//    [self.bgView addSubview:nameTextField];
+    
+    NSString *tipString = [NSString stringWithFormat:@"%@,你将要申请加入%@-%@，如班主任老师同意您的申请，您将加入该班级。",[Tools user_name],schoolName,className];
+    CGSize size = [Tools getSizeWithString:tipString andWidth:SCREEN_WIDTH-20 andFont:[UIFont systemFontOfSize:18]];
+    tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT+110, size.width, size.height)];
+    tipLabel.text = tipString;
+    tipLabel.numberOfLines  = 100;
     tipLabel.font = [UIFont systemFontOfSize:18];
     tipLabel.backgroundColor = [UIColor clearColor];
     tipLabel.textColor = TITLE_COLOR;
-    tipLabel.text = [NSString stringWithFormat:@"%@,你将要申请加入%@-%@，如班主任老师同意您的申请，您将加入该班级。",real_name,schoolName,className];
     tipLabel.lineBreakMode = NSLineBreakByWordWrapping;
     tipLabel.textAlignment = NSTextAlignmentCenter;
     [self.bgView addSubview:tipLabel];
@@ -48,7 +65,7 @@
     UIImage *btnImage  =[Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
     UIButton *studentButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [studentButton setTitle:@"提交申请" forState:UIControlStateNormal];
-    studentButton.frame = CGRectMake(38, SCREEN_HEIGHT-260, SCREEN_WIDTH-76, 40);
+    studentButton.frame = CGRectMake(38, tipLabel.frame.size.height+tipLabel.frame.origin.y+20, SCREEN_WIDTH-76, 40);
     studentButton.layer.cornerRadius = 2;
     studentButton.clipsToBounds = YES;
     [studentButton addTarget:self action:@selector(applyJoinClass) forControlEvents:UIControlEventTouchUpInside];
@@ -57,6 +74,17 @@
     [studentButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     [self.bgView addSubview:studentButton];
 }
+-(void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"PageOne"];
+}
+-(void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"PageOne"];
+}
+
 
 - (void)didReceiveMemoryWarning
 {

@@ -26,7 +26,8 @@
         [self.contentView addSubview:headerImageView];
         
         unreadedMsgLabel = [[UILabel alloc] initWithFrame:CGRectMake(45, 2, 20, 20)];
-        unreadedMsgLabel.layer.cornerRadius = 8;
+        unreadedMsgLabel.layer.cornerRadius = 10;
+        unreadedMsgLabel.clipsToBounds = YES;
         unreadedMsgLabel.layer.borderColor = [UIColor whiteColor].CGColor;
         unreadedMsgLabel.layer.borderWidth = 1;
         unreadedMsgLabel.font = [UIFont systemFontOfSize:11];
@@ -42,7 +43,7 @@
         [self.contentView addSubview:memNameLabel];
         
         contentLabel = [[UILabel alloc] initWithFrame:CGRectMake(70, 30, 150, 30)];
-        contentLabel.textColor = [UIColor lightGrayColor];
+        contentLabel.textColor = [UIColor grayColor];
         contentLabel.backgroundColor = [UIColor clearColor];
         contentLabel.hidden = YES;
         contentLabel.font = [UIFont systemFontOfSize:12];

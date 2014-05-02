@@ -18,7 +18,11 @@
 #define MSGBUTTONTAG  3000
 #define KICKALTAG    4000
 
-@interface ParentsDetailViewController ()<UIAlertViewDelegate,UITableViewDataSource,UITableViewDelegate>
+@interface ParentsDetailViewController ()<
+UIAlertViewDelegate,
+UITableViewDataSource,
+UITableViewDelegate,
+SetRelateDel>
 {
     UIView *tmpBgView;
     UIImageView *genderImageView;
@@ -28,6 +32,9 @@
     NSMutableDictionary *dataDict;
     
     UITableView *infoView;
+    OperatDB *db;
+    
+    NSString *userPhone;
 }
 @end
 
@@ -50,6 +57,7 @@
     DDLOG(@"parent id=%@",parentName);
     self.titleLabel.text = @"个人信息";
     dataDict  = [[NSMutableDictionary alloc] initWithCapacity:0];
+    db = [[OperatDB alloc] init];
     
     int adminNum = [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] intValue];
     if (adminNum == 2)
@@ -59,6 +67,10 @@
         [moreButton setImage:[UIImage imageNamed:@"icon_more"] forState:UIControlStateNormal];
         [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
         [self.navigationBarView addSubview:moreButton];
+        if ([parentID isEqualToString:[Tools user_id]])
+        {
+            moreButton.hidden = YES;
+        }
     }
     
     headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(33.5, UI_NAVIGATION_BAR_HEIGHT+11, 80, 80)];
@@ -66,17 +78,23 @@
     headerImageView.clipsToBounds = YES;
     if ([headerImg length]>0)
     {
-        [Tools fillImageView:headerImageView withImageFromURL:headerImg andDefault:HEADERDEFAULT];
+        [Tools fillImageView:headerImageView withImageFromURL:headerImg andDefault:HEADERBG];
     }
     else
     {
-        [headerImageView setImage:[UIImage imageNamed:HEADERDEFAULT]];
+        [headerImageView setImage:[UIImage imageNamed:HEADERBG]];
     }
     [self.bgView addSubview:headerImageView];
     
     UITapGestureRecognizer *tapTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(moreClick)];
     headerImageView.userInteractionEnabled = YES;
-    [headerImageView addGestureRecognizer:tapTgr];
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
+    {
+        if (![parentID isEqualToString:[Tools user_id]])
+        {
+            [headerImageView addGestureRecognizer:tapTgr];
+        }
+    }
     
     nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(headerImageView.frame.size.width+headerImageView.frame.origin.x+20, UI_NAVIGATION_BAR_HEIGHT+36, [parentName length]*18>100?100:([parentName length]*18), 20)];
     nameLabel.text = parentName;
@@ -89,11 +107,17 @@
     genderImageView.backgroundColor = [UIColor clearColor];
     [self.bgView addSubview:genderImageView];
     
+    NSMutableString *titleStr = [[NSMutableString alloc] initWithString:title];
+    if ([title rangeOfString:@"."].length > 0)
+    {
+        [titleStr replaceCharactersInRange:[title rangeOfString:@"."] withString:@"的"];
+    }
+    
     jobLabel = [[UILabel alloc] initWithFrame:CGRectMake(nameLabel.frame.origin.x, nameLabel.frame.size.height+nameLabel.frame.origin.y, 70, 30)];
     jobLabel.backgroundColor = [UIColor clearColor];
     jobLabel.font = [UIFont systemFontOfSize:13];
     jobLabel.textColor = [UIColor lightGrayColor];
-    jobLabel.text = title;
+    jobLabel.text = titleStr;
     [self.bgView addSubview:jobLabel];
     
     UIImageView *bgImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, jobLabel.frame.size.height+jobLabel.frame.origin.y+20, SCREEN_WIDTH, SCREEN_HEIGHT - headerImageView.frame.size.height-headerImageView.frame.origin.y)];
@@ -103,6 +127,8 @@
     infoView  = [[UITableView alloc] initWithFrame:CGRectMake(10, jobLabel.frame.size.height+jobLabel.frame.origin.y+50, SCREEN_WIDTH-15, 160) style:UITableViewStylePlain];
     infoView.delegate = self;
     infoView.dataSource = self;
+    infoView.scrollEnabled = NO;
+    infoView.separatorStyle = UITableViewCellSeparatorStyleNone;
     infoView.backgroundColor = [UIColor clearColor];
     [self.bgView addSubview:infoView];
     
@@ -110,13 +136,13 @@
     
     UIButton *sendMsgButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [sendMsgButton setTitle:@"发消息" forState:UIControlStateNormal];
-    sendMsgButton.frame = CGRectMake(50, SCREEN_HEIGHT-115, SCREEN_WIDTH-100, 30);
+    sendMsgButton.frame = CGRectMake(50, infoView.frame.size.height+infoView.frame.origin.y+5, SCREEN_WIDTH-100, 35);
     [sendMsgButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     [sendMsgButton addTarget:self action:@selector(toChat) forControlEvents:UIControlEventTouchUpInside];
     
     UIButton *addFriendButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [addFriendButton setTitle:@"加好友" forState:UIControlStateNormal];
-    addFriendButton.frame = CGRectMake(50, SCREEN_HEIGHT-60, SCREEN_WIDTH-100, 30);
+    addFriendButton.frame = CGRectMake(50, sendMsgButton.frame.size.height+sendMsgButton.frame.origin.y+5, SCREEN_WIDTH-100, 35);
     [addFriendButton addTarget:self action:@selector(addFriend) forControlEvents:UIControlEventTouchUpInside];
     [addFriendButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     
@@ -126,6 +152,11 @@
         [self.bgView addSubview:addFriendButton];
     }
     
+    if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fid":parentID} andTableName:FRIENDSTABLE] count] > 0)
+    {
+        addFriendButton.hidden = YES;
+    }
+    
     [self getUserInfo];
 }
 
@@ -133,6 +164,16 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+#pragma mark - setRelate
+-(void)changePareTitle:(NSString *)newTitle
+{
+    jobLabel.text = newTitle;
+    if ([self.memDel respondsToSelector:@selector(updateListWith:)])
+    {
+        [self.memDel updateListWith:YES];
+    }
 }
 
 #pragma mark - tableview
@@ -155,6 +196,17 @@
 }
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
+    if ([[db findSetWithDictionary:@{@"uid":parentID,@"classid":classID} andTableName:CLASSMEMBERTABLE] count] > 0)
+    {
+        NSArray *array = [db findSetWithDictionary:@{@"uid":parentID,@"classid":classID} andTableName:CLASSMEMBERTABLE];
+        if (![[[array firstObject] objectForKey:@"phone"] isEqual:[NSNull null]])
+        {
+            if ([[[array firstObject] objectForKey:@"phone"] length] > 8)
+            {
+                return 1;
+            }
+        }
+    }
     return [[dataDict allKeys] count];
 }
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -168,19 +220,40 @@
     if (indexPath.row == 0)
     {
         cell.nameLabel.text = @"移动电话";
-        cell.contentLabel.text = [dataDict objectForKey:@"phone"];
+        if ([[db findSetWithDictionary:@{@"uid":parentID,@"classid":classID} andTableName:CLASSMEMBERTABLE] count] > 0)
+        {
+            NSArray *array = [db findSetWithDictionary:@{@"uid":parentID,@"classid":classID} andTableName:CLASSMEMBERTABLE];
+            if (![[[array firstObject] objectForKey:@"phone"] isEqual:[NSNull null]])
+            {
+                if ([[[array firstObject] objectForKey:@"phone"] length] > 8)
+                {
+                    userPhone = [[array firstObject]objectForKey:@"phone"];
+                }
+            }
+        }
+        if ([dataDict count] > 0)
+        {
+            userPhone = [dataDict objectForKey:@"phone"];
+        }
+        cell.contentLabel.text = userPhone;
         [cell.button1 addTarget:self action:@selector(msgToUser) forControlEvents:UIControlEventTouchUpInside];
         [cell.button2 addTarget:self action:@selector(callToUser) forControlEvents:UIControlEventTouchUpInside];
+        if ([parentID isEqualToString:[Tools user_id]])
+        {
+            cell.button2.hidden = YES;
+        }
     }
+    UIImageView *bgImageBG = [[UIImageView alloc] init];
+    bgImageBG.image = [UIImage imageNamed:@"line3"];
+    bgImageBG.backgroundColor = [UIColor clearColor];
+    cell.backgroundView = bgImageBG;
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
 }
 
 -(void)callToUser
 {
-    UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"您确定要拨打这个电话吗？" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"拨打", nil];
-    al.tag = CALLBUTTONTAG;
-    [al show];
+    [Tools dialPhoneNumber:userPhone inView:self.bgView];
 }
 
 -(void)msgToUser
@@ -202,15 +275,7 @@
 
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    if (alertView.tag == CALLBUTTONTAG)
-    {
-        if (buttonIndex == 1)
-        {
-            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel://%@",[dataDict objectForKey:@"phone"]]]];
-        }
-        
-    }
-    else if(alertView.tag == MSGBUTTONTAG)
+    if(alertView.tag == MSGBUTTONTAG)
     {
         if (buttonIndex == 1)
         {
@@ -237,7 +302,7 @@
                                                                       @"token":[Tools client_token],
                                                                       @"m_id":parentID,
                                                                       @"c_id":classID,
-                                                                      @"role":@"students"
+                                                                      @"role":@"parents"
                                                                       } API:KICKUSERFROMCLASS];
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
@@ -246,6 +311,11 @@
             DDLOG(@"kickuser responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
+                
+                if ([db deleteRecordWithDict:@{@"uid":parentID,@"classid":classID,@"role":@"parents"} andTableName:CLASSMEMBERTABLE])
+                {
+                    DDLOG(@"delete parent success!");
+                }
                 if ([self.memDel respondsToSelector:@selector(updateListWith:)])
                 {
                     [self.memDel updateListWith:YES];
@@ -366,6 +436,7 @@
         settingRelate.title = title;
         settingRelate.parentID = parentID;
         settingRelate.admin = admin;
+        settingRelate.setRelate = self;
         settingRelate.classID = classID;
         [settingRelate showSelfViewController:self];
     }
@@ -397,7 +468,8 @@
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
-                                                                      @"other_id":parentID
+                                                                      @"other_id":parentID,
+                                                                      @"c_id":classID
                                                                       } API:MB_GETUSERINFO];
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
@@ -420,11 +492,27 @@
                         //男
                         [genderImageView setImage:[UIImage imageNamed:@"male"]];
                     }
-                    else if ([[dict objectForKey:@"sex"] intValue] == 2)
+                    else if ([[dict objectForKey:@"sex"] intValue] == 0)
                     {
                         //
                         [genderImageView setImage:[UIImage imageNamed:@"female"]];
                     }
+                    if ([[dataDict objectForKey:@"phone"] length] > 0)
+                    {
+                        [db updeteKey:@"phone" toValue:[dataDict objectForKey:@"phone"] withParaDict:@{@"uid":parentID,@"classid":classID} andTableName:CLASSMEMBERTABLE];
+                    }
+                    if (![[dict objectForKey:@"img_icon"] isEqual:[NSNull null]])
+                    {
+                        if ([[dict objectForKey:@"img_icon"] length] > 10)
+                        {
+                            [Tools fillImageView:headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERBG];
+                        }
+                        else
+                        {
+                            [headerImageView setImage:[UIImage imageNamed:HEADERBG]];
+                        }
+                    }
+                    
                     [infoView reloadData];
                 }
             }

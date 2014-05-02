@@ -10,7 +10,9 @@
 
 @protocol ClassZoneDelegate;
 
-@interface AddDongTaiViewController : XDContentViewController
+@interface AddDongTaiViewController : XDContentViewController<
+UIImagePickerControllerDelegate,
+UINavigationBarDelegate>
 @property (nonatomic, strong) NSString *classID;
 @property (nonatomic, assign) id<ClassZoneDelegate> classZoneDelegate;
 @end

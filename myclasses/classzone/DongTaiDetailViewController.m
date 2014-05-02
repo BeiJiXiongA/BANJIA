@@ -16,6 +16,8 @@
 #import "NSString+Emojize.h"
 #import "InputTableBar.h"
 
+#define additonalH  90
+
 @interface DongTaiDetailViewController ()<UITableViewDataSource,
 UITableViewDelegate,
 UITextFieldDelegate,
@@ -31,11 +33,19 @@ ReturnFunctionDelegate>
     NSMutableString *commentStr;
     
     InputTableBar *inputTabBar;
+    
+    CGFloat tmpheight;
+    
+    CGSize inputSize;
+    
+    CGFloat faceViewHeight;
+    
+    OperatDB *db;
 }
 @end
 
 @implementation DongTaiDetailViewController
-@synthesize dongtaiId,classID;
+@synthesize dongtaiId,classID,addComDel;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -52,12 +62,28 @@ ReturnFunctionDelegate>
     [self.sideMenuController setPanGestureEnabled:NO];
 }
 
+-(void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    inputTabBar.returnFunDel = nil;
+    [[NSNotificationCenter defaultCenter] removeObserver:inputTabBar];
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     
-    self.titleLabel.text = @"动态详情";
+    self.titleLabel.text = @"空间详情";
+    
+    faceViewHeight = 0;
+    
+    db = [[OperatDB alloc] init];
+    
+    inputSize = CGSizeMake(250, 30);
+    
+    self.bgView.frame = CGRectMake(0, YSTART, SCREEN_WIDTH, SCREEN_HEIGHT+200);
+    
     
     commentStr = [[NSMutableString alloc] initWithCapacity:0];
     
@@ -66,12 +92,13 @@ ReturnFunctionDelegate>
     UIView *tableViewBg = [[UIView alloc] initWithFrame:self.bgView.frame];
     [tableViewBg setBackgroundColor:UIColorFromRGB(0xf1f0ec)];
     
-    diaryDetailTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT-40) style:UITableViewStyleGrouped];
+    diaryDetailTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT-40) style:UITableViewStylePlain];
     diaryDetailTableView.dataSource = self;
     diaryDetailTableView.delegate = self;
     diaryDetailTableView.tag = 10000;
     diaryDetailTableView.backgroundView = tableViewBg;
     diaryDetailTableView.backgroundColor = [UIColor clearColor];
+    diaryDetailTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     [self.bgView addSubview:diaryDetailTableView];
     
     inputTabBar = [[InputTableBar alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT-40, SCREEN_WIDTH, 40)];
@@ -95,30 +122,109 @@ ReturnFunctionDelegate>
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+#pragma mark - inputTabBarDel
 
 -(void)myReturnFunction
 {
-    DDLOG(@"=====%@",inputTabBar.sendString);
     if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"parents"])
     {
         if ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:ParentComment] integerValue] == 0)
         {
             [Tools showAlertView:@"本班日志不允许家长发表评论" delegateViewController:nil];
+            return ;
+        }
+        else
+        {
+            [self commentdiary];
         }
     }
-    [self commentdiary];
+    else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"opt"] objectForKey:UserSendComment] == 0)
+    {
+        [Tools showAlertView:@"您没有评论日志的权限" delegateViewController:nil];
+        return ;
+    }
+    else
+    {
+        [self commentdiary];
+    }
+    inputSize = CGSizeMake(250, 30);
+    [UIView animateWithDuration:0.2 animations:^{
+        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10, SCREEN_WIDTH, inputSize.height+10);
+        [self backInput];
+    }];
 }
+
+-(void)backInput
+{
+    [UIView animateWithDuration:0.2 animations:^{
+        [inputTabBar.inputTextView resignFirstResponder];
+        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10, SCREEN_WIDTH, inputSize.height+10);
+    }];
+}
+
+
+-(void)showKeyBoard:(CGFloat)keyBoardHeight
+{
+    [UIView animateWithDuration:0.2 animations:^{
+        tmpheight = keyBoardHeight;
+        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10-keyBoardHeight, SCREEN_WIDTH, inputSize.height+10+ FaceViewHeight);
+    }];
+}
+
+-(void)changeInputType:(NSString *)changeType
+{
+    if ([changeType isEqualToString:@"face"])
+    {
+        faceViewHeight = FaceViewHeight;
+        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10-faceViewHeight, SCREEN_WIDTH, inputSize.height+10 + faceViewHeight);
+    }
+    else if([changeType isEqualToString:@"key"])
+    {
+        faceViewHeight = inputSize.height;
+        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10-tmpheight, SCREEN_WIDTH, inputSize.height+10 + faceViewHeight);
+    }
+}
+
+-(void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
+{
+    [self backInput];
+    [inputTabBar backKeyBoard];
+}
+
+-(void)changeInputViewSize:(CGSize)size
+{
+    inputSize = size;
+    [UIView animateWithDuration:0.2 animations:^{
+        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-size.height-10-tmpheight, SCREEN_WIDTH, size.height+10+faceViewHeight);
+    }];
+}
+
 
 #pragma mark - tableview
 
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
-//    if (section == 0)
+    if (section == 0)
     {
         return 0;
     }
-//    else
-//        return 40;
+    else
+        return 30;
+}
+
+-(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+{
+    UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH-30, 26.5)];
+    
+    headerView.backgroundColor = RGB(234, 234, 234, 1);
+    UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 1.5, headerView.frame.size.width, 26.5)];
+    headerLabel.backgroundColor = [UIColor clearColor];
+//    headerLabel.textAlignment = NSTextAlignmentCenter;
+    headerLabel.font = [UIFont systemFontOfSize:17];
+    headerLabel.textColor = TITLE_COLOR;
+    headerLabel.text = @"    评论";
+    [headerView addSubview:headerLabel];
+    return headerView;
 }
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -132,16 +238,21 @@ ReturnFunctionDelegate>
         {
             imageViewHeight = 134;
         }
-        CGFloat contentHtight = [self getSizeWithString:content andWidth:SCREEN_WIDTH-50 andFont:nil].height;
-        return 60+imageViewHeight+contentHtight+50;
+        CGFloat he= 0;
+        if (SYSVERSION>=7)
+        {
+            he = 10;
+        }
+        CGFloat contentHtight = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-50 andFont:nil].height;
+        return 60+imageViewHeight+contentHtight+70+he;
     }
     else if(indexPath.section == 1)
     {
         
-        NSDictionary *dict = [commentsArray objectAtIndex:indexPath.row];
+        NSDictionary *dict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row-1];
         NSString *contentStr = [dict objectForKey:@"content"];
-        CGSize size = [self getSizeWithString:contentStr andWidth:SCREEN_WIDTH-50 andFont:nil];
-        return size.height+50;
+        CGSize size = [Tools getSizeWithString:contentStr andWidth:SCREEN_WIDTH-50 andFont:nil];
+        return size.height+80;
     }
     return 0;
 }
@@ -153,7 +264,10 @@ ReturnFunctionDelegate>
 {
     if (section == 0)
     {
-        return 1;
+        if (diaryDetailDict)
+        {
+            return 1;
+        }
     }
     else if(section == 1)
     {
@@ -172,13 +286,47 @@ ReturnFunctionDelegate>
         {
             cell = [[TrendsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:topImageView];
         }
-        cell.nameLabel.text = [[diaryDetailDict objectForKey:@"by"] objectForKey:@"name"];
-        cell.timeLabel.frame = CGRectMake(cell.nameLabel.frame.size.width+cell.nameLabel.frame.origin.x+10, 5, SCREEN_WIDTH-cell.nameLabel.frame.origin.x-cell.nameLabel.frame.size.width-40, 30);
+        
+        NSString *name = [[diaryDetailDict objectForKey:@"by"] objectForKey:@"name"];
+        
+        NSString *nameStr;
+        NSArray *classmen = [db findSetWithDictionary:@{@"uid":[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"],@"classid":classID} andTableName:CLASSMEMBERTABLE];
+        if ([classmen count]>0)
+        {
+            NSDictionary *memdict = [classmen firstObject];
+            if (![[memdict objectForKey:@"title"] isEqual:[NSNull null]])
+            {
+                if ([[memdict objectForKey:@"title"] length] >0)
+                {
+                    nameStr = [NSString stringWithFormat:@"%@（%@）",name,[memdict objectForKey:@"title"]];
+                }
+                else
+                    nameStr = name;
+            }
+            else
+            {
+                nameStr = name;
+            }
+        }
+        else
+        {
+            nameStr = name;
+        }
+        
+        cell.nameLabel.frame = CGRectMake(60, 5, [nameStr length]*25>170?170:([nameStr length]*18), 30);
+        cell.nameLabel.text = nameStr;
+        cell.nameLabel.font = [UIFont systemFontOfSize:15];
+        cell.nameLabel.textColor = LIGHT_BLUE_COLOR;
+        cell.timeLabel.frame = CGRectMake(cell.nameLabel.frame.size.width+cell.nameLabel.frame.origin.x, 5, SCREEN_WIDTH-cell.nameLabel.frame.origin.x-cell.nameLabel.frame.size.width-20, 30);
         cell.timeLabel.textAlignment = NSTextAlignmentRight;
+        cell.timeLabel.numberOfLines = 2;
+        cell.timeLabel.lineBreakMode = NSLineBreakByWordWrapping;
+        
+        cell.nameLabel.text = nameStr;
         cell.timeLabel.text = [Tools showTime:[NSString stringWithFormat:@"%d",[[[diaryDetailDict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]];
         cell.locationLabel.frame = CGRectMake(60, cell.nameLabel.frame.origin.y+cell.nameLabel.frame.size.height, SCREEN_WIDTH-80, 20);
         cell.locationLabel.text = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"add"];
-        cell.headerImageView.layer.cornerRadius = 5;
+        cell.headerImageView.layer.cornerRadius = cell.headerImageView.frame.size.width/2;
         cell.headerImageView.clipsToBounds = YES;
         [Tools fillImageView:cell.headerImageView withImageFromURL:[[diaryDetailDict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:@"header_pic.jpg"];
         cell.contentLabel.hidden = YES;
@@ -190,14 +338,18 @@ ReturnFunctionDelegate>
         }
         if (!([[[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"] length] <= 0))
         {
+            CGFloat he = 0;
+            if (SYSVERSION >= 7)
+            {
+                he = 10;
+            }
             //有文字
             cell.contentLabel.hidden = NO;
             NSString *content = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"];
-            CGSize contentSize = [self getSizeWithString:content andWidth:SCREEN_WIDTH-30 andFont:nil];
+            CGSize contentSize = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-50 andFont:[UIFont systemFontOfSize:16]];
             cell.contentLabel.text = [[[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"] emojizedString];
-            cell.contentLabel.textColor = TITLE_COLOR;
-            
-            cell.contentLabel.frame = CGRectMake(15, 60, SCREEN_WIDTH-50, contentSize.height);
+            cell.contentLabel.textColor = [UIColor blackColor];
+            cell.contentLabel.frame = CGRectMake(15, 60, SCREEN_WIDTH-50, contentSize.height+8+he);
             
         }
         else
@@ -213,9 +365,8 @@ ReturnFunctionDelegate>
             cell.imagesScrollView.hidden = NO;
             
             NSArray *imgsArray = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"img"];
-            cell.imagesScrollView.frame = CGRectMake(5, cell.contentLabel.frame.size.height+cell.contentLabel.frame.origin.y+3, SCREEN_WIDTH-50, imageViewHeight);
+            cell.imagesScrollView.frame = CGRectMake(5, cell.contentLabel.frame.size.height+cell.contentLabel.frame.origin.y+3, SCREEN_WIDTH-20, imageViewHeight);
             cell.imagesScrollView.contentSize = CGSizeMake((imageViewWidth+5)*[imgsArray count], imageViewHeight);
-            UIImage *placeholder = [UIImage imageNamed:@""];
             for (int i=0; i<[imgsArray count]; ++i)
             {
                 UIImageView *imageView = [[UIImageView alloc] init];
@@ -225,8 +376,6 @@ ReturnFunctionDelegate>
                 
                 imageView.userInteractionEnabled = YES;
                 [imageView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapImage:)]];
-                
-                [imageView setImageURLStr:[NSString stringWithFormat:@"%@%@",IMAGEURL,[imgsArray objectAtIndex:i]] placeholder:placeholder];
                 
                 // 内容模式
                 imageView.clipsToBounds = YES;
@@ -246,7 +395,7 @@ ReturnFunctionDelegate>
         cell.commentButton.frame = CGRectMake(SCREEN_WIDTH - 80, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+10, 40, 30);
         [cell.commentButton addTarget:self action:@selector(startCommit) forControlEvents:UIControlEventTouchUpInside];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        cell.bgView.frame = CGRectMake(5, 5, SCREEN_WIDTH-10, cell.headerImageView.frame.size.height+cell.contentLabel.frame.size.height+cell.imagesScrollView.frame.size.height+cell.praiseButton.frame.size.height);
+        cell.bgView.frame = CGRectMake(5, 5, SCREEN_WIDTH-10, cell.headerImageView.frame.size.height+cell.contentLabel.frame.size.height+cell.imagesScrollView.frame.size.height+cell.praiseButton.frame.size.height+30);
         cell.bgView.backgroundColor = [UIColor clearColor];
         cell.bgView.layer.borderWidth = 0;
         UIImageView *cellImage = [[UIImageView alloc] initWithFrame:cell.bgView.frame];
@@ -263,27 +412,62 @@ ReturnFunctionDelegate>
         {
             cell = [[TrendsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:commitCell];
         }
-        NSDictionary *dict = [commentsArray objectAtIndex:indexPath.row];
+        NSDictionary *dict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row-1];
         cell.headerImageView.frame = CGRectMake(5, 5, 30, 30);
-        cell.headerImageView.layer.cornerRadius = 5;
+        cell.headerImageView.layer.cornerRadius = cell.headerImageView.frame.size.width/2;
         cell.headerImageView.clipsToBounds = YES;
+        
+        NSString *name = [[diaryDetailDict objectForKey:@"by"] objectForKey:@"name"];
+        
+        NSString *nameStr;
+        NSArray *classmen = [db findSetWithDictionary:@{@"uid":[[dict objectForKey:@"by"] objectForKey:@"_id"],@"classid":classID} andTableName:CLASSMEMBERTABLE];
+        if ([classmen count]>0)
+        {
+            NSDictionary *memdict = [classmen firstObject];
+            if (![[memdict objectForKey:@"title"] isEqual:[NSNull null]])
+            {
+                if ([[memdict objectForKey:@"title"] length] >0)
+                {
+                    nameStr = [NSString stringWithFormat:@"%@（%@）",name,[memdict objectForKey:@"title"]];
+                }
+                else
+                    nameStr = name;
+            }
+            else
+            {
+                nameStr = name;
+            }
+        }
+        else
+        {
+            nameStr = name;
+        }
+        
+        cell.nameLabel.frame = CGRectMake(cell.headerImageView.frame.origin.x+cell.headerImageView.frame.size.width+5, 5, [nameStr length]*25>170?170:([nameStr length]*18), 30);
+        cell.nameLabel.text = nameStr;
+        cell.nameLabel.font = [UIFont systemFontOfSize:15];
+        cell.nameLabel.textColor = LIGHT_BLUE_COLOR;
+        cell.timeLabel.frame = CGRectMake(cell.nameLabel.frame.size.width+cell.nameLabel.frame.origin.x, 5, SCREEN_WIDTH-cell.nameLabel.frame.origin.x-cell.nameLabel.frame.size.width-20, 30);
+        cell.timeLabel.numberOfLines = 2;
+        cell.timeLabel.lineBreakMode = NSLineBreakByWordWrapping;
+        cell.nameLabel.textColor = LIGHT_BLUE_COLOR;
+        cell.nameLabel.font = [UIFont systemFontOfSize:15];
+        
         [Tools fillImageView:cell.headerImageView withImageFromURL:[[dict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:@"0.jpg"];
-        cell.nameLabel.text = [[dict objectForKey:@"by"] objectForKey:@"name"];
         cell.timeLabel.frame = CGRectMake(cell.nameLabel.frame.size.width+cell.nameLabel.frame.origin.x+10, 5, SCREEN_WIDTH-cell.nameLabel.frame.origin.x-cell.nameLabel.frame.size.width-40, 30);
         cell.timeLabel.textAlignment = NSTextAlignmentRight;
         cell.timeLabel.text = [Tools showTime:[[dict objectForKey:@"created"] objectForKey:@"sec"]];
         NSString *contentStr = [dict objectForKey:@"content"];
-        CGSize size = [self getSizeWithString:contentStr andWidth:SCREEN_WIDTH-50 andFont:nil];
-        cell.contentLabel.numberOfLines = 0;
-        cell.contentLabel.lineBreakMode = NSLineBreakByWordWrapping;
-        cell.contentLabel.frame = CGRectMake(40, 35, SCREEN_WIDTH-90, size.height);
+        CGSize size = [Tools getSizeWithString:contentStr andWidth:SCREEN_WIDTH-50 andFont:nil];
+
+        cell.contentLabel.frame = CGRectMake(40, 35, SCREEN_WIDTH-90, size.height+22);
         cell.contentLabel.text = [[dict objectForKey:@"content"] emojizedString];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         cell.bgView.frame = CGRectMake(5, 5, SCREEN_WIDTH-10, cell.headerImageView.frame.size.height+cell.contentLabel.frame.size.height);
         cell.bgView.backgroundColor = [UIColor clearColor];
         cell.bgView.layer.borderWidth = 0;
         UIImageView *cellImage = [[UIImageView alloc] initWithFrame:cell.bgView.frame];
-        [cellImage setImage:[Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)]];
+        [cellImage setImage:[UIImage imageNamed:@"line3"]];
         cell.backgroundView = cellImage;
         return cell;
     }
@@ -300,7 +484,7 @@ ReturnFunctionDelegate>
         // 替换为中等尺寸图片
         NSString *url = [[NSString stringWithFormat:@"%@%@",IMAGEURL,imgs[i]] stringByReplacingOccurrencesOfString:@"thumbnail" withString:@"bmiddle"];
         MJPhoto *photo = [[MJPhoto alloc] init];
-        photo.url = [NSURL URLWithString:url]; // 图片路径
+        photo.image = [UIImage imageWithData:[FTWCache objectForKey:[url MD5Hash]]]; // 图片路径
         photo.srcImageView = (UIImageView *)[self.bgView viewWithTag:tap.view.tag]; // 来源于哪个UIImageView
         [photos addObject:photo];
     }
@@ -315,23 +499,6 @@ ReturnFunctionDelegate>
 -(void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
     [inputTabBar backKeyBoard];
-}
-
--(CGSize)getSizeWithString:(NSString *)content andWidth:(CGFloat)width andFont:(UIFont *)font
-{
-    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
-    [label setNumberOfLines:0];
-    label.lineBreakMode = NSLineBreakByWordWrapping;
-    CGSize size = CGSizeMake(width, 2000);
-    if (font == nil)
-    {
-        font = [UIFont systemFontOfSize:14];
-    }
-    CGSize labelSize = [content sizeWithFont:font constrainedToSize:size lineBreakMode:NSLineBreakByWordWrapping];
-    
-    DDLOG(@"labelSize==%@",NSStringFromCGSize(labelSize));
-    [label setFrame:CGRectMake(0, 0, labelSize.width, labelSize.height)];
-    return labelSize;
 }
 
 #pragma mark - aboutComment
@@ -372,6 +539,11 @@ ReturnFunctionDelegate>
             {
                 [Tools showTips:@"评论成功" toView:diaryDetailTableView];
                 [self getDiaryDetail];
+                
+                if ([self.addComDel respondsToSelector:@selector(addComment:)])
+                {
+                    [self.addComDel addComment:YES];
+                }
             }
             else
             {

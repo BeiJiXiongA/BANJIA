@@ -34,6 +34,7 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"设置发言权限";
+    DDLOG(@"role=%@",role);
     
     if ([role isEqualToString:@"parents"])
     {
@@ -80,56 +81,56 @@
         DDLOG(@"%@===%@", UserSendLike,[optionDict objectForKey:UserSendLike]);
         if ([[optionDict objectForKey:UserSendLike] integerValue] == 0)
         {
-            [cell.mySwitch setOn:NO];
+            [cell.mySwitch isOn:NO];
         }
         else
         {
-            [cell.mySwitch setOn:YES];
+            [cell.mySwitch isOn:YES];
         }
     }
     else if (indexPath.row == 1)
     {
         if ([[optionDict objectForKey:UserSendComment] integerValue] == 0)
         {
-            [cell.mySwitch setOn:NO];
+            [cell.mySwitch isOn:NO];
         }
         else
         {
-            [cell.mySwitch setOn:YES];
+            [cell.mySwitch isOn:YES];
         }
     }
     else if(indexPath.row == 2)
     {
         if ([role isEqualToString:@"students"])
         {
-            if ([[optionDict objectForKey:UserSendComment] integerValue] == 0)
+            if ([[optionDict objectForKey:UserReceiveDiary] integerValue] == 0)
             {
-                [cell.mySwitch setOn:NO];
+                [cell.mySwitch isOn:NO];
             }
             else
             {
-                [cell.mySwitch setOn:YES];
+                [cell.mySwitch isOn:YES];
             }
         }
         else if([role isEqualToString:@"parents"])
         {
             if ([[optionDict objectForKey:UserChatTeacher] integerValue] == 0)
             {
-                [cell.mySwitch setOn:NO];
+                [cell.mySwitch isOn:NO];
             }
             else
             {
-                [cell.mySwitch setOn:YES];
+                [cell.mySwitch isOn:YES];
             }
         }
     }
-    cell.mySwitch.tag = indexPath.row*1000;
+    cell.mySwitch.tag = indexPath.row+1000;
     [cell.mySwitch addTarget:self action:@selector(switchchange:) forControlEvents:UIControlEventValueChanged];
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
 }
 
--(void)switchchange:(UISwitch *)sw
+-(void)switchchange:(KLSwitch *)sw
 {
     NSString *value = @"";
     if ([sw isOn])
@@ -140,15 +141,15 @@
     {
         value = @"0";
     }
-    if (sw.tag/1000 == 0)
+    if (sw.tag-1000 == 0)
     {
         [self settingValue:value forKay:UserSendLike];
     }
-    else if(sw.tag/1000 == 1)
+    else if(sw.tag-1000 == 1)
     {
         [self settingValue:value forKay:UserSendComment];
     }
-    else if(sw.tag/1000 == 2)
+    else if(sw.tag-1000 == 2)
     {
         if ([role isEqualToString:@"students"])
         {
@@ -193,6 +194,10 @@
             DDLOG(@"error %@",error);
         }];
         [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
     }
 }
 

@@ -9,12 +9,13 @@
 #import "SetObjectViewController.h"
 #import "Header.h"
 #import "OjectCell.h"
+#import "KLSwitch.h"
 
 @interface SetObjectViewController ()<UITableViewDataSource,UITableViewDelegate,UITextFieldDelegate>
 {
     NSMutableDictionary *selectDict;
     UITableView *objectTabelView;
-    UISwitch *noticeSwitch;
+    KLSwitch *noticeSwitch;
     NSMutableArray *objectArray;
     
     UITextField *addObjectTextField;
@@ -23,7 +24,7 @@
 @end
 
 @implementation SetObjectViewController
-@synthesize name,userid,classID;
+@synthesize name,userid,classID,title;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -46,6 +47,17 @@
     objectArray = [[NSMutableArray alloc] initWithArray:@[@"数学老师",@"英语老师",@"语文老师",@"物理老师"]];
     selectDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     
+    NSArray *titleArray = [title componentsSeparatedByString:@","];
+    for (int i=0; i<[objectArray count]; ++i)
+    {
+        for (int j=0; j<[titleArray count]; ++j)
+        {
+            if ([[titleArray objectAtIndex:j] isEqualToString:[objectArray objectAtIndex:i]])
+            {
+                [selectDict setObject:[objectArray objectAtIndex:i] forKey:[NSString stringWithFormat:@"%d",i]];
+            }
+        }
+    }
     UILabel *tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(32, UI_NAVIGATION_BAR_HEIGHT+38, 150, 20)];
     tipLabel.text = [NSString stringWithFormat:@"您想任命%@为",name];
     tipLabel.font = [UIFont systemFontOfSize:15];
@@ -62,15 +74,16 @@
     
     addButton = [UIButton buttonWithType:UIButtonTypeCustom];
     addButton.frame = CGRectMake(31, objectTabelView.frame.size.height+objectTabelView.frame.origin.y, 40, 40);
-    [addButton setImage:[UIImage imageNamed:@"icon_add"] forState:UIControlStateNormal];
+    [addButton setImage:[UIImage imageNamed:@"set_add"] forState:UIControlStateNormal];
     [addButton addTarget:self action:@selector(addObjectToObjects) forControlEvents:UIControlEventTouchUpInside];
     [self.bgView addSubview:addButton];
     
     UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
     
-    addObjectTextField = [[UITextField alloc] initWithFrame:CGRectMake(addButton.frame.size.width+addButton.frame.origin.x, objectTabelView.frame.size.height+objectTabelView.frame.origin.y+5, SCREEN_WIDTH-62-50, 30)];
+    addObjectTextField = [[UITextField alloc] initWithFrame:CGRectMake(71, objectTabelView.frame.size.height+objectTabelView.frame.origin.y+5, SCREEN_WIDTH-62-40, 30)];
     addObjectTextField.background = inputImage;
     addObjectTextField.delegate = self;
+    addObjectTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
     addObjectTextField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
     addObjectTextField.placeholder = @"  添加其他班级角色";
     [self.bgView addSubview:addObjectTextField];
@@ -85,15 +98,14 @@
     tipLabel2.textColor = UIColorFromRGB(0x727171);
     [buttomView addSubview:tipLabel2];
     
-    noticeSwitch = [[UISwitch alloc] initWithFrame:CGRectMake(SCREEN_WIDTH-81, 10, 80, 30)];
+    noticeSwitch = [[KLSwitch  alloc] initWithFrame:CGRectMake(SCREEN_WIDTH-80, 10, 60, 30)];
     noticeSwitch.onTintColor = LIGHT_BLUE_COLOR;
     [buttomView addSubview:noticeSwitch];
     
     UIButton *submit = [UIButton buttonWithType:UIButtonTypeCustom];
-    submit.frame = CGRectMake(SCREEN_WIDTH-60, 3, 40, 38);
+    submit.frame = CGRectMake(SCREEN_WIDTH-65, 3, 55, 38);
+    [submit setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
     [submit setTitle:@"提交" forState:UIControlStateNormal];
-    [submit setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
-    submit.backgroundColor = [UIColor clearColor];
     [submit addTarget:self action:@selector(submit) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:submit];
 }
@@ -125,7 +137,9 @@
                                                                       @"token":[Tools client_token],
                                                                       @"m_id":userid,
                                                                       @"c_id":classID,
-                                                                      @"title":[jobTitle substringToIndex:[jobTitle length]-1]
+                                                                      @"role":@"teachers",
+                                                                      @"onduty":[noticeSwitch isOn]?@"1":@"0",
+                                                                      @"title":[jobTitle length]>0?[jobTitle substringToIndex:[jobTitle length]-1]:@""
                                                                       } API:CHANGE_MEM_TITLE];
         [request setCompletionBlock:^{
             NSString *responseString = [request responseString];
@@ -133,6 +147,11 @@
             DDLOG(@"commit diary responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
+                if ([self.setobject respondsToSelector:@selector(setobject:)])
+                {
+                    [self.setobject setobject:[jobTitle length]>0?[jobTitle substringToIndex:[jobTitle length]-1]:@""];
+                }
+                
                 [self unShowSelfViewController];
             }
             else
@@ -153,6 +172,7 @@
 {
     if ([addObjectTextField.text length] > 0)
     {
+        
         [objectArray addObject:addObjectTextField.text];
         [objectTabelView reloadData];
         objectTabelView.scrollEnabled = YES;
@@ -166,6 +186,7 @@
         {
             objectTabelView.contentOffset = CGPointMake(0, objectTabelView.contentSize.height - objectTabelView.frame.size.height);
         }
+        [addObjectTextField setText:nil];
         
     }
     else
@@ -211,6 +232,19 @@
     return cell;
 }
 
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if ([[selectDict objectForKey:[NSString stringWithFormat:@"%d",indexPath.row]] length] > 0)
+    {
+        [selectDict removeObjectForKey:[NSString stringWithFormat:@"%d",indexPath.row]];
+    }
+    else
+    {
+        [selectDict setObject:[objectArray objectAtIndex:indexPath.row] forKey:[NSString stringWithFormat:@"%d",indexPath.row]];
+    }
+    [objectTabelView reloadData];
+}
+
 -(void)operateObject:(UIButton *)button
 {
     if ([[selectDict objectForKey:[NSString stringWithFormat:@"%d",button.tag/1000]] length] > 0)
@@ -231,9 +265,9 @@
 }
 -(BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
 {
-    if (range.location>7)
+    if (range.location>20)
     {
-        [Tools showAlertView:@"请将字数限制在8个以内" delegateViewController:nil];
+        [Tools showAlertView:@"请将字数限制在20个以内" delegateViewController:nil];
         return NO;
     }
     return YES;

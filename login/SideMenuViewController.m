@@ -18,6 +18,8 @@
 {
     UIImage *greenImage;
     UIImage *btnImage;
+    
+    OperatDB *db;
 }
 @end
 
@@ -40,6 +42,9 @@
     self.backButton.hidden = YES;
     self.navigationBarView.hidden = YES;
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeIcon) name:@"changeicon" object:nil];
+    
+    db = [[OperatDB alloc] init];
     
     self.bgView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"drawer"]];
     
@@ -47,10 +52,14 @@
     self.imageView.backgroundColor = [UIColor whiteColor];
     self.imageView.layer.borderColor = [UIColor whiteColor].CGColor;
     self.imageView.layer.borderWidth = 2;
-    [Tools fillImageView:self.imageView withImageFromURL:[Tools header_image] andDefault:HEADERDEFAULT];
+    [Tools fillImageView:self.imageView withImageFromURL:[Tools header_image] andDefault:HEADERBG];
     self.imageView.layer.cornerRadius = imageView.frame.size.width/2;
     self.imageView.clipsToBounds = YES;
     [self.bgView addSubview:self.imageView];
+    
+    UITapGestureRecognizer *headerTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(headerTap)];
+    self.imageView.userInteractionEnabled = YES;
+    [self.imageView addGestureRecognizer:headerTap];
     
     NSString *name = [Tools user_name];
     
@@ -64,7 +73,7 @@
     
     btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
     greenImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg_green"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
-    NSArray *menuNamesArray = [NSArray arrayWithObjects:@"   我的班级",@"   消息",@"   好友",@"   个人设置", nil];
+    NSArray *menuNamesArray = [NSArray arrayWithObjects:@"   我的班级",@"   我的好友",@"   聊天记录",@"   个人信息", nil];
     for(int i=0;i<[menuNamesArray count];++i)
     {
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -81,20 +90,48 @@
         {
             [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         }
+        
         [button setContentHorizontalAlignment:UIControlContentHorizontalAlignmentLeft];
         [self.bgView addSubview:button];
         
-        UILabel *unReadLabel = [[UILabel alloc] initWithFrame:CGRectMake(120, button.frame.origin.y+11, 18, 18)];
+        UILabel *unReadLabel = [[UILabel alloc] init];
         unReadLabel.backgroundColor = [UIColor redColor];
-        unReadLabel.layer.cornerRadius = 9;
+        unReadLabel.layer.cornerRadius = 7.5;
+        unReadLabel.layer.borderColor = [UIColor whiteColor].CGColor;
+        unReadLabel.layer.borderWidth = 2;
+        unReadLabel.clipsToBounds = YES;
         unReadLabel.clipsToBounds = YES;
         unReadLabel.tag = 2000+i;
         unReadLabel.textAlignment = NSTextAlignmentCenter;
         unReadLabel.font = [UIFont systemFontOfSize:10];
         unReadLabel.textColor = [UIColor whiteColor];
         unReadLabel.hidden = YES;
+        unReadLabel.frame = CGRectMake(100, button.frame.origin.y+12.5, 15, 15);
         [self.bgView addSubview:unReadLabel];
     }
+}
+-(void)headerTap
+{
+    PersonalSettingViewController *personalSetting = [[PersonalSettingViewController alloc] init];
+    [self.sideMenuController setContentController:personalSetting animted:YES];
+    for(int i=1000;i<1004;++i)
+    {
+        if (i==1003)
+        {
+            [((UIButton *)[self.bgView viewWithTag:i]) setTitleColor:RGB(255, 108, 0, 1) forState:UIControlStateNormal];
+        }
+        else
+        {
+            [((UIButton *)[self.bgView viewWithTag:i]) setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        }
+    }
+
+}
+
+-(void)changeIcon
+{
+    DDLOG(@"changeicon==%@",[[NSUserDefaults standardUserDefaults] objectForKey:HEADERIMAGE]);
+    [Tools fillImageView:self.imageView withImageFromURL:[Tools header_image] andDefault:HEADERBG];
 }
 
 -(void)viewWillAppear:(BOOL)animated
@@ -115,8 +152,21 @@
     
     if ([self haveNewMsg])
     {
+        [self.bgView viewWithTag:2002].hidden = NO;
+    }
+    else
+    {
+        [self.bgView viewWithTag:2002].hidden = YES;
+    }
+    if ([self haveNewFriendApply])
+    {
         [self.bgView viewWithTag:2001].hidden = NO;
     }
+    else
+    {
+        [self.bgView viewWithTag:2001].hidden = YES;
+    }
+    
 }
 
 - (void)didReceiveMemoryWarning
@@ -127,17 +177,23 @@
 
 -(BOOL)haveNewMsg
 {
-    OperatDB *db = [[OperatDB alloc] init];
     NSMutableArray *array = [db findSetWithDictionary:@{@"readed":@"0",@"userid":[Tools user_id]} andTableName:@"chatMsg"];
     if ([array count] > 0)
     {
         return YES;
     }
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue]>0)
+    {
+        return YES;
+    }
+    else
+    {
+        return NO;
+    }
     return NO;
 }
 -(BOOL)haveNewNotice
 {
-    OperatDB *db = [[OperatDB alloc] init];
     NSMutableArray *array = [db findSetWithDictionary:@{@"readed":@"0",@"uid":[Tools user_id]} andTableName:@"notice"];
     if ([array count] > 0)
     {
@@ -145,7 +201,21 @@
     }
     return NO;
 }
-
+-(BOOL)haveNewFriendApply
+{
+    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+    int ucfriendNum = [[ud objectForKey:UCFRIENDSUM] intValue];
+    if (ucfriendNum > 0)
+    {
+        return YES;
+    }
+    NSArray *ucfriends = [db findSetWithDictionary:@{@"uid":[Tools user_id],@"checked":@"0"} andTableName:FRIENDSTABLE];
+    if ([ucfriends count] > 0)
+    {
+        return YES;
+    }
+    return NO;
+}
 
 -(void)buttonClick:(UIButton *)button
 {
@@ -156,13 +226,14 @@
     }
     else if(button.tag == 1001)
     {
-        MessageViewController *message = [[MessageViewController alloc] init];
-        [self.sideMenuController setContentController:message animted:YES];
+        FriendsViewController *friends = [[FriendsViewController alloc] init];
+        [self.sideMenuController setContentController:friends animted:YES];
+        
     }
     else if(button.tag == 1002)
     {
-        FriendsViewController *friends = [[FriendsViewController alloc] init];
-        [self.sideMenuController setContentController:friends animted:YES];
+        MessageViewController *message = [[MessageViewController alloc] init];
+        [self.sideMenuController setContentController:message animted:YES];
     }
     else if(button.tag == 1003)
     {

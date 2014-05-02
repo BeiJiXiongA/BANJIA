@@ -8,8 +8,16 @@
 
 #import "XDContentViewController.h"
 
+@protocol SetObjectDelegate <NSObject>
+
+-(void)setobject:(NSString *)objectUpdate;
+
+@end
+
 @interface SetObjectViewController : XDContentViewController
 @property (nonatomic, strong) NSString *name;
 @property (nonatomic, strong) NSString *userid;
 @property (nonatomic, strong) NSString *classID;
+@property (nonatomic, strong) NSString *title;
+@property (nonatomic, strong) id<SetObjectDelegate> setobject;
 @end

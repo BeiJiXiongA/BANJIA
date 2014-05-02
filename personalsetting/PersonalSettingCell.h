@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 
 @interface PersonalSettingCell : UITableViewCell
+@property (nonatomic, strong) UIImageView *topImageView;
 @property (nonatomic, strong) UIImageView *headerImageView;
 @property (nonatomic, strong) UILabel *nameLabel;
 @property (nonatomic, strong) UILabel *objectsLabel;

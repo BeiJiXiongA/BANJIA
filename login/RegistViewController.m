@@ -18,11 +18,12 @@
 {
     MyTextField *phoneNumTextfield;
     MyTextField *codeTextField;
+    NSString *codeStr;
 }
 @end
 
 @implementation RegistViewController
-
+@synthesize headerIcon,nickName,accountID,accountType,account;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -50,7 +51,7 @@
     phoneNumTextfield.background = inputImage;
     phoneNumTextfield.textColor = UIColorFromRGB(0x727171);
     phoneNumTextfield.placeholder = @"手机号码";
-    phoneNumTextfield.numericFormatter = [AKNumericFormatter formatterWithMask:@"***-****-****" placeholderCharacter:'*'];
+    phoneNumTextfield.numericFormatter = [AKNumericFormatter formatterWithMask:@"***********" placeholderCharacter:'*'];
     [self.bgView addSubview:phoneNumTextfield];
     
     UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
@@ -126,6 +127,16 @@
             {
                 Regist3ViewController *regist3ViewController = [[Regist3ViewController alloc] init];
                 regist3ViewController.phoneNum = phoneNumTextfield.text;
+                
+                if ([accountID length] > 0)
+                {
+                    regist3ViewController.accountID = accountID;
+                    regist3ViewController.accountType = accountType;
+                    regist3ViewController.nickName = nickName;
+                    regist3ViewController.headerIcon = headerIcon;
+                    regist3ViewController.account = account;
+                }
+                
                 [regist3ViewController showSelfViewController:self];
             }
             else
@@ -163,7 +174,8 @@
             DDLOG(@"== responsedict %@",responseString);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                codeTextField.text = [responseDict objectForKey:@"data"];
+                codeStr = [responseDict objectForKey:@"data"];
+                codeTextField.text = codeStr;
             }
             else
             {

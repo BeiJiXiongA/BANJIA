@@ -21,6 +21,7 @@
 
 @implementation Regist3ViewController
 @synthesize phoneNum;
+@synthesize headerIcon,nickName,accountID,accountType,account;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -63,21 +64,22 @@
     nameTextfield.clearButtonMode = UITextFieldViewModeWhileEditing;
     [mainScrollView addSubview:nameTextfield];
     
-    passwordTextField = [[MyTextField alloc] initWithFrame:CGRectMake(29, nameTextfield.frame.origin.y+nameTextfield.frame.size.height+5, SCREEN_WIDTH-58, 40)];
-    passwordTextField.delegate = self;
-    passwordTextField.secureTextEntry = YES;
-    passwordTextField.background = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
-    passwordTextField.placeholder = @"密码";
-    passwordTextField.tag = 1000;
-    passwordTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
-    [mainScrollView addSubview:passwordTextField];
+//    passwordTextField = [[MyTextField alloc] initWithFrame:CGRectMake(29, nameTextfield.frame.origin.y+nameTextfield.frame.size.height+5, SCREEN_WIDTH-58, 40)];
+//    passwordTextField.delegate = self;
+//    passwordTextField.secureTextEntry = YES;
+//    passwordTextField.background = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
+//    passwordTextField.placeholder = @"密码";
+//    passwordTextField.tag = 1000;
+//    passwordTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
+//    [mainScrollView addSubview:passwordTextField];
     
-    verifyTextField = [[MyTextField alloc] initWithFrame:CGRectMake(29, passwordTextField.frame.origin.y+passwordTextField.frame.size.height+5, SCREEN_WIDTH-58, 40)];
+    verifyTextField = [[MyTextField alloc] initWithFrame:CGRectMake(29, nameTextfield.frame.origin.y+nameTextfield.frame.size.height+5, SCREEN_WIDTH-58, 40)];
     verifyTextField.delegate = self;
     verifyTextField.secureTextEntry = YES;
     verifyTextField.tag = 1001;
+    verifyTextField.backgroundColor = [UIColor clearColor];
     verifyTextField.background = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
-    verifyTextField.placeholder = @"再次输入密码";
+    verifyTextField.placeholder = @"请设置密码";
     verifyTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
     [mainScrollView addSubview:verifyTextField];
     
@@ -116,7 +118,14 @@
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"PageOne"];
 }
+-(void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"PageOne"];
+}
+
 
 - (void)didReceiveMemoryWarning
 {
@@ -127,21 +136,26 @@
 
 -(void)start
 {
-    if ([passwordTextField.text length] == 0)
+    if ([verifyTextField.text length] == 0)
     {
         [Tools showAlertView:@"密码不能为空" delegateViewController:nil];
         return ;
     }
-    if ([verifyTextField.text length] == 0)
+    else if(![Tools isPassWord:verifyTextField.text])
     {
-        [Tools showAlertView:@"再次输入密码" delegateViewController:nil];
+        [Tools showAlertView:@"密码由6-12位字母或数字组成" delegateViewController:nil];
         return ;
     }
-    if (![passwordTextField.text isEqualToString:verifyTextField.text])
-    {
-        [Tools showAlertView:@"两次密码不一致" delegateViewController:nil];
-        return ;
-    }
+//    if ([verifyTextField.text length] == 0)
+//    {
+//        [Tools showAlertView:@"再次输入密码" delegateViewController:nil];
+//        return ;
+//    }
+//    if (![passwordTextField.text isEqualToString:verifyTextField.text])
+//    {
+//        [Tools showAlertView:@"两次密码不一致" delegateViewController:nil];
+//        return ;
+//    }
     
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     NSString *channelStr = @"";
@@ -165,21 +179,67 @@
     {
         userStr = [ud objectForKey:BPushRequestUserIdKey];
     }
+    NSDictionary *paraDict;
+    if ([accountID length] > 0)
+    {
+        NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+        
+        NSString *channelStr,*userStr;
+        
+        id channel = [ud objectForKey:BPushRequestChannelIdKey];
+        if (channel == nil)
+        {
+            channelStr = @"0";
+        }
+        else
+        {
+            channelStr = [ud objectForKey:BPushRequestChannelIdKey];
+        }
+        id user_id = [ud objectForKey:BPushRequestUserIdKey];
+        
+        if (user_id == nil)
+        {
+            userStr = @"0";
+        }
+        else
+        {
+            userStr = [ud objectForKey:BPushRequestUserIdKey];
+        }
+        
+        paraDict = @{@"account":@"1",
+                     @"a_id":accountID,
+                     @"a_type":accountType,
+                     @"c_ver":[Tools client_ver],
+                     @"d_name":[Tools device_name],
+                     @"d_imei":[Tools device_uid],
+                     @"c_os":[Tools device_os],
+                     @"d_type":@"iOS",
+                     @"p_cid":channelStr,
+                     @"p_uid":userStr,
+                     @"r_name":nickName,
+                     @"sex":@"1"
+                     };
+    }
+    else
+    {
+        paraDict = @{@"u_id":[Tools user_id],
+                     @"pwd":verifyTextField.text,
+                     @"reg_method":[Tools reg_method],
+                     @"d_name":[Tools device_name],
+                     @"d_imei":[Tools device_uid],
+                     @"c_ver":[Tools client_ver],
+                     @"c_os":[Tools device_version],
+                     @"d_type":@"iOS",
+                     @"p_cid":channelStr,
+                     @"p_uid":userStr,
+                     @"account":@"0"
+                     };
+    }
 
     
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
-                                                                      @"r_name":@"anonymity",
-                                                                      @"pwd":verifyTextField.text,
-                                                                      @"reg_method":[Tools reg_method],
-                                                                      @"d_name":[Tools device_name],
-                                                                      @"d_imei":[Tools device_uid],
-                                                                      @"c_ver":[Tools client_ver],
-                                                                      @"c_os":[Tools device_version],
-                                                                      @"d_type":@"iOS",
-                                                                      @"p_cid":channelStr,
-                                                                      @"p_uid":userStr}
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:paraDict
                                                                 API:MB_SUBPWD];
         [request setCompletionBlock:^{
             
@@ -199,6 +259,14 @@
                 [ud setObject:verifyTextField.text forKey:PASSWORD];
                 [ud synchronize];
                 FillInfoViewController *fillInfoViewController = [[FillInfoViewController alloc] init];
+                if ([accountID length] > 0)
+                {
+                    fillInfoViewController.headerIcon = headerIcon;
+                    fillInfoViewController.fromRoot = NO;
+                    fillInfoViewController.nickName = nickName;
+                }
+                [passwordTextField resignFirstResponder];
+                [verifyTextField resignFirstResponder];
                 [fillInfoViewController showSelfViewController:self];
             }
             else

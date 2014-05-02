@@ -31,13 +31,18 @@
 #define SectionTag  10000
 #define RowTag     100
 
+#define ImageHeight  120
+
 @interface ClassZoneViewController ()<UITableViewDataSource,
 UITableViewDelegate,
 UIScrollViewDelegate,
+NewDongtaiDelegate,
 ClassZoneDelegate,
-EGORefreshTableHeaderDelegate>
+EGORefreshTableHeaderDelegate,
+DongTaiDetailAddCommentDelegate>
 {
     UITableView *classZoneTableView;
+    NSMutableArray *DongTaiArray;
     NSMutableArray *tmpArray;
     NSMutableDictionary *tmpDict;
     int page;
@@ -59,11 +64,15 @@ EGORefreshTableHeaderDelegate>
     
     NSString *schoolName;
     NSString *className;
+    
+    UIButton *addButton;
+    
+    OperatDB *db;
 }
 @end
 
 @implementation ClassZoneViewController
-@synthesize classID,className,schoolID,schoolName,fromClasses,fromMsg;
+@synthesize classID,className,schoolID,schoolName,fromClasses,fromMsg,refreshDel;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -76,9 +85,13 @@ EGORefreshTableHeaderDelegate>
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    DDLOG_CURRENT_METHOD;
+    
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"班级空间";
     monthStr = @"";
+    
+    db = [[OperatDB alloc] init];
     
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     page = 0;
@@ -89,8 +102,9 @@ EGORefreshTableHeaderDelegate>
     uncheckedCount = 0;
     
     tmpArray = [[NSMutableArray alloc] initWithCapacity:0];
+    DongTaiArray = [[NSMutableArray alloc] initWithCapacity:0];
     
-    UIButton *addButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    addButton = [UIButton buttonWithType:UIButtonTypeCustom];
     addButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
 //    [addButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     addButton.hidden = YES;
@@ -113,7 +127,7 @@ EGORefreshTableHeaderDelegate>
     [noneDongTaiLabel addGestureRecognizer:tapFresh];
     
     classZoneTableView = [[UITableView alloc] init];
-    if (fromMsg || fromClasses)
+    if (fromClasses)
     {
         classZoneTableView.frame = CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT - UI_NAVIGATION_BAR_HEIGHT);
     }
@@ -134,12 +148,7 @@ EGORefreshTableHeaderDelegate>
     
     [self.bgView addSubview:noneDongTaiLabel];
     
-    if (fromMsg)
-    {
-        [self.backButton addTarget:self action:@selector(mybackClick) forControlEvents:UIControlEventTouchUpInside];
-        addButton.hidden = NO;
-    }
-    else if (!fromClasses)
+    if (!fromClasses)
     {
         [self.backButton addTarget:self action:@selector(backClick) forControlEvents:UIControlEventTouchUpInside];
         addButton.hidden = NO;
@@ -158,14 +167,15 @@ EGORefreshTableHeaderDelegate>
     pullRefreshView = [[EGORefreshTableHeaderView alloc] initWithScrollView:classZoneTableView orientation:EGOPullOrientationDown];
     pullRefreshView.delegate = self;
     
-    if (fromClasses)
+    
+    if ([Tools NetworkReachable])
     {
-        [self getClassInfo];
+        addButton.hidden = YES;
+        [self getCacheSetting];
         [self getCLassSettings];
     }
     else
     {
-        [self getCLassInfoCache];
         [self getCacheSetting];
     }
 }
@@ -222,7 +232,7 @@ EGORefreshTableHeaderDelegate>
         haveNew = YES;
         page = 0;
         monthStr = @"";
-        [self getCLassSettings];
+        [self getDongTaiList];
     }
 }
 
@@ -267,44 +277,6 @@ EGORefreshTableHeaderDelegate>
     addDongTaiViewController.classZoneDelegate = self;
     [addDongTaiViewController showSelfViewController:[XDTabViewController sharedTabViewController]];
 }
-#pragma mark - getclassInfo
--(void)getClassInfo
-{
-    if ([Tools NetworkReachable])
-    {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
-                                                                      @"token":[Tools client_token],
-                                                                      @"c_id":classID
-                                                                      } API:CLASSINFO];
-        [request setCompletionBlock:^{
-            isRefresh = NO;
-            NSString *responseString = [request responseString];
-            NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"classInfo responsedict %@",responseDict);
-            if ([[responseDict objectForKey:@"code"] intValue]== 1)
-            {
-                if(![[responseDict objectForKey:@"data"] isEqual:[NSNull null]])
-                {
-                    className = [[responseDict objectForKey:@"data"] objectForKey:@"name"];
-                    schoolName =[[[responseDict objectForKey:@"data"] objectForKey:@"school"] objectForKey:@"name"];
-                }
-                NSString *requestUrlStr = [NSString stringWithFormat:@"%@=%@=%@",CLASSINFO,[Tools user_id],classID];
-                NSString *key = [requestUrlStr MD5Hash];
-                [FTWCache setObject:[responseString dataUsingEncoding:NSUTF8StringEncoding] forKey:key];
-            }
-            else
-            {
-                [Tools dealRequestError:responseDict fromViewController:self];
-            }
-        }];
-        
-        [request setFailedBlock:^{
-            NSError *error = [request error];
-            DDLOG(@"error %@",error);
-        }];
-        [request startAsynchronous];
-    }
-}
 
 -(void)getCLassSettings
 {
@@ -341,15 +313,12 @@ EGORefreshTableHeaderDelegate>
 }
 -(void)getCacheSetting
 {
-    if ([Tools NetworkReachable])
-    {
-        [self getCLassSettings];
-    }
     NSString *requestUrlStr = [NSString stringWithFormat:@"%@=%@=%@",GETSETTING,[Tools user_id],classID];
     NSString *key = [requestUrlStr MD5Hash];
     NSData *data = [FTWCache objectForKey:key];
     NSString *settingCacheString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     NSDictionary *settingCacheDict = [Tools JSonFromString:settingCacheString];
+    DDLOG(@"cache setting==%@",settingCacheDict);
     if ([settingCacheDict count] > 0)
     {
         [self dealClassSetting:settingCacheDict];
@@ -376,13 +345,28 @@ EGORefreshTableHeaderDelegate>
     }
     
     [ud synchronize];
-    if (fromClasses)
+    
+    if ([self isInAccessTime])
     {
-        [self getDongTaiList];
+        addButton.hidden = NO;
+        if ([Tools NetworkReachable])
+        {
+            [self getCacheData];
+            [self getDongTaiList];
+        }
+        else
+        {
+            [self getCacheData];
+        }
     }
     else
     {
-        [self getCacheData];
+        addButton.hidden = YES;
+    }
+    
+    if (fromClasses)
+    {
+        addButton.hidden = YES;
     }
 }
 
@@ -391,7 +375,7 @@ EGORefreshTableHeaderDelegate>
 {
     if (fromClasses)
     {
-        return [tmpArray count]>0?([tmpArray count]+1):1;
+        return [tmpArray count]>0?2:1;
     }
     else
     {
@@ -405,11 +389,11 @@ EGORefreshTableHeaderDelegate>
     if (section > 0)
     {
         NSDictionary *dict = [tmpArray objectAtIndex:section-1];
-        UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(5, 0, SCREEN_WIDTH-10, 60)];
-        headerLabel.text = [dict objectForKey:@"date"];
+        UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(5, 0, SCREEN_WIDTH-10, 40)];
+        headerLabel.text = [NSString stringWithFormat:@"  %@",[dict objectForKey:@"date"]];
         headerLabel.textColor = TITLE_COLOR;
         headerLabel.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.6];
-        headerLabel.font = [UIFont systemFontOfSize:30];
+        headerLabel.font = [UIFont systemFontOfSize:20];
         return headerLabel;
     }
     return nil;
@@ -419,7 +403,7 @@ EGORefreshTableHeaderDelegate>
 {
     if (section > 0)
     {
-        return 60;
+        return 40;
     }
     return 0;
 }
@@ -432,13 +416,12 @@ EGORefreshTableHeaderDelegate>
         {
             return 1;
         }
-        else if(([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:VisitorAccess] integerValue] == 0))
+        else if(([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:VisitorAccess] integerValue] == 1))
         {
-            NSArray *array = [[tmpArray objectAtIndex:section] objectForKey:@"diaries"];
-            DDLOG(@"from class diaries %@",array);
-            return [array count] > 5 ? 5 : ([array count]);
+            NSDictionary *dict = [tmpArray objectAtIndex:section-1];
+            NSArray *array = [dict objectForKey:@"diaries"];
+            return [array count];
         }
-       
     }
     else
     {
@@ -465,18 +448,23 @@ EGORefreshTableHeaderDelegate>
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    CGFloat he=0;
+    if (SYSVERSION>=7)
+    {
+        he =5;
+    }
     if (indexPath.section >0)
     {
         if (indexPath.section < [tmpArray count])
         {
             NSDictionary *groupDict = [tmpArray objectAtIndex:indexPath.section-1];
             NSArray *array = [groupDict objectForKey:@"diaries"];
-            CGFloat imageViewHeight = 134;
+            CGFloat imageViewHeight = ImageHeight;
             NSDictionary *dict = [array objectAtIndex:indexPath.row];
             NSString *content = [dict objectForKey:@"content"];
             NSArray *imgsArray = [[dict objectForKey:@"img"] count]>0?[dict objectForKey:@"img"]:nil;
             CGFloat imgsHeight = [imgsArray count]>0?(imageViewHeight+10):10;
-            CGFloat contentHtight = [content length]>0?35:0;
+            CGFloat contentHtight = [content length]>0?(35+he):0;
             return 60+imgsHeight+contentHtight+50;
         }
         else
@@ -485,12 +473,12 @@ EGORefreshTableHeaderDelegate>
             NSArray *array = [groupDict objectForKey:@"diaries"];
             if (indexPath.row < [array count])
             {
-                CGFloat imageViewHeight = 134;
+                CGFloat imageViewHeight = ImageHeight;
                 NSDictionary *dict = [array objectAtIndex:indexPath.row];
                 NSString *content = [dict objectForKey:@"content"];
                 NSArray *imgsArray = [[dict objectForKey:@"img"] count]>0?[dict objectForKey:@"img"]:nil;
                 CGFloat imgsHeight = [imgsArray count]>0?(imageViewHeight+10):10;
-                CGFloat contentHtight = [content length]>0?35:0;
+                CGFloat contentHtight = [content length]>0?(35+he):0;
                 return 60+imgsHeight+contentHtight+50;
             }
             else
@@ -620,15 +608,44 @@ EGORefreshTableHeaderDelegate>
             NSArray *array = [groupDict objectForKey:@"diaries"];
             NSDictionary *dict = [array objectAtIndex:indexPath.row];
             NSString *name = [[dict objectForKey:@"by"] objectForKey:@"name"];
-            cell.nameLabel.frame = CGRectMake(60, 5, [name length]*25>100?100:([name length]*25), 30);
-            cell.nameLabel.text = name;
-            cell.timeLabel.frame = CGRectMake(cell.nameLabel.frame.size.width+cell.nameLabel.frame.origin.x+10, 5, SCREEN_WIDTH-cell.nameLabel.frame.origin.x-cell.nameLabel.frame.size.width-20, 30);
+            
+            NSString *nameStr;
+            NSArray *classmen = [db findSetWithDictionary:@{@"uid":[[dict objectForKey:@"by"] objectForKey:@"_id"],@"classid":classID} andTableName:CLASSMEMBERTABLE];
+            if ([classmen count]>0)
+            {
+                NSDictionary *memdict = [classmen firstObject];
+                if (![[memdict objectForKey:@"title"] isEqual:[NSNull null]])
+                {
+                    if ([[memdict objectForKey:@"title"] length] >0)
+                    {
+                        nameStr = [NSString stringWithFormat:@"%@（%@）",name,[memdict objectForKey:@"title"]];
+                    }
+                    else
+                        nameStr = name;
+                }
+                else
+                {
+                    nameStr = name;
+                }
+            }
+            else
+            {
+                nameStr = name;
+            }
+            
+            cell.nameLabel.frame = CGRectMake(60, 5, [nameStr length]*25>170?170:([nameStr length]*18), 30);
+            cell.nameLabel.text = nameStr;
+            cell.nameLabel.font = [UIFont systemFontOfSize:15];
+            cell.nameLabel.textColor = LIGHT_BLUE_COLOR;
+            cell.timeLabel.frame = CGRectMake(cell.nameLabel.frame.size.width+cell.nameLabel.frame.origin.x, 5, SCREEN_WIDTH-cell.nameLabel.frame.origin.x-cell.nameLabel.frame.size.width-20, 30);
             cell.timeLabel.textAlignment = NSTextAlignmentRight;
+            cell.timeLabel.numberOfLines = 2;
+            cell.timeLabel.lineBreakMode = NSLineBreakByWordWrapping;
             cell.timeLabel.text = [Tools showTime:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]];
-            cell.headerImageView.layer.cornerRadius = 5;
+            cell.headerImageView.layer.cornerRadius = cell.headerImageView.frame.size.width/2;
             cell.headerImageView.clipsToBounds = YES;
             cell.headerImageView.backgroundColor = [UIColor clearColor];
-            [Tools fillImageView:cell.headerImageView withImageFromURL:[[dict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:@"header_pic.jpg"];
+            [Tools fillImageView:cell.headerImageView withImageFromURL:[[dict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERBG];
             cell.locationLabel.frame = CGRectMake(60, cell.nameLabel.frame.origin.y+cell.nameLabel.frame.size.height, SCREEN_WIDTH-80, 20);
             cell.locationLabel.text = [dict objectForKey:@"add"];
             
@@ -642,24 +659,38 @@ EGORefreshTableHeaderDelegate>
             }
             if (![[dict objectForKey:@"content"] length] <=0)
             {
+                CGFloat he = 0;
+                if (SYSVERSION >= 7)
+                {
+                    he = 10;
+                }
                 //有文字
                 cell.contentLabel.hidden = NO;
-                cell.contentLabel.textColor = TITLE_COLOR;
-                cell.contentLabel.text = [dict objectForKey:@"content"];
-                cell.contentLabel.frame = CGRectMake(10, 60, SCREEN_WIDTH-20, 35);
+                cell.contentLabel.editable = NO;
+                cell.contentLabel.textColor = [UIColor blackColor];
+                if ([[dict objectForKey:@"content"] length] > 40)
+                {
+                    cell.contentLabel.text = cell.contentLabel.text = [NSString stringWithFormat:@"%@...",[[dict objectForKey:@"content"] substringToIndex:37]];
+                }
+                else
+                {
+                    cell.contentLabel.text = [dict objectForKey:@"content"];
+                }
+                CGSize size = [Tools getSizeWithString:[dict objectForKey:@"content"] andWidth:SCREEN_WIDTH-50 andFont:[UIFont systemFontOfSize:15]];
+                cell.contentLabel.frame = CGRectMake(10, 55, SCREEN_WIDTH-20, size.height>45?(45+he):(size.height+5+he));
             }
             else
             {
                 cell.contentLabel.frame = CGRectMake(10, 60, 0, 0);
             }
-            CGFloat imageViewHeight = 134;
-            CGFloat imageViewWidth = 134;
+            CGFloat imageViewHeight = ImageHeight;
+            CGFloat imageViewWidth = ImageHeight;
             if ([[dict objectForKey:@"img"] count] > 0)
             {
                 //有图片
                 
                 NSArray *imgsArray = [dict objectForKey:@"img"];                
-                cell.imagesScrollView.frame = CGRectMake(5, cell.contentLabel.frame.size.height+cell.contentLabel.frame.origin.y+3, SCREEN_WIDTH-10, imageViewHeight);
+                cell.imagesScrollView.frame = CGRectMake(5, cell.contentLabel.frame.size.height+cell.contentLabel.frame.origin.y+7, SCREEN_WIDTH-20, imageViewHeight);
                 cell.imagesScrollView.contentSize = CGSizeMake((imageViewWidth+5)*[imgsArray count], imageViewHeight);
                 for (int i=0; i<[imgsArray count]; ++i)
                 {
@@ -736,6 +767,12 @@ EGORefreshTableHeaderDelegate>
 
 -(void)praiseDiary:(UIButton *)button
 {
+    if (fromClasses)
+    {
+        [Tools showTips:@"游客不能赞班级日志,赶快加入吧!" toView:self.bgView];
+        return ;
+    }
+    
     if ([Tools NetworkReachable])
     {
         NSDictionary *groupDict = [tmpArray objectAtIndex:button.tag/SectionTag-1];
@@ -757,7 +794,6 @@ EGORefreshTableHeaderDelegate>
                 page = 0;
                 monthStr = @"";
                 NSString *title = [[button titleForState:UIControlStateNormal] substringFromIndex:2];
-                DDLOG(@"like count==%d",[title integerValue]);
                 [button setTitle:[NSString stringWithFormat:@"赞(%d)",[title integerValue]+1] forState:UIControlStateNormal];
             }
             else
@@ -784,6 +820,7 @@ EGORefreshTableHeaderDelegate>
     DongTaiDetailViewController *dongtaiDetailViewController = [[DongTaiDetailViewController alloc] init];
     dongtaiDetailViewController.dongtaiId = [dict objectForKey:@"_id"];
     dongtaiDetailViewController.classID = classID;
+    dongtaiDetailViewController.addComDel = self;
     [dongtaiDetailViewController showSelfViewController:[XDTabViewController sharedTabViewController]];
 }
 
@@ -813,12 +850,22 @@ EGORefreshTableHeaderDelegate>
         DongTaiDetailViewController *dongtaiDetailViewController = [[DongTaiDetailViewController alloc] init];
         dongtaiDetailViewController.dongtaiId = [[array objectAtIndex:indexPath.row] objectForKey:@"_id"];
         dongtaiDetailViewController.classID = classID;
+        dongtaiDetailViewController.addComDel = self;
         [dongtaiDetailViewController showSelfViewController:[XDTabViewController sharedTabViewController]];
         [tableView deselectRowAtIndexPath:indexPath animated:YES];
     }
 }
 
-#pragma mark -
+#pragma mark - addCommetnDel
+-(void)addComment:(BOOL)add
+{
+    if (add)
+    {
+        page = 0;
+        monthStr = @"";
+        [self getDongTaiList];
+    }
+}
 
 -(void)getMoreDongTai
 {
@@ -850,10 +897,15 @@ EGORefreshTableHeaderDelegate>
             {
                 if (page == 0)
                 {
-                    [tmpArray removeAllObjects];
+                    [DongTaiArray removeAllObjects];
                     NSString *requestUrlStr = [NSString stringWithFormat:@"%@=%@=%@",GETDIARIESLIST,[Tools user_id],classID];
                     NSString *key = [requestUrlStr MD5Hash];
                     [FTWCache setObject:[responseString dataUsingEncoding:NSUTF8StringEncoding] forKey:key];
+                    
+                    if ([self.refreshDel respondsToSelector:@selector(reFreshClassZone:)])
+                    {
+                        [self.refreshDel reFreshClassZone:YES];
+                    }
                 }
                 if ([[[responseDict objectForKey:@"data"] objectForKey:@"posts"] count]>0)
                 {
@@ -861,19 +913,19 @@ EGORefreshTableHeaderDelegate>
                     if ([array count] > 0)
                     {
                         classZoneTableView.hidden = NO;
-                        noneDongTaiLabel.hidden = YES;
-                        [self groupByTime:array];
+                        [DongTaiArray addObjectsFromArray:array];
+                        [self groupByTime:DongTaiArray];
                         _reloading = NO;
                         [pullRefreshView egoRefreshScrollViewDataSourceDidFinishedLoading:classZoneTableView];
                     }
                     page = [[[responseDict objectForKey:@"data"] objectForKey:@"page"] intValue];
                     monthStr = [NSString stringWithFormat:@"%@",[[responseDict objectForKey:@"data"] objectForKey:@"month"]];
                 }
-                else if (page == 0)
+                else if (page==0 && [monthStr length]==0 )
                 {
                     noneDongTaiLabel.hidden = NO;
                 }
-                else
+                else if([monthStr length]>0 && page>0)
                 {
                     [Tools showAlertView:@"没有更多动态了" delegateViewController:nil];
                 }
@@ -904,13 +956,9 @@ EGORefreshTableHeaderDelegate>
 {
     NSString *timeStr;
     int index = 0;
-    if (page == 0)
-    {
-        [tmpArray removeAllObjects];
-    }
+    [tmpArray removeAllObjects];
     for (int i=index; i<[array count]; i++)
     {
-        DDLOG(@"index =%d,%d",index,[array count]);
         NSDictionary *dict = [array objectAtIndex:i];
         CGFloat sec = [[[dict objectForKey:@"created"] objectForKey:@"sec"] floatValue];
         
@@ -948,6 +996,14 @@ EGORefreshTableHeaderDelegate>
             }
         }
     }
+    if ([tmpArray count]>0)
+    {
+        noneDongTaiLabel.hidden = YES;
+    }
+    else
+    {
+        noneDongTaiLabel.hidden = NO;
+    }
     [classZoneTableView reloadData];
 }
 
@@ -966,8 +1022,6 @@ EGORefreshTableHeaderDelegate>
 
 -(BOOL)isInAccessTime
 {
-    DDLOG(@"role=%@ accessTime=%@",[[NSUserDefaults standardUserDefaults] objectForKey:@"role"],[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:StudentVisiteTime]);
-    
     if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"students"])
     {
         NSDate *date = [NSDate date];
@@ -996,7 +1050,7 @@ EGORefreshTableHeaderDelegate>
                         return NO;
                     }
                 }
-                else if ([timeLimit integerValue] ==1)
+                else if ([timeLimit integerValue] ==0)
                 {
                     if ([hourStr integerValue] < 5)
                     {
@@ -1016,7 +1070,7 @@ EGORefreshTableHeaderDelegate>
                         return NO;
                     }
                 }
-                else if ([timeLimit integerValue] ==1)
+                else if ([timeLimit integerValue] ==0)
                 {
                     if ([hourStr integerValue] < 5+12)
                     {
@@ -1042,7 +1096,7 @@ EGORefreshTableHeaderDelegate>
                     return NO;
                 }
             }
-            else if ([timeLimit integerValue] ==1)
+            else if ([timeLimit integerValue] ==0)
             {
                 if ([hourStr integerValue] < 17)
                 {
@@ -1052,7 +1106,7 @@ EGORefreshTableHeaderDelegate>
             }
         }
     }
-    else if(([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"visitor"]) && ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:VisitorAccess] integerValue] == 1))
+    else if(([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"visitor"]) && ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:VisitorAccess] integerValue] == 0))
     {
         [Tools showAlertView:@"游客不可以查看班级空间！" delegateViewController:nil];
         return NO;
@@ -1062,10 +1116,6 @@ EGORefreshTableHeaderDelegate>
 
 -(void)getCacheData
 {
-    if (![self isInAccessTime])
-    {
-        return ;
-    }
     NSString *requestUrlStr = [NSString stringWithFormat:@"%@=%@=%@",GETDIARIESLIST,[Tools user_id],classID];
     NSString *key = [requestUrlStr MD5Hash];
     NSData *cacheData = [FTWCache objectForKey:key];
@@ -1078,13 +1128,12 @@ EGORefreshTableHeaderDelegate>
             if ([[[responseDict objectForKey:@"data"] objectForKey:@"posts"] count] > 0)
             {
                 classZoneTableView.hidden = NO;
-                noneDongTaiLabel.hidden = YES;
                 NSArray *array = [[responseDict objectForKey:@"data"] objectForKey:@"posts"];
                 [self groupByTime:array];
             }
             else
             {
-                [self getDongTaiList];
+                noneDongTaiLabel.hidden = NO;
             }
         }
     }
@@ -1093,33 +1142,4 @@ EGORefreshTableHeaderDelegate>
         [self getDongTaiList];
     }
 }
-
--(void)getCLassInfoCache
-{
-    NSString *requestUrlStr = [NSString stringWithFormat:@"%@=%@=%@",CLASSINFO,[Tools user_id],classID];
-    NSString *key = [requestUrlStr MD5Hash];
-    NSData *cacheData = [FTWCache objectForKey:key];
-    if ([cacheData length] > 0)
-    {
-        NSString *responseString = [[NSString alloc] initWithData:cacheData encoding:NSUTF8StringEncoding];
-        NSDictionary *responseDict = [Tools JSonFromString:responseString];
-        if ([[responseDict objectForKey:@"code"] intValue]== 1)
-        {
-            if(![[responseDict objectForKey:@"data"] isEqual:[NSNull null]])
-            {
-                className = [[responseDict objectForKey:@"data"] objectForKey:@"name"];
-                schoolName = [[[responseDict objectForKey:@"data"] objectForKey:@"school"] objectForKey:@"name"];
-            }
-        }
-        else
-        {
-            [Tools dealRequestError:responseDict fromViewController:self];
-        }
-    }
-    else
-    {
-        [self getClassInfo];
-    }
-}
-
 @end

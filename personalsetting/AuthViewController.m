@@ -11,7 +11,7 @@
 
 @interface AuthViewController ()<UITextFieldDelegate,UIActionSheetDelegate>
 {
-    UITextField *nameTextField;
+    MyTextField *nameTextField;
     UIImageView *idCardImageView;
     UIImageView *competenceImageView;
     NSString *imageUsed;
@@ -25,7 +25,7 @@
 @end
 
 @implementation AuthViewController
-
+@synthesize img_id,img_tcard;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -45,7 +45,7 @@
     
     UIButton *setButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [setButton setTitle:@"提交" forState:UIControlStateNormal];
-    [setButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+    [setButton setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
     setButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
     [setButton addTarget:self action:@selector(submit) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:setButton];
@@ -59,12 +59,14 @@
     nameLabel.textColor = TITLE_COLOR;
     [self.bgView addSubview:nameLabel];
     
-    nameTextField = [[UITextField alloc] initWithFrame:CGRectMake(nameLabel.frame.origin.x+nameLabel.frame.size.width, nameLabel.frame.origin.y, 200, 30)];
+    nameTextField = [[MyTextField alloc] initWithFrame:CGRectMake(nameLabel.frame.origin.x+nameLabel.frame.size.width, nameLabel.frame.origin.y, 200, 35)];
     nameTextField.backgroundColor = [UIColor clearColor];
     nameTextField.delegate = self;
+    nameTextField.enabled = NO;
+    nameTextField.text = [Tools user_name];
     nameTextField.background = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
     nameTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
-    nameTextField.font = [UIFont systemFontOfSize:14];
+    nameTextField.font = [UIFont systemFontOfSize:16];
     [self.bgView addSubview:nameTextField];
     
     UILabel *idCardLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, nameLabel.frame.size.height+nameLabel.frame.origin.y+20, 100, 30)];
@@ -78,11 +80,15 @@
     idCardImageView.backgroundColor = [UIColor whiteColor];
     idCardImageView.layer.cornerRadius = 2;
     idCardImageView.layer.masksToBounds = YES;
-    idCardImageView.image = [UIImage imageNamed:@""];
+    idCardImageView.userInteractionEnabled = YES;
     [self.bgView addSubview:idCardImageView];
     
+    if ([img_id length] > 10)
+    {
+        [Tools fillImageView:idCardImageView withImageFromURL:img_id andDefault:nil];
+    }
+    
     UITapGestureRecognizer *idCardGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(changeIDCardImage)];
-    idCardImageView.userInteractionEnabled = YES;
     [idCardImageView addGestureRecognizer:idCardGestureRecognizer];
     
     UILabel *competenceLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, idCardImageView.frame.size.height+idCardImageView.frame.origin.y+20, 100, 30)];
@@ -95,17 +101,20 @@
     competenceImageView = [[UIImageView alloc] initWithFrame:CGRectMake(competenceLabel.frame.size.width+competenceLabel.frame.origin.x+10, idCardImageView.frame.origin.y+idCardImageView.frame.size.height+20, 150, 100)];
     competenceImageView.backgroundColor = [UIColor whiteColor];
     competenceImageView.layer.cornerRadius = 2;
+    competenceImageView.userInteractionEnabled = YES;
     competenceImageView.layer.masksToBounds = YES;
-    competenceImageView.image = [UIImage imageNamed:@""];
     [self.bgView addSubview:competenceImageView];
     
+    if ([img_tcard length] > 10)
+    {
+        [Tools fillImageView:competenceImageView withImageFromURL:img_tcard andDefault:nil];
+    }
+    
     UITapGestureRecognizer *competenceGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(changeCompetenceImage)];
-    competenceImageView.userInteractionEnabled = YES;
     [competenceImageView addGestureRecognizer:competenceGestureRecognizer];
     
     imagePickerController = [[UIImagePickerController alloc] init];
     imagePickerController.delegate = self;
-    
     
 }
 
@@ -117,26 +126,30 @@
 
 -(void)submit
 {
-    if (!idImage || !componentImage)
+    if (idImage && componentImage)
     {
-        if (idImage)
-        {
-            [self uploadImage:idImage used:@"img_id"];
-        }
-        if (componentImage)
-        {
-            [self uploadImage:componentImage used:@"img_tcard"];
-        }
+        [self uploadImage:idImage used:@"img_id"];
+        [self uploadImage:componentImage used:@"img_tcard"];
     }
-    else
+    else if(!idImage)
     {
-        [Tools showAlertView:@"请选择身份证或教师资格证" delegateViewController:nil];
+        [Tools showAlertView:@"请添加身份证" delegateViewController:nil];
+        return ;
+    }
+    else if(!componentImage)
+    {
+        [Tools showAlertView:@"请添加教师资格证" delegateViewController:nil];
         return ;
     }
 }
 
 -(void)changeCompetenceImage
 {
+    if ([img_tcard length] > 10)
+    {
+        [Tools showAlertView:@"正在审核中" delegateViewController:nil];
+        return;
+    }
     imageUsed = @"img_tcard";
     [self selectImage];
 }
@@ -147,52 +160,27 @@
     [self selectImage];
 }
 
+-(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (buttonIndex == 0)
+    {
+        [self selectPicture:1001];
+    }
+    else if(buttonIndex == 1)
+    {
+        [self selectPicture:1000];
+    }
+}
+
 -(void)selectImage
 {
-//    selectImageView = [[UIView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, 0, 0)];
-//    selectImageView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.7];
-//    [self.bgView addSubview:selectImageView];
-//    
-//    UITapGestureRecognizer *cancelSelectImage = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(cancelSelectImage)];
-//    selectImageView.userInteractionEnabled = YES;
-//    [selectImageView addGestureRecognizer:cancelSelectImage];
-//    
-//    UIButton *cancelSelectButton = [UIButton buttonWithType:UIButtonTypeCustom];
-//    cancelSelectButton.backgroundColor = [UIColor grayColor];
-//    [cancelSelectButton setTitle:@"取消" forState:UIControlStateNormal];
-//    [cancelSelectButton addTarget:self action:@selector(cancelSelectImage) forControlEvents:UIControlEventTouchUpInside];
-//    [selectImageView addSubview:cancelSelectButton];
-//    
-//    UIButton *takePictureButton = [UIButton buttonWithType:UIButtonTypeCustom];
-//    takePictureButton.backgroundColor = [UIColor whiteColor];
-//    takePictureButton.tag = 1000;
-//    [takePictureButton addTarget:self action:@selector(selectPicture:) forControlEvents:UIControlEventTouchUpInside];
-//    [takePictureButton setTitleColor:[UIColor blueColor] forState:UIControlStateNormal];
-//    [takePictureButton setTitle:@"拍照" forState:UIControlStateNormal];
-//    [selectImageView addSubview:takePictureButton];
-//    
-//    UIButton *fromLibraryButton = [UIButton buttonWithType:UIButtonTypeCustom];
-//    fromLibraryButton.backgroundColor = [UIColor whiteColor];
-//    fromLibraryButton.tag = 1001;
-//    [fromLibraryButton addTarget:self action:@selector(selectPicture:) forControlEvents:UIControlEventTouchUpInside];
-//    [fromLibraryButton setTitleColor:[UIColor blueColor] forState:UIControlStateNormal];
-//    [fromLibraryButton setTitle:@"从相册选取" forState:UIControlStateNormal];
-//    [selectImageView addSubview:fromLibraryButton];
-//    
-//    [UIView animateWithDuration:0.2 animations:^{
-//        selectImageView.frame = CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-//        cancelSelectButton.frame = CGRectMake(SCREEN_WIDTH/2-100, SCREEN_HEIGHT - 50, 200, 30);
-//        takePictureButton.frame = CGRectMake(SCREEN_WIDTH/2-100, SCREEN_HEIGHT - 90, 200, 30);
-//        fromLibraryButton.frame = CGRectMake(SCREEN_WIDTH/2-100, SCREEN_HEIGHT-130, 200, 30);
-//    }];
-    
-    UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"提示" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"", nil];
+    UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"从相册选取",@"相机", nil];
     [ac showInView:self.bgView];
 }
 
--(void)selectPicture:(UIButton *)button
+-(void)selectPicture:(NSInteger)buttonIndex
 {
-    if (button.tag == 1000)
+    if (buttonIndex == 1000)
     {
         //拍照
         if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
@@ -205,7 +193,7 @@
             [Tools showAlertView:@"相机不可用" delegateViewController:nil];
         }
     }
-    else if(button.tag == 1001)
+    else if(buttonIndex == 1001)
     {
         //相册
         if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary])
@@ -226,6 +214,24 @@
     [self cancelSelectImage];
     [imageArray removeAllObjects];
     UIImage *image = [info objectForKey:UIImagePickerControllerOriginalImage];
+    
+    if (image.size.width>SCREEN_WIDTH*2 || image.size.height>SCREEN_HEIGHT*2)
+    {
+        CGFloat imageHeight = 0.0f;
+        CGFloat imageWidth = 0.0f;
+        if (image.size.width>SCREEN_WIDTH*2)
+        {
+            imageWidth = SCREEN_WIDTH*2;
+            imageHeight = imageWidth*image.size.height/image.size.width;
+        }
+        else
+        {
+            imageHeight = SCREEN_HEIGHT*2;
+            imageWidth = imageHeight*image.size.width/image.size.height;
+        }
+        image = [Tools thumbnailWithImageWithoutScale:image size:CGSizeMake(imageWidth, imageHeight)];
+    }
+
     [imageArray addObject:image];
     [imagePickerController dismissViewControllerAnimated:YES completion:nil];
     
@@ -251,6 +257,7 @@
     if ([Tools NetworkReachable])
     {
         UIActivityIndicatorView *indi = [[UIActivityIndicatorView alloc] init];
+        indi.activityIndicatorViewStyle = UIActivityIndicatorViewStyleWhiteLarge;
         if ([imgUsed isEqualToString:@"img_tcard"])
         {
             indi.frame = CGRectMake(competenceImageView.frame.origin.x+competenceImageView.frame.size.width/2-20, competenceImageView.frame.origin.y+competenceImageView.frame.size.height/2-20, 40, 40);
@@ -259,10 +266,8 @@
         {
             indi.frame = CGRectMake(idCardImageView.frame.origin.x+idCardImageView.frame.size.width/2-20, idCardImageView.frame.origin.y+idCardImageView.frame.size.height/2-20, 40, 40);
         }
-        
-        indi .activityIndicatorViewStyle = UIActivityIndicatorViewStyleGray;
         [self.bgView addSubview:indi];
-        __weak ASIHTTPRequest *request = [Tools upLoadImages:[NSArray arrayWithObject:image] withSubURL:SETUSERIMAGE andParaDict:@{@"u_id":[Tools user_id],@"token":[Tools client_token],@"img_type":imageUsed}];
+        __weak ASIHTTPRequest *request = [Tools upLoadImages:[NSArray arrayWithObject:image] withSubURL:SETUSERIMAGE andParaDict:@{@"u_id":[Tools user_id],@"token":[Tools client_token],@"img_type":imgUsed}];
         [request setCompletionBlock:^{
             [indi stopAnimating];
             [indi removeFromSuperview];
@@ -273,11 +278,13 @@
             {
                 if ([imgUsed isEqualToString:@"img_tcard"])
                 {
-                    [competenceImageView setImage:[imageArray firstObject]];
+                    [competenceImageView setImage:image];
+                    [Tools showTips:@"教师资格证上传成功" toView:self.bgView];
                 }
                 else if ([imgUsed isEqualToString:@"img_id"])
                 {
-                    [idCardImageView setImage:[imageArray firstObject]];
+                    [idCardImageView setImage:image];
+                    [Tools showTips:@"身份证上传成功" toView:self.bgView];
                 }
             }
             else

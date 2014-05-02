@@ -8,6 +8,13 @@
 
 #import "XDContentViewController.h"
 
+@protocol moreDelegate <NSObject>
+
+-(void)signOutClass:(BOOL)signOut;
+
+@end
+
 @interface MoreViewController : XDContentViewController
 @property (nonatomic, strong) NSString *classID;
+@property (nonatomic, strong) id<moreDelegate> signOutDel;
 @end

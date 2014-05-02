@@ -12,8 +12,11 @@
 #import "SideMenuViewController.h"
 #import "MyClassesViewController.h"
 #import "JDSideMenu.h"
+#define NAMETFTAG   1000
 
-@interface FillInfoViewController ()<UITextFieldDelegate,UIScrollViewDelegate>
+@interface FillInfoViewController ()<UITextFieldDelegate,
+UIScrollViewDelegate,
+MySwitchDel>
 {
     UIScrollView *mainScrollView;
     UIImageView *headerImageView;
@@ -28,13 +31,15 @@
     MySwitchView *sexSwitch;
     NSString *sex;
     
+    UIImage *fullScreenImage;
+    
     UIView *selectImageView;
     UIImagePickerController *imagePickerController;
 }
 @end
 
 @implementation FillInfoViewController
-
+@synthesize headerIcon,nickName,accountID,accountType,account,fromRoot;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -49,7 +54,16 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     
-    self.titleLabel.text = @"注册成功";
+    if (fromRoot)
+    {
+        self.titleLabel.text = @"完善信息";
+        self.returnImageView.hidden = YES;
+        self.backButton.hidden = YES;
+    }
+    else
+    {
+        self.titleLabel.text = @"注册成功";
+    }
     
     mainScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT)];
     mainScrollView.backgroundColor = [UIColor clearColor];
@@ -85,23 +99,38 @@
     [mainScrollView addSubview:headerLabel];
     
     headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(headerLabel.frame.origin.x+headerLabel.frame.size.width+10, 39, 100, 100)];
-    [headerImageView setImage:[Tools getImageFromImage:[UIImage imageNamed:@"selectheader"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)]];
+    [headerImageView setImage:[Tools getImageFromImage:[UIImage imageNamed:HEADERBG] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)]];
     headerImageView.backgroundColor = [UIColor clearColor];
     [mainScrollView addSubview:headerImageView];
+    
+    if ([headerIcon length] > 0)
+    {
+        [Tools fillImageView:headerImageView withImageFromURL:headerIcon];
+    }
     
     UITapGestureRecognizer *selectHeaderImageTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(selectHeaderImage)];
     headerImageView.userInteractionEnabled = YES;
     [headerImageView addGestureRecognizer:selectHeaderImageTgr];
     
     nameTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(29, headerImageView.frame.origin.y+headerImageView.frame.size.height+27, SCREEN_WIDTH-29-24.5, 35)];
+    nameTextfield.tag = NAMETFTAG;
     nameTextfield.delegate = self;
+    nameTextfield.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
     nameTextfield.background = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
-    nameTextfield.placeholder = @"姓名";
+    if ([nickName length] > 0)
+    {
+        nameTextfield.text = nickName;
+    }
+    else
+    {
+        nameTextfield.placeholder = @"姓名";
+    }
     nameTextfield.clearButtonMode = UITextFieldViewModeWhileEditing;
     [mainScrollView addSubview:nameTextfield];
     
-    sexSwitch = [[MySwitchView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH/2-40, nameTextfield.frame.size.height+nameTextfield.frame.origin.y+5, 70, 30)];
+    sexSwitch = [[MySwitchView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH/2-40, nameTextfield.frame.size.height+nameTextfield.frame.origin.y+10, 70, 30)];
     sexSwitch.selectView.frame = CGRectMake(sexSwitch.frame.size.width/2, 0, sexSwitch.frame.size.width/2, sexSwitch.frame.size.height);
+    sexSwitch.mySwitchDel = self;
     sexSwitch.backgroundColor = RGB(65, 181, 186, 1);
     sexSwitch.leftView.layer.borderWidth = 0;
     sexSwitch.rightView.layer.borderWidth = 0;
@@ -148,6 +177,20 @@
     {
         oriY = 20;
     }
+    sex = @"1";
+}
+
+-(void)switchStateChanged:(MySwitchView *)mySwitchView
+{
+    if ([mySwitchView isOpen])
+    {
+        sex = @"0";
+    }
+    else
+    {
+        sex = @"1";
+    }
+    DDLOG(@"====%@",sex);
 }
 
 - (void)didReceiveMemoryWarning
@@ -206,6 +249,7 @@
 
 -(void)selectPicture:(UIButton *)button
 {
+    imagePickerController.allowsEditing = YES;
     if (button.tag == 1000)
     {
         //拍照
@@ -240,7 +284,8 @@
     [self cancelSelectImage];
     [imagePickerController dismissViewControllerAnimated:YES completion:nil];
     
-    UIImage *fullScreenImage = [info objectForKey:UIImagePickerControllerOriginalImage];
+    fullScreenImage = [info objectForKey:UIImagePickerControllerEditedImage];
+    
     if (fullScreenImage.size.width>SCREEN_WIDTH*1.5 || fullScreenImage.size.height>SCREEN_HEIGHT*2)
     {
         CGFloat imageHeight = 0.0f;
@@ -258,7 +303,7 @@
         fullScreenImage = [Tools thumbnailWithImageWithoutScale:fullScreenImage size:CGSizeMake(imageWidth, imageHeight)];
     }
     
-    [self uploadImage:fullScreenImage];
+    [headerImageView setImage:fullScreenImage];
 }
 
 -(void)uploadImage:(UIImage *)image
@@ -287,7 +332,8 @@
                 [[NSUserDefaults standardUserDefaults] setObject:img_icon forKey:HEADERIMAGE];
                 
                 [[NSUserDefaults standardUserDefaults] synchronize];
-                [headerImageView setImage:image];
+                
+                [self submitClick];
             }
             else
             {
@@ -313,6 +359,7 @@
 
 -(void)submitClick
 {
+    
     if ([nameTextfield.text length] == 0)
     {
         [Tools showAlertView:@"请输入您的姓名" delegateViewController:nil];
@@ -320,20 +367,71 @@
     }
     if ([sexSwitch isOpen])
     {
-        //男
-        sex = @"1";
+        //nv
+        sex = @"0";
     }
     else
     {
-        sex = @"2";
+        sex = @"1";
     }
+    
+    NSDictionary *paraDict;
+    NSString *url;
+    if ([accountID length] > 0)
+    {
+        NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+        
+        NSString *channelStr,*userStr;
+        
+        id channel = [ud objectForKey:BPushRequestChannelIdKey];
+        if (channel == nil)
+        {
+            channelStr = @"0";
+        }
+        else
+        {
+            channelStr = [ud objectForKey:BPushRequestChannelIdKey];
+        }
+        id user_id = [ud objectForKey:BPushRequestUserIdKey];
+        
+        if (user_id == nil)
+        {
+            userStr = @"0";
+        }
+        else
+        {
+            userStr = [ud objectForKey:BPushRequestUserIdKey];
+        }
+
+        paraDict = @{@"a_id":accountID,
+                      @"a_type":accountType,
+                      @"c_ver":[Tools client_ver],
+                      @"d_name":[Tools device_name],
+                      @"d_imei":[Tools device_uid],
+                      @"c_os":[Tools device_os],
+                      @"d_type":@"iOS",
+                      @"p_cid":channelStr,
+                      @"p_uid":userStr,
+                      @"r_name":nameTextfield.text,
+                      @"sex":sex,
+                      @"reg":@"1"
+                    };
+        url = LOGINBYAUTHOR;
+    }
+    else
+    {
+        paraDict = @{@"sex":sex,
+                     @"r_name":nameTextfield.text,
+                     @"u_id":[Tools user_id],
+                     @"token":[Tools client_token]
+                     };
+        url = MB_SUBINFO;
+    }
+    
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"sex":sex,
-                                                                      @"r_name":nameTextfield.text,
-                                                                      @"u_id":[Tools user_id],
-                                                                      @"token":[Tools client_token]}
-                                                                API:MB_SUBINFO];
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:paraDict
+                                                                API:url];
         
         [request setCompletionBlock:^{
             
@@ -343,15 +441,23 @@
             DDLOG(@"verify responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                
                 [[NSUserDefaults standardUserDefaults] setObject:nameTextfield.text forKey:USERNAME];
                 [[NSUserDefaults standardUserDefaults] setObject:sex forKey:USERSEX];
+                if ([accountID length]>0)
+                {
+                    [[NSUserDefaults standardUserDefaults] setObject:[[responseDict objectForKey:@"data"] objectForKey:@"token"] forKey:CLIENT_TOKEN];
+                    [[NSUserDefaults standardUserDefaults] setObject:[[responseDict objectForKey:@"data"] objectForKey:@"u_id"] forKey:USERID];
+                }
                 [[NSUserDefaults standardUserDefaults] synchronize];
+                
+                
+                
                 SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
                 MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
+                myClassesViewController.headerIcon = headerIcon;
                 JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myClassesViewController menuController:sideMenuViewController];
                 [self presentViewController:sideMenu animated:YES completion:^{
-                    
+                    [self uploadImage:headerImageView.image];
                 }];
             }
             else
@@ -422,9 +528,16 @@
 -(void)textFieldDidBeginEditing:(UITextField *)textField
 {
     [UIView animateWithDuration:0.25 animations:^{
-        if (textField.tag == 1000)
+        if (textField.tag == NAMETFTAG)
         {
-            self.bgView.center = CGPointMake(SCREEN_WIDTH/2, SCREEN_HEIGHT/2-20);
+            if (FOURS)
+            {
+                self.bgView.center = CGPointMake(SCREEN_WIDTH/2, SCREEN_HEIGHT/2-50);
+            }
+            else
+            {
+                self.bgView.center = CGPointMake(SCREEN_WIDTH/2, SCREEN_HEIGHT/2-20);
+            }
         }
         else if(textField.tag == 1001)
         {
@@ -441,6 +554,11 @@
 
 -(BOOL)textFieldShouldReturn:(UITextField *)textField
 {
+    [UIView animateWithDuration:0.25 animations:^{
+        self.bgView.center = CENTER_POINT;
+    }completion:^(BOOL finished) {
+        
+    }];
     [textField resignFirstResponder];
     return YES;
 }

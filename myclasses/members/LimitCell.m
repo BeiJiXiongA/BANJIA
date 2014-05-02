@@ -21,7 +21,8 @@
         contentLabel.font = [UIFont systemFontOfSize:14];
         [self.contentView addSubview:contentLabel];
         
-        mySwitch = [[UISwitch alloc] initWithFrame:CGRectMake(SCREEN_WIDTH-100, 10, 80, 30)];
+        mySwitch = [[KLSwitch alloc] initWithFrame:CGRectMake(SCREEN_WIDTH-80, 10, 50, 30)];
+        [mySwitch setOnTintColor:LIGHT_BLUE_COLOR];
         [self.contentView addSubview:mySwitch];
         
         markLabel = [[UILabel alloc] initWithFrame:CGRectMake(SCREEN_WIDTH - 150, 15, 120, 30)];

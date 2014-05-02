@@ -7,9 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "Header.h"
+#import "KLSwitch.h"
 
 @interface LimitCell : UITableViewCell
 @property (nonatomic, strong) UILabel *contentLabel;
-@property (nonatomic, strong) UISwitch *mySwitch;
+@property (nonatomic, strong) KLSwitch *mySwitch;
 @property (nonatomic, strong) UILabel *markLabel;
 @end

@@ -20,12 +20,14 @@
 #import "SettingViewController.h"
 #import "ChangePhoneViewController.h"
 
+
 @interface PersonalSettingViewController ()<UITableViewDataSource,
 UITableViewDelegate,
 ChatDelegate,
 UITextFieldDelegate,
 ChangePhoneNum,
-UIAlertViewDelegate>
+UIAlertViewDelegate,
+UIActionSheetDelegate>
 {
     UITableView *personalSettiongTableView;
     BOOL isAuth;
@@ -57,7 +59,7 @@ UIAlertViewDelegate>
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     
-    isAuth = NO;
+    isAuth = YES;
     
     qqNickName = @"";
     rrNickName = @"";
@@ -65,6 +67,7 @@ UIAlertViewDelegate>
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeIcon) name:@"changeicon" object:nil];
     
     userInfoDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     
@@ -104,6 +107,18 @@ UIAlertViewDelegate>
     [self.bgView addSubview:personalSettiongTableView];
     
     [self getAccount];
+    
+    UIButton *shareButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    shareButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
+    [shareButton setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
+    [shareButton setTitle:@"分享" forState:UIControlStateNormal];
+    [shareButton addTarget:self action:@selector(shareAPP:) forControlEvents:UIControlEventTouchUpInside];
+    [self.navigationBarView addSubview:shareButton];
+}
+
+-(void)changeIcon
+{
+    [personalSettiongTableView reloadData];
 }
 
 - (void)didReceiveMemoryWarning
@@ -124,6 +139,410 @@ UIAlertViewDelegate>
         self.unReadLabel.hidden = YES;
     }
 }
+
+
+#pragma mark - shareAPP
+-(void)shareAPP:(UIButton *)sender
+{
+    UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"分享到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"QQ空间",@"腾讯微博",@"QQ好友",@"微信朋友圈",@"人人网", nil];
+    [actionSheet showInView:self.bgView];
+}
+
+-(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    switch (buttonIndex)
+    {
+        case 0:
+            [self shareToSinaWeiboClickHandler:nil];
+            break;
+        case 1:
+            [self shareToQQSpaceClickHandler:nil];
+            break;
+        case 2:
+            [self shareToTencentWeiboClickHandler:nil];
+            break;
+        case 3:
+            [self shareToQQFriendClickHandler:nil];
+            break;
+        case 4:
+            [self shareToWeixinTimelineClickHandler:nil];
+            break;
+        case 5:
+            [self shareToRenRenClickHandler:nil];
+            break;
+        default:
+            break;
+    }
+}
+
+/**
+ *	@brief	分享到QQ空间
+ *
+ *	@param 	sender 	事件对象
+ */
+- (void)shareToQQSpaceClickHandler:(UIButton *)sender
+{
+    //创建分享内容
+    NSString *imagePath = [[NSBundle mainBundle] pathForResource:IMAGE_NAME ofType:IMAGE_EXT];
+    id<ISSContent> publishContent = [ShareSDK content:ShareContent
+                                       defaultContent:@""
+                                                image:[ShareSDK imageWithPath:imagePath]
+                                                title:@"班家"
+                                                  url:@"http://www.banjiaedu.com"
+                                          description:ShareContent
+                                            mediaType:SSPublishContentMediaTypeText];
+    
+    //创建弹出菜单容器
+    id<ISSContainer> container = [ShareSDK container];
+    [container setIPadContainerWithView:sender arrowDirect:UIPopoverArrowDirectionUp];
+    
+    id<ISSAuthOptions> authOptions = [ShareSDK authOptionsWithAutoAuth:YES
+                                                         allowCallback:YES
+                                                         authViewStyle:SSAuthViewStyleFullScreenPopup
+                                                          viewDelegate:nil
+                                               authManagerViewDelegate:nil];
+    
+    //在授权页面中添加关注官方微博
+    [authOptions setFollowAccounts:[NSDictionary dictionaryWithObjectsAndKeys:
+                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
+                                    SHARE_TYPE_NUMBER(ShareTypeSinaWeibo),
+                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
+                                    SHARE_TYPE_NUMBER(ShareTypeTencentWeibo),
+                                    nil]];
+    
+    //显示分享菜单
+    [ShareSDK showShareViewWithType:ShareTypeQQSpace
+                          container:container
+                            content:publishContent
+                      statusBarTips:YES
+                        authOptions:authOptions
+                       shareOptions:[ShareSDK defaultShareOptionsWithTitle:nil
+                                                           oneKeyShareList:[NSArray defaultOneKeyShareList]
+                                                            qqButtonHidden:NO
+                                                     wxSessionButtonHidden:NO
+                                                    wxTimelineButtonHidden:NO
+                                                      showKeyboardOnAppear:NO
+                                                         shareViewDelegate:nil
+                                                       friendsViewDelegate:nil
+                                                     picViewerViewDelegate:nil]
+                             result:^(ShareType type, SSResponseState state, id<ISSPlatformShareInfo> statusInfo, id<ICMErrorInfo> error, BOOL end) {
+                                 
+                                 if (state == SSPublishContentStateSuccess)
+                                 {
+                                     NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
+                                 }
+                                 else if (state == SSPublishContentStateFail)
+                                 {
+                                     NSLog(NSLocalizedString(@"TEXT_SHARE_FAI", @"发布失败!error code == %d, error code == %@"), [error errorCode], [error errorDescription]);
+                                 }
+                             }];
+}
+
+/**
+ *	@brief	分享到新浪微博
+ *
+ *	@param 	sender 	事件对象
+ */
+- (void)shareToSinaWeiboClickHandler:(UIButton *)sender
+{
+    //创建分享内容
+    id<ISSContent> publishContent = [ShareSDK content:ShareContent
+                                       defaultContent:@""
+                                                image:nil
+                                                title:@"班家"
+                                                  url:@"http://www.banjiaedu.com"
+                                          description:ShareContent
+                                            mediaType:SSPublishContentMediaTypeText];
+    
+    //创建弹出菜单容器
+    id<ISSContainer> container = [ShareSDK container];
+    [container setIPadContainerWithView:sender arrowDirect:UIPopoverArrowDirectionUp];
+    [container setIPhoneContainerWithViewController:self];
+    
+    id<ISSAuthOptions> authOptions = [ShareSDK authOptionsWithAutoAuth:YES
+                                                         allowCallback:YES
+                                                         authViewStyle:SSAuthViewStyleFullScreenPopup
+                                                          viewDelegate:nil
+                                               authManagerViewDelegate:nil];
+    
+    //在授权页面中添加关注官方微博
+    [authOptions setFollowAccounts:[NSDictionary dictionaryWithObjectsAndKeys:
+                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
+                                    SHARE_TYPE_NUMBER(ShareTypeSinaWeibo),
+                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
+                                    SHARE_TYPE_NUMBER(ShareTypeTencentWeibo),
+                                    nil]];
+    
+    //显示分享菜单
+    [ShareSDK showShareViewWithType:ShareTypeSinaWeibo
+                          container:container
+                            content:publishContent
+                      statusBarTips:YES
+                        authOptions:authOptions
+                       shareOptions:[ShareSDK defaultShareOptionsWithTitle:nil
+                                                           oneKeyShareList:nil
+                                                            qqButtonHidden:NO
+                                                     wxSessionButtonHidden:NO
+                                                    wxTimelineButtonHidden:NO
+                                                      showKeyboardOnAppear:NO
+                                                         shareViewDelegate:nil                                                       friendsViewDelegate:nil
+                                                     picViewerViewDelegate:nil]
+                             result:^(ShareType type, SSResponseState state, id<ISSPlatformShareInfo> statusInfo, id<ICMErrorInfo> error, BOOL end) {
+                                 
+                                 if (state == SSPublishContentStateSuccess)
+                                 {
+                                     NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
+                                 }
+                                 else if (state == SSPublishContentStateFail)
+                                 {
+                                     NSLog(NSLocalizedString(@"TEXT_SHARE_FAI", @"发布失败!error code == %d, error code == %@"), [error errorCode], [error errorDescription]);
+                                 }
+                             }];
+}
+
+/**
+ *	@brief	分享到腾讯微博
+ *
+ *	@param 	sender 	事件对象
+ */
+- (void)shareToTencentWeiboClickHandler:(UIButton *)sender
+{
+    //创建分享内容
+//    NSString *imagePath = [[NSBundle mainBundle] pathForResource:IMAGE_NAME ofType:IMAGE_EXT];
+    id<ISSContent> publishContent = [ShareSDK content:ShareContent
+                                       defaultContent:@""
+                                                image:nil
+                                                title:@"班家"
+                                                  url:@"http://www.banjiaedu.com"
+                                          description:ShareContent
+                                            mediaType:SSPublishContentMediaTypeText];
+    
+    //创建弹出菜单容器
+    id<ISSContainer> container = [ShareSDK container];
+    [container setIPadContainerWithView:sender arrowDirect:UIPopoverArrowDirectionUp];
+    
+    id<ISSAuthOptions> authOptions = [ShareSDK authOptionsWithAutoAuth:YES
+                                                         allowCallback:YES
+                                                         authViewStyle:SSAuthViewStyleFullScreenPopup
+                                                          viewDelegate:nil
+                                               authManagerViewDelegate:nil];
+    
+    //在授权页面中添加关注官方微博
+    [authOptions setFollowAccounts:[NSDictionary dictionaryWithObjectsAndKeys:
+                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
+                                    SHARE_TYPE_NUMBER(ShareTypeSinaWeibo),
+                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
+                                    SHARE_TYPE_NUMBER(ShareTypeTencentWeibo),
+                                    nil]];
+    
+    //显示分享菜单
+    [ShareSDK showShareViewWithType:ShareTypeTencentWeibo
+                          container:container
+                            content:publishContent
+                      statusBarTips:YES
+                        authOptions:authOptions
+                       shareOptions:[ShareSDK defaultShareOptionsWithTitle:nil
+                                                           oneKeyShareList:nil
+                                                            qqButtonHidden:NO
+                                                     wxSessionButtonHidden:NO
+                                                    wxTimelineButtonHidden:NO
+                                                      showKeyboardOnAppear:NO
+                                                         shareViewDelegate:nil
+                                                       friendsViewDelegate:nil
+                                                     picViewerViewDelegate:nil]
+                             result:^(ShareType type, SSResponseState state, id<ISSPlatformShareInfo> statusInfo, id<ICMErrorInfo> error, BOOL end) {
+                                 
+                                 if (state == SSPublishContentStateSuccess)
+                                 {
+                                     NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
+                                 }
+                                 else if (state == SSPublishContentStateFail)
+                                 {
+                                     NSLog(NSLocalizedString(@"TEXT_SHARE_FAI", @"发布失败!error code == %d, error code == %@") , [error errorCode], [error errorDescription]);
+                                 }
+                             }];
+}
+/**
+ *	@brief	分享给QQ好友
+ *
+ *	@param 	sender 	事件对象
+ */
+- (void)shareToQQFriendClickHandler:(UIButton *)sender
+{
+    //创建分享内容
+//    NSString *imagePath = [[NSBundle mainBundle] pathForResource:IMAGE_NAME ofType:IMAGE_EXT];
+    id<ISSContent> publishContent = [ShareSDK content:ShareContent
+                                       defaultContent:@""
+                                                image:nil
+                                                title:@"班家"
+                                                  url:@"http://www.banjiaedu.com"
+                                          description:ShareContent
+                                            mediaType:SSPublishContentMediaTypeNews];
+    
+    id<ISSAuthOptions> authOptions = [ShareSDK authOptionsWithAutoAuth:YES
+                                                         allowCallback:YES
+                                                         authViewStyle:SSAuthViewStyleFullScreenPopup
+                                                          viewDelegate:nil
+                                               authManagerViewDelegate:nil];
+    
+    //在授权页面中添加关注官方微博
+    [authOptions setFollowAccounts:[NSDictionary dictionaryWithObjectsAndKeys:
+                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
+                                    SHARE_TYPE_NUMBER(ShareTypeSinaWeibo),
+                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
+                                    SHARE_TYPE_NUMBER(ShareTypeTencentWeibo),
+                                    nil]];
+    
+    //显示分享菜单
+    [ShareSDK showShareViewWithType:ShareTypeQQ
+                          container:nil
+                            content:publishContent
+                      statusBarTips:YES
+                        authOptions:authOptions
+                       shareOptions:[ShareSDK defaultShareOptionsWithTitle:nil
+                                                           oneKeyShareList:[NSArray defaultOneKeyShareList]
+                                                            qqButtonHidden:NO
+                                                     wxSessionButtonHidden:NO
+                                                    wxTimelineButtonHidden:NO
+                                                      showKeyboardOnAppear:NO
+                                                         shareViewDelegate:nil
+                                                       friendsViewDelegate:nil
+                                                     picViewerViewDelegate:nil]
+                             result:^(ShareType type, SSResponseState state, id<ISSPlatformShareInfo> statusInfo, id<ICMErrorInfo> error, BOOL end) {
+                                 
+                                 if (state == SSPublishContentStateSuccess)
+                                 {
+                                     NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
+                                 }
+                                 else if (state == SSPublishContentStateFail)
+                                 {
+                                     NSLog(NSLocalizedString(@"TEXT_SHARE_FAI", @"发布失败!error code == %d, error code == %@"), [error errorCode], [error errorDescription]);
+                                 }
+                             }];
+}
+
+/**
+ *	@brief	分享给微信朋友圈
+ *
+ *	@param 	sender 	事件对象
+ */
+- (void)shareToWeixinTimelineClickHandler:(UIButton *)sender
+{
+    //创建分享内容
+    NSString *imagePath = [[NSBundle mainBundle] pathForResource:IMAGE_NAME ofType:IMAGE_EXT];
+    id<ISSContent> publishContent = [ShareSDK content:ShareContent
+                                       defaultContent:@""
+                                                image:[ShareSDK imageWithPath:imagePath]
+                                                title:@"班家"
+                                                  url:@"http://www.banjiaedu.com"
+                                          description:ShareContent
+                                            mediaType:SSPublishContentMediaTypeNews];
+    
+    id<ISSAuthOptions> authOptions = [ShareSDK authOptionsWithAutoAuth:YES
+                                                         allowCallback:YES
+                                                         authViewStyle:SSAuthViewStyleFullScreenPopup
+                                                          viewDelegate:nil
+                                               authManagerViewDelegate:nil];
+    
+    //在授权页面中添加关注官方微博
+    [authOptions setFollowAccounts:[NSDictionary dictionaryWithObjectsAndKeys:
+                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
+                                    SHARE_TYPE_NUMBER(ShareTypeSinaWeibo),
+                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
+                                    SHARE_TYPE_NUMBER(ShareTypeTencentWeibo),
+                                    nil]];
+    
+    //显示分享菜单
+    [ShareSDK showShareViewWithType:ShareTypeWeixiTimeline
+                          container:nil
+                            content:publishContent
+                      statusBarTips:YES
+                        authOptions:authOptions
+                       shareOptions:[ShareSDK defaultShareOptionsWithTitle:nil
+                                                           oneKeyShareList:[NSArray defaultOneKeyShareList]
+                                                            qqButtonHidden:NO
+                                                     wxSessionButtonHidden:NO
+                                                    wxTimelineButtonHidden:NO
+                                                      showKeyboardOnAppear:NO
+                                                         shareViewDelegate:nil
+                                                       friendsViewDelegate:nil
+                                                     picViewerViewDelegate:nil]
+                             result:^(ShareType type, SSResponseState state, id<ISSPlatformShareInfo> statusInfo, id<ICMErrorInfo> error, BOOL end) {
+                                 
+                                 if (state == SSPublishContentStateSuccess)
+                                 {
+                                     NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
+                                 }
+                                 else if (state == SSPublishContentStateFail)
+                                 {
+                                     NSLog(NSLocalizedString(@"TEXT_SHARE_FAI", @"发布失败!error code == %d, error code == %@"), [error errorCode], [error errorDescription]);
+                                 }
+                             }];
+}
+
+/**
+ *	@brief	分享到人人网
+ *
+ *	@param 	sender 	事件对象
+ */
+- (void)shareToRenRenClickHandler:(UIButton *)sender
+{
+    //创建分享内容
+    id<ISSContent> publishContent = [ShareSDK content:ShareContent
+                                       defaultContent:@""
+                                                image:nil
+                                                title:@"班家"
+                                                  url:@"http://www.banjiaedu.com"
+                                          description:ShareContent
+                                            mediaType:SSPublishContentMediaTypeText];
+    
+//    //创建弹出菜单容器
+//    id<ISSContainer> container = [ShareSDK container];
+//    [container setIPadContainerWithView:sender arrowDirect:UIPopoverArrowDirectionUp];
+//    
+    id<ISSAuthOptions> authOptions = [ShareSDK authOptionsWithAutoAuth:YES
+                                                         allowCallback:YES
+                                                         authViewStyle:SSAuthViewStyleFullScreenPopup
+                                                          viewDelegate:nil
+                                               authManagerViewDelegate:nil];
+    
+    //在授权页面中添加关注官方微博
+    [authOptions setFollowAccounts:[NSDictionary dictionaryWithObjectsAndKeys:
+                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
+                                    SHARE_TYPE_NUMBER(ShareTypeSinaWeibo),
+                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
+                                    SHARE_TYPE_NUMBER(ShareTypeTencentWeibo),
+                                    nil]];
+    
+    //显示分享菜单
+    [ShareSDK showShareViewWithType:ShareTypeRenren
+                          container:nil
+                            content:publishContent
+                      statusBarTips:YES
+                        authOptions:authOptions
+                       shareOptions:[ShareSDK defaultShareOptionsWithTitle:nil
+                                                           oneKeyShareList:nil
+                                                            qqButtonHidden:NO
+                                                     wxSessionButtonHidden:NO
+                                                    wxTimelineButtonHidden:NO
+                                                      showKeyboardOnAppear:NO
+                                                         shareViewDelegate:nil
+                                                       friendsViewDelegate:nil
+                                                     picViewerViewDelegate:nil]
+                             result:^(ShareType type, SSResponseState state, id<ISSPlatformShareInfo> statusInfo, id<ICMErrorInfo> error, BOOL end) {
+                                 
+                                 if (state == SSPublishContentStateSuccess)
+                                 {
+                                     NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
+                                 }
+                                 else if (state == SSPublishContentStateFail)
+                                 {
+                                     NSLog( @"发布失败!error code == %d, error code == %@", [error errorCode], [error errorDescription]);
+                                 }
+                             }];
+}
+
+
 - (void)keyBoardWillHide:(NSNotification *)aNotification
 {
     [UIView animateWithDuration:0.25 animations:^{
@@ -168,16 +587,20 @@ UIAlertViewDelegate>
     OperatDB *db = [[OperatDB alloc] init];
     NSMutableArray *array = [db findSetWithDictionary:@{@"readed":@"0",@"userid":[Tools user_id]} andTableName:@"chatMsg"];
     DDLOG(@"new chat msg=%d",[array count]);
-    if ([array count] > 0)
+    if ([array count] > 0 || [[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue]>0)
     {
         return YES;
+    }
+    else
+    {
+        return NO;
     }
     return NO;
 }
 -(BOOL)haveNewNotice
 {
     OperatDB *db = [[OperatDB alloc] init];
-    NSMutableArray *array = [db findSetWithDictionary:@{@"readed":@"0",@"uid":[Tools user_id]} andTableName:@"notice"];
+    NSMutableArray *array = [db findSetWithDictionary:@{@"readed":@"0",@"uid":[Tools user_id],@"type":@"f_apply"} andTableName:@"notice"];
     DDLOG(@"new notice msg=%d",[array count]);
     if ([array count] > 0)
     {
@@ -208,12 +631,11 @@ UIAlertViewDelegate>
 {
     UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 5, SCREEN_WIDTH, 10)];
     headerLabel.backgroundColor = [UIColor clearColor];
-    headerLabel.textColor = TITLE_COLOR;
     headerLabel.font = [UIFont systemFontOfSize:16];
 //        headerLabel.text = @"我的社交账号";
     if (section == 1)
     {
-        headerLabel.backgroundColor = LIGHT_BLUE_COLOR;
+        headerLabel.backgroundColor = [UIColor clearColor];
     }
     else
     {
@@ -272,16 +694,16 @@ UIAlertViewDelegate>
         }
         else if(indexPath.row == 2)
         {
-            return 56;
+            return 47;
         }
     }
     else if (indexPath.section == 1)
     {
-        return 43;
+        return 47;
     }
     else if(indexPath.section == 2)
     {
-        return 47.5;
+        return 47;
     }
     return 0;
 }
@@ -301,17 +723,21 @@ UIAlertViewDelegate>
             cell.nameLabel.text = [Tools user_name];
             cell.nameLabel.font = [UIFont systemFontOfSize:18];
             cell.nameLabel.textColor = TITLE_COLOR;
-            
+            cell.headerImageView.layer.borderColor = [UIColor whiteColor].CGColor;
+            cell.headerImageView.layer.borderWidth = 2;
             cell.headerImageView.layer.cornerRadius = 41;
             cell.headerImageView.clipsToBounds = YES;
             cell.headerImageView.frame = CGRectMake(22, 20, 82, 82);
-            [Tools fillImageView:cell.headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERDEFAULT];
+            [Tools fillImageView:cell.headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERBG];
             
-//            cell.authenticationSign.frame = CGRectMake(cell.nameLabel.frame.origin.x+cell.nameLabel.frame.size.width, 15, 15, 15);
+            cell.authenticationSign.frame = CGRectMake(cell.nameLabel.frame.origin.x+cell.nameLabel.frame.size.width+5, cell.nameLabel.frame.origin.y-10, 20, 20);
             
+            if ([accountDict objectForKey:@"t_checked"])
+            {
+                [cell.authenticationSign setImage:[UIImage imageNamed:@"auth"]];
+            }
             cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_angle"]];
-            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 21, 22, 40)];
-            cell.backgroundColor = RGB(235, 237, 236, 1);
+            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 53, 10, 20)];
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
             return cell;
         }
@@ -328,24 +754,55 @@ UIAlertViewDelegate>
             cell.headerImageView.hidden = YES;
             if (indexPath.row == 1)
             {
-                cell.nameLabel.textColor = RGB(254, 136, 0, 1);
-                cell.nameLabel.text = @"您尚未进行教师认证";
-                 cell.nameLabel.frame = CGRectMake(20, 13, 200, 20);
-                cell.backgroundColor = RGB(254, 243, 169, 1);
+                if (!isAuth)
+                {
+                    cell.nameLabel.hidden = NO;
+                    cell.nameLabel.textColor = RGB(254, 136, 0, 1);
+                    cell.nameLabel.text = @"您尚未进行教师认证";
+                    cell.nameLabel.frame = CGRectMake(20, 13, 200, 20);
+                    
+                    if ([accountDict objectForKey:@"t_checked"])
+                    {
+                        if ([[accountDict objectForKey:@"t_checked"] integerValue] == 0)
+                        {
+                            cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-100, 13, 80, 20);
+                            cell.objectsLabel.text = @"审核被拒绝";
+                            cell.objectsLabel.font = [UIFont systemFontOfSize:14];
+                        }
+                    }
+                    else if ([accountDict objectForKey:@"img_tcard"])
+                    {
+                        if ([[accountDict objectForKey:@"img_tcard"] length] > 10)
+                        {
+                            cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-100, 13, 80, 20);
+                            cell.objectsLabel.text = @"正在审核";
+                            cell.objectsLabel.font = [UIFont systemFontOfSize:14];
+                        }
+                    }
+                }
+                else
+                    cell.nameLabel.hidden = YES;
             }
             else if (indexPath.row == 2)
             {
-                cell.nameLabel.frame = CGRectMake(20, 18, 100, 20);
+                cell.nameLabel.frame = CGRectMake(20, 13, 100, 20);
                 cell.nameLabel.textColor = [UIColor blackColor];
-                cell.nameLabel.text = [NSString stringWithFormat:@"班级账号"];
+                if ([Tools phone_num])
+                {
+                    cell.nameLabel.text = [NSString stringWithFormat:@"班家账号"];
+                }
+                else
+                {
+                    cell.nameLabel.text = [NSString stringWithFormat:@"绑定手机"];
+                    cell.textLabel.textColor = TITLE_COLOR;
+                    cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_angle"]];
+                    [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 10, 10, 20)];
+                }
                 
-                cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-150, 18.5, 124, 20);
+                cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-150, 13, 124, 20);
                 cell.objectsLabel.text = [Tools phone_num];
                 cell.objectsLabel.font = [UIFont systemFontOfSize:16];
             }
-            cell.textLabel.textColor = TITLE_COLOR;
-            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_angle"]];
-            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 10, 10, 20)];
             
             UIImageView *bgImageBG = [[UIImageView alloc] init];
             bgImageBG.image = [UIImage imageNamed:@"cell_bg2"];
@@ -369,7 +826,6 @@ UIAlertViewDelegate>
         {
             if ([ShareSDK hasAuthorizedWithType:ShareTypeQQSpace])
             {
-                DDLOG(@"qqnick==%@",[[NSUserDefaults standardUserDefaults] objectForKey:QQNICKNAME]);
                 cell.nametf.text = [[NSUserDefaults standardUserDefaults] objectForKey:QQNICKNAME];
                 [cell.relateButton setTitle:@"解除" forState:UIControlStateNormal];
                 [cell.relateButton removeTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
@@ -443,7 +899,6 @@ UIAlertViewDelegate>
         }
         cell.textLabel.font = [UIFont systemFontOfSize:18];
         cell.textLabel.text = @"设置";
-//        cell.textLabel.textColor = TITLE_COLOR;
         cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_angle"]];
         [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 10, 10, 20)];
         UIImageView *bgImageBG = [[UIImageView alloc] init];
@@ -461,20 +916,37 @@ UIAlertViewDelegate>
         if (indexPath.row == 0)
         {
             PersonInfoSettingViewController *personInfoSettiongViewController = [[PersonInfoSettingViewController alloc] init];
-            
             [personInfoSettiongViewController showSelfViewController:self];
         }
         else if(indexPath.row == 1)
         {
-            self.sideMenuController.panGestureEnabled = NO;
             AuthViewController *authViewController = [[AuthViewController alloc] init];
+            if ([accountDict objectForKey:@"img_id"])
+            {
+                authViewController.img_id = [accountDict objectForKey:@"img_id"];
+            }
+            else
+            {
+                authViewController.img_id = @"";
+            }
+            if ([accountDict objectForKey:@"img_tcard"])
+            {
+                authViewController.img_tcard = [accountDict objectForKey:@"img_tcard"];
+            }
+            else
+            {
+                authViewController.img_tcard = @"";
+            }
             [authViewController showSelfViewController:self];
         }
         else if(indexPath.row == 2)
         {
-            ChangePhoneViewController *changePhoneNumVC = [[ChangePhoneViewController alloc] init];
-            changePhoneNumVC.changePhoneDel = self;
-            [changePhoneNumVC showSelfViewController:self];
+            if (![Tools phone_num])
+            {
+                ChangePhoneViewController *changePhoneNumVC = [[ChangePhoneViewController alloc] init];
+                changePhoneNumVC.changePhoneDel = self;
+                [changePhoneNumVC showSelfViewController:self];
+            }
         }
     }
     
@@ -536,21 +1008,21 @@ static int loginID;
              {
                  //sina
                  sinaNickName = [userInfo nickname];
-                 [self relateAccount:[userInfo uid] accountType:@"sw"];
+                 [self relateAccount:[userInfo uid] accountType:@"sw" andName:sinaNickName];
                  
              }
              else if(loginID == ShareTypeQQSpace)
              {
                  //qq
-                  qqNickName = [userInfo nickname];
-                 [self relateAccount:[userInfo uid] accountType:@"qq"];
-                
+                 qqNickName = [userInfo nickname];
+                 [self relateAccount:[userInfo uid] accountType:@"qq" andName:qqNickName];
+                 
              }
              else if(loginID == ShareTypeRenren)
              {
                  //ren ren
                  rrNickName = [userInfo nickname];
-                 [self relateAccount:[userInfo uid] accountType:@"rr"];
+                 [self relateAccount:[userInfo uid] accountType:@"rr" andName:rrNickName];
                  
              }
          }
@@ -605,14 +1077,15 @@ static int loginID;
     }
 }
 
--(void)relateAccount:(NSString *)account accountType:(NSString *)accountType
+-(void)relateAccount:(NSString *)account accountType:(NSString *)accountType andName:(NSString *)name
 {
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
                                                                       @"a_id":account,
-                                                                      @"a_type":accountType
+                                                                      @"a_type":accountType,
+                                                                      @"n_name":name
                                                                       } API:BINDACCOUNT];
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
@@ -695,10 +1168,25 @@ static int loginID;
         [request setCompletionBlock:^{
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"accountlist responsedict %@",responseString);
+            DDLOG(@"accountlist responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 accountDict = [responseDict objectForKey:@"data"];
+                if ([accountDict objectForKey:@"t_checked"])
+                {
+                    if ([[accountDict objectForKey:@"t_checked"] integerValue] == 1)
+                    {
+                        isAuth = YES;
+                    }
+                    else
+                    {
+                        isAuth = NO;
+                    }
+                }
+                else
+                {
+                    isAuth = NO;
+                }
                 [personalSettiongTableView reloadData];
             }
             else

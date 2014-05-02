@@ -17,7 +17,14 @@
 #define UnreadTabelTag 2000
 #define ReadTableTag  3000
 
-@interface NotificationDetailViewController ()<UITableViewDataSource,UITableViewDelegate,UIScrollViewDelegate>
+
+#define CallAlterViewTag   4000
+
+@interface NotificationDetailViewController ()<
+UITableViewDataSource,
+UITableViewDelegate,
+UIScrollViewDelegate,
+UIAlertViewDelegate>
 {
     UITextView *contentTextView;
     NSMutableArray *buttonNamesArray;
@@ -34,11 +41,13 @@
     NSMutableArray *readArray;
     NSMutableArray *unreaderArray;
     
+    NSString *phoneStr;
+    
 }
 @end
 
 @implementation NotificationDetailViewController
-@synthesize noticeContent,noticeID,c_read,classID;
+@synthesize noticeContent,noticeID,c_read,classID,byID,readnotificationDetaildel,isnew;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -65,59 +74,17 @@
     contentTextView = [[UITextView alloc] initWithFrame:CGRectMake(8, UI_NAVIGATION_BAR_HEIGHT+8, SCREEN_WIDTH-16, 152)];
     contentTextView.backgroundColor = [UIColor clearColor];
     contentTextView.editable = NO;
-    contentTextView.contentInset = UIEdgeInsetsMake(0, 18.5, 18, 18.5);
+    contentTextView.contentInset = UIEdgeInsetsMake(0, 0, 18, 0);
     contentTextView.textColor = TITLE_COLOR;
     contentTextView.font = [UIFont systemFontOfSize:16];
     contentTextView.text = noticeContent;
     [self.bgView addSubview:contentTextView];
 
-    buttonNamesArray = [[NSMutableArray alloc] initWithCapacity:2];
-
-    buttonHeight = 38;
     
-    UIImage *buttonImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
+    [self readNotice];
     
-    readButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    readButton.frame = CGRectMake(0, contentTextView.frame.origin.y+contentTextView.frame.size.height, SCREEN_WIDTH/2, buttonHeight);
-    [readButton setBackgroundImage:buttonImage forState:UIControlStateNormal];
-    readButton.backgroundColor = [UIColor clearColor];
-    readButton.tag = 1000;
-    [readButton setTitleColor:LIGHT_BLUE_COLOR forState:UIControlStateNormal];
-    [readButton setTitle:[NSString stringWithFormat:@"已读(%d)",0] forState:UIControlStateNormal];
-    [readButton addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
-    [self.bgView addSubview:readButton];
     
-    unreadButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    unreadButton.frame = CGRectMake(SCREEN_WIDTH/2, contentTextView.frame.origin.y+contentTextView.frame.size.height, SCREEN_WIDTH/2, buttonHeight);
-    unreadButton.backgroundColor = [UIColor clearColor];
-    unreadButton.tag = 1001;
-    [unreadButton setBackgroundImage:inputImage forState:UIControlStateNormal];
-    [unreadButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
-    [unreadButton setTitle:[NSString stringWithFormat:@"未读(%d)",0] forState:UIControlStateNormal];
-    [unreadButton addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
-    [self.bgView addSubview:unreadButton];
-    
-    containerScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, readButton.frame.origin.y+readButton.frame.size.height, SCREEN_WIDTH,SCREEN_HEIGHT - readButton.frame.origin.y - readButton.frame.size.height)];
-    containerScrollView.backgroundColor = [UIColor clearColor];
-    containerScrollView.delegate = self;
-    containerScrollView.tag = 1000;
-    containerScrollView.bounces = NO;
-    containerScrollView.pagingEnabled = YES;
-    [self.bgView addSubview:containerScrollView];
-
-    readedTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, containerScrollView.frame.size.height) style:UITableViewStylePlain];
-    readedTableView.delegate = self;
-    readedTableView.tag = ReadTableTag;
-    readedTableView.dataSource = self;
-    readedTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-    [containerScrollView addSubview:readedTableView];
-    
-    if ([c_read integerValue] == 1)
-    {
-        [self getViewList:@"read"];
-        [self getViewList:@"unread"];
-    }
-    else
+    if ([c_read integerValue] == 0)
     {
         unreadButton.hidden = YES;
         readButton.hidden = YES;
@@ -126,15 +93,69 @@
         
         containerScrollView.hidden = YES;
     }
+    else
+    {
+        buttonNamesArray = [[NSMutableArray alloc] initWithCapacity:2];
+        
+        buttonHeight = 38;
+        
+        UIImage *buttonImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
+        
+        readButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        readButton.frame = CGRectMake(0, contentTextView.frame.origin.y+contentTextView.frame.size.height, SCREEN_WIDTH/2, buttonHeight);
+        [readButton setBackgroundImage:buttonImage forState:UIControlStateNormal];
+        readButton.backgroundColor = [UIColor clearColor];
+        readButton.tag = 1000;
+        [readButton setTitleColor:LIGHT_BLUE_COLOR forState:UIControlStateNormal];
+        [readButton setTitle:[NSString stringWithFormat:@"已读(%d)",0] forState:UIControlStateNormal];
+        [readButton addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
+        [self.bgView addSubview:readButton];
+        
+        unreadButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        unreadButton.frame = CGRectMake(SCREEN_WIDTH/2, contentTextView.frame.origin.y+contentTextView.frame.size.height, SCREEN_WIDTH/2, buttonHeight);
+        unreadButton.backgroundColor = [UIColor clearColor];
+        unreadButton.tag = 1001;
+        [unreadButton setBackgroundImage:inputImage forState:UIControlStateNormal];
+        [unreadButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+        [unreadButton setTitle:[NSString stringWithFormat:@"未读(%d)",0] forState:UIControlStateNormal];
+        [unreadButton addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
+        [self.bgView addSubview:unreadButton];
+        
+        containerScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, readButton.frame.origin.y+readButton.frame.size.height, SCREEN_WIDTH,SCREEN_HEIGHT - readButton.frame.origin.y - readButton.frame.size.height)];
+        containerScrollView.backgroundColor = [UIColor clearColor];
+        containerScrollView.delegate = self;
+        containerScrollView.tag = 1000;
+        containerScrollView.bounces = NO;
+        containerScrollView.pagingEnabled = YES;
+        [self.bgView addSubview:containerScrollView];
+        
+        readedTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, containerScrollView.frame.size.height) style:UITableViewStylePlain];
+        readedTableView.delegate = self;
+        readedTableView.tag = ReadTableTag;
+        readedTableView.dataSource = self;
+        readedTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+        [containerScrollView addSubview:readedTableView];
+        
+        unreadTableView = [[UITableView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH, 0, SCREEN_WIDTH, containerScrollView.frame.size.height) style:UITableViewStylePlain];
+        unreadTableView.tag = UnreadTabelTag;
+        unreadTableView.delegate = self;
+        unreadTableView.dataSource = self;
+        unreadTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+        [containerScrollView addSubview:unreadTableView];
+        
+        containerScrollView.contentSize = CGSizeMake(SCREEN_WIDTH*2, containerScrollView.frame.size.height);
 
-    unreadTableView = [[UITableView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH, 0, SCREEN_WIDTH, containerScrollView.frame.size.height) style:UITableViewStylePlain];
-    unreadTableView.tag = UnreadTabelTag;
-    unreadTableView.delegate = self;
-    unreadTableView.dataSource = self;
-    unreadTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-    [containerScrollView addSubview:unreadTableView];
+    }
+
     
-    containerScrollView.contentSize = CGSizeMake(SCREEN_WIDTH*2, containerScrollView.frame.size.height);
+    
+    if (isnew)
+    {
+        if ([self.readnotificationDetaildel respondsToSelector:@selector(readNotificationDetail)])
+        {
+            [self.readnotificationDetaildel readNotificationDetail];
+        }
+    }
 }
 
 - (void)didReceiveMemoryWarning
@@ -142,6 +163,43 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
+-(void)readNotice
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"p_id":noticeID,
+                                                                      @"c_id":classID
+                                                                      } API:READNTICES];
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"classInfo responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                DDLOG(@"read success!");
+                if ([c_read integerValue] == 1)
+                {
+                    [self getViewList:@"read"];
+                    [self getViewList:@"unread"];
+                }
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:self];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+        }];
+        [request startAsynchronous];
+    }
+}
+
 
 
 -(void)buttonClick:(UIButton *)button
@@ -192,24 +250,29 @@
         }
        
         NSDictionary *dict = [readArray objectAtIndex:indexPath.row];
-        [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:@"header_pic.jpg"];
+        [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERBG];
         cell.headerImageView.frame = CGRectMake(14, 3.75, 40, 40);
-        [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:@"header_pic.jpg"];
-        cell.nameLabel.frame = CGRectMake(60, 8.75, 150, 30);
-        cell.nameLabel.text = [dict objectForKey:@"name"];
+        cell.nameLabel.frame = CGRectMake(60, 8.75, 200, 30);
+        if ([[dict objectForKey:@"role"] isEqualToString:@"parents"])
+        {
+            cell.nameLabel.text = [NSString stringWithFormat:@"%@（%@）",[dict objectForKey:@"name"],[dict objectForKey:@"title"]];
+        }
+        else
+        {
+            cell.nameLabel.text = [dict objectForKey:@"name"];
+        }
         cell.nameLabel.backgroundColor = [UIColor clearColor];
         cell.nameLabel.textColor = TITLE_COLOR;
         cell.contactButton.hidden = YES;
         [cell.contactButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
-        [cell.contactButton setImage:[UIImage imageNamed:@"icon_comment"] forState:UIControlStateNormal];
+        [cell.contactButton setImage:[UIImage imageNamed:@"telephone1"] forState:UIControlStateNormal];
         cell.contactButton.titleLabel.font = [UIFont systemFontOfSize:18];
-        cell.contactButton.frame = CGRectMake( SCREEN_WIDTH-120, 8.75, 90, 30);
+        cell.contactButton.frame = CGRectMake( SCREEN_WIDTH-120, 8.75, 30, 30);
         cell.contactButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentRight;
         cell.contactButton.backgroundColor = [UIColor yellowColor];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
-//        cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"indicator"]];
-//        cell.accessoryView.frame = CGRectMake(SCREEN_WIDTH-30, 20, 15, 20);
-        UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
+
+        UIImage *inputImage = [UIImage imageNamed:@"line3"];
         UIImageView *bgImageBG = [[UIImageView alloc] initWithImage:inputImage];
         cell.backgroundView = bgImageBG;
         return cell;
@@ -224,22 +287,29 @@
         }
         NSDictionary *dict = [unreaderArray objectAtIndex:indexPath.row];
         cell.headerImageView.frame = CGRectMake(14, 3.75, 40, 40);
-        [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:@"header_pic.jpg"];
-        cell.nameLabel.text = [dict objectForKey:@"name"];
-        cell.nameLabel.frame = CGRectMake(60, 8.75, 150, 30);
+        [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERBG];
+        
+        if ([[dict objectForKey:@"role"] isEqualToString:@"parents"])
+        {
+            cell.nameLabel.text = [NSString stringWithFormat:@"%@（%@）",[dict objectForKey:@"name"],[dict objectForKey:@"title"]];
+        }
+        else
+        {
+            cell.nameLabel.text = [dict objectForKey:@"name"];
+        }
+        cell.nameLabel.frame = CGRectMake(60, 8.75, 200, 30);
         cell.nameLabel.backgroundColor = [UIColor clearColor];
         cell.nameLabel.textColor = TITLE_COLOR;
         cell.contactButton.hidden = NO;
         [cell.contactButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
-        [cell.contactButton setImage:[UIImage imageNamed:@"icon_comment"] forState:UIControlStateNormal];
+        [cell.contactButton setImage:[UIImage imageNamed:@"telephone1"] forState:UIControlStateNormal];
         
-//        [cell.contactButton setTitle:@"联系家长" forState:UIControlStateNormal];
         cell.contactButton.titleLabel.font = [UIFont systemFontOfSize:18];
-        cell.contactButton.frame = CGRectMake( SCREEN_WIDTH-80, 8.85, 90, 30);
-        cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"indicator"]];
-        cell.accessoryView.frame = CGRectMake(SCREEN_WIDTH-30, 13.85, 10, 20);
+        cell.contactButton.frame = CGRectMake( SCREEN_WIDTH-60, 8, 30, 30);
+        [cell.contactButton addTarget:self action:@selector(callUser:) forControlEvents:UIControlEventTouchUpInside];
+        cell.contactButton.tag = UnreadTabelTag+indexPath.row;
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
+        UIImage *inputImage = [UIImage imageNamed:@"line3"];
         UIImageView *bgImageBG = [[UIImageView alloc] initWithImage:inputImage];
         cell.backgroundView = bgImageBG;
         return cell;
@@ -247,49 +317,85 @@
     return nil;
 }
 
+-(void)callUser:(UIButton *)button
+{
+    NSDictionary *dict = [unreaderArray objectAtIndex:button.tag - UnreadTabelTag];
+    if (![[dict objectForKey:@"phone"] isEqual:[NSNull null]])
+    {
+        if ([[dict objectForKey:@"phone"] length] > 8)
+        {
+            [Tools dialPhoneNumber:[dict objectForKey:@"phone"] inView:self.bgView];
+        }
+        else
+        {
+            [self toUserDetail:dict];
+        }
+    }
+}
+
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (alertView.tag == CallAlterViewTag)
+    {
+        if (buttonIndex == 1)
+        {
+            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel://%@",phoneStr]]];
+        }
+    }
+}
+
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    NSDictionary *dict;
     if (tableView.tag == UnreadTabelTag)
     {
-        NSDictionary *dict = [unreaderArray objectAtIndex:indexPath.row];
-        NSString *role = [dict objectForKey:@"role"];
-        DDLOG(@"%@===%@",role,[dict objectForKey:@"name"]);
-        if ([role isEqualToString:@"students"])
-        {
-            StudentDetailViewController *studentDetail = [[StudentDetailViewController alloc] init];
-            studentDetail.classID = classID;
-            studentDetail.studentID = [dict objectForKey:@"_id"];
-            studentDetail.studentName = [dict objectForKey:@"name"];
-            studentDetail.title = [dict objectForKey:@"title"];
-            studentDetail.headerImg = [dict objectForKey:@"img_icon"];
-            studentDetail.role = [dict objectForKey:@"role"];
-            studentDetail.classID = classID;
-            [studentDetail showSelfViewController:self];
-        }
-        else if([role isEqualToString:@"parents"])
-        {
-            ParentsDetailViewController *parentDetail = [[ParentsDetailViewController alloc] init];
-            parentDetail.parentID = [dict objectForKey:@"_id"];
-            parentDetail.parentName = [dict objectForKey:@"name"];
-            parentDetail.title = [dict objectForKey:@"title"];
-            parentDetail.headerImg = [dict objectForKey:@"img_icon"];
-            parentDetail.admin = NO;
-            parentDetail.classID = classID;
-            parentDetail.role = [dict objectForKey:@"role"];
-            [parentDetail showSelfViewController:self];
-        }
-        else if([role isEqualToString:@"teachers"])
-        {
-            MemberDetailViewController *teacherDetail = [[MemberDetailViewController alloc] init];
-            teacherDetail.teacherID = [dict objectForKey:@"_id"];
-            teacherDetail.teacherName = [dict objectForKey:@"name"];
-            teacherDetail.title = [dict objectForKey:@"title"];
-            teacherDetail.headerImg = [dict objectForKey:@"img_icon"];
-            teacherDetail.admin = NO;
-            teacherDetail.classID = classID;
-            teacherDetail.role = [dict objectForKey:@"role"];
-            [teacherDetail showSelfViewController:self];
-        }
+        dict = [unreaderArray objectAtIndex:indexPath.row];
+    }
+    else
+    {
+        dict = [readArray objectAtIndex:indexPath.row];
+    }
+    [self toUserDetail:dict];
+}
+
+-(void)toUserDetail:(NSDictionary *)dict
+{
+    NSString *role = [dict objectForKey:@"role"];
+    if ([role isEqualToString:@"students"])
+    {
+        StudentDetailViewController *studentDetail = [[StudentDetailViewController alloc] init];
+        studentDetail.classID = classID;
+        studentDetail.studentID = [dict objectForKey:@"_id"];
+        studentDetail.studentName = [dict objectForKey:@"name"];
+        studentDetail.title = [dict objectForKey:@"title"];
+        studentDetail.headerImg = [dict objectForKey:@"img_icon"];
+        studentDetail.role = [dict objectForKey:@"role"];
+        studentDetail.classID = classID;
+        [studentDetail showSelfViewController:self];
+    }
+    else if([role isEqualToString:@"parents"])
+    {
+        ParentsDetailViewController *parentDetail = [[ParentsDetailViewController alloc] init];
+        parentDetail.parentID = [dict objectForKey:@"_id"];
+        parentDetail.parentName = [dict objectForKey:@"name"];
+        parentDetail.title = [dict objectForKey:@"title"];
+        parentDetail.headerImg = [dict objectForKey:@"img_icon"];
+        parentDetail.admin = NO;
+        parentDetail.classID = classID;
+        parentDetail.role = [dict objectForKey:@"role"];
+        [parentDetail showSelfViewController:self];
+    }
+    else if([role isEqualToString:@"teachers"])
+    {
+        MemberDetailViewController *teacherDetail = [[MemberDetailViewController alloc] init];
+        teacherDetail.teacherID = [dict objectForKey:@"_id"];
+        teacherDetail.teacherName = [dict objectForKey:@"name"];
+        teacherDetail.title = [dict objectForKey:@"title"];
+        teacherDetail.headerImg = [dict objectForKey:@"img_icon"];
+        teacherDetail.admin = NO;
+        teacherDetail.classID = classID;
+        teacherDetail.role = [dict objectForKey:@"role"];
+        [teacherDetail showSelfViewController:self];
     }
 }
 
@@ -326,13 +432,42 @@
         [request setCompletionBlock:^{
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
-//            DDLOG(@"notice_view_list responsedict %@",responseDict);
+            DDLOG(@"notice_view_list responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 [buttonNamesArray removeAllObjects];
+                
+                if ([[[responseDict objectForKey:@"data"] objectForKey:@"unread_list"] count]>0)
+                {
+                    [unreaderArray addObjectsFromArray:[[[responseDict objectForKey:@"data"] objectForKey:@"unread_list"] allValues]];
+//                    for (int i=0; i<[unreaderArray count]; ++i)
+//                    {
+//                        NSString *unReadID = [[unreaderArray objectAtIndex:i] objectForKey:@"_id"];
+//                        if ([unReadID isEqualToString:byID])
+//                        {
+//                            [unreaderArray removeObject:[unreaderArray objectAtIndex:i]];
+//                            break;
+//                        }
+//                    }
+                    [unreadTableView reloadData];
+                }
+                if ([[[responseDict objectForKey:@"data"] objectForKey:@"read_list"] count]>0)
+                {
+                    [readArray addObjectsFromArray:[[[responseDict objectForKey:@"data"] objectForKey:@"read_list"] allValues]];
+//                    for (int i=0; i<[readArray count]; ++i)
+//                    {
+//                        NSString *unReadID = [[readArray objectAtIndex:i] objectForKey:@"_id"];
+//                        if ([unReadID isEqualToString:byID])
+//                        {
+//                            [readArray removeObject:[readArray objectAtIndex:i]];
+//                            break;
+//                        }
+//                    }
+                    [readedTableView reloadData];
+                }
                 if (![[[responseDict objectForKey:@"data"] objectForKey:@"read_num"] isEqual:[NSNull null]])
                 {
-                    [readButton setTitle:[NSString stringWithFormat:@"已读(%d)",[[[responseDict objectForKey:@"data"] objectForKey:@"read_num"] integerValue]] forState:UIControlStateNormal];
+                    [readButton setTitle:[NSString stringWithFormat:@"已读(%d)",[readArray count]] forState:UIControlStateNormal];
                 }
                 else
                 {
@@ -340,23 +475,13 @@
                 }
                 if (![[[responseDict objectForKey:@"data"] objectForKey:@"unread_num"] isEqual:[NSNull null]])
                 {
-                    [unreadButton setTitle:[NSString stringWithFormat:@"未读(%d)",[[[responseDict objectForKey:@"data"] objectForKey:@"unread_num"] integerValue]] forState:UIControlStateNormal];
+                    [unreadButton setTitle:[NSString stringWithFormat:@"未读(%d)",[unreaderArray count]] forState:UIControlStateNormal];
                 }
                 else
                 {
                     [unreadButton setTitle:[NSString stringWithFormat:@"未读(%d)",0] forState:UIControlStateNormal];
                 }
-                
-                if ([[[responseDict objectForKey:@"data"] objectForKey:@"unread_list"] count]>0)
-                {
-                    [unreaderArray addObjectsFromArray:[[[responseDict objectForKey:@"data"] objectForKey:@"unread_list"] allValues]];
-                    [unreadTableView reloadData];
-                }
-                if ([[[responseDict objectForKey:@"data"] objectForKey:@"read_list"] count]>0)
-                {
-                    [readArray addObjectsFromArray:[[[responseDict objectForKey:@"data"] objectForKey:@"read_list"] allValues]];
-                    [readedTableView reloadData];
-                }
+
             }
             else
             {

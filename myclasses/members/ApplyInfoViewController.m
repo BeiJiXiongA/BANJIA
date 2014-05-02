@@ -49,16 +49,16 @@
     dataDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     
     headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(33.5, UI_NAVIGATION_BAR_HEIGHT+11, 80, 80)];
-    headerImageView.backgroundColor = [UIColor greenColor];
+    headerImageView.backgroundColor = [UIColor clearColor];
     headerImageView.layer.cornerRadius = headerImageView.frame.size.width/2;
     headerImageView.clipsToBounds = YES;
     if ([headerImg length]>0)
     {
-        [Tools fillImageView:headerImageView withImageFromURL:headerImg andDefault:HEADERDEFAULT];
+        [Tools fillImageView:headerImageView withImageFromURL:headerImg andDefault:HEADERBG];
     }
     else
     {
-        [headerImageView setImage:[UIImage imageNamed:HEADERDEFAULT]];
+        [headerImageView setImage:[UIImage imageNamed:HEADERBG]];
     }
     [self.bgView addSubview:headerImageView];
     
@@ -94,22 +94,29 @@
     infoView.backgroundColor = [UIColor clearColor];
     [self.bgView addSubview:infoView];
     
-    infoLabel = [[UILabel alloc] initWithFrame:CGRectMake(29, infoView.frame.size.height + infoView.frame.origin.y+10, SCREEN_WIDTH-58, 20)];
+    infoLabel = [[UILabel alloc] initWithFrame:CGRectMake(25, infoView.frame.size.height + infoView.frame.origin.y+10, SCREEN_WIDTH-50, 20)];
     infoLabel.backgroundColor = [UIColor clearColor];
     infoLabel.textAlignment = NSTextAlignmentCenter;
     infoLabel.textColor = [UIColor whiteColor];
-    infoLabel.font = [UIFont systemFontOfSize:18];
-    if ([role isEqualToString:@"students"])
+    infoLabel.font = [UIFont systemFontOfSize:16];
+    if (![role isEqual:[NSNull null]])
     {
-        infoLabel.text = [NSString stringWithFormat:@"%@想申请成为本班的学生",applyName];
+        if ([role isEqualToString:@"students"])
+        {
+            infoLabel.text = [NSString stringWithFormat:@"%@想申请成为本班的学生",applyName];
+        }
+        else if ([role isEqualToString:@"teachers"])
+        {
+            infoLabel.text = [NSString stringWithFormat:@"%@想申请成为本班的%@",applyName,title];
+        }
+        else if ([role isEqualToString:@"parents"])
+        {
+            infoLabel.text = [NSString stringWithFormat:@"%@想申请成为本班%@",applyName,title];
+        }
     }
-    else if ([role isEqualToString:@"teachers"])
+    else
     {
-        infoLabel.text = [NSString stringWithFormat:@"%@想申请成为本班的%@",applyName,title];
-    }
-    else if ([role isEqualToString:@"parents"])
-    {
-        infoLabel.text = [NSString stringWithFormat:@"%@想申请成为本班%@",applyName,title];
+        DDLOG(@"role is null");
     }
     [self.bgView addSubview:infoLabel];
     
@@ -232,7 +239,7 @@
                         //男
                         [genderImageView setImage:[UIImage imageNamed:@"male"]];
                     }
-                    else if ([[dataDict objectForKey:@"sex"] intValue] == 2)
+                    else if ([[dataDict objectForKey:@"sex"] intValue] == 0)
                     {
                         //
                         [genderImageView setImage:[UIImage imageNamed:@"female"]];
@@ -273,13 +280,17 @@
             DDLOG(@"memberByClass responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                NSString *messageStr = [NSString stringWithFormat:@"您已经同意%@的申请",nameLabel.text];
-                UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:messageStr delegate:self cancelButtonTitle:@"返回" otherButtonTitles: nil];
-                [al show];
                 if ([self.applyDel respondsToSelector:@selector(updateList:)])
                 {
+                    OperatDB *db = [[OperatDB alloc] init];
+                    if ([db updeteKey:@"checked" toValue:@"1" withParaDict:@{@"uid":j_id,@"classid":classID,@"checked":@"0"} andTableName:CLASSMEMBERTABLE])
+                    {
+                        DDLOG(@"c_apply %@ delete success!",[Tools user_id]);
+                    }
+                    
                     [self.applyDel updateList:YES];
                 }
+                [Tools showTips:[NSString stringWithFormat:@"您已经同意%@的申请",applyName] toView:self.bgView];
             }
             else
             {
@@ -315,8 +326,15 @@
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 NSString *messageStr = [NSString stringWithFormat:@"您已经忽略%@的申请",nameLabel.text];
-                UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:messageStr delegate:self cancelButtonTitle:@"返回" otherButtonTitles: nil];
-                [al show];
+                [Tools showTips:messageStr toView:self.bgView];
+                
+                OperatDB *db = [[OperatDB alloc] init];
+                if ([db deleteRecordWithDict:@{@"uid":j_id,@"classid":classID,@"checked":@"0"} andTableName:CLASSMEMBERTABLE])
+                {
+                    DDLOG(@"c_apply %@ delete success!",[Tools user_id]);
+                }
+                
+                [self.applyDel updateList:YES];
                 
                 if ([self.applyDel respondsToSelector:@selector(updateList:)])
                 {

@@ -13,7 +13,12 @@
 #import "NotificationDetailViewController.h"
 #import "EGORefreshTableHeaderView.h"
 
-@interface NotificationViewController ()<UITableViewDataSource,UITableViewDelegate,EGORefreshTableHeaderDelegate,updateDelegate>
+@interface NotificationViewController ()<
+UITableViewDataSource,
+UITableViewDelegate,
+EGORefreshTableHeaderDelegate,
+updateDelegate,
+NotificationDetailDelegate>
 {
     UITableView *notificationTableView;
     NSMutableArray *tmpArray;
@@ -23,6 +28,10 @@
     BOOL _reloading;
     
     NSString *month;
+    
+    OperatDB *db;
+    
+    UILabel *tipLabel;
 }
 @end
 
@@ -45,6 +54,7 @@
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     page = 0;
     month = @"";
+    db = [[OperatDB alloc] init];
     
     if (fromMsg)
     {
@@ -62,9 +72,18 @@
     [addButton addTarget:self action:@selector(addClick) forControlEvents:UIControlEventTouchUpInside];
     [addButton setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
     
-    if([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] > 0)
+    DDLOG(@"class set%@",[[NSUserDefaults standardUserDefaults] objectForKey:@"set"]);
+    
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] ==2)
     {
         [self.navigationBarView addSubview:addButton];
+    }
+    else if([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:AdminSendNotice] integerValue] == 1)
+    {
+        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] ==1)
+        {
+            [self.navigationBarView addSubview:addButton];
+        }
     }
     notificationTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT - UI_NAVIGATION_BAR_HEIGHT-UI_TAB_BAR_HEIGHT) style:UITableViewStylePlain];
     notificationTableView.delegate = self;
@@ -78,12 +97,27 @@
     
     [self getCacheNotices];
     [self getNotifications];
+    
+    tipLabel = [[UILabel alloc] init];
+    tipLabel.frame = CGRectMake(40, CENTER_POINT.y-100, SCREEN_WIDTH-80, 80);
+    tipLabel.backgroundColor = [UIColor clearColor];
+    tipLabel.textColor = TITLE_COLOR;
+    tipLabel.textAlignment = NSTextAlignmentCenter;
+    tipLabel.text = @"班级目前还没有任何公告！";
+    tipLabel.hidden = YES;
+    [self.bgView addSubview:tipLabel];
 }
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+-(void)readNotificationDetail
+{
+    page = 0;
+    month = @"";
+    [self getNotifications];
 }
 
 -(void)mybackClick
@@ -127,7 +161,6 @@
 {
     [pullRefreshView egoRefreshScrollViewDidEndDragging:notificationTableView];
 }
-
 
 -(void)backClick
 {
@@ -176,26 +209,71 @@
         NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
         
         [cell.bgImageView setImage:[UIImage imageNamed:@"noticeBg"]];
-        [cell.iconImageView setImage:[UIImage imageNamed:@"noticeIcon"]];
+        cell.bgImageView.frame = CGRectMake(25, 10, SCREEN_WIDTH-30, 110);
         
+        
+        
+        cell.iconImageView.frame = CGRectMake(8, 20, 10, 10);
+        
+        cell.iconImageView.layer.cornerRadius = 5;
+        cell.iconImageView.clipsToBounds = YES;
+        
+        cell.nameLabel.frame = CGRectMake(40, 20, 100, 20);
+        cell.nameLabel.text = [[dict objectForKey:@"by"] objectForKey:@"name"];
+        
+        CGFloat he = 0;
+        if (SYSVERSION>=7)
+        {
+            he = 5;
+        }
         
         cell.contentLabel.text = [dict objectForKey:@"content"];
         cell.contentLabel.backgroundColor = [UIColor clearColor];
         cell.contentLabel.font = [UIFont systemFontOfSize:16];
         cell.contentLabel.textColor = TITLE_COLOR;
+        cell.contentLabel.contentMode = UIViewContentModeTop;
+        cell.contentLabel.frame = CGRectMake(30, 40, SCREEN_WIDTH-40, 55+he);
         
         cell.statusLabel.textColor = TITLE_COLOR;
+        
+        cell.timeLabel.frame = CGRectMake(SCREEN_WIDTH-160, 20, 150, 20);
+        cell.timeLabel.textAlignment = NSTextAlignmentRight;
         cell.timeLabel.text = [Tools showTime:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]];
         cell.timeLabel.textColor = TITLE_COLOR;
+        
+        if (![[[dict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
+        {
+            if ([[dict objectForKey:@"new"] integerValue] == 0)
+            {
+                cell.iconImageView.backgroundColor = [UIColor grayColor];
+            }
+            else if([[dict objectForKey:@"new"] integerValue] == 1)
+            {
+                cell.iconImageView.backgroundColor = [UIColor redColor];
+            }
+        }
+        else
+        {
+            cell.iconImageView.backgroundColor = [UIColor grayColor];
+        }
+        
         if ([[dict objectForKey:@"c_read"] integerValue] == 0)
         {
             cell.statusLabel.hidden = YES;
         }
         else
         {
-            cell.statusLabel.text =[NSString stringWithFormat:@"%d人已读 %d人未读",[[dict objectForKey:@"read_num"] integerValue],[[dict objectForKey:@"read_num"] integerValue]];
+            if ([[[dict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
+            {
+                cell.statusLabel.text =[NSString stringWithFormat:@"%d人已读 %d人未读",[[dict objectForKey:@"read_num"] integerValue],[[dict objectForKey:@"unread_num"] integerValue]];
+            }
+            else
+            {
+                cell.statusLabel.text =[NSString stringWithFormat:@"%d人已读 %d人未读",[[dict objectForKey:@"read_num"] integerValue],[[dict objectForKey:@"unread_num"] integerValue]];
+            }
         }
-        cell.selectionStyle = UITableViewCellSelectionStyleGray;
+
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
         cell.backgroundColor = [UIColor clearColor];
         return cell;
     }
@@ -243,48 +321,25 @@
     notificationDetailViewController.noticeContent = [dict objectForKey:@"content"];
     notificationDetailViewController.c_read = [dict objectForKey:@"c_read"];
     notificationDetailViewController.classID = classID;
-    
-    if ([[dict objectForKey:@"c_read"] integerValue] == 1)
+    notificationDetailViewController.readnotificationDetaildel = self;
+    notificationDetailViewController.byID = [[dict objectForKey:@"by"] objectForKey:@"_id"];
+    if ([[dict objectForKey:@"new"] integerValue] == 1)
     {
-        [self readNotice:[dict objectForKey:@"_id"]];
+        notificationDetailViewController.isnew = YES;
+        
+        int newNoticeNum = [[[NSUserDefaults standardUserDefaults]objectForKey:[NSString stringWithFormat:@"%@-notice",classID]] integerValue];
+        [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",--newNoticeNum ] forKey:[NSString stringWithFormat:@"%@-notice",classID]];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+        [[XDTabViewController sharedTabViewController] viewWillAppear:YES];
     }
-    
+    else
+    {
+        notificationDetailViewController.isnew = NO;
+    }
     [notificationDetailViewController showSelfViewController:[XDTabViewController sharedTabViewController]];
     
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
-
--(void)readNotice:(NSString *)noticeID
-{
-    if ([Tools NetworkReachable])
-    {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
-                                                                      @"token":[Tools client_token],
-                                                                      @"p_id":noticeID,
-                                                                      @"c_id":classID
-                                                                      } API:READNTICES];
-        [request setCompletionBlock:^{
-            NSString *responseString = [request responseString];
-            NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"classInfo responsedict %@",responseDict);
-            if ([[responseDict objectForKey:@"code"] intValue]== 1)
-            {
-                DDLOG(@"read success!");
-            }
-            else
-            {
-                [Tools dealRequestError:responseDict fromViewController:self];
-            }
-        }];
-        
-        [request setFailedBlock:^{
-            NSError *error = [request error];
-            DDLOG(@"error %@",error);
-        }];
-        [request startAsynchronous];
-    }
-}
-
 
 -(void)getNotifications
 {
@@ -302,30 +357,56 @@
             DDLOG(@"notifications responseDict==%@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                [tmpArray removeAllObjects];
                 if ([[[responseDict objectForKey:@"data"] objectForKey:@"posts"] count] > 0)
                 {
                     if (page == 0)
                     {
+                        [tmpArray removeAllObjects];
                         NSString *requestUrlStr = [NSString stringWithFormat:@"%@=%@=%@",GETNOTIFICATIONS,[Tools user_id],classID];
                         NSString *key = [requestUrlStr MD5Hash];
                         [FTWCache setObject:[responseString dataUsingEncoding:NSUTF8StringEncoding] forKey:key];
                     }
-                    if ([[[responseDict objectForKey:@"data"] objectForKey:@"month"] integerValue] == 0)
-                    {
-                        [Tools showAlertView:@"没有更多公告了！" delegateViewController:nil];
-                        return ;
-                    }
                     [tmpArray addObjectsFromArray:[[responseDict objectForKey:@"data"] objectForKey:@"posts"]];
                     page = [[[responseDict objectForKey:@"data"] objectForKey:@"page"] intValue];
                     month = [NSString stringWithFormat:@"%@",[[responseDict objectForKey:@"data"] objectForKey:@"month"]];
+                    
+                    [db deleteRecordWithDict:@{@"uid":[Tools user_id],@"type":@"notice"} andTableName:@"notice"];
+                    
+                    if ([[responseDict objectForKey:@"data"] objectForKey:@"posts"] > 0)
+                    {
+                        tipLabel.hidden = YES;
+                    }
+                    else if(page == 0)
+                    {
+                        tipLabel.hidden = NO;
+                    }
+                    else
+                    {
+                        tipLabel.hidden = YES;
+                    }
                     [notificationTableView reloadData];
                     _reloading = NO;
                     [pullRefreshView egoRefreshScrollViewDataSourceDidFinishedLoading:notificationTableView];
                 }
                 else
                 {
-                    [Tools showAlertView:@"班级目前还没有任何公告！" delegateViewController:nil];
+                    if (page ==0)
+                    {
+                        if ([tmpArray count] > 0)
+                        {
+                            tipLabel.hidden = YES;
+                        }
+                        else
+                        {
+                            tipLabel.hidden = NO;
+                        }
+                        
+                    }
+                    else
+                    {
+                        [Tools showAlertView:@"没有更多公告了！" delegateViewController:nil];
+                    }
+                    
                 }
             }
             else
@@ -361,6 +442,10 @@
         [tmpArray removeAllObjects];
         [tmpArray addObjectsFromArray:[[responseDict objectForKey:@"data"] objectForKey:@"posts"]];
         [notificationTableView reloadData];
+    }
+    if ([tmpArray count] <= 0)
+    {
+        tipLabel.hidden = NO;
     }
 }
 @end

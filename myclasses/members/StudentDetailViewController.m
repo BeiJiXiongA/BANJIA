@@ -23,7 +23,11 @@
 #define INFOTABLEVIEWTAG  3333
 #define PARENTTABLEVIEWTAG  4444
 
-@interface StudentDetailViewController ()<UIAlertViewDelegate,UITableViewDataSource,UITableViewDelegate>
+@interface StudentDetailViewController ()<UIAlertViewDelegate,
+UITableViewDataSource,
+UITableViewDelegate,
+PareberDetailDelegate,
+SetStudentObject>
 {
     UIView *tmpBgView;
     UIImageView *genderImageView;
@@ -39,11 +43,18 @@
     UITableView *parentsTableView;
     
     NSString *phoneNum;
+    
+    NSString *otherUserAdmin;
+    OperatDB *db;
+    
+    NSString *userPhone;
+    
+    UIScrollView *mainScrollView;
 }
 @end
 
 @implementation StudentDetailViewController
-@synthesize classID,studentName,studentID,title,admin,headerImg,role,memDel;
+@synthesize classID,studentName,studentID,title,admin,headerImg,role,memDel,schoolName,className;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -63,55 +74,68 @@
     dataDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     pArray = [[NSMutableArray alloc] initWithCapacity:0];
     
-    OperatDB *dataBase = [[OperatDB alloc] init];
-    NSArray *parentsArray = [dataBase findSetWithDictionary:@{@"re_id":studentID} andTableName:@"userinfo"];
-    DDLOG(@"parents===%@",parentsArray);
+    db = [[OperatDB alloc] init];
     
-    for(int i=0;i<[parentsArray count];i++)
+    otherUserAdmin = @"0";
+    role = @"students";
+    
+    mainScrollView = [[UIScrollView alloc] init];
+    mainScrollView.frame = CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT);
+    [self.bgView addSubview:mainScrollView];
+
+    
+    if (![studentID isEqual:[NSNull null]])
     {
-        NSDictionary *dict = [parentsArray objectAtIndex:i];
-        [self getUserInfoWithID:[dict objectForKey:@"uid"] andClassID:classID];
+        int adminNum = [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] intValue];
+        if (adminNum == 2)
+        {
+            UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
+            moreButton.frame = CGRectMake(SCREEN_WIDTH-60, 6, 50, 32);
+            [moreButton setImage:[UIImage imageNamed:@"icon_more"] forState:UIControlStateNormal];
+            [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
+            [self.navigationBarView addSubview:moreButton];
+            if ([studentID isEqualToString:[Tools user_id]])
+            {
+                moreButton.hidden = YES;
+            }
+        }
     }
-    
-    
-    int adminNum = [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] intValue];
-    if (adminNum == 2)
-    {
-        UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        moreButton.frame = CGRectMake(SCREEN_WIDTH-60, 6, 50, 32);
-        [moreButton setImage:[UIImage imageNamed:@"icon_more"] forState:UIControlStateNormal];
-        [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
-        [self.navigationBarView addSubview:moreButton];
-    }
-    
-    headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(33.5, UI_NAVIGATION_BAR_HEIGHT+11, 80, 80)];
-    headerImageView.backgroundColor = [UIColor greenColor];
+    headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(33.5, 11, 80, 80)];
+    headerImageView.backgroundColor = [UIColor clearColor];
     headerImageView.layer.cornerRadius = headerImageView.frame.size.width/2;
     headerImageView.clipsToBounds = YES;
-    if ([headerImg length]>0)
+    if (![headerImg isEqual:[NSNull null]])
     {
-        [Tools fillImageView:headerImageView withImageFromURL:headerImg andDefault:HEADERDEFAULT];
+        [Tools fillImageView:headerImageView withImageFromURL:headerImg andDefault:HEADERBG];
     }
     else
     {
-        [headerImageView setImage:[UIImage imageNamed:HEADERDEFAULT]];
+        [headerImageView setImage:[UIImage imageNamed:HEADERBG]];
     }
-    [self.bgView addSubview:headerImageView];
+    [mainScrollView addSubview:headerImageView];
     
     UITapGestureRecognizer *tapTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(moreClick)];
     headerImageView.userInteractionEnabled = YES;
-    [headerImageView addGestureRecognizer:tapTgr];
-    
-    nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(headerImageView.frame.size.width+headerImageView.frame.origin.x+20, UI_NAVIGATION_BAR_HEIGHT+36, [studentName length]*18>100?100:([studentName length]*18), 20)];
+    if (![studentID isEqual:[NSNull null]])
+    {
+        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
+        {
+            if (![studentID isEqualToString:[Tools user_id]])
+            {
+                [headerImageView addGestureRecognizer:tapTgr];
+            }
+        }
+    }
+    nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(headerImageView.frame.size.width+headerImageView.frame.origin.x+20, 36, [studentName length]*18>100?100:([studentName length]*18), 20)];
     nameLabel.text = studentName;
     nameLabel.textColor = [UIColor blackColor];
     nameLabel.backgroundColor = [UIColor clearColor];
     nameLabel.font = [UIFont systemFontOfSize:18];
-    [self.bgView addSubview:nameLabel];
+    [mainScrollView addSubview:nameLabel];
     
     genderImageView = [[UIImageView alloc] initWithFrame:CGRectMake(nameLabel.frame.size.width+nameLabel.frame.origin.x, headerImageView.frame.origin.y, 15, 15)];
     genderImageView.backgroundColor = [UIColor clearColor];
-    [self.bgView addSubview:genderImageView];
+    [mainScrollView addSubview:genderImageView];
     
     titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(nameLabel.frame.origin.x, nameLabel.frame.size.height+nameLabel.frame.origin.y, 150, 30)];
     titleLabel.font = [UIFont systemFontOfSize:13];
@@ -119,12 +143,16 @@
     titleLabel.numberOfLines = 2;
     titleLabel.lineBreakMode = NSLineBreakByWordWrapping;
     titleLabel.backgroundColor = [UIColor clearColor];
-    titleLabel.text = title;
-    [self.bgView addSubview:titleLabel];
+    if (![title isEqual:[NSNull null]])
+    {
+         titleLabel.text = title;
+    }
+   
+    [mainScrollView addSubview:titleLabel];
     
-    bgImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, titleLabel.frame.size.height+titleLabel.frame.origin.y+20, SCREEN_WIDTH, SCREEN_HEIGHT - headerImageView.frame.size.height-headerImageView.frame.origin.y)];
+    bgImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, titleLabel.frame.size.height+titleLabel.frame.origin.y+20, SCREEN_WIDTH, SCREEN_HEIGHT - headerImageView.frame.size.height-headerImageView.frame.origin.y+80)];
     [bgImageView setImage:[UIImage imageNamed:@"bg.jpg"]];
-    [self.bgView addSubview:bgImageView];
+    [mainScrollView addSubview:bgImageView];
     
     parentsTableView  = [[UITableView alloc] initWithFrame:CGRectMake(0, headerImageView.frame.size.height+headerImageView.frame.origin.y+10, SCREEN_WIDTH, 0) style:UITableViewStylePlain];
     parentsTableView.delegate = self;
@@ -132,36 +160,75 @@
     parentsTableView.tag = PARENTTABLEVIEWTAG;
     parentsTableView.backgroundColor = [UIColor clearColor];
     parentsTableView.scrollEnabled = NO;
-    [self.bgView addSubview:parentsTableView];
+    [mainScrollView addSubview:parentsTableView];
     
-    infoView  = [[UITableView alloc] initWithFrame:CGRectMake(10, parentsTableView.frame.size.height+parentsTableView.frame.origin.y+50, SCREEN_WIDTH-15, 160) style:UITableViewStylePlain];
+    infoView  = [[UITableView alloc] initWithFrame:CGRectMake(10, parentsTableView.frame.size.height+parentsTableView.frame.origin.y+50, SCREEN_WIDTH-15, 210) style:UITableViewStylePlain];
     infoView.delegate = self;
     infoView.dataSource = self;
-//    infoView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    infoView.separatorStyle = UITableViewCellSeparatorStyleNone;
     infoView.tag = INFOTABLEVIEWTAG;
+    infoView.scrollEnabled = NO;
     infoView.backgroundColor = [UIColor clearColor];
-    [self.bgView addSubview:infoView];
+    [mainScrollView addSubview:infoView];
     
     UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
     UIButton *sendMsgButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [sendMsgButton setTitle:@"发消息" forState:UIControlStateNormal];
-    sendMsgButton.frame = CGRectMake(50, SCREEN_HEIGHT-115, SCREEN_WIDTH-100, 40);
+    sendMsgButton.frame = CGRectMake(50, infoView.frame.size.height+infoView.frame.origin.y+5, SCREEN_WIDTH-100, 35);
     [sendMsgButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     [sendMsgButton addTarget:self action:@selector(toChat) forControlEvents:UIControlEventTouchUpInside];
     
     UIButton *addFriendButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [addFriendButton setTitle:@"加好友" forState:UIControlStateNormal];
-    addFriendButton.frame = CGRectMake(50, SCREEN_HEIGHT-60, SCREEN_WIDTH-100, 35);
+    addFriendButton.frame = CGRectMake(50, sendMsgButton.frame.size.height+sendMsgButton.frame.origin.y+10, SCREEN_WIDTH-100, 35);
     [addFriendButton addTarget:self action:@selector(addFriend) forControlEvents:UIControlEventTouchUpInside];
     [addFriendButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     
-    if (![studentID isEqualToString:[Tools user_id]])
+    if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fname":studentName} andTableName:FRIENDSTABLE] count] > 0)
     {
-        [self.bgView addSubview:addFriendButton];
-        [self.bgView addSubview:sendMsgButton];
+        addFriendButton.hidden = YES;
+    }
+    if (![studentID isEqual:[NSNull null]])
+    {
+        if (![studentID isEqualToString:[Tools user_id]])
+        {
+            if ([studentID length] > 10)
+            {
+                [mainScrollView addSubview:addFriendButton];
+                [mainScrollView addSubview:sendMsgButton];
+            }
+        }
     }
     
-    [self getUserInfoWithID:studentID andClassID:classID];
+    mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, addFriendButton.frame.size.height+addFriendButton.frame.origin.y+20);
+    mainScrollView.bounces = NO;
+    [self getParentsWithStudentName];
+    
+    if (![studentID isEqual:[NSNull null]])
+    {
+        if ([studentID length]>10)
+        {
+            [self getUserInfo];
+        }
+    }
+}
+
+-(void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    self.memDel = nil;
+}
+
+-(void)getParentsWithStudentName
+{
+    [pArray removeAllObjects];
+    NSArray *tmpParentsArray = [db findSetWithDictionary:@{@"classid":classID,@"role":@"parents",@"re_name":studentName} andTableName:CLASSMEMBERTABLE];
+    if ([tmpParentsArray count] > 0)
+    {
+        [pArray addObjectsFromArray:tmpParentsArray];
+    }
+    [parentsTableView reloadData];
+    
 }
 
 - (void)didReceiveMemoryWarning
@@ -202,7 +269,15 @@
         [request startAsynchronous];
     }
 }
-
+#pragma mark - setstuobj
+-(void)setStuObj:(NSString *)newTitle
+{
+    titleLabel.text = newTitle;
+    if ([self.memDel respondsToSelector:@selector(updateChatList:)])
+    {
+        [self.memDel updateListWith:YES];
+    }
+}
 
 #pragma mark - tableview
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
@@ -242,6 +317,21 @@
 {
     if (tableView.tag == INFOTABLEVIEWTAG)
     {
+        if ([studentID length]>10)
+        {
+            if ([[db findSetWithDictionary:@{@"uid":studentID,@"classid":classID} andTableName:CLASSMEMBERTABLE] count] > 0)
+            {
+                NSArray *array = [db findSetWithDictionary:@{@"uid":studentID,@"classid":classID} andTableName:CLASSMEMBERTABLE];
+                if (![[[array firstObject] objectForKey:@"phone"] isEqual:[NSNull null]])
+                {
+                    if ([[[array firstObject] objectForKey:@"phone"] length] > 8)
+                    {
+                        return 1;
+                    }
+                }
+            }
+        }
+        
         return [[dataDict allKeys] count];
     }
     else if(tableView.tag == PARENTTABLEVIEWTAG)
@@ -269,11 +359,37 @@
         if (indexPath.row == 0)
         {
             cell.nameLabel.text = @"移动电话";
-            cell.contentLabel.text = [dataDict objectForKey:@"phone"];
-            //        [cell.button1 addTarget:self action:@selector(msgToUser) forControlEvents:UIControlEventTouchUpInside];
+            if ([studentID length]>10)
+            {
+                if ([[db findSetWithDictionary:@{@"uid":studentID,@"classid":classID} andTableName:CLASSMEMBERTABLE] count] > 0)
+                {
+                    NSArray *array = [db findSetWithDictionary:@{@"uid":studentID,@"classid":classID} andTableName:CLASSMEMBERTABLE];
+                    if (![[[array firstObject] objectForKey:@"phone"] isEqual:[NSNull null]])
+                    {
+                        if ([[[array firstObject] objectForKey:@"phone"] length] > 8)
+                        {
+                            userPhone = [[array firstObject]objectForKey:@"phone"];
+                        }
+                    }
+                }
+            }
+            if ([dataDict count] > 0)
+            {
+                userPhone = [dataDict objectForKey:@"phone"];
+            }
+            cell.contentLabel.text = userPhone;
             [cell.button2 addTarget:self action:@selector(callToUser) forControlEvents:UIControlEventTouchUpInside];
+            if ([studentID isEqualToString:[Tools user_id]])
+            {
+                cell.button2.hidden = YES;
+            }
         }
+        
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        UIImageView *bgImageBG = [[UIImageView alloc] init];
+        bgImageBG.image = [UIImage imageNamed:@"line3"];
+        bgImageBG.backgroundColor = [UIColor clearColor];
+        cell.backgroundView = bgImageBG;
         return cell;
     }
     else if(tableView.tag == PARENTTABLEVIEWTAG)
@@ -287,8 +403,7 @@
         NSDictionary *dict = [pArray objectAtIndex:indexPath.row];
         if ([dict objectForKey:@"img_icon"])
         {
-            DDLOG(@"parent dict %d",[[dict objectForKey:@"img_icon"] length]);
-            [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERDEFAULT];
+            [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERBG];
         }
         else
         {
@@ -303,12 +418,20 @@
         cell.nameBgView.frame = CGRectMake(66, 1, SCREEN_WIDTH-66, 48);
         cell.nameBgView.backgroundColor = LIGHT_BLUE_COLOR;
         
-        cell.button2.frame = CGRectMake(SCREEN_WIDTH-90, 10, 30, 30);
+        cell.button2.frame = CGRectMake(SCREEN_WIDTH-50, 10, 30, 30);
         cell.button2.tag = indexPath.row+100;
         [cell.button2 addTarget:self action:@selector(callToParents:) forControlEvents:UIControlEventTouchUpInside];
-        
-        NSString *name = [dict objectForKey:@"r_name"];
-        cell.nameLabel.frame = CGRectMake(83, 15, [name length]*20>80?80:[name length]*20, 20);
+        NSString *titleStr;
+        if ([[dict objectForKey:@"title"] rangeOfString:@"."].length > 0)
+        {
+            titleStr = [[dict objectForKey:@"title"] substringFromIndex:[[dict objectForKey:@"title"] rangeOfString:@"."].location+1];
+        }
+        else
+        {
+            titleStr = [dict objectForKey:@"title"];
+        }
+        NSString *name = [NSString stringWithFormat:@"%@（%@）",[dict objectForKey:@"name"],titleStr];
+        cell.nameLabel.frame = CGRectMake(83, 15, [name length]*20>150?150:[name length]*20, 20);
         cell.nameLabel.text = name;
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         cell.backgroundColor = [UIColor whiteColor];
@@ -323,36 +446,104 @@
     if (tableView.tag == PARENTTABLEVIEWTAG)
     {
         NSDictionary *dict = [pArray objectAtIndex:indexPath.row];
-        
-        ParentsDetailViewController *parentDetail = [[ParentsDetailViewController alloc] init];
-        parentDetail.parentID = [dict objectForKey:@"_id"];
-        parentDetail.parentName = [dict objectForKey:@"name"];
-        parentDetail.title = [dict objectForKey:@"title"];
-        parentDetail.headerImg = [dict objectForKey:@"img_icon"];
-        parentDetail.admin = NO;
-        parentDetail.classID = classID;
-        parentDetail.role = [dict objectForKey:@"role"];
-        [parentDetail showSelfViewController:self];
+        if (![studentID isEqual:[NSNull null]])
+        {
+            ParentsDetailViewController *parentDetail = [[ParentsDetailViewController alloc] init];
+            parentDetail.parentID = [dict objectForKey:@"uid"];
+            parentDetail.parentName = [dict objectForKey:@"name"];
+            parentDetail.title = [dict objectForKey:@"title"];
+            parentDetail.headerImg = [dict objectForKey:@"img_icon"];
+            parentDetail.admin = NO;
+            parentDetail.classID = classID;
+            parentDetail.memDel = self;
+            parentDetail.role = [dict objectForKey:@"role"];
+            [parentDetail showSelfViewController:self];
+        }
+        else
+        {
+            ParentsDetailViewController *parentDetail = [[ParentsDetailViewController alloc] init];
+            parentDetail.parentID = [dict objectForKey:@"uid"];
+            parentDetail.parentName = [dict objectForKey:@"name"];
+            parentDetail.title = [dict objectForKey:@"title"];
+            parentDetail.headerImg = [dict objectForKey:@"img_icon"];
+            parentDetail.admin = NO;
+            parentDetail.memDel = self;
+            parentDetail.classID = classID;
+            parentDetail.role = [dict objectForKey:@"role"];
+            [parentDetail showSelfViewController:self];
+        }
+    }
+}
 
+#pragma mark - parentDetailDelegate
+-(void)updateListWith:(BOOL)update
+{
+    if (update)
+    {
+        [pArray removeAllObjects];
+        NSArray *tmpParentsArray = [db findSetWithDictionary:@{@"classid":classID,@"role":@"parents",@"re_name":studentName} andTableName:CLASSMEMBERTABLE];
+        if ([tmpParentsArray count] > 0)
+        {
+            [pArray addObjectsFromArray:tmpParentsArray];
+        }
+        else
+        {
+            if ([self.memDel respondsToSelector:@selector(updateListWith:)])
+            {
+                [self.memDel updateListWith:YES];
+            }
+            [self unShowSelfViewController];
+        }
+        [parentsTableView reloadData];
     }
 }
 
 -(void)callToParents:(UIButton *)button
 {
     NSDictionary *dict = [pArray objectAtIndex:button.tag - 100];
-    DDLOG(@"===%@",[dict objectForKey:@"phone"]);
-    UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"您确定要拨打这个电话吗？" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"拨打", nil];
-    al.tag = CALLBUTTONTAG;
-    phoneNum = [dict objectForKey:@"phone"];
-    [al show];
+    if (![[dict objectForKey:@"phone"] isEqual:[NSNull null]])
+    {
+        if ([[dict objectForKey:@"phone"] length] > 8)
+        {
+            [Tools dialPhoneNumber:[dict objectForKey:@"phone"] inView:self.bgView];
+        }
+    }
+    else
+    {
+        NSDictionary *dict = [pArray objectAtIndex:button.tag - 100];
+        if ([studentID length] > 0)
+        {
+            ParentsDetailViewController *parentDetail = [[ParentsDetailViewController alloc] init];
+            parentDetail.parentID = [dict objectForKey:@"uid"];
+            parentDetail.parentName = [dict objectForKey:@"name"];
+            parentDetail.title = [dict objectForKey:@"title"];
+            parentDetail.headerImg = [dict objectForKey:@"img_icon"];
+            parentDetail.admin = NO;
+            parentDetail.classID = classID;
+            parentDetail.memDel = self;
+            parentDetail.role = [dict objectForKey:@"role"];
+            [parentDetail showSelfViewController:self];
+        }
+        else
+        {
+            ParentsDetailViewController *parentDetail = [[ParentsDetailViewController alloc] init];
+            parentDetail.parentID = [dict objectForKey:@"uid"];
+            parentDetail.parentName = [dict objectForKey:@"name"];
+            parentDetail.title = [dict objectForKey:@"title"];
+            parentDetail.headerImg = [dict objectForKey:@"img_icon"];
+            parentDetail.admin = NO;
+            parentDetail.memDel = self;
+            parentDetail.classID = classID;
+            parentDetail.role = [dict objectForKey:@"role"];
+            [parentDetail showSelfViewController:self];
+        }
+
+    }
 }
 
 -(void)callToUser
 {
-    UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"您确定要拨打这个电话吗？" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"拨打", nil];
-    al.tag = CALLBUTTONTAG;
-    phoneNum = [dataDict objectForKey:@"phone"];
-    [al show];
+    [Tools dialPhoneNumber:userPhone inView:self.bgView];
 }
 
 -(void)msgToUser
@@ -388,8 +579,7 @@
     {
         if (buttonIndex == 1)
         {
-            DDLOG(@"===%@",phoneNum);
-            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel://%@",phoneNum]]];
+//            [Tools dialPhoneNumber:phoneNum inView:self.bgView];
         }
         
     }
@@ -411,17 +601,34 @@
     {
         if (buttonIndex == 1)
         {
-            [self appointToAdmin];
+            if ([otherUserAdmin integerValue] == 0)
+            {
+                [self appointToAdmin];
+            }
+            else if ([otherUserAdmin integerValue] == 1)
+            {
+                //解除管理员任命
+                [self rmAdmin];
+            }
         }
     }
 }
 
 -(void)moreClick
 {
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] > 0)
+    DDLOG(@"======%d",[[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue]);
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
     {
-        NSArray *array = [[NSArray alloc] initWithObjects:@"踢出班级",@"设置发言权限",@"解除任命",@"任命班干部",@"邀请家长",@"任命为普通管理员", nil];
-        [self showView:[NSMutableArray arrayWithArray:array]];
+        if ([otherUserAdmin integerValue] == 0)
+        {
+            NSArray *array = [[NSArray alloc] initWithObjects:@"踢出班级",@"设置发言权限",@"任命/解除班干部",@"邀请家长",@"任命为普通管理员", nil];
+            [self showView:[NSMutableArray arrayWithArray:array]];
+        }
+        else if([otherUserAdmin integerValue] == 1)
+        {
+            NSArray *array = [[NSArray alloc] initWithObjects:@"踢出班级",@"设置发言权限",@"任命/解除班干部",@"邀请家长",@"解除管理员任命", nil];
+            [self showView:[NSMutableArray arrayWithArray:array]];
+        }
     }
     else
     {
@@ -478,38 +685,47 @@
 -(void)phoneClick:(UIButton *)button
 {
     DDLOG(@"%d",button.tag-4000-1);
-    if (button.tag-4000-1 == 5)
+    if (button.tag-4000-1 == 4)
     {
-        //任命为普通管理员
-        UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:[NSString stringWithFormat:@"您确定要任命%@为管理员吗？",studentName] delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
-        al.tag = SETADMINTAG;
-        [al show];
+        if ([otherUserAdmin integerValue] == 0)
+        {
+            //任命为普通管理员
+            UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:[NSString stringWithFormat:@"您确定要任命%@为管理员吗？",studentName] delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
+            al.tag = SETADMINTAG;
+            [al show];
+        }
+        else if([otherUserAdmin integerValue] == 1)
+        {
+            UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:[NSString stringWithFormat:@"您确定要解除%@的管理员身份吗？",studentName] delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
+            al.tag = SETADMINTAG;
+            [al show];
+        }
+        
     }
-    else if (button.tag-4000-1 == 4)
+    else if (button.tag-4000-1 == 3)
     {
         //邀请家长
         InviteStuPareViewController *invite = [[InviteStuPareViewController alloc] init];
         invite.classID = classID;
         invite.name = studentName;
         invite.userid = studentID;
+        invite.className = className;
+        invite.schoolName = schoolName;
         [invite showSelfViewController:self];
     }
-    else if(button.tag-4000-1 == 3)
+    else if(button.tag-4000-1 == 2)
     {
         //任命班干部
         SetStuObjectViewController *setStuViewController = [[SetStuObjectViewController alloc] init];
         setStuViewController.classID = classID;
         setStuViewController.userid = studentID;
         setStuViewController.name = studentName;
+        setStuViewController.setStudel = self;
         [setStuViewController showSelfViewController:self];
         if ([self.memDel respondsToSelector:@selector(updateListWith:)])
         {
             [self.memDel updateListWith:YES];
         }
-    }
-    else if(button.tag-4000-1 == 2)
-    {
-        //解除任命
     }
     else if(button.tag-4000-1 == 1)
     {
@@ -545,7 +761,7 @@
             [Tools hideProgress:self.bgView];
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"kickuser responsedict %@",responseString);
+            DDLOG(@"appointadmin responsedict %@",responseString);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 if ([self.memDel respondsToSelector:@selector(updateListWith:)])
@@ -570,6 +786,46 @@
     }
 
 }
+
+-(void)rmAdmin
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"o_id":studentID,
+                                                                      @"c_id":classID
+                                                                      } API:RMADMIN];
+        [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"rmadmin responsedict %@",responseString);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                if ([self.memDel respondsToSelector:@selector(updateListWith:)])
+                {
+                    [self.memDel updateListWith:YES];
+                }
+                [self unShowSelfViewController];
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:self];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools hideProgress:self.bgView];
+        }];
+        [Tools showProgress:self.bgView];
+        [request startAsynchronous];
+    }
+    
+}
+
 
 -(void)excludeUser
 {
@@ -611,48 +867,47 @@
 
 }
 
--(void)getUserInfoWithID:(NSString *)userID andClassID:(NSString *)classid
+-(void)getUserInfo
 {
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
-                                                                      @"other_id":userID,
-                                                                      @"c_id":classid
+                                                                      @"other_id":studentID,
+                                                                      @"c_id":classID
                                                                       } API:MB_GETUSERINFO];
         [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"getusetinfo-responsedict==%@",responseDict);
+            DDLOG(@"memberByClass responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 NSDictionary *dict = [responseDict objectForKey:@"data"];
-                
-                if (![[[dict objectForKey:@"classInfo"] objectForKey:@"role"] isEqual:[NSNull null]])
+                if (![dict isEqual:[NSNull null]])
                 {
-                    if ([[[dict objectForKey:@"classInfo"] objectForKey:@"role"] isEqualToString:@"parents"])
+                    
+                    if ([dict objectForKey:@"phone"])
                     {
-                        [pArray addObject:dict];
-                        [parentsTableView reloadData];
+                        [dataDict setObject:[dict objectForKey:@"phone"] forKey:@"phone"];
                     }
-                    else if([[[dict objectForKey:@"classInfo"] objectForKey:@"role"] isEqualToString:@"students"])
+                    
+                    if ([[dict objectForKey:@"sex"] intValue] == 1)
                     {
-                        if ([dict objectForKey:@"phone"])
-                        {
-                            [dataDict setObject:[dict objectForKey:@"phone"] forKey:@"phone"];
-                        }
-                        if ([[dict objectForKey:@"sex"] intValue] == 1)
-                        {
-                            //男
-                            [genderImageView setImage:[UIImage imageNamed:@"male"]];
-                        }
-                        else if ([[dict objectForKey:@"sex"] intValue] == 2)
-                        {
-                            //
-                            [genderImageView setImage:[UIImage imageNamed:@"female"]];
-                        }
-                        [infoView reloadData];
+                        //男
+                        [genderImageView setImage:[UIImage imageNamed:@"male"]];
                     }
+                    else if ([[dict objectForKey:@"sex"] intValue] == 0)
+                    {
+                        //
+                        [genderImageView setImage:[UIImage imageNamed:@"female"]];
+                    }
+                    if ([[dataDict objectForKey:@"phone"] length] > 0)
+                    {
+                        [db updeteKey:@"phone" toValue:[dataDict objectForKey:@"phone"] withParaDict:@{@"uid":studentID,@"classid":classID} andTableName:CLASSMEMBERTABLE];
+                    }
+                    [Tools fillImageView:headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERDEFAULT];
+                    [infoView reloadData];
                 }
             }
             else
@@ -664,8 +919,11 @@
         [request setFailedBlock:^{
             NSError *error = [request error];
             DDLOG(@"error %@",error);
+            [Tools hideProgress:self.bgView];
         }];
+        [Tools showProgress:self.bgView];
         [request startAsynchronous];
     }
 }
+
 @end

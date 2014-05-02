@@ -10,15 +10,20 @@
 #import "Header.h"
 
 @implementation PersonalSettingCell
-@synthesize headerImageView,nameLabel,objectsLabel,authenticationSign;
+@synthesize headerImageView,nameLabel,objectsLabel,authenticationSign,topImageView;
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
     if (self) {
         // Initialization code
+        topImageView = [[UIImageView alloc] initWithFrame:self.frame];
+        topImageView.backgroundColor = [UIColor clearColor];
+        [self.contentView addSubview:topImageView];
+        
         
         headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 15, 50, 50)];
-        headerImageView.backgroundColor = [UIColor grayColor];
+        headerImageView.backgroundColor = [UIColor clearColor];
+        [headerImageView setImage:[UIImage imageNamed:HEADERBG]];
         [self.contentView addSubview:headerImageView];
         
         nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(70, 10, 60, 30)];
@@ -33,13 +38,8 @@
         [self.contentView addSubview:objectsLabel];
         
         authenticationSign = [[UIImageView alloc] init];
-        authenticationSign.backgroundColor = [UIColor grayColor];
+        authenticationSign.backgroundColor = [UIColor clearColor];
         [self.contentView addSubview:authenticationSign];
-        
-//        UIImageView *arrowsImageView = [[UIImageView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH - 60, 10, 30, 60)];
-//        arrowsImageView.backgroundColor = [UIColor yellowColor];
-//        [self.contentView addSubview:arrowsImageView];
-        
     }
     return self;
 }

@@ -15,8 +15,11 @@
 @interface TeacherApplyViewController()<UIAlertViewDelegate,
 UITextFieldDelegate,
 UITableViewDataSource,
-UITableViewDelegate>
+UITableViewDelegate,
+UIScrollViewDelegate>
 {
+    
+    UIScrollView *mainScrollView;
     
     UILabel *schoolInfoLabel;
     
@@ -33,10 +36,13 @@ UITableViewDelegate>
     
     MyTextField *phoneNumTextfield;
     MyTextField *codeTextField;
-    NSString *checkCode;;
+    
+    NSString *checkCode;
     
     
     NSString *adminID;
+    
+    UIButton *studentButton;
 }
 @end
 
@@ -59,7 +65,15 @@ UITableViewDelegate>
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     
-    schoolInfoLabel = [[UILabel alloc] initWithFrame:CGRectMake(63, UI_NAVIGATION_BAR_HEIGHT+44, SCREEN_WIDTH-126, 90)];
+    mainScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT)];
+    mainScrollView.delegate = self;
+    [self.bgView addSubview:mainScrollView];
+    
+//    UITapGestureRecognizer *scTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(returnKeyBoard)];
+//    mainScrollView.userInteractionEnabled = YES;
+//    [mainScrollView addGestureRecognizer:scTap];
+    
+    schoolInfoLabel = [[UILabel alloc] initWithFrame:CGRectMake(30, 44, SCREEN_WIDTH-60, 90)];
     schoolInfoLabel.numberOfLines = 2;
     schoolInfoLabel.font = [UIFont systemFontOfSize:18];
     schoolInfoLabel.text = [NSString stringWithFormat:@"您希望加入%@-%@",schoolName,className];
@@ -67,21 +81,22 @@ UITableViewDelegate>
     schoolInfoLabel.textAlignment = NSTextAlignmentCenter;
     schoolInfoLabel.backgroundColor = [UIColor clearColor];
     schoolInfoLabel.textColor = TITLE_COLOR;
-    [self.bgView addSubview:schoolInfoLabel];
+    [mainScrollView addSubview:schoolInfoLabel];
     
     UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
-    nameTextField = [[MyTextField alloc] initWithFrame:CGRectMake(27.5, UI_NAVIGATION_BAR_HEIGHT+143, SCREEN_WIDTH-55, 35)];
+    nameTextField = [[MyTextField alloc] initWithFrame:CGRectMake(27.5, schoolInfoLabel.frame.size.height+schoolInfoLabel.frame.origin.y+20, SCREEN_WIDTH-55, 35)];
     nameTextField.backgroundColor = [UIColor clearColor];
     nameTextField.tag = 1000;
     nameTextField.background = inputImage;
-    nameTextField.placeholder = @"请输入您的姓名";
+    nameTextField.placeholder = @"请确认您的姓名";
+    nameTextField.text = [Tools user_name];
     nameTextField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
     nameTextField.keyboardType = UIKeyboardAppearanceDefault;
     nameTextField.delegate = self;
     nameTextField.textColor = TITLE_COLOR;
     nameTextField.returnKeyType = UIReturnKeyDone;
     nameTextField.font = [UIFont systemFontOfSize:14];
-    [self.bgView addSubview:nameTextField];
+    [mainScrollView addSubview:nameTextField];
     
     UILabel *tip1 = [[UILabel alloc] init];
     tip1.frame = CGRectMake(nameTextField.frame.origin.x, nameTextField.frame.origin.y+nameTextField.frame.size.height+10, 16*7, 24);
@@ -89,12 +104,13 @@ UITableViewDelegate>
     tip1.backgroundColor = [UIColor clearColor];
     tip1.font = [UIFont systemFontOfSize:16];
     tip1.textColor = TITLE_COLOR;
-    [self.bgView addSubview:tip1];
+    [mainScrollView addSubview:tip1];
     
     showObjects = YES;
     checkCode = @"";
     
     objectArray = [[NSArray alloc] initWithObjects:@"语文",@"数学",@"英语",@"输入", nil];
+    objectStr = [objectArray firstObject];
     
     showObjectButton = [UIButton buttonWithType:UIButtonTypeCustom];
     showObjectButton.backgroundColor = [UIColor clearColor];
@@ -103,14 +119,15 @@ UITableViewDelegate>
     [showObjectButton setBackgroundImage:inputImage forState:UIControlStateNormal];
     [showObjectButton setTitle:[objectArray firstObject] forState:UIControlStateNormal];
     [showObjectButton addTarget:self action:@selector(showObject) forControlEvents:UIControlEventTouchUpInside];
-    [self.bgView addSubview:showObjectButton];
+    [mainScrollView addSubview:showObjectButton];
     
     objectsTableView = [[UITableView alloc] initWithFrame:CGRectMake(showObjectButton.frame.origin.x, showObjectButton.frame.size.height+showObjectButton.frame.origin.y, showObjectButton.frame.size.width, 0) style:UITableViewStylePlain];
     objectsTableView.delegate = self;
     objectsTableView.dataSource = self;
     objectsTableView.tag = 2000;
+    objectsTableView.backgroundColor = [UIColor whiteColor];
     objectsTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-    [self.bgView addSubview:objectsTableView];
+    
     
     objectTextField = [[MyTextField alloc] initWithFrame:CGRectMake(showObjectButton.frame.size.width+showObjectButton.frame.origin.x+10, showObjectButton.frame.origin.y, 130, 35)];
     objectTextField.background = inputImage;
@@ -119,27 +136,29 @@ UITableViewDelegate>
     objectTextField.delegate = self;
     objectTextField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
     objectTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
-    objectTextField.font = [UIFont systemFontOfSize:14];
-    [self.bgView addSubview:objectTextField];
+    objectTextField.font = [UIFont systemFontOfSize:17];
+    objectTextField.placeholder = @"输入";
+    objectTextField.hidden = YES;
+    [mainScrollView addSubview:objectTextField];
     
 //    [self getAdmins];
     
     if ([[Tools phone_num] length] > 0)
     {
-        UILabel *tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, SCREEN_HEIGHT-150, SCREEN_WIDTH-20, 20)];
+        UILabel *tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, objectTextField.frame.size.height+objectTextField.frame.origin.y+40, SCREEN_WIDTH-20, 20)];
         tipLabel.numberOfLines = 1;
         tipLabel.font = [UIFont systemFontOfSize:14];
         tipLabel.text = [NSString stringWithFormat:@"您已绑定手机：%@",[Tools phone_num]];
         tipLabel.textAlignment = NSTextAlignmentCenter;
         tipLabel.textColor = TITLE_COLOR;
         tipLabel.backgroundColor = [UIColor clearColor];
-        [self.bgView addSubview:tipLabel];
+        [mainScrollView addSubview:tipLabel];
     }
     else
     {
         UIImage*inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 3, 20, 2.3)];
         
-        phoneNumTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(29, SCREEN_HEIGHT-205, SCREEN_WIDTH-58, 35)];
+        phoneNumTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(29, objectTextField.frame.size.height+objectTextField.frame.origin.y+20, SCREEN_WIDTH-58, 35)];
         phoneNumTextfield.delegate = self;
         phoneNumTextfield.keyboardType = UIKeyboardTypeNumberPad;
         phoneNumTextfield.clearButtonMode = UITextFieldViewModeWhileEditing;
@@ -148,7 +167,8 @@ UITableViewDelegate>
         phoneNumTextfield.background = inputImage;
         phoneNumTextfield.textColor = UIColorFromRGB(0x727171);
         phoneNumTextfield.enabled = YES;
-        [self.bgView addSubview:phoneNumTextfield];
+        phoneNumTextfield.numericFormatter = [AKNumericFormatter formatterWithMask:PHONE_FORMAT placeholderCharacter:'*'];
+        [mainScrollView addSubview:phoneNumTextfield];
         
         UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
         UIButton *getCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -156,8 +176,8 @@ UITableViewDelegate>
         [getCodeButton setBackgroundImage:btnImage forState:UIControlStateNormal];
         [getCodeButton setTitle:@"短信验证" forState:UIControlStateNormal];
         getCodeButton.titleLabel.font = [UIFont boldSystemFontOfSize:13];
-        [getCodeButton addTarget:self action:@selector(getCheckCode) forControlEvents:UIControlEventTouchUpInside];
-        [self.bgView addSubview:getCodeButton];
+        [getCodeButton addTarget:self action:@selector(bindPhone) forControlEvents:UIControlEventTouchUpInside];
+        [mainScrollView addSubview:getCodeButton];
         
         codeTextField = [[MyTextField alloc] initWithFrame:CGRectMake(29, phoneNumTextfield.frame.size.height+phoneNumTextfield.frame.origin.y+3, SCREEN_WIDTH-58, 35)];
         codeTextField.delegate = self;
@@ -167,30 +187,76 @@ UITableViewDelegate>
         codeTextField.tag = 4000;
         codeTextField.textColor = UIColorFromRGB(0x727171);
         codeTextField.placeholder = @"验证码";
-        [self.bgView addSubview:codeTextField];
+        [mainScrollView addSubview:codeTextField];
         
         UIButton *checkCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
         checkCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, codeTextField.frame.origin.y+5, 58, 25);
         [checkCodeButton setBackgroundImage:btnImage forState:UIControlStateNormal];
         [checkCodeButton setTitle:@"验证" forState:UIControlStateNormal];
         checkCodeButton.titleLabel.font = [UIFont boldSystemFontOfSize:13];
-        [checkCodeButton addTarget:self action:@selector(verify) forControlEvents:UIControlEventTouchUpInside];
-        [self.bgView addSubview:checkCodeButton];
+        [checkCodeButton addTarget:self action:@selector(bindPhone) forControlEvents:UIControlEventTouchUpInside];
+        [mainScrollView addSubview:checkCodeButton];
     }
 
     
     
     UIImage *btnImage  =[Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
-    UIButton *studentButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    studentButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [studentButton setTitle:@"提交" forState:UIControlStateNormal];
-    studentButton.frame = CGRectMake(38, SCREEN_HEIGHT-105, SCREEN_WIDTH-76, 40);
+    studentButton.enabled = NO;
+    if ([[Tools phone_num] length] > 0)
+    {
+        studentButton.frame = CGRectMake(38, objectTextField.frame.size.height+objectTextField.frame.origin.y+100, SCREEN_WIDTH-76, 40);
+        studentButton.enabled = YES;
+    }
+    else
+    {
+        studentButton.frame = CGRectMake(38, objectTextField.frame.size.height+objectTextField.frame.origin.y+130, SCREEN_WIDTH-76, 40);
+    }
+    
     studentButton.layer.cornerRadius = 2;
     studentButton.clipsToBounds = YES;
     [studentButton addTarget:self action:@selector(applyForJoinClass) forControlEvents:UIControlEventTouchUpInside];
     studentButton.tag = 1000;
     studentButton.titleLabel.font = [UIFont systemFontOfSize:18];
     [studentButton setBackgroundImage:btnImage forState:UIControlStateNormal];
-    [self.bgView addSubview:studentButton];
+    [mainScrollView addSubview:studentButton];
+    
+    mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, studentButton.frame.size.height+studentButton.frame.origin.y+30);
+    
+    [mainScrollView addSubview:objectsTableView];
+}
+-(void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"PageOne"];
+}
+-(void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"PageOne"];
+}
+
+-(void)returnKeyBoard
+{
+    for(UIView *v in mainScrollView.subviews)
+    {
+        if ([v isKindOfClass:[UITextField class]])
+        {
+            [v resignFirstResponder];
+        }
+    }
+}
+
+-(void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    for(UIView *v in mainScrollView.subviews)
+    {
+        if ([v isKindOfClass:[UITextField class]])
+        {
+            [v resignFirstResponder];
+        }
+    }
 }
 
 - (void)didReceiveMemoryWarning
@@ -200,33 +266,71 @@ UITableViewDelegate>
 }
 
 #pragma mark - 验证码
--(void)getCheckCode
+-(void)bindPhone
 {
-    if ([phoneNumTextfield.text length] == 0)
+    if ([checkCode length] > 0)
     {
-        [Tools showAlertView:@"请输入手机号码！" delegateViewController:nil];
-        return ;
+        if ([codeTextField.text length] <= 0)
+        {
+            [Tools showAlertView:@"请填写验证码" delegateViewController:nil];
+            return ;
+        }
+        if (![codeTextField.text isEqualToString:checkCode])
+        {
+            [Tools showAlertView:@"验证码填写错误" delegateViewController:nil];
+            return ;
+        }
     }
-    if (![Tools isPhoneNumber:[Tools getPhoneNumFromString:phoneNumTextfield.text]])
+    else
     {
-        [Tools showAlertView:@"手机号格式不正确！" delegateViewController:nil];
-        return ;
+        if ([phoneNumTextfield.text length] <= 0)
+        {
+            [Tools showAlertView:@"请填写手机号" delegateViewController:nil];
+            return ;
+        }
+        if (![Tools isPhoneNumber:phoneNumTextfield.text])
+        {
+            [Tools showAlertView:@"手机号格式不正确" delegateViewController:nil];
+            return ;
+        }
+    }
+    
+    NSDictionary *paraDict;
+    if ([checkCode length] > 0)
+    {
+        paraDict = @{@"u_id":[Tools user_id],@"token":[Tools client_token],@"phone":phoneNumTextfield.text,@"auth_code":checkCode};
+    }
+    else
+    {
+        paraDict = @{@"u_id":[Tools user_id],@"token":[Tools client_token],@"phone":phoneNumTextfield.text};
     }
     
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"phone":phoneNumTextfield.text} API:CHECKPHONE];
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:paraDict API:BINDPHONE];
         
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"login responsedict %@",responseString);
+            DDLOG(@"verify responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                //                [[NSUserDefaults standardUserDefaults] setObject:[responseDict objectForKey:@"data"]forKey:USERID];
-                //                [[NSUserDefaults standardUserDefaults] synchronize];
-                [self getVerifyCode];
+                if([checkCode length] > 0)
+                {
+//                    UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"设置密码" message:nil delegate:self cancelButtonTitle:@"提交密码" otherButtonTitles:@"手机后6位默认密码", nil];
+//                    al.alertViewStyle = UIAlertViewStyleSecureTextInput;
+                    
+                    UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"默认密码手机后6位" delegate:self cancelButtonTitle:@"好的" otherButtonTitles:nil];
+                    al.tag = 5555;
+                    [al show];
+                    
+                    studentButton.enabled = YES;
+                }
+                else
+                {
+                    [self getVerifyCode];
+                }
             }
             else
             {
@@ -253,7 +357,7 @@ UITableViewDelegate>
 {
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"phone":phoneNumTextfield.text} API:@"/users/mbAuthCode2"];
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],@"token":[Tools client_token],@"phone":phoneNumTextfield.text} API:MB_AUTHCODE];
         
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
@@ -286,46 +390,6 @@ UITableViewDelegate>
     }
     
 }
--(void)verify
-{
-    if ([codeTextField.text length] == 0)
-    {
-        [Tools showAlertView:@"请您填写验证码" delegateViewController:nil];
-        return ;
-    }
-    if ([Tools NetworkReachable])
-    {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"phone":[Tools getPhoneNumFromString:phoneNumTextfield.text],@"auth_code":codeTextField.text} API:MB_CHECKOUT];
-        
-        [request setCompletionBlock:^{
-            [Tools hideProgress:self.bgView];
-            NSString *responseString = [request responseString];
-            NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"verify responsedict %@",responseDict);
-            if ([[responseDict objectForKey:@"code"] intValue]== 1)
-            {
-                [Tools showAlertView:@"验证成功！" delegateViewController:nil];
-            }
-            else
-            {
-                [Tools dealRequestError:responseDict fromViewController:self];
-            }
-            
-        }];
-        
-        [request setFailedBlock:^{
-            NSError *error = [request error];
-            DDLOG(@"error %@",error);
-            [Tools hideProgress:self.bgView];
-        }];
-        [Tools showProgress:self.bgView];
-        [request startAsynchronous];
-    }
-    else
-    {
-        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
-    }
-}
 
 
 #pragma mark - tableview
@@ -335,7 +399,7 @@ UITableViewDelegate>
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return 20;
+    return 40;
 }
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -349,9 +413,10 @@ UITableViewDelegate>
     cell.textLabel.font = [UIFont systemFontOfSize:17];
     cell.textLabel.textAlignment = NSTextAlignmentCenter;
     cell.textLabel.text = [objectArray objectAtIndex:indexPath.row];
+    cell.textLabel.backgroundColor = [UIColor clearColor];
     UIImageView *bgImageBG = [[UIImageView alloc] init];
-    bgImageBG.image = [UIImage imageNamed:@"cell_bg"];
-    bgImageBG.backgroundColor = [UIColor clearColor];
+    bgImageBG.image = [UIImage imageNamed:@"line3"];
+    cell.contentView.backgroundColor = [UIColor clearColor];
     cell.backgroundView = bgImageBG;
     return  cell;
 }
@@ -360,6 +425,7 @@ UITableViewDelegate>
 {
     if (indexPath.row == [objectArray count]-1)
     {
+        objectTextField.hidden = NO;
         objectTextField.enabled = YES;
         [showObjectButton setTitle:@"" forState:UIControlStateNormal];
         [objectTextField becomeFirstResponder];
@@ -369,6 +435,7 @@ UITableViewDelegate>
         objectStr = [objectArray objectAtIndex:indexPath.row];
         [showObjectButton setTitle:objectStr forState:UIControlStateNormal];
         objectTextField.text = @"";
+        objectTextField.hidden = YES;
         objectTextField.enabled = NO;
     }
     [self showObject];
@@ -419,7 +486,7 @@ UITableViewDelegate>
     {
         [UIView animateWithDuration:0.2 animations:^{
             
-            objectsTableView.frame = CGRectMake(showObjectButton.frame.origin.x, showObjectButton.frame.size.height+showObjectButton.frame.origin.y, showObjectButton.frame.size.width, 60);
+            objectsTableView.frame = CGRectMake(showObjectButton.frame.origin.x, showObjectButton.frame.size.height+showObjectButton.frame.origin.y, showObjectButton.frame.size.width, [objectArray count]*40);
         }];
     }
     else
@@ -437,7 +504,7 @@ UITableViewDelegate>
     
     if ([objectStr length] <= 0 && [objectTextField.text length] <= 0)
     {
-        [Tools showAlertView:@"请选择和孩子的关系" delegateViewController:nil];
+        [Tools showAlertView:@"请填写您的任教科目" delegateViewController:nil];
         return ;
     }
     if ([objectTextField.text length] > 0)
@@ -462,6 +529,7 @@ UITableViewDelegate>
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"你的申请已经提交，请等待班主任的审核！" delegate:self cancelButtonTitle:@"回到班级列表" otherButtonTitles: nil];
+                al.tag = 3333;
                 [al show];
                 
             }
@@ -560,12 +628,19 @@ UITableViewDelegate>
 }
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
-    MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
-    JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myClassesViewController menuController:sideMenuViewController];
-    [self presentViewController:sideMenu animated:YES completion:^{
+    if (alertView.tag == 3333)
+    {
+        SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
+        MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
+        JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myClassesViewController menuController:sideMenuViewController];
+        [self presentViewController:sideMenu animated:YES completion:^{
+            
+        }];
+    }
+    else if(alertView.tag == 5555)
+    {
         
-    }];
+    }
 }
 
 @end

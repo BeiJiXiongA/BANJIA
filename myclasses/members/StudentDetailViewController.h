@@ -23,4 +23,7 @@
 @property (nonatomic, strong) NSString *headerImg;
 @property (nonatomic, strong) NSString *role;
 @property (nonatomic, strong) id<StuDetailDelegate> memDel;
+
+@property (nonatomic, strong) NSString *schoolName;
+@property (nonatomic, strong) NSString *className;
 @end

@@ -146,6 +146,11 @@
         [Tools showAlertView:@"密码不能为空" delegateViewController:nil];
         return ;
     }
+    if(![Tools isPassWord:passwordTextField.text])
+    {
+        [Tools showAlertView:@"密码由6-12位字母或数字组成" delegateViewController:nil];
+        return ;
+    }
     if ([verifyTextField.text length] == 0)
     {
         [Tools showAlertView:@"再次输入密码" delegateViewController:nil];
@@ -185,7 +190,6 @@
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":user_id,
-                                                                      @"r_name":@"anonymity",
                                                                       @"pwd":verifyTextField.text,
                                                                       @"reg_method":[Tools reg_method],
                                                                       @"d_name":@"anonymity",@"d_name":[Tools device_name],
@@ -194,7 +198,8 @@
                                                                       @"c_os":[Tools device_version],
                                                                       @"d_type":@"iOS",
                                                                       @"p_cid":channelStr,
-                                                                      @"p_uid":userStr}
+                                                                      @"p_uid":userStr,
+                                                                      @"account":@"0"}
                                                                 API:MB_SUBPWD];
         [request setCompletionBlock:^{
             
@@ -308,7 +313,7 @@
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 checkCode = [responseDict objectForKey:@"data"];
-                codeTextField.text = checkCode;
+//                codeTextField.text = checkCode;
             }
             else
             {

@@ -316,6 +316,18 @@ typedef enum {
     [self sendActionsForControlEvents:UIControlEventValueChanged];
 }
 
+-(void)isOn:(BOOL)on
+{
+    [self setThumbOn: on
+            animated: NO];
+    [self.track setOn: on
+                 animated: NO];
+    if (self.didChangeHandler)
+    {
+        self.didChangeHandler(_on);
+    }
+}
+
 - (void) setOn:(BOOL)on {
     [self setOn: on animated: NO];
 }

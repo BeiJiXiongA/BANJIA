@@ -15,6 +15,7 @@
     MyTextField *codeTextField;
     
     NSString *checkCode;
+    UIButton *changeButton;
 }
 @end
 
@@ -33,7 +34,7 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    self.titleLabel.text = @"更改手机号";
+    self.titleLabel.text = @"绑定手机号";
     
     UIImage*inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 3, 20, 2.3)];
     
@@ -46,6 +47,7 @@
     phoneNumTextfield.background = inputImage;
     phoneNumTextfield.textColor = UIColorFromRGB(0x727171);
     phoneNumTextfield.enabled = YES;
+    phoneNumTextfield.numericFormatter = [AKNumericFormatter formatterWithMask:PHONE_FORMAT placeholderCharacter:'*'];
     [self.bgView addSubview:phoneNumTextfield];
     
     UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
@@ -54,7 +56,7 @@
     [getCodeButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     [getCodeButton setTitle:@"短信验证" forState:UIControlStateNormal];
     getCodeButton.titleLabel.font = [UIFont boldSystemFontOfSize:13];
-    [getCodeButton addTarget:self action:@selector(getCheckCode) forControlEvents:UIControlEventTouchUpInside];
+    [getCodeButton addTarget:self action:@selector(getVerifyCode) forControlEvents:UIControlEventTouchUpInside];
     [self.bgView addSubview:getCodeButton];
     
     codeTextField = [[MyTextField alloc] initWithFrame:CGRectMake(29, phoneNumTextfield.frame.size.height+phoneNumTextfield.frame.origin.y+3, SCREEN_WIDTH-58, 35)];
@@ -67,13 +69,13 @@
     codeTextField.placeholder = @"验证码";
     [self.bgView addSubview:codeTextField];
     
-    UIButton *checkCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    checkCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, codeTextField.frame.origin.y+5, 58, 25);
-    [checkCodeButton setBackgroundImage:btnImage forState:UIControlStateNormal];
-    [checkCodeButton setTitle:@"验证" forState:UIControlStateNormal];
-    checkCodeButton.titleLabel.font = [UIFont boldSystemFontOfSize:13];
-    [checkCodeButton addTarget:self action:@selector(verify) forControlEvents:UIControlEventTouchUpInside];
-    [self.bgView addSubview:checkCodeButton];
+    changeButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [changeButton setBackgroundImage:btnImage forState:UIControlStateNormal];
+    changeButton.frame = CGRectMake(30, codeTextField.frame.origin.y+codeTextField.frame.size.height + 25, SCREEN_WIDTH-60, 40);
+    [changeButton setTitle:@"提交手机号" forState:UIControlStateNormal];
+    [changeButton addTarget:self action:@selector(verify) forControlEvents:UIControlEventTouchUpInside];
+    changeButton.enabled = NO;
+    [self.bgView addSubview:changeButton];
 
 }
 
@@ -82,71 +84,28 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
-
--(void)getCheckCode
-{
-    if ([phoneNumTextfield.text length] == 0)
-    {
-        [Tools showAlertView:@"请输入手机号码！" delegateViewController:nil];
-        return ;
-    }
-    if (![Tools isPhoneNumber:[Tools getPhoneNumFromString:phoneNumTextfield.text]])
-    {
-        [Tools showAlertView:@"手机号格式不正确！" delegateViewController:nil];
-        return ;
-    }
-    
-    if ([Tools NetworkReachable])
-    {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"phone":phoneNumTextfield.text} API:CHECKPHONE];
-        
-        [request setCompletionBlock:^{
-            [Tools hideProgress:self.bgView];
-            NSString *responseString = [request responseString];
-            NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"login responsedict %@",responseString);
-            if ([[responseDict objectForKey:@"code"] intValue]== 1)
-            {
-                //                [[NSUserDefaults standardUserDefaults] setObject:[responseDict objectForKey:@"data"]forKey:USERID];
-                //                [[NSUserDefaults standardUserDefaults] synchronize];
-                [self getVerifyCode];
-            }
-            else
-            {
-                [Tools dealRequestError:responseDict fromViewController:self];
-            }
-            
-        }];
-        
-        [request setFailedBlock:^{
-            NSError *error = [request error];
-            DDLOG(@"error %@",error);
-            [Tools hideProgress:self.bgView];
-        }];
-        [Tools showProgress:self.bgView];
-        [request startAsynchronous];
-    }
-    else
-    {
-        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
-    }
-}
-
 -(void)getVerifyCode
 {
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"phone":phoneNumTextfield.text} API:@"/users/mbAuthCode2"];
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id]} API:MB_AUTHCODE];
         
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"checkphone responsedict %@",responseString);
+            DDLOG(@"get code %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                checkCode = [responseDict objectForKey:@"data"];
-                codeTextField.text = checkCode;
+                if (![[responseDict objectForKey:@"data"] isEqual:[NSNull null]])
+                {
+//                    codeTextField.text = [responseDict objectForKey:@"data"];
+                    changeButton.enabled = YES;
+                }
+                else
+                {
+                    [Tools dealRequestError:responseDict fromViewController:nil];
+                }
             }
             else
             {
@@ -169,6 +128,7 @@
     }
     
 }
+
 -(void)verify
 {
     if ([codeTextField.text length] == 0)
@@ -178,7 +138,7 @@
     }
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"phone":[Tools getPhoneNumFromString:phoneNumTextfield.text],@"auth_code":codeTextField.text} API:MB_CHECKOUT];
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],@"auth_code":codeTextField.text} API:MB_CHECKOUT];
         
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
@@ -187,16 +147,7 @@
             DDLOG(@"verify responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                [Tools showAlertView:@"验证成功！" delegateViewController:nil];
-                
-                if ([self.changePhoneDel respondsToSelector:@selector(changePhoneNum:)])
-                {
-                    [self.changePhoneDel changePhoneNum:YES];
-                }
-                NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
-                [ud setObject:phoneNumTextfield.text forKey:PHONENUM];
-                [ud synchronize];
-                
+                [Tools showTips:@"绑定成功" toView:self.bgView];
                 [self unShowSelfViewController];
             }
             else
@@ -220,6 +171,144 @@
     }
 }
 
+
+//-(void)getCheckCode
+//{
+//    if ([phoneNumTextfield.text length] == 0)
+//    {
+//        [Tools showAlertView:@"请输入手机号码！" delegateViewController:nil];
+//        return ;
+//    }
+//    if (![Tools isPhoneNumber:[Tools getPhoneNumFromString:phoneNumTextfield.text]])
+//    {
+//        [Tools showAlertView:@"手机号格式不正确！" delegateViewController:nil];
+//        return ;
+//    }
+//    
+//    if ([Tools NetworkReachable])
+//    {
+//        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"phone":phoneNumTextfield.text} API:CHECKPHONE];
+//        
+//        [request setCompletionBlock:^{
+//            [Tools hideProgress:self.bgView];
+//            NSString *responseString = [request responseString];
+//            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+//            DDLOG(@"check phone responsedict %@",responseString);
+//            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+//            {
+//                //                [[NSUserDefaults standardUserDefaults] setObject:[responseDict objectForKey:@"data"]forKey:USERID];
+//                //                [[NSUserDefaults standardUserDefaults] synchronize];
+//                [self getVerifyCode];
+//            }
+//            else
+//            {
+//                [Tools dealRequestError:responseDict fromViewController:self];
+//            }
+//            
+//        }];
+//        
+//        [request setFailedBlock:^{
+//            NSError *error = [request error];
+//            DDLOG(@"error %@",error);
+//            [Tools hideProgress:self.bgView];
+//        }];
+//        [Tools showProgress:self.bgView];
+//        [request startAsynchronous];
+//    }
+//    else
+//    {
+//        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+//    }
+//}
+//
+//-(void)getVerifyCode
+//{
+//    if ([Tools NetworkReachable])
+//    {
+//        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"phone":phoneNumTextfield.text} API:@"/users/mbAuthCode2"];
+//        
+//        [request setCompletionBlock:^{
+//            [Tools hideProgress:self.bgView];
+//            NSString *responseString = [request responseString];
+//            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+//            DDLOG(@"checkphone responsedict %@",responseString);
+//            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+//            {
+//                checkCode = [responseDict objectForKey:@"data"];
+//                codeTextField.text = checkCode;
+//            }
+//            else
+//            {
+//                [Tools dealRequestError:responseDict fromViewController:self];
+//            }
+//            
+//        }];
+//        
+//        [request setFailedBlock:^{
+//            NSError *error = [request error];
+//            DDLOG(@"error %@",error);
+//            [Tools hideProgress:self.bgView];
+//        }];
+//        [Tools showProgress:self.bgView];
+//        [request startAsynchronous];
+//    }
+//    else
+//    {
+//        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+//    }
+//    
+//}
+//-(void)verify
+//{
+//    if ([codeTextField.text length] == 0)
+//    {
+//        [Tools showAlertView:@"请您填写验证码" delegateViewController:nil];
+//        return ;
+//    }
+//    if ([Tools NetworkReachable])
+//    {
+//        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"phone":[Tools getPhoneNumFromString:phoneNumTextfield.text],@"auth_code":codeTextField.text} API:MB_CHECKOUT];
+//        
+//        [request setCompletionBlock:^{
+//            [Tools hideProgress:self.bgView];
+//            NSString *responseString = [request responseString];
+//            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+//            DDLOG(@"verify responsedict %@",responseDict);
+//            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+//            {
+//                [Tools showAlertView:@"验证成功！" delegateViewController:nil];
+//                
+//                if ([self.changePhoneDel respondsToSelector:@selector(changePhoneNum:)])
+//                {
+//                    [self.changePhoneDel changePhoneNum:YES];
+//                }
+//                NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+//                [ud setObject:phoneNumTextfield.text forKey:PHONENUM];
+//                [ud synchronize];
+//                
+//                [self unShowSelfViewController];
+//            }
+//            else
+//            {
+//                [Tools dealRequestError:responseDict fromViewController:self];
+//            }
+//            
+//        }];
+//        
+//        [request setFailedBlock:^{
+//            NSError *error = [request error];
+//            DDLOG(@"error %@",error);
+//            [Tools hideProgress:self.bgView];
+//        }];
+//        [Tools showProgress:self.bgView];
+//        [request startAsynchronous];
+//    }
+//    else
+//    {
+//        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+//    }
+//}
+//
 
 /*
 #pragma mark - Navigation

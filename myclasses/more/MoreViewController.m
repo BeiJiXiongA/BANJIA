@@ -13,7 +13,8 @@
 @interface MoreViewController ()<UITableViewDataSource,
                                 UITableViewDelegate,
                                 UIPickerViewDataSource,
-                                UIPickerViewDelegate>
+                                UIPickerViewDelegate,
+UIAlertViewDelegate>
 {
     UITableView *classSettingTableView;
     NSArray *sectionArray;
@@ -35,11 +36,13 @@
     NSMutableDictionary *settingDict;
     
     NSArray *settingKeysArray;
+    
+    BOOL first;
 }
 @end
 
 @implementation MoreViewController
-@synthesize classID;
+@synthesize classID,signOutDel;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -55,6 +58,8 @@
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"班级设置";
     
+    first = YES;
+    
     settingDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
@@ -63,8 +68,8 @@
     
     sectionArray = @[@{@"count":@"4",@"name":@"家长权限"},
                     @{@"count":@"4",@"name":@"学生权限"},
-                     @{@"count":@"3",@"name":@"管理员权限"},
-                     @{@"count": @"1",@"name":@"访客权限"}];
+                     @{@"count":@"4",@"name":@"管理员权限"},
+                     @{@"count": @"2",@"name":@"访客权限"}];
     rowsArray = @[@"允许家长评论",
                   @"允许家长加老师为好友",
                   @"家长发表班级日志",
@@ -76,9 +81,11 @@
                   @"邀请其他成员",
                   @"审核成员申请",
                   @"审核班级空间",
-                  @"查看班级空间"];
+                  @"发布公告",
+                  @"查看班级空间",
+                  @"退出班级"];
     
-    settingKeysArray = [NSArray arrayWithObjects:@"p_com",@"p_t_f",@"p_s_d",@"p_i_m",@"s_t_f",@"s_s_d",@"s_i_m",@"s_v_t",@"a_i_m",@"a_c_a",@"a_c_d",@"o_v_d", nil];
+    settingKeysArray = [NSArray arrayWithObjects:@"p_com",@"p_t_f",@"p_s_d",@"p_i_m",@"s_t_f",@"s_s_d",@"s_i_m",@"s_v_t",@"a_i_m",@"a_c_a",@"a_c_d",@"a_s_n",@"o_v_d", nil];
     
     timeArray = [[NSMutableArray alloc] initWithCapacity:0];
     for (int i=0; i<24; i++)
@@ -96,7 +103,7 @@
     
     parentsPublish = @"直接发布";
     studentsPublish = @"需要审核";
-    accessClassZone = @"前5条可查看";
+    accessClassZone = @"前10条可查看";
     accessTime = @"全时段";
     
     classSettingTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT - UI_NAVIGATION_BAR_HEIGHT-UI_TAB_BAR_HEIGHT) style:UITableViewStylePlain];
@@ -196,7 +203,7 @@
 
     if ([[settingDict objectForKey:VisitorAccess] intValue] == 0)
     {
-        accessClassZone = @"可查看前5条";
+        accessClassZone = @"可查看前10条";
     }
     else if([[settingDict objectForKey:VisitorAccess] intValue] == 1)
     {
@@ -246,7 +253,7 @@
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
     UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 30)];
-    headerView.backgroundColor = [UIColor whiteColor];
+    headerView.backgroundColor = RGB(234, 234, 234, 1);
     
     UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 5, SCREEN_WIDTH, 20)];
     headerLabel.backgroundColor = [UIColor clearColor];
@@ -275,125 +282,168 @@
     }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     
+    cell.switchView.hidden = YES;
+    cell.contentLabel.hidden = YES;
+    cell.button.hidden = YES;
+    cell.nameLabel.hidden = YES;
+    
     cell.nameLabel.frame = CGRectMake(10, 7, 200, 30);
     cell.nameLabel.textColor = TITLE_COLOR;
     cell.nameLabel.text = [rowsArray objectAtIndex:indexPath.row+row];
-    cell.switchView.hidden = YES;
-    cell.contentLabel.hidden = YES;
+    
     cell.switchView.tag = indexPath.row + row;
+    cell.switchView.frame = CGRectMake( SCREEN_WIDTH-60, 7, 50, 30);
     [cell.switchView addTarget:self action:@selector(switchViewChange:) forControlEvents:UIControlEventValueChanged];
     int adminNum = [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] intValue];
-    if (adminNum<2)
+    if (adminNum < 2)
     {
         cell.switchView.enabled = NO;
     }
-    
+    cell.contentLabel.font = [UIFont systemFontOfSize:14];
     if ([settingDict count] > 0)
     {
+        if ([[[NSUserDefaults standardUserDefaults]objectForKey:@"admin"] intValue] < 2)
+        {
+            cell.contentLabel.frame = CGRectMake(SCREEN_WIDTH - 60, 7, 30, 30);
+            cell.contentLabel.textColor = LIGHT_BLUE_COLOR;
+            cell.contentLabel.hidden = NO;
+            cell.switchView.hidden = YES;
+            cell.nameLabel.hidden = NO;
+        }
+        else
+        {
+            cell.contentLabel.hidden = YES;
+            cell.switchView.hidden = NO;
+            cell.nameLabel.hidden = NO;
+        }
         if (indexPath.row+row == 0)
         {
-            cell.switchView.hidden = NO;
             if ([[settingDict objectForKey:ParentComment] intValue] == 0)
             {
-                [cell.switchView setOn:NO];
+                cell.contentLabel.text = @"关";
+                [cell.switchView isOn:NO];
             }
             else if([[settingDict objectForKey:ParentComment] intValue] == 1)
             {
-                [cell.switchView setOn:YES];
+                cell.contentLabel.text = @"开";
+                [cell.switchView isOn:YES];
             }
         }
         else if (indexPath.row+row == 1)
         {
-            cell.switchView.hidden = NO;
             if ([[settingDict objectForKey:ParentTeacherFriend] intValue] == 0)
             {
-                [cell.switchView setOn:NO];
+                 cell.contentLabel.text = @"关";
+                [cell.switchView isOn:NO];
             }
-            else if([[settingDict objectForKey:ParentComment] intValue] == 1)
+            else if([[settingDict objectForKey:ParentTeacherFriend] intValue] == 1)
             {
-                [cell.switchView setOn:YES];
+                cell.contentLabel.text = @"开";
+                [cell.switchView isOn:YES];
             }
         }
         else if (indexPath.row+row == 3)
         {
-            cell.switchView.hidden = NO;
             if ([[settingDict objectForKey:ParentInviteMem] intValue] == 0)
             {
-                [cell.switchView setOn:NO];
+                cell.contentLabel.text = @"关";
+                [cell.switchView isOn:NO];
             }
-            else if([[settingDict objectForKey:ParentComment] intValue] == 1)
+            else if([[settingDict objectForKey:ParentInviteMem] intValue] == 1)
             {
-                [cell.switchView setOn:YES];
+                cell.contentLabel.text = @"开";
+                [cell.switchView isOn:YES];
             }
         }
         else if (indexPath.row+row == 4)
         {
-            cell.switchView.hidden = NO;
             if ([[settingDict objectForKey:StudentTeacherFriend] intValue] == 0)
             {
-                [cell.switchView setOn:NO];
+                cell.contentLabel.text = @"关";
+                [cell.switchView isOn:NO];
             }
-            else if([[settingDict objectForKey:ParentComment] intValue] == 1)
+            else if([[settingDict objectForKey:StudentTeacherFriend] intValue] == 1)
             {
-                [cell.switchView setOn:YES];
+                cell.contentLabel.text = @"开";
+                [cell.switchView isOn:YES];
             }
         }
         else if (indexPath.row+row == 6)
         {
-            cell.switchView.hidden = NO;
             if ([[settingDict objectForKey:StudentInviteMem] intValue] == 0)
             {
-                [cell.switchView setOn:NO];
+                cell.contentLabel.text = @"关";
+                [cell.switchView isOn:NO];
             }
             else if([[settingDict objectForKey:StudentInviteMem] intValue] == 1)
             {
-                [cell.switchView setOn:YES];
+                cell.contentLabel.text = @"开";
+                [cell.switchView isOn:YES];
             }
         }
         else if (indexPath.row+row == 8)
         {
-            cell.switchView.hidden = NO;
             if ([[settingDict objectForKey:AdminInviteMem] intValue] == 0)
             {
-                [cell.switchView setOn:NO];
+                cell.contentLabel.text = @"关";
+                [cell.switchView isOn:NO];
             }
             else if([[settingDict objectForKey:AdminInviteMem] intValue] == 1)
             {
-                [cell.switchView setOn:YES];
+                cell.contentLabel.text = @"开";
+                [cell.switchView isOn:YES];
             }
         }
         else if (indexPath.row+row == 9)
         {
-            cell.switchView.hidden = NO;
             if ([[settingDict objectForKey:AdminCheckApply] intValue] == 0)
             {
-                [cell.switchView setOn:NO];
+                 cell.contentLabel.text = @"关";
+                [cell.switchView isOn:NO];
             }
             else if([[settingDict objectForKey:AdminCheckApply] intValue] == 1)
             {
-                [cell.switchView setOn:YES];
+                cell.contentLabel.text = @"开";
+                [cell.switchView isOn:YES];
             }
         }
         else if (indexPath.row+row == 10)
         {
-            cell.switchView.hidden = NO;
             if ([[settingDict objectForKey:AdminCheckDiary] intValue] == 0)
             {
-                [cell.switchView setOn:NO];
+                cell.contentLabel.text = @"关";
+                [cell.switchView isOn:NO];
             }
             else if([[settingDict objectForKey:AdminCheckDiary] intValue] == 1)
             {
-                [cell.switchView setOn:YES];
+                cell.contentLabel.text = @"开";
+                [cell.switchView isOn:YES];
             }
+        }
+        else if (indexPath.row+row == 11)
+        {
+            if ([[settingDict objectForKey:AdminSendNotice] intValue] == 0)
+            {
+                cell.contentLabel.text = @"关";
+                [cell.switchView isOn:NO];
+            }
+            else if([[settingDict objectForKey:AdminSendNotice] intValue] == 1)
+            {
+                cell.contentLabel.text = @"开";
+                [cell.switchView isOn:YES];
+            }
+            first = NO;
         }
         else
         {
-            cell.contentLabel.hidden = NO;
+            cell.switchView.hidden = YES;
             cell.contentLabel.frame = CGRectMake(SCREEN_WIDTH - 110, 7, 100, 30);
             cell.contentLabel.textColor = [UIColor colorWithRed:22.00/255.00 green:157.00/255.00 blue:195.00/255.00 alpha:1.0f];
             cell.contentLabel.font = [UIFont systemFontOfSize:12.0];
             if(indexPath.row + row == 2)
             {
+                cell.contentLabel.hidden = NO;
+                cell.nameLabel.hidden = NO;
                 if ([[settingDict objectForKey:ParentSendDiary] intValue] == 0)
                 {
                     parentsPublish = @"需要审核";
@@ -410,6 +460,8 @@
             }
             else if(indexPath.row + row == 5)
             {
+                cell.contentLabel.hidden = NO;
+                cell.nameLabel.hidden = NO;
                 if ([[settingDict objectForKey:StudentSendDiary] intValue] == 0)
                 {
                     studentsPublish = @"需要审核";
@@ -426,13 +478,15 @@
             }
             else if(indexPath.row + row == 7)
             {
+                cell.contentLabel.hidden = NO;
+                cell.nameLabel.hidden = NO;
                 if ([[settingDict objectForKey:StudentVisiteTime] intValue] == 0)
                 {
-                    accessTime = @"全时段";
+                    accessTime = @"晚上17点后";
                 }
                 else if([[settingDict objectForKey:StudentVisiteTime] intValue] == 1)
                 {
-                    accessTime = @"晚上17点后";
+                    accessTime = @"全时段";
                 }
                 else if([[settingDict objectForKey:StudentVisiteTime] intValue] == 2)
                 {
@@ -440,39 +494,45 @@
                 }
                 cell.contentLabel.text = accessTime;
             }
-            else if(indexPath.row + row == 11)
+            else if(indexPath.row + row == 12)
             {
-                if ([[settingDict objectForKey:VisitorAccess] intValue] == 0)
+                cell.contentLabel.hidden = NO;
+                cell.nameLabel.hidden = NO;
+                if ([[settingDict objectForKey:VisitorAccess] intValue] == 1)
                 {
-                    accessClassZone = @"可查看前5条";
+                    accessClassZone = @"可查看前10条";
                 }
-                else if([[settingDict objectForKey:StudentVisiteTime] intValue] == 1)
+                else if([[settingDict objectForKey:VisitorAccess] intValue] == 0)
                 {
                     accessClassZone = @"不可查看";
                 }
                 cell.contentLabel.text = accessClassZone;
             }
+            else if(indexPath.row + row == 13)
+            {
+                cell.button.hidden = NO;
+                cell.contentLabel.hidden = YES;
+                cell.nameLabel.hidden = YES;
+                
+                cell.button.frame = CGRectMake(40, 5, SCREEN_WIDTH-80, 34);
+                [cell.button setTitle:@"退出班级" forState:UIControlStateNormal];
+                [cell.button setBackgroundImage:[UIImage imageNamed:@"logout"] forState:UIControlStateNormal];
+                [cell.button addTarget:self action:@selector(signOut) forControlEvents:UIControlEventTouchUpInside];
+            }
         }
-
     }
     return cell;
 }
 
 -(void)switchViewChange:(UISwitch *)switchItem
 {
-    int adminNum = [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] intValue];
-    if (adminNum<2)
-    {
-        [Tools showAlertView:@"您没有权限" delegateViewController:nil];
-        return;
-    }
     if ([switchItem isOn])
     {
-        [self settingValue:@"1" forKay:[settingKeysArray objectAtIndex:switchItem.tag]];
+        [self settingValue:@"0" forKay:[settingKeysArray objectAtIndex:switchItem.tag]];
     }
     else
     {
-        [self settingValue:@"0" forKay:[settingKeysArray objectAtIndex:switchItem.tag]];
+        [self settingValue:@"1" forKay:[settingKeysArray objectAtIndex:switchItem.tag]];
     }
 }
 
@@ -481,7 +541,6 @@
     int adminNum = [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] intValue];
     if (adminNum<2)
     {
-        [Tools showAlertView:@"您没有权限" delegateViewController:nil];
         return;
     }
     if (indexPath.section == 0)
@@ -504,7 +563,7 @@
         else if(indexPath.row == 3)
         {
             [optionArray removeAllObjects];
-            [optionArray addObjectsFromArray:[NSArray arrayWithObjects:@"全时段",@"晚上17点后",@"晚上19点后", nil]];
+            [optionArray addObjectsFromArray:[NSArray arrayWithObjects:@"晚上17点后",@"全时段",@"晚上19点后", nil]];
             [self showSettingView:optionArray withSection:indexPath.section+1 andIndexRow:indexPath.row];
         }
     }
@@ -513,10 +572,75 @@
         if (indexPath.row == 0)
         {
             [optionArray removeAllObjects];
-            [optionArray addObjectsFromArray:[NSArray arrayWithObjects:@"可查看前5条",@"不可查看", nil]];
+            [optionArray addObjectsFromArray:[NSArray arrayWithObjects:@"不可查看",@"可查看10条", nil]];
             [self showSettingView:optionArray withSection:indexPath.section+1 andIndexRow:indexPath.row];
         }
+        else if(indexPath.row == 1)
+        {
+            [self signoutclass];
+        }
     }
+}
+
+-(void)signOut
+{
+    UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"确定要退出这个班级吗？" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
+    al.tag = 2222;
+    [al show];
+}
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (alertView.tag == 2222)
+    {
+        if (buttonIndex == 1)
+        {
+            [self signoutclass];
+        }
+    }
+}
+
+-(void)signoutclass
+{
+    if([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
+    {
+        [Tools showAlertView:@"您是班级管理者，不能退出!" delegateViewController:nil];
+        return ;
+    }
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"role":[[NSUserDefaults standardUserDefaults] objectForKey:@"role"],
+                                                                      @"c_id":classID
+                                                                      } API:SIGNOUTCLASS];
+        [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"signout responsedict %@",responseString);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                if ([self.signOutDel respondsToSelector:@selector(signOutClass:)])
+                {
+                    [self.signOutDel signOutClass:YES];
+                }
+                [self backClick];
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:self];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools hideProgress:self.bgView];
+        }];
+        [Tools showProgress:self.bgView];
+        [request startAsynchronous];
+    }
+
 }
 
 -(void)showSettingView:(NSMutableArray *)titleArray withSection:(NSInteger)section andIndexRow:(NSInteger)row
@@ -602,7 +726,7 @@
         [request setCompletionBlock:^{
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"memberByClass responsedict %@",responseDict);
+            DDLOG(@"more setting responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 [settingDict setObject:value forKey:key];

@@ -12,4 +12,6 @@
 {
     UIImagePickerController *imagePickerController;
 }
+@property (nonatomic, strong) NSString *img_id;
+@property (nonatomic, strong) NSString *img_tcard;
 @end

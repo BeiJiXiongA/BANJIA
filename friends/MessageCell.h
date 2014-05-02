@@ -10,8 +10,10 @@
 
 @interface MessageCell : UITableViewCell
 @property (nonatomic, strong) UIImageView *headerImageView;
-@property (nonatomic,strong) UITextView *messageTf;
-@property (nonatomic,strong) UIImageView *chatBg;
-@property (nonatomic,strong) UIButton *button;
-@property (nonatomic,strong) UILabel *timeLabel;
+@property (nonatomic, strong) UITextView *messageTf;
+@property (nonatomic, strong) UIImageView *chatBg;
+@property (nonatomic, strong) UIButton *button;
+@property (nonatomic, strong) UILabel *timeLabel;
+
+@property (nonatomic, strong) UILabel *joinlable;
 @end

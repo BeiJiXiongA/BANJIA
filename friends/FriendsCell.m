@@ -16,17 +16,24 @@
     if (self) {
         // Initialization code
         headerImageView = [[UIImageView alloc] init];
+        headerImageView.backgroundColor = [UIColor clearColor];
         [self.contentView addSubview:headerImageView];
         
         nameLabel = [[UILabel alloc] init];
+        nameLabel.textColor = TITLE_COLOR;
+        nameLabel.backgroundColor = [UIColor clearColor];
         [self.contentView addSubview:nameLabel];
         
         locationLabel = [[UILabel alloc] init];
+        locationLabel.backgroundColor = [UIColor clearColor];
         locationLabel.font = [UIFont systemFontOfSize:14];
         [self.contentView addSubview:locationLabel];
         
         inviteButton = [UIButton buttonWithType:UIButtonTypeCustom];
         [self.contentView addSubview:inviteButton];
+        
+        self.contentView.backgroundColor = [UIColor clearColor];
+        self.backgroundColor = [UIColor clearColor];
     }
     return self;
 }

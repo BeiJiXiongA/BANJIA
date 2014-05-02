@@ -1,0 +1,49 @@
+//
+//  InputTableBar.h
+//  FaceDemo
+//
+//  Created by TeekerZW on 3/26/14.
+//
+//
+
+#import <UIKit/UIKit.h>
+
+#import "NSString+Emojize.h"
+#import "Header.h"
+@protocol ReturnFunctionDelegate;
+
+@interface InputTableBar : UIView<UIScrollViewDelegate,UITextViewDelegate>
+{
+    UIButton *inputButton;
+    UIButton *addButton;
+    CGFloat inputLength;
+    
+    UIScrollView *faceView;
+    NSMutableArray *fileNameArray;
+    UIPageControl *pageControl;
+    NSDictionary *faceDict;
+    
+    CGFloat keyBoardHeight;
+    
+    CGSize inputTextViewSize;
+}
+@property (nonatomic, strong) UITextView *inputTextView;
+@property (nonatomic, strong) UIView *inputBgView;
+@property (nonatomic, assign) BOOL face;
+@property (nonatomic, assign) id<ReturnFunctionDelegate> returnFunDel;
+@property (nonatomic, strong) NSMutableString *sendString;
+-(NSMutableString *)analyString:(NSString *)inputString;
+
+-(void)backKeyBoard;
+//-(void)layOutWithKeyBoardHeight:(CGFloat)keyBoardHeight;
+@end
+
+@protocol ReturnFunctionDelegate <NSObject>
+
+-(void)myReturnFunction;
+-(void)showKeyBoard:(CGFloat)keyBoardHeight;
+-(void)changeInputType:(NSString *)changeType;
+
+-(void)changeInputViewSize:(CGSize)size;
+
+@end

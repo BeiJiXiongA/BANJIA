@@ -22,11 +22,13 @@
     UIButton *relateButton;
     
     UILabel *relateLabel;
-    UITextField *relatextField;
+    MyTextField *relatextField;
     
     CGFloat yyy;
     
-    NSString *studentId;
+    NSString *studentName;
+    NSString *re_type;
+    NSString *studentID;
 }
 @end
 
@@ -50,6 +52,9 @@
     showStudents = YES;
     showRelate = YES;
     
+    studentName = @"";
+    studentID = @"";
+    
     studentsArray = [[NSMutableArray alloc] initWithCapacity:0];
     
     UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
@@ -61,15 +66,15 @@
     
     UILabel *tipLabel1 = [[UILabel alloc] initWithFrame:CGRectMake(32, yyy-30, SCREEN_WIDTH-54, 30)];
     tipLabel1.text = [NSString stringWithFormat:@"设置%@为哪位学生的家长:",parentName];
-    tipLabel1.font = [UIFont systemFontOfSize:13];
+    tipLabel1.font = [UIFont systemFontOfSize:16];
     tipLabel1.textColor = [UIColor grayColor];
     tipLabel1.backgroundColor = [UIColor clearColor];
     [self.bgView addSubview:tipLabel1];
     
     UIButton *studentButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    studentButton.frame = CGRectMake(SCREEN_WIDTH-83, yyy, 40, 40);
+    studentButton.frame = bg1.frame;
     studentButton.backgroundColor = [UIColor clearColor];
-    [studentButton setImage:[UIImage imageNamed:@"icon_peo"] forState:UIControlStateNormal];
+//    [studentButton setImage:[UIImage imageNamed:@"icon_peo"] forState:UIControlStateNormal];
     [studentButton addTarget:self action:@selector(showStudents) forControlEvents:UIControlEventTouchUpInside];
     [self.bgView addSubview:studentButton];
     
@@ -77,6 +82,7 @@
     studentsTableView.delegate = self;
     studentsTableView.dataSource = self;
     studentsTableView.tag = 1000;
+    studentsTableView.backgroundColor = [UIColor whiteColor];
     [self.bgView addSubview:studentsTableView];
     
     studentNameLabel = [[UILabel alloc] initWithFrame:CGRectMake(30, yyy+5, 60, 30)];
@@ -93,22 +99,24 @@
     
     UILabel *tipLabel2 = [[UILabel alloc] initWithFrame:CGRectMake(5, -30, SCREEN_WIDTH-54, 30)];
     tipLabel2.text = [NSString stringWithFormat:@"设置%@与同学的关系为:",parentName];
-    tipLabel2.font = [UIFont systemFontOfSize:13];
+    tipLabel2.font = [UIFont systemFontOfSize:16];
     tipLabel2.textColor = [UIColor grayColor];
     tipLabel2.backgroundColor = [UIColor clearColor];
     [bg2 addSubview:tipLabel2];
     
-    relateLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 5, bg2.frame.size.width-40, 30)];
-    relateLabel.backgroundColor = [UIColor clearColor];
-    relateLabel.font = [UIFont systemFontOfSize:15];
-    relateLabel.textColor = [UIColor grayColor];
-    [bg2 addSubview:relateLabel];
-    
     relateArray = [[NSArray alloc] initWithObjects:@"爸爸",@"妈妈",@"爷爷",@"奶奶",@"输入", nil];
     
+    relateLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 5, bg2.frame.size.width-40, 30)];
+    relateLabel.backgroundColor = [UIColor clearColor];
+    relateLabel.font = [UIFont systemFontOfSize:16];
+    relateLabel.textColor = TITLE_COLOR;
+    relateLabel.text = [relateArray firstObject];
+    [bg2 addSubview:relateLabel];
+    
+    
     relateButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    relateButton.backgroundColor = [UIColor greenColor];
-    relateButton.frame = CGRectMake(bg2.frame.size.width+bg2.frame.origin.x-40, bg2.frame.origin.y, 40, 35);
+    relateButton.backgroundColor = [UIColor clearColor];
+    relateButton.frame = CGRectMake(bg2.frame.origin.x, bg2.frame.origin.y, 134, bg2.frame.size.height);
     [relateButton addTarget:self action:@selector(selectRelate) forControlEvents:UIControlEventTouchUpInside];
     [self.bgView addSubview:relateButton];
     
@@ -116,16 +124,21 @@
     relateTableView.delegate = self;
     relateTableView.dataSource = self;
     relateTableView.tag = 2000;
+    relateTableView.backgroundColor = [UIColor whiteColor];
     [self.bgView addSubview:relateTableView];
     
-    relatextField = [[UITextField alloc] initWithFrame:CGRectMake(relateButton.frame.size.width+relateButton.frame.origin.x+30, relateButton.frame.origin.y, 90, 40)];
+    relatextField = [[MyTextField alloc] initWithFrame:CGRectMake(bg2.frame.size.width+bg2.frame.origin.x+30, bg2.frame.origin.y, 90, 40)];
     relatextField.background = inputImage;
     relatextField.enabled = NO;
+    relatextField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
+    relatextField.placeholder = @"输入";
+    relatextField.font = [UIFont systemFontOfSize:16];
+    relatextField.hidden = YES;
     [self.bgView addSubview:relatextField];
     
     UIButton *submitButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [submitButton setTitle:@"提交" forState:UIControlStateNormal];
-    submitButton.frame = CGRectMake(SCREEN_WIDTH-50, 3, 40, 38);
+    submitButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
     [submitButton setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
     [submitButton addTarget:self action:@selector(submitChange) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:submitButton];
@@ -144,7 +157,7 @@
     if (showRelate)
     {
         [UIView animateWithDuration:0.2 animations:^{
-            relateTableView.frame = CGRectMake(bg2.frame.origin.x, bg2.frame.size.height+bg2.frame.origin.y, bg2.frame.size.width, [relateArray count]*30);
+            relateTableView.frame = CGRectMake(bg2.frame.origin.x, bg2.frame.size.height+bg2.frame.origin.y, bg2.frame.size.width, [relateArray count]*40);
         }];
     }
     else
@@ -162,9 +175,9 @@
     {
         
         [UIView animateWithDuration:0.2 animations:^{
-            studentsTableView.frame = CGRectMake(27, yyy+40, SCREEN_WIDTH-124, [studentsArray count]*30);
+            studentsTableView.frame = CGRectMake(27, yyy+40, SCREEN_WIDTH-124, [studentsArray count]*40);
             bg2.frame = CGRectMake(27, studentsTableView.frame.size.height+studentsTableView.frame.origin.y+40, 134, 40);
-            relateButton.frame = CGRectMake(bg2.frame.size.width+bg2.frame.origin.x-40, bg2.frame.origin.y, 40, 40);
+            relateButton.frame = CGRectMake(bg2.frame.origin.x, bg2.frame.origin.y, 134, 40);
             relatextField.frame = CGRectMake(relateButton.frame.size.width+relateButton.frame.origin.x+30, relateButton.frame.origin.y, 90, 40);
         }];
     }
@@ -173,7 +186,7 @@
         [UIView animateWithDuration:0.2 animations:^{
             studentsTableView.frame = CGRectMake(27, yyy+40, SCREEN_WIDTH-124, 0);
             bg2.frame = CGRectMake(27, yyy+90, 134, 40);
-            relateButton.frame = CGRectMake(bg2.frame.size.width+bg2.frame.origin.x-40, bg2.frame.origin.y, 40, 40);
+            relateButton.frame = CGRectMake(bg2.frame.origin.x, bg2.frame.origin.y, 134, 40);
             relatextField.frame = CGRectMake(relateButton.frame.size.width+relateButton.frame.origin.x+30, relateButton.frame.origin.y, 90, 40);
         }];
     }
@@ -206,7 +219,7 @@
         cell.textLabel.text = [[studentsArray objectAtIndex:indexPath.row] objectForKey:@"name"];
         cell.contentView.backgroundColor = [UIColor clearColor];
         cell.textLabel.textColor = [UIColor grayColor];
-        cell.textLabel.font = [UIFont systemFontOfSize:14];
+        cell.textLabel.font = [UIFont systemFontOfSize:16];
         return cell;
     }
     else if(tableView.tag == 2000)
@@ -219,6 +232,7 @@
         }
         cell.textLabel.text = [relateArray objectAtIndex:indexPath.row];
         cell.contentView.backgroundColor = [UIColor clearColor];
+        cell.textLabel.font = [UIFont systemFontOfSize:16];
         cell.textLabel.textColor = [UIColor grayColor];
         return cell;
 
@@ -232,7 +246,7 @@
     {
         studentNameLabel.text = [[studentsArray objectAtIndex:indexPath.row] objectForKey:@"name"];
         [tableView deselectRowAtIndexPath:indexPath animated:YES];
-        studentId = [[studentsArray objectAtIndex:indexPath.row] objectForKey:@"_id"];
+        studentName = [[studentsArray objectAtIndex:indexPath.row] objectForKey:@"name"];
         [self showStudents];
     }
     else if(tableView.tag == 2000)
@@ -241,6 +255,7 @@
         {
             relateLabel.text = nil;
             relatextField.enabled = YES;
+            relatextField.hidden = NO;
             [relatextField becomeFirstResponder];
             [tableView deselectRowAtIndexPath:indexPath animated:YES];
             [self selectRelate];
@@ -250,6 +265,7 @@
             relateLabel.text = [relateArray objectAtIndex:indexPath.row];
             [tableView deselectRowAtIndexPath:indexPath animated:YES];
             relatextField.enabled = NO;
+            relatextField.hidden = YES;
             relatextField.text = nil;
             [self selectRelate];
         }
@@ -257,74 +273,81 @@
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return 30;
+    return 40;
 }
 
 -(void)getStudents
 {
-    
-    if ([Tools NetworkReachable])
-    {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
-                                                                      @"token":[Tools client_token],
-                                                                      @"c_id":classID,
-                                                                      @"role":@"students"
-                                                                      } API:GETUSERSBYCLASS];
-        [request setCompletionBlock:^{
-            [Tools hideProgress:self.bgView];
-            NSString *responseString = [request responseString];
-            NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"students mem responsedict %@",responseDict);
-            if ([[responseDict objectForKey:@"code"] intValue]== 1)
-            {
-                if ([[responseDict objectForKey:@"data"] count] > 0)
-                {
-                    [studentsArray addObjectsFromArray:[[responseDict objectForKey:@"data"] allValues]];
-                    [studentsTableView reloadData];
-                }
-            }
-            else
-            {
-                [Tools dealRequestError:responseDict fromViewController:self];
-            }
-        }];
-        
-        [request setFailedBlock:^{
-            NSError *error = [request error];
-            DDLOG(@"error %@",error);
-            [Tools hideProgress:self.bgView];
-        }];
-        [request startAsynchronous];
-    }
+    OperatDB *db = [[OperatDB alloc] init];
+    [studentsArray addObjectsFromArray:[db findSetWithDictionary:@{@"classid":classID,@"role":@"students"} andTableName:CLASSMEMBERTABLE]];
+    [studentsTableView reloadData];
+//    if ([Tools NetworkReachable])
+//    {
+//        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+//                                                                      @"token":[Tools client_token],
+//                                                                      @"c_id":classID,
+//                                                                      @"role":@"students"
+//                                                                      } API:GETUSERSBYCLASS];
+//        [request setCompletionBlock:^{
+//            [Tools hideProgress:self.bgView];
+//            NSString *responseString = [request responseString];
+//            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+//            DDLOG(@"students mem responsedict %@",responseDict);
+//            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+//            {
+//                if ([[responseDict objectForKey:@"data"] count] > 0)
+//                {
+//                    [studentsArray addObjectsFromArray:[[responseDict objectForKey:@"data"] allValues]];
+//                    [studentsTableView reloadData];
+//                }
+//            }
+//            else
+//            {
+//                [Tools dealRequestError:responseDict fromViewController:self];
+//            }
+//        }];
+//        
+//        [request setFailedBlock:^{
+//            NSError *error = [request error];
+//            DDLOG(@"error %@",error);
+//            [Tools hideProgress:self.bgView];
+//        }];
+//        [request startAsynchronous];
+//    }
 }
 
 -(void)submitChange
 {
     if ([Tools NetworkReachable])
     {
-        if ([studentId length] <= 0)
+        if ([studentName length] <= 0)
         {
             [Tools showAlertView:@"请选择学生" delegateViewController:nil];
             return ;
         }
-        if ([relateLabel.text length] == 0)
+        if ([relateLabel.text length] > 0)
         {
-            title = relatextField.text;
+            re_type = relateLabel.text;
         }
         else if([relatextField.text length] >0)
         {
-            title = relateLabel.text;
+            re_type = relatextField.text;
         }
         else
         {
             [Tools showAlertView:@"请确定您的孩子的关系" delegateViewController:nil];
             return ;
         }
+        title = [NSString stringWithFormat:@"%@.%@",studentName,re_type];
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
                                                                       @"m_id":parentID,
                                                                       @"c_id":classID,
-                                                                      @"title":title
+                                                                      @"title":title,
+                                                                      @"role":@"parents",
+                                                                      @"re_name":studentName,
+                                                                      @"re_type":re_type,
+                                                                      @"re_id":@""
                                                                       } API:CHANGE_MEM_TITLE];
         [request setCompletionBlock:^{
             NSString *responseString = [request responseString];
@@ -332,6 +355,10 @@
             DDLOG(@"setRelate responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
+                if ([self.setRelate respondsToSelector:@selector(changePareTitle:)])
+                {
+                    [self.setRelate changePareTitle:title];
+                }
                 [self unShowSelfViewController];
             }
             else

@@ -13,6 +13,7 @@
 @property (nonatomic, strong) UIImageView *iconImageView;
 @property (nonatomic, strong) UIImageView *bgImageView;
 @property (nonatomic, strong) MyLabel *contentLabel;
+@property (nonatomic, strong) UILabel *nameLabel;
 @property (nonatomic, strong) UILabel *timeLabel;
 @property (nonatomic, strong) UILabel *statusLabel;
 @property (nonatomic, strong) UITextView *contentTextView;

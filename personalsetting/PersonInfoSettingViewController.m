@@ -23,14 +23,15 @@ UITableViewDelegate>
     
     NSString *imageUsed;
     
-    NSMutableArray *imageArray;
-    
     UITableView *personInfoTableView;
     
     NSMutableArray *objectArray;
     
     UIView *dateView;
     UIDatePicker *datePicker;
+    
+    UIImage *bgImage;
+    UIImage *iconImage;
 }
 @end
 
@@ -54,6 +55,9 @@ UITableViewDelegate>
     
     imageUsed = @"";
     
+    bgImage = nil;
+    iconImage = nil;
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
     
@@ -66,28 +70,47 @@ UITableViewDelegate>
     [inviteButton addTarget:self action:@selector(submitChange) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:inviteButton];
     
-    imageArray = [[NSMutableArray alloc] initWithCapacity:0];
-    
     UIImage *topImage = [UIImage imageNamed:@"toppic.jpg"];
     topImage = [topImage blurredImage:2];
     
-    topicImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, 113)];
+    NSString *topImageStr = [Tools top_image];
+    topicImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, 150)];
     topicImageView.backgroundColor = [UIColor whiteColor];
     topicImageView.image = topImage;
+    topicImageView.layer.contentsGravity = kCAGravityResizeAspectFill;
+    topicImageView.clipsToBounds = YES;
+    if ([topImageStr length] > 10)
+    {
+        [Tools fillImageView:topicImageView withImageFromURL:topImageStr andDefault:HEADERBG];
+    }
+    else
+    {
+        [topicImageView setImage:topImage];
+    }
+    
     [self.bgView addSubview:topicImageView];
     
     UITapGestureRecognizer *topGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(changeTopImage)];
     topicImageView.userInteractionEnabled = YES;
     [topicImageView addGestureRecognizer:topGestureRecognizer];
     
-    headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(15, UI_NAVIGATION_BAR_HEIGHT + 69, 88, 88)];
+    
+    NSString *headerImageStr = [Tools header_image];
+    headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(15, UI_NAVIGATION_BAR_HEIGHT + topicImageView.frame.size.height-44, 88, 88)];
     headerImageView.backgroundColor = [UIColor whiteColor];
     headerImageView.layer.cornerRadius = 44;
     headerImageView.layer.borderColor = [UIColor whiteColor].CGColor;
-    headerImageView.layer.borderWidth = 3;
-    [Tools fillImageView:headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERDEFAULT];
+    headerImageView.layer.borderWidth = 2;
+    
+    if ([headerImageStr length]>10)
+    {
+        [Tools fillImageView:headerImageView withImageFromURL:headerImageStr andDefault:HEADERBG];
+    }
+    else
+    {
+        [headerImageView setImage:[UIImage imageNamed:HEADERBG]];
+    }
     headerImageView.layer.masksToBounds = YES;
-    headerImageView.image = [UIImage imageNamed:@"headpic"];
     
     
     UITapGestureRecognizer *headerGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(changeHeaderImage)];
@@ -106,11 +129,12 @@ UITableViewDelegate>
     personInfoTableView.dataSource = self;
     personInfoTableView.backgroundColor = [UIColor clearColor];
     personInfoTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    personInfoTableView.scrollEnabled = NO;
     [self.bgView addSubview:personInfoTableView];
     
     
     dateView = [[UIView alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT, SCREEN_WIDTH, 0)];
-    dateView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.8];
+    dateView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
     
     datePicker = [[UIDatePicker alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT-210, SCREEN_WIDTH-100, 60)];
     datePicker.datePickerMode = UIDatePickerModeDate;
@@ -123,7 +147,11 @@ UITableViewDelegate>
     
     [self.bgView addSubview:headerImageView];
     [self.bgView addSubview:dateView];
-    [self getUserInfo];
+    
+    if (![Tools user_birth])
+    {
+        [self getUserInfo];
+    }
 }
 
 - (void)didReceiveMemoryWarning
@@ -134,9 +162,55 @@ UITableViewDelegate>
 
 -(void)submitChange
 {
-    DDLOG(@"====%@",((UITextField *)[personInfoTableView viewWithTag:3]).text);
-    DDLOG(@"====%@",((UITextField *)[personInfoTableView viewWithTag:4]).text);
-//    DDLOG(@"====%@",((UITextField *)[personInfoTableView viewWithTag:5]).text);
+    [self dateDone];
+    
+    if (bgImage)
+    {
+        [self uploadImage:bgImage andkey:@"img_kb"];
+    }
+    if (iconImage)
+    {
+        [self uploadImage:iconImage andkey:@"img_icon"];
+    }
+    if ([Tools NetworkReachable])
+    {
+        DDLOG(@"%@==%@",[Tools user_id],[Tools client_token]);
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"birth":[[NSString stringWithFormat:@"%@",datePicker.date] substringToIndex:10]}
+                                                                API:MB_SETUSERINFO];
+        
+        [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"setusetInfo== responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                [[NSUserDefaults standardUserDefaults] setObject:[[NSString stringWithFormat:@"%@",datePicker.date] substringToIndex:10] forKey:BIRTH];
+                [[NSUserDefaults standardUserDefaults] synchronize];
+                
+                [Tools showTips:@"修改成功" toView:self.bgView];
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:self];
+            }
+            
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools hideProgress:self.bgView];
+        }];
+        [Tools showProgress:self.bgView];
+        [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
 }
 
 #pragma mark - tableview
@@ -187,10 +261,11 @@ UITableViewDelegate>
     {
         cell = [[RelatedCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:personInfoCell];
     }
-    cell.iconImageView.frame = CGRectMake(18, 16, 22, 22);
+//    cell.iconImageView.frame = CGRectMake(18, 16, 22, 22);
+//    cell.iconImageView.backgroundColor = [UIColor clearColor];
+//    [cell.iconImageView setImage:[UIImage imageNamed:@"set_del"]];
+//    cell.iconImageView.tag = indexPath.row+333;
     cell.iconImageView.backgroundColor = [UIColor clearColor];
-    [cell.iconImageView setImage:[UIImage imageNamed:@"set_del"]];
-    cell.iconImageView.tag = indexPath.row+333;
     
     UITapGestureRecognizer *iconTag = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(editInfo:)];
     cell.iconImageView.userInteractionEnabled = YES;
@@ -216,16 +291,10 @@ UITableViewDelegate>
             cell.nametf.text = [Tools user_name];
             [cell.bgImageView setImage:[UIImage imageNamed:@"line1"]];
         }
-//        else if(indexPath.row == 1)
-//        {
-//            [cell.relateButton setTitle:@"电话" forState:UIControlStateNormal];
-//            cell.nametf.text = [Tools phone_num];
-//            [cell.bgImageView setImage:[UIImage imageNamed:@"line1"]];
-//        }
         else if(indexPath.row == 1)
         {
             [cell.relateButton setTitle:@"生日" forState:UIControlStateNormal];
-            cell.nametf.text = @"请选择";
+            cell.nametf.text = [Tools user_birth]?[Tools user_birth]:@"请选择";
             [cell.bgImageView setImage:[UIImage imageNamed:@"line1"]];
         }
         cell.nametf.tag = indexPath.row+3;
@@ -263,14 +332,47 @@ UITableViewDelegate>
     return cell;
 }
 
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [self editInfo1:indexPath.row+333];
+}
+
 -(void)editInfo:(UITapGestureRecognizer *)tap
 {
     DDLOG(@"buttontag==%d",tap.view.tag-333);
     if (tap.view.tag-333<1)
     {
-        ((UITextField *)[personInfoTableView viewWithTag:tap.view.tag-330]).backgroundColor = [[UIColor whiteColor]colorWithAlphaComponent:0.5];
-        ((UITextField *)[personInfoTableView viewWithTag:tap.view.tag-330]).enabled = YES;
-        [((UITextField *)[personInfoTableView viewWithTag:tap.view.tag-330]) becomeFirstResponder];
+//        ((UITextField *)[personInfoTableView viewWithTag:tap.view.tag-330]).backgroundColor = [[UIColor whiteColor]colorWithAlphaComponent:0.5];
+//        ((UITextField *)[personInfoTableView viewWithTag:tap.view.tag-330]).enabled = YES;
+//        [((UITextField *)[personInfoTableView viewWithTag:tap.view.tag-330]) becomeFirstResponder];
+    }
+    else
+    {
+        [UIView animateWithDuration:0.2 animations:^{
+            dateView.frame = CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT);
+        }];
+    }
+}
+
+-(void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    for(UIView *v in personInfoTableView.subviews)
+    {
+        if ([v isKindOfClass:[UITextField class]])
+        {
+            [v resignFirstResponder];
+        }
+    }
+}
+
+-(void)editInfo1:(NSInteger)tag
+{
+    DDLOG(@"buttontag==%d",tag-333);
+    if (tag-333<1)
+    {
+//        ((UITextField *)[personInfoTableView viewWithTag:tag-330]).backgroundColor = [[UIColor whiteColor]colorWithAlphaComponent:0.5];
+//        ((UITextField *)[personInfoTableView viewWithTag:tag-330]).enabled = YES;
+//        [((UITextField *)[personInfoTableView viewWithTag:tag-330]) becomeFirstResponder];
     }
     else
     {
@@ -300,17 +402,31 @@ UITableViewDelegate>
         [request setCompletionBlock:^{
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"memberByClass responsedict %@",responseDict);
+            DDLOG(@"getuserinfo responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 NSDictionary *dataDict = [responseDict objectForKey:@"data"];
                 if (![[dataDict objectForKey:@"img_icon"] isEqual:[NSNull null]])
                 {
-                    [Tools fillImageView:headerImageView withImageFromURL:[dataDict objectForKey:@"img_icon"] andDefault:@"head_pic.jpg"];
+                    if ([[dataDict objectForKey:@"img_icon"] length] > 10)
+                    {
+                        [Tools fillImageView:headerImageView withImageFromURL:[dataDict objectForKey:@"img_icon"] andDefault:@""];
+                    }
                 }
                 if (![[dataDict objectForKey:@"img_kb"] isEqual:[NSNull null]])
                 {
-                    [Tools fillImageView:topicImageView withImageFromURL:[dataDict objectForKey:@"img_kb"] andDefault:@"toppic.jpg"];
+                    if ([[dataDict objectForKey:@"img_kb"] length] > 10)
+                    {
+                        [Tools fillImageView:topicImageView withImageFromURL:[dataDict objectForKey:@"img_kb"] andDefault:@""];
+                    }
+                }
+                if ([dataDict objectForKey:@"birth"])
+                {
+                    ((UITextField *)[personInfoTableView viewWithTag:4]).text = [dataDict objectForKey:@"birth"];
+                }
+                else
+                {
+                    ((UITextField *)[personInfoTableView viewWithTag:4]).text = @"请选择生日";
                 }
             }
             else
@@ -332,13 +448,11 @@ UITableViewDelegate>
 -(void)changeTopImage
 {
     imageUsed = @"img_kb";
-    DDLOG(@"used=%@",imageUsed);
     [self selectoo];
 }
 -(void)changeHeaderImage
 {
     imageUsed = @"img_icon";
-    DDLOG(@"used=%@",imageUsed);
     [self selectoo];
 }
 
@@ -350,7 +464,6 @@ UITableViewDelegate>
 
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    DDLOG(@"====%d",buttonIndex);
     if (buttonIndex == 0)
     {
         [self selectPicture:1001];
@@ -363,17 +476,21 @@ UITableViewDelegate>
 
 -(void)selectPicture:(NSInteger)selectIndex
 {
+    imagePickerController.allowsEditing = YES;
     if (selectIndex == 1000)
     {
         //拍照
-        if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
+        if ([Tools captureEnable])
         {
-            imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
-            [self presentModalViewController:imagePickerController animated:YES];
-        }
-        else
-        {
-            [Tools showAlertView:@"相机不可用" delegateViewController:nil];
+            if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
+            {
+                imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
+                [self presentViewController:imagePickerController animated:YES completion:nil];
+            }
+            else
+            {
+                [Tools showAlertView:@"相机不可用" delegateViewController:nil];
+            }
         }
     }
     else if(selectIndex == 1001)
@@ -382,17 +499,16 @@ UITableViewDelegate>
         if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary])
         {
             imagePickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-            [self presentModalViewController:imagePickerController animated:YES];
+            [self presentViewController:imagePickerController animated:YES completion:nil];
         }
     }
 }
 
 -(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
-    [imageArray removeAllObjects];
     [imagePickerController dismissViewControllerAnimated:YES completion:nil];
     
-    UIImage *fullScreenImage = [info objectForKey:UIImagePickerControllerOriginalImage];
+    UIImage *fullScreenImage = [info objectForKey:UIImagePickerControllerEditedImage];
     if (fullScreenImage.size.width>SCREEN_WIDTH*2 || fullScreenImage.size.height>SCREEN_HEIGHT*2)
     {
         CGFloat imageHeight = 0.0f;
@@ -407,11 +523,18 @@ UITableViewDelegate>
             imageHeight = SCREEN_HEIGHT*2;
             imageWidth = imageHeight*fullScreenImage.size.width/fullScreenImage.size.height;
         }
-        DDLOG(@"%.1f==%.1f++%.1f==%.1f",imageWidth,imageHeight,fullScreenImage.size.width,fullScreenImage.size.height);
         fullScreenImage = [Tools thumbnailWithImageWithoutScale:fullScreenImage size:CGSizeMake(imageWidth, imageHeight)];
     }
-    [imageArray addObject:fullScreenImage];
-    [self uploadImage];
+    if ([imageUsed isEqualToString:@"img_kb"])
+    {
+        bgImage = fullScreenImage;
+        [topicImageView setImage:fullScreenImage];
+    }
+    else if([imageUsed isEqualToString:@"img_icon"])
+    {
+        iconImage = fullScreenImage;
+        [headerImageView setImage:fullScreenImage];
+    }
 }
 
 -(void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
@@ -419,40 +542,33 @@ UITableViewDelegate>
     [imagePickerController dismissViewControllerAnimated:YES completion:nil];
 }
 
--(void)uploadImage
+-(void)uploadImage:(UIImage *)image andkey:(NSString *)imageKey
 {
     if ([Tools NetworkReachable])
     {
-        UIActivityIndicatorView *indi = [[UIActivityIndicatorView alloc] init];
-        if ([imageUsed isEqualToString:@"img_kb"])
-        {
-            indi.frame = CGRectMake(topicImageView.frame.origin.x+topicImageView.frame.size.width/2-20, topicImageView.frame.origin.y+topicImageView.frame.size.height/2-20, 40, 40);
-        }
-        else if([imageUsed isEqualToString:@"img_icon"])
-        {
-            indi.frame = CGRectMake(headerImageView.frame.origin.x+headerImageView.frame.size.width/2-20, headerImageView.frame.origin.y+headerImageView.frame.size.height/2-20, 40, 40);
-        }
-
-        __weak ASIHTTPRequest *request = [Tools upLoadImages:imageArray withSubURL:SETUSERIMAGE andParaDict:@{@"u_id":[Tools user_id],@"token":[Tools client_token],@"img_type":imageUsed}];
+        __weak ASIHTTPRequest *request = [Tools upLoadImages:[NSArray arrayWithObject:image] withSubURL:SETUSERIMAGE andParaDict:@{@"u_id":[Tools user_id],@"token":[Tools client_token],@"img_type":imageKey}];
         [request setCompletionBlock:^{
-            [indi stopAnimating];
-            [indi removeFromSuperview];
+            [Tools hideProgress:self.bgView];
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
             DDLOG(@"upload image responsedict %@",responseDict);
+            
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                if ([imageUsed isEqualToString:@"img_kb"])
+                if ([imageKey isEqualToString:@"img_kb"])
                 {
-                    [topicImageView setImage:[imageArray firstObject]];
+                    NSString *img_icon = [[responseDict objectForKey:@"data"] objectForKey:@"files"];
+                    [[NSUserDefaults standardUserDefaults] setObject:img_icon forKey:TOPIMAGE];
+                    [[NSUserDefaults standardUserDefaults] synchronize];
                 }
-                else if ([imageUsed isEqualToString:@"img_icon"])
+                else if ([imageKey isEqualToString:@"img_icon"])
                 {
-                    [headerImageView setImage:[imageArray firstObject]];
                     NSString *img_icon = [[responseDict objectForKey:@"data"] objectForKey:@"files"];
                     [[NSUserDefaults standardUserDefaults] setObject:img_icon forKey:HEADERIMAGE];
                     
                     [[NSUserDefaults standardUserDefaults] synchronize];
+                    
+                    [[NSNotificationCenter defaultCenter] postNotificationName:@"changeicon" object:nil];
                 }
             }
             else
@@ -464,10 +580,10 @@ UITableViewDelegate>
         [request setFailedBlock:^{
             NSError *error = [request error];
             DDLOG(@"error %@",error);
-            [indi stopAnimating];
-            [indi removeFromSuperview];
+            [Tools hideProgress:self.bgView];
+    
         }];
-        [indi startAnimating];
+        [Tools showProgress:self.bgView];
         [request startAsynchronous];
     }
     else
@@ -489,10 +605,10 @@ UITableViewDelegate>
 - (void)keyboardWillShow:(NSNotification *)aNotification
 {
     //获取键盘的高度
-    NSDictionary *userInfo = [aNotification userInfo];
-    NSValue *aValue = [userInfo objectForKey:UIKeyboardFrameEndUserInfoKey];
-    CGRect keyboardRect = [aValue CGRectValue];
-    int height = keyboardRect.size.height;
+//    NSDictionary *userInfo = [aNotification userInfo];
+//    NSValue *aValue = [userInfo objectForKey:UIKeyboardFrameEndUserInfoKey];
+//    CGRect keyboardRect = [aValue CGRectValue];
+//    int height = keyboardRect.size.height;
 
     [UIView animateWithDuration:0.25 animations:^{
 //        if (iPhone5)
@@ -530,5 +646,4 @@ UITableViewDelegate>
         self.bgView.center = CGPointMake(CENTER_POINT.x, CENTER_POINT.y-textField.tag*25);
     }];
 }
-
 @end

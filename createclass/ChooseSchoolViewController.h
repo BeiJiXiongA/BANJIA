@@ -9,5 +9,5 @@
 #import "XDContentViewController.h"
 
 @interface ChooseSchoolViewController : XDContentViewController
-
+@property (nonatomic, strong) NSMutableArray *schoolArray;
 @end

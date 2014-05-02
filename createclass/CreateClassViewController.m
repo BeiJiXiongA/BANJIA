@@ -20,8 +20,8 @@ UIPickerViewDataSource,
 UIAlertViewDelegate>
 {
     MySwitchView *schoolTypeSwitch;
-    UITextField *classNameTextField;
-    UITextField *nickNameTextField;
+    MyTextField *classNameTextField;
+    MyTextField *nickNameTextField;
     
     UIButton *establishButton;
     NSString *joinYear;
@@ -81,13 +81,26 @@ UIAlertViewDelegate>
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     
-    UILabel *schoolNameLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, UI_NAVIGATION_BAR_HEIGHT+30, [schoolName length]*14>180?180:[schoolName length]*14, 30)];
-    schoolNameLabel.text = schoolName;
+    NSArray *schoolLevelArray = [NSArray arrayWithObjects:@"幼儿园",@"小学",@"中学",@"中专技校",@"培训机构",@"其他", nil];
+    
+    UILabel *schoolNameLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, UI_NAVIGATION_BAR_HEIGHT+25, SCREEN_WIDTH-40, 35)];
+    if ([schoolName rangeOfString:@"（"].length > 0)
+    {
+        schoolNameLabel.text = [NSString stringWithFormat:@"%@",schoolName];
+    }
+    else
+    {
+        schoolNameLabel.text = [NSString stringWithFormat:@"%@（%@）",schoolName,[schoolLevelArray objectAtIndex:[schoolLevel integerValue]]];
+    }
+    
+    schoolNameLabel.numberOfLines = 2;
+    schoolNameLabel.lineBreakMode = NSLineBreakByWordWrapping;
+//    schoolNameLabel.textColor = TITLE_COLOR;
     schoolNameLabel.backgroundColor = [UIColor clearColor];
-    schoolNameLabel.font = [UIFont systemFontOfSize:14];
+    schoolNameLabel.font = [UIFont systemFontOfSize:16];
     [self.bgView addSubview:schoolNameLabel];
     
-    schoolTypeSwitch = [[MySwitchView alloc] initWithFrame:CGRectMake(schoolNameLabel.frame.size.width+schoolNameLabel.frame.origin.x+10, schoolNameLabel.frame.origin.y, 100, 30)];
+    schoolTypeSwitch = [[MySwitchView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH/2-50, schoolNameLabel.frame.origin.y+schoolNameLabel.frame.size.height+10, 100, 30)];
     schoolTypeSwitch.mySwitchDel = self;
     if ([schoolLevel intValue] == 2)
     {
@@ -116,7 +129,7 @@ UIAlertViewDelegate>
     rightLabel.backgroundColor = LIGHT_BLUE_COLOR;
     [schoolTypeSwitch.rightView addSubview:rightLabel];
     
-    UILabel *joinLabel = [[UILabel alloc] initWithFrame:CGRectMake(schoolNameLabel.frame.origin.x+5, schoolNameLabel.frame.size.height+schoolNameLabel.frame.origin.y+30, 75, 30)];
+    UILabel *joinLabel = [[UILabel alloc] initWithFrame:CGRectMake(schoolNameLabel.frame.origin.x+5, schoolNameLabel.frame.size.height+schoolNameLabel.frame.origin.y+60, 75, 30)];
     joinLabel.text = @"入学年份";
     joinLabel.backgroundColor = [UIColor clearColor];
     joinLabel.textAlignment = NSTextAlignmentRight;
@@ -211,7 +224,7 @@ UIAlertViewDelegate>
     classLabel.textColor = TITLE_COLOR;
     [self.bgView addSubview:classLabel];
     
-    classNameTextField = [[UITextField alloc] initWithFrame:CGRectMake(classLabel.frame.origin.x+classLabel.frame.size.width, classLabel.frame.origin.y, 280, 30)];
+    classNameTextField = [[MyTextField alloc] initWithFrame:CGRectMake(classLabel.frame.origin.x, classLabel.frame.origin.y+30, 225, 30)];
     classNameTextField.text = @"";
     classNameTextField.returnKeyType = UIReturnKeyDone;
     classNameTextField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
@@ -219,27 +232,36 @@ UIAlertViewDelegate>
     classNameTextField.textAlignment = NSTextAlignmentLeft;
     classNameTextField.textColor = TITLE_COLOR;
     classNameTextField.delegate = self;
+    classNameTextField.background= nil;
+    classNameTextField.placeholder = @"班级名称";
     classNameTextField.font = [UIFont systemFontOfSize:18];
     [self.bgView addSubview:classNameTextField];
     
-    UIButton *editButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    editButton.frame = CGRectMake(schoolNameLabel.frame.origin.x, classNameTextField.frame.size.height+classNameTextField.frame.origin.y+15, 30, 30);
-    [editButton setImage:[UIImage imageNamed:@"icon_add"] forState:UIControlStateNormal];
-    editButton.backgroundColor = [UIColor clearColor];
-    [editButton addTarget:self action:@selector(editNickName) forControlEvents:UIControlEventTouchUpInside];
-    [self.bgView addSubview:editButton];
+    UIButton *editButton1 = [UIButton buttonWithType:UIButtonTypeCustom];
+    editButton1.frame = CGRectMake(classNameTextField.frame.origin.x+classNameTextField.frame.size.width, classNameTextField.frame.origin.y, 30, 30);
+    [editButton1 setImage:[UIImage imageNamed:@"edit"] forState:UIControlStateNormal];
+    editButton1.backgroundColor = [UIColor clearColor];
+    [editButton1 addTarget:self action:@selector(editClassName) forControlEvents:UIControlEventTouchUpInside];
+    [self.bgView addSubview:editButton1];
     
-    nickNameTextField = [[UITextField alloc] initWithFrame:CGRectMake(editButton.frame.size.width+editButton.frame.origin.x, editButton.frame.origin.y, 200, 30)];
+    nickNameTextField = [[MyTextField alloc] initWithFrame:CGRectMake(schoolNameLabel.frame.origin.x, classNameTextField.frame.size.height+classNameTextField.frame.origin.y+15, 225, 30)];
     nickNameTextField.backgroundColor = [UIColor clearColor];
-    nickNameTextField.enabled = NO;
     nickNameTextField.returnKeyType = UIReturnKeyDone;
     nickNameTextField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
     nickNameTextField.font = [UIFont systemFontOfSize:18];
     nickNameTextField.placeholder = @"请填写班级昵称";
     nickNameTextField.delegate = self;
+    nickNameTextField.background = nil;
     nickNameTextField.textColor = TITLE_COLOR;
     nickNameTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
     [self.bgView addSubview:nickNameTextField];
+    
+    UIButton *editButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    editButton.frame = CGRectMake(nickNameTextField.frame.origin.x+nickNameTextField.frame.size.width, classNameTextField.frame.size.height+classNameTextField.frame.origin.y+15, 30, 30);
+    [editButton setImage:[UIImage imageNamed:@"edit"] forState:UIControlStateNormal];
+    editButton.backgroundColor = [UIColor clearColor];
+    [editButton addTarget:self action:@selector(editNickName) forControlEvents:UIControlEventTouchUpInside];
+    [self.bgView addSubview:editButton];
     
     UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
     UIButton *createButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -259,7 +281,7 @@ UIAlertViewDelegate>
     selectDateView.userInteractionEnabled = YES;
     [selectDateView addGestureRecognizer:cancelSelectDateTgr];
     
-    yearPicker = [[UIPickerView alloc] initWithFrame:CGRectMake((SCREEN_WIDTH-pickerViewWidth)/2, SCREEN_HEIGHT*2, pickerViewWidth, pickerViewHeight)];
+    yearPicker = [[UIPickerView alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT*2, SCREEN_WIDTH, pickerViewHeight)];
     yearPicker.backgroundColor = [UIColor whiteColor];
     yearPicker.delegate = self;
     yearPicker.tag = 1001;
@@ -270,12 +292,12 @@ UIAlertViewDelegate>
     NSDateComponents *comp = [[NSCalendar currentCalendar] components:NSCalendarUnitYear fromDate:[NSDate date]];
     comp.timeZone = [NSTimeZone defaultTimeZone];
     yearArray = [[NSMutableArray alloc] initWithCapacity:0];
-    for (int i=[comp year]-20; i<=[comp year]+20; ++i)
+    for (int i=[comp year]-30; i<=[comp year]; ++i)
     {
         [yearArray addObject:[NSString stringWithFormat:@"%d年",i]];
     }
     
-    [yearPicker selectRow:[yearArray count]/2 inComponent:0 animated:YES];
+    [yearPicker selectRow:[yearArray count]/2+15 inComponent:0 animated:NO];
     
     classNumberArray = [[NSMutableArray alloc] initWithCapacity:0];
     for (int i=1; i<=20; ++i)
@@ -283,7 +305,7 @@ UIAlertViewDelegate>
         [classNumberArray addObject:[NSString stringWithFormat:@"%d班",i]];
     }
     
-    classNumberPickerView = [[UIPickerView alloc] initWithFrame:CGRectMake((SCREEN_WIDTH-pickerViewWidth)/2, SCREEN_HEIGHT*2, pickerViewWidth, pickerViewHeight)];
+    classNumberPickerView = [[UIPickerView alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT*2, SCREEN_WIDTH, pickerViewHeight)];
     classNumberPickerView.backgroundColor = [UIColor whiteColor];
     classNumberPickerView.delegate = self;
     classNumberPickerView.tag = 1002;
@@ -294,14 +316,26 @@ UIAlertViewDelegate>
     [classNumberPickerView selectRow:10 inComponent:0 animated:YES];
     
 }
+-(void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"PageOne"];
+}
+-(void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"PageOne"];
+}
+
 
 -(void)selectClassNumber
 {
+    dateType = @"classNum";
     [UIView animateWithDuration:.2 animations:^{
         classNumberPickerView.hidden = NO;
         selectDateView.frame = CGRectMake(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
         classNumberPickerView.frame = CGRectMake((SCREEN_WIDTH-pickerViewWidth)/2, SCREEN_HEIGHT - pickerViewHeight-100, pickerViewWidth, pickerViewHeight);
-        [classNumberPickerView selectRow:[classNumberArray count]/2 inComponent:0 animated:NO];
+//        [classNumberPickerView selectRow:[classNumberArray count]/2 inComponent:0 animated:NO];
     }];
 }
 
@@ -319,7 +353,7 @@ UIAlertViewDelegate>
         selectDateView.frame = CGRectMake(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
         yearPicker.hidden = NO;
         yearPicker.frame = CGRectMake((SCREEN_WIDTH-pickerViewWidth)/2, SCREEN_HEIGHT - pickerViewHeight-100, pickerViewWidth, pickerViewHeight);
-        [yearPicker selectRow:[yearArray count]/2 inComponent:0 animated:NO];
+//        [yearPicker selectRow:[yearArray count]/2 inComponent:0 animated:NO];
     }];
 }
 
@@ -329,6 +363,19 @@ UIAlertViewDelegate>
         yearPicker.frame = CGRectMake((SCREEN_WIDTH-pickerViewWidth)/2, SCREEN_HEIGHT, pickerViewWidth, pickerViewHeight);
         classNumberPickerView.hidden = NO;
         classNumberPickerView.frame = CGRectMake((SCREEN_WIDTH-pickerViewWidth)/2, SCREEN_HEIGHT*2, pickerViewWidth, pickerViewHeight);
+        if ([dateType isEqualToString:@"join"])
+        {
+            joinYear = [yearArray objectAtIndex:[yearPicker selectedRowInComponent:0]];
+            establishYear = [yearArray objectAtIndex:[yearPicker selectedRowInComponent:0]];
+        }
+        else if ([dateType isEqualToString:@"establish"])
+        {
+            establishYear = [yearArray objectAtIndex:[yearPicker selectedRowInComponent:0]];
+        }
+        else
+        {
+            classNumber = [classNumberArray objectAtIndex:[classNumberPickerView selectedRowInComponent:0]];
+        }
     } completion:^(BOOL finished) {
         yearPicker.hidden = YES;
         classNumberPickerView.hidden = YES;
@@ -336,6 +383,14 @@ UIAlertViewDelegate>
         [joinButton setTitle:joinYear forState:UIControlStateNormal];
         [establishButton setTitle:establishYear forState:UIControlStateNormal];
         [classNumberButton setTitle:classNumber forState:UIControlStateNormal];
+        if ([classTypeStr length] > 0)
+        {
+            className = [NSString stringWithFormat:@"%@级%@(%@)",[joinYear substringToIndex:4],classNumber,classTypeStr];
+        }
+        else
+        {
+            className = [NSString stringWithFormat:@"%@级%@",[joinYear substringToIndex:4],classNumber];
+        }
         classNameTextField.text = className;
     }];
 }
@@ -364,7 +419,7 @@ UIAlertViewDelegate>
                                                                       @"build_t":[NSString stringWithFormat:@"%d",[establishYear intValue]],
                                                                       @"role":@"teachers",
                                                                       @"code":[NSString stringWithFormat:@"%d",[classNumber intValue]],
-                                                                      @"level":classType} API:CREATECLASS];
+                                                                      @"level":schoolLevel} API:CREATECLASS];
         
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
@@ -452,7 +507,6 @@ UIAlertViewDelegate>
     {
         classNumber = [classNumberArray objectAtIndex:row];
     }
-    className = [NSString stringWithFormat:@"%@级%@(%@)",[joinYear substringToIndex:4],classNumber,classTypeStr];
 }
 
 - (void)didReceiveMemoryWarning
@@ -466,15 +520,20 @@ UIAlertViewDelegate>
     if ([mySwitchView isOpen])
     {
         classType = @"1";
-        classTypeStr = @"初中";
+        classTypeStr = @"高中";
     }
     else
     {
         classType = @"2";
-        classTypeStr = @"高中";
+        classTypeStr = @"初中";
     }
     className = [NSString stringWithFormat:@"%@级%@(%@)",joinYear,classNumber,classTypeStr];
     classNameTextField.text = className;
+}
+-(void)editClassName
+{
+    classNameTextField.enabled = YES;
+    [classNameTextField becomeFirstResponder];
 }
 
 -(void)editNickName
@@ -494,7 +553,6 @@ UIAlertViewDelegate>
 {
     [UIView animateWithDuration:0.25 animations:^{
         self.bgView.center = CENTER_POINT;
-        nickNameTextField.enabled = NO;
     }completion:^(BOOL finished) {
         
     }];

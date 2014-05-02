@@ -8,9 +8,18 @@
 
 #import "XDContentViewController.h"
 
+@protocol NotificationDetailDelegate <NSObject>
+
+-(void)readNotificationDetail;
+
+@end
+
 @interface NotificationDetailViewController : XDContentViewController
 @property (nonatomic, strong) NSString *noticeContent;
 @property (nonatomic, strong) NSString *noticeID;
 @property (nonatomic, strong) NSString *c_read;
 @property (nonatomic, strong) NSString *classID;
+@property (nonatomic, strong) NSString *byID;
+@property (nonatomic, assign) BOOL isnew;
+@property (nonatomic, assign) id<NotificationDetailDelegate> readnotificationDetaildel;
 @end

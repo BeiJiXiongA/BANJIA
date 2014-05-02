@@ -10,6 +10,11 @@
 #import "Header.h"
 #import "CreateClassViewController.h"
 #import "ClassZoneViewController.h"
+#import "XDTabViewController.h"
+#import "ClassZoneViewController.h"
+#import "ClassMemberViewController.h"
+#import "NotificationViewController.h"
+#import "MoreViewController.h"
 
 @interface ClassesViewController ()<UITableViewDataSource,UITableViewDelegate>
 {
@@ -48,10 +53,12 @@
     
     tmpArray = [[NSMutableArray alloc] initWithCapacity:0];
     
-    tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT+50, SCREEN_WIDTH, 30)];
+    tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, UI_NAVIGATION_BAR_HEIGHT+50, SCREEN_WIDTH-40, 35)];
     tipLabel.backgroundColor = [UIColor clearColor];
     tipLabel.text = [NSString stringWithFormat:@"%@还没有班级哦！",schoolName];
-    tipLabel.font = [UIFont systemFontOfSize:14];
+    tipLabel.font = [UIFont systemFontOfSize:17];
+    tipLabel.numberOfLines = 2;
+    tipLabel.lineBreakMode = NSLineBreakByWordWrapping;
     tipLabel.textAlignment = NSTextAlignmentCenter;
     [self.bgView addSubview:tipLabel];
     
@@ -60,7 +67,7 @@
     createClassButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [createClassButton setTitle:@"创建班级" forState:UIControlStateNormal];
     [createClassButton setBackgroundImage:btnImag forState:UIControlStateNormal];
-    createClassButton.frame = CGRectMake(SCREEN_WIDTH/2-40, tipLabel.frame.size.height+tipLabel.frame.origin.y+40, 80, 30);
+    createClassButton.frame = CGRectMake(SCREEN_WIDTH/2-70, tipLabel.frame.size.height+tipLabel.frame.origin.y+40, 140, 40);
     [createClassButton addTarget:self action:@selector(createClassClick) forControlEvents:UIControlEventTouchUpInside];
     createClassButton.backgroundColor = [UIColor greenColor];
     [self.bgView addSubview:createClassButton];
@@ -105,31 +112,33 @@
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 NSDictionary *dict1 = [responseDict objectForKey:@"data"];
-                NSDictionary *dict2 = [dict1 objectForKey:@"classes"];
-                NSArray *array = [dict2 allValues];
-                for (int i=0; i<[array count]; ++i)
-                {
-                    NSDictionary *dict1 = [array objectAtIndex:i];
-                    if (![self isExistInTmpArray:[dict1 objectForKey:@"enter_t"]])
+                if (![dict1 isEqual:[NSNull null]]) {
+                    NSDictionary *dict2 = [dict1 objectForKey:@"classes"];
+                    NSArray *array = [dict2 allValues];
+                    for (int i=0; i<[array count]; ++i)
                     {
-                        NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithCapacity:0];
-                        NSString *enterTime1 = [NSString stringWithFormat:@"%@",[dict1 objectForKey:@"enter_t"]];
-                        [dict setObject:enterTime1 forKey:@"enter_t"];
-                        NSMutableArray *array2 = [[NSMutableArray alloc] initWithCapacity:0];
-                        for (int m=0; m<[array count]; ++m)
+                        NSDictionary *dict1 = [array objectAtIndex:i];
+                        if (![self isExistInTmpArray:[dict1 objectForKey:@"enter_t"]])
                         {
-                            NSString *enterTime2 = [NSString stringWithFormat:@"%@",[[array objectAtIndex:m] objectForKey:@"enter_t"]];
-                            if ([enterTime2 isEqualToString:enterTime1])
+                            NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithCapacity:0];
+                            NSString *enterTime1 = [NSString stringWithFormat:@"%@",[dict1 objectForKey:@"enter_t"]];
+                            [dict setObject:enterTime1 forKey:@"enter_t"];
+                            NSMutableArray *array2 = [[NSMutableArray alloc] initWithCapacity:0];
+                            for (int m=0; m<[array count]; ++m)
                             {
-                                [array2 addObject:[array objectAtIndex:m]];
+                                NSString *enterTime2 = [NSString stringWithFormat:@"%@",[[array objectAtIndex:m] objectForKey:@"enter_t"]];
+                                if ([enterTime2 isEqualToString:enterTime1])
+                                {
+                                    [array2 addObject:[array objectAtIndex:m]];
+                                }
                             }
+                            [dict setObject:array2 forKey:@"classes"];
+                            [tmpArray addObject:dict];
                         }
-                        [dict setObject:array2 forKey:@"classes"];
-                        [tmpArray addObject:dict];
                     }
+
                 }
                 [classTableView reloadData];
-                
             }
             else
             {
@@ -195,15 +204,8 @@
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    if (sectionOpen)
-    {
-        if (openSection == section)
-        {
-            NSDictionary *dict = [tmpArray objectAtIndex:section];
-            return [[dict objectForKey:@"classes"] count];
-        }
-    }
-    return 0;
+    NSDictionary *dict = [tmpArray objectAtIndex:section];
+    return [[dict objectForKey:@"classes"] count];
 }
 
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
@@ -230,6 +232,7 @@
     NSDictionary *dict = [tmpArray objectAtIndex:indexPath.section];
     NSArray *array = [dict objectForKey:@"classes"];
     cell.textLabel.text = [[array objectAtIndex:indexPath.row] objectForKey:@"name"];
+    cell.textLabel.textColor = TITLE_COLOR;
     cell.selectionStyle = UITableViewCellSelectionStyleGray;
     return cell;
 }
@@ -238,15 +241,40 @@
 {
     NSDictionary *dict = [tmpArray objectAtIndex:indexPath.section];
     NSArray *array = [dict objectForKey:@"classes"];
-    ClassZoneViewController *classZoneViewController = [[ClassZoneViewController alloc] init];
-    classZoneViewController.classID = [[array objectAtIndex:indexPath.row] objectForKey:@"_id"];
-    classZoneViewController.className = [[array objectAtIndex:indexPath.row] objectForKey:@"name"];
-    classZoneViewController.schoolID = schoollID;
-    classZoneViewController.schoolName = schoolName;
-    classZoneViewController.fromClasses = YES;
-    [classZoneViewController showSelfViewController:self];
-    
+    NSString *classid = [[array objectAtIndex:indexPath.row] objectForKey:@"_id"];
+    NSString *className = [[array objectAtIndex:indexPath.row] objectForKey:@"name"];
+    if ([self isInThisClass:classid])
+    {
+        [Tools showAlertView:@"您已经是这个班的一员了" delegateViewController:nil];
+    }
+    else
+    {
+        ClassZoneViewController *classZoneViewController = [[ClassZoneViewController alloc] init];
+        classZoneViewController.classID = classid;
+        classZoneViewController.className = className;
+        classZoneViewController.schoolID = schoollID;
+        classZoneViewController.schoolName = schoolName;
+        classZoneViewController.fromClasses = YES;
+        [classZoneViewController showSelfViewController:self];
+    }
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
+}
+
+-(BOOL)isInThisClass:(NSString *)classId
+{
+    NSString *key = [TAGSARRAYKEY MD5Hash];
+    NSData *tagsData = [FTWCache objectForKey:key];
+    NSString *tagsString = [[NSString alloc] initWithData:tagsData encoding:NSUTF8StringEncoding];
+    
+    NSArray *tagsArray = [tagsString componentsSeparatedByString:@","];
+    for (int i=0; i<[tagsArray count]; ++i)
+    {
+        if ([classId isEqualToString:[tagsArray objectAtIndex:i]])
+        {
+            return YES;
+        }
+    }
+    return NO;
 }
 
 -(void)headerBbuttonClick:(UIButton *)button

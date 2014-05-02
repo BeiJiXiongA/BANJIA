@@ -9,5 +9,5 @@
 #import "XDContentViewController.h"
 
 @interface MyClassesViewController : XDContentViewController
-
+@property (nonatomic, strong) NSString *headerIcon;
 @end

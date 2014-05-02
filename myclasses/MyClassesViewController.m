@@ -20,11 +20,16 @@
 #import "AppDelegate.h"
 #import "KKNavigationController.h"
 
+#import "XDTabViewController.h"
+
 @interface MyClassesViewController ()<UITableViewDataSource,
 UITableViewDelegate,
 EGORefreshTableHeaderDelegate,
 ChatDelegate,
-MsgDelegate>
+MsgDelegate,
+moreDelegate,
+ReadNoticeDelegate,
+FreshClassZone>
 {
     BOOL moreOpen;
     UITableView *classTableView;
@@ -34,7 +39,12 @@ MsgDelegate>
     
     EGORefreshTableHeaderView *pullRefreshView;
     BOOL _reloading;
+    
     OperatDB *db;
+    
+    NSArray *schoolLevelArray;
+    
+    BOOL inThisPage;
     
 //    UIView *headerView;
 //    UILabel *headerLabel;
@@ -42,7 +52,7 @@ MsgDelegate>
 @end
 
 @implementation MyClassesViewController
-
+@synthesize headerIcon;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -62,10 +72,10 @@ MsgDelegate>
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     [self.backButton setHidden:YES];
     self.returnImageView .hidden = YES;
-    db = [OperatDB alloc];
     
-    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).ChatDelegate = self;
-    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = self;
+    db = [[OperatDB alloc] init];
+    
+    schoolLevelArray = [NSArray arrayWithObjects:@"幼儿园",@"小学",@"中学",@"中专技校",@"培训机构",@"其他", nil];
     
     [[self.bgView layer] setShadowOffset:CGSizeMake(-5.0f, 5.0f)];
     [[self.bgView layer] setShadowColor:[UIColor darkGrayColor].CGColor];
@@ -85,7 +95,6 @@ MsgDelegate>
     
     UIButton *addButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [addButton setTitle:@"添加" forState:UIControlStateNormal];
-//    [addButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     addButton.backgroundColor = [UIColor clearColor];
     [addButton setBackgroundImage:[UIImage imageNamed:@"navbtn"] forState:UIControlStateNormal];
     addButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
@@ -116,35 +125,79 @@ MsgDelegate>
     pullRefreshView.delegate = self;
     
     
-    [self getClassesByUser];
-//    [self getCacheData];
+    [self getCacheData];
+    
+    if ([Tools NetworkReachable])
+    {
+        [self getClassesByUser];
+    }
 }
 
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"PageOne"];
+    inThisPage = YES;
     
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).ChatDelegate = self;
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = self;
+    
+    [self dealNewChatMsg:nil];
+    [self dealNewMsg:nil];
+}
+-(void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"PageOne"];
 }
 
 #pragma mark - chatdelegate
 -(void)dealNewChatMsg:(NSDictionary *)dict
 {
-    NSMutableArray *array = [db findSetWithDictionary:@{} andTableName:@"chatMsg"];
-    DDLOG(@"new chat==%d",[array count]);
-    if ([array count] > 0)
+    db = [[OperatDB alloc] init];
+    NSMutableArray *array = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"readed":@"0"} andTableName:@"chatMsg"];
+    if ([array count] > 0 || [[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue]>0)
     {
         self.unReadLabel.hidden = NO;
     }
+    else
+    {
+        self.unReadLabel.hidden = YES;
+    }
+    DDLOG(@"new chatmsg array=%d",[array count]);
 }
+#pragma mark - moredelegate
+-(void)signOutClass:(BOOL)signOut
+{
+    if (signOut)
+    {
+        [self egoRefreshTableHeaderDidTriggerRefresh:pullRefreshView];
+    }
+}
+
 #pragma mark - newMsg
 
 -(void)dealNewMsg:(NSDictionary *)dict
 {
-    [classTableView reloadData];
+    if ([[dict objectForKey:@"type"] isEqualToString:@"c_apply"] ||
+        [[dict objectForKey:@"type"] isEqualToString:@"notice"] ||
+        [[dict objectForKey:@"type"] isEqualToString:@"c_allow"]||
+        [[[NSUserDefaults standardUserDefaults] objectForKey:NewClassNum] integerValue]>0)
+    {
+        [self getClassesByUser];
+    }
+    else if([[dict objectForKey:@"type"]isEqualToString:@"f_apply"])
+    {
+        if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"checked":@"0"} andTableName:FRIENDSTABLE] count] > 0)
+        {
+            self.unReadLabel.hidden = NO;
+        }
+    }
 }
 -(void)countOfNewMsgWithType:(NSString *)msgType andTag:(NSString *)tagStr
 {
-    NSMutableArray *array = [db findSetWithDictionary:@{} andTableName:@"notice"];
+    db = [[OperatDB alloc] init];
+    NSMutableArray *array = [db findSetWithDictionary:@{@"uid":[Tools user_id],@"tag":tagStr} andTableName:@"notice"];
     DDLOG(@"new %@==%d",msgType,[array count]);
 }
 
@@ -256,9 +309,6 @@ MsgDelegate>
     if ([Tools NetworkReachable])
     {
         UIActivityIndicatorView *indicatorView = [[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH/2-25, UI_NAVIGATION_BAR_HEIGHT + 10, 50, 50)];
-        
-        
-        
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token]
                                                                       } API:GETCLASSESBYUSER];
@@ -271,16 +321,20 @@ MsgDelegate>
             DDLOG(@"classesByUser responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                
-                if ([[[responseDict objectForKey:@"data"] objectForKey:@"count"] intValue] >0 ||
-                    [[[responseDict objectForKey:@"data"] objectForKey:@"ucfriendsnum"] intValue] > 0)
+                int ucfriendNum = [[[responseDict objectForKey:@"data"] objectForKey:@"ucfriendsnum"] intValue];
+                if (ucfriendNum > 0)
                 {
+                    [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",ucfriendNum] forKey:UCFRIENDSUM];
+                    [[NSUserDefaults standardUserDefaults] synchronize];
                     self.unReadLabel.hidden = NO;
                 }
-                else
+                
+                if ([[[NSUserDefaults standardUserDefaults] objectForKey:NewClassNum] integerValue] > 0)
                 {
-                    self.unReadLabel.hidden = YES;
+                    [[NSUserDefaults standardUserDefaults] removeObjectForKey:NewClassNum];
+                    [[NSUserDefaults standardUserDefaults] synchronize];
                 }
+                
                 [tmpArray removeAllObjects];
                 NSDictionary *dict1 = [responseDict objectForKey:@"data"];
                 if (![dict1 isEqual:[NSNull null]])
@@ -332,7 +386,10 @@ MsgDelegate>
                     {
                         haveNoClassLabel.hidden = YES;
                         classTableView.hidden = NO;
-                        [self setBaiduTags];
+                        if (inThisPage)
+                        {
+                            [self setBaiduTags];
+                        }
                     }
                     [classTableView reloadData];
                     _reloading = NO;
@@ -409,7 +466,6 @@ MsgDelegate>
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    DDLOG(@"====%@",tmpArray);
     return [tmpArray count];
 }
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -453,24 +509,46 @@ MsgDelegate>
     NSDictionary *dict = [tmpArray objectAtIndex:indexPath.section];
     NSArray *array = [dict objectForKey:@"classes"];
     NSDictionary *classDict = [array objectAtIndex:indexPath.row];
-    cell.headerImageView.frame = CGRectMake(16, 7.5, 36, 36);
-    cell.headerImageView.layer.cornerRadius = 10;
+    cell.headerImageView.frame = CGRectMake(16, 7.5, 40, 40);
+    cell.headerImageView.layer.cornerRadius = 5;
     cell.headerImageView.clipsToBounds =YES;
-    [Tools fillImageView:cell.headerImageView withImageFromURL:@"" andDefault:@"headpic"];
+//    [Tools fillImageView:cell.headerImageView withImageFromURL:@"" andDefault:@"headpic"];
+    [cell.headerImageView setImage:[UIImage imageNamed:@"headpic.jpg"]];
     cell.nameLabel.frame = CGRectMake(80, 10, SCREEN_WIDTH-95, 30);
     cell.nameLabel.text = [classDict objectForKey:@"name"];
     int num = 0;
-    if ([classDict objectForKey:NOTICE])
+    
+    if ([[classDict objectForKey:@"notice"] integerValue] > 0)
     {
-        num+=[[classDict objectForKey:NOTICE] integerValue];
+        num+=[[classDict objectForKey:@"notice"] integerValue];
     }
+    
+    OperatDB *_db = [[OperatDB alloc] init];
     if ([classDict objectForKey:UCMEMBER])
     {
         num+=[[classDict objectForKey:UCMEMBER] integerValue];
+        if ([[classDict objectForKey:UCMEMBER] integerValue] > 0)
+        {
+            [_db deleteRecordWithDict:@{@"classid":[classDict objectForKey:@"_id"],@"checked":@"0"} andTableName:CLASSMEMBERTABLE];
+            for (int i=0; i<[[classDict objectForKey:UCMEMBER] integerValue]; ++i)
+            {
+                NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithCapacity:0];
+                [dict setObject:@"" forKey:@"name"];
+                [dict setObject:[classDict objectForKey:@"_id"] forKey:@"classid"];
+                [dict setObject:@"" forKey:@"img_icon"];
+                [dict setObject:@"0" forKey:@"checked"];
+                [dict setObject:@"" forKey:@"phone"];
+                [dict setObject:@"" forKey:@"re_name"];
+                [dict setObject:@"" forKey:@"re_id"];
+                [dict setObject:@"" forKey:@"re_type"];
+                [dict setObject:@"" forKey:@"title"];
+                if ([_db insertRecord:dict andTableName:CLASSMEMBERTABLE])
+                {
+                    DDLOG(@"insert new apply in myclassesVC success!");
+                }
+            }
+        }
     }
-    
-    [self countOfNewMsgWithType:@"notice" andTag:[classDict objectForKey:@"_id"]];
-    [self countOfNewMsgWithType:@"c_apply" andTag:[classDict objectForKey:@"_id"]];
     
     cell.contentLable.backgroundColor = [UIColor redColor];
     cell.contentLable.textColor = [UIColor whiteColor];
@@ -481,6 +559,7 @@ MsgDelegate>
         cell.contentLable.frame = CGRectMake(cell.headerImageView.frame.size.width+cell.headerImageView.frame.origin.x-5, cell.headerImageView.frame.origin.y-5, 15, 15);
         cell.contentLable.layer.cornerRadius = 7.5;
         cell.contentLable.clipsToBounds = YES;
+        cell.contentLable.hidden = NO;
         cell.contentLable.text = [NSString stringWithFormat:@"%d",num];
     }
     else if([classDict objectForKey:UCDIARY] || [classDict objectForKey:DIARY])
@@ -488,6 +567,7 @@ MsgDelegate>
         cell.contentLable.frame = CGRectMake(cell.headerImageView.frame.size.width+cell.headerImageView.frame.origin.x-3, cell.headerImageView.frame.origin.y-3, 6, 6);
         cell.contentLable.layer.cornerRadius = 3;
         cell.contentLable.clipsToBounds = YES;
+        cell.contentLable.hidden = NO;
     }
     else
     {
@@ -504,57 +584,61 @@ MsgDelegate>
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSDictionary *dict = [tmpArray objectAtIndex:indexPath.section];
+    DDLOG(@"class %@",dict);
     NSDictionary *classDict = [[dict objectForKey:@"classes"] objectAtIndex:indexPath.row];
     NSString *classID = [classDict objectForKey:@"_id"];
-    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
-    if ([classDict objectForKey:NOTICE])
-    {
-        [ud setObject:[classDict objectForKey:NOTICE] forKey:NOTICE];
-    }
-    else
-    {
-        [ud setObject:@"0" forKey:NOTICE];
-    }
-    if ([classDict objectForKey:UCMEMBER])
-    {
-        [ud setObject:[classDict objectForKey:UCMEMBER] forKey:UCMEMBER];
-    }
-    else
-    {
-        [ud setObject:@"0" forKey:UCMEMBER];
-    }
-    if ([classDict objectForKey:UCDIARY] || [classDict objectForKey:DIARY])
-    {
-        [ud setObject:@"2" forKey:DIARY];
-    }
-    else
-    {
-        [ud setObject:@"0" forKey:DIARY];
-    }
-    [ud synchronize];
+    
+    [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",[[classDict objectForKey:@"notice"] integerValue]] forKey:[NSString  stringWithFormat:@"%@-notice",classID]];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    
+    XDTabViewController *tabViewController = [XDTabViewController sharedTabViewController];
+    tabViewController.classID = classID;
     
     ClassZoneViewController *classZone = [[ClassZoneViewController alloc] init];
     classZone.classID = classID;
     classZone.fromClasses = NO;
     classZone.fromMsg = NO;
+    classZone.className = [classDict objectForKey:@"name"];
+    classZone.schoolID = [classDict objectForKey:@"s_id"];
+    classZone.schoolName = [classDict objectForKey:@"s_name"];
+    classZone.refreshDel = self;
     
     NotificationViewController *notification = [[NotificationViewController alloc] init];
     notification.classID = classID;
+    notification.readNoticedel = self;
     
     ClassMemberViewController *classMember = [[ClassMemberViewController alloc] init];
     classMember.classID = classID;
     classMember.fromMsg = NO;
+    classMember.schoolName = [classDict objectForKey:@"s_name"];
+    classMember.className = [classDict objectForKey:@"name"];
     
     MoreViewController *more = [[MoreViewController alloc] init];
+    more.signOutDel = self;
     more.classID = classID;
     
-    XDTabViewController *tabViewController = [XDTabViewController sharedTabViewController];
     NSArray *viewControllerArray = @[classZone,notification,classMember,more];
     [tabViewController setTabBarContents:viewControllerArray];
     [tabViewController selectItemAtIndex:0];
     [tabViewController showSelfViewController:self];
     [self.sideMenuController hideMenuAnimated:YES];
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    inThisPage = NO;
+}
+-(void)reFreshClassZone:(BOOL)refresh
+{
+    if (refresh)
+    {
+        [self getClassesByUser];
+    }
+}
+-(void)readNotice:(BOOL)read
+{
+    if (read)
+    {
+        [self getClassesByUser];
+    }
 }
 
 -(void)moreOpen
@@ -571,53 +655,16 @@ MsgDelegate>
 
 -(void)addButtonClick
 {
-    ChooseSchoolViewController *chooseViewController = [[ChooseSchoolViewController alloc] init];
-    [chooseViewController showSelfViewController:self];
+    if ([Tools phone_num])
+    {
+        ChooseSchoolViewController *chooseViewController = [[ChooseSchoolViewController alloc] init];
+        [chooseViewController.schoolArray addObjectsFromArray:tmpArray];
+        [chooseViewController showSelfViewController:self];
+    }
+    else
+    {
+        [Tools showAlertView:@"请先到个人信息里绑定手机号" delegateViewController:nil];
+    }
 }
 
 @end
-
-//-(void)getMsgList
-//{
-//    if ([Tools NetworkReachable])
-//    {
-//        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],@"token":[Tools client_token]} API:MSGLIST];
-//        
-//        [request setCompletionBlock:^{
-//            [Tools hideProgress:self.bgView];
-//            NSString *responseString = [request responseString];
-//            NSDictionary *responseDict = [Tools JSonFromString:responseString];
-//            DDLOG(@"msglist responsedict %@",responseDict);
-//            if ([[responseDict objectForKey:@"code"] intValue]== 1)
-//            {
-//                NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
-//                [ud setObject:[[responseDict objectForKey:@"data"] objectForKey:@"count"] forKey:@"count"];
-//                [ud setObject:[[responseDict objectForKey:@"data"] objectForKey:UCMEMBER] forKey:UCFRIENDSUM];
-//                [ud synchronize];
-//                
-//                if ([[[responseDict objectForKey:@"data"] objectForKey:@"count"] integerValue] > 0 || [[[responseDict objectForKey:@"data"] objectForKey:UCFRIENDSUM] integerValue] > 0)
-//                {
-//                    self.unReadLabel.hidden = NO;
-//                }
-//            }
-//            else
-//            {
-//                [Tools dealRequestError:responseDict fromViewController:self];
-//            }
-//            
-//        }];
-//        
-//        [request setFailedBlock:^{
-//            NSError *error = [request error];
-//            DDLOG(@"error %@",error);
-//            [Tools hideProgress:self.bgView];
-//        }];
-//        [Tools showProgress:self.bgView];
-//        [request startAsynchronous];
-//    }
-//    else
-//    {
-//        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
-//    }
-//    
-//}

@@ -12,4 +12,6 @@
 @property (nonatomic, strong) NSString *name;
 @property (nonatomic, strong) NSString *userid;
 @property (nonatomic, strong) NSString *classID;
+@property (nonatomic ,strong) NSString *className;
+@property (nonatomic, strong) NSString *schoolName;
 @end

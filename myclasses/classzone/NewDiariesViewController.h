@@ -7,13 +7,13 @@
 //
 
 #import "XDContentViewController.h"
-@protocol ClassZoneDelegate;
+@protocol NewDongtaiDelegate;
 @interface NewDiariesViewController : XDContentViewController
 @property (nonatomic, strong) NSString *classID;
-@property (nonatomic, assign) id<ClassZoneDelegate> classZoneDelegate;
+@property (nonatomic, assign) id<NewDongtaiDelegate> classZoneDelegate;
 @end
 
-@protocol ClassZoneDelegate <NSObject>
+@protocol NewDongtaiDelegate <NSObject>
 
 -(void)haveAddDonfTai:(BOOL)add;
 

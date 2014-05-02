@@ -15,7 +15,8 @@
 #import "ParentsDetailViewController.h"
 @interface SubGroupViewController ()<UITableViewDataSource,
 UITableViewDelegate,
-ApplyInfoDelegate>
+ApplyInfoDelegate,
+StuDetailDelegate>
 {
     UITableView *tmpTableView;
 }
@@ -37,11 +38,14 @@ ApplyInfoDelegate>
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    DDLOG(@"tmpArray==%@",tmpArray);
+    
+    DDLOG(@"tmp array = %@",tmpArray);
     
     tmpTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
     tmpTableView.delegate = self;
     tmpTableView.dataSource = self;
+    tmpTableView.backgroundColor = [UIColor clearColor];
+    tmpTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     [self.bgView addSubview:tmpTableView];
 }
 
@@ -51,18 +55,6 @@ ApplyInfoDelegate>
     // Dispose of any resources that can be recreated.
 }
 
-#pragma mark - applydelegate
--(void)updateList:(BOOL)update
-{
-    if (update)
-    {
-        [self unShowSelfViewController];
-        if ([self.subGroupDel respondsToSelector:@selector(subGroupUpdate:)])
-        {
-            [self.subGroupDel subGroupUpdate:YES];
-        }
-    }
-}
 #pragma mark - tableview
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
@@ -111,33 +103,38 @@ ApplyInfoDelegate>
         }
 
     }
-    cell.headerImageView.layer.cornerRadius = 5;
+    cell.headerImageView.layer.cornerRadius = cell.headerImageView.frame.size.width/2;
     cell.headerImageView.clipsToBounds = YES;
-    [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERDEFAULT];
+    [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERBG];
     cell.selectionStyle = UITableViewCellSelectionStyleGray;
     cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_angle"]];
     [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 20, 10, 16)];
+    
+    UIImageView *bgImageBG = [[UIImageView alloc] init];
+    bgImageBG.image = [UIImage imageNamed:@"line3"];
+    bgImageBG.backgroundColor = [UIColor clearColor];
+    cell.backgroundView = bgImageBG;
     return cell;
 }
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
-    
+    DDLOG(@"dict ===%@",dict);
     if ([[dict objectForKey:@"checked"] intValue] == 0)
     {
         ApplyInfoViewController *applyInfoViewController = [[ApplyInfoViewController alloc] init];
         applyInfoViewController.classID = classID;
         applyInfoViewController.applyDel = self;
         applyInfoViewController.role = [dict objectForKey:@"role"];
-        applyInfoViewController.j_id = [dict objectForKey:@"_id"];
+        applyInfoViewController.j_id = [dict objectForKey:@"uid"];
         applyInfoViewController.title = [dict objectForKey:@"title"];
         applyInfoViewController.applyName = [dict objectForKey:@"name"];
-        [applyInfoViewController showSelfViewController:[XDTabViewController sharedTabViewController]];
+        [applyInfoViewController showSelfViewController:self];
     }
     else if ([[dict objectForKey:@"role"] isEqualToString:@"teachers"])
     {
         MemberDetailViewController *memDetail = [[MemberDetailViewController alloc] init];
-        memDetail.teacherID = [dict objectForKey:@"_id"];
+        memDetail.teacherID = [dict objectForKey:@"uid"];
         memDetail.teacherName = [dict objectForKey:@"name"];
         memDetail.classID = classID;
         memDetail.admin = YES;
@@ -154,7 +151,7 @@ ApplyInfoDelegate>
     else if([[dict objectForKey:@"role"] isEqualToString:@"parents"])
     {
         ParentsDetailViewController *parentDetail = [[ParentsDetailViewController alloc] init];
-        parentDetail.parentID = [dict objectForKey:@"_id"];
+        parentDetail.parentID = [dict objectForKey:@"uid"];
         parentDetail.parentName = [dict objectForKey:@"name"];
         parentDetail.classID = classID;
         parentDetail.admin = YES;
@@ -171,9 +168,10 @@ ApplyInfoDelegate>
     else if([[dict objectForKey:@"role"] isEqualToString:@"students"])
     {
         StudentDetailViewController *studentDetail = [[StudentDetailViewController alloc] init];
-        studentDetail.studentID = [dict objectForKey:@"_id"];
+        studentDetail.studentID = [dict objectForKey:@"uid"];
         studentDetail.studentName = [dict objectForKey:@"name"];
         studentDetail.classID = classID;
+        studentDetail.memDel = self;
         studentDetail.admin = YES;
         if (admin)
         {
@@ -188,6 +186,33 @@ ApplyInfoDelegate>
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
+#pragma mark - applydelegate
+-(void)updateList:(BOOL)update
+{
+    if (update)
+    {
+        if ([self.subGroupDel respondsToSelector:@selector(subGroupUpdate:)])
+        {
+            [self.subGroupDel subGroupUpdate:YES];
+        }
+        [self unShowSelfViewController];
+    }
+}
+
+
+#pragma mark - studentDetailDel
+-(void)updateListWith:(BOOL)update
+{
+    if (update)
+    {
+        if ([self.subGroupDel respondsToSelector:@selector(subGroupUpdate:)])
+        {
+            [self.subGroupDel subGroupUpdate:YES];
+        }
+        [self unShowSelfViewController];
+    }
+}
+
 -(void)checkApply:(UIButton *)button
 {
     NSDictionary *dict = [tmpArray objectAtIndex:button.tag - 3000];
@@ -195,10 +220,10 @@ ApplyInfoDelegate>
     applyInfoViewController.classID = classID;
     applyInfoViewController.applyDel = self;
     applyInfoViewController.role = [dict objectForKey:@"role"];
-    applyInfoViewController.j_id = [dict objectForKey:@"_id"];
+    applyInfoViewController.j_id = [dict objectForKey:@"uid"];
     applyInfoViewController.title = [dict objectForKey:@"title"];
     applyInfoViewController.applyName = [dict objectForKey:@"name"];
-    [applyInfoViewController showSelfViewController:[XDTabViewController sharedTabViewController]];
+    [applyInfoViewController showSelfViewController:self];
 }
 
 @end

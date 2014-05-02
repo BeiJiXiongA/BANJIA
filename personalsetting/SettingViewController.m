@@ -10,18 +10,26 @@
 #import "Header.h"
 #import "LimitCell.h"
 #import "WelcomeViewController.h"
+#import <MessageUI/MessageUI.h>
+#import "AboutUsViewController.h"
 
 #define SWITCHTAG   1000
 #define CLEARCACHE   2000
 #define LOGOUTTAG    3000
+#define NEWVERSION   4000
 
-@interface SettingViewController ()<UITableViewDataSource,UITableViewDelegate,UIAlertViewDelegate>
+@interface SettingViewController ()<UITableViewDataSource,
+UITableViewDelegate,
+UIAlertViewDelegate,
+MFMailComposeViewControllerDelegate>
 {
     UITableView *settingTableView;
     NSArray *setArray1;
     NSArray *setArray2;
     NSArray *setArray3;
     NSMutableDictionary *settingDict;
+    
+    NSString *_trackViewUrl;
 }
 @end
 
@@ -44,7 +52,7 @@
     self.titleLabel.text = @"个人设置";
     setArray1 = [[NSArray alloc] initWithObjects:@"收到公告时提醒",@"收到公告时手机震动",@"新班级日记提醒",@"好友消息提醒", nil];
     setArray2 = [[NSArray alloc] initWithObjects:@"检查版本更新",@"手动清除缓存", nil];
-    setArray3 = [[NSArray alloc] initWithObjects:@"应用推荐",@"意见反馈",@"给五星好评",@"", nil];
+    setArray3 = [[NSArray alloc] initWithObjects:@"关于我们",@"意见反馈",@"给五星好评",@"", nil];
     
     if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"useropt"] count] > 0)
     {
@@ -54,6 +62,7 @@
     {
         settingDict = [[NSMutableDictionary alloc] initWithCapacity:4];
     }
+    DDLOG(@"setting dict ==%@",settingDict);
     
     UIView *tableViewBg = [[UIView alloc] initWithFrame:self.bgView.frame];
     [tableViewBg setBackgroundColor:UIColorFromRGB(0xf1f0ec)];
@@ -151,69 +160,90 @@
     }
     
     cell.mySwitch.hidden = YES;
+    cell.mySwitch.frame = CGRectMake( SCREEN_WIDTH-65, 7, 50, 30);
     cell.accessoryType = UITableViewCellAccessoryNone;
     cell.accessoryView = nil;
     
-    if (SYSVERSION < 7)
-    {
-        cell.mySwitch.frame = CGRectMake(SCREEN_WIDTH-95, 6.5, 60, 30);
-    }
-    else
-    {
-        cell.mySwitch.frame = CGRectMake(SCREEN_WIDTH-75, 6.5, 60, 30);
-    }
     cell.accessoryType = UITableViewCellAccessoryNone;
     cell.contentLabel.frame = CGRectMake(10, 6.5, 150, 30);
     cell.contentLabel.textColor = TITLE_COLOR;
     cell.markLabel.text = @"";
     cell.markLabel.frame = CGRectMake(SCREEN_WIDTH - 150, 6.5, 120, 30);
-    DDLOG(@"settingDict=%@",settingDict);
     if (indexPath.section == 0)
     {
         cell.contentLabel.text = [setArray1 objectAtIndex:indexPath.row];
         cell.mySwitch.hidden = NO;
         if (indexPath.row == 0)
         {
-            if ([[settingDict objectForKey:NewNoticeAlert] integerValue] == 0)
+            if ([settingDict objectForKey:NewNoticeAlert])
             {
-                [cell.mySwitch setOn:NO];
+                if ([[settingDict objectForKey:NewNoticeAlert] integerValue] == 0)
+                {
+                    [cell.mySwitch isOn:NO];
+                }
+                else
+                {
+                    [cell.mySwitch isOn:YES];
+                }
             }
             else
             {
-                [cell.mySwitch setOn:YES];
+                [cell.mySwitch isOn:YES];
             }
         }
         else if(indexPath.row == 1)
         {
-            if ([[settingDict objectForKey:NewNoticeMotion] integerValue] == 0)
+            if ([settingDict objectForKey:NewNoticeMotion])
             {
-                [cell.mySwitch setOn:NO];
+                if ([[settingDict objectForKey:NewNoticeMotion] integerValue] == 0)
+                {
+                    [cell.mySwitch isOn:NO];
+                }
+                else
+                {
+                    [cell.mySwitch isOn:YES];
+                }
             }
             else
             {
-                [cell.mySwitch setOn:YES];
+                [cell.mySwitch isOn:YES];
             }
         }
         else if(indexPath.row == 2)
         {
-            if ([[settingDict objectForKey:NewDiaryAlert] integerValue] == 0)
+            if ([settingDict objectForKey:NewDiaryAlert])
             {
-                [cell.mySwitch setOn:NO];
+                if ([[settingDict objectForKey:NewDiaryAlert] integerValue] == 0)
+                {
+                    [cell.mySwitch isOn:NO];
+                }
+                else
+                {
+                    [cell.mySwitch isOn:YES];
+                }
             }
             else
             {
-                [cell.mySwitch setOn:YES];
+                [cell.mySwitch isOn:YES];
             }
+            
         }
         else if (indexPath.row == 3)
         {
-            if ([[settingDict objectForKey:NewChatAlert] integerValue] == 0)
+            if ([settingDict objectForKey:NewChatAlert])
             {
-                [cell.mySwitch setOn:NO];
+                if ([[settingDict objectForKey:NewChatAlert] integerValue] == 0)
+                {
+                    [cell.mySwitch isOn:NO];
+                }
+                else
+                {
+                    [cell.mySwitch isOn:YES];
+                }
             }
             else
             {
-                [cell.mySwitch setOn:YES];
+                [cell.mySwitch isOn:YES];
             }
         }
         cell.mySwitch.tag = indexPath.row*SWITCHTAG;
@@ -275,7 +305,12 @@
 {
     if (indexPath.section == 1)
     {
-        if (indexPath.row == 1)
+        if (indexPath.row == 0)
+        {
+            //版本更新
+            [self updateNewVersion];
+        }
+        else if (indexPath.row == 1)
         {
             //清除内存
             UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"确定要清楚缓存吗?" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
@@ -283,6 +318,179 @@
             [al show];
         }
     }
+    else if (indexPath.section == 2)
+    {
+        if (indexPath.row == 0)
+        {
+            //关于我们
+            AboutUsViewController *aboutUs = [[AboutUsViewController alloc] init];
+            [aboutUs showSelfViewController:self];
+            
+        }
+        else if (indexPath.row == 1)
+        {
+            //意见反馈
+            Class mailClass = (NSClassFromString(@"MFMailComposeViewController"));
+            if (!mailClass) {
+                [Tools showAlertView:@"当前系统版本不支持应用内发送邮件功能，您可以使用mailto方法代替" delegateViewController:nil];
+                return;
+            }
+            if (![mailClass canSendMail]) {
+                [Tools showAlertView:@"用户没有设置邮件账户" delegateViewController:nil];
+                return;
+            }     
+            [self displayMailPicker];
+        }
+        else if(indexPath.row == 1)
+        {
+            if ([_trackViewUrl length] <= 0)
+            {
+                UIAlertView *alert;
+                alert = [[UIAlertView alloc] initWithTitle:nil
+                                                   message:@"没有拿到APP地址，稍后再试试哦。"
+                                                  delegate: nil
+                                         cancelButtonTitle:@"好的"
+                                         otherButtonTitles: nil, nil];
+                [alert show];
+                return ;
+            }
+            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@",_trackViewUrl]]];
+        }
+    }
+}
+
+#pragma mark - updateNewVersion
+-(void)updateNewVersion
+{
+    if ([Tools NetworkReachable])
+    {
+        NSString *appleID = @"862315597";
+        NSString *urlStr = [NSString stringWithFormat:@"http://itunes.apple.com/lookup?id=%@",appleID];
+        __weak ASIHTTPRequest *request = [Tools getRequestWithDict:@{} andHostUrl:urlStr];
+        
+        [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"newViewsion== responsedict %@",responseDict);
+            int resultCount = [[responseDict objectForKey:@"resultCount"] intValue];
+            if (resultCount >= 1) {
+                NSMutableArray *results = [responseDict objectForKey:@"results"];
+                NSDictionary *releaseInfo = [results objectAtIndex:0];
+                
+                NSString *latestVersion = [releaseInfo objectForKey:@"version"];
+                double doubleUpdateVersion = [latestVersion doubleValue];
+                _trackViewUrl = [releaseInfo objectForKey:@"trackViewUrl"];
+                NSString *trackName = [releaseInfo objectForKey:@"trackName"];
+                
+                
+                NSDictionary *infoDict = [[NSBundle mainBundle] infoDictionary];
+                NSString *currentVersion = [infoDict objectForKey:@"CFBundleShortVersionString"];
+                double doubleCurrentVersion = [currentVersion doubleValue];
+                
+                if (doubleCurrentVersion < doubleUpdateVersion) {
+                    
+                    UIAlertView *alert;
+                    alert = [[UIAlertView alloc] initWithTitle:trackName
+                                                       message:@"有新版本，是否升级！"
+                                                      delegate: self
+                                             cancelButtonTitle:@"取消"
+                                             otherButtonTitles: @"升级", nil];
+                    alert.tag = NEWVERSION;
+                    [alert show];
+                }
+                else{
+                    UIAlertView *alert;
+                    alert = [[UIAlertView alloc] initWithTitle:trackName
+                                                       message:@"您现在用的已经是最新版，最最新版值得您期待！"
+                                                      delegate: nil
+                                             cancelButtonTitle:@"好的"
+                                             otherButtonTitles: nil, nil];
+                    [alert show];
+                }
+            }else{
+                UIAlertView *alert;
+                alert = [[UIAlertView alloc] initWithTitle:@"更新检查失败"
+                                                   message:@"啊哦，貌似暂时搞不定版本信息，稍后再试试吧，期待你的好评哦！"
+                                                  delegate: nil
+                                         cancelButtonTitle:@"好的"
+                                         otherButtonTitles: nil, nil];
+                [alert show];
+            }
+            
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools hideProgress:self.bgView];
+        }];
+        [Tools showProgress:self.bgView];
+        [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
+}
+//调出邮件发送窗口
+- (void)displayMailPicker
+{
+    MFMailComposeViewController *mailPicker = [[MFMailComposeViewController alloc] init];
+    mailPicker.mailComposeDelegate = self;
+    
+    //设置主题
+    [mailPicker setSubject: @"班家意见反馈"];
+    //添加收件人
+    NSArray *toRecipients = [NSArray arrayWithObject: @"ios-support@banjiaedu.com"];
+    [mailPicker setToRecipients: toRecipients];
+    //添加抄送
+//    NSArray *ccRecipients = [NSArray arrayWithObjects:@"second@example.com", @"third@example.com", nil];
+//    [mailPicker setCcRecipients:ccRecipients];
+    //添加密送
+//    NSArray *bccRecipients = [NSArray arrayWithObjects:@"fourth@example.com", nil];
+//    [mailPicker setBccRecipients:bccRecipients];
+    
+//    // 添加一张图片
+//    UIImage *addPic = [UIImage imageNamed: @"icon@2x.png"];
+//    NSData *imageData = UIImagePNGRepresentation(addPic);            // png
+//    //关于mimeType：http://www.iana.org/assignments/media-types/index.html
+//    [mailPicker addAttachmentData: imageData mimeType: @"" fileName: @"icon.png"];
+    
+    //添加一个pdf附件
+//    NSString *file = [self fullBundlePathFromRelativePath:@"高质量C++编程指南.pdf"];
+//    NSData *pdf = [NSData dataWithContentsOfFile:file];
+//    [mailPicker addAttachmentData: pdf mimeType: @"" fileName: @"高质量C++编程指南.pdf"];
+    
+//    NSString *emailBody = @"<font color='black'>请输入您要反馈的内容：</font> ";
+//    [mailPicker setMessageBody:emailBody isHTML:YES];
+    [self presentViewController:mailPicker animated:YES completion:nil];
+}
+
+#pragma mark - 实现 MFMailComposeViewControllerDelegate
+- (void)mailComposeController:(MFMailComposeViewController *)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError *)error
+{
+    //关闭邮件发送窗口
+    [self dismissViewControllerAnimated:YES completion:nil];
+    NSString *msg;
+    switch (result) {
+        case MFMailComposeResultCancelled:
+            msg = @"用户取消编辑邮件";
+            break;
+        case MFMailComposeResultSaved:
+            msg = @"用户成功保存邮件";
+            break;
+        case MFMailComposeResultSent:
+            msg = @"用户点击发送，将邮件放到队列中，还没发送";
+            break;
+        case MFMailComposeResultFailed:
+            msg = @"用户试图保存或者发送邮件失败";
+            break;
+        default:
+            msg = @"";
+            break;
+    }
+    [Tools showAlertView:msg delegateViewController:nil];
 }
 
 - (float ) folderSizeAtPath:(NSString*) folderPath{
@@ -307,7 +515,7 @@
 
 -(void)askloginOut
 {
-    UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"确定要注销登录吗?" delegate:self cancelButtonTitle:@"再玩会儿" otherButtonTitles:@"注销登录", nil];
+    UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"确定要注销登录吗?" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"注销登录", nil];
     al.tag = LOGOUTTAG;
     [al show];
 }
@@ -330,13 +538,19 @@
             [settingTableView reloadData];
         }
     }
+    else if(alertView.tag == NEWVERSION)
+    {
+        if (buttonIndex == 1)
+        {
+            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@",_trackViewUrl]]];
+        }
+    }
 }
 
 -(void)logOut
 {
     if ([Tools NetworkReachable])
     {
-        DDLOG(@"%@==%@",[Tools user_id],[Tools client_token]);
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token]}
                                                                 API:MB_LOGOUT];
@@ -380,11 +594,11 @@
     NSString *value = @"";
     if ([sw isOn])
     {
-        value = @"1";
+        value = @"0";
     }
     else
     {
-        value = @"0";
+        value = @"1";
     }
     if (sw.tag/1000 == 0)
     {
@@ -422,6 +636,7 @@
                 [settingDict setObject:value forKey:key];
                 [settingTableView reloadData];
                 [Tools showTips:@"设置成功" toView:self.bgView];
+                DDLOG(@"setting opt==%@",settingDict);
             }
             else
             {

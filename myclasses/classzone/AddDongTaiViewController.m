@@ -47,14 +47,18 @@ AGImagePickerControllerDelegate,
 UIGestureRecognizerDelegate,
 ShowDetailImageViewControllerDelegate,
 UITextViewDelegate,
+UITextFieldDelegate,
 CLLocationManagerDelegate,
-ASIProgressDelegate>
+ASIProgressDelegate,
+UIActionSheetDelegate
+>
 {
     AGImagePickerController *imagePickerController;
+    UIImagePickerController *sysImagePickerController;
     NSMutableArray *selectPhotosArray;
     NSMutableArray *thunImageArray;
     
-    UILabel *imageTipLabel;
+    UIButton *imageTipLabel;
     
     UIScrollView *mainScrollView;
     
@@ -80,7 +84,7 @@ ASIProgressDelegate>
     CLLocation *nowLocation;
     UIButton *locationButton;
     BOOL locationEditing;
-    UITextView *locationTextView;
+    MyTextField *locationTextView;
     CLLocationDegrees latitude;
     CLLocationDegrees longitude;
     
@@ -135,47 +139,56 @@ int count = 0;
         if ([array count]>0) {
             CLPlacemark * placemark = [array objectAtIndex:0];
             NSString *name = placemark.name;
+            [UIView animateWithDuration:0.2 animations:^{
+                locationTextView.frame = CGRectMake(locationButton.frame.size.width+locationButton.frame.origin.x, locationButton.frame.origin.y-3, [name length]*14>280?280:([name length]*14),35);
+            }];
+            
             locationTextView.text = name;
             latitude = newLocation.coordinate.latitude;
             longitude = newLocation.coordinate.longitude;
-            
         }
     }];
 
 }
 
+-(void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
+{
+    NSString *errorString;
+    [manager stopUpdatingLocation];
+    DDLOG(@"Error:%@",[error localizedDescription]);
+    switch ([error code])
+    {
+        case kCLErrorDenied:
+            errorString = @"定位服务被禁止，请到设置->隐私->定位服务里打开这个应用的定位服务";
+            break;
+        case kCLErrorLocationUnknown:
+            errorString = @"定位信息不可用";
+        default:
+            errorString = @"位置错误";
+            break;
+    }
+    [Tools showAlertView:errorString delegateViewController:nil];
+}
+
 - (void) setupLocationManager {
+    if (![Tools NetworkReachable])
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+        return ;
+    }
+    
     locationManager = [[CLLocationManager alloc] init];
     if ([CLLocationManager locationServicesEnabled]) {
-        NSLog( @"Starting CLLocationManager" );
         locationManager.delegate = self;
         locationManager.distanceFilter = 200;
         locationManager.desiredAccuracy = kCLLocationAccuracyBest;
         [locationManager startUpdatingLocation];
-    } else {
-        NSLog( @"Cannot Starting CLLocationManager" );
-        /*self.locationManager.delegate = self;
-         self.locationManager.distanceFilter = 200;
-         locationManager.desiredAccuracy = kCLLocationAccuracyBest;
-         [self.locationManager startUpdatingLocation];*/
-    }  
+    }
 }
 
 -(void)switchLocation
 {
-    if (locationEditing)
-    {
-        locationTextView.editable = NO;
-        [locationButton setTitle:@"编辑" forState:UIControlStateNormal];
-        [locationTextView resignFirstResponder];
-    }
-    else
-    {
-        locationTextView.editable = YES;
-        [locationButton setTitle:@"完成" forState:UIControlStateNormal];
-        [locationTextView becomeFirstResponder];
-    }
-    locationEditing = !locationEditing;
+    [self setupLocationManager];
 }
 
 
@@ -184,10 +197,6 @@ int count = 0;
 -(void)mybackClick
 {
     count = 0;
-    if ([self.classZoneDelegate respondsToSelector:@selector(haveAddDonfTai:)])
-    {
-        [self.classZoneDelegate haveAddDonfTai:NO];
-    }
     [self unShowSelfViewController];
 }
 #pragma mark - viewControllerLifeCycle
@@ -195,7 +204,15 @@ int count = 0;
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"PageOne"];
 }
+
+-(void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"PageOne"];
+}
+
 
 - (void)viewDidLoad
 {
@@ -203,13 +220,12 @@ int count = 0;
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"发布日记";
     
-    self.bgView.frame = CGRectMake(0, YSTART,
-                                   UI_SCREEN_WIDTH,
-                                   UI_SCREEN_HEIGHT+50);
-    
     keyBoardHeight = 0.0f;
     imageW = 70;
     imageH = 70;
+    
+    sysImagePickerController = [[UIImagePickerController alloc] init];
+    sysImagePickerController.delegate = self;
     
     imagePickerController = [[AGImagePickerController alloc] initWithDelegate:self];
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:YES];
@@ -223,22 +239,36 @@ int count = 0;
     mainScrollView.frame = CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT);
     [self.bgView addSubview:mainScrollView];
     
+    UITapGestureRecognizer *scTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(backKeyboard)];
+    mainScrollView.userInteractionEnabled = YES;
+    [mainScrollView addGestureRecognizer:scTap];
     
-    imageTipLabel = [[UILabel alloc] init];
-    imageTipLabel.frame = CGRectMake(SCREEN_WIDTH/2-60, imageScrollView.frame.origin.y+30, 120, 20);
-    imageTipLabel.text = @"添加图片";
+    
+    imageTipLabel = [UIButton buttonWithType:UIButtonTypeCustom];
+    [imageTipLabel setImage:[UIImage imageNamed:@"addimage"] forState:UIControlStateNormal];
+    imageTipLabel.frame = CGRectMake(15, 10, 70, 70);
+//    [imageTipLabel setTitle:@"添加图片" forState:UIControlStateNormal];
     imageTipLabel.backgroundColor = [UIColor clearColor];
-    imageTipLabel.textColor = TITLE_COLOR;
-    imageTipLabel.font = [UIFont systemFontOfSize:16];
-    imageTipLabel.textAlignment = NSTextAlignmentCenter;
-    [mainScrollView addSubview:imageTipLabel];
+    [imageTipLabel addTarget:self action:@selector(selectPhoto) forControlEvents:UIControlEventTouchUpInside];
+    [imageTipLabel setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+    imageTipLabel.titleLabel.font = [UIFont systemFontOfSize:16];
+    
+    addImageButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    //    addImageButton.backgroundColor = [UIColor greenColor];
+    addImageButton.frame = CGRectMake(imageTipLabel.frame.origin.x+imageTipLabel.frame.size.width + 10, imageTipLabel.frame.origin.y+imageTipLabel.frame.size.height/2-15, 80, 30);
+    [addImageButton setTitleColor:[UIColor lightGrayColor] forState:UIControlStateNormal];
+    [addImageButton setTitle: @"添加图片" forState:UIControlStateNormal];
+    [addImageButton addTarget:self action:@selector(selectPhoto) forControlEvents:UIControlEventTouchUpInside];
+    placeHolderLabel.frame = contentTextView.frame;
 
     imageScrollView = [[UIScrollView alloc] init];
     imageScrollView.frame = CGRectMake(4, 7.5, SCREEN_WIDTH-8, 80);
     imageScrollView.backgroundColor = [UIColor clearColor];
-//    imageScrollView.layer.borderColor = TITLE_COLOR.CGColor;
-//    imageScrollView.layer.borderWidth = 0.3f;
+    imageScrollView.contentSize = CGSizeMake(SCREEN_WIDTH-8, 80);
     [mainScrollView addSubview:imageScrollView];
+    
+    [mainScrollView addSubview:imageTipLabel];
+    [mainScrollView addSubview:addImageButton];
     
     inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(10, 2, 10, 2)];
     contentImageView = [[UIImageView alloc] init];
@@ -260,41 +290,29 @@ int count = 0;
     contentTextView.font = [UIFont systemFontOfSize:15];
     [mainScrollView addSubview:contentTextView];
     
-    addImageButton = [UIButton buttonWithType:UIButtonTypeCustom];
-//    addImageButton.backgroundColor = [UIColor greenColor];
-    addImageButton.frame = CGRectMake(contentTextView.frame.origin.x+5, contentTextView.frame.origin.y+contentTextView.frame.size.height, 40, 30);
-    [addImageButton setImage:[UIImage imageNamed:@"icon_pic"] forState:UIControlStateNormal];
-    [addImageButton addTarget:self action:@selector(openAction:) forControlEvents:UIControlEventTouchUpInside];
-    [mainScrollView addSubview:addImageButton];
-    
     placeHolderLabel.frame = contentTextView.frame;
-                            
     
 //    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
     
     //位置
     locationEditing = NO;
     locationButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    locationButton.frame = CGRectMake(contentTextView.frame.origin.x, contentTextView.frame.origin.y+contentTextView.frame.size.height+40, 40, 40);
+    locationButton.frame = CGRectMake(contentTextView.frame.origin.x, contentTextView.frame.origin.y+contentTextView.frame.size.height+40, 30, 30);
 //    [locationButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     [locationButton addTarget:self action:@selector(switchLocation) forControlEvents:UIControlEventTouchUpInside];
     [locationButton setImage:[UIImage imageNamed:@"icon_location"] forState:UIControlStateNormal];
     [mainScrollView addSubview:locationButton];
     
-    inputImageView = [[UIImageView alloc] init];
-    inputImageView.frame = CGRectMake(locationButton.frame.size.width+locationButton.frame.origin.x, locationButton.frame.origin.y, SCREEN_WIDTH-locationButton.frame.size.width-locationButton.frame.origin.x*2, locationButton.frame.size.height);
-    [inputImageView setImage:inputImage];
-    [mainScrollView addSubview:inputImageView];
-    
-    locationTextView = [[UITextView alloc] init];
-    locationTextView.frame = CGRectMake(locationButton.frame.size.width+locationButton.frame.origin.x, locationButton.frame.origin.y-3, SCREEN_WIDTH-locationButton.frame.size.width-locationButton.frame.origin.x*2, locationButton.frame.size.height+3);
+    locationTextView = [[MyTextField alloc] init];
+    locationTextView.frame = CGRectMake(locationButton.frame.size.width+locationButton.frame.origin.x, locationButton.frame.origin.y, 0,35);
     locationTextView.font = [UIFont systemFontOfSize:14];
-    locationTextView.backgroundColor = [UIColor clearColor];
+    locationTextView.backgroundColor = RGB(222, 222, 222, 1);
+    locationTextView.layer.cornerRadius = 3;
+    locationTextView.clipsToBounds = YES;
+    locationTextView.background = nil;
     locationTextView.delegate = self;
-//    locationTextView.editable = NO;
+    locationTextView.clearButtonMode = UITextFieldViewModeWhileEditing;
     locationTextView.tag = LocationTextViewTag;
-    locationTextView.scrollEnabled = NO;
-    locationTextView.backgroundColor = [UIColor clearColor];
     [mainScrollView addSubview:locationTextView];
     
     //提交
@@ -320,16 +338,92 @@ int count = 0;
     latelyLabel.textColor = UIColorFromRGB(0x727171);
     [mainScrollView addSubview:latelyLabel];
     
-    [self getImgs];
+    mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, lateImageView.frame.size.height+lateImageView.frame.origin.y+20);
     
+    [self getImgs];
     [self setupLocationManager];
 }
+
+
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
+#pragma mark - aboutPhoto
+-(void)selectPhoto
+{
+    [self backKeyboard];
+    
+    if ([selectPhotosArray count]>12)
+    {
+        [Tools showAlertView:@"最多添加12张图片" delegateViewController:nil];
+        imageTipLabel.hidden = YES;
+        addImageButton.hidden = YES;
+        return ;
+    }
+    UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"从相册选取",@"拍照", nil];
+    [ac showInView:self.bgView];
+}
+-(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (buttonIndex == 0)
+    {
+        [self openAction:nil];
+    }
+    else if(buttonIndex == 1)
+    {
+        if ([Tools captureEnable])
+        {
+            if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
+            {
+                sysImagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
+                [self presentViewController:sysImagePickerController animated:YES completion:nil];
+            }
+            else
+            {
+                [Tools showAlertView:@"相机不可用" delegateViewController:nil];
+            }
+        }
+    }
+}
+
+-(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
+{
+    [sysImagePickerController dismissViewControllerAnimated:YES completion:nil];
+    DDLOG(@"picker info %@",info);
+    UIImage *fullScreenImage = [info objectForKey:UIImagePickerControllerOriginalImage];
+    if (fullScreenImage.size.width>SCREEN_WIDTH*2 || fullScreenImage.size.height>SCREEN_HEIGHT*2)
+    {
+        CGFloat imageHeight = 0.0f;
+        CGFloat imageWidth = 0.0f;
+        if (fullScreenImage.size.width>SCREEN_WIDTH*2)
+        {
+            imageWidth = SCREEN_WIDTH*2;
+            imageHeight = imageWidth*fullScreenImage.size.height/fullScreenImage.size.width;
+        }
+        else
+        {
+            imageHeight = SCREEN_HEIGHT*2;
+            imageWidth = imageHeight*fullScreenImage.size.width/fullScreenImage.size.height;
+        }
+        fullScreenImage = [Tools thumbnailWithImageWithoutScale:fullScreenImage size:CGSizeMake(imageWidth, imageHeight)];
+    }
+    if (fullScreenImage)
+    {
+        [selectPhotosArray addObject:fullScreenImage];
+        [thunImageArray addObject:fullScreenImage];
+        [self reloadImages];
+    }
+}
+
+-(void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
+{
+    [sysImagePickerController dismissViewControllerAnimated:YES completion:nil];
+}
+
 
 #pragma mark - getLatelyPhotos
 
@@ -432,6 +526,7 @@ int count = 0;
     if (count >12)
     {
         [Tools showAlertView:@"最多添加12张图片" delegateViewController:nil];
+        addImageButton.hidden = YES;
         return;
     }
     DDLOG(@"tap tag==%@",latelyImageNumArray);
@@ -453,25 +548,53 @@ int count = 0;
 
 -(void)reloadImages
 {
+    if ([selectPhotosArray count] > 12)
+    {
+        [Tools showAlertView:@"最多添加12张图片" delegateViewController:nil];
+        addImageButton.hidden = YES;
+        imageTipLabel.hidden = YES;
+        return;
+    }
+    else if([selectPhotosArray count]==12)
+    {
+        addImageButton.hidden = YES;
+        imageTipLabel.hidden = YES;
+    }
     int row = 0;
-    DDLOG(@"thun=%d,full=%d",[thunImageArray count],[selectPhotosArray count]);
+    if ([selectPhotosArray count] < 12)
+    {
+        addImageButton.hidden = NO;
+        imageTipLabel.hidden = NO;
+    }
     for(UIView *v in imageScrollView.subviews)
     {
         [v removeFromSuperview];
     }
-    if ([thunImageArray count]%4 == 0)
+    
+    if ([thunImageArray count]>0)
     {
-        row = [thunImageArray count]/4;
+        [addImageButton setTitle:@"" forState:UIControlStateNormal];
+        addImageButton.enabled = NO;
     }
     else
     {
-        row = [thunImageArray count]/4+1;
+        [addImageButton setTitle:@"添加图片" forState:UIControlStateNormal];
+        addImageButton.enabled = YES;
+    }
+    if (([thunImageArray count]+1)%4 == 0)
+    {
+        row = ([thunImageArray count]+1)/4;
+    }
+    else
+    {
+        row = ([thunImageArray count]+1)/4+1;
     }
     for (int i=0; i<[thunImageArray count]; ++i)
     {
         UIImageView *imageView = [[UIImageView alloc] init];
+        imageView.layer.contentsGravity = kCAGravityResizeAspectFill;
         imageView.frame = CGRectMake(10+(imageW+5)*(i%4), 5+(imageH+5)*(i/4), imageW, imageH);
-        [imageView setImage:[thunImageArray objectAtIndex:i]];
+        [imageView setImage:[selectPhotosArray objectAtIndex:i]];
         imageView.tag = ImageTag + i;
         imageView.layer.cornerRadius = 5;
         imageView.clipsToBounds = YES;
@@ -485,27 +608,30 @@ int count = 0;
         [imageScrollView addSubview:deleteButton];
     }
     
-    imageScrollView.frame = CGRectMake(4, 7.5, SCREEN_WIDTH-8, row>1?(10+(imageH+5)*row):80);
-    contentTextView.frame = CGRectMake(8, 17+imageScrollView.frame.origin.y+imageScrollView.frame.size.height, SCREEN_WIDTH -18, 110);
-    placeHolderLabel.frame = contentTextView.frame;
-    addImageButton.frame = CGRectMake(contentTextView.frame.origin.x+5, contentTextView.frame.origin.y+contentTextView.frame.size.height, 40, 30);
-    locationButton.frame = CGRectMake(contentTextView.frame.origin.x, contentTextView.frame.origin.y+contentTextView.frame.size.height+40, 40, 40);
-    contentImageView.frame = CGRectMake(4, 7.5+imageScrollView.frame.size.height+imageScrollView.frame.origin.y, SCREEN_WIDTH - 8,150);
-    inputImageView.frame = CGRectMake(locationButton.frame.size.width+locationButton.frame.origin.x, locationButton.frame.origin.y, SCREEN_WIDTH-locationButton.frame.size.width-locationButton.frame.origin.x*2, locationButton.frame.size.height);
-    locationTextView.frame = CGRectMake(locationButton.frame.size.width+locationButton.frame.origin.x, locationButton.frame.origin.y-3, SCREEN_WIDTH-locationButton.frame.size.width-locationButton.frame.origin.x*2, locationButton.frame.size.height+3);
-    lateImageView.frame = CGRectMake(4, locationButton.frame.size.height+locationButton.frame.origin.y+10, SCREEN_WIDTH-8, 120);
-    latelyLabel.frame = CGRectMake(lateImageView.frame.origin.x+10, lateImageView.frame.origin.y+3, 17*[latelyLabel.text length], 20);
     
-    mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, lateImageView.frame.size.height+lateImageView.frame.origin.y+20);
-    
-    if ([thunImageArray count] > 0)
+    if (row<=3)
     {
-        imageTipLabel.text = @"";
+        imageScrollView.frame = CGRectMake(4, 7.5, SCREEN_WIDTH-8, row>1?(10+(imageH+5)*row):80);
     }
     else
     {
-        imageTipLabel.text = @"添加图片";
+        imageScrollView.frame = CGRectMake(4, 7.5, SCREEN_WIDTH-8, (10+(imageH+5)*3));
     }
+    
+    [UIView animateWithDuration:0.2 animations:^{
+        imageTipLabel.frame = CGRectMake(15+(imageW+5)*([thunImageArray count]%4), 13+(imageH+5)*([thunImageArray count]/4), imageW, imageH);
+        contentTextView.frame = CGRectMake(8, 17+imageScrollView.frame.origin.y+imageScrollView.frame.size.height, SCREEN_WIDTH -18, 110);
+        placeHolderLabel.frame = contentTextView.frame;
+        locationButton.frame = CGRectMake(contentTextView.frame.origin.x, contentTextView.frame.origin.y+contentTextView.frame.size.height+40, 40, 40);
+        contentImageView.frame = CGRectMake(4, 7.5+imageScrollView.frame.size.height+imageScrollView.frame.origin.y, SCREEN_WIDTH - 8,150);
+        inputImageView.frame = CGRectMake(locationButton.frame.size.width+locationButton.frame.origin.x, locationButton.frame.origin.y, SCREEN_WIDTH-locationButton.frame.size.width-locationButton.frame.origin.x*2, locationButton.frame.size.height);
+        locationTextView.frame = CGRectMake(locationButton.frame.size.width+locationButton.frame.origin.x, locationButton.frame.origin.y-3, SCREEN_WIDTH-locationButton.frame.size.width-locationButton.frame.origin.x*2, 35);
+        lateImageView.frame = CGRectMake(4, locationButton.frame.size.height+locationButton.frame.origin.y+10, SCREEN_WIDTH-8, 120);
+        latelyLabel.frame = CGRectMake(lateImageView.frame.origin.x+10, lateImageView.frame.origin.y+3, 17*[latelyLabel.text length], 20);
+        
+        mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, lateImageView.frame.size.height+lateImageView.frame.origin.y+20);
+    }];
+    
 }
 
 -(BOOL)hasThisLatelyImage:(NSString *)latelyImageTag
@@ -551,8 +677,6 @@ int count = 0;
 
 -(void)emitClick
 {
-    DDLOG(@"========%ld",sizeof(selectPhotosArray));
-    
     [contentTextView resignFirstResponder];
     [self submitDongTai];
 }
@@ -561,7 +685,7 @@ int count = 0;
 {
     if ([contentTextView.text length] <= 0 && [selectPhotosArray count] <= 0)
     {
-        [Tools showAlertView:@"输出您的话或添加几张图片吧！" delegateViewController:nil];
+        [Tools showAlertView:@"说出您的话或添加几张图片吧！" delegateViewController:nil];
         return ;
     }
     if ([Tools NetworkReachable])
@@ -573,6 +697,7 @@ int count = 0;
         [request setPostValue:[Tools client_token] forKey:@"token"];
         [request setPostValue:[Tools user_id] forKey:@"u_id"];
         [request setPostValue:classID forKey:@"c_id"];
+//        [request setPostValue:[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] forKey:@"role"];
         [request setPostValue:contentTextView.text forKey:@"content"];
         [request setTimeOutSeconds:60];
         
@@ -681,20 +806,31 @@ int count = 0;
 
 #pragma mark - textViewDelegate
 
+-(void)backKeyboard
+{
+    [contentTextView resignFirstResponder];
+    [locationTextView resignFirstResponder];
+    keyBoardHeight = 0;
+}
+
 -(void)textViewDidBeginEditing:(UITextView *)textView
 {
     if(textView.tag == ContentTextViewTag)
     {
         [UIView animateWithDuration:0.25 animations:^{
-            self.bgView.center = CGPointMake(CENTER_POINT.x,CENTER_POINT.y-keyBoardHeight+30);
+            mainScrollView.contentOffset = CGPointMake(0,keyBoardHeight);
             
         }completion:^(BOOL finished) {
         }];
     }
-    else if(textView.tag == LocationTextViewTag)
+}
+
+-(void)textFieldDidBeginEditing:(UITextField *)textField
+{
+    if(textField.tag == LocationTextViewTag)
     {
         [UIView animateWithDuration:0.25 animations:^{
-            self.bgView.center = CGPointMake(CENTER_POINT.x,CENTER_POINT.y-keyBoardHeight);
+            mainScrollView.contentOffset = CGPointMake(0,keyBoardHeight+80);
             
         }completion:^(BOOL finished) {
         }];
@@ -723,8 +859,9 @@ int count = 0;
         {
             placeHolderLabel.text = @"请填写要发布的内容";
         }
-        else if([textView.text length] > 140)
+        if([textView.text length] > 140)
         {
+            textView.text = [textView.text substringToIndex:141];
             [Tools showAlertView:@"字数不能超过140个字" delegateViewController:nil];
         }
     }
@@ -733,7 +870,7 @@ int count = 0;
 
 -(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    for(UIView *v in self.bgView.subviews)
+    for(UIView *v in mainScrollView.subviews)
     {
         if ([v isKindOfClass:[UITextView class]])
         {
@@ -748,11 +885,11 @@ int count = 0;
 - (void)keyBoardWillHide:(NSNotification *)aNotification
 {
     [UIView animateWithDuration:0.25 animations:^{
-        self.bgView.center = CGPointMake(CENTER_POINT.x,CENTER_POINT.y+25);
+        mainScrollView.contentOffset = CGPointMake(0,0);
+        keyBoardHeight = 0;
+        mainScrollView.scrollEnabled = YES;
     }completion:^(BOOL finished) {
-        locationTextView.editable = NO;
         locationEditing = NO;
-        [locationButton setTitle:@"编辑" forState:UIControlStateNormal];
     }];
 }
 
@@ -764,16 +901,22 @@ int count = 0;
     CGRect keyboardRect = [aValue CGRectValue];
     int height = keyboardRect.size.height;
     
-    if (iPhone5)
+    if (FOURS)
     {
-        //            self.bgView.center = CGPointMake(CENTER_POINT.x,CENTER_POINT.y-height+150);
-        keyBoardHeight = height-150;
+        keyBoardHeight = ABS(height + (mainScrollView.contentSize.height - mainScrollView.frame.size.height))-YSTART-130;
     }
     else
     {
-        //            self.bgView.center = CGPointMake(CENTER_POINT.x,CENTER_POINT.y-height);
-        keyBoardHeight = height;
+        if (SYSVERSION>=7)
+        {
+            keyBoardHeight = ABS(height + (mainScrollView.contentSize.height - mainScrollView.frame.size.height))-YSTART-35;
+        }
+        else
+        {
+            keyBoardHeight = ABS(height + (mainScrollView.contentSize.height - mainScrollView.frame.size.height))-YSTART;
+        }
     }
+    mainScrollView.scrollEnabled = NO;
 }
 
 
@@ -799,7 +942,6 @@ int count = 0;
             imageHeight = SCREEN_HEIGHT*2;
             imageWidth = imageHeight*image.size.width/image.size.height;
         }
-        DDLOG(@"%.1f==%.1f++%.1f==%.1f",imageWidth,imageHeight,image.size.width,image.size.height);
         image = [Tools thumbnailWithImageWithoutScale:image size:CGSizeMake(imageWidth, imageHeight)];
         
     }
@@ -860,21 +1002,21 @@ int count = 0;
         
     }];
     
-    
-    if ([info count]+count  > 12)
+    if ([info count]+[selectPhotosArray count] > 12)
     {
         [Tools showAlertView:@"最多添加12张图片" delegateViewController:nil];
+        imageTipLabel.hidden = YES;
+        addImageButton.hidden = YES;
         return;
     }
-    
-    if ([info count] > 12)
+    else if([info count]+[selectPhotosArray count] == 12)
     {
-        [Tools showAlertView:@"最多添加12张图片" delegateViewController:nil];
-        return;
+        imageTipLabel.hidden = YES;
+        addImageButton.hidden = YES;
     }
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:YES];
     
-    for (int i=0;i<([info count]>7 ? 7:[info count]);++i)
+    for (int i=0;i<([info count]>12 ? 12:[info count]);++i)
     {
         
         ALAsset *asset = [info objectAtIndex:i];

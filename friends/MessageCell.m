@@ -9,7 +9,7 @@
 #import "MessageCell.h"
 
 @implementation MessageCell
-@synthesize messageTf,chatBg,button,timeLabel,headerImageView;
+@synthesize messageTf,chatBg,button,timeLabel,headerImageView,joinlable;
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
@@ -18,24 +18,29 @@
         // Initialization code
         
         headerImageView = [[UIImageView alloc] init];
-        headerImageView.layer.cornerRadius = 5;
-        headerImageView.clipsToBounds = YES;
         [self.contentView addSubview:headerImageView];
         
         chatBg = [[UIImageView alloc] init];
         chatBg.hidden = YES;
         button = [UIButton buttonWithType:UIButtonTypeCustom];
         button.hidden = YES;
-        //        button.layer.cornerRadius = 5;
-        [self.contentView addSubview:button];
+//        [self.contentView addSubview:button];
         [self.contentView addSubview:chatBg];
+        
+        joinlable = [[UILabel alloc] init];
+        joinlable.textColor = RGB(0, 165, 195, 1);
+        joinlable.hidden = YES;
+        joinlable.backgroundColor = [UIColor clearColor];
+        [chatBg addSubview:joinlable];
         
         messageTf = [[UITextView alloc] init];
         messageTf.editable = NO;
+        messageTf.scrollEnabled = NO;
         messageTf.backgroundColor = [UIColor clearColor];
         messageTf.hidden = YES;
+        messageTf.userInteractionEnabled = YES;
         messageTf.font = [UIFont systemFontOfSize:13];
-        [chatBg addSubview:messageTf];
+        [self.contentView addSubview:messageTf];
         
         timeLabel = [[UILabel alloc] init];
         timeLabel.backgroundColor = [UIColor clearColor];

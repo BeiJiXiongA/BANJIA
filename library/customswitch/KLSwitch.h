@@ -45,7 +45,7 @@ typedef void(^changeHandler)(BOOL isOn);
 - (id)initWithFrame:(CGRect)frame;
 - (id)initWithFrame:(CGRect)frame
    didChangeHandler:(changeHandler) didChangeHandler;
-
+-(void)isOn:(BOOL)on;
 //Events
 - (void)setOn:(BOOL)on animated:(BOOL)animated;
 - (void)setLocked:(BOOL)locked;

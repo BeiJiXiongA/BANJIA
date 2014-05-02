@@ -7,16 +7,38 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "BPush.h"
+#import "OperatDB.h"
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate>
+
+
+@protocol ChatDelegate;
+@protocol MsgDelegate;
+
+@interface AppDelegate : UIResponder <UIApplicationDelegate,BPushDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 
 @property (readonly, strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 @property (readonly, strong, nonatomic) NSManagedObjectModel *managedObjectModel;
 @property (readonly, strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
+@property (nonatomic, assign) id<ChatDelegate> chatDelegate;
+@property (nonatomic, assign) id<MsgDelegate> msgDelegate;
+@property (strong ,nonatomic) OperatDB *db;
+
 
 - (void)saveContext;
 - (NSURL *)applicationDocumentsDirectory;
+
+@end
+
+@protocol ChatDelegate <NSObject>
+
+-(void)dealNewChatMsg:(NSDictionary *)dict;
+
+@end
+@protocol MsgDelegate <NSObject>
+
+-(void)dealNewMsg:(NSDictionary *)dict;
 
 @end

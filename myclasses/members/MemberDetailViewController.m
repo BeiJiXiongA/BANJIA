@@ -17,7 +17,7 @@
 #define MSGBUTTONTAG  3000
 #define TRANSADMINTAG  4000
 #define KICKALTAG    5000
-@interface MemberDetailViewController ()<UITableViewDelegate,UITableViewDataSource>
+@interface MemberDetailViewController ()<UITableViewDelegate,UITableViewDataSource,SetObjectDelegate>
 {
     UIView *tmpBgView;
     UIImageView *genderImageView;
@@ -27,6 +27,10 @@
     
     NSMutableDictionary *dataDict;
     UITableView *infoView;
+    
+    OperatDB *db;
+    
+    NSString *userPhone;
 }
 @end
 
@@ -51,6 +55,7 @@
     
     self.titleLabel.text = @"个人信息";
     dataDict = [[NSMutableDictionary alloc] initWithCapacity:0];
+    db = [[OperatDB alloc] init];
     
     int adminNum = [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] intValue];
     if (adminNum == 2)
@@ -67,7 +72,7 @@
     }
     
     headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(33.5, UI_NAVIGATION_BAR_HEIGHT+11, 80, 80)];
-    headerImageView.backgroundColor = [UIColor greenColor];
+    headerImageView.backgroundColor = [UIColor clearColor];
     headerImageView.layer.cornerRadius = headerImageView.frame.size.width/2;
     headerImageView.clipsToBounds = YES;
     [self.bgView addSubview:headerImageView];
@@ -76,31 +81,36 @@
     nameLabel.text = teacherName;
     if ([headerImg length]>0)
     {
-        [Tools fillImageView:headerImageView withImageFromURL:headerImg andDefault:HEADERDEFAULT];
+        [Tools fillImageView:headerImageView withImageFromURL:headerImg andDefault:HEADERBG];
     }
     else
     {
-        [headerImageView setImage:[UIImage imageNamed:HEADERDEFAULT]];
+        [headerImageView setImage:[UIImage imageNamed:HEADERBG]];
     }
     
     UITapGestureRecognizer *tapTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(moreClick)];
     headerImageView.userInteractionEnabled = YES;
     
-    [headerImageView addGestureRecognizer:tapTgr];
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
+    {
+        if (![teacherID isEqualToString:[Tools user_id]])
+        {
+            [headerImageView addGestureRecognizer:tapTgr];
+        }
+    }
     
     nameLabel.textColor = TITLE_COLOR;
     nameLabel.backgroundColor = [UIColor clearColor];
     nameLabel.font = [UIFont systemFontOfSize:16];
     [self.bgView addSubview:nameLabel];
     
-    genderImageView = [[UIImageView alloc] initWithFrame:CGRectMake(nameLabel.frame.size.width+nameLabel.frame.origin.x, headerImageView.frame.origin.y, 15, 15)];
+    genderImageView = [[UIImageView alloc] initWithFrame:CGRectMake(nameLabel.frame.size.width+nameLabel.frame.origin.x+5, headerImageView.frame.origin.y+15, 15, 15)];
     genderImageView.backgroundColor = [UIColor clearColor];
     [self.bgView addSubview:genderImageView];
     
-    jobLabel = [[UILabel alloc] initWithFrame:CGRectMake(nameLabel.frame.origin.x, nameLabel.frame.size.height+nameLabel.frame.origin.y, 70, 30)];
+    jobLabel = [[UILabel alloc] initWithFrame:CGRectMake(nameLabel.frame.origin.x, nameLabel.frame.size.height+nameLabel.frame.origin.y, SCREEN_WIDTH-nameLabel.frame.origin.x-30, 30)];
     jobLabel.font = [UIFont systemFontOfSize:13];
     jobLabel.textColor = [UIColor lightGrayColor];
-    jobLabel.text = @"学习委员";
     jobLabel.backgroundColor = [UIColor clearColor];
     [self.bgView addSubview:jobLabel];
     
@@ -111,6 +121,8 @@
     infoView  = [[UITableView alloc] initWithFrame:CGRectMake(10, jobLabel.frame.size.height+jobLabel.frame.origin.y+50, SCREEN_WIDTH-15, 160) style:UITableViewStylePlain];
     infoView.delegate = self;
     infoView.dataSource = self;
+    infoView.scrollEnabled = NO;
+    infoView.separatorStyle = UITableViewCellSeparatorStyleNone;
     infoView.backgroundColor = [UIColor clearColor];
     [self.bgView addSubview:infoView];
     
@@ -149,6 +161,11 @@
         addFriendButton.hidden = YES;
     }
     
+    if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fid":teacherID} andTableName:FRIENDSTABLE] count] > 0)
+    {
+        addFriendButton.hidden = YES;
+    }
+    
     [self getUserInfo];
 }
 
@@ -157,6 +174,20 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
     
+}
+
+#pragma mark - setobjectdel
+-(void)setobject:(NSString *)objectUpdate
+{
+    if (objectUpdate)
+    {
+        jobLabel.text = objectUpdate;
+        if ([self.memDel respondsToSelector:@selector(updateListWith:)])
+        {
+            [self.memDel updateListWith:YES];
+        }
+        [self unShowSelfViewController];
+    }
 }
 
 #pragma mark - tableview
@@ -179,6 +210,18 @@
 }
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
+    if ([[db findSetWithDictionary:@{@"uid":teacherID,@"classid":classID} andTableName:CLASSMEMBERTABLE] count] > 0)
+    {
+        NSArray *array = [db findSetWithDictionary:@{@"uid":teacherID,@"classid":classID} andTableName:CLASSMEMBERTABLE];
+        if (![[[array firstObject] objectForKey:@"phone"] isEqual:[NSNull null]])
+        {
+            if ([[[array firstObject] objectForKey:@"phone"] length] > 8)
+            {
+                return 1;
+            }
+        }
+    }
+    
     return [[dataDict allKeys] count];
 }
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -192,19 +235,40 @@
     if (indexPath.row == 0)
     {
         cell.nameLabel.text = @"移动电话";
-        cell.contentLabel.text = [dataDict objectForKey:@"phone"];
+        if ([[db findSetWithDictionary:@{@"uid":teacherID,@"classid":classID} andTableName:CLASSMEMBERTABLE] count] > 0)
+        {
+            NSArray *array = [db findSetWithDictionary:@{@"uid":teacherID,@"classid":classID} andTableName:CLASSMEMBERTABLE];
+            if (![[[array firstObject] objectForKey:@"phone"] isEqual:[NSNull null]])
+            {
+                if ([[[array firstObject] objectForKey:@"phone"] length] > 8)
+                {
+                    userPhone = [[array firstObject]objectForKey:@"phone"];
+                }
+            }
+        }
+        if ([dataDict count] > 0)
+        {
+            userPhone = [dataDict objectForKey:@"phone"];
+        }
+        cell.contentLabel.text = userPhone;
         [cell.button1 addTarget:self action:@selector(msgToUser) forControlEvents:UIControlEventTouchUpInside];
         [cell.button2 addTarget:self action:@selector(callToUser) forControlEvents:UIControlEventTouchUpInside];
+        if ([teacherID isEqualToString:[Tools user_id]])
+        {
+            cell.button2.hidden = YES;
+        }
     }
+    UIImageView *bgImageBG = [[UIImageView alloc] init];
+    bgImageBG.image = [UIImage imageNamed:@"line3"];
+    bgImageBG.backgroundColor = [UIColor clearColor];
+    cell.backgroundView = bgImageBG;
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
 }
 
 -(void)callToUser
 {
-    UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"您确定要拨打这个电话吗？" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"拨打", nil];
-    al.tag = CALLBUTTONTAG;
-    [al show];
+    [Tools dialPhoneNumber:userPhone inView:self.bgView];
 }
 
 -(void)msgToUser
@@ -218,7 +282,7 @@
 -(void)moreClick
 {
     
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] > 0)
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
     {
         NSArray *array = [[NSArray alloc] initWithObjects:@"踢出班级",@"任命为班主任",@"设置班级角色", nil];
         [self showView:[NSMutableArray arrayWithArray:array]];
@@ -285,6 +349,8 @@
         setobject.name = teacherName;
         setobject.userid = teacherID;
         setobject.classID = classID;
+        setobject.title = jobLabel.text;
+        setobject.setobject= self;
         [setobject showSelfViewController:self];
     }
     else if(button.tag-4000-1 == 1)
@@ -407,15 +473,7 @@
 
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    if (alertView.tag == CALLBUTTONTAG)
-    {
-        if (buttonIndex == 1)
-        {
-            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel://%@",[dataDict objectForKey:@"phone"]]]];
-        }
-        
-    }
-    else if(alertView.tag == MSGBUTTONTAG)
+    if(alertView.tag == MSGBUTTONTAG)
     {
         if (buttonIndex == 1)
         {
@@ -483,13 +541,14 @@
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
-                                                                      @"other_id":teacherID
+                                                                      @"other_id":teacherID,
+                                                                      @"c_id":classID
                                                                       } API:MB_GETUSERINFO];
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"memberByClass responsedict %@",responseDict);
+            DDLOG(@"memberinfo responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 NSDictionary *dict = [responseDict objectForKey:@"data"];
@@ -505,11 +564,19 @@
                         //男
                         [genderImageView setImage:[UIImage imageNamed:@"male"]];
                     }
-                    else if ([[dict objectForKey:@"sex"] intValue] == 2)
+                    else if ([[dict objectForKey:@"sex"] intValue] == 0)
                     {
                         //
                         [genderImageView setImage:[UIImage imageNamed:@"female"]];
                     }
+                    
+                    if ([[dataDict objectForKey:@"phone"] length] > 0)
+                    {
+                        [db updeteKey:@"phone" toValue:[dataDict objectForKey:@"phone"] withParaDict:@{@"uid":teacherID,@"classid":classID} andTableName:CLASSMEMBERTABLE];
+                    }
+                    
+                    jobLabel.text = [[dict objectForKey:@"classInfo"] objectForKey:@"title"];
+                    [Tools fillImageView:headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERDEFAULT];
                 }
                 [infoView reloadData];
             }

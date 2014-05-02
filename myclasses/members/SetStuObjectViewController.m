@@ -9,21 +9,23 @@
 #import "SetStuObjectViewController.h"
 #import "Header.h"
 #import "OjectCell.h"
+#import "KLSwitch.h"
 
 @interface SetStuObjectViewController ()<UITableViewDataSource,UITableViewDelegate,UITextFieldDelegate>
 {
     NSMutableDictionary *selectDict;
     UITableView *objectTabelView;
-    UISwitch *noticeSwitch;
+    KLSwitch *noticeSwitch;
     NSMutableArray *objectArray;
     
-    UITextField *addObjectTextField;
+    MyTextField *addObjectTextField;
     UIButton *addButton;
+    int alert;
 }
 @end
 
 @implementation SetStuObjectViewController
-@synthesize name,userid,classID;
+@synthesize name,userid,classID,setStudel;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -38,6 +40,9 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"设置班级角色";
+    
+    DDLOG(@"uiser==%@",userid);
+    alert = 1;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
@@ -60,17 +65,17 @@
     
     addButton = [UIButton buttonWithType:UIButtonTypeCustom];
     addButton.frame = CGRectMake(31, objectTabelView.frame.size.height+objectTabelView.frame.origin.y, 40, 40);
-    [addButton setImage:[UIImage imageNamed:@"icon_add"] forState:UIControlStateNormal];
+    [addButton setImage:[UIImage imageNamed:@"set_add"] forState:UIControlStateNormal];
     [addButton addTarget:self action:@selector(addObjectToObjects) forControlEvents:UIControlEventTouchUpInside];
     [self.bgView addSubview:addButton];
     
     UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
     
-    addObjectTextField = [[UITextField alloc] initWithFrame:CGRectMake(addButton.frame.size.width+addButton.frame.origin.x, objectTabelView.frame.size.height+objectTabelView.frame.origin.y+5, SCREEN_WIDTH-62-50, 30)];
+    addObjectTextField = [[MyTextField alloc] initWithFrame:CGRectMake(71, objectTabelView.frame.size.height+objectTabelView.frame.origin.y+5, SCREEN_WIDTH-62, 30)];
     addObjectTextField.background = inputImage;
     addObjectTextField.delegate = self;
     addObjectTextField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
-    addObjectTextField.placeholder = @"  添加其他班级角色";
+    addObjectTextField.placeholder = @"添加其他班级角色";
     [self.bgView addSubview:addObjectTextField];
     
     UILabel *tipLabel2 = [[UILabel alloc] initWithFrame:CGRectMake(20, SCREEN_HEIGHT-50, 170, 30)];
@@ -79,13 +84,15 @@
     tipLabel2.textColor = UIColorFromRGB(0x727171);
     [self.bgView addSubview:tipLabel2];
     
-    noticeSwitch = [[UISwitch alloc] initWithFrame:CGRectMake(SCREEN_WIDTH-100, SCREEN_HEIGHT-50, 80, 30)];
+    noticeSwitch = [[KLSwitch alloc] init];
+    noticeSwitch.frame = CGRectMake(SCREEN_WIDTH-100, SCREEN_HEIGHT-50, 80, 30);
+    [noticeSwitch addTarget:self action:@selector(valueChange) forControlEvents:UIControlEventValueChanged];
+    [noticeSwitch isOn:YES];
     [self.bgView addSubview:noticeSwitch];
     
-    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
     UIButton *submit = [UIButton buttonWithType:UIButtonTypeCustom];
-    submit.frame = CGRectMake(SCREEN_WIDTH-60, 3, 40, 38);
-    [submit setBackgroundImage:btnImage forState:UIControlStateNormal];
+    submit.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
+    [submit setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
     [submit setTitle:@"提交" forState:UIControlStateNormal];
     [submit addTarget:self action:@selector(submit) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:submit];
@@ -97,11 +104,24 @@
     // Dispose of any resources that can be recreated.
 }
 
+-(void)valueChange
+{
+    if ([noticeSwitch isOn])
+    {
+        alert = 1;
+    }
+    else
+    {
+        alert = 0;
+    }
+}
+
 -(void)submit
 {
     if ([Tools NetworkReachable])
     {
         NSMutableString *jobTitle = [[NSMutableString alloc] initWithCapacity:0];
+        [BPush delTag:classID];
         if ([selectDict count] >0)
         {
             for(NSString *key in selectDict)
@@ -113,7 +133,9 @@
                                                                       @"token":[Tools client_token],
                                                                       @"m_id":userid,
                                                                       @"c_id":classID,
-                                                                      @"title":[jobTitle substringToIndex:[jobTitle length]-1]
+                                                                      @"role":@"students",
+                                                                      @"alert":[NSString stringWithFormat:@"%d",alert],
+                                                                      @"title":[jobTitle length]>0?[jobTitle substringToIndex:[jobTitle length]-1]:@""
                                                                       } API:CHANGE_MEM_TITLE];
         [request setCompletionBlock:^{
             NSString *responseString = [request responseString];
@@ -121,6 +143,10 @@
             DDLOG(@"commit diary responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
+                if ([self.setStudel respondsToSelector:@selector(setStuObj:)])
+                {
+                    [self.setStudel setStuObj:[jobTitle length]>0?[jobTitle substringToIndex:[jobTitle length]-1]:@""];
+                }
                 [self unShowSelfViewController];
             }
             else
@@ -215,9 +241,9 @@
 }
 -(BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
 {
-    if (range.location>7)
+    if (range.location>20)
     {
-        [Tools showAlertView:@"请将字数限制在8个以内" delegateViewController:nil];
+        [Tools showAlertView:@"请将字数限制在18个以内" delegateViewController:nil];
         return NO;
     }
     return YES;

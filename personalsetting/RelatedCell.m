@@ -20,7 +20,7 @@
         bgImageView = [[UIImageView alloc] initWithFrame:CGRectMake(9, 11, SCREEN_WIDTH-10, 35)];
         self.backgroundView = bgImageView;
         
-        iconImageView = [[UIImageView alloc] initWithFrame:CGRectMake(15, 5, 30, 30)];
+        iconImageView = [[UIImageView alloc] initWithFrame:CGRectMake(15, 5, 37, 37)];
         iconImageView.backgroundColor = [UIColor whiteColor];
         [self.contentView addSubview:iconImageView];
         

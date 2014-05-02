@@ -11,4 +11,7 @@
 @interface ClassMemberViewController : XDContentViewController
 @property (nonatomic, strong) NSString *classID;
 @property (nonatomic)BOOL fromMsg;
+
+@property (nonatomic, strong) NSString *className;
+@property (nonatomic, strong) NSString *schoolName;
 @end
