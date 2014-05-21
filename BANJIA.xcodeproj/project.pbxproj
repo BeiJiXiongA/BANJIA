@@ -3947,13 +3947,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-
-
-
-
-
-
-
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Lanjing Tongchuang (Tianjin) Technology & Development Co., Ltd. (X7FQ79MF8R)";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/library/ShareSDK/Connection",
@@ -3988,7 +3982,7 @@
 					"-alll_load",
 					"-Objc",
 				);
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "F12BF7D3-775D-4D9D-A353-FA991F1DD11E";
 				VALID_ARCHS = "armv7 armv7s";
 				WRAPPER_EXTENSION = app;
 			};
