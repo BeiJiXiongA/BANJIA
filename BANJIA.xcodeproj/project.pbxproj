@@ -2926,6 +2926,9 @@
 				LastUpgradeCheck = 0510;
 				ORGANIZATIONNAME = TEEKER;
 				TargetAttributes = {
+					38938FC118EEF0260014F169 = {
+						DevelopmentTeam = X7FQ79MF8R;
+					};
 					38938FE118EEF0270014F169 = {
 						TestTargetID = 38938FC118EEF0260014F169;
 					};
@@ -3626,6 +3629,7 @@
 				"ARCHS[sdk=*]" = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer: Rui Wang (VEUQ5JBY8P)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Rui Wang (VEUQ5JBY8P)";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/library/ShareSDK/Connection",
@@ -3656,7 +3660,7 @@
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "A5ED7D25-B076-472D-8B06-34007A73D7A5";
+				PROVISIONING_PROFILE = "F12BF7D3-775D-4D9D-A353-FA991F1DD11E";
 				SDKROOT = iphoneos7.1;
 				VALID_ARCHS = "armv7 armv7s";
 				WRAPPER_EXTENSION = app;
@@ -3669,6 +3673,7 @@
 				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Lanjing Tongchuang (Tianjin) Technology & Development Co., Ltd. (X7FQ79MF8R)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Lanjing Tongchuang (Tianjin) Technology & Development Co., Ltd. (X7FQ79MF8R)";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/library/ShareSDK/Connection",
@@ -3699,7 +3704,7 @@
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "EA2F57F3-BDD6-44D6-BA5B-EE237F7ACEC8";
+				PROVISIONING_PROFILE = "C72A2FCD-CA2C-4CAE-9A3E-3F0A7A823C75";
 				SDKROOT = iphoneos7.1;
 				VALID_ARCHS = "armv7 armv7s";
 				WRAPPER_EXTENSION = app;
