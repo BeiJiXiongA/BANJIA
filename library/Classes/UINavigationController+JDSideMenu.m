@@ -9,5 +9,12 @@
 #import "UINavigationController+JDSideMenu.h"
 
 @implementation UINavigationController (JDSideMenu)
-
+- (JDSideMenu *)sideMenuController
+{
+    if ([self.parentViewController isKindOfClass:[JDSideMenu class]]) {
+        return (JDSideMenu *)self.parentViewController;
+    }
+    
+    return nil;
+}
 @end

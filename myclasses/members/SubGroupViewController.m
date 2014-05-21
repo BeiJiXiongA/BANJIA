@@ -39,7 +39,7 @@ StuDetailDelegate>
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     
-    DDLOG(@"tmp array = %@",tmpArray);
+    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     
     tmpTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
     tmpTableView.delegate = self;
@@ -53,6 +53,11 @@ StuDetailDelegate>
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 #pragma mark - tableview
@@ -123,21 +128,23 @@ StuDetailDelegate>
     if ([[dict objectForKey:@"checked"] intValue] == 0)
     {
         ApplyInfoViewController *applyInfoViewController = [[ApplyInfoViewController alloc] init];
-        applyInfoViewController.classID = classID;
         applyInfoViewController.applyDel = self;
         applyInfoViewController.role = [dict objectForKey:@"role"];
         applyInfoViewController.j_id = [dict objectForKey:@"uid"];
         applyInfoViewController.title = [dict objectForKey:@"title"];
         applyInfoViewController.applyName = [dict objectForKey:@"name"];
-        [applyInfoViewController showSelfViewController:self];
+        [self.navigationController pushViewController:applyInfoViewController animated:YES];
     }
     else if ([[dict objectForKey:@"role"] isEqualToString:@"teachers"])
     {
         MemberDetailViewController *memDetail = [[MemberDetailViewController alloc] init];
         memDetail.teacherID = [dict objectForKey:@"uid"];
         memDetail.teacherName = [dict objectForKey:@"name"];
-        memDetail.classID = classID;
         memDetail.admin = YES;
+        if (![[dict objectForKey:@"title"] isEqual:[NSNull null]])
+        {
+            memDetail.title = [dict objectForKey:@"title"];
+        }
         if (admin)
         {
             memDetail.admin = YES;
@@ -146,14 +153,13 @@ StuDetailDelegate>
         {
             memDetail.admin = NO;
         }
-        [memDetail showSelfViewController:self];
+        [self.navigationController pushViewController:memDetail animated:YES];
     }
     else if([[dict objectForKey:@"role"] isEqualToString:@"parents"])
     {
         ParentsDetailViewController *parentDetail = [[ParentsDetailViewController alloc] init];
         parentDetail.parentID = [dict objectForKey:@"uid"];
         parentDetail.parentName = [dict objectForKey:@"name"];
-        parentDetail.classID = classID;
         parentDetail.admin = YES;
         if (admin)
         {
@@ -163,16 +169,19 @@ StuDetailDelegate>
         {
             parentDetail.admin = NO;
         }
-        [parentDetail showSelfViewController:self];
+        [self.navigationController pushViewController:parentDetail animated:YES];
     }
     else if([[dict objectForKey:@"role"] isEqualToString:@"students"])
     {
         StudentDetailViewController *studentDetail = [[StudentDetailViewController alloc] init];
         studentDetail.studentID = [dict objectForKey:@"uid"];
         studentDetail.studentName = [dict objectForKey:@"name"];
-        studentDetail.classID = classID;
         studentDetail.memDel = self;
         studentDetail.admin = YES;
+        if (![[dict objectForKey:@"title"] isEqual:[NSNull null]])
+        {
+            studentDetail.title = [dict objectForKey:@"title"];
+        }
         if (admin)
         {
             studentDetail.admin = YES;
@@ -181,7 +190,7 @@ StuDetailDelegate>
         {
             studentDetail.admin = NO;
         }
-        [studentDetail showSelfViewController:self];
+        [self.navigationController pushViewController:studentDetail animated:YES];
     }
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
@@ -195,7 +204,7 @@ StuDetailDelegate>
         {
             [self.subGroupDel subGroupUpdate:YES];
         }
-        [self unShowSelfViewController];
+        [self.navigationController popViewControllerAnimated:YES];
     }
 }
 
@@ -209,7 +218,7 @@ StuDetailDelegate>
         {
             [self.subGroupDel subGroupUpdate:YES];
         }
-        [self unShowSelfViewController];
+        [self.navigationController popViewControllerAnimated:YES];
     }
 }
 
@@ -217,13 +226,12 @@ StuDetailDelegate>
 {
     NSDictionary *dict = [tmpArray objectAtIndex:button.tag - 3000];
     ApplyInfoViewController *applyInfoViewController = [[ApplyInfoViewController alloc] init];
-    applyInfoViewController.classID = classID;
     applyInfoViewController.applyDel = self;
     applyInfoViewController.role = [dict objectForKey:@"role"];
     applyInfoViewController.j_id = [dict objectForKey:@"uid"];
     applyInfoViewController.title = [dict objectForKey:@"title"];
     applyInfoViewController.applyName = [dict objectForKey:@"name"];
-    [applyInfoViewController showSelfViewController:self];
+    [self.navigationController pushViewController:applyInfoViewController animated:YES];
 }
 
 @end

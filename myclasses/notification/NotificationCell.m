@@ -10,20 +10,20 @@
 #import "Header.h"
 
 @implementation NotificationCell
-@synthesize iconImageView,bgImageView,contentLabel,timeLabel,statusLabel,contentTextView,nameLabel;
+@synthesize iconLabel,bgImageView,contentLabel,timeLabel,statusLabel,contentTextView,nameLabel;
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
     if (self) {
         // Initialization code
-        
-        iconImageView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 10, 30, 30)];
-        iconImageView.backgroundColor = [UIColor clearColor];
-        [self.contentView addSubview:iconImageView];
-        
-        bgImageView = [[UIImageView alloc] initWithFrame:CGRectMake(20, 10, SCREEN_WIDTH-30, 100)];
+                
+        bgImageView = [[UIImageView alloc] initWithFrame:CGRectMake(3, 10, SCREEN_WIDTH-6, 100)];
         bgImageView.backgroundColor = [UIColor clearColor];
         [self.contentView addSubview:bgImageView];
+        
+        iconLabel = [[UILabel alloc] init];
+//        iconLabel.backgroundColor = RGB(234, 234, 234, 1);
+        [self.contentView addSubview:iconLabel];
         
         nameLabel = [[UILabel alloc] init];
         nameLabel.font = [UIFont systemFontOfSize:16];

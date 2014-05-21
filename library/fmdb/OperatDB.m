@@ -18,12 +18,42 @@
         _db = [DBManager defaultDBManager].dataBase;
         [self createTableWithTableName:@"chatMsg"];
         [self createNoticeTabel];
+        [self createCityTable];
         [self createFriendsTable];
         [self createClassMemTable];
         [self createImgIconTabel];
     }
     return self;
 }
+
+-(void)createCityTable
+{
+    FMResultSet *set = [_db executeQuery:[NSString stringWithFormat:@"select count(*) from sqlite_master where type ='table' and name = '%@'",CITYTABLE]];
+    [set next];
+    
+    NSInteger count = [set intForColumnIndex:0];
+    BOOL existTable = !!count;
+    if (existTable)
+    {
+        NSLog(@"table has exist!");
+    }
+    else
+    {
+        //chatMsg
+        NSString *sql = [NSString stringWithFormat:@"CREATE TABLE %@ (\
+                         cityid VARCHAR(30),cityname VARCHAR(30),jianpin VARCHAR(10),quanpin VARCHAR(30),citylevel VARCHAR(10),pid VARCHAR(50))",CITYTABLE];
+        BOOL res = [_db executeUpdate:sql];
+        if (!res)
+        {
+            NSLog(@"table %@ create failed!",CITYTABLE);
+        }
+        else
+        {
+            NSLog(@"table %@ create success!",CITYTABLE);
+        }
+    }
+}
+
 #pragma mark - chattable
 -(void)createTableWithTableName:(NSString *)TableName
 {
@@ -278,6 +308,67 @@
     }
     return msgArray;
 }
+
+-(NSMutableArray *)findSetWithDictionary:(NSDictionary *)dict
+                             orderByName:(NSString *)orderKey
+                            andTableName:(NSString *)tableName
+{
+    NSMutableArray *msgArray = [[NSMutableArray alloc] initWithCapacity:0];
+    NSMutableString *query = [NSMutableString stringWithFormat:@"SELECT * FROM %@ ",tableName];
+    if([dict count] > 0)
+    {
+        [query insertString:@" WHERE" atIndex:[query length]];
+        for (NSString *key in dict)
+        {
+            [query appendString:[NSString stringWithFormat:@" %@='%@' and",key,[dict objectForKey:key]]];
+        }
+        [query deleteCharactersInRange:NSMakeRange([query length]-3, 3)];
+        [query insertString:[NSString stringWithFormat:@" order by %@",orderKey] atIndex:[query length]];
+    }
+    DDLOG(@"find query %@",query);
+    FMResultSet *resultSet = [_db executeQuery:query];
+    while ([resultSet next])
+    {
+        [msgArray addObject:[resultSet resultDictionary]];
+    }
+    return msgArray;
+}
+
+
+-(NSMutableArray *)fuzzyfindSetWithDictionary:(NSDictionary *)dict
+                     andTableName:(NSString *)tableName
+                           andFuzzyDictionary:(NSDictionary *)fuzzyDict
+{
+    NSMutableArray *msgArray = [[NSMutableArray alloc] initWithCapacity:0];
+    NSMutableString *query = [NSMutableString stringWithFormat:@"SELECT * FROM %@ ",tableName];
+    if([dict count] > 0)
+    {
+        [query insertString:@" WHERE" atIndex:[query length]];
+        for (NSString *key in dict)
+        {
+            [query appendString:[NSString stringWithFormat:@" %@='%@' and",key,[dict objectForKey:key]]];
+        }
+        
+        if ([fuzzyDict count] > 0)
+        {
+            [query insertString:@" (" atIndex:[query length]];
+            for(NSString *key in fuzzyDict)
+            {
+                [query appendString:[NSString stringWithFormat:@" %@ like \'%%%@%%\' or",key,[fuzzyDict objectForKey:key]]];
+            }
+            [query deleteCharactersInRange:NSMakeRange([query length]-2, 2)];
+            [query insertString:@")" atIndex:[query length]];
+        }
+//        [query appendString:[NSString stringWithFormat:@" (%@ like \'%%%@%%\' or %@ like \'%@%%\' or %@ like \'%%%@\')",fuzzyKey,fuzzyValue,fuzzyKey,fuzzyValue,fuzzyKey,fuzzyValue]];
+    }
+    FMResultSet *resultSet = [_db executeQuery:query];
+    while ([resultSet next])
+    {
+        [msgArray addObject:[resultSet resultDictionary]];
+    }
+    return msgArray;
+}
+
 
 -(NSMutableArray *)findSetWithDictionary:(NSDictionary *)dict
                          andDistinctName:(NSString *)distinctName

@@ -12,6 +12,7 @@
 #import "MyClassesViewController.h"
 #import "SideMenuViewController.h"
 #import "JDSideMenu.h"
+#import "KKNavigationController.h"
 
 @interface CreateClassViewController ()<MySwitchDel,
 UITextFieldDelegate,
@@ -74,7 +75,7 @@ UIAlertViewDelegate>
     classNumber = @"请选择";
     className = @"";
     classType = @"1";
-    classTypeStr = @"初中";
+    classTypeStr = schoolLevel;
  
     pickerViewWidth = 120;
     pickerViewHeight = 90;
@@ -254,14 +255,14 @@ UIAlertViewDelegate>
     nickNameTextField.background = nil;
     nickNameTextField.textColor = TITLE_COLOR;
     nickNameTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
-    [self.bgView addSubview:nickNameTextField];
+//    [self.bgView addSubview:nickNameTextField];
     
     UIButton *editButton = [UIButton buttonWithType:UIButtonTypeCustom];
     editButton.frame = CGRectMake(nickNameTextField.frame.origin.x+nickNameTextField.frame.size.width, classNameTextField.frame.size.height+classNameTextField.frame.origin.y+15, 30, 30);
     [editButton setImage:[UIImage imageNamed:@"edit"] forState:UIControlStateNormal];
     editButton.backgroundColor = [UIColor clearColor];
     [editButton addTarget:self action:@selector(editNickName) forControlEvents:UIControlEventTouchUpInside];
-    [self.bgView addSubview:editButton];
+//    [self.bgView addSubview:editButton];
     
     UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
     UIButton *createButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -320,6 +321,11 @@ UIAlertViewDelegate>
 {
     [super viewWillAppear:animated];
     [MobClick beginLogPageView:@"PageOne"];
+}
+
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
 }
 -(void)viewWillDisappear:(BOOL)animated
 {
@@ -383,7 +389,7 @@ UIAlertViewDelegate>
         [joinButton setTitle:joinYear forState:UIControlStateNormal];
         [establishButton setTitle:establishYear forState:UIControlStateNormal];
         [classNumberButton setTitle:classNumber forState:UIControlStateNormal];
-        if ([classTypeStr length] > 0)
+        if ([classTypeStr length] > 0 && ([classTypeStr isEqualToString:@"初中"] || [classTypeStr isEqualToString:@"高中"]))
         {
             className = [NSString stringWithFormat:@"%@级%@(%@)",[joinYear substringToIndex:4],classNumber,classTypeStr];
         }
@@ -408,13 +414,14 @@ UIAlertViewDelegate>
         [Tools showAlertView:@"请选择班号" delegateViewController:nil];
         return ;
     }
+    
+    className = classNameTextField.text;
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
                                                                       @"s_id":[schoollID length]>0?schoollID:@"0",
                                                                       @"name":[NSString stringWithFormat:@"%@",className],
-                                                                      @"n_name":[nickNameTextField.text length]?nickNameTextField.text:@"",
                                                                       @"enter_t":[NSString stringWithFormat:@"%d",[joinYear intValue]],
                                                                       @"build_t":[NSString stringWithFormat:@"%d",[establishYear intValue]],
                                                                       @"role":@"teachers",
@@ -453,8 +460,9 @@ UIAlertViewDelegate>
 {
     SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
     MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
-    JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myClassesViewController menuController:sideMenuViewController];
-    [self presentViewController:sideMenu animated:YES completion:^{
+    KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClassesViewController];
+    JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myClassesNav menuController:sideMenuViewController];
+    [self.navigationController presentViewController:sideMenu animated:YES completion:^{
         
     }];
 }

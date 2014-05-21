@@ -10,4 +10,13 @@
 
 @implementation KKNavigationController (JDSideMenu)
 
+- (JDSideMenu *)sideMenuController
+{
+    if ([self.parentViewController isKindOfClass:[JDSideMenu class]]) {
+        return (JDSideMenu *)self.parentViewController;
+    }
+    
+    return nil;
+}
+
 @end

@@ -66,6 +66,7 @@ MsgDelegate>
     UIView *searchView;
     
     UITapGestureRecognizer *tapTgr;
+    NSString *classID;
 }
 @end
 
@@ -86,7 +87,11 @@ MsgDelegate>
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"班级成员";
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+    
+    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     updateGroup = @"";
+    
+    classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
     _db = [[OperatDB alloc] init];
     
@@ -123,8 +128,6 @@ MsgDelegate>
     [inviteButton addTarget:self action:@selector(inviteClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:inviteButton];
     
-    DDLOG(@"%@==%@",[[NSUserDefaults standardUserDefaults] objectForKey:@"role"],[[NSUserDefaults standardUserDefaults] objectForKey:@"set"]);
-    
     if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"parents"] && [[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:ParentInviteMem] integerValue] == 0)
     {
         inviteButton.hidden = YES;
@@ -137,6 +140,7 @@ MsgDelegate>
     mySearchBar = [[UISearchBar alloc] initWithFrame:
                    CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH-0, 40)];
     mySearchBar.delegate = self;
+    mySearchBar.placeholder = @"输入学生姓名";
     mySearchBar.backgroundColor = [UIColor whiteColor];
     [self.bgView addSubview:mySearchBar];
     
@@ -152,8 +156,8 @@ MsgDelegate>
     pullRefreshView.delegate = self;
     
     
-    searchView = [[UIView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT+40, SCREEN_WIDTH, SCREEN_HEIGHT-40-UI_TAB_BAR_HEIGHT-43)];
-    searchView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
+    searchView = [[UIView alloc] initWithFrame:CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT+40, SCREEN_WIDTH-20, SCREEN_HEIGHT-40-UI_TAB_BAR_HEIGHT-43)];
+    searchView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0];
     [self.bgView addSubview:searchView];
     [self.bgView sendSubviewToBack:searchView];
     
@@ -168,11 +172,9 @@ MsgDelegate>
         {
             searchField = (UITextField*)subview;
             searchField.leftView=nil;
-            searchField.placeholder = @"输入学生姓名";
             [searchField setBackground:nil];
-            searchField.background = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
             [searchField setBackgroundColor:[UIColor whiteColor]];
-            [searchField setBorderStyle:UITextBorderStyleNone];
+            searchField.background = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
             break;
         }
     }
@@ -181,17 +183,11 @@ MsgDelegate>
     {
         if ([subview isKindOfClass:NSClassFromString(@"UISearchBarBackground")])
         {
-            subview.backgroundColor = [UIColor whiteColor];
+            subview.backgroundColor = [UIColor clearColor];
             [subview removeFromSuperview];
             break;
         }
     }
-    
-    UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 3, 20, 2)];
-    
-    UIImageView *inputImageView = [[UIImageView alloc] initWithFrame:mySearchBar.frame];
-    inputImageView.image = inputImage;
-    [self.bgView insertSubview:inputImageView belowSubview:mySearchBar];
     
     searchTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 40, SCREEN_WIDTH, 0) style:UITableViewStylePlain];
     searchTableView.delegate = self;
@@ -204,6 +200,7 @@ MsgDelegate>
         NSArray *newApplyArray = [_db findSetWithDictionary:@{@"classid":classID,@"checked":@"0"} andTableName:CLASSMEMBERTABLE];
         if ([newApplyArray count] > 0)
         {
+            [self getAdminCache];
             [self getAdmins];
         }
         else
@@ -280,26 +277,28 @@ MsgDelegate>
     //    [searchResultTableView reloadData];
     [UIView animateWithDuration:0.2 animations:^{
         [self.bgView sendSubviewToBack:searchView];
-        
-        self.bgView.center = CGPointMake(CENTER_POINT.x, CENTER_POINT.y-(35+YSTART));
         memberTableView.hidden = NO;
-//        searchTableView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-//        mySearchBar.frame = CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, 40);
+        searchTableView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+        mySearchBar.frame = CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, 40);
+        mySearchBar.showsCancelButton = NO;
+        searchView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0];
     }];
-    mySearchBar.showsCancelButton = NO;
+   
     [mySearchBar resignFirstResponder];
 }
 -(void)searchBarTextDidBeginEditing:(UISearchBar *)searchBar
 {
     [UIView animateWithDuration:0.2 animations:^{
         [searchView addGestureRecognizer:tapTgr];
-        self.bgView.center = CGPointMake(CENTER_POINT.x, CENTER_POINT.y-75);
-//        mySearchBar.frame = CGRectMake(0, 0, SCREEN_WIDTH, 40);
+        mySearchBar.frame = CGRectMake(0, 0, SCREEN_WIDTH, 40);
         [self.bgView bringSubviewToFront:searchView];
-//        searchTableView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+        searchTableView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+        searchView.frame = CGRectMake(0, 40, SCREEN_WIDTH, SCREEN_HEIGHT);
         memberTableView.hidden = YES;
+        searchView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.4];
+        searchBar.showsCancelButton = YES;
     }];
-    searchBar.showsCancelButton = YES;
+    
 }
 
 -(void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText
@@ -365,17 +364,14 @@ MsgDelegate>
 -(void)backClick
 {
 //    [[XDTabViewController sharedTabViewController] dismissViewControllerAnimated:YES completion:nil];
-    [[XDTabViewController sharedTabViewController] unShowSelfViewController];
+    [[XDTabViewController sharedTabViewController] dismissViewControllerAnimated:YES completion:nil];
 }
 
 -(void)inviteClick
 {
     InviteViewController *inviteViewController = [[InviteViewController alloc] init];
-    inviteViewController.schoolName = schoolName;
-    inviteViewController.className = className;
     inviteViewController.fromClass = YES;
-    inviteViewController.classID = classID;
-    [inviteViewController showSelfViewController:[XDTabViewController sharedTabViewController]];
+    [[XDTabViewController sharedTabViewController].navigationController pushViewController:inviteViewController animated:YES];
 }
 #pragma mark - getNetData
 
@@ -943,6 +939,7 @@ MsgDelegate>
         NSDictionary *dict = [searchResultArray objectAtIndex:indexPath.row];
         cell.textLabel.font = [UIFont systemFontOfSize:14];
         cell.textLabel.text = [dict objectForKey:@"name"];
+        cell.selectionStyle = UITableViewCellSelectionStyleGray;
         return cell;
     }
     return nil;
@@ -963,7 +960,7 @@ MsgDelegate>
                 subGroup.classID = classID;
                 subGroup.subGroupDel = self;
                 subGroup.admin = NO;
-                [subGroup showSelfViewController:[XDTabViewController sharedTabViewController]];
+                [[XDTabViewController sharedTabViewController].navigationController pushViewController:subGroup animated:YES];
             }
             else if (indexPath.row == 1)
             {
@@ -972,7 +969,7 @@ MsgDelegate>
                 subGroup.classID = classID;
                 subGroup.admin = NO;
                 subGroup.subGroupDel = self;
-                [subGroup showSelfViewController:[XDTabViewController sharedTabViewController]];
+                [[XDTabViewController sharedTabViewController].navigationController pushViewController:subGroup animated:YES];
             }
             else if(indexPath.row == 2)
             {
@@ -981,7 +978,7 @@ MsgDelegate>
                 subGroup.classID = classID;
                 subGroup.admin = YES;
                 subGroup.subGroupDel = self;
-                [subGroup showSelfViewController:[XDTabViewController sharedTabViewController]];
+                [[XDTabViewController sharedTabViewController].navigationController pushViewController:subGroup animated:YES];
             }
             else if(indexPath.row == 3)
             {
@@ -990,30 +987,26 @@ MsgDelegate>
                 subGroup.classID = classID;
                 subGroup.admin = NO;
                 subGroup.subGroupDel = self;
-                [subGroup showSelfViewController:[XDTabViewController sharedTabViewController]];
+                [[XDTabViewController sharedTabViewController].navigationController pushViewController:subGroup animated:YES];
             }
         }
         else if(indexPath.section == 1)
         {
             NSDictionary *dict = [classLeadersArray objectAtIndex:indexPath.row];
             StudentDetailViewController *studentDetail = [[StudentDetailViewController alloc] init];
-            studentDetail.classID = classID;
             studentDetail.admin = NO;
             studentDetail.memDel = self;
-            studentDetail.schoolName = schoolName;
-            studentDetail.className = className;
             studentDetail.studentID = [dict objectForKey:@"uid"];
             studentDetail.studentName = [dict objectForKey:@"name"];
             studentDetail.title = [dict objectForKey:@"title"];
             studentDetail.headerImg = [dict objectForKey:@"img_icon"];
             studentDetail.role = [dict objectForKey:@"role"];
-            [studentDetail showSelfViewController:[XDTabViewController sharedTabViewController]];
+            [[XDTabViewController sharedTabViewController].navigationController pushViewController:studentDetail animated:YES];
         }
         else
         {
             NSDictionary *dict = [[[membersArray objectAtIndex:indexPath.section-2] objectForKey:@"array"] objectAtIndex:indexPath.row];
             StudentDetailViewController *studentDetail = [[StudentDetailViewController alloc] init];
-            studentDetail.classID = classID;
             if (![[dict objectForKey:@"uid"] isEqual:[NSNull null]])
             {
                 studentDetail.studentID = [dict objectForKey:@"uid"];
@@ -1022,14 +1015,16 @@ MsgDelegate>
             {
                 studentDetail.title = [dict objectForKey:@"title"];
             }
-            studentDetail.schoolName = schoolName;
-            studentDetail.className = className;
             studentDetail.studentName = [dict objectForKey:@"name"];
-            studentDetail.title = [dict objectForKey:@"title"];
+            if (![[dict objectForKey:@"title"] isEqual:[NSNull null]])
+            {
+                studentDetail.title = [dict objectForKey:@"title"];
+            }
+            
             studentDetail.headerImg = [dict objectForKey:@"img_icon"];
             studentDetail.memDel = self;
             studentDetail.role = [dict objectForKey:@"role"];
-            [studentDetail showSelfViewController:[XDTabViewController sharedTabViewController]];
+            [[XDTabViewController sharedTabViewController].navigationController pushViewController:studentDetail animated:YES];
         }
     }
     else if(tableView.tag == SearchTableViewTag)
@@ -1038,16 +1033,13 @@ MsgDelegate>
         if ([[dict objectForKey:@"role"] isEqualToString:@"students"])
         {
             StudentDetailViewController *studentDetail = [[StudentDetailViewController alloc] init];
-            studentDetail.classID = classID;
-            studentDetail.schoolName = schoolName;
-            studentDetail.className = className;
             studentDetail.studentID = [dict objectForKey:@"uid"];
             studentDetail.studentName = [dict objectForKey:@"name"];
             studentDetail.title = [dict objectForKey:@"title"];
             studentDetail.headerImg = [dict objectForKey:@"img_icon"];
             studentDetail.role = [dict objectForKey:@"role"];
             studentDetail.memDel = self;
-            [studentDetail showSelfViewController:[XDTabViewController sharedTabViewController]];
+            [[XDTabViewController sharedTabViewController].navigationController pushViewController:studentDetail animated:YES];
         }
         else if([[dict objectForKey:@"role"] isEqualToString:@"parents"])
         {
@@ -1058,9 +1050,8 @@ MsgDelegate>
             parentDetail.headerImg = [dict objectForKey:@"img_icon"];
             parentDetail.admin = NO;
             parentDetail.memDel = self;
-            parentDetail.classID = classID;
             parentDetail.role = [dict objectForKey:@"role"];
-            [parentDetail showSelfViewController:[XDTabViewController sharedTabViewController]];
+            [[XDTabViewController sharedTabViewController].navigationController pushViewController:parentDetail animated:YES];
         }
         else if([[dict objectForKey:@"role"] isEqualToString:@"teachers"])
         {
@@ -1068,9 +1059,9 @@ MsgDelegate>
             memDetail.teacherID = [dict objectForKey:@"uid"];
             memDetail.teacherName = [dict objectForKey:@"name"];
             memDetail.memDel = self;
-            memDetail.classID = classID;
-            [memDetail showSelfViewController:[XDTabViewController sharedTabViewController]];
+            [[XDTabViewController sharedTabViewController].navigationController pushViewController:memDetail animated:YES];
         }
+        [self cancelSearch];
         [self searchBarCancelButtonClicked:mySearchBar];
     }
     [tableView deselectRowAtIndexPath:indexPath animated:NO];

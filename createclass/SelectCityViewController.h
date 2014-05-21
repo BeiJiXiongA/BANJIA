@@ -8,6 +8,12 @@
 
 #import "XDContentViewController.h"
 
-@interface SelectCityViewController : XDContentViewController
+@protocol SelectCitydelegate <NSObject>
 
+-(void)selectCityWithDict:(NSDictionary *)cityDict;
+
+@end
+
+@interface SelectCityViewController : XDContentViewController
+@property (nonatomic, assign)  id<SelectCitydelegate> selectCityDel;
 @end

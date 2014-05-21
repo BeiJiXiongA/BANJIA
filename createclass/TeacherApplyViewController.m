@@ -43,11 +43,15 @@ UIScrollViewDelegate>
     NSString *adminID;
     
     UIButton *studentButton;
+    
+    NSString *schoolName;
+    NSString *className;
+    NSString *classID;
 }
 @end
 
 @implementation TeacherApplyViewController
-@synthesize schoolName,schoolID,className,classID,real_name;
+@synthesize real_name;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -62,6 +66,10 @@ UIScrollViewDelegate>
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"老师申请加入";
+    
+    schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
+    classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
+    className = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     

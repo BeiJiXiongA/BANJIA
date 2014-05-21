@@ -40,14 +40,14 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"设置班级角色";
+    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     
-    DDLOG(@"uiser==%@",userid);
     alert = 1;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
     
-    objectArray = [[NSMutableArray alloc] initWithArray:@[@"副班长",@"生活委员",@"学习委员",@"文体委员"]];
+    objectArray = [[NSMutableArray alloc] initWithArray:@[@"班长",@"生活委员",@"学习委员",@"文体委员"]];
     selectDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     
     UILabel *tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT+20, 150, 20)];
@@ -71,7 +71,7 @@
     
     UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
     
-    addObjectTextField = [[MyTextField alloc] initWithFrame:CGRectMake(71, objectTabelView.frame.size.height+objectTabelView.frame.origin.y+5, SCREEN_WIDTH-62, 30)];
+    addObjectTextField = [[MyTextField alloc] initWithFrame:CGRectMake(71, objectTabelView.frame.size.height+objectTabelView.frame.origin.y+5, SCREEN_WIDTH-62-40, 30)];
     addObjectTextField.background = inputImage;
     addObjectTextField.delegate = self;
     addObjectTextField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
@@ -87,7 +87,7 @@
     noticeSwitch = [[KLSwitch alloc] init];
     noticeSwitch.frame = CGRectMake(SCREEN_WIDTH-100, SCREEN_HEIGHT-50, 80, 30);
     [noticeSwitch addTarget:self action:@selector(valueChange) forControlEvents:UIControlEventValueChanged];
-    [noticeSwitch isOn:YES];
+//    [noticeSwitch isOn:YES];
     [self.bgView addSubview:noticeSwitch];
     
     UIButton *submit = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -102,6 +102,11 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 -(void)valueChange
@@ -147,7 +152,7 @@
                 {
                     [self.setStudel setStuObj:[jobTitle length]>0?[jobTitle substringToIndex:[jobTitle length]-1]:@""];
                 }
-                [self unShowSelfViewController];
+                [self.navigationController popViewControllerAnimated:YES];
             }
             else
             {
@@ -219,6 +224,19 @@
     }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
+}
+
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if ([[selectDict objectForKey:[NSString stringWithFormat:@"%d",indexPath.row]] length] > 0)
+    {
+        [selectDict removeObjectForKey:[NSString stringWithFormat:@"%d",indexPath.row]];
+    }
+    else
+    {
+        [selectDict setObject:[objectArray objectAtIndex:indexPath.row] forKey:[NSString stringWithFormat:@"%d",indexPath.row]];
+    }
+    [objectTabelView reloadData];
 }
 
 -(void)operateObject:(UIButton *)button

@@ -31,12 +31,13 @@
     OperatDB *db;
     
     NSString *userPhone;
+    NSString *classID;
 }
 @end
 
 @implementation MemberDetailViewController
 
-@synthesize classID,role,j_id,applyName,title,admin,headerImg,memDel;
+@synthesize role,j_id,applyName,title,admin,headerImg,memDel;
 @synthesize teacherID,teacherName;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -53,7 +54,11 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     
+    classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
+    
     self.titleLabel.text = @"个人信息";
+    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+    
     dataDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     db = [[OperatDB alloc] init];
     
@@ -108,9 +113,13 @@
     genderImageView.backgroundColor = [UIColor clearColor];
     [self.bgView addSubview:genderImageView];
     
-    jobLabel = [[UILabel alloc] initWithFrame:CGRectMake(nameLabel.frame.origin.x, nameLabel.frame.size.height+nameLabel.frame.origin.y, SCREEN_WIDTH-nameLabel.frame.origin.x-30, 30)];
+    
+    CGSize titleSize = [Tools getSizeWithString:title andWidth:200 andFont:[UIFont systemFontOfSize:13]];
+    jobLabel = [[UILabel alloc] initWithFrame:CGRectMake(nameLabel.frame.origin.x, nameLabel.frame.size.height+nameLabel.frame.origin.y, titleSize.width, titleSize.height>0?(titleSize.height+10):40)];
     jobLabel.font = [UIFont systemFontOfSize:13];
     jobLabel.textColor = [UIColor lightGrayColor];
+    jobLabel.numberOfLines = 3;
+    jobLabel.text = title;
     jobLabel.backgroundColor = [UIColor clearColor];
     [self.bgView addSubview:jobLabel];
     
@@ -176,6 +185,11 @@
     
 }
 
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
 #pragma mark - setobjectdel
 -(void)setobject:(NSString *)objectUpdate
 {
@@ -186,7 +200,7 @@
         {
             [self.memDel updateListWith:YES];
         }
-        [self unShowSelfViewController];
+        [self.navigationController popViewControllerAnimated:YES];
     }
 }
 
@@ -351,7 +365,8 @@
         setobject.classID = classID;
         setobject.title = jobLabel.text;
         setobject.setobject= self;
-        [setobject showSelfViewController:self];
+        [self cancelPhone];
+        [self.navigationController pushViewController:setobject animated:YES];
     }
     else if(button.tag-4000-1 == 1)
     {
@@ -394,7 +409,7 @@
                 {
                     [self.memDel updateListWith:YES];
                 }
-                [self unShowSelfViewController];
+                [self.navigationController popViewControllerAnimated:YES];
             }
             else
             {
@@ -431,7 +446,7 @@
             DDLOG(@"transadmin responsedict %@",responseString);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                [self unShowSelfViewController];
+                [self.navigationController popViewControllerAnimated:YES];
             }
             else
             {
@@ -457,7 +472,7 @@
     chatViewController.toID = teacherID;
     chatViewController.name = teacherName;
     chatViewController.imageUrl = headerImg;
-    [chatViewController showSelfViewController:self];
+    [self.navigationController pushViewController:chatViewController animated:YES];
 }
 
 
@@ -496,7 +511,7 @@
     }
     else
     {
-        [self unShowSelfViewController];
+        [self.navigationController popViewControllerAnimated:YES];
     }
     
 }

@@ -8,12 +8,15 @@
 
 #import "SelectSchoolLevelViewController.h"
 
-@interface SelectSchoolLevelViewController ()
-
+@interface SelectSchoolLevelViewController ()<UITableViewDataSource,UITableViewDelegate>
+{
+    NSArray *schoolLevelArray;
+    NSArray *valueArray;
+}
 @end
 
 @implementation SelectSchoolLevelViewController
-
+@synthesize selectSchoolLevelDel,fromCreate;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -27,12 +30,69 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    
+    if (fromCreate)
+    {
+        schoolLevelArray = [NSArray arrayWithObjects:@"幼儿园",@"小学",@"中学",@"中专技校",@"培训机构",@"其它", nil];
+        valueArray = [NSArray arrayWithObjects:@"0",@"1",@"2",@"3",@"4",@"5", nil];
+    }
+    else
+    {
+        schoolLevelArray = [NSArray arrayWithObjects:@"全部",@"幼儿园",@"小学",@"中学",@"中专技校",@"培训机构",@"其它", nil];
+        valueArray = [NSArray arrayWithObjects:@"-1",@"0",@"1",@"2",@"3",@"4",@"5", nil];
+    }
+    
+    
+    UITableView *schoolLevelTableView = [[UITableView alloc] initWithFrame:CGRectMake(5, UI_NAVIGATION_BAR_HEIGHT + 10, SCREEN_WIDTH-10, 240) style:UITableViewStylePlain];
+    schoolLevelTableView.delegate  = self;
+    schoolLevelTableView.dataSource = self;
+    schoolLevelTableView.backgroundColor = [UIColor whiteColor];
+    [self.bgView addSubview:schoolLevelTableView];
 }
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return [schoolLevelArray count];
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 40;
+}
+
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *schoolLevel = @"schoollevelcell";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:schoolLevel];
+    if (cell == nil)
+    {
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:schoolLevel];
+    }
+    cell.textLabel.text = [schoolLevelArray objectAtIndex:indexPath.row];
+    cell.textLabel.font = [UIFont systemFontOfSize:14];
+    cell.selectionStyle = UITableViewCellSelectionStyleGray;
+    return cell;
+
+}
+
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    if ([self.selectSchoolLevelDel respondsToSelector:@selector(updateSchoolLevelWith:andId:)])
+    {
+        [self.selectSchoolLevelDel updateSchoolLevelWith:[schoolLevelArray objectAtIndex:indexPath.row] andId:[valueArray objectAtIndex:indexPath.row]];
+    }
+    [self unShowSelfViewController];
 }
 
 /*

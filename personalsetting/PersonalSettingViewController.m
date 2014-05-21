@@ -19,6 +19,8 @@
 #import "AppDelegate.h"
 #import "SettingViewController.h"
 #import "ChangePhoneViewController.h"
+#import "UINavigationController+JDSideMenu.h"
+#import "ClassPlusAccountViewController.h"
 
 
 @interface PersonalSettingViewController ()<UITableViewDataSource,
@@ -586,7 +588,6 @@ UIActionSheetDelegate>
 {
     OperatDB *db = [[OperatDB alloc] init];
     NSMutableArray *array = [db findSetWithDictionary:@{@"readed":@"0",@"userid":[Tools user_id]} andTableName:@"chatMsg"];
-    DDLOG(@"new chat msg=%d",[array count]);
     if ([array count] > 0 || [[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue]>0)
     {
         return YES;
@@ -601,7 +602,6 @@ UIActionSheetDelegate>
 {
     OperatDB *db = [[OperatDB alloc] init];
     NSMutableArray *array = [db findSetWithDictionary:@{@"readed":@"0",@"uid":[Tools user_id],@"type":@"f_apply"} andTableName:@"notice"];
-    DDLOG(@"new notice msg=%d",[array count]);
     if ([array count] > 0)
     {
         return YES;
@@ -612,7 +612,7 @@ UIActionSheetDelegate>
 -(void)settingClick
 {
     SettingViewController *setting = [[SettingViewController alloc] init];
-    [setting showSelfViewController:self];
+    [self.navigationController pushViewController:setting animated:YES];
 }
 
 -(void)viewDidDisappear:(BOOL)animated
@@ -624,7 +624,7 @@ UIActionSheetDelegate>
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return 3;
+    return 2;
 }
 
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
@@ -661,15 +661,11 @@ UIActionSheetDelegate>
 {
     if (section == 0)
     {
-        return 3;
+        return 5;
     }
     else if (section == 1)
     {
-        return 3;
-    }
-    else if (section == 2)
-    {
-        return 1;
+        return 2;
     }
     return 0;
 }
@@ -681,28 +677,20 @@ UIActionSheetDelegate>
         {
             return 125;
         }
-        else if(indexPath.row == 1)
-        {
-            if (isAuth)
-            {
-                return 0;
-            }
-            else
-            {
-                return 47;
-            }
-        }
-        else if(indexPath.row == 2)
+        else
         {
             return 47;
         }
     }
     else if (indexPath.section == 1)
     {
-        return 47;
-    }
-    else if(indexPath.section == 2)
-    {
+        if (isAuth)
+        {
+            if (indexPath.row == 0)
+            {
+                return 0;
+            }
+        }
         return 47;
     }
     return 0;
@@ -741,7 +729,7 @@ UIActionSheetDelegate>
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
             return cell;
         }
-        else
+        else if(indexPath.row == 1)
         {
             static NSString *authcell = @"section0";
             PersonalSettingCell *cell = [tableView dequeueReusableCellWithIdentifier:authcell];
@@ -753,37 +741,6 @@ UIActionSheetDelegate>
             cell.nameLabel.textAlignment = NSTextAlignmentLeft;
             cell.headerImageView.hidden = YES;
             if (indexPath.row == 1)
-            {
-                if (!isAuth)
-                {
-                    cell.nameLabel.hidden = NO;
-                    cell.nameLabel.textColor = RGB(254, 136, 0, 1);
-                    cell.nameLabel.text = @"您尚未进行教师认证";
-                    cell.nameLabel.frame = CGRectMake(20, 13, 200, 20);
-                    
-                    if ([accountDict objectForKey:@"t_checked"])
-                    {
-                        if ([[accountDict objectForKey:@"t_checked"] integerValue] == 0)
-                        {
-                            cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-100, 13, 80, 20);
-                            cell.objectsLabel.text = @"审核被拒绝";
-                            cell.objectsLabel.font = [UIFont systemFontOfSize:14];
-                        }
-                    }
-                    else if ([accountDict objectForKey:@"img_tcard"])
-                    {
-                        if ([[accountDict objectForKey:@"img_tcard"] length] > 10)
-                        {
-                            cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-100, 13, 80, 20);
-                            cell.objectsLabel.text = @"正在审核";
-                            cell.objectsLabel.font = [UIFont systemFontOfSize:14];
-                        }
-                    }
-                }
-                else
-                    cell.nameLabel.hidden = YES;
-            }
-            else if (indexPath.row == 2)
             {
                 cell.nameLabel.frame = CGRectMake(20, 13, 100, 20);
                 cell.nameLabel.textColor = [UIColor blackColor];
@@ -810,102 +767,152 @@ UIActionSheetDelegate>
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
             return cell;
         }
-    }
-    else if (indexPath.section == 1)
-    {
-        static NSString *relateCell = @"relateCell";
-        RelatedCell *cell = [tableView dequeueReusableCellWithIdentifier:relateCell];
-        if (cell == nil)
+        else
         {
-            cell = [[RelatedCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:relateCell];
+            static NSString *relateCell = @"relateCell";
+            RelatedCell *cell = [tableView dequeueReusableCellWithIdentifier:relateCell];
+            if (cell == nil)
+            {
+                cell = [[RelatedCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:relateCell];
+            }
+            cell.relateButton.tag = indexPath.row+1000;
+            cell.relateButton.frame = CGRectMake(SCREEN_WIDTH-100, 8.5, 80, 26);
+            cell.nametf.frame = CGRectMake(60, 11, 170, 20);
+            if (indexPath.row == 2)
+            {
+                if ([ShareSDK hasAuthorizedWithType:ShareTypeQQSpace])
+                {
+                    cell.nametf.text = [[NSUserDefaults standardUserDefaults] objectForKey:QQNICKNAME];
+                    [cell.relateButton setTitle:@"解除" forState:UIControlStateNormal];
+                    [cell.relateButton removeTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
+                    [cell.relateButton addTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
+                }
+                else
+                {
+                    [cell.relateButton removeTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
+                    [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
+                    cell.nametf.text = @"";
+                    [cell.relateButton setTitle:@"关联" forState:UIControlStateNormal];
+                }
+                [cell.iconImageView setImage:[UIImage imageNamed:@"QQicon"]];
+            }
+            else if(indexPath.row == 3)
+            {
+                if ([ShareSDK hasAuthorizedWithType:ShareTypeSinaWeibo])
+                {
+                    cell.nametf.text = [[NSUserDefaults standardUserDefaults] objectForKey:SINANICKNAME];
+                    [cell.relateButton setTitle:@"解除" forState:UIControlStateNormal];
+                    [cell.relateButton removeTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
+                    [cell.relateButton addTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
+                }
+                else
+                {
+                    [cell.relateButton removeTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
+                    [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
+                    cell.nametf.text = @"";
+                    [cell.relateButton setTitle:@"关联" forState:UIControlStateNormal];
+                }
+                [cell.iconImageView setImage:[UIImage imageNamed:@"sinaicon"]];
+            }
+            else if(indexPath.row == 4)
+            {
+                if ([ShareSDK hasAuthorizedWithType:ShareTypeRenren])
+                {
+                    cell.nametf.text = [[NSUserDefaults standardUserDefaults] objectForKey:RRNICKNAME];
+                    [cell.relateButton setTitle:@"解除" forState:UIControlStateNormal];
+                     [cell.relateButton removeTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
+                    [cell.relateButton addTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
+                }
+                else
+                {
+                    [cell.relateButton removeTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
+                    [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
+                    cell.nametf.text = @"";
+                    [cell.relateButton setTitle:@"关联" forState:UIControlStateNormal];
+                }
+                [cell.iconImageView setImage:[UIImage imageNamed:@"renrenicon"]];
+            }
+            cell.nametf.tag = indexPath.row+333;
+            cell.nametf.textColor = [UIColor blackColor];
+            cell.nametf.font = [UIFont systemFontOfSize:16];
+            cell.nametf.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
+            cell.nametf.enabled = NO;
+            
+            cell.nametf.returnKeyType = UIReturnKeyDone;
+            UIImageView *bgImageBG = [[UIImageView alloc] init];
+            bgImageBG.image = [UIImage imageNamed:@"cell_bg2"];
+            cell.backgroundView = bgImageBG;
+            cell.selectionStyle = UITableViewCellSelectionStyleNone;
+            return cell;
         }
-        cell.relateButton.tag = indexPath.row+1000;
-        cell.relateButton.frame = CGRectMake(SCREEN_WIDTH-100, 8.5, 80, 26);
-        cell.nametf.frame = CGRectMake(60, 11, 170, 20);
+    }
+    else if(indexPath.section == 1)
+    {
         if (indexPath.row == 0)
         {
-            if ([ShareSDK hasAuthorizedWithType:ShareTypeQQSpace])
+            static NSString *authcell = @"section0";
+            PersonalSettingCell *cell = [tableView dequeueReusableCellWithIdentifier:authcell];
+            if (cell == nil)
             {
-                cell.nametf.text = [[NSUserDefaults standardUserDefaults] objectForKey:QQNICKNAME];
-                [cell.relateButton setTitle:@"解除" forState:UIControlStateNormal];
-                [cell.relateButton removeTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-                [cell.relateButton addTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
+                cell = [[PersonalSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:authcell];
+            }
+            cell.nameLabel.font = [UIFont systemFontOfSize:18];
+            cell.nameLabel.textAlignment = NSTextAlignmentLeft;
+            cell.headerImageView.hidden = YES;
+            
+            if (!isAuth)
+            {
+                cell.nameLabel.hidden = NO;
+                cell.nameLabel.textColor = RGB(254, 136, 0, 1);
+                cell.nameLabel.text = @"您尚未进行教师认证";
+                cell.nameLabel.frame = CGRectMake(20, 13, 200, 20);
+                
+                if ([accountDict objectForKey:@"t_checked"])
+                {
+                    if ([[accountDict objectForKey:@"t_checked"] integerValue] == 0)
+                    {
+                        cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-100, 13, 80, 20);
+                        cell.objectsLabel.text = @"审核被拒绝";
+                        cell.objectsLabel.font = [UIFont systemFontOfSize:14];
+                    }
+                }
+                else if ([accountDict objectForKey:@"img_tcard"])
+                {
+                    if ([[accountDict objectForKey:@"img_tcard"] length] > 10)
+                    {
+                        cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-100, 13, 80, 20);
+                        cell.objectsLabel.text = @"正在审核";
+                        cell.objectsLabel.font = [UIFont systemFontOfSize:14];
+                    }
+                }
             }
             else
-            {
-                [cell.relateButton removeTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
-                [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-                cell.nametf.text = @"";
-                [cell.relateButton setTitle:@"关联" forState:UIControlStateNormal];
-            }
-            [cell.iconImageView setImage:[UIImage imageNamed:@"QQicon"]];
+                cell.nameLabel.hidden = YES;
+            UIImageView *bgImageBG = [[UIImageView alloc] init];
+            bgImageBG.image = [UIImage imageNamed:@"cell_bg2"];
+            cell.backgroundView = bgImageBG;
+            cell.selectionStyle = UITableViewCellSelectionStyleNone;
+            cell.backgroundColor = [UIColor whiteColor];
+            return cell;
         }
-        else if(indexPath.row == 1)
+        else if (indexPath.row == 1)
         {
-            if ([ShareSDK hasAuthorizedWithType:ShareTypeSinaWeibo])
+            static NSString *authcell = @"section2";
+            UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:authcell];
+            if (cell == nil)
             {
-                cell.nametf.text = [[NSUserDefaults standardUserDefaults] objectForKey:SINANICKNAME];
-                [cell.relateButton setTitle:@"解除" forState:UIControlStateNormal];
-                [cell.relateButton removeTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-                [cell.relateButton addTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
+                cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:authcell];
             }
-            else
-            {
-                [cell.relateButton removeTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
-                [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-                cell.nametf.text = @"";
-                [cell.relateButton setTitle:@"关联" forState:UIControlStateNormal];
-            }
-            [cell.iconImageView setImage:[UIImage imageNamed:@"sinaicon"]];
+            cell.textLabel.font = [UIFont systemFontOfSize:18];
+            cell.textLabel.text = @"设置";
+            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_angle"]];
+            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 10, 10, 20)];
+            UIImageView *bgImageBG = [[UIImageView alloc] init];
+            bgImageBG.image = [UIImage imageNamed:@"cell_bg2"];
+            cell.backgroundView = bgImageBG;
+            cell.selectionStyle = UITableViewCellSelectionStyleNone;
+            return cell;
         }
-        else if(indexPath.row == 2)
-        {
-            if ([ShareSDK hasAuthorizedWithType:ShareTypeRenren])
-            {
-                cell.nametf.text = [[NSUserDefaults standardUserDefaults] objectForKey:RRNICKNAME];
-                [cell.relateButton setTitle:@"解除" forState:UIControlStateNormal];
-                 [cell.relateButton removeTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-                [cell.relateButton addTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
-            }
-            else
-            {
-                [cell.relateButton removeTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
-                [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-                cell.nametf.text = @"";
-                [cell.relateButton setTitle:@"关联" forState:UIControlStateNormal];
-            }
-            [cell.iconImageView setImage:[UIImage imageNamed:@"renrenicon"]];
-        }
-        cell.nametf.tag = indexPath.row+333;
-        cell.nametf.textColor = [UIColor blackColor];
-        cell.nametf.font = [UIFont systemFontOfSize:16];
-        cell.nametf.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
-        cell.nametf.enabled = NO;
-        
-        cell.nametf.returnKeyType = UIReturnKeyDone;
-        UIImageView *bgImageBG = [[UIImageView alloc] init];
-        bgImageBG.image = [UIImage imageNamed:@"cell_bg2"];
-        cell.backgroundView = bgImageBG;
-        cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        return cell;
-    }
-    else if(indexPath.section == 2)
-    {
-        static NSString *authcell = @"section2";
-        UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:authcell];
-        if (cell == nil)
-        {
-            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:authcell];
-        }
-        cell.textLabel.font = [UIFont systemFontOfSize:18];
-        cell.textLabel.text = @"设置";
-        cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_angle"]];
-        [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 10, 10, 20)];
-        UIImageView *bgImageBG = [[UIImageView alloc] init];
-        bgImageBG.image = [UIImage imageNamed:@"cell_bg2"];
-        cell.backgroundView = bgImageBG;
-        cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        return cell;
     }
     return nil;
 }
@@ -916,9 +923,31 @@ UIActionSheetDelegate>
         if (indexPath.row == 0)
         {
             PersonInfoSettingViewController *personInfoSettiongViewController = [[PersonInfoSettingViewController alloc] init];
-            [personInfoSettiongViewController showSelfViewController:self];
+            [self.navigationController pushViewController:personInfoSettiongViewController animated:YES];
         }
         else if(indexPath.row == 1)
+        {
+            if (![Tools phone_num])
+            {
+                ChangePhoneViewController *changePhoneNumVC = [[ChangePhoneViewController alloc] init];
+                changePhoneNumVC.changePhoneDel = self;
+                [self.navigationController pushViewController:changePhoneNumVC animated:YES];
+            }
+            else
+            {
+                ClassPlusAccountViewController *classPlusViewController = [[ClassPlusAccountViewController alloc] init];
+                [self.navigationController pushViewController:classPlusViewController animated:YES];
+            }
+        }
+        else
+        {
+            [self bindThirdAccountWithIndex:indexPath.row];
+        }
+    }
+    
+    else if (indexPath.section == 1)
+    {
+        if (indexPath.row == 0)
         {
             AuthViewController *authViewController = [[AuthViewController alloc] init];
             if ([accountDict objectForKey:@"img_id"])
@@ -937,22 +966,9 @@ UIActionSheetDelegate>
             {
                 authViewController.img_tcard = @"";
             }
-            [authViewController showSelfViewController:self];
+            [self.navigationController pushViewController:authViewController animated:YES];
         }
-        else if(indexPath.row == 2)
-        {
-            if (![Tools phone_num])
-            {
-                ChangePhoneViewController *changePhoneNumVC = [[ChangePhoneViewController alloc] init];
-                changePhoneNumVC.changePhoneDel = self;
-                [changePhoneNumVC showSelfViewController:self];
-            }
-        }
-    }
-    
-    else if (indexPath.section == 2)
-    {
-        if (indexPath.row == 0)
+        else if (indexPath.row == 1)
         {
             [self settingClick];
         }
@@ -964,18 +980,22 @@ UIActionSheetDelegate>
 static int loginID;
 - (void)clickedThirdLoginButton:(UIButton *)button
 {
-    
-    switch (button.tag-1000)
+    [self bindThirdAccountWithIndex:button.tag-1000];
+}
+
+-(void)bindThirdAccountWithIndex:(NSInteger)index
+{
+    switch (index)
     {
-        case 0:
+        case 2:
             loginID = ShareTypeQQSpace;
             
             break;
-        case 1:
+        case 3:
             loginID = ShareTypeSinaWeibo;
             
             break;
-        case 2:
+        case 4:
             loginID = ShareTypeRenren;
             break;
             
@@ -1034,7 +1054,6 @@ static int loginID;
          //                               [ShareSDK cancelAuthWithType:loginID];
      }];
     //                           [ShareSDK cancelAuthWithType:loginID];
-    
 }
 
 -(void)cancelAccount:(UIButton *)button
@@ -1147,13 +1166,13 @@ static int loginID;
 
 -(void)moreOpen
 {
-    if (![self.sideMenuController isMenuVisible])
+    if (![[self.navigationController sideMenuController] isMenuVisible])
     {
-        [self.sideMenuController showMenuAnimated:YES];
+        [[self.navigationController sideMenuController] showMenuAnimated:YES];
     }
     else
     {
-        [self.sideMenuController hideMenuAnimated:YES];
+        [[self.navigationController sideMenuController] hideMenuAnimated:YES];
     }
 }
 

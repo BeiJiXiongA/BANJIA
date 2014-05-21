@@ -95,6 +95,11 @@
     // Dispose of any resources that can be recreated.
 }
 
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
 #pragma mark - getClasses
 -(void)getSchoolClasses
 {
@@ -179,7 +184,7 @@
     createClassViewController.schoolName = schoolName;
     createClassViewController.schoolLevel = schoolLevel;
     createClassViewController.schoollID = schoollID;
-    [createClassViewController showSelfViewController:self];
+    [self.navigationController pushViewController:createClassViewController animated:YES];
 }
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -250,12 +255,8 @@
     else
     {
         ClassZoneViewController *classZoneViewController = [[ClassZoneViewController alloc] init];
-        classZoneViewController.classID = classid;
-        classZoneViewController.className = className;
-        classZoneViewController.schoolID = schoollID;
-        classZoneViewController.schoolName = schoolName;
         classZoneViewController.fromClasses = YES;
-        [classZoneViewController showSelfViewController:self];
+        [self.navigationController pushViewController:classZoneViewController animated:YES];
     }
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
 }

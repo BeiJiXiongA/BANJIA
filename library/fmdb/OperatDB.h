@@ -13,6 +13,7 @@
 #define FRIENDSTABLE     @"friends"
 #define CLASSMEMBERTABLE   @"classmembertable"
 #define USERICONTABLE    @"usericontalble"
+#define CITYTABLE         @"citytable"
 
 @interface OperatDB : NSObject
 {
@@ -29,6 +30,14 @@
 
 -(NSMutableArray *)findSetWithDictionary:(NSDictionary *)dict
                             andTableName:(NSString *)tableName;
+
+-(NSMutableArray *)findSetWithDictionary:(NSDictionary *)dict
+                             orderByName:(NSString *)orderKey
+                            andTableName:(NSString *)tableName;
+
+-(NSMutableArray *)fuzzyfindSetWithDictionary:(NSDictionary *)dict
+                                 andTableName:(NSString *)tableName
+                           andFuzzyDictionary:(NSDictionary *)fuzzyDict;
 
 -(NSMutableArray *)findSetWithDictionary:(NSDictionary *)dict
                          andDistinctName:(NSString *)distinctName

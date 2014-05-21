@@ -9,5 +9,4 @@
 #import "XDContentViewController.h"
 
 @interface ClassPlusAccountViewController : XDContentViewController
-
 @end

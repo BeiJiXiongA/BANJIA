@@ -8,6 +8,12 @@
 
 #import "XDContentViewController.h"
 
-@interface ClassInfoViewController : XDContentViewController
+@protocol moreDelegate <NSObject>
 
+-(void)signOutClass:(BOOL)signOut;
+
+@end
+
+@interface ClassInfoViewController : XDContentViewController<UIImagePickerControllerDelegate,UINavigationControllerDelegate>
+@property (nonatomic, strong) id<moreDelegate> signOutDel;
 @end

@@ -35,11 +35,13 @@ SetRelateDel>
     OperatDB *db;
     
     NSString *userPhone;
+    
+    NSString *classID;
 }
 @end
 
 @implementation ParentsDetailViewController
-@synthesize parentID,parentName,title,admin,classID,headerImg,role,memDel;
+@synthesize parentID,parentName,title,admin,headerImg,role,memDel;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -54,8 +56,11 @@ SetRelateDel>
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     
-    DDLOG(@"parent id=%@",parentName);
+    classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
+    
     self.titleLabel.text = @"个人信息";
+    
+    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     dataDict  = [[NSMutableDictionary alloc] initWithCapacity:0];
     db = [[OperatDB alloc] init];
     
@@ -113,11 +118,14 @@ SetRelateDel>
         [titleStr replaceCharactersInRange:[title rangeOfString:@"."] withString:@"的"];
     }
     
-    jobLabel = [[UILabel alloc] initWithFrame:CGRectMake(nameLabel.frame.origin.x, nameLabel.frame.size.height+nameLabel.frame.origin.y, 70, 30)];
+    
+    CGSize titleSize = [Tools getSizeWithString:titleStr andWidth:200 andFont:[UIFont systemFontOfSize:13]];
+    jobLabel = [[UILabel alloc] initWithFrame:CGRectMake(nameLabel.frame.origin.x, nameLabel.frame.size.height+nameLabel.frame.origin.y, titleSize.width, titleSize.height>0?(titleSize.height+10):40)];
     jobLabel.backgroundColor = [UIColor clearColor];
     jobLabel.font = [UIFont systemFontOfSize:13];
     jobLabel.textColor = [UIColor lightGrayColor];
     jobLabel.text = titleStr;
+    jobLabel.numberOfLines = 3;
     [self.bgView addSubview:jobLabel];
     
     UIImageView *bgImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, jobLabel.frame.size.height+jobLabel.frame.origin.y+20, SCREEN_WIDTH, SCREEN_HEIGHT - headerImageView.frame.size.height-headerImageView.frame.origin.y)];
@@ -166,6 +174,10 @@ SetRelateDel>
     // Dispose of any resources that can be recreated.
 }
 
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
 #pragma mark - setRelate
 -(void)changePareTitle:(NSString *)newTitle
 {
@@ -438,7 +450,8 @@ SetRelateDel>
         settingRelate.admin = admin;
         settingRelate.setRelate = self;
         settingRelate.classID = classID;
-        [settingRelate showSelfViewController:self];
+        [self cancelPhone];
+        [self.navigationController pushViewController:settingRelate animated:YES];
     }
     else if(button.tag-4000-1 == 1)
     {
@@ -446,9 +459,9 @@ SetRelateDel>
         SettingStateLimitViewController *settingLimit = [[SettingStateLimitViewController alloc] init];
         settingLimit.userid = parentID;
         settingLimit.name = parentName;
-        settingLimit.classID = classID;
         settingLimit.role = role;
-        [settingLimit showSelfViewController:self];
+        [self cancelPhone];
+        [self.navigationController pushViewController:settingLimit animated:YES];
         
     }
     else if(button.tag-4000-1 == 0)

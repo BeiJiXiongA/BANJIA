@@ -11,6 +11,8 @@
 #import "ClassesViewController.h"
 #import "CreateClassViewController.h"
 #import "CreateSchoolViewController.h"
+#import "SearchSchoolViewController.h"
+
 #define SEARCHRESULTTABLEVIEWTAG   1000
 #define HOTSCHOOLTABLEVIEW         2000
 
@@ -36,6 +38,10 @@ UISearchBarDelegate>
     NSMutableArray *hotSchoolArray;
     
     UITableView *hotTableView;
+    
+    NSArray *schoolLevelArray;
+    NSArray *valueArray;
+    
 }
 @end
 
@@ -57,6 +63,9 @@ UISearchBarDelegate>
 	// Do any additional setup after loading the view.
     
     self.titleLabel.text = @"请选择学校";
+    
+    schoolLevelArray = [NSArray arrayWithObjects:@"幼儿园",@"小学",@"中学",@"中专技校",@"培训机构",@"其他", nil];
+    valueArray = [NSArray arrayWithObjects:@"0",@"1",@"2",@"3",@"4",@"5", nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     [schoolArray removeAllObjects];
@@ -101,7 +110,6 @@ UISearchBarDelegate>
             break;  
         }   
     }
-//    
 //    UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 3, 20, 2)];
 //    
 //    UIImageView *inputImageView = [[UIImageView alloc] initWithFrame:mySearchBar.frame];
@@ -124,7 +132,7 @@ UISearchBarDelegate>
     [createClassButton addTarget:self action:@selector(createSchoolClick) forControlEvents:UIControlEventTouchUpInside];
     [createClassButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     
-    searchResultTableView = [[UITableView alloc] initWithFrame:CGRectMake(15, mySearchBar.frame.origin.y+mySearchBar.frame.size.height, SCREEN_WIDTH-30, SCREEN_HEIGHT - mySearchBar.frame.origin.y-mySearchBar.frame.size.height) style:UITableViewStylePlain];
+    searchResultTableView = [[UITableView alloc] initWithFrame:CGRectMake(15, mySearchBar.frame.origin.y+mySearchBar.frame.size.height, SCREEN_WIDTH-30, SCREEN_HEIGHT - mySearchBar.frame.origin.y-mySearchBar.frame.size.height-5) style:UITableViewStylePlain];
     searchResultTableView.backgroundColor = [UIColor clearColor];
     searchResultTableView.dataSource = self;
     searchResultTableView.delegate = self;
@@ -132,7 +140,7 @@ UISearchBarDelegate>
     searchResultTableView.backgroundColor = [UIColor clearColor];
     searchResultTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     
-    hotTableView = [[UITableView alloc] initWithFrame:CGRectMake(15, mySearchBar.frame.origin.y+mySearchBar.frame.size.height, SCREEN_WIDTH-30, SCREEN_HEIGHT - mySearchBar.frame.origin.y-mySearchBar.frame.size.height) style:UITableViewStylePlain];
+    hotTableView = [[UITableView alloc] initWithFrame:CGRectMake(15, mySearchBar.frame.origin.y+mySearchBar.frame.size.height, SCREEN_WIDTH-30, SCREEN_HEIGHT - mySearchBar.frame.origin.y-mySearchBar.frame.size.height-5) style:UITableViewStylePlain];
     hotTableView.tag = HOTSCHOOLTABLEVIEW;
     hotTableView.delegate = self;
     hotTableView.dataSource = self;
@@ -149,12 +157,29 @@ UISearchBarDelegate>
     searchResultTableView.hidden = YES;
     
     [self getHotSchools];
+    
+//    UIButton *regionSearch = [UIButton buttonWithType:UIButtonTypeCustom];
+//    [regionSearch setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(10, 10, 10, 10)] forState:UIControlStateNormal];
+//    regionSearch.frame = CGRectMake(50, SCREEN_HEIGHT-50, SCREEN_WIDTH-100, 40);
+//    [regionSearch addTarget:self action:@selector(regionsearch) forControlEvents:UIControlEventTouchUpInside];
+//    [regionSearch setTitle:@"按区域搜索" forState:UIControlStateNormal];
+//    [self.bgView addSubview:regionSearch];
 }
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+-(void)regionsearch
+{
+        SearchSchoolViewController *searchSchoolViewController = [[SearchSchoolViewController alloc] init];
+        [self.navigationController pushViewController:searchSchoolViewController animated:YES];
+}
+
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 #pragma mark - searchbardelegate
@@ -304,7 +329,7 @@ UISearchBarDelegate>
     [mySearchBar resignFirstResponder];
     CreateSchoolViewController *createSchoolViewController = [[CreateSchoolViewController alloc] init];
     createSchoolViewController.schoolName = [mySearchBar text];
-    [createSchoolViewController showSelfViewController:self];
+    [self.navigationController pushViewController:createSchoolViewController animated:YES];
 }
 
 #pragma mark - hotschools
@@ -313,11 +338,12 @@ UISearchBarDelegate>
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"token":[Tools client_token],@"u_id":[Tools user_id]} API:GETHOTSCHOOLS];
+//        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"token":[Tools client_token],@"u_id":[Tools user_id]} API:GETCITYS];
         
         [request setCompletionBlock:^{
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"hotschools responsedict %@",responseString);
+            DDLOG(@"hotschools responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 if ([[responseDict objectForKey:@"data"] isKindOfClass:[NSDictionary class]])
@@ -459,7 +485,7 @@ UISearchBarDelegate>
             cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:schoolName];
         }
         NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
-        cell.textLabel.text = [dict objectForKey:@"name"];
+        cell.textLabel.text = [NSString stringWithFormat:@"%@-(%@)",[dict objectForKey:@"name"],[schoolLevelArray objectAtIndex:[[dict objectForKey:@"level"] integerValue]]];
         cell.textLabel.font = [UIFont systemFontOfSize:14];
         cell.selectionStyle = UITableViewCellSelectionStyleGray;
         UIImageView *bgImageBG = [[UIImageView alloc] init];
@@ -478,7 +504,7 @@ UISearchBarDelegate>
                 cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:schoolName];
             }
             NSDictionary *dict = [schoolArray objectAtIndex:indexPath.row];
-            cell.textLabel.text = [dict objectForKey:@"s_name"];
+            cell.textLabel.text = [NSString stringWithFormat:@"%@-(%@)",[dict objectForKey:@"name"],[schoolLevelArray objectAtIndex:[[dict objectForKey:@"level"] integerValue]]];
             cell.textLabel.font = [UIFont systemFontOfSize:14];
             cell.selectionStyle = UITableViewCellSelectionStyleGray;
             UIImageView *bgImageBG = [[UIImageView alloc] init];
@@ -495,7 +521,7 @@ UISearchBarDelegate>
                 cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:schoolName];
             }
             NSDictionary *dict = [hotSchoolArray objectAtIndex:indexPath.row];
-            cell.textLabel.text = [dict objectForKey:@"name"];
+            cell.textLabel.text = [NSString stringWithFormat:@"%@-(%@)",[dict objectForKey:@"name"],[schoolLevelArray objectAtIndex:[[dict objectForKey:@"level"] integerValue]]];
             cell.textLabel.font = [UIFont systemFontOfSize:14];
             cell.selectionStyle = UITableViewCellSelectionStyleGray;
             UIImageView *bgImageBG = [[UIImageView alloc] init];
@@ -512,34 +538,31 @@ UISearchBarDelegate>
     if (tableView.tag == SEARCHRESULTTABLEVIEWTAG)
     {
         NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
-        DDLOG(@"school dict %@",dict);
         ClassesViewController *classesViewController = [[ClassesViewController alloc] init];
         classesViewController.schoolName = [dict objectForKey:@"name"];
         classesViewController.schoollID = [dict objectForKey:@"_id"];
         classesViewController.schoolLevel = [NSString stringWithFormat:@"%d",[[dict objectForKey:@"level"] integerValue]];
-        [classesViewController showSelfViewController:self];
+        [self.navigationController pushViewController:classesViewController animated:YES];
     }
     else if (tableView.tag == HOTSCHOOLTABLEVIEW)
     {
         if (indexPath.section == 0)
         {
             NSDictionary *dict = [schoolArray objectAtIndex:indexPath.row];
-            DDLOG(@"school dict %@",dict);
             ClassesViewController *classesViewController = [[ClassesViewController alloc] init];
             classesViewController.schoolName = [dict objectForKey:@"s_name"];
             classesViewController.schoollID = [dict objectForKey:@"s_id"];
             classesViewController.schoolLevel = [NSString stringWithFormat:@"%d",[[dict objectForKey:@"level"] integerValue]];
-            [classesViewController showSelfViewController:self];
+            [self.navigationController pushViewController:classesViewController animated:YES];
         }
         else if(indexPath.section == 1)
         {
             NSDictionary *dict = [hotSchoolArray objectAtIndex:indexPath.row];
-            DDLOG(@"school dict %@",dict);
             ClassesViewController *classesViewController = [[ClassesViewController alloc] init];
             classesViewController.schoolName = [dict objectForKey:@"name"];
             classesViewController.schoollID = [dict objectForKey:@"_id"];
             classesViewController.schoolLevel = [NSString stringWithFormat:@"%d",[[dict objectForKey:@"level"] integerValue]];
-            [classesViewController showSelfViewController:self];
+            [self.navigationController pushViewController:classesViewController animated:YES];
         }
     }
     [tableView deselectRowAtIndexPath:indexPath animated:NO];

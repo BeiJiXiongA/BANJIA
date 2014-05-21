@@ -15,10 +15,6 @@
 @end
 
 @interface ClassZoneViewController : XDContentViewController
-@property (nonatomic, strong) NSString *classID;
-@property (nonatomic, strong) NSString *className;
-@property (nonatomic, strong) NSString *schoolName;
-@property (nonatomic, strong) NSString *schoolID;
 @property (nonatomic) BOOL fromClasses;
 @property (nonatomic) BOOL fromMsg;
 @property (nonatomic, assign) id<FreshClassZone> refreshDel;

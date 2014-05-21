@@ -15,11 +15,13 @@
     UITableView *limitTableView;
     NSMutableDictionary *optDict;
     NSMutableDictionary *optionDict;
+    
+    NSString *classID;
 }
 @end
 
 @implementation SettingStateLimitViewController
-@synthesize name,userid,classID,role;
+@synthesize name,userid,role;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -34,7 +36,9 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"设置发言权限";
-    DDLOG(@"role=%@",role);
+    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+    
+    classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
     if ([role isEqualToString:@"parents"])
     {
@@ -59,6 +63,11 @@
     // Dispose of any resources that can be recreated.
 }
 
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     return [limitArray count];
@@ -78,7 +87,6 @@
     cell.contentLabel.text = [limitArray objectAtIndex:indexPath.row];
     if (indexPath.row == 0)
     {
-        DDLOG(@"%@===%@", UserSendLike,[optionDict objectForKey:UserSendLike]);
         if ([[optionDict objectForKey:UserSendLike] integerValue] == 0)
         {
             [cell.mySwitch isOn:NO];

@@ -122,11 +122,8 @@ const CGFloat JDSideMenuDefaultCloseAnimationTime = 0.2;
 
 - (void)tapRecognized:(UITapGestureRecognizer*)recognizer
 {
-//    if (!self.tapGestureEnabled) return;
-    
     if (![self isMenuVisible]) {
-//        self.tapGestureEnabled = YES;
-//        [self showMenuAnimated:YES];
+
         
     } else {
         [self hideMenuAnimated:YES];
@@ -152,7 +149,6 @@ const CGFloat JDSideMenuDefaultCloseAnimationTime = 0.2;
             {
                 [recognizer.view setTransform:CGAffineTransformMakeTranslation(MAX(0,translation.x), 0)];
             }
-//            [self statusBarView].transform = recognizer.view.transform;
             break;
         }
         case UIGestureRecognizerStateEnded:

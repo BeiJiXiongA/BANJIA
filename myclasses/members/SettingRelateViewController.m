@@ -49,6 +49,8 @@
 	// Do any additional setup after loading the view.
     
     self.titleLabel.text = @"设置关系";
+    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+    
     showStudents = YES;
     showRelate = YES;
     
@@ -150,6 +152,11 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 -(void)selectRelate
@@ -281,39 +288,6 @@
     OperatDB *db = [[OperatDB alloc] init];
     [studentsArray addObjectsFromArray:[db findSetWithDictionary:@{@"classid":classID,@"role":@"students"} andTableName:CLASSMEMBERTABLE]];
     [studentsTableView reloadData];
-//    if ([Tools NetworkReachable])
-//    {
-//        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
-//                                                                      @"token":[Tools client_token],
-//                                                                      @"c_id":classID,
-//                                                                      @"role":@"students"
-//                                                                      } API:GETUSERSBYCLASS];
-//        [request setCompletionBlock:^{
-//            [Tools hideProgress:self.bgView];
-//            NSString *responseString = [request responseString];
-//            NSDictionary *responseDict = [Tools JSonFromString:responseString];
-//            DDLOG(@"students mem responsedict %@",responseDict);
-//            if ([[responseDict objectForKey:@"code"] intValue]== 1)
-//            {
-//                if ([[responseDict objectForKey:@"data"] count] > 0)
-//                {
-//                    [studentsArray addObjectsFromArray:[[responseDict objectForKey:@"data"] allValues]];
-//                    [studentsTableView reloadData];
-//                }
-//            }
-//            else
-//            {
-//                [Tools dealRequestError:responseDict fromViewController:self];
-//            }
-//        }];
-//        
-//        [request setFailedBlock:^{
-//            NSError *error = [request error];
-//            DDLOG(@"error %@",error);
-//            [Tools hideProgress:self.bgView];
-//        }];
-//        [request startAsynchronous];
-//    }
 }
 
 -(void)submitChange

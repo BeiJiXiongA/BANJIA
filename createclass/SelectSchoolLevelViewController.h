@@ -8,6 +8,13 @@
 
 #import "XDContentViewController.h"
 
-@interface SelectSchoolLevelViewController : XDContentViewController
+@protocol SelectSchoolLevelDel <NSObject>
 
+-(void)updateSchoolLevelWith:(NSString *)schoolLevelName andId:(NSString *)schoolId;
+
+@end
+
+@interface SelectSchoolLevelViewController : XDContentViewController
+@property (nonatomic, assign) id<SelectSchoolLevelDel> selectSchoolLevelDel;
+@property (nonatomic, assign) BOOL fromCreate;
 @end

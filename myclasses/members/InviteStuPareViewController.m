@@ -55,12 +55,14 @@
     relateString = @"";
     
     self.titleLabel.text = @"邀请学生家长";
+    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+    
     NSString *tipStr = [NSString stringWithFormat:@"您正在邀请%@的",name];
     tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(30, UI_NAVIGATION_BAR_HEIGHT+45, [tipStr length]*18, 30)];
     tipLabel.text = tipStr;
     tipLabel.textColor = [UIColor grayColor];
     tipLabel.backgroundColor = [UIColor clearColor];
-    [self.bgView addSubview:tipLabel];
+    [self.bgView addSubview:tipLabel];    
     
     UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
     

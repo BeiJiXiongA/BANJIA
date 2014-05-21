@@ -7,7 +7,10 @@
 //
 
 #import "KKNavigationController.h"
+#import "JDSideMenu.h"
 
 @interface KKNavigationController (JDSideMenu)
+
+- (JDSideMenu *)sideMenuController;
 
 @end

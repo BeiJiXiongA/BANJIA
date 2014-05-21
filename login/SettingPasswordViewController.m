@@ -129,6 +129,10 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
 -(void)start
 {
     if ([codeTextField.text length] == 0)
@@ -303,7 +307,7 @@
 {
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"phone":phoneNum} API:@"/users/mbAuthCode2"];
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"phone":phoneNum} API:MB_AUTHCODE];
         
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
@@ -313,7 +317,7 @@
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 checkCode = [responseDict objectForKey:@"data"];
-//                codeTextField.text = checkCode;
+                codeTextField.text = checkCode;
             }
             else
             {

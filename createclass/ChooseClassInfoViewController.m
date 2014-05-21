@@ -90,40 +90,33 @@
     // Dispose of any resources that can be recreated.
 }
 
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
 -(void)applyForJoinClass:(UIButton *)button
 {
     if (button.tag == 1000)
     {
         //学生加入
         StudentApplyViewController *studentApply = [[StudentApplyViewController alloc] init];
-        studentApply.classID = classID;
-        studentApply.className = className;
-        studentApply.schoolName = schoolName;
-        studentApply.schoolID = schoolID;
         studentApply.real_name = real_name;
-        [studentApply showSelfViewController:self];
+        [self.navigationController pushViewController:studentApply animated:YES];
     }
     else if(button.tag == 2000)
     {
         //家长加入
         ParentApplyViewController *parentApply = [[ParentApplyViewController alloc] init];
-        parentApply.classID = classID;
-        parentApply.className = className;
-        parentApply.schoolName = schoolName;
-        parentApply.schoolID = schoolID;
         parentApply.real_name = real_name;
-        [parentApply showSelfViewController:self];
+        [self.navigationController pushViewController:parentApply animated:YES];
     }
     
     else if(button.tag == 3000)
     {
         TeacherApplyViewController *teacherApply = [[TeacherApplyViewController alloc] init];
-        teacherApply.classID = classID;
-        teacherApply.className = className;
-        teacherApply.schoolName = schoolName;
-        teacherApply.schoolID = schoolID;
         teacherApply.real_name = real_name;
-        [teacherApply showSelfViewController:self];
+        [self.navigationController pushViewController:teacherApply animated:YES];
     }
 }
 
@@ -133,6 +126,7 @@
     [self presentViewController:myClassViewController animated:YES completion:^{
         
     }];
+//    [self.navigationController popToViewController:myClassViewController animated:YES];
 }
 
 -(void)getClassInfo
@@ -184,7 +178,6 @@
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 real_name = [[responseDict objectForKey:@"data"] objectForKey:@"r_name"];
-                
             }
             else
             {

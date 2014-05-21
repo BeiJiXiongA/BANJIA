@@ -54,11 +54,6 @@
         [inputButton addTarget:self action:@selector(changeInputType) forControlEvents:UIControlEventTouchUpInside];
         [inputBgView addSubview:inputButton];
         
-        addButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        addButton.backgroundColor = [UIColor greenColor];
-        addButton.frame = CGRectMake(SCREEN_WIDTH-50, 5, 40, 30);
-//        [inputBgView addSubview:addButton];
-        
         faceView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, FaceViewHeight+40, SCREEN_WIDTH, 0)];
         faceView.backgroundColor = [UIColor lightGrayColor];
         faceView.pagingEnabled = YES;
@@ -235,7 +230,6 @@
 {
     if ([text isEqualToString:@"\n"])
     {
-//        [self backKeyBoard];
         inputTextViewSize = CGSizeMake(250, 30);
         [self inputChange];
         if ([self.returnFunDel respondsToSelector:@selector(myReturnFunction)])
@@ -282,7 +276,6 @@
     [UIView animateWithDuration:0.2 animations:^{
         [inputTextView resignFirstResponder];
         [inputButton setImage:[UIImage imageNamed:@"face"] forState:UIControlStateNormal];
-//        self.frame = CGRectMake(0, SCREEN_HEIGHT-40, SCREEN_WIDTH, 40);
     }];
 }
 

@@ -19,6 +19,7 @@
 #import "SettingPasswordViewController.h"
 #import "UIImage+URBImageEffects.h"
 #import "UIImage-Helpers.h"
+#import "KKNavigationController.h"
 
 #define NOPWDTAG   787878
 
@@ -47,6 +48,7 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"手机号登陆";
+    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     
     DDLOG(@"accountid inlonin %@",accountID);
@@ -173,6 +175,11 @@
     // Dispose of any resources that can be recreated.
 }
 
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
 -(void)login
 {
     if ([phoneNumTextfield.text length] == 0)
@@ -278,8 +285,9 @@
                 
                 SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
                 MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
-                JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myClassesViewController menuController:sideMenuViewController];
-                [self presentViewController:sideMenu animated:YES completion:^{
+                KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClassesViewController];
+                JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myClassesNav menuController:sideMenuViewController];
+                [self.navigationController presentViewController:sideMenu animated:YES completion:^{
                     
                 }];
             }
@@ -328,7 +336,7 @@
 -(void)regist
 {
     RegistViewController *registViewController = [[RegistViewController alloc] init];
-    [registViewController showSelfViewController:self];
+    [self.navigationController pushViewController:registViewController animated:YES];
 }
 
 -(void)forgetPassword
@@ -346,7 +354,7 @@
     SettingPasswordViewController *setpwd = [[SettingPasswordViewController alloc] init];
     setpwd.phoneNum = [Tools getPhoneNumFromString:phoneNumTextfield.text];
     setpwd.forgetPwd = YES;
-    [setpwd showSelfViewController:self];
+    [self.navigationController pushViewController:setpwd animated:YES];
 }
 
 -(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event

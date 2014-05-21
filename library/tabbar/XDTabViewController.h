@@ -21,7 +21,6 @@
 @property (nonatomic, retain) UILabel *label1;
 @property (nonatomic, retain) UILabel *label2;
 @property (nonatomic, retain) UILabel *label3;
-@property (nonatomic, strong) NSString *classID;
 
 +(XDTabViewController *)sharedTabViewController;
 

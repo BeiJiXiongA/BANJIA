@@ -46,11 +46,15 @@ UIScrollViewDelegate>
     
     UIButton *studentButton;
     UIButton *getCodeButton;
+    
+    NSString *schoolName;
+    NSString *className;
+    NSString *classID;
 }
 @end
 
 @implementation ParentApplyViewController
-@synthesize schoolName,schoolID,className,classID,real_name;
+@synthesize real_name;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -65,6 +69,10 @@ UIScrollViewDelegate>
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"家长申请加入";
+    
+    schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
+    classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
+    className = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     checkCode = @"";
@@ -237,6 +245,12 @@ UIScrollViewDelegate>
     [super viewWillDisappear:animated];
     [MobClick endLogPageView:@"PageOne"];
 }
+
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
 -(void)returnKeyBoard
 {
     for(UIView *v in mainScrollView.subviews)
@@ -299,7 +313,7 @@ UIScrollViewDelegate>
 {
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"phone":phoneNumTextfield.text} API:@"/users/mbAuthCode2"];
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"phone":phoneNumTextfield.text} API:MB_AUTHCODE];
         
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];

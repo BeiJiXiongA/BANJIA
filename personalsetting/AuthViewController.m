@@ -49,6 +49,10 @@
     setButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
     [setButton addTarget:self action:@selector(submit) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:setButton];
+    if ([img_tcard length] > 10 || [img_id length] > 10)
+    {
+        setButton.hidden = YES;
+    }
     
     imageArray = [[NSMutableArray alloc] initWithCapacity:0];
     
@@ -124,6 +128,11 @@
     // Dispose of any resources that can be recreated.
 }
 
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
 -(void)submit
 {
     if (idImage && componentImage)
@@ -156,6 +165,11 @@
 
 -(void)changeIDCardImage
 {
+    if ([img_id length] > 10)
+    {
+        [Tools showAlertView:@"正在审核中" delegateViewController:nil];
+        return;
+    }
     imageUsed = @"img_id";
     [self selectImage];
 }

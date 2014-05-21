@@ -7,6 +7,7 @@
 //
 
 #import "XDContentViewController.h"
+#import "BMapKit.h"
 
 @interface NearbySchoolListViewController : XDContentViewController
 

@@ -14,6 +14,8 @@
 #import "XDContentViewController+JDSideMenu.h"
 #import "Header.h"
 
+#import "KKNavigationController.h"
+
 @interface SideMenuViewController ()
 {
     UIImage *greenImage;
@@ -41,6 +43,7 @@
     
     self.backButton.hidden = YES;
     self.navigationBarView.hidden = YES;
+    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeIcon) name:@"changeicon" object:nil];
     
@@ -113,7 +116,8 @@
 -(void)headerTap
 {
     PersonalSettingViewController *personalSetting = [[PersonalSettingViewController alloc] init];
-    [self.sideMenuController setContentController:personalSetting animted:YES];
+    KKNavigationController *personSettingNav = [[KKNavigationController alloc] initWithRootViewController:personalSetting];
+    [self.sideMenuController setContentController:personSettingNav animted:YES];
     for(int i=1000;i<1004;++i)
     {
         if (i==1003)
@@ -222,23 +226,27 @@
     if (button.tag == 1000)
     {
         MyClassesViewController *myClasses = [[MyClassesViewController alloc] init];
-        [self.sideMenuController setContentController:myClasses animted:YES];
+        KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClasses];
+        [self.sideMenuController setContentController:myClassesNav animted:YES];
     }
     else if(button.tag == 1001)
     {
         FriendsViewController *friends = [[FriendsViewController alloc] init];
-        [self.sideMenuController setContentController:friends animted:YES];
+        KKNavigationController *friendsNav = [[KKNavigationController alloc] initWithRootViewController:friends];
+        [self.sideMenuController setContentController:friendsNav animted:YES];
         
     }
     else if(button.tag == 1002)
     {
         MessageViewController *message = [[MessageViewController alloc] init];
-        [self.sideMenuController setContentController:message animted:YES];
+        KKNavigationController *messageNav = [[KKNavigationController alloc] initWithRootViewController:message];
+        [self.sideMenuController setContentController:messageNav animted:YES];
     }
     else if(button.tag == 1003)
     {
         PersonalSettingViewController *personalSetting = [[PersonalSettingViewController alloc] init];
-        [self.sideMenuController setContentController:personalSetting animted:YES];
+        KKNavigationController *personSettingNav = [[KKNavigationController alloc] initWithRootViewController:personalSetting];
+        [self.sideMenuController setContentController:personSettingNav animted:YES];
     }
     
     

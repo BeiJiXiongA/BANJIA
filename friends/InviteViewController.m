@@ -63,11 +63,15 @@ UIAlertViewDelegate>
     UIButton *inviteButton;
     
     OperatDB *db;
+    
+    NSString *schoolName;
+    NSString *className;
+    NSString *classID;
 }
 @end
 
 @implementation InviteViewController
-@synthesize fromClass,className,schoolName,classID;
+@synthesize fromClass;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -83,12 +87,19 @@ UIAlertViewDelegate>
 	// Do any additional setup after loading the view.
     
     self.titleLabel.text = @"邀请";
+    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 20);
+    
+    schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
+    className = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
+    classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
     pageNum = 0;
     pageSize = 100;
     weiboToken = @"";
     
     db = [[OperatDB alloc] init];
+    
+    
     
     //手机联系人
     contactArray = [[NSMutableArray alloc]initWithCapacity:0];
@@ -180,6 +191,10 @@ UIAlertViewDelegate>
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 #pragma mark - tableview
@@ -854,7 +869,7 @@ UIAlertViewDelegate>
                                        defaultContent:@""
                                                 image:nil
                                                 title:@"班家"
-                                                  url:@"http://www.banjiaedu.com"
+                                                  url:ShareUrl
                                           description:nil
                                             mediaType:SSPublishContentMediaTypeNews];
     
@@ -914,9 +929,9 @@ UIAlertViewDelegate>
                                 defaultContent:nil
                                          image:[ShareSDK jpegImageWithImage:[UIImage imageNamed:@""] quality:1]
                                          title:NSLocalizedString(@"班家", @"这是App消息")
-                                           url:@"http://www.banjiaedu.com"
-                                   description:@"班家是一款为方便老师，家长，学生之间有效沟通的平台，在这里你可以找到或创建属于你们的班级大家庭，快来一起加入吧！"
-                                     mediaType:SSPublishContentMediaTypeApp];
+                                           url:ShareUrl
+                                   description:ShareContent
+                                     mediaType:SSPublishContentMediaTypeNews];
     [content addWeixinSessionUnitWithType:INHERIT_VALUE
                                   content:ShareContent
                                     title:INHERIT_VALUE

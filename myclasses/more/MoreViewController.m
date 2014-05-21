@@ -38,11 +38,13 @@ UIAlertViewDelegate>
     NSArray *settingKeysArray;
     
     BOOL first;
+    
+    NSString *classID;
 }
 @end
 
 @implementation MoreViewController
-@synthesize classID,signOutDel;
+
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -59,7 +61,8 @@ UIAlertViewDelegate>
     self.titleLabel.text = @"班级设置";
     
     first = YES;
-    
+    classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
+        
     settingDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
@@ -69,7 +72,8 @@ UIAlertViewDelegate>
     sectionArray = @[@{@"count":@"4",@"name":@"家长权限"},
                     @{@"count":@"4",@"name":@"学生权限"},
                      @{@"count":@"4",@"name":@"管理员权限"},
-                     @{@"count": @"2",@"name":@"访客权限"}];
+                     @{@"count": @"1",@"name":@"访客权限"}];
+    
     rowsArray = @[@"允许家长评论",
                   @"允许家长加老师为好友",
                   @"家长发表班级日志",
@@ -82,8 +86,7 @@ UIAlertViewDelegate>
                   @"审核成员申请",
                   @"审核班级空间",
                   @"发布公告",
-                  @"查看班级空间",
-                  @"退出班级"];
+                  @"查看班级空间"];
     
     settingKeysArray = [NSArray arrayWithObjects:@"p_com",@"p_t_f",@"p_s_d",@"p_i_m",@"s_t_f",@"s_s_d",@"s_i_m",@"s_v_t",@"a_i_m",@"a_c_a",@"a_c_d",@"a_s_n",@"o_v_d", nil];
     
@@ -106,7 +109,7 @@ UIAlertViewDelegate>
     accessClassZone = @"前10条可查看";
     accessTime = @"全时段";
     
-    classSettingTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT - UI_NAVIGATION_BAR_HEIGHT-UI_TAB_BAR_HEIGHT) style:UITableViewStylePlain];
+    classSettingTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT - UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
     classSettingTableView.delegate = self;
     classSettingTableView.dataSource = self;
     [self.bgView addSubview:classSettingTableView];
@@ -229,8 +232,7 @@ UIAlertViewDelegate>
 
 -(void)backClick
 {
-//    [[XDTabViewController sharedTabViewController] dismissViewControllerAnimated:YES completion:nil];
-    [[XDTabViewController sharedTabViewController] unShowSelfViewController];
+    [self.navigationController popViewControllerAnimated:YES];
 }
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
@@ -575,10 +577,6 @@ UIAlertViewDelegate>
             [optionArray addObjectsFromArray:[NSArray arrayWithObjects:@"不可查看",@"可查看10条", nil]];
             [self showSettingView:optionArray withSection:indexPath.section+1 andIndexRow:indexPath.row];
         }
-        else if(indexPath.row == 1)
-        {
-            [self signoutclass];
-        }
     }
 }
 
@@ -588,61 +586,6 @@ UIAlertViewDelegate>
     al.tag = 2222;
     [al show];
 }
--(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-    if (alertView.tag == 2222)
-    {
-        if (buttonIndex == 1)
-        {
-            [self signoutclass];
-        }
-    }
-}
-
--(void)signoutclass
-{
-    if([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
-    {
-        [Tools showAlertView:@"您是班级管理者，不能退出!" delegateViewController:nil];
-        return ;
-    }
-    if ([Tools NetworkReachable])
-    {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
-                                                                      @"token":[Tools client_token],
-                                                                      @"role":[[NSUserDefaults standardUserDefaults] objectForKey:@"role"],
-                                                                      @"c_id":classID
-                                                                      } API:SIGNOUTCLASS];
-        [request setCompletionBlock:^{
-            [Tools hideProgress:self.bgView];
-            NSString *responseString = [request responseString];
-            NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"signout responsedict %@",responseString);
-            if ([[responseDict objectForKey:@"code"] intValue]== 1)
-            {
-                if ([self.signOutDel respondsToSelector:@selector(signOutClass:)])
-                {
-                    [self.signOutDel signOutClass:YES];
-                }
-                [self backClick];
-            }
-            else
-            {
-                [Tools dealRequestError:responseDict fromViewController:self];
-            }
-        }];
-        
-        [request setFailedBlock:^{
-            NSError *error = [request error];
-            DDLOG(@"error %@",error);
-            [Tools hideProgress:self.bgView];
-        }];
-        [Tools showProgress:self.bgView];
-        [request startAsynchronous];
-    }
-
-}
-
 -(void)showSettingView:(NSMutableArray *)titleArray withSection:(NSInteger)section andIndexRow:(NSInteger)row
 {
     examineView = [[UIView alloc] init];
@@ -707,7 +650,6 @@ UIAlertViewDelegate>
         row += [[[sectionArray objectAtIndex:section-1] objectForKey:@"count"] intValue];
         section--;
     }
-    DDLOG(@"section==%d---row==%d--tag==%d",section,row,button.tag);
     [self settingValue:[NSString stringWithFormat:@"%d",button.tag%1000-1] forKay:[settingKeysArray objectAtIndex:row]];
     [classSettingTableView reloadData];
     [self cancelPhone];

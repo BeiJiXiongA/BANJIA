@@ -26,11 +26,12 @@
     UITableView *infoView;
     UIButton *phoneButton;
     UILabel *phoneNumLabel;
+    NSString *classID;
 }
 @end
 
 @implementation ApplyInfoViewController
-@synthesize classID,role,j_id,applyName,title,applyDel,headerImg;
+@synthesize role,j_id,applyName,title,applyDel,headerImg;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -44,9 +45,12 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    DDLOG(@"j_id id=%@,classid = %@",j_id,classID);
     self.titleLabel.text = @"个人信息";
+    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+    
     dataDict = [[NSMutableDictionary alloc] initWithCapacity:0];
+    
+    classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
     headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(33.5, UI_NAVIGATION_BAR_HEIGHT+11, 80, 80)];
     headerImageView.backgroundColor = [UIColor clearColor];
@@ -73,7 +77,9 @@
     genderImageView.backgroundColor = [UIColor clearColor];
     [self.bgView addSubview:genderImageView];
     
-    titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(nameLabel.frame.origin.x, nameLabel.frame.size.height+nameLabel.frame.origin.y, 150, 30)];
+    
+    CGSize titleSize = [Tools getSizeWithString:title andWidth:200 andFont:[UIFont systemFontOfSize:13]];
+    titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(nameLabel.frame.origin.x, nameLabel.frame.size.height+nameLabel.frame.origin.y, titleSize.width, titleSize.height>0?(titleSize.height+10):40)];
     titleLabel.font = [UIFont systemFontOfSize:13];
     titleLabel.textColor = [UIColor lightGrayColor];
     titleLabel.numberOfLines = 2;
@@ -143,6 +149,11 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 #pragma mark - tableview

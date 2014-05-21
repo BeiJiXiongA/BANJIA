@@ -13,6 +13,7 @@
 #import "SideMenuViewController.h"
 #import "MyClassesViewController.h"
 #import "MCSoundBoard.h"
+#import "KKNavigationController.h"
 
 #import <ShareSDK/ShareSDK.h>
 #import <RennSDK/RennSDK.h>
@@ -22,6 +23,9 @@
 #import "WeiboApi.h"
 #import "MobClick.h"
 #import "WXApi.h"
+#import "ChineseToPinyin.h"
+
+#define NewVersionTag  1000
 
 #import "FiistLaunchViewController.h"
 
@@ -36,11 +40,23 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
     
-    
-    [[UIApplication sharedApplication] cancelAllLocalNotifications];
-    DDLOG(@"myphonenum= %@",[[Tools myNumber] substringFromIndex:3]);
+    [[NSUserDefaults standardUserDefaults] setObject:@"0010" forKey:@"currentVersion"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
     
     _db = [[OperatDB alloc] init];
+    if ([[_db findSetWithDictionary:@{} andTableName:CITYTABLE] count] <= 0)
+    {
+        NSString *filePath = [[NSBundle mainBundle] pathForResource:@"citys" ofType:@"plist"];
+        NSDictionary *dict = [[NSDictionary alloc] initWithContentsOfFile:filePath];
+        [self dealCity:dict];
+    }
+    
+    _mapManager = [[BMKMapManager alloc]init];
+    BOOL ret = [_mapManager start:@"myqUGnjMNzdgscv8HVTTgWkn"  generalDelegate:nil];
+    if (!ret)
+    {
+        DDLOG(@"manager start failed!");
+    }
     
     [MobClick startWithAppkey:@"533f919556240b5a200b0339" reportPolicy:SEND_INTERVAL channelId:nil];
     NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
@@ -49,7 +65,8 @@
     if (![[NSUserDefaults standardUserDefaults] objectForKey:@"first"])
     {
         FiistLaunchViewController *firstLaunch = [[FiistLaunchViewController alloc] init];
-        self.window.rootViewController = firstLaunch;
+        KKNavigationController *firstNav = [[KKNavigationController alloc] initWithRootViewController:firstLaunch];
+        self.window.rootViewController = firstNav;
     }
     else if ([[Tools user_id] length] > 0)
     {
@@ -64,15 +81,24 @@
 //            [self getNewChat];
             SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
             MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
-            
-            JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myClassesViewController menuController:sideMenuViewController];
+            KKNavigationController *myclassNav = [[KKNavigationController alloc] initWithRootViewController:myClassesViewController];
+            JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myclassNav menuController:sideMenuViewController];
             self.window.rootViewController = sideMenu;
+            
+//#ifdef DEBUG
+            
+            [self getNewVersion];
+//#else
+            
+//#endif
+
         }
     }
     else
     {
         WelcomeViewController *welcomeViewCOntroller = [[WelcomeViewController alloc]init];
-        self.window.rootViewController = welcomeViewCOntroller;
+        KKNavigationController *welNav = [[KKNavigationController alloc] initWithRootViewController:welcomeViewCOntroller];
+        self.window.rootViewController = welNav;
     }
 
     
@@ -91,6 +117,79 @@
      |UIRemoteNotificationTypeSound];
     
     return YES;
+}
+
+-(void)dealCity:(NSDictionary *)dict
+{
+    NSArray *array = [dict allValues];
+    for (int i=0; i<[array count]; i++)
+    {
+        NSDictionary *dict = [array objectAtIndex:i];
+        NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithCapacity:0];
+        [tmpDict setObject:[dict objectForKey:@"_id"] forKey:@"cityid"];
+        [tmpDict setObject:[dict objectForKey:@"name"] forKey:@"cityname"];
+        [tmpDict setObject:[dict objectForKey:@"level"] forKey:@"citylevel"];
+        [tmpDict setObject:[dict objectForKey:@"p_id"] forKey:@"pid"];
+        [tmpDict setObject:[ChineseToPinyin jianPinFromChiniseString:[dict objectForKey:@"name"]] forKey:@"jianpin"];
+        [tmpDict setObject:[ChineseToPinyin pinyinFromChiniseString:[dict objectForKey:@"name"]] forKey:@"quanpin"];
+        if ([_db insertRecord:tmpDict  andTableName:CITYTABLE])
+        {
+            DDLOG(@"insert city success!");
+        }
+    }
+}
+
+
+-(void)getNewVersion
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"type":@"iOS",
+                                                                      @"build":[[NSUserDefaults standardUserDefaults] objectForKey:@"currentVersion"]
+                                                                      } API:MB_NEWVERSION];
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"newversion responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                if ([[responseDict objectForKey:@"data"] isKindOfClass:[NSDictionary class]])
+                {
+                    [[NSUserDefaults standardUserDefaults] setObject:[[responseDict objectForKey:@"data"] objectForKey:@"iOS_url"] forKey:@"iOS_url"];
+                    [[NSUserDefaults standardUserDefaults] synchronize];
+                    
+                    UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"新版本提示" message:@"有新版本哦，快去更新吧，加了好多功能的！" delegate:self cancelButtonTitle:@"一会在更新" otherButtonTitles:@"用最新的", nil];
+                    al.tag = NewVersionTag;
+                    [al show];
+                }
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+        }];
+        [request startAsynchronous];
+    }
+
+}
+
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (alertView.tag == NewVersionTag)
+    {
+        if (buttonIndex == 1)
+        {
+            NSString *url = [[NSUserDefaults standardUserDefaults] objectForKey:@"iOS_url"];
+            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
+        }
+    }
 }
 
 -(void)getNewClass
@@ -129,10 +228,6 @@
         }];
         [request startAsynchronous];
     }
-    else
-    {
-        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
-    }
 }
 
 -(void)getNewChat
@@ -167,10 +262,6 @@
                 DDLOG(@"error %@",error);
             }];
             [request startAsynchronous];
-    }
-    else
-    {
-        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
     }
 }
 

@@ -54,6 +54,7 @@ UITextViewDelegate>
     
     self.titleLabel.text = @"发布公告";
     replay = 1;
+    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     
     [self.backButton addTarget:self action:@selector(myBack) forControlEvents:UIControlEventTouchUpInside];
     
@@ -175,7 +176,7 @@ UITextViewDelegate>
     {
         [self.updel update:NO];
     }
-    [self unShowSelfViewController];
+    [self .navigationController popViewControllerAnimated:YES];
 }
 
 #pragma mark - tableView
@@ -290,7 +291,7 @@ UITextViewDelegate>
                     sleep(5);
                     [self.updel update:YES];
                 }
-                [self unShowSelfViewController];
+                [self.navigationController popViewControllerAnimated:YES];
             }
             else
             {

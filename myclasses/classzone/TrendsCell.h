@@ -22,4 +22,5 @@
 @property (nonatomic, strong) UIButton *commentButton;
 @property (nonatomic, strong) UIImageView *praiseImageView;
 @property (nonatomic, strong) UIImageView *commentImageView;
+@property (nonatomic, strong) MyTextField *nameTextField;
 @end

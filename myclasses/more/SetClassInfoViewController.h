@@ -8,6 +8,15 @@
 
 #import "XDContentViewController.h"
 
-@interface SetClassInfoViewController : XDContentViewController
+@protocol SetClassInfoDel <NSObject>
 
+-(void)updateClassInfo:(NSString *)infoKey value:(NSString *)infoValue;
+
+@end
+
+@interface SetClassInfoViewController : XDContentViewController
+@property (nonatomic, strong) NSString *infoKey;
+@property (nonatomic, strong) NSString *infoStr;
+@property (nonatomic, strong) NSString *classID;
+@property (nonatomic, assign) id<SetClassInfoDel> setClassInfoDel;
 @end

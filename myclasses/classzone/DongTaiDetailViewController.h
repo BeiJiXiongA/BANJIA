@@ -16,6 +16,5 @@
 
 @interface DongTaiDetailViewController : XDContentViewController
 @property (nonatomic, strong) NSString *dongtaiId;
-@property (nonatomic, strong) NSString *classID;
 @property (nonatomic, assign) id<DongTaiDetailAddCommentDelegate> addComDel;
 @end

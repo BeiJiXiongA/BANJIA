@@ -24,6 +24,9 @@
 #import "MJPhotoBrowser.h"
 #import "MJPhoto.h"
 
+#define NormalImageScale  1.5
+#define BigImageScale    2
+
 #define ContentTextViewTag  1000
 #define LocationTextViewTag  2000
 
@@ -55,7 +58,9 @@ UIActionSheetDelegate
 {
     AGImagePickerController *imagePickerController;
     UIImagePickerController *sysImagePickerController;
+    
     NSMutableArray *selectPhotosArray;
+    NSMutableArray *normalPhotosArray;
     NSMutableArray *thunImageArray;
     
     UIButton *imageTipLabel;
@@ -78,6 +83,7 @@ UIActionSheetDelegate
     NSMutableArray *latelyThumImageArray;
     NSMutableArray *latelyFullImageArray;
     NSMutableDictionary *latelyImageDict;
+    NSMutableArray *originalLatelyImageArray;
     
     //位置
     CLLocationManager *locationManager;
@@ -124,6 +130,8 @@ int count = 0;
         latelyImageDict = [[NSMutableDictionary alloc] initWithCapacity:0];
         tmpLatelyArray = [[NSMutableArray alloc] initWithCapacity:0];
         latelyImageNumArray = [[NSMutableArray alloc] initWithCapacity:0];
+        normalPhotosArray = [[NSMutableArray alloc] initWithCapacity:0];
+        originalLatelyImageArray = [[NSMutableArray alloc] initWithCapacity:0];
     }
     return self;
 }
@@ -205,6 +213,7 @@ int count = 0;
 {
     [super viewWillAppear:animated];
     [MobClick beginLogPageView:@"PageOne"];
+    [self getImgs];
 }
 
 -(void)viewWillDisappear:(BOOL)animated
@@ -219,6 +228,7 @@ int count = 0;
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"发布日记";
+    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     
     keyBoardHeight = 0.0f;
     imageW = 70;
@@ -340,7 +350,6 @@ int count = 0;
     
     mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, lateImageView.frame.size.height+lateImageView.frame.origin.y+20);
     
-    [self getImgs];
     [self setupLocationManager];
 }
 
@@ -350,6 +359,11 @@ int count = 0;
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 #pragma mark - aboutPhoto
@@ -393,30 +407,64 @@ int count = 0;
 -(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
     [sysImagePickerController dismissViewControllerAnimated:YES completion:nil];
-    DDLOG(@"picker info %@",info);
+    
+    DDLOG(@" imagepicker=%@",info);
+    
     UIImage *fullScreenImage = [info objectForKey:UIImagePickerControllerOriginalImage];
-    if (fullScreenImage.size.width>SCREEN_WIDTH*2 || fullScreenImage.size.height>SCREEN_HEIGHT*2)
-    {
-        CGFloat imageHeight = 0.0f;
-        CGFloat imageWidth = 0.0f;
-        if (fullScreenImage.size.width>SCREEN_WIDTH*2)
-        {
-            imageWidth = SCREEN_WIDTH*2;
-            imageHeight = imageWidth*fullScreenImage.size.height/fullScreenImage.size.width;
-        }
-        else
-        {
-            imageHeight = SCREEN_HEIGHT*2;
-            imageWidth = imageHeight*fullScreenImage.size.width/fullScreenImage.size.height;
-        }
-        fullScreenImage = [Tools thumbnailWithImageWithoutScale:fullScreenImage size:CGSizeMake(imageWidth, imageHeight)];
-    }
+    
+    [selectPhotosArray addObject:fullScreenImage];
+    
+    fullScreenImage = [self getNormalImageFromImage:fullScreenImage];
+    
     if (fullScreenImage)
     {
-        [selectPhotosArray addObject:fullScreenImage];
+        [normalPhotosArray addObject:fullScreenImage];
         [thunImageArray addObject:fullScreenImage];
         [self reloadImages];
     }
+}
+
+#pragma mark - dealImage
+-(UIImage *)getNormalImageFromImage:(UIImage *)originalImage
+{
+    if (originalImage.size.width>SCREEN_WIDTH*NormalImageScale || originalImage.size.height>SCREEN_HEIGHT*NormalImageScale)
+    {
+        CGFloat imageHeight = 0.0f;
+        CGFloat imageWidth = 0.0f;
+        if (originalImage.size.width>SCREEN_WIDTH*NormalImageScale)
+        {
+            imageWidth = SCREEN_WIDTH*NormalImageScale;
+            imageHeight = imageWidth*originalImage.size.height/originalImage.size.width;
+        }
+        else
+        {
+            imageHeight = SCREEN_HEIGHT*NormalImageScale;
+            imageWidth = imageHeight*originalImage.size.width/originalImage.size.height;
+        }
+        originalImage = [Tools thumbnailWithImageWithoutScale:originalImage size:CGSizeMake(imageWidth, imageHeight)];
+    }
+    return originalImage;
+}
+
+-(UIImage *)getBigImageFromImage:(UIImage *)originalImage
+{
+    if (originalImage.size.width>SCREEN_WIDTH*BigImageScale || originalImage.size.height>SCREEN_HEIGHT*BigImageScale)
+    {
+        CGFloat imageHeight = 0.0f;
+        CGFloat imageWidth = 0.0f;
+        if (originalImage.size.width>SCREEN_WIDTH*BigImageScale)
+        {
+            imageWidth = SCREEN_WIDTH*BigImageScale;
+            imageHeight = imageWidth*originalImage.size.height/originalImage.size.width;
+        }
+        else
+        {
+            imageHeight = SCREEN_HEIGHT*BigImageScale;
+            imageWidth = imageHeight*originalImage.size.width/originalImage.size.height;
+        }
+        originalImage = [Tools thumbnailWithImageWithoutScale:originalImage size:CGSizeMake(imageWidth, imageHeight)];
+    }
+    return originalImage;
 }
 
 -(void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
@@ -492,17 +540,25 @@ int count = 0;
 {
     for (int i=0; i<4; ++i)
     {
-        DDLOG(@"tm == %d",[tmpLatelyArray count]-i-1);
         int m = [tmpLatelyArray count]-i-1;
         if (m > 0)
         {
             ALAssetsLibrary *assetLibrary=[[ALAssetsLibrary alloc] init];
             NSURL *url=[NSURL URLWithString:[tmpLatelyArray objectAtIndex:[tmpLatelyArray count]-i-1]];
             [assetLibrary assetForURL:url resultBlock:^(ALAsset *asset)  {
+                
                 UIImage *image=[UIImage imageWithCGImage:asset.thumbnail];
                 [latelyThumImageArray addObject:image];
-                UIImage *fullImage = [self getImageFromALAssesst:asset];
-                [latelyFullImageArray addObject:fullImage];
+                
+                UIImage *fullScreenImage = [self getImageFromALAssesst:asset];
+                
+                [originalLatelyImageArray addObject:fullScreenImage];
+                
+                fullScreenImage = [self getNormalImageFromImage:fullScreenImage];
+                
+                [latelyFullImageArray addObject:fullScreenImage];
+                
+                
                 UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(10+(70+5)*i, 35, 70, 70)];
                 imageView.layer.cornerRadius = 5;
                 imageView.clipsToBounds = YES;
@@ -518,7 +574,6 @@ int count = 0;
              ];
         }
     }
-
 }
 
 -(void)addLatelyImage:(UITapGestureRecognizer *)tap
@@ -529,17 +584,19 @@ int count = 0;
         addImageButton.hidden = YES;
         return;
     }
-    DDLOG(@"tap tag==%@",latelyImageNumArray);
     NSString *imageTag = [NSString stringWithFormat:@"%d",tap.view.tag];
+    
     if ([self hasThisLatelyImage:imageTag])
     {
-        [selectPhotosArray removeObject:[latelyFullImageArray objectAtIndex:tap.view.tag-ImageTag]];
+        [selectPhotosArray removeObject:[originalLatelyImageArray objectAtIndex:tap.view.tag-ImageTag]];
+        [normalPhotosArray removeObject:[latelyFullImageArray objectAtIndex:tap.view.tag-ImageTag]];
         [thunImageArray removeObject:[latelyThumImageArray objectAtIndex:tap.view.tag-ImageTag]];
         [latelyImageNumArray removeObject:imageTag];
     }
     else
     {
-        [selectPhotosArray addObject:[latelyFullImageArray objectAtIndex:tap.view.tag-ImageTag]];
+        [selectPhotosArray addObject:[originalLatelyImageArray objectAtIndex:tap.view.tag-ImageTag]];
+        [normalPhotosArray addObject:[latelyFullImageArray objectAtIndex:tap.view.tag-ImageTag]];
         [thunImageArray addObject:[latelyThumImageArray objectAtIndex:tap.view.tag-ImageTag]];
         [latelyImageNumArray addObject:imageTag];
     }
@@ -548,20 +605,20 @@ int count = 0;
 
 -(void)reloadImages
 {
-    if ([selectPhotosArray count] > 12)
+    if ([normalPhotosArray count] > 12)
     {
         [Tools showAlertView:@"最多添加12张图片" delegateViewController:nil];
         addImageButton.hidden = YES;
         imageTipLabel.hidden = YES;
         return;
     }
-    else if([selectPhotosArray count]==12)
+    else if([normalPhotosArray count]==12)
     {
         addImageButton.hidden = YES;
         imageTipLabel.hidden = YES;
     }
     int row = 0;
-    if ([selectPhotosArray count] < 12)
+    if ([normalPhotosArray count] < 12)
     {
         addImageButton.hidden = NO;
         imageTipLabel.hidden = NO;
@@ -594,7 +651,7 @@ int count = 0;
         UIImageView *imageView = [[UIImageView alloc] init];
         imageView.layer.contentsGravity = kCAGravityResizeAspectFill;
         imageView.frame = CGRectMake(10+(imageW+5)*(i%4), 5+(imageH+5)*(i/4), imageW, imageH);
-        [imageView setImage:[selectPhotosArray objectAtIndex:i]];
+        [imageView setImage:[normalPhotosArray objectAtIndex:i]];
         imageView.tag = ImageTag + i;
         imageView.layer.cornerRadius = 5;
         imageView.clipsToBounds = YES;
@@ -650,6 +707,7 @@ int count = 0;
 {
     [thunImageArray removeObjectAtIndex:button.tag-DeleteButtonTag];
     [selectPhotosArray removeObjectAtIndex:button.tag-DeleteButtonTag];
+    [normalPhotosArray removeObjectAtIndex:button.tag-DeleteButtonTag];
     count--;
     [self reloadImages];
 }
@@ -683,7 +741,7 @@ int count = 0;
 
 -(void)submitDongTai
 {
-    if ([contentTextView.text length] <= 0 && [selectPhotosArray count] <= 0)
+    if ([contentTextView.text length] <= 0 && [normalPhotosArray count] <= 0)
     {
         [Tools showAlertView:@"说出您的话或添加几张图片吧！" delegateViewController:nil];
         return ;
@@ -697,7 +755,6 @@ int count = 0;
         [request setPostValue:[Tools client_token] forKey:@"token"];
         [request setPostValue:[Tools user_id] forKey:@"u_id"];
         [request setPostValue:classID forKey:@"c_id"];
-//        [request setPostValue:[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] forKey:@"role"];
         [request setPostValue:contentTextView.text forKey:@"content"];
         [request setTimeOutSeconds:60];
         
@@ -708,17 +765,16 @@ int count = 0;
             [request setPostValue:[NSString stringWithFormat:@"%f",longitude] forKey:@"lng"];
         }
         long total = 0.0f;
-        for (int i=0; i<[selectPhotosArray count]; ++i)
+        for (int i=0; i<[normalPhotosArray count]; ++i)
         {
-            UIImage *image = [selectPhotosArray objectAtIndex:i];
-            image = [Tools thumbnailWithImageWithoutScale:image size:[self sizeWithImage:image]];
+            UIImage *image = [normalPhotosArray objectAtIndex:i];
             DDLOG(@"image size = %@",NSStringFromCGSize(image.size));
+            DDLOG(@"size======%ld",total);
             NSData *imageData = UIImagePNGRepresentation(image);
             total += [imageData length];
             
             [request addData:imageData withFileName:[NSString stringWithFormat:@"%d.png",i+1] andContentType:@"image/png" forKey:[NSString stringWithFormat:@"file%d",i+1]];
         }
-        DDLOG(@"size======%ld",total);
         [request setCompletionBlock:^{
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
@@ -740,7 +796,7 @@ int count = 0;
                     count = 0;
                 }
                 emitButton.enabled = YES;
-                [self unShowSelfViewController];
+                [self.navigationController popViewControllerAnimated:YES];
             }
             else
             {
@@ -765,37 +821,6 @@ int count = 0;
 -(void)request:(ASIHTTPRequest *)request didSendBytes:(long long)bytes
 {
     DDLOG(@"%f",[mypro progress]);
-}
-
--(CGSize)sizeWithImage:(UIImage *)image
-{
-    CGFloat imageHeight = 0.0f;
-    CGFloat imageWidth = 0.0f;
-    CGFloat times = 1;
-    if (image.size.width>SCREEN_WIDTH*times || image.size.height>SCREEN_HEIGHT*times)
-    {
-        if (image.size.width>SCREEN_WIDTH*1.5)
-        {
-            imageWidth = SCREEN_WIDTH*times;
-            imageHeight = imageWidth*image.size.height/image.size.width;
-        }
-        else
-        {
-            imageHeight = SCREEN_HEIGHT*times;
-            imageWidth = imageHeight*image.size.width/image.size.height;
-        }
-    }
-    else
-    {
-        imageWidth = image.size.width;
-        imageHeight = image.size.height;
-    }
-    return CGSizeMake(imageWidth, imageHeight);
-}
-
--(void)unShowSelfViewController
-{
-    [super unShowSelfViewController];
 }
 
 -(void)selfBackClick
@@ -928,23 +953,7 @@ int count = 0;
     
     CGImageRef imageRef = [assetPresentation fullResolutionImage];
     UIImage *image = [UIImage imageWithCGImage:imageRef];
-    if (image.size.width>SCREEN_WIDTH*2 || image.size.height>SCREEN_HEIGHT*2)
-    {
-        CGFloat imageHeight = 0.0f;
-        CGFloat imageWidth = 0.0f;
-        if (image.size.width>SCREEN_WIDTH*2)
-        {
-            imageWidth = SCREEN_WIDTH*2;
-            imageHeight = imageWidth*image.size.height/image.size.width;
-        }
-        else
-        {
-            imageHeight = SCREEN_HEIGHT*2;
-            imageWidth = imageHeight*image.size.width/image.size.height;
-        }
-        image = [Tools thumbnailWithImageWithoutScale:image size:CGSizeMake(imageWidth, imageHeight)];
-        
-    }
+    
     NSData *data = UIImageJPEGRepresentation(image, 1.0f);
     
     NSString *tmpDir = NSTemporaryDirectory();
@@ -1026,23 +1035,11 @@ int count = 0;
         [thunImageArray addObject:image];
         
         UIImage *fullScreenImage = [self getImageFromALAssesst:asset];
-        if (fullScreenImage.size.width>SCREEN_WIDTH*2 || image.size.height>SCREEN_HEIGHT*2)
-        {
-            CGFloat imageHeight = 0.0f;
-            CGFloat imageWidth = 0.0f;
-            if (fullScreenImage.size.width>SCREEN_WIDTH*2)
-            {
-                imageWidth = SCREEN_WIDTH*2;
-                imageHeight = imageWidth*image.size.height/image.size.width;
-            }
-            else
-            {
-                imageHeight = SCREEN_HEIGHT*2;
-                imageWidth = imageHeight*image.size.width/image.size.height;
-            }
-        }
-        
         [selectPhotosArray addObject:fullScreenImage];
+        
+        fullScreenImage = [self getNormalImageFromImage:fullScreenImage];
+        
+        [normalPhotosArray addObject:fullScreenImage];
         count ++;
     }
     [self reloadImages];

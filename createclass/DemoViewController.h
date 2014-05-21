@@ -9,6 +9,12 @@
 #import <UIKit/UIKit.h>
 #import "XDContentViewController.h"
 
-@interface DemoViewController : XDContentViewController
+@protocol SelectArea <NSObject>
 
+-(void)updateAreaWithId:(NSString *)areaID areaName:(NSString *)areaName;
+
+@end
+
+@interface DemoViewController : XDContentViewController
+@property (nonatomic, assign) id<SelectArea> selectArea;
 @end

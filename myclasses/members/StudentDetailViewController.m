@@ -50,11 +50,15 @@ SetStudentObject>
     NSString *userPhone;
     
     UIScrollView *mainScrollView;
+    
+    NSString *schoolName;
+    NSString *className;
+    NSString *classID;
 }
 @end
 
 @implementation StudentDetailViewController
-@synthesize classID,studentName,studentID,title,admin,headerImg,role,memDel,schoolName,className;
+@synthesize studentName,studentID,title,admin,headerImg,role,memDel;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -69,8 +73,13 @@ SetStudentObject>
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     
-    DDLOG(@"student id=%@,classid = %@",studentID,classID);
+    schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
+    className = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
+    classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
+    
     self.titleLabel.text = @"个人信息";
+    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+    
     dataDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     pArray = [[NSMutableArray alloc] initWithCapacity:0];
     
@@ -81,23 +90,28 @@ SetStudentObject>
     
     mainScrollView = [[UIScrollView alloc] init];
     mainScrollView.frame = CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT);
-    [self.bgView addSubview:mainScrollView];
-
     
+    [self.bgView addSubview:mainScrollView];
+    
+    UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    moreButton.frame = CGRectMake(SCREEN_WIDTH-60, 6, 50, 32);
+    moreButton.hidden = YES;
+    [moreButton setImage:[UIImage imageNamed:@"icon_more"] forState:UIControlStateNormal];
+    [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
     if (![studentID isEqual:[NSNull null]])
     {
         int adminNum = [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] intValue];
         if (adminNum == 2)
         {
-            UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
-            moreButton.frame = CGRectMake(SCREEN_WIDTH-60, 6, 50, 32);
-            [moreButton setImage:[UIImage imageNamed:@"icon_more"] forState:UIControlStateNormal];
-            [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
             [self.navigationBarView addSubview:moreButton];
-            if ([studentID isEqualToString:[Tools user_id]])
+            if ([studentID length]>10)
             {
-                moreButton.hidden = YES;
+                if (![studentID isEqualToString:[Tools user_id]])
+                {
+                    moreButton.hidden = NO;
+                }
             }
+            
         }
     }
     headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(33.5, 11, 80, 80)];
@@ -120,12 +134,16 @@ SetStudentObject>
     {
         if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
         {
-            if (![studentID isEqualToString:[Tools user_id]])
+            if ([studentID length]>10)
             {
-                [headerImageView addGestureRecognizer:tapTgr];
+                if (![studentID isEqualToString:[Tools user_id]])
+                {
+                    [headerImageView addGestureRecognizer:tapTgr];
+                }
             }
         }
     }
+
     nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(headerImageView.frame.size.width+headerImageView.frame.origin.x+20, 36, [studentName length]*18>100?100:([studentName length]*18), 20)];
     nameLabel.text = studentName;
     nameLabel.textColor = [UIColor blackColor];
@@ -137,10 +155,11 @@ SetStudentObject>
     genderImageView.backgroundColor = [UIColor clearColor];
     [mainScrollView addSubview:genderImageView];
     
-    titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(nameLabel.frame.origin.x, nameLabel.frame.size.height+nameLabel.frame.origin.y, 150, 30)];
+    CGSize titleSize = [Tools getSizeWithString:title andWidth:200 andFont:[UIFont systemFontOfSize:13]];
+    titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(nameLabel.frame.origin.x, nameLabel.frame.size.height+nameLabel.frame.origin.y, titleSize.width, titleSize.height>0?(titleSize.height+10):40)];
     titleLabel.font = [UIFont systemFontOfSize:13];
     titleLabel.textColor = [UIColor lightGrayColor];
-    titleLabel.numberOfLines = 2;
+    titleLabel.numberOfLines = 3;
     titleLabel.lineBreakMode = NSLineBreakByWordWrapping;
     titleLabel.backgroundColor = [UIColor clearColor];
     if (![title isEqual:[NSNull null]])
@@ -161,6 +180,8 @@ SetStudentObject>
     parentsTableView.backgroundColor = [UIColor clearColor];
     parentsTableView.scrollEnabled = NO;
     [mainScrollView addSubview:parentsTableView];
+    
+    
     
     infoView  = [[UITableView alloc] initWithFrame:CGRectMake(10, parentsTableView.frame.size.height+parentsTableView.frame.origin.y+50, SCREEN_WIDTH-15, 210) style:UITableViewStylePlain];
     infoView.delegate = self;
@@ -183,7 +204,6 @@ SetStudentObject>
     addFriendButton.frame = CGRectMake(50, sendMsgButton.frame.size.height+sendMsgButton.frame.origin.y+10, SCREEN_WIDTH-100, 35);
     [addFriendButton addTarget:self action:@selector(addFriend) forControlEvents:UIControlEventTouchUpInside];
     [addFriendButton setBackgroundImage:btnImage forState:UIControlStateNormal];
-    
     if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fname":studentName} andTableName:FRIENDSTABLE] count] > 0)
     {
         addFriendButton.hidden = YES;
@@ -217,6 +237,11 @@ SetStudentObject>
 {
     [super viewWillDisappear:animated];
     self.memDel = nil;
+}
+
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 -(void)getParentsWithStudentName
@@ -317,16 +342,19 @@ SetStudentObject>
 {
     if (tableView.tag == INFOTABLEVIEWTAG)
     {
-        if ([studentID length]>10)
+        if(![studentID isEqual:[NSNull null]])
         {
-            if ([[db findSetWithDictionary:@{@"uid":studentID,@"classid":classID} andTableName:CLASSMEMBERTABLE] count] > 0)
+            if ([studentID length]>10)
             {
-                NSArray *array = [db findSetWithDictionary:@{@"uid":studentID,@"classid":classID} andTableName:CLASSMEMBERTABLE];
-                if (![[[array firstObject] objectForKey:@"phone"] isEqual:[NSNull null]])
+                if ([[db findSetWithDictionary:@{@"uid":studentID,@"classid":classID} andTableName:CLASSMEMBERTABLE] count] > 0)
                 {
-                    if ([[[array firstObject] objectForKey:@"phone"] length] > 8)
+                    NSArray *array = [db findSetWithDictionary:@{@"uid":studentID,@"classid":classID} andTableName:CLASSMEMBERTABLE];
+                    if (![[[array firstObject] objectForKey:@"phone"] isEqual:[NSNull null]])
                     {
-                        return 1;
+                        if ([[[array firstObject] objectForKey:@"phone"] length] > 8)
+                        {
+                            return 1;
+                        }
                     }
                 }
             }
@@ -359,29 +387,33 @@ SetStudentObject>
         if (indexPath.row == 0)
         {
             cell.nameLabel.text = @"移动电话";
-            if ([studentID length]>10)
+            if (![studentID isEqual:[NSNull null]])
             {
-                if ([[db findSetWithDictionary:@{@"uid":studentID,@"classid":classID} andTableName:CLASSMEMBERTABLE] count] > 0)
+                if ([studentID length]>10)
                 {
-                    NSArray *array = [db findSetWithDictionary:@{@"uid":studentID,@"classid":classID} andTableName:CLASSMEMBERTABLE];
-                    if (![[[array firstObject] objectForKey:@"phone"] isEqual:[NSNull null]])
+                    if ([[db findSetWithDictionary:@{@"uid":studentID,@"classid":classID} andTableName:CLASSMEMBERTABLE] count] > 0)
                     {
-                        if ([[[array firstObject] objectForKey:@"phone"] length] > 8)
+                        NSArray *array = [db findSetWithDictionary:@{@"uid":studentID,@"classid":classID} andTableName:CLASSMEMBERTABLE];
+                        if (![[[array firstObject] objectForKey:@"phone"] isEqual:[NSNull null]])
                         {
-                            userPhone = [[array firstObject]objectForKey:@"phone"];
+                            if ([[[array firstObject] objectForKey:@"phone"] length] > 8)
+                            {
+                                userPhone = [[array firstObject]objectForKey:@"phone"];
+                            }
                         }
                     }
                 }
-            }
-            if ([dataDict count] > 0)
-            {
-                userPhone = [dataDict objectForKey:@"phone"];
-            }
-            cell.contentLabel.text = userPhone;
-            [cell.button2 addTarget:self action:@selector(callToUser) forControlEvents:UIControlEventTouchUpInside];
-            if ([studentID isEqualToString:[Tools user_id]])
-            {
-                cell.button2.hidden = YES;
+                if ([dataDict count] > 0)
+                {
+                    userPhone = [dataDict objectForKey:@"phone"];
+                }
+                cell.contentLabel.text = userPhone;
+                [cell.button2 addTarget:self action:@selector(callToUser) forControlEvents:UIControlEventTouchUpInside];
+                if ([studentID isEqualToString:[Tools user_id]])
+                {
+                    cell.button2.hidden = YES;
+                }
+
             }
         }
         
@@ -454,10 +486,9 @@ SetStudentObject>
             parentDetail.title = [dict objectForKey:@"title"];
             parentDetail.headerImg = [dict objectForKey:@"img_icon"];
             parentDetail.admin = NO;
-            parentDetail.classID = classID;
             parentDetail.memDel = self;
             parentDetail.role = [dict objectForKey:@"role"];
-            [parentDetail showSelfViewController:self];
+            [self.navigationController pushViewController:parentDetail animated:YES];
         }
         else
         {
@@ -468,9 +499,8 @@ SetStudentObject>
             parentDetail.headerImg = [dict objectForKey:@"img_icon"];
             parentDetail.admin = NO;
             parentDetail.memDel = self;
-            parentDetail.classID = classID;
             parentDetail.role = [dict objectForKey:@"role"];
-            [parentDetail showSelfViewController:self];
+            [self.navigationController pushViewController:parentDetail animated:YES];
         }
     }
 }
@@ -492,7 +522,7 @@ SetStudentObject>
             {
                 [self.memDel updateListWith:YES];
             }
-            [self unShowSelfViewController];
+            [self.navigationController popViewControllerAnimated:YES];
         }
         [parentsTableView reloadData];
     }
@@ -519,10 +549,9 @@ SetStudentObject>
             parentDetail.title = [dict objectForKey:@"title"];
             parentDetail.headerImg = [dict objectForKey:@"img_icon"];
             parentDetail.admin = NO;
-            parentDetail.classID = classID;
             parentDetail.memDel = self;
             parentDetail.role = [dict objectForKey:@"role"];
-            [parentDetail showSelfViewController:self];
+            [self.navigationController pushViewController:parentDetail animated:YES];
         }
         else
         {
@@ -533,9 +562,8 @@ SetStudentObject>
             parentDetail.headerImg = [dict objectForKey:@"img_icon"];
             parentDetail.admin = NO;
             parentDetail.memDel = self;
-            parentDetail.classID = classID;
             parentDetail.role = [dict objectForKey:@"role"];
-            [parentDetail showSelfViewController:self];
+            [self.navigationController pushViewController:parentDetail animated:YES];
         }
 
     }
@@ -560,7 +588,7 @@ SetStudentObject>
     chatViewController.toID = studentID;
     chatViewController.name = studentName;
     chatViewController.imageUrl = headerImg;
-    [chatViewController showSelfViewController:self];
+    [self.navigationController pushViewController:chatViewController animated:YES];
 }
 
 -(void)infoButtonClick:(UIButton *)button
@@ -616,7 +644,6 @@ SetStudentObject>
 
 -(void)moreClick
 {
-    DDLOG(@"======%d",[[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue]);
     if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
     {
         if ([otherUserAdmin integerValue] == 0)
@@ -684,7 +711,6 @@ SetStudentObject>
 }
 -(void)phoneClick:(UIButton *)button
 {
-    DDLOG(@"%d",button.tag-4000-1);
     if (button.tag-4000-1 == 4)
     {
         if ([otherUserAdmin integerValue] == 0)
@@ -711,7 +737,8 @@ SetStudentObject>
         invite.userid = studentID;
         invite.className = className;
         invite.schoolName = schoolName;
-        [invite showSelfViewController:self];
+        [self cancelPhone];
+        [self.navigationController pushViewController:invite animated:YES];
     }
     else if(button.tag-4000-1 == 2)
     {
@@ -721,7 +748,8 @@ SetStudentObject>
         setStuViewController.userid = studentID;
         setStuViewController.name = studentName;
         setStuViewController.setStudel = self;
-        [setStuViewController showSelfViewController:self];
+        [self cancelPhone];
+        [self.navigationController pushViewController:setStuViewController animated:YES];
         if ([self.memDel respondsToSelector:@selector(updateListWith:)])
         {
             [self.memDel updateListWith:YES];
@@ -733,9 +761,9 @@ SetStudentObject>
         SettingStateLimitViewController *settingLimit = [[SettingStateLimitViewController alloc] init];
         settingLimit.userid = studentID;
         settingLimit.name = studentName;
-        settingLimit.classID = classID;
         settingLimit.role = role;
-        [settingLimit showSelfViewController:self];
+        [self cancelPhone];
+        [self.navigationController pushViewController:settingLimit animated:YES];
     }
     else if(button.tag-4000-1 == 0)
     {
@@ -768,7 +796,7 @@ SetStudentObject>
                 {
                     [self.memDel updateListWith:YES];
                 }
-                [self unShowSelfViewController];
+                [self.navigationController popViewControllerAnimated:YES];
             }
             else
             {
@@ -807,7 +835,7 @@ SetStudentObject>
                 {
                     [self.memDel updateListWith:YES];
                 }
-                [self unShowSelfViewController];
+                [self.navigationController popViewControllerAnimated:YES];
             }
             else
             {
@@ -848,7 +876,7 @@ SetStudentObject>
                 {
                     [self.memDel updateListWith:YES];
                 }
-                [self unShowSelfViewController];
+                [self.navigationController popViewControllerAnimated:YES];
             }
             else
             {
@@ -906,6 +934,7 @@ SetStudentObject>
                     {
                         [db updeteKey:@"phone" toValue:[dataDict objectForKey:@"phone"] withParaDict:@{@"uid":studentID,@"classid":classID} andTableName:CLASSMEMBERTABLE];
                     }
+                    otherUserAdmin = [NSString stringWithFormat:@"%d",[[[dict objectForKey:@"classInfo"] objectForKey:@"admin"] integerValue]];
                     [Tools fillImageView:headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERDEFAULT];
                     [infoView reloadData];
                 }

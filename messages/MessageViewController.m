@@ -27,6 +27,8 @@
 
 #import "NSString+Emojize.h"
 
+#import "UINavigationController+JDSideMenu.h"
+
 #define CHATMSGTAG  2000
 #define NOTICETAG  3000
 #define REPLAYTAG  10000
@@ -118,7 +120,9 @@
     tipLabel.textAlignment = NSTextAlignmentCenter;
     tipLabel.text = @"您还没有消息记录";
     tipLabel.hidden = YES;
-    [self.bgView addSubview:tipLabel];
+    [friendsListTableView addSubview:tipLabel];
+    
+    [self manageChatList];
 }
 
 -(void)viewWillAppear:(BOOL)animated
@@ -142,30 +146,39 @@
             {
                 if ([[responseDict objectForKey:@"data"] count] > 0)
                 {
-                    NSArray *array = [responseDict objectForKey:@"data"];
-                    for (int i=0; i<[array count]; ++i)
+                    if ([[responseDict objectForKey:@"data"] isKindOfClass:[NSDictionary class]])
                     {
-                        NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithCapacity:0];
-                        NSDictionary *dict = [array objectAtIndex:i];
-                        [tmpDict setObject:[dict objectForKey:@"tid"] forKey:@"fid"];
-                        if ([dict objectForKey:@"img_icon"])
+                        NSArray *array = [[responseDict objectForKey:@"data"] allValues];
+                        for (int i=0; i<[array count]; ++i)
                         {
-                            [tmpDict setObject:[dict objectForKey:@"img_icon"] forKey:@"ficon"];
+                            NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithCapacity:0];
+                            NSDictionary *dict = [array objectAtIndex:i];
+                            [tmpDict setObject:[dict objectForKey:@"tid"] forKey:@"fid"];
+                            if ([dict objectForKey:@"img_icon"])
+                            {
+                                [tmpDict setObject:[dict objectForKey:@"img_icon"] forKey:@"ficon"];
+                            }
+                            if ([dict objectForKey:@"r_name"])
+                            {
+                                [tmpDict setObject:[dict objectForKey:@"r_name"] forKey:@"fname"];
+                            }
+                            NSString *mid = [[dict objectForKey:@"l_n"] objectForKey:@"_id"];
+                            [tmpDict setObject:mid forKey:@"mid"];
+                            [tmpDict setObject:[[dict objectForKey:@"l_n"] objectForKey:@"msg"] forKey:@"content"];
+                            [tmpDict setObject:[[dict objectForKey:@"l_n"] objectForKey:@"t"] forKey:@"time"];
+                            [tmpDict setObject:@"0" forKey:@"readed"];
+                            [tmpDict setObject:@"f" forKey:@"direct"];
+                            [tmpDict setObject:[Tools user_id] forKey:@"userid"];
+                            [tmpDict setObject:@"text" forKey:@"msgType"];
+                            [tmpDict setObject:[Tools user_id] forKey:@"tid"];
+                            if ([[db findSetWithDictionary:@{@"mid":mid} andTableName:CHATTABLE] count] <= 0)
+                            {
+                                if ([db insertRecord:tmpDict andTableName:@"chatMsg"])
+                                {
+                                    DDLOG(@"new msg insert success!");
+                                }
+                            }
                         }
-                        if ([dict objectForKey:@"r_name"])
-                        {
-                            [tmpDict setObject:[dict objectForKey:@"r_name"] forKey:@"fname"];
-                        }
-                        NSString *mid = [[dict objectForKey:@"l_n"] objectForKey:@"_id"];
-                        [tmpDict setObject:mid forKey:@"mid"];
-                        [tmpDict setObject:[[dict objectForKey:@"l_n"] objectForKey:@"msg"] forKey:@"content"];
-                        [tmpDict setObject:[[dict objectForKey:@"l_n"] objectForKey:@"t"] forKey:@"time"];
-                        [tmpDict setObject:@"0" forKey:@"readed"];
-                        [tmpDict setObject:@"f" forKey:@"direct"];
-                        [tmpDict setObject:[Tools user_id] forKey:@"userid"];
-                        [tmpDict setObject:@"text" forKey:@"msgType"];
-                        [tmpDict setObject:[Tools user_id] forKey:@"tid"];
-                        [db insertRecord:tmpDict andTableName:@"chatMsg"];
                     }
                 }
                 [self manageChatList];
@@ -331,7 +344,6 @@
         cell = [[MemberCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:chatCell];
     }
     NSDictionary *dict = [chatFriendArray objectAtIndex:indexPath.row];
-    DDLOG(@"msg dict %@",dict);
     cell.headerImageView.frame = CGRectMake(10, 7, 46, 46);
     
     if (![[dict objectForKey:@"ficon"] isEqual:[NSNull null]])
@@ -367,6 +379,7 @@
     cell.memNameLabel.frame = CGRectMake(70, 7, 150, 20);
     cell.memNameLabel.text = [self getNameFromString:[dict objectForKey:@"fname"]];
     cell.memNameLabel.textColor = [UIColor blackColor];
+    cell.memNameLabel.font = [UIFont boldSystemFontOfSize:16];
     cell.unreadedMsgLabel.hidden = YES;
     
     if ([self newMsgCountOfUser:[dict objectForKey:@"fid"]] > 0)
@@ -377,6 +390,7 @@
     
     NSDictionary *lastMsgDict = [self findLastMsgWithUser:[dict objectForKey:@"fid"]];
     cell.contentLabel.hidden = NO;
+    cell.contentLabel.font = [UIFont systemFontOfSize:14];
     cell.contentLabel.text = [[lastMsgDict  objectForKey:@"content"]emojizedString];
     if ([[lastMsgDict objectForKey:@"content"] rangeOfString:@"$!#"].length >0)
     {
@@ -400,6 +414,7 @@
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    
     NSDictionary *dict = [chatFriendArray objectAtIndex:indexPath.row];
     
     [db updeteKey:@"readed" toValue:@"1" withParaDict:@{@"fid":[dict objectForKey:@"fid"],@"userid":[Tools user_id]} andTableName:@"chatMsg"];
@@ -410,8 +425,8 @@
     chat.toID = [dict objectForKey:@"fid"];
     chat.imageUrl = [dict objectForKey:@"ficon"];
     chat.chatVcDel = self;
-    [chat showSelfViewController:self];
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    [self.navigationController pushViewController:chat animated:YES];
 }
 
 -(void)updateChatList:(BOOL)update
@@ -449,13 +464,13 @@
 
 -(void)moreOpen
 {
-    if (![self.sideMenuController isMenuVisible])
+    if (![[self.navigationController sideMenuController] isMenuVisible])
     {
-        [self.sideMenuController showMenuAnimated:YES];
+        [[self.navigationController sideMenuController] showMenuAnimated:YES];
     }
     else
     {
-        [self.sideMenuController hideMenuAnimated:YES];
+        [[self.navigationController sideMenuController] hideMenuAnimated:YES];
     }
 }
 @end

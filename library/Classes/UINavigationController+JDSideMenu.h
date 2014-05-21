@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-
+#import "JDSideMenu.h"
 @interface UINavigationController (JDSideMenu)
-
+- (JDSideMenu *)sideMenuController;
 @end

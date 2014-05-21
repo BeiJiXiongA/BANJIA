@@ -8,6 +8,7 @@
 
 #import "FiistLaunchViewController.h"
 #import "WelcomeViewController.h"
+#import "KKNavigationController.h"
 
 @interface FiistLaunchViewController ()<UIScrollViewDelegate>
 {
@@ -50,16 +51,8 @@
         {
 
             imageView.userInteractionEnabled = YES;
-            
-            UISwipeGestureRecognizer *swipe = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(startBanJia)];
-            swipe.direction = UISwipeGestureRecognizerDirectionRight;
-            [imageView addGestureRecognizer:swipe];
-//
-//            showScrollView.userInteractionEnabled = YES;
-//            [showScrollView addGestureRecognizer:swipe];
-            
-//            UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(startBanJia)];
-//            [imageView addGestureRecognizer:tap];
+            UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(startBanJia)];
+            [imageView addGestureRecognizer:tap];
         }
     }
     showScrollView.pagingEnabled = YES;
@@ -92,7 +85,9 @@
     if (scrollView.contentOffset.x > SCREEN_WIDTH*2)
     {
         WelcomeViewController *welcomeViewCOntroller = [[WelcomeViewController alloc]init];
-        [welcomeViewCOntroller showSelfViewController:self];
+        KKNavigationController *welNav = [[KKNavigationController alloc] initWithRootViewController:welcomeViewCOntroller];
+        
+        [self.navigationController presentViewController:welNav animated:YES completion:nil];
         
         [[NSUserDefaults standardUserDefaults] setObject:@"first" forKey:@"first"];
         [[NSUserDefaults standardUserDefaults] synchronize];
@@ -102,7 +97,8 @@
 -(void)startBanJia
 {
     WelcomeViewController *welcomeViewCOntroller = [[WelcomeViewController alloc]init];
-    [welcomeViewCOntroller showSelfViewController:self];
+    KKNavigationController *welNav = [[KKNavigationController alloc] initWithRootViewController:welcomeViewCOntroller];
+    [self.navigationController presentViewController:welNav animated:YES completion:nil];
     
     [[NSUserDefaults standardUserDefaults] setObject:@"first" forKey:@"first"];
     [[NSUserDefaults standardUserDefaults] synchronize];

@@ -27,7 +27,7 @@
         [self.contentView addSubview:nameLabel];
         
         selectButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        selectButton.frame = CGRectMake(SCREEN_WIDTH-32-70, 5, 21.5, 21.5);
+        selectButton.frame = CGRectMake(SCREEN_WIDTH-32-70, 9, 21.5, 21.5);
         selectButton.backgroundColor = [UIColor grayColor];
         selectButton.layer.cornerRadius = 10.5;
         selectButton.clipsToBounds = YES;

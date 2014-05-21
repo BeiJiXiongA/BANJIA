@@ -8,7 +8,6 @@
 
 #import "RegistViewController.h"
 #import "Header.h"
-#import "Regist2ViewController.h"
 #import "Regist3ViewController.h"
 #import "UITextField+AKNumericFormatter.h"
 #import "NSString+AKNumericFormatter.h"
@@ -38,6 +37,7 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"注册";
+    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     
     UIImage*inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 3, 20, 2.3)];
     
@@ -107,6 +107,11 @@
     [self.bgView addSubview:logoImageView];
 }
 
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
 -(void)verify
 {
     if ([codeTextField.text length] == 0)
@@ -136,8 +141,7 @@
                     regist3ViewController.headerIcon = headerIcon;
                     regist3ViewController.account = account;
                 }
-                
-                [regist3ViewController showSelfViewController:self];
+                [self.navigationController pushViewController:regist3ViewController animated:YES];
             }
             else
             {
@@ -175,7 +179,11 @@
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 codeStr = [responseDict objectForKey:@"data"];
+#ifdef DEBUG
                 codeTextField.text = codeStr;
+#else
+                
+#endif
             }
             else
             {

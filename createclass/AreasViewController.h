@@ -8,6 +8,14 @@
 
 #import "XDContentViewController.h"
 
-@interface AreasViewController : XDContentViewController
+@protocol SelectAreaDelegate <NSObject>
 
+-(void)selectAreaWithDict:(NSDictionary *)dict;
+
+@end
+
+@interface AreasViewController : XDContentViewController
+@property (nonatomic, strong) NSArray *areaArray;
+@property (nonatomic, strong) id<SelectAreaDelegate> selectAreaDel;
+@property (nonatomic, assign) BOOL fromCreate;
 @end
