@@ -12,11 +12,11 @@
 #pragma mark - 接口网址
 
 //
-//#define HOST_URL       @"http://api.banjiaedu.com"
-//#define IMAGEURL       @"http://img.banjiaedu.com"
+#define HOST_URL       @"http://api.banjiaedu.com"
+#define IMAGEURL       @"http://img.banjiaedu.com"
 
-#define HOST_URL      @"http://192.168.10.62"
-#define IMAGEURL       @"http://imgtest.banjiaedu.com"
+//#define HOST_URL      @"http://mytest.banjiaedu.com"
+//#define IMAGEURL       @"http://imgtest.banjiaedu.com"
 
 #pragma mark - users
 #define MB_REG         @"/users/mbReg"
@@ -26,6 +26,7 @@
 
 #define MB_CHECKOUT    @"/users/mbCheckCode"
 #define MB_SUBPWD         @"/users/mbSubPwd"
+#define MB_RESETPWD      @"/users/mbUpdatePwd"
 #define MB_SUBINFO        @"/users/mbSubInfo"
 #define MB_LOGIN          @"/users/mbLogin"
 #define MB_LOGOUT         @"/users/mbLogout"
@@ -48,6 +49,12 @@
 #define SEARCHSCHOOL      @"/schools/mbSchoolSearch"
 #define CREATESCHOOL      @"/schools/mbAddSchool"
 #define GETHOTSCHOOLS        @"/schools/mbTopSchools"
+#define GETCITYS         @"/schools/mbGetCity"
+#define CITYLIST         @"/schools/mbCityList"
+#define SEARCHSCHOOLBYCITY   @"/schools/mbSearchSchoolByCity"
+#define SEARCHSCHOOLBYBAIDU   @"/schools/mbSearchSchool"
+#define SEARCHNEARBYSCHOOL    @"/schools/mbNearBy"
+#define NEARBYSCHOOLDETAIL    @"/schools/mbDetail"
 
 #pragma mark - classes
 #define CREATECLASS       @"/classes/mbAddClass"
@@ -68,6 +75,8 @@
 #define GETSETTING      @"/classes/mbUserMatchClass" //u_id,c_id
 #define RMADMIN        @"/classes/mbRmAdmin"    //u_id o_id
 #define SIGNOUTCLASS    @"/classes/mbSignoutClass" //u_id,c_id,role
+#define SETCLASSIMAGE    @"/classes/mbUpdateClassImg"
+#define SETCLASSINFO     @"/classes/mbSetClassInfo"
 
 #pragma mark - diaries
 #define ADDDIARY        @"/Diaries/mbAddDiaries"
@@ -99,6 +108,10 @@
 #pragma mark - mbnewchat
 #define MB_NEWCHAT     @"/chats/mbNewChat"
 #define MB_NEWCLASS    @"/classes/mbNewClass"
+#define MB_NEWVERSION   @"/debugs/mbGetNew"  //type:iOS  build:0007
+
+#pragma mark - debugs
+#define MB_ADVISE     @"/debugs/mbAdvise"  //'u_id','content'
 
 #pragma mark - 三方
 #define BINDACCOUNT    @"/users/mbBindAccount"  //u_id,a_id,a_type
@@ -150,8 +163,10 @@
 #define UCFRIENDSUM   @"ucfriendsnum"
 
 
-#define ShareContent  @"班家是一个为方便老师，家长，学生之间有效沟通的平台，在这里你可以找到或创建属于你们的班级大家庭，快来一起加入吧！http://www.banjiaedu.com"
+#define ShareContent  @"班家是一个为方便老师，家长，学生之间有效沟通的平台，在这里你可以找到或创建属于你们的班级大家庭，快来一起加入吧！http://mytest.banjiaedu.com"
 
 #define IMAGE_NAME @"icon120"
 #define IMAGE_EXT @"png"
+
+#define ShareUrl  @"http://mytest.banjiaedu.com"
 #endif

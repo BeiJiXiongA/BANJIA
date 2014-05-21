@@ -12,11 +12,13 @@
 #define SELECTED_VIEW_CONTROLLER_TAG 98456345
 
 @interface XDTabViewController ()
-
+{
+    NSString *classID;
+}
 @end
 
 @implementation XDTabViewController
-@synthesize label0,label1,label2,label3,classID;
+@synthesize label0,label1,label2,label3;
 static XDTabViewController *_tabViewController = nil;
 +(XDTabViewController *)sharedTabViewController
 {
@@ -64,8 +66,6 @@ static XDTabViewController *_tabViewController = nil;
 {
     [super viewDidLoad];
     
-    DDLOG_CURRENT_METHOD;
-    
     self.tabBar = [[XDTabBar alloc] initWithItemCount:self.tabBarContents.count
                                              itemSize:CGSizeMake(SCREEN_WIDTH / self.tabBarContents.count, UI_TAB_BAR_HEIGHT)
                                                   tag:0
@@ -74,6 +74,8 @@ static XDTabViewController *_tabViewController = nil;
     self.tabBar.frame = CGRectMake(0,0,UI_SCREEN_WIDTH,SCREEN_HEIGHT);
     self.tabBar.backgroundColor = [UIColor whiteColor];
     [self.bgView addSubview:_tabBar];
+    
+    self.stateView.hidden = YES;
 
     label0 = [[UILabel alloc] initWithFrame:CGRectMake(50, SCREEN_HEIGHT-50, 20, 20)];
     label0.layer.cornerRadius = 10;
@@ -121,6 +123,8 @@ static XDTabViewController *_tabViewController = nil;
 - (void)viewWillAppear:(BOOL)animated
 {
     [self selectItemAtIndex:_preItemIndex];
+    
+    classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
     OperatDB *db = [[OperatDB alloc] init];
     int newNoticeNum = [[[NSUserDefaults standardUserDefaults] objectForKey:[NSString stringWithFormat:@"%@-notice",classID]] integerValue];
@@ -199,7 +203,7 @@ static XDTabViewController *_tabViewController = nil;
     
     self.preItemIndex = itemIndex;
     XDContentViewController* viewController = [_tabBarContents objectAtIndex:itemIndex];
-    viewController.view.frame = CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - UI_TAB_BAR_HEIGHT);
+    viewController.view.frame = CGRectMake(0, -YSTART, SCREEN_WIDTH, SCREEN_HEIGHT - UI_TAB_BAR_HEIGHT+YSTART);
     viewController.bgView.frame = CGRectMake(0, 0,SCREEN_WIDTH,SCREEN_HEIGHT - UI_TAB_BAR_HEIGHT);
     viewController.view.backgroundColor = [UIColor blackColor];
     viewController.bgView.backgroundColor = [UIColor whiteColor];

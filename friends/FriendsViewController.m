@@ -15,6 +15,7 @@
 #import "EGORefreshTableHeaderView.h"
 #import "AppDelegate.h"
 #import "NSString+Emojize.h"
+#import "UINavigationController+JDSideMenu.h"
 
 @interface FriendsViewController ()<UITableViewDataSource,
 UITableViewDelegate,
@@ -57,7 +58,7 @@ MsgDelegate>
     [[self.bgView layer] setShadowOpacity:1.0f];
     [[self.bgView layer] setShadowRadius:3.0f];
     self.returnImageView.hidden = YES;
-    
+        
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = self;
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = self;
     
@@ -110,7 +111,7 @@ MsgDelegate>
     tipLabel.textAlignment = NSTextAlignmentCenter;
     tipLabel.text = @"您还没有好友";
     tipLabel.hidden = YES;
-    [self.bgView addSubview:tipLabel];
+    [friendsListTableView addSubview:tipLabel];
 }
 
 -(void)viewWillAppear:(BOOL)animated
@@ -222,13 +223,13 @@ MsgDelegate>
 
 -(void)moreOpen
 {
-    if (![self.sideMenuController isMenuVisible])
+    if (![[self.navigationController sideMenuController] isMenuVisible])
     {
-        [self.sideMenuController showMenuAnimated:YES];
+        [[self.navigationController sideMenuController] showMenuAnimated:YES];
     }
     else
     {
-        [self.sideMenuController hideMenuAnimated:YES];
+        [[self.navigationController sideMenuController] hideMenuAnimated:YES];
     }
 }
 
@@ -236,10 +237,7 @@ MsgDelegate>
 {
     InviteViewController *inviteViewController = [[InviteViewController alloc] init];
     inviteViewController.fromClass = NO;
-    inviteViewController.classID = @"";
-    inviteViewController.schoolName = @"";
-    inviteViewController.className = @"";
-    [inviteViewController showSelfViewController:self];
+    [self.navigationController pushViewController:inviteViewController animated:YES];
 }
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -397,7 +395,7 @@ MsgDelegate>
         chatViewController.toID = [dict objectForKey:@"fid"];
         chatViewController.imageUrl = [dict objectForKey:@"ficon"];
         [self.sideMenuController hideMenuAnimated:YES];
-        [chatViewController showSelfViewController:self];
+        [self.navigationController pushViewController:chatViewController animated:YES];
 
     }
     [tableView deselectRowAtIndexPath:indexPath animated:NO];

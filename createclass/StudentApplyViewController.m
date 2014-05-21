@@ -16,11 +16,15 @@
 {
     UILabel *tipLabel;
     MyTextField *nameTextField;
+    
+    NSString *schoolName;
+    NSString *className;
+    NSString *classID;
 }
 @end
 
 @implementation StudentApplyViewController
-@synthesize schoolName,schoolID,className,classID,real_name;
+@synthesize real_name;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -35,6 +39,10 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"学生申请加入";
+    
+    schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
+    classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
+    className = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
     
 //    UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
 //    nameTextField = [[MyTextField alloc] initWithFrame:CGRectMake(27.5, UI_NAVIGATION_BAR_HEIGHT+75, SCREEN_WIDTH-55, 35)];
@@ -90,6 +98,11 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 -(void)applyJoinClass

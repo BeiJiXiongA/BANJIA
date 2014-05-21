@@ -48,24 +48,21 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    
-    reg = 0;
-    
+    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+    reg = 0;    
     self.backButton.hidden = YES;
     self.stateView.hidden = YES;
     self.navigationBarView.hidden = YES;
-    self.view.backgroundColor = [UIColor whiteColor];
     UIImage *logoImage = [UIImage imageNamed:@"logo"];
     UIImageView *logoImageView = [[UIImageView alloc] init];
     logoImageView.image = logoImage;
     logoImageView.frame = CGRectMake((SCREEN_WIDTH-logoImage.size.width)/2,SCREEN_HEIGHT, logoImage.size.width, logoImage.size.height);
     logoImageView.alpha = 0;
+    
     [self.bgView addSubview:logoImageView];
     
-    //CGRectMake((SCREEN_WIDTH-logoImage.size.width)/2,UI_NAVIGATION_BAR_HEIGHT+40, logoImage.size.width, logoImage.size.height);
     UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
     
-//    UIImage *loginImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
     UIButton *loginButton = [UIButton buttonWithType:UIButtonTypeCustom];
     loginButton.frame = CGRectMake(10, SCREEN_HEIGHT-250.5, 186, 38);
     [loginButton setTitle:@"手机号登陆" forState:UIControlStateNormal];
@@ -77,7 +74,6 @@
     [self.bgView addSubview:loginButton];
     
     
-//    UIImage *registImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg_green"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
     UIButton *registButton = [UIButton buttonWithType:UIButtonTypeCustom];
     registButton.frame = CGRectMake(loginButton.frame.origin.x+loginButton.frame.size.width+3, SCREEN_HEIGHT-250.5, SCREEN_WIDTH-loginButton.frame.size.width-20-3, 38);
     [registButton setBackgroundImage:inputImage forState:UIControlStateNormal];
@@ -221,10 +217,7 @@ static int loginID;
                                {
                                    DDLOG(@"faile==%@==%ld==%d",[error errorDescription],(long)[error errorCode],[error errorLevel]);
                                }
-                               
-//                                                             [ShareSDK cancelAuthWithType:loginID];
                            }];
-//                               [ShareSDK cancelAuthWithType:loginID];
     
 }
 
@@ -314,10 +307,7 @@ static int loginID;
                     fillInfo.accountType = [accountDict objectForKey:@"a_type"];
                     fillInfo.account = @"1";
                     fillInfo.nickName = [accountDict objectForKey:@"nickname"];
-                    [fillInfo showSelfViewController:self];
-//                    UIAlertView *al1 = [[UIAlertView alloc] initWithTitle:@"提示" message:@"未找到该账号信息" delegate:self cancelButtonTitle:@"注册新号" otherButtonTitles:@"绑定已有",@"直接登录", nil];
-//                    al1.tag = 1000;
-//                    [al1 show];
+                    [self.navigationController pushViewController:fillInfo animated:YES];
                 }
                 else
                 {
@@ -352,59 +342,17 @@ static int loginID;
     }
 }
 
--(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-    if (alertView.tag == 1000)
-    {
-        DDLOG(@"account dict ==%@",accountDict);
-        if (buttonIndex == 0)
-        {
-            //
-            RegistViewController *regist = [[RegistViewController alloc] init];
-            regist.headerIcon = [accountDict objectForKey:@"header_icon"];
-            regist.accountID = [accountDict objectForKey:@"a_id"];
-            regist.accountType = [accountDict objectForKey:@"a_type"];
-            regist.account = @"1";
-            regist.nickName = [accountDict objectForKey:@"nickname"];
-            [regist showSelfViewController:self];
-            
-        }
-        else if(buttonIndex == 1)
-        {
-            //绑定已有
-            LoginViewController *login = [[LoginViewController alloc] init];
-            login.accountID = [accountDict objectForKey:@"a_id"];
-            login.accountType = [accountDict objectForKey:@"a_type"];
-            login.account = @"1";
-            [login showSelfViewController:self];
-            
-        }
-        else if(buttonIndex == 2)
-        {
-            //zhijie
-            FillInfoViewController *fillInfo = [[FillInfoViewController alloc] init];
-            fillInfo.headerIcon = [accountDict objectForKey:@"header_icon"];
-            fillInfo.accountID = [accountDict objectForKey:@"a_id"];
-            fillInfo.accountType = [accountDict objectForKey:@"a_type"];
-            fillInfo.account = @"1";
-            fillInfo.nickName = [accountDict objectForKey:@"nickname"];
-            [fillInfo showSelfViewController:self];
-        }
-    }
-    
-}
-
 -(void)login
 {
     LoginViewController *loginViewController = [[LoginViewController alloc] init];
     loginViewController.account = @"0";
-    [loginViewController showSelfViewController:self];
+    [self.navigationController pushViewController:loginViewController animated:YES];
 }
 
 -(void)regist
 {
     RegistViewController *registViewController = [[RegistViewController alloc] init];
-    [registViewController showSelfViewController:self];
+    [self.navigationController pushViewController:registViewController animated:YES];
 }
 
 @end

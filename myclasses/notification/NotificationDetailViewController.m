@@ -43,11 +43,13 @@ UIAlertViewDelegate>
     
     NSString *phoneStr;
     
+    NSString *classID;
+    
 }
 @end
 
 @implementation NotificationDetailViewController
-@synthesize noticeContent,noticeID,c_read,classID,byID,readnotificationDetaildel,isnew;
+@synthesize noticeContent,noticeID,c_read,byID,readnotificationDetaildel,isnew;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -61,6 +63,8 @@ UIAlertViewDelegate>
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
+    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+    classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
     self.titleLabel.text = @"公告详情";
     readArray = [[NSMutableArray alloc] initWithCapacity:0];
@@ -80,9 +84,6 @@ UIAlertViewDelegate>
     contentTextView.text = noticeContent;
     [self.bgView addSubview:contentTextView];
 
-    
-    [self readNotice];
-    
     
     if ([c_read integerValue] == 0)
     {
@@ -144,17 +145,16 @@ UIAlertViewDelegate>
         [containerScrollView addSubview:unreadTableView];
         
         containerScrollView.contentSize = CGSizeMake(SCREEN_WIDTH*2, containerScrollView.frame.size.height);
-
     }
-
-    
     
     if (isnew)
     {
-        if ([self.readnotificationDetaildel respondsToSelector:@selector(readNotificationDetail)])
-        {
-            [self.readnotificationDetaildel readNotificationDetail];
-        }
+        [self readNotice];
+    }
+    else if ([c_read integerValue] == 1)
+    {
+        [self getViewList:@"read"];
+        [self getViewList:@"unread"];
     }
 }
 
@@ -162,6 +162,11 @@ UIAlertViewDelegate>
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 -(void)readNotice
@@ -180,6 +185,12 @@ UIAlertViewDelegate>
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 DDLOG(@"read success!");
+                
+                if ([self.readnotificationDetaildel respondsToSelector:@selector(readNotificationDetail)])
+                {
+                    [self.readnotificationDetaildel readNotificationDetail];
+                }
+
                 if ([c_read integerValue] == 1)
                 {
                     [self getViewList:@"read"];
@@ -253,9 +264,16 @@ UIAlertViewDelegate>
         [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERBG];
         cell.headerImageView.frame = CGRectMake(14, 3.75, 40, 40);
         cell.nameLabel.frame = CGRectMake(60, 8.75, 200, 30);
+        
         if ([[dict objectForKey:@"role"] isEqualToString:@"parents"])
         {
-            cell.nameLabel.text = [NSString stringWithFormat:@"%@（%@）",[dict objectForKey:@"name"],[dict objectForKey:@"title"]];
+            NSMutableString *titleStr = [[NSMutableString alloc] initWithString:[dict objectForKey:@"title"]];
+            NSRange range = [titleStr rangeOfString:@"."];
+            if (range.length > 0)
+            {
+                [titleStr replaceCharactersInRange:range withString:@"的"];
+            }
+            cell.nameLabel.text = [NSString stringWithFormat:@"%@（%@）",[dict objectForKey:@"name"],titleStr];
         }
         else
         {
@@ -291,7 +309,13 @@ UIAlertViewDelegate>
         
         if ([[dict objectForKey:@"role"] isEqualToString:@"parents"])
         {
-            cell.nameLabel.text = [NSString stringWithFormat:@"%@（%@）",[dict objectForKey:@"name"],[dict objectForKey:@"title"]];
+            NSMutableString *titleStr = [[NSMutableString alloc] initWithString:[dict objectForKey:@"title"]];
+            NSRange range = [titleStr rangeOfString:@"."];
+            if (range.length > 0)
+            {
+                [titleStr replaceCharactersInRange:range withString:@"的"];
+            }
+            cell.nameLabel.text = [NSString stringWithFormat:@"%@（%@）",[dict objectForKey:@"name"],titleStr];
         }
         else
         {
@@ -339,7 +363,7 @@ UIAlertViewDelegate>
     {
         if (buttonIndex == 1)
         {
-            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel://%@",phoneStr]]];
+            [Tools dialPhoneNumber:phoneStr inView:self.bgView];
         }
     }
 }
@@ -364,14 +388,12 @@ UIAlertViewDelegate>
     if ([role isEqualToString:@"students"])
     {
         StudentDetailViewController *studentDetail = [[StudentDetailViewController alloc] init];
-        studentDetail.classID = classID;
         studentDetail.studentID = [dict objectForKey:@"_id"];
         studentDetail.studentName = [dict objectForKey:@"name"];
         studentDetail.title = [dict objectForKey:@"title"];
         studentDetail.headerImg = [dict objectForKey:@"img_icon"];
         studentDetail.role = [dict objectForKey:@"role"];
-        studentDetail.classID = classID;
-        [studentDetail showSelfViewController:self];
+        [self.navigationController pushViewController:studentDetail animated:YES];
     }
     else if([role isEqualToString:@"parents"])
     {
@@ -381,9 +403,8 @@ UIAlertViewDelegate>
         parentDetail.title = [dict objectForKey:@"title"];
         parentDetail.headerImg = [dict objectForKey:@"img_icon"];
         parentDetail.admin = NO;
-        parentDetail.classID = classID;
         parentDetail.role = [dict objectForKey:@"role"];
-        [parentDetail showSelfViewController:self];
+        [self.navigationController pushViewController:parentDetail animated:YES];
     }
     else if([role isEqualToString:@"teachers"])
     {
@@ -393,9 +414,8 @@ UIAlertViewDelegate>
         teacherDetail.title = [dict objectForKey:@"title"];
         teacherDetail.headerImg = [dict objectForKey:@"img_icon"];
         teacherDetail.admin = NO;
-        teacherDetail.classID = classID;
         teacherDetail.role = [dict objectForKey:@"role"];
-        [teacherDetail showSelfViewController:self];
+        [self.navigationController pushViewController:teacherDetail animated:YES];
     }
 }
 

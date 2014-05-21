@@ -10,6 +10,7 @@
 #import "WelcomeViewController.h"
 #import "ChineseToPinyin.h"
 #import <AVFoundation/AVFoundation.h>
+#import "KKNavigationController.h"
 
 extern NSString *CTSettingCopyMyPhoneNumber();
 
@@ -64,22 +65,22 @@ extern NSString *CTSettingCopyMyPhoneNumber();
         UIImage *image = [UIImage imageWithData:data];
 		imageView.image = image;
 	} else {
-        if ([defaultName length]>10)
+        if ([defaultName length] > 0)
         {
             imageView.image = [UIImage imageNamed:defaultName];
         }
 		dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0ul);
 		dispatch_async(queue, ^{
-            UIActivityIndicatorView *ac = [[UIActivityIndicatorView alloc] initWithFrame:imageView.bounds];
-            ac.activityIndicatorViewStyle = UIActivityIndicatorViewStyleGray;
-            [imageView addSubview:ac];
-            [ac startAnimating];
+//            UIActivityIndicatorView *ac = [[UIActivityIndicatorView alloc] initWithFrame:imageView.bounds];
+//            ac.activityIndicatorViewStyle = UIActivityIndicatorViewStyleGray;
+//            [imageView addSubview:ac];
+//            [ac startAnimating];
 			NSData *data = [NSData dataWithContentsOfURL:imageURL];
 			[FTWCache setObject:data forKey:key];
 			UIImage *image = [UIImage imageWithData:data];
 			dispatch_sync(dispatch_get_main_queue(), ^{
-                [ac stopAnimating];
-                [ac removeFromSuperview];
+//                [ac stopAnimating];
+//                [ac removeFromSuperview];
                 if (image == nil)
                 {
                     imageView.image = [UIImage imageNamed:defaultName];
@@ -584,14 +585,14 @@ extern NSString *CTSettingCopyMyPhoneNumber();
         if (asize.width/asize.height > oldsize.width/oldsize.height) {
             rect.size.width = asize.height*oldsize.width/oldsize.height;
             rect.size.height = asize.height;
-            rect.origin.x = (asize.width - rect.size.width)/2;
+            rect.origin.x = (asize.width - rect.size.width)/3;
             rect.origin.y = 0;
         }
         else{
             rect.size.width = asize.width;
             rect.size.height = asize.width*oldsize.height/oldsize.width;
             rect.origin.x = 0;
-            rect.origin.y = (asize.height - rect.size.height)/2;
+            rect.origin.y = (asize.height - rect.size.height)/3;
         }
         UIGraphicsBeginImageContext(asize);
         CGContextRef context = UIGraphicsGetCurrentContext();
@@ -667,19 +668,15 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 
 +(void)dealRequestError:(NSDictionary *)errorDict fromViewController:(XDContentViewController *)viewController
 {
-    [Tools showAlertView:[[[errorDict objectForKey:@"message"] allValues] firstObject] delegateViewController:viewController];
-    DDLOG(@"request error %@",[[[errorDict objectForKey:@"message"] allKeys] firstObject]);
-    
     if ([[[[errorDict objectForKey:@"message"] allKeys] firstObject] isEqualToString:@"NO_AUTH"])
     {
-        [Tools showAlertView:@"您已在另一地点登陆" delegateViewController:nil];
         WelcomeViewController *login = [[WelcomeViewController alloc] init];
+        KKNavigationController *loginNav = [[KKNavigationController alloc] initWithRootViewController:login];
         [self exit];
-        [login showSelfViewController:viewController];
-//        [viewController presentViewController:login animated:YES completion:^{
-//            
-//        }];
+        [viewController presentViewController:loginNav animated:YES completion:nil];
     }
+    [Tools showAlertView:[[[errorDict objectForKey:@"message"] allValues] firstObject] delegateViewController:viewController];
+
 }
 
 #pragma mark - aboutSort
@@ -705,6 +702,22 @@ extern NSString *CTSettingCopyMyPhoneNumber();
                 count++;
             }
         }
+        
+        for (int i=0; i<[array count]; i++)
+        {
+            NSDictionary *maxDict = [array objectAtIndex:i];
+            NSString *maxJIanPin = [ChineseToPinyin pinyinFromChiniseString:[maxDict objectForKey:key]];
+            for (int j=i; j<[array count]; j++)
+            {
+                NSDictionary *tmpDict = [array objectAtIndex:j];
+                NSString *tmpPinYin = [ChineseToPinyin pinyinFromChiniseString:[tmpDict objectForKey:key]];
+                if ([maxJIanPin compare:tmpPinYin options:NSLiteralSearch] == NSOrderedDescending)
+                {
+                    [array exchangeObjectAtIndex:i withObjectAtIndex:j];
+                }
+            }
+        }
+        
         if (count > 0)
         {
             [dict setObject:[NSString stringWithFormat:@"%d",count] forKey:@"count"];

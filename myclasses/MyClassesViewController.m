@@ -13,12 +13,15 @@
 #import "ClassZoneViewController.h"
 #import "ClassMemberViewController.h"
 #import "NotificationViewController.h"
-#import "MoreViewController.h"
+#import "ClassInfoViewController.h"
 #import "ChooseSchoolViewController.h"
 #import "ClassCell.h"
 #import "EGORefreshTableHeaderView.h"
 #import "AppDelegate.h"
 #import "KKNavigationController.h"
+#import "KKNavigationController+JDSideMenu.h"
+#import "UINavigationController+JDSideMenu.h"
+#import "SearchSchoolViewController.h"
 
 #import "XDTabViewController.h"
 
@@ -27,7 +30,6 @@ UITableViewDelegate,
 EGORefreshTableHeaderDelegate,
 ChatDelegate,
 MsgDelegate,
-moreDelegate,
 ReadNoticeDelegate,
 FreshClassZone>
 {
@@ -69,13 +71,14 @@ FreshClassZone>
     
     self.titleLabel.text = @"我的班级";
     self.titleLabel.font = [UIFont systemFontOfSize:19];
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     [self.backButton setHidden:YES];
     self.returnImageView .hidden = YES;
     
     db = [[OperatDB alloc] init];
     
     schoolLevelArray = [NSArray arrayWithObjects:@"幼儿园",@"小学",@"中学",@"中专技校",@"培训机构",@"其他", nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeClassInfo) name:@"changeClassInfo" object:nil];
     
     [[self.bgView layer] setShadowOffset:CGSizeMake(-5.0f, 5.0f)];
     [[self.bgView layer] setShadowColor:[UIColor darkGrayColor].CGColor];
@@ -131,6 +134,10 @@ FreshClassZone>
     {
         [self getClassesByUser];
     }
+}
+-(void)changeClassInfo
+{
+    [self getClassesByUser];
 }
 
 -(void)viewWillAppear:(BOOL)animated
@@ -403,7 +410,7 @@ FreshClassZone>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:(XDContentViewController *)self.sideMenuController];
+                [Tools dealRequestError:responseDict fromViewController:self];
             }
         }];
 
@@ -512,8 +519,14 @@ FreshClassZone>
     cell.headerImageView.frame = CGRectMake(16, 7.5, 40, 40);
     cell.headerImageView.layer.cornerRadius = 5;
     cell.headerImageView.clipsToBounds =YES;
-//    [Tools fillImageView:cell.headerImageView withImageFromURL:@"" andDefault:@"headpic"];
-    [cell.headerImageView setImage:[UIImage imageNamed:@"headpic.jpg"]];
+    if (![[classDict objectForKey:@"img_icon"] isEqual:[NSNull null]] && [[classDict objectForKey:@"img_icon"] length] > 10)
+    {
+        [Tools fillImageView:cell.headerImageView withImageFromURL:[classDict objectForKey:@"img_icon"] andDefault:@"3100"];
+    }
+    else
+    {
+        [cell.headerImageView setImage:[UIImage imageNamed:@"headpic.jpg"]];
+    }
     cell.nameLabel.frame = CGRectMake(80, 10, SCREEN_WIDTH-95, 30);
     cell.nameLabel.text = [classDict objectForKey:@"name"];
     int num = 0;
@@ -592,40 +605,65 @@ FreshClassZone>
     [[NSUserDefaults standardUserDefaults] synchronize];
     
     XDTabViewController *tabViewController = [XDTabViewController sharedTabViewController];
-    tabViewController.classID = classID;
     
     ClassZoneViewController *classZone = [[ClassZoneViewController alloc] init];
-    classZone.classID = classID;
     classZone.fromClasses = NO;
     classZone.fromMsg = NO;
-    classZone.className = [classDict objectForKey:@"name"];
-    classZone.schoolID = [classDict objectForKey:@"s_id"];
-    classZone.schoolName = [classDict objectForKey:@"s_name"];
     classZone.refreshDel = self;
     
     NotificationViewController *notification = [[NotificationViewController alloc] init];
-    notification.classID = classID;
     notification.readNoticedel = self;
     
     ClassMemberViewController *classMember = [[ClassMemberViewController alloc] init];
-    classMember.classID = classID;
     classMember.fromMsg = NO;
-    classMember.schoolName = [classDict objectForKey:@"s_name"];
-    classMember.className = [classDict objectForKey:@"name"];
     
-    MoreViewController *more = [[MoreViewController alloc] init];
-    more.signOutDel = self;
-    more.classID = classID;
+    ClassInfoViewController *classInfoViewController = [[ClassInfoViewController alloc] init];
     
-    NSArray *viewControllerArray = @[classZone,notification,classMember,more];
+    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+    [ud setObject:classID forKey:@"classid"];
+    [ud setObject:[classDict objectForKey:@"name"] forKey:@"classname"];
+    [ud setObject:[classDict objectForKey:@"s_id"] forKey:@"schoolid"];
+    [ud setObject:[classDict objectForKey:@"s_name"] forKey:@"schoolname"];
+    
+    if (![[classDict objectForKey:@"img_kb"] isEqual:[NSNull null]] && [[classDict objectForKey:@"img_kb"] length] > 10)
+    {
+        [ud setObject:[classDict objectForKey:@"img_kb"] forKey:@"classkbimage"];
+    }
+    else
+    {
+        [ud setObject:@"" forKey:@"classkbimage"];
+    }
+    
+    if (![[classDict objectForKey:@"img_icon"] isEqual:[NSNull null]] && [[classDict objectForKey:@"img_icon"] length] > 10)
+    {
+        [ud setObject:[classDict objectForKey:@"img_icon"] forKey:@"classiconimage"];
+    }
+    else
+    {
+        [ud setObject:@"" forKey:@"classiconimage"];
+    }
+
+    [ud synchronize];
+    
+    KKNavigationController *nav1 = [[KKNavigationController alloc] initWithRootViewController:classZone];
+    KKNavigationController *nav2 = [[KKNavigationController alloc] initWithRootViewController:notification];
+    KKNavigationController *nav3 = [[KKNavigationController alloc] initWithRootViewController:classMember];
+    KKNavigationController *nav4 = [[KKNavigationController alloc] initWithRootViewController:classInfoViewController];
+    
+    NSArray *viewControllerArray = @[nav1,nav2,nav3,nav4];
     [tabViewController setTabBarContents:viewControllerArray];
     [tabViewController selectItemAtIndex:0];
-    [tabViewController showSelfViewController:self];
+    
+    KKNavigationController *tabBarNav = [[KKNavigationController alloc] initWithRootViewController:tabViewController];
+    [self.navigationController presentViewController:tabBarNav animated:YES completion:^{
+        
+    }];
     [self.sideMenuController hideMenuAnimated:YES];
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
     inThisPage = NO;
 }
+
 -(void)reFreshClassZone:(BOOL)refresh
 {
     if (refresh)
@@ -643,13 +681,13 @@ FreshClassZone>
 
 -(void)moreOpen
 {
-    if (![self.sideMenuController isMenuVisible])
+    if (![[self.navigationController sideMenuController] isMenuVisible])
     {
-        [self.sideMenuController showMenuAnimated:YES];
+        [[self.navigationController sideMenuController] showMenuAnimated:YES];
     }
     else
     {
-        [self.sideMenuController hideMenuAnimated:YES];
+        [[self.navigationController sideMenuController] hideMenuAnimated:YES];
     }
 }
 
@@ -657,9 +695,11 @@ FreshClassZone>
 {
     if ([Tools phone_num])
     {
-        ChooseSchoolViewController *chooseViewController = [[ChooseSchoolViewController alloc] init];
-        [chooseViewController.schoolArray addObjectsFromArray:tmpArray];
-        [chooseViewController showSelfViewController:self];
+        SearchSchoolViewController *searchSchoolViewController = [[SearchSchoolViewController alloc] init];
+        [self.navigationController pushViewController:searchSchoolViewController animated:YES];
+//        ChooseSchoolViewController *chooseViewController = [[ChooseSchoolViewController alloc] init];
+//        [chooseViewController.schoolArray addObjectsFromArray:tmpArray];
+//        [self.navigationController pushViewController:chooseViewController animated:YES];
     }
     else
     {

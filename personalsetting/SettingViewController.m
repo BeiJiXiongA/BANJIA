@@ -12,6 +12,8 @@
 #import "WelcomeViewController.h"
 #import <MessageUI/MessageUI.h>
 #import "AboutUsViewController.h"
+#import "SendAdviseViewController.h"
+#import "KKNavigationController.h"
 
 #define SWITCHTAG   1000
 #define CLEARCACHE   2000
@@ -81,6 +83,11 @@ MFMailComposeViewControllerDelegate>
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -324,22 +331,25 @@ MFMailComposeViewControllerDelegate>
         {
             //关于我们
             AboutUsViewController *aboutUs = [[AboutUsViewController alloc] init];
-            [aboutUs showSelfViewController:self];
+            [self.navigationController pushViewController:aboutUs animated:YES];
             
         }
         else if (indexPath.row == 1)
         {
             //意见反馈
-            Class mailClass = (NSClassFromString(@"MFMailComposeViewController"));
-            if (!mailClass) {
-                [Tools showAlertView:@"当前系统版本不支持应用内发送邮件功能，您可以使用mailto方法代替" delegateViewController:nil];
-                return;
-            }
-            if (![mailClass canSendMail]) {
-                [Tools showAlertView:@"用户没有设置邮件账户" delegateViewController:nil];
-                return;
-            }     
-            [self displayMailPicker];
+//            Class mailClass = (NSClassFromString(@"MFMailComposeViewController"));
+//            if (!mailClass) {
+//                [Tools showAlertView:@"当前系统版本不支持应用内发送邮件功能，您可以使用mailto方法代替" delegateViewController:nil];
+//                return;
+//            }
+//            if (![mailClass canSendMail]) {
+//                [Tools showAlertView:@"用户没有设置邮件账户" delegateViewController:nil];
+//                return;
+//            }     
+//            [self displayMailPicker];
+            
+            SendAdviseViewController *sendAdviseVC = [[SendAdviseViewController alloc] init];
+            [self.navigationController pushViewController:sendAdviseVC animated:YES];
         }
         else if(indexPath.row == 1)
         {
@@ -433,6 +443,8 @@ MFMailComposeViewControllerDelegate>
         [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
     }
 }
+
+#pragma mark - 意见反馈
 //调出邮件发送窗口
 - (void)displayMailPicker
 {
@@ -563,8 +575,9 @@ MFMailComposeViewControllerDelegate>
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 [Tools exit];
-                WelcomeViewController *welcomeViewController = [[WelcomeViewController alloc] init];
-                [self presentViewController:welcomeViewController animated:YES completion:nil];
+                WelcomeViewController *welcomeViewCOntroller = [[WelcomeViewController alloc]init];
+                KKNavigationController *welNav = [[KKNavigationController alloc] initWithRootViewController:welcomeViewCOntroller];
+                [self.navigationController presentViewController:welNav animated:YES completion:nil];
             }
             else
             {

@@ -12,6 +12,7 @@
 #import "SideMenuViewController.h"
 #import "MyClassesViewController.h"
 #import "JDSideMenu.h"
+#import "KKNavigationController.h"
 #define NAMETFTAG   1000
 
 @interface FillInfoViewController ()<UITextFieldDelegate,
@@ -65,6 +66,8 @@ MySwitchDel>
         self.titleLabel.text = @"注册成功";
     }
     
+    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+    
     mainScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT)];
     mainScrollView.backgroundColor = [UIColor clearColor];
     mainScrollView.showsVerticalScrollIndicator = NO;
@@ -99,7 +102,7 @@ MySwitchDel>
     [mainScrollView addSubview:headerLabel];
     
     headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(headerLabel.frame.origin.x+headerLabel.frame.size.width+10, 39, 100, 100)];
-    [headerImageView setImage:[Tools getImageFromImage:[UIImage imageNamed:HEADERBG] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)]];
+    [headerImageView setImage:[UIImage imageNamed:HEADERBG]];
     headerImageView.backgroundColor = [UIColor clearColor];
     [mainScrollView addSubview:headerImageView];
     
@@ -197,6 +200,11 @@ MySwitchDel>
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 -(void)scrollViewDidScroll:(UIScrollView *)scrollView
@@ -450,14 +458,12 @@ MySwitchDel>
                 }
                 [[NSUserDefaults standardUserDefaults] synchronize];
                 
-                
-                
                 SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
                 MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
-                myClassesViewController.headerIcon = headerIcon;
-                JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myClassesViewController menuController:sideMenuViewController];
-                [self presentViewController:sideMenu animated:YES completion:^{
-                    [self uploadImage:headerImageView.image];
+                KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClassesViewController];
+                JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myClassesNav menuController:sideMenuViewController];
+                [self.navigationController presentViewController:sideMenu animated:YES completion:^{
+                    
                 }];
             }
             else

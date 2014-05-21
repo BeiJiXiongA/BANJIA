@@ -15,8 +15,4 @@
 @property (nonatomic, retain) NSMutableArray *followersArr;
 @property (nonatomic, retain) NSMutableArray *bilateralFriendsArr;
 @property (nonatomic, assign) BOOL fromClass;
-
-@property (nonatomic, strong) NSString *schoolName;
-@property (nonatomic, strong) NSString *className;
-@property (nonatomic, strong) NSString *classID;
 @end

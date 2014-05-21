@@ -11,6 +11,7 @@
 #import "KKNavigationController.h"
 #import <QuartzCore/QuartzCore.h>
 #import <math.h>
+#import "KKNavigationController+JDSideMenu.h"
 
 @interface KKNavigationController ()
 {
@@ -25,6 +26,8 @@
 @property (nonatomic,retain) NSMutableArray *screenShotsList;
 
 @property (nonatomic,assign) BOOL isMoving;
+
+@property (nonatomic, strong) UIView *bgView;
 
 @end
 
@@ -54,6 +57,8 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    self.bgView = [[UIView alloc] init];
 
     self.navigationBar.barStyle = UIBarStyleBlackTranslucent;
     self.navigationBar.backgroundColor = [UIColor redColor];
@@ -78,7 +83,7 @@
 - (void)pushViewController:(UIViewController *)viewController animated:(BOOL)animated
 {
     [self.screenShotsList addObject:[self capture]];
-    
+
     [super pushViewController:viewController animated:animated];
 }
 
@@ -148,7 +153,22 @@
 
 - (void)paningGestureReceive:(UIPanGestureRecognizer *)recoginzer
 {
-    if (self.viewControllers.count <= 1 || !self.canDragBack) return;
+    if (self.viewControllers.count <= 1 || !self.canDragBack)
+    {
+        if(recoginzer.state == UIGestureRecognizerStateEnded)
+        {
+            if ([self.sideMenuController isMenuVisible])
+            {
+                [self.sideMenuController hideMenuAnimated:YES];
+            }
+            else
+            {
+                [self.sideMenuController showMenuAnimated:YES];
+            }
+        }
+        
+        return;
+    }
     
     CGPoint touchPoint = [recoginzer locationInView:KEY_WINDOW];
     
@@ -230,9 +250,6 @@
         [self moveViewWithX:touchPoint.x - startTouch.x];
     }
 }
-
-
-
 @end
 
 

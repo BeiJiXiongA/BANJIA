@@ -9,14 +9,18 @@
 #import <UIKit/UIKit.h>
 #import "BPush.h"
 #import "OperatDB.h"
+#import "BMapKit.h"
 
 
 
 @protocol ChatDelegate;
 @protocol MsgDelegate;
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate,BPushDelegate>
-
+@interface AppDelegate : UIResponder <UIApplicationDelegate,BPushDelegate,UIAlertViewDelegate>
+{
+    NSString *updateUrl;
+    BMKMapManager* _mapManager;
+}
 @property (strong, nonatomic) UIWindow *window;
 
 @property (readonly, strong, nonatomic) NSManagedObjectContext *managedObjectContext;

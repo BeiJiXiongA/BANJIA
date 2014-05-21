@@ -37,7 +37,7 @@
         _shadowView.alpha =  XD_SHADOWVIEW_MAX_ALPHA;
         [self.parentViewController.view addSubview:_shadowView];
         [self.parentViewController.view bringSubviewToFront:self.view];
-        [self.view bringSubviewToFront:_shadowView];
+//        [self.view bringSubviewToFront:_shadowView];
         UIView *view = self.parentViewController.view ;
         NSLog(@"%f %f  %f %f", view.frame.origin.x, view.frame.origin.y
               ,view.frame.size.width, view.frame.size.height);
@@ -109,73 +109,13 @@
 
 - (void)unShowSelfViewController
 {
-    XDContentViewController * xdParentContent = (XDContentViewController*)self.parentViewController;
-    [UIView animateWithDuration:0.3 animations:^{
-        self.view.frame = CGRectMake(UI_SCREEN_WIDTH,
-                                     0,
-                                     UI_SCREEN_WIDTH,
-                                     UI_MAINSCREEN_HEIGHT);
-//        xdParentContent.bgView.frame = CGRectMake(0,
-//                                                  YSTART,
-//                                                  UI_SCREEN_WIDTH,
-//                                                  UI_MAINSCREEN_HEIGHT);
-        _shadowView.alpha = 0;
-    }completion:^(BOOL finished) {
-        [xdParentContent viewWillAppear:YES];
-        [_shadowView removeFromSuperview];
-        [self willMoveToParentViewController:nil];
-        [self.view removeFromSuperview];
-        [self removeFromParentViewController];
-    }];
+
 }
+
 
 -(void)showSelfViewController: (XDContentViewController*) parentViewCon
 {
     
-    _shadowView.frame = CGRectMake(0, 0, UI_SCREEN_WIDTH, UI_SCREEN_HEIGHT);
-    _shadowView.backgroundColor = [UIColor blackColor];
-    _shadowView.alpha = 0;
-
-    self.view.frame = CGRectMake(SCREEN_WIDTH,
-                                               0,
-                                               SCREEN_WIDTH - 1,
-                                               SCREEN_HEIGHT);
-    
-//    CGRect parentRect = CGRectMake(XD_SHADOWVIEW_ORGION_MAX_X ,
-//                                   XD_SHADOWVIEW_ORGION_MAX_Y,
-//                                   SCREEN_WIDTH - XD_SHADOWVIEW_ORGION_MAX_X  * 1,
-//                                   SCREEN_HEIGHT - XD_SHADOWVIEW_ORGION_MAX_Y * 1);
-
-    @try {
-        [parentViewCon addChildViewController:self];
-        [parentViewCon.view addSubview:self.view];
-    }
-    @catch (NSException *exception) {
-        DDLOG(@"exception:%@", exception);
-    }
-    @finally {
-        
-    }
-    
-    
-//    [self didMoveToParentViewController:parentViewCon];
-
-    [parentViewCon.view addSubview:_shadowView];
-    [parentViewCon.view bringSubviewToFront:self.view];
-    [self.view bringSubviewToFront:_shadowView];
-     
-    [UIView animateWithDuration:0.3 animations:^{
-        self.view.frame = CGRectMake(0,
-                                     0,
-                                    UI_SCREEN_WIDTH,
-                                    UI_SCREEN_HEIGHT);
-//        parentViewCon.bgView.frame = parentRect;
-        _shadowView.alpha = XD_SHADOWVIEW_MAX_ALPHA;
-        
-    } completion:^(BOOL finished) {
-        _shadowView.alpha = 0;
-        [_shadowView removeFromSuperview];
-    }];
 }
 
 #pragma -mark lifeCycle
@@ -203,11 +143,6 @@
                                                                  UI_SCREEN_WIDTH,
                                                                  UI_NAVIGATION_BAR_HEIGHT)];
     
-//    _navigationBarView.layer.shadowColor = [UIColor blackColor].CGColor;
-//    _navigationBarView.layer.shadowOffset = CGSizeMake(0, 0.5);
-//    _navigationBarView.layer.shadowOpacity = 0.2;
-    
-    
     _contentView = [[UIView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT,
                                                               UI_SCREEN_WIDTH,
                                                               UI_MAINSCREEN_HEIGHT - UI_NAVIGATION_BAR_HEIGHT)];
@@ -223,8 +158,6 @@
     
     _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(self.view.frame.size.width/2-90, 8, 180, 36)];
     _titleLabel.font = [UIFont fontWithName:@"Courier" size:19];
-//    _titleLabel.shadowColor = [UIColor blackColor];
-//    _titleLabel.shadowOffset = CGSizeMake(-0.6, 0.6);
     _titleLabel.backgroundColor = [UIColor clearColor];
     _titleLabel.textColor = UIColorFromRGB(0x666464);
     _titleLabel.textAlignment = NSTextAlignmentCenter;
@@ -238,7 +171,6 @@
     _backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 5, 60 , UI_NAVIGATION_BAR_HEIGHT-10)];
     [_backButton setTitle:@"  返回" forState:UIControlStateNormal];
     [_backButton setBackgroundColor:[UIColor clearColor]];
-//    [_backButton setImage:[UIImage imageNamed:@"backBG"] forState:UIControlStateNormal];
     [_backButton setTitleColor:UIColorFromRGB(0x727171) forState:UIControlStateNormal];
     [_backButton addTarget:self action:@selector(unShowSelfViewController) forControlEvents:UIControlEventTouchUpInside];
     _backButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentRight;
@@ -252,7 +184,7 @@
     unReadLabel.clipsToBounds = YES;
     unReadLabel.hidden = YES;
     [self.navigationBarView addSubview:unReadLabel];
-    
+
     [_navigationBarView addSubview:_backButton];
     _bgView.backgroundColor = UIColorFromRGB(0xf1f0ec);
     [self.view addSubview:_bgView];
@@ -264,10 +196,6 @@
     {
         [self.view addSubview:_stateView];
     }
-    
-//    self.view.backgroundColor = [UIColor colorWithRed:105.00/255.00 green:232.00/255.00 blue:247.00/255.00 alpha:0.7];
-    
-    _shadowView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, UI_SCREEN_WIDTH, UI_SCREEN_HEIGHT)];
 }
 
 -(void)viewWillAppear:(BOOL)animated

@@ -30,7 +30,7 @@
     
     self.titleLabel.text = @"关于我们";
     
-    UIImage *logo = [UIImage imageNamed:@"icon20"];
+    UIImage *logo = [UIImage imageNamed:@"icon120"];
     UIImageView *logoImageView = [[UIImageView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH/2-45, UI_NAVIGATION_BAR_HEIGHT+50, 90, 90)];
     [logoImageView setImage:logo];
     logoImageView.layer.cornerRadius = 10;
@@ -45,21 +45,21 @@
     tipLabel1.text = [NSString stringWithFormat:@"班家%.1f For iPhone",[[Tools client_ver] floatValue]];
     [self.bgView addSubview:tipLabel1];
     
-    UILabel *tipLabel2 = [[UILabel alloc] initWithFrame:CGRectMake(25, SCREEN_HEIGHT-130, SCREEN_WIDTH-50, 30)];
+    UILabel *tipLabel2 = [[UILabel alloc] initWithFrame:CGRectMake(25, SCREEN_HEIGHT-150, SCREEN_WIDTH-50, 30)];
     tipLabel2.backgroundColor = [UIColor clearColor];
     tipLabel2.textAlignment = NSTextAlignmentCenter;
     tipLabel2.font = [UIFont systemFontOfSize:20];
     tipLabel2.text = [NSString stringWithFormat:@"天津蓝景同创科技有限公司"];
     [self.bgView addSubview:tipLabel2];
     
-    UILabel *tipLabel3 = [[UILabel alloc] initWithFrame:CGRectMake(80, SCREEN_HEIGHT-100, SCREEN_WIDTH-160, 60)];
+    UILabel *tipLabel3 = [[UILabel alloc] initWithFrame:CGRectMake(65, SCREEN_HEIGHT-115, SCREEN_WIDTH-130, 80)];
     tipLabel3.backgroundColor = [UIColor clearColor];
     tipLabel3.textAlignment = NSTextAlignmentCenter;
     tipLabel3.font = [UIFont systemFontOfSize:14];
-    tipLabel3.numberOfLines = 3;
+    tipLabel3.numberOfLines = 4;
     tipLabel3.lineBreakMode = NSLineBreakByWordWrapping;
     tipLabel3.textColor = TITLE_COLOR;
-    tipLabel3.text = [NSString stringWithFormat:@"Copyright 2014 LanJingTongChuang(TianJin) Technology & Development All Rights Reserved"];
+    tipLabel3.text = [NSString stringWithFormat:@"Copyright 2014 LanJingTongChuang(TianJin)Technology & Development All Rights Reserved"];
     [self.bgView addSubview:tipLabel3];
 }
 
@@ -67,6 +67,11 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 /*

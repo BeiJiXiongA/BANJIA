@@ -41,11 +41,12 @@ ReturnFunctionDelegate>
     CGFloat faceViewHeight;
     
     OperatDB *db;
+    NSString *classID;
 }
 @end
 
 @implementation DongTaiDetailViewController
-@synthesize dongtaiId,classID,addComDel;
+@synthesize dongtaiId,addComDel;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -53,13 +54,6 @@ ReturnFunctionDelegate>
         // Custom initialization
     }
     return self;
-}
-
--(void)viewWillAppear:(BOOL)animated
-{
-    [super viewWillAppear:animated];
-    DDLOG_CURRENT_METHOD;
-    [self.sideMenuController setPanGestureEnabled:NO];
 }
 
 -(void)viewWillDisappear:(BOOL)animated
@@ -73,8 +67,15 @@ ReturnFunctionDelegate>
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
+    classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
+}
+
+-(void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
     self.titleLabel.text = @"空间详情";
+    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     
     faceViewHeight = 0;
     
@@ -113,7 +114,7 @@ ReturnFunctionDelegate>
     [faceButton setImage:[UIImage imageNamed:@"icon_comment"] forState:UIControlStateNormal];
     faceButton.backgroundColor = [UIColor clearColor];
     [commitView addSubview:faceButton];
-
+    
     [self getDiaryDetail];
 }
 
@@ -121,6 +122,11 @@ ReturnFunctionDelegate>
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
 }
 #pragma mark - inputTabBarDel
 
@@ -214,17 +220,12 @@ ReturnFunctionDelegate>
 
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
-    UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH-30, 26.5)];
-    
-    headerView.backgroundColor = RGB(234, 234, 234, 1);
-    UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 1.5, headerView.frame.size.width, 26.5)];
+    UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 1.5, SCREEN_WIDTH-30, 26.5)];
     headerLabel.backgroundColor = [UIColor clearColor];
-//    headerLabel.textAlignment = NSTextAlignmentCenter;
     headerLabel.font = [UIFont systemFontOfSize:17];
     headerLabel.textColor = TITLE_COLOR;
     headerLabel.text = @"    评论";
-    [headerView addSubview:headerLabel];
-    return headerView;
+    return headerLabel;
 }
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -243,16 +244,23 @@ ReturnFunctionDelegate>
         {
             he = 10;
         }
-        CGFloat contentHtight = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-50 andFont:nil].height;
+        CGFloat contentHtight;
+        if ([content length]>0)
+        {
+            contentHtight = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-50 andFont:nil].height;
+        }
+        else
+        {
+            contentHtight = -15;
+        }
         return 60+imageViewHeight+contentHtight+70+he;
     }
     else if(indexPath.section == 1)
     {
-        
         NSDictionary *dict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row-1];
         NSString *contentStr = [dict objectForKey:@"content"];
         CGSize size = [Tools getSizeWithString:contentStr andWidth:SCREEN_WIDTH-50 andFont:nil];
-        return size.height+80;
+        return size.height+65;
     }
     return 0;
 }
@@ -329,9 +337,20 @@ ReturnFunctionDelegate>
         cell.headerImageView.layer.cornerRadius = cell.headerImageView.frame.size.width/2;
         cell.headerImageView.clipsToBounds = YES;
         [Tools fillImageView:cell.headerImageView withImageFromURL:[[diaryDetailDict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:@"header_pic.jpg"];
+        
+        
+        cell.headerImageView.hidden = NO;
         cell.contentLabel.hidden = YES;
         cell.imagesScrollView.hidden = YES;
         cell.imagesView.hidden  = YES;
+        cell.nameLabel.hidden = NO;
+        cell.locationLabel.hidden = NO;
+        cell.timeLabel.hidden = NO;
+        cell.praiseImageView.hidden = NO;
+        cell.praiseButton.hidden = NO;
+        cell.commentButton.hidden = NO;
+        cell.commentImageView.hidden = NO;
+        
         for(UIView *v in cell.imagesScrollView.subviews)
         {
             [v removeFromSuperview];
@@ -388,19 +407,22 @@ ReturnFunctionDelegate>
         {
             cell.imagesScrollView.frame = CGRectMake(5, cell.contentLabel.frame.size.height+cell.contentLabel.frame.origin.y, SCREEN_WIDTH-10, 0);
         }
+        
+        cell.praiseImageView.frame = CGRectMake((SCREEN_WIDTH-20)/4-30, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+30, 13, 13);
+        cell.praiseButton.frame = CGRectMake(0, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+16, (SCREEN_WIDTH-0)/2, 30);
+        
+        cell.commentImageView.frame = CGRectMake((SCREEN_WIDTH-20)*3/4-30, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+25, 13, 13);
+        cell.commentButton.frame = CGRectMake((SCREEN_WIDTH-0)/2, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+16, (SCREEN_WIDTH-0)/2, 30);
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        
         [cell.praiseButton setTitle:[NSString stringWithFormat:@"赞(%d)",[[diaryDetailDict objectForKey:@"likes_num"] integerValue]] forState:UIControlStateNormal];
-        cell.praiseButton.frame = CGRectMake(SCREEN_WIDTH - 140, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+10, 40, 30);
         [cell.praiseButton addTarget:self action:@selector(praiseDiary) forControlEvents:UIControlEventTouchUpInside];
         [cell.commentButton setTitle:[NSString stringWithFormat:@"评论(%d)",[[diaryDetailDict objectForKey:@"comments_num"] integerValue]] forState:UIControlStateNormal];
-        cell.commentButton.frame = CGRectMake(SCREEN_WIDTH - 80, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+10, 40, 30);
         [cell.commentButton addTarget:self action:@selector(startCommit) forControlEvents:UIControlEventTouchUpInside];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         cell.bgView.frame = CGRectMake(5, 5, SCREEN_WIDTH-10, cell.headerImageView.frame.size.height+cell.contentLabel.frame.size.height+cell.imagesScrollView.frame.size.height+cell.praiseButton.frame.size.height+30);
-        cell.bgView.backgroundColor = [UIColor clearColor];
-        cell.bgView.layer.borderWidth = 0;
-        UIImageView *cellImage = [[UIImageView alloc] initWithFrame:cell.bgView.frame];
-        [cellImage setImage:[Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)]];
-        cell.backgroundView = cellImage;
+        cell.bgView.layer.borderWidth = 1;
+        cell.backgroundColor = [UIColor clearColor];
         return cell;
 
     }
@@ -412,12 +434,18 @@ ReturnFunctionDelegate>
         {
             cell = [[TrendsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:commitCell];
         }
+        
+        cell.headerImageView.hidden = NO;
+        cell.nameLabel.hidden = NO;
+        cell.contentLabel.hidden = NO;
+        cell.timeLabel.hidden = NO;
+        
         NSDictionary *dict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row-1];
         cell.headerImageView.frame = CGRectMake(5, 5, 30, 30);
         cell.headerImageView.layer.cornerRadius = cell.headerImageView.frame.size.width/2;
         cell.headerImageView.clipsToBounds = YES;
         
-        NSString *name = [[diaryDetailDict objectForKey:@"by"] objectForKey:@"name"];
+        NSString *name = [[dict objectForKey:@"by"] objectForKey:@"name"];
         
         NSString *nameStr;
         NSArray *classmen = [db findSetWithDictionary:@{@"uid":[[dict objectForKey:@"by"] objectForKey:@"_id"],@"classid":classID} andTableName:CLASSMEMBERTABLE];
@@ -463,16 +491,20 @@ ReturnFunctionDelegate>
         cell.contentLabel.frame = CGRectMake(40, 35, SCREEN_WIDTH-90, size.height+22);
         cell.contentLabel.text = [[dict objectForKey:@"content"] emojizedString];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        cell.bgView.frame = CGRectMake(5, 5, SCREEN_WIDTH-10, cell.headerImageView.frame.size.height+cell.contentLabel.frame.size.height);
-        cell.bgView.backgroundColor = [UIColor clearColor];
-        cell.bgView.layer.borderWidth = 0;
-        UIImageView *cellImage = [[UIImageView alloc] initWithFrame:cell.bgView.frame];
-        [cellImage setImage:[UIImage imageNamed:@"line3"]];
-        cell.backgroundView = cellImage;
+        cell.bgView.frame = CGRectMake(5, 5, SCREEN_WIDTH-10, cell.headerImageView.frame.size.height+cell.contentLabel.frame.size.height+10);
+        cell.bgView.backgroundColor = [UIColor whiteColor];
+        cell.bgView.layer.borderWidth = 1;
+        cell.backgroundColor = [UIColor clearColor];
         return cell;
     }
     return nil;
 }
+
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [inputTabBar backKeyBoard];
+}
+
 - (void)tapImage:(UITapGestureRecognizer *)tap
 {
     NSArray *imgs = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"img"];
@@ -513,7 +545,7 @@ ReturnFunctionDelegate>
             return ;
         }
     }
-    [commitTextField becomeFirstResponder];
+    [inputTabBar.inputTextView becomeFirstResponder];
 }
 
 -(void)commentdiary
@@ -580,6 +612,11 @@ ReturnFunctionDelegate>
             {
                 [Tools showTips:@"赞成功" toView:diaryDetailTableView];
                 [self getDiaryDetail];
+                
+                if ([self.addComDel respondsToSelector:@selector(addComment:)])
+                {
+                    [self.addComDel addComment:YES];
+                }
             }
             else
             {

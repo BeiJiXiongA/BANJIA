@@ -19,7 +19,6 @@
 @property (nonatomic, strong) NSString *parentID;
 @property (nonatomic, strong) NSString *title;
 @property (nonatomic, assign) BOOL admin;
-@property (nonatomic, strong) NSString *classID;
 @property (nonatomic, strong) NSString *headerImg;
 @property (nonatomic, strong) NSString *role;
 @property (nonatomic, strong) id<PareberDetailDelegate> memDel;

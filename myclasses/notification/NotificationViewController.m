@@ -32,6 +32,8 @@ NotificationDetailDelegate>
     OperatDB *db;
     
     UILabel *tipLabel;
+    
+    NSString *classID;
 }
 @end
 
@@ -54,6 +56,8 @@ NotificationDetailDelegate>
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     page = 0;
     month = @"";
+    classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
+        
     db = [[OperatDB alloc] init];
     
     if (fromMsg)
@@ -105,7 +109,7 @@ NotificationDetailDelegate>
     tipLabel.textAlignment = NSTextAlignmentCenter;
     tipLabel.text = @"班级目前还没有任何公告！";
     tipLabel.hidden = YES;
-    [self.bgView addSubview:tipLabel];
+    [notificationTableView addSubview:tipLabel];
 }
 
 - (void)didReceiveMemoryWarning
@@ -164,8 +168,7 @@ NotificationDetailDelegate>
 
 -(void)backClick
 {
-//    [[XDTabViewController sharedTabViewController] dismissViewControllerAnimated:YES completion:nil];
-    [[XDTabViewController sharedTabViewController] unShowSelfViewController];
+    [[XDTabViewController sharedTabViewController] dismissViewControllerAnimated:YES completion:nil];
 }
 
 -(void)addClick
@@ -173,7 +176,7 @@ NotificationDetailDelegate>
     AddNotificationViewController *addNotificationViewController = [[AddNotificationViewController alloc] init];
     addNotificationViewController.classID = classID;
     addNotificationViewController.updel = self;
-    [addNotificationViewController showSelfViewController:[XDTabViewController sharedTabViewController]];
+    [[XDTabViewController sharedTabViewController].navigationController pushViewController:addNotificationViewController animated:YES];
 }
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -192,7 +195,7 @@ NotificationDetailDelegate>
     {
         return 40;
     }
-    return 120;
+    return 105;
 }
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -209,17 +212,24 @@ NotificationDetailDelegate>
         NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
         
         [cell.bgImageView setImage:[UIImage imageNamed:@"noticeBg"]];
-        cell.bgImageView.frame = CGRectMake(25, 10, SCREEN_WIDTH-30, 110);
+//        cell.bgImageView.frame = CGRectMake(55, 10, SCREEN_WIDTH-60, 110);
         
         
         
-        cell.iconImageView.frame = CGRectMake(8, 20, 10, 10);
+        cell.iconLabel.frame = CGRectMake(8, 20, 40, 40);
         
-        cell.iconImageView.layer.cornerRadius = 5;
-        cell.iconImageView.clipsToBounds = YES;
+        NSString *byName = [[dict objectForKey:@"by"] objectForKey:@"name"];
         
-        cell.nameLabel.frame = CGRectMake(40, 20, 100, 20);
-        cell.nameLabel.text = [[dict objectForKey:@"by"] objectForKey:@"name"];
+        cell.iconLabel.layer.cornerRadius = 20;
+        cell.iconLabel.clipsToBounds = YES;
+        
+        cell.iconLabel.textAlignment = NSTextAlignmentCenter;
+        cell.iconLabel.text = [byName substringFromIndex:[byName length]-1];
+        cell.iconLabel.textColor = [UIColor grayColor];
+        cell.iconLabel.layer.borderWidth = 1;
+        
+        cell.nameLabel.frame = CGRectMake(60, 20, 100, 20);
+        cell.nameLabel.text = byName;
         
         CGFloat he = 0;
         if (SYSVERSION>=7)
@@ -229,15 +239,16 @@ NotificationDetailDelegate>
         
         cell.contentLabel.text = [dict objectForKey:@"content"];
         cell.contentLabel.backgroundColor = [UIColor clearColor];
-        cell.contentLabel.font = [UIFont systemFontOfSize:16];
+        cell.contentLabel.font = [UIFont systemFontOfSize:14];
         cell.contentLabel.textColor = TITLE_COLOR;
         cell.contentLabel.contentMode = UIViewContentModeTop;
-        cell.contentLabel.frame = CGRectMake(30, 40, SCREEN_WIDTH-40, 55+he);
+        cell.contentLabel.frame = CGRectMake(60, 40, SCREEN_WIDTH-70, 55+he);
         
         cell.statusLabel.textColor = TITLE_COLOR;
         
         cell.timeLabel.frame = CGRectMake(SCREEN_WIDTH-160, 20, 150, 20);
         cell.timeLabel.textAlignment = NSTextAlignmentRight;
+        cell.timeLabel.font = [UIFont systemFontOfSize:13];
         cell.timeLabel.text = [Tools showTime:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]];
         cell.timeLabel.textColor = TITLE_COLOR;
         
@@ -245,16 +256,18 @@ NotificationDetailDelegate>
         {
             if ([[dict objectForKey:@"new"] integerValue] == 0)
             {
-                cell.iconImageView.backgroundColor = [UIColor grayColor];
+                cell.iconLabel.textColor = [UIColor grayColor];
+                cell.iconLabel.layer.borderColor = [UIColor grayColor].CGColor;
             }
             else if([[dict objectForKey:@"new"] integerValue] == 1)
             {
-                cell.iconImageView.backgroundColor = [UIColor redColor];
+                cell.iconLabel.textColor = [UIColor redColor];
+                cell.iconLabel.layer.borderColor = [UIColor redColor].CGColor;
             }
         }
         else
         {
-            cell.iconImageView.backgroundColor = [UIColor grayColor];
+            cell.iconLabel.layer.borderColor = [UIColor grayColor].CGColor;
         }
         
         if ([[dict objectForKey:@"c_read"] integerValue] == 0)
@@ -320,7 +333,6 @@ NotificationDetailDelegate>
     notificationDetailViewController.noticeID = [dict objectForKey:@"_id"];
     notificationDetailViewController.noticeContent = [dict objectForKey:@"content"];
     notificationDetailViewController.c_read = [dict objectForKey:@"c_read"];
-    notificationDetailViewController.classID = classID;
     notificationDetailViewController.readnotificationDetaildel = self;
     notificationDetailViewController.byID = [[dict objectForKey:@"by"] objectForKey:@"_id"];
     if ([[dict objectForKey:@"new"] integerValue] == 1)
@@ -336,7 +348,7 @@ NotificationDetailDelegate>
     {
         notificationDetailViewController.isnew = NO;
     }
-    [notificationDetailViewController showSelfViewController:[XDTabViewController sharedTabViewController]];
+    [[XDTabViewController sharedTabViewController].navigationController pushViewController:notificationDetailViewController animated:YES];
     
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
@@ -383,6 +395,11 @@ NotificationDetailDelegate>
                     else
                     {
                         tipLabel.hidden = YES;
+                    }
+                    
+                    if ([self.readNoticedel respondsToSelector:@selector(readNotice:)])
+                    {
+                        [self.readNoticedel readNotice:YES];
                     }
                     [notificationTableView reloadData];
                     _reloading = NO;

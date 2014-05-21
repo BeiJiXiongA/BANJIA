@@ -37,6 +37,7 @@
 	// Do any additional setup after loading the view.
     
     self.titleLabel.text = @"填写密码";
+    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
@@ -132,6 +133,12 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
 
 
 -(void)start
@@ -267,7 +274,7 @@
                 }
                 [passwordTextField resignFirstResponder];
                 [verifyTextField resignFirstResponder];
-                [fillInfoViewController showSelfViewController:self];
+                [self.navigationController pushViewController:fillInfoViewController animated:YES];
             }
             else
             {

@@ -49,6 +49,7 @@ ReturnFunctionDelegate>
     NSInteger currentSec;
     
     CGFloat tmpheight;
+    CGFloat keyboardHeight;
     
     CGSize inputSize;
     
@@ -91,9 +92,19 @@ ReturnFunctionDelegate>
     fromImage = [Tools getImageFromImage:[UIImage imageNamed:@"f"] andInsets:UIEdgeInsetsMake(35, 40, 17, 40)];
     toImage = [Tools getImageFromImage:[UIImage imageNamed:@"t"] andInsets:UIEdgeInsetsMake(35, 40, 17, 40)];
     
-    if (imageUrl)
+    if (imageUrl && [imageUrl length]>10)
     {
         NSString *urlStr = [NSString stringWithFormat:@"%@%@",IMAGEURL,imageUrl];
+        
+        NSString *key = [urlStr MD5Hash];
+        NSData *data = [FTWCache objectForKey:key];
+        fromHeaderImage = [UIImage imageWithData:data];
+    }
+    else if([[db findSetWithDictionary:@{@"uid":toID} andTableName:CLASSMEMBERTABLE] count] > 0)
+    {
+        NSArray *array = [db findSetWithDictionary:@{@"uid":toID} andTableName:CLASSMEMBERTABLE];
+        
+        NSString *urlStr = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[array firstObject] objectForKey:@"img_icon"]];
         
         NSString *key = [urlStr MD5Hash];
         NSData *data = [FTWCache objectForKey:key];
@@ -104,7 +115,6 @@ ReturnFunctionDelegate>
         fromHeaderImage = [UIImage imageNamed:HEADERBG];
     }
    
-    
     edittingTableView = NO;
     editButton = [UIButton buttonWithType:UIButtonTypeCustom];
     editButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
@@ -149,6 +159,7 @@ ReturnFunctionDelegate>
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = self;
     
     [MobClick beginLogPageView:@"PageOne"];
+    [self uploadLastViewTime];
 }
 -(void)viewWillDisappear:(BOOL)animated
 {
@@ -159,12 +170,17 @@ ReturnFunctionDelegate>
     [[NSNotificationCenter defaultCenter] removeObserver:inputTabBar];
     
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
+    
+    [self uploadLastViewTime];
 }
 
 -(void)myBackButtonClick
 {
-    [self uploadLastViewTime];
     [self unShowSelfViewController];
+}
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 - (void)didReceiveMemoryWarning
@@ -290,7 +306,7 @@ ReturnFunctionDelegate>
     if ([inputTabBar.inputTextView.text length]>0)
     {
         inputSize = CGSizeMake(250, 30);
-//        [self backInput];
+        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10-keyboardHeight, SCREEN_WIDTH, inputSize.height+10+ FaceViewHeight);
         [self sendMsgWithString:[inputTabBar analyString:inputTabBar.inputTextView.text]];
     }
 }
@@ -299,7 +315,8 @@ ReturnFunctionDelegate>
 {
     [UIView animateWithDuration:0.2 animations:^{
         tmpheight = keyBoardHeight;
-        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10-keyBoardHeight, SCREEN_WIDTH, inputSize.height+10+ FaceViewHeight);
+        keyboardHeight = keyBoardHeight;
+        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10-keyboardHeight, SCREEN_WIDTH, inputSize.height+10+ FaceViewHeight);
         if (messageTableView.contentSize.height>tmpheight)
         {
             messageTableView.contentOffset = CGPointMake(0, messageTableView.contentSize.height-messageTableView.frame.size.height+keyBoardHeight);
@@ -369,7 +386,6 @@ ReturnFunctionDelegate>
 {
     [messageArray removeAllObjects];
     [messageArray addObjectsFromArray:[db findChatLogWithUid:[Tools user_id] andOtherId:toID andTableName:@"chatMsg"]];
-    DDLOG(@"dict = %@",dict);
     if ([[dict objectForKey:@"content"] isEqualToString:@"您有一条新的邀请"]||
         [[dict objectForKey:@"content"] isEqualToString:@"您有一条新的消息"])
     {
@@ -560,7 +576,7 @@ ReturnFunctionDelegate>
     cell.button.hidden = YES;
     cell.joinlable.hidden = YES;
     cell.timeLabel.hidden = NO;
-    
+    cell.messageTf.editable = YES;
     cell.messageTf.hidden = NO;
     cell.messageTf.backgroundColor = [UIColor clearColor];
     cell.messageTf.font = [UIFont systemFontOfSize:16];
@@ -596,29 +612,27 @@ ReturnFunctionDelegate>
                 size = [self sizeWithText:[[msgContent substringFromIndex:range.location+range.length] emojizedString]];
                
                 cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x + 10,cell.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+10+he);
-
-                cell.button.frame = cell.chatBg.frame;
-                [cell.button addTarget:self action:@selector(joinClass:) forControlEvents:UIControlEventTouchUpInside];
-                cell.backgroundColor = [UIColor clearColor];
-                cell.button.tag = 5555+indexPath.row;
-                cell.button.hidden = NO;
-                
-                cell.chatBg.frame = CGRectMake(55, messageBgY-10, size.width+20, size.height+20+30);
+                cell.messageTf.editable = NO;
                 
                 UITapGestureRecognizer *msgTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(joinClass:)];
                 
                 cell.chatBg.tag = 5555+indexPath.row;
                 cell.chatBg.userInteractionEnabled = YES;
                 [cell.chatBg addGestureRecognizer:msgTap];
+                cell.chatBg.backgroundColor = [UIColor clearColor];
                 
                 cell.messageTf.backgroundColor = [UIColor clearColor];
                 cell.messageTf.tag = 5555+indexPath.row;
                 cell.messageTf.userInteractionEnabled = YES;
                 [cell.messageTf addGestureRecognizer:msgTap];
 
-                cell.joinlable.frame = CGRectMake(15, cell.chatBg.frame.size.height-35, size.width, 30);
+                cell.joinlable.frame = CGRectMake(15, size.height+15, size.width, 30);
                 cell.joinlable.text = @"点击申请加入";
+                cell.joinlable.backgroundColor = [UIColor clearColor];
                 cell.joinlable.hidden = NO;
+                
+                cell.chatBg.frame = CGRectMake(55, messageBgY-10, size.width+20, size.height+20+30);
+                cell.messageTf.backgroundColor = [UIColor yellowColor];
                 
                 cell.joinlable.userInteractionEnabled = YES;
                 cell.joinlable.tag = 5555+indexPath.row;
@@ -640,17 +654,7 @@ ReturnFunctionDelegate>
                 cell.timeLabel.hidden = YES;
             }
             
-            if (![imageUrl isEqual:[NSNull null]])
-            {
-                if ([imageUrl length] > 10)
-                {
-                    [Tools fillImageView:cell.headerImageView withImageFromURL:imageUrl andDefault:HEADERBG];
-                }
-                else
-                {
-                    [cell.headerImageView setImage:[UIImage imageNamed:HEADERBG]];
-                }
-            }
+            [cell.headerImageView setImage:fromHeaderImage];
         }
     }
     else if([[dict objectForKey:DIRECT] isEqualToString:@"t"])
@@ -667,7 +671,7 @@ ReturnFunctionDelegate>
                 x=0;
             }
             
-            cell.chatBg.frame = CGRectMake(self.view.frame.size.width - 10-size.width-30-45, messageBgY-10, size.width+20, size.height+20);
+            cell.chatBg.frame = CGRectMake(self.view.frame.size.width - 10-size.width-30-45, messageBgY, size.width+20, size.height+20);
             [cell.chatBg setImage:toImage];
             
             cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x+ 5-x,cell.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+20);
@@ -764,9 +768,10 @@ ReturnFunctionDelegate>
     
     ClassZoneViewController *classZone = [[ClassZoneViewController alloc] init];
     classZone.fromClasses = YES;
-    classZone.classID = classID;
-    classZone.schoolName = schoolName;
-    classZone.className = className;
+    [[NSUserDefaults standardUserDefaults] setObject:classID forKey:@"classid"];
+    [[NSUserDefaults standardUserDefaults] setObject:className forKey:@"classname"];
+    [[NSUserDefaults standardUserDefaults] setObject:schoolName forKey:@"schoolname"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
     [classZone showSelfViewController:self];
 }
 
@@ -788,8 +793,6 @@ ReturnFunctionDelegate>
 {
     NSDictionary *dict = [messageArray objectAtIndex:indexPath.row];
     [db deleteRecordWithDict:dict andTableName:@"chatMsg"];
-//    [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationBottom];
-    DDLOG(@"dict == %@",dict);
     [self dealNewChatMsg:nil];
 }
 

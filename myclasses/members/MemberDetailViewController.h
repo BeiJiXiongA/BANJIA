@@ -15,7 +15,6 @@
 @end
 
 @interface MemberDetailViewController : XDContentViewController
-@property (nonatomic, strong) NSString *classID;
 @property (nonatomic, strong) NSString *role;
 @property (nonatomic, strong) NSString *j_id;
 @property (nonatomic, strong) NSString *applyName;

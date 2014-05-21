@@ -11,6 +11,5 @@
 @interface SettingStateLimitViewController : XDContentViewController
 @property (nonatomic, strong) NSString *name;
 @property (nonatomic, strong) NSString *userid;
-@property (nonatomic, strong) NSString *classID;
 @property (nonatomic, strong) NSString *role;
 @end
