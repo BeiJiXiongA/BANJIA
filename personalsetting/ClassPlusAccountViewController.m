@@ -35,11 +35,12 @@
     
     array = [[NSArray alloc] initWithObjects:@"班家账号",@"注册方式",@"修改密码", nil];
     
-    UITableView *accountTableView = [[UITableView alloc] initWithFrame:CGRectMake(20, UI_NAVIGATION_BAR_HEIGHT+30, SCREEN_WIDTH-40, 140) style:UITableViewStylePlain];
+    UITableView *accountTableView = [[UITableView alloc] initWithFrame:CGRectMake(20, UI_NAVIGATION_BAR_HEIGHT+30, SCREEN_WIDTH-40, 100) style:UITableViewStylePlain];
     accountTableView.delegate = self;
     accountTableView.dataSource = self;
     accountTableView.tableHeaderView = nil;
     accountTableView.backgroundColor = [UIColor whiteColor];
+    accountTableView.scrollEnabled = NO;
     [self.bgView addSubview:accountTableView];
 }
 
@@ -64,7 +65,7 @@
 {
     if (section == 0)
     {
-        return 2;
+        return 1;
     }
     else if(section == 1)
     {

@@ -12,10 +12,10 @@
 #pragma mark - 接口网址
 
 //
-#define HOST_URL       @"http://api.banjiaedu.com"
+#define HOST_URL       @"http://www.banjiaedu.com"
 #define IMAGEURL       @"http://img.banjiaedu.com"
 
-//#define HOST_URL      @"http://mytest.banjiaedu.com"
+//#define HOST_URL       @"http://mytest.banjiaedu.com"
 //#define IMAGEURL       @"http://imgtest.banjiaedu.com"
 
 #pragma mark - users
@@ -55,6 +55,7 @@
 #define SEARCHSCHOOLBYBAIDU   @"/schools/mbSearchSchool"
 #define SEARCHNEARBYSCHOOL    @"/schools/mbNearBy"
 #define NEARBYSCHOOLDETAIL    @"/schools/mbDetail"
+#define GETCITIES            @"/schools/mbCitiesList"
 
 #pragma mark - classes
 #define CREATECLASS       @"/classes/mbAddClass"
@@ -89,6 +90,7 @@
 #define ALLOW_DIARY     @"/Diaries/mbAllowDiary"  //u_id,c_id,p_id
 #define IGNORE_DIARY    @"/Diaries/mbRefuseDiary"
 #define GETNEWDIARIES   @"/Diaries/mbGetUnckeckedList"  //c_id
+#define DELETEDIARY     @"/Diaries/mbDelDiary"
 
 #pragma mark - notices
 #define GETNOTIFICATIONS @"/notices/mbGetNoticesList"
@@ -96,6 +98,7 @@
 #define ADDNOTIFICATION @"/notices/mbAddNotices"
 //#define READNTICES        @"/notices/mbReceipt"
 #define READNTICES        @"/notices/mbNoticeRead"
+#define DELETENOTICE      @"/notices/mbDelNotice"
 
 #pragma mark - chat
 #define CREATE_CHAT_MSG  @"/chats/mbChat"
@@ -168,5 +171,5 @@
 #define IMAGE_NAME @"icon120"
 #define IMAGE_EXT @"png"
 
-#define ShareUrl  @"http://mytest.banjiaedu.com"
+#define ShareUrl  HOST_URL
 #endif

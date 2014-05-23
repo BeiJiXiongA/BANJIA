@@ -391,11 +391,12 @@ UIAlertViewDelegate>
         [classNumberButton setTitle:classNumber forState:UIControlStateNormal];
         if ([classTypeStr length] > 0 && ([classTypeStr isEqualToString:@"初中"] || [classTypeStr isEqualToString:@"高中"]))
         {
-            className = [NSString stringWithFormat:@"%@级%@(%@)",[joinYear substringToIndex:4],classNumber,classTypeStr];
+            
+            className = [NSString stringWithFormat:@"%@级%@(%@)",[joinYear length] >= 4?[joinYear substringToIndex:4]:@"年份",classNumber,classTypeStr];
         }
         else
         {
-            className = [NSString stringWithFormat:@"%@级%@",[joinYear substringToIndex:4],classNumber];
+            className = [NSString stringWithFormat:@"%@级%@",[joinYear length] >= 4?[joinYear substringToIndex:4]:@"年份",classNumber];
         }
         classNameTextField.text = className;
     }];
@@ -416,6 +417,11 @@ UIAlertViewDelegate>
     }
     
     className = classNameTextField.text;
+    if ([className length] <4 || [className length] > 10)
+    {
+        [Tools showAlertView:@"学校名称应该在4~10个字符之间" delegateViewController:nil];
+        return ;
+    }
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],

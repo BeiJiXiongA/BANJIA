@@ -43,6 +43,7 @@
     self.titleLabel.text = @"待审核日志";
     
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+    self.view.backgroundColor = [UIColor blackColor];
     
     DDLOG(@"frame=%@",NSStringFromCGRect(self.bgView.frame));
     self.navigationBarView.backgroundColor = [UIColor redColor];

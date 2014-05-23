@@ -128,7 +128,7 @@ UIActionSheetDelegate>
     [addButton addTarget:self action:@selector(addDongTaiClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:addButton];
     
-    noneDongTaiLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, UI_NAVIGATION_BAR_HEIGHT+bgImageViewHeight+90, SCREEN_WIDTH-40, 60)];
+    noneDongTaiLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, bgImageViewHeight+50, SCREEN_WIDTH-40, 60)];
     noneDongTaiLabel.text = @"这个班级还没有任何动态，你可以成为第一人发布动态的人哦！";
     noneDongTaiLabel.numberOfLines = 2;
     noneDongTaiLabel.lineBreakMode = NSLineBreakByWordWrapping;
@@ -352,10 +352,6 @@ UIActionSheetDelegate>
     if ([settingCacheDict count] > 0)
     {
         [self dealClassSetting:settingCacheDict];
-    }
-    else
-    {
-        [self getCLassSettings];
     }
 }
 
@@ -781,12 +777,21 @@ UIActionSheetDelegate>
             
             CGFloat cellHeight = cell.headerImageView.frame.size.height+cell.contentLabel.frame.size.height+cell.imagesScrollView.frame.size.height+18;
             
+            CGFloat he = 0;
+//            if (SYSVERSION >= 7.0)
+            {
+                he = 5;
+            }
+            
+            cell.transmitImageView.frame = CGRectMake((SCREEN_WIDTH-20)/4-55, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+22+he, 13, 13);
+            cell.transmitImageView.hidden = NO;
             
             cell.transmitButton.frame = CGRectMake(0, cellHeight+13, (SCREEN_WIDTH-0)/3, 30);
             [cell.transmitButton setTitle:@"转发" forState:UIControlStateNormal];
             cell.transmitButton.tag = indexPath.section*SectionTag+indexPath.row;
             [cell.transmitButton addTarget:self action:@selector(transmitDiary:) forControlEvents:UIControlEventTouchUpInside];
             
+            cell.praiseImageView.frame = CGRectMake((SCREEN_WIDTH-20)*2/4-20, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+25+he, 13, 13);
 //            cell.praiseImageView.frame = CGRectMake((SCREEN_WIDTH-20)/4-30, cellHeight + 24, 13, 13);
             
             [cell.praiseButton setTitle:[NSString stringWithFormat:@"赞(%d)",[[dict objectForKey:@"likes_num"] integerValue]] forState:UIControlStateNormal];
@@ -795,7 +800,7 @@ UIActionSheetDelegate>
             cell.praiseButton.frame = CGRectMake((SCREEN_WIDTH-0)/3, cellHeight+13, (SCREEN_WIDTH-0)/3, 30);
             
 //            cell.commentImageView.frame = CGRectMake((SCREEN_WIDTH-20)*3/4-30, cellHeight+22, 13, 13);
-            
+            cell.commentImageView.frame = CGRectMake((SCREEN_WIDTH-20)*3/4, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+23+he, 13, 13);
             [cell.commentButton setTitle:[NSString stringWithFormat:@"评论(%d)",[[dict objectForKey:@"comments_num"] integerValue]] forState:UIControlStateNormal];
             cell.commentButton.frame = CGRectMake((SCREEN_WIDTH-0)/3*2, cellHeight+13, (SCREEN_WIDTH-0)/3, 30);
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
@@ -1548,6 +1553,10 @@ UIActionSheetDelegate>
     for (int i=index; i<[array count]; i++)
     {
         NSDictionary *dict = [array objectAtIndex:i];
+        if ([dict isEqual:[NSNull null]])
+        {
+            continue ;
+        }
         CGFloat sec = [[[dict objectForKey:@"created"] objectForKey:@"sec"] floatValue];
         
         NSDateFormatter *dateFormatter = [[NSDateFormatter alloc]init];
@@ -1559,9 +1568,14 @@ UIActionSheetDelegate>
         [groupDict setObject:timeStr forKey:@"date"];
         NSMutableArray *array2 = [[NSMutableArray alloc] initWithCapacity:0];
         [array2 addObject:dict];
+        
         for (int j=i+1; j<[array count]; j++)
         {
             NSDictionary *dict2 = [array objectAtIndex:j];
+            if ([dict2 isEqual:[NSNull null]])
+            {
+                continue;
+            }
             CGFloat sec2 = [[[dict2 objectForKey:@"created"] objectForKey:@"sec"] floatValue];
             NSDate *datetimeDate2 = [NSDate dateWithTimeIntervalSince1970:sec2];
             NSString * timeStr2 = [dateFormatter stringFromDate:datetimeDate2];

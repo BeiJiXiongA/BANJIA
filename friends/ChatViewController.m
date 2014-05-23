@@ -62,7 +62,7 @@ ReturnFunctionDelegate>
 @end
 
 @implementation ChatViewController
-@synthesize name,toID,imageUrl,chatVcDel;
+@synthesize name,toID,imageUrl,chatVcDel,fromClass;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -87,7 +87,11 @@ ReturnFunctionDelegate>
     
     inputSize = CGSizeMake(250, 30);
     
-    self.bgView.frame = CGRectMake(0, YSTART, SCREEN_WIDTH, SCREEN_HEIGHT+200);
+    if (fromClass)
+    {
+        self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 20);
+        self.view.backgroundColor = [UIColor blackColor];
+    }
     
     fromImage = [Tools getImageFromImage:[UIImage imageNamed:@"f"] andInsets:UIEdgeInsetsMake(35, 40, 17, 40)];
     toImage = [Tools getImageFromImage:[UIImage imageNamed:@"t"] andInsets:UIEdgeInsetsMake(35, 40, 17, 40)];
@@ -150,7 +154,6 @@ ReturnFunctionDelegate>
         [self dealNewChatMsg:nil];
     }
     [self dealNewChatMsg:nil];
-    [self.backButton addTarget:self action:@selector(myBackButtonClick) forControlEvents:UIControlEventTouchUpInside];
 }
 
 -(void)viewWillAppear:(BOOL)animated
@@ -174,10 +177,6 @@ ReturnFunctionDelegate>
     [self uploadLastViewTime];
 }
 
--(void)myBackButtonClick
-{
-    [self unShowSelfViewController];
-}
 -(void)unShowSelfViewController
 {
     [self.navigationController popViewControllerAnimated:YES];
@@ -576,10 +575,17 @@ ReturnFunctionDelegate>
     cell.button.hidden = YES;
     cell.joinlable.hidden = YES;
     cell.timeLabel.hidden = NO;
-    cell.messageTf.editable = YES;
+    cell.messageTf.editable = NO;
     cell.messageTf.hidden = NO;
     cell.messageTf.backgroundColor = [UIColor clearColor];
-    cell.messageTf.font = [UIFont systemFontOfSize:16];
+    if (SYSVERSION >= 7.0)
+    {
+        cell.messageTf.font = [UIFont systemFontOfSize:16];
+    }
+    else
+    {
+        cell.messageTf.font = [UIFont systemFontOfSize:14];
+    }
     
     if ([[dict objectForKey:DIRECT] isEqualToString:@"f"])
     {
@@ -593,7 +599,7 @@ ReturnFunctionDelegate>
             [cell.chatBg setImage:fromImage];
             
             CGFloat he = 0;
-            if (SYSVERSION>=7)
+            if (SYSVERSION >= 7)
             {
                 he = 3;
             }
@@ -632,7 +638,6 @@ ReturnFunctionDelegate>
                 cell.joinlable.hidden = NO;
                 
                 cell.chatBg.frame = CGRectMake(55, messageBgY-10, size.width+20, size.height+20+30);
-                cell.messageTf.backgroundColor = [UIColor yellowColor];
                 
                 cell.joinlable.userInteractionEnabled = YES;
                 cell.joinlable.tag = 5555+indexPath.row;
@@ -772,7 +777,7 @@ ReturnFunctionDelegate>
     [[NSUserDefaults standardUserDefaults] setObject:className forKey:@"classname"];
     [[NSUserDefaults standardUserDefaults] setObject:schoolName forKey:@"schoolname"];
     [[NSUserDefaults standardUserDefaults] synchronize];
-    [classZone showSelfViewController:self];
+    [self.navigationController pushViewController:classZone animated:YES];
 }
 
 -(UITableViewCellEditingStyle)tableView:(UITableView *)tableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -786,7 +791,7 @@ ReturnFunctionDelegate>
 }
 -(BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return YES;
+    return NO;
 }
 
 -(void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath

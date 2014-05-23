@@ -93,6 +93,10 @@ UITextFieldDelegate>
     searchSchoolTableView.backgroundColor = [UIColor whiteColor];
     [self.bgView addSubview:searchSchoolTableView];
     
+    if ([searchSchoolTableView respondsToSelector:@selector(setSeparatorInset:)]) {
+        [searchSchoolTableView setSeparatorInset:UIEdgeInsetsZero];
+    }
+    
     if ([prID length] > 0)
     {
         [self getAreasWith:prID];
@@ -425,9 +429,9 @@ UITextFieldDelegate>
         [Tools showAlertView:@"请选择学校类型" delegateViewController:nil];
         return ;
     }
-    if (![((MyTextField *)[searchSchoolTableView viewWithTag:3333]).text length] > 0)
+    if ([((MyTextField *)[searchSchoolTableView viewWithTag:3333]).text length] < 4 )
     {
-        [Tools showAlertView:@"请确定学校名称" delegateViewController:nil];
+        [Tools showAlertView:@"学校名称应该多于4个字符哦" delegateViewController:nil];
         return;
     }
     
@@ -437,7 +441,7 @@ UITextFieldDelegate>
                                                                       @"token":[Tools client_token],
                                                                       @"name":((MyTextField *)[searchSchoolTableView viewWithTag:3333]).text,
                                                                       @"level":levelValue,
-                                                                      @"pr_id":self.prID,
+//                                                                      @"pr_id":self.prID,
                                                                       @"r_id":areaId} API:CREATESCHOOL];
         
         [request setCompletionBlock:^{

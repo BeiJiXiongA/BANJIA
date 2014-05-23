@@ -196,6 +196,7 @@
     {
         [self.view addSubview:_stateView];
     }
+//    self.view.backgroundColor = [UIColor whiteColor];
 }
 
 -(void)viewWillAppear:(BOOL)animated

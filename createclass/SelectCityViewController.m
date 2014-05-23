@@ -107,13 +107,17 @@ UITableViewDelegate>
     }
 
     searchResultTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 0) style:UITableViewStylePlain];
-    searchResultTableView.backgroundColor = [UIColor clearColor];
+    searchResultTableView.backgroundColor = [UIColor whiteColor];
     searchResultTableView.dataSource = self;
     searchResultTableView.delegate = self;
     searchResultTableView.tag = SEARCHTAG;
-    searchResultTableView.backgroundColor = [UIColor clearColor];
     searchResultTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     [searchView addSubview:searchResultTableView];
+    
+    if (SYSVERSION >= 7.0)
+    {
+        searchResultTableView.contentInset = UIEdgeInsetsMake(-20, 0, 0, 0);
+    }
     
     hotTableView = [[UITableView alloc] initWithFrame:CGRectMake(5, mySearchBar.frame.origin.y+mySearchBar.frame.size.height, SCREEN_WIDTH-10, SCREEN_HEIGHT - mySearchBar.frame.origin.y-mySearchBar.frame.size.height-5) style:UITableViewStylePlain];
     hotTableView.tag = HOTTAG;
@@ -122,6 +126,7 @@ UITableViewDelegate>
     hotTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     hotTableView.backgroundColor = [UIColor clearColor];
     [self.bgView addSubview:hotTableView];
+    hotTableView.sectionIndexTrackingBackgroundColor=[UIColor grayColor];
     
     [self getCities];
 }

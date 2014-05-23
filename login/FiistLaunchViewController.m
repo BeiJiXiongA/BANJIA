@@ -35,6 +35,9 @@
     
     self.navigationBarView.hidden = YES;
     
+    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 20);
+    self.view.backgroundColor = [UIColor blackColor];
+    
     showScrollView = [[UIScrollView alloc] init];
     showScrollView.delegate = self;
     showScrollView.frame = CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);

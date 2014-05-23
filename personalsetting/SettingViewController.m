@@ -14,6 +14,7 @@
 #import "AboutUsViewController.h"
 #import "SendAdviseViewController.h"
 #import "KKNavigationController.h"
+#import "UserProtocolViewController.h"
 
 #define SWITCHTAG   1000
 #define CLEARCACHE   2000
@@ -54,7 +55,7 @@ MFMailComposeViewControllerDelegate>
     self.titleLabel.text = @"个人设置";
     setArray1 = [[NSArray alloc] initWithObjects:@"收到公告时提醒",@"收到公告时手机震动",@"新班级日记提醒",@"好友消息提醒", nil];
     setArray2 = [[NSArray alloc] initWithObjects:@"检查版本更新",@"手动清除缓存", nil];
-    setArray3 = [[NSArray alloc] initWithObjects:@"关于我们",@"意见反馈",@"给五星好评",@"", nil];
+    setArray3 = [[NSArray alloc] initWithObjects:@"关于我们",@"意见反馈",@"给五星好评",@"用户协议",@"", nil];
     
     if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"useropt"] count] > 0)
     {
@@ -64,7 +65,6 @@ MFMailComposeViewControllerDelegate>
     {
         settingDict = [[NSMutableDictionary alloc] initWithCapacity:4];
     }
-    DDLOG(@"setting dict ==%@",settingDict);
     
     UIView *tableViewBg = [[UIView alloc] initWithFrame:self.bgView.frame];
     [tableViewBg setBackgroundColor:UIColorFromRGB(0xf1f0ec)];
@@ -337,21 +337,12 @@ MFMailComposeViewControllerDelegate>
         else if (indexPath.row == 1)
         {
             //意见反馈
-//            Class mailClass = (NSClassFromString(@"MFMailComposeViewController"));
-//            if (!mailClass) {
-//                [Tools showAlertView:@"当前系统版本不支持应用内发送邮件功能，您可以使用mailto方法代替" delegateViewController:nil];
-//                return;
-//            }
-//            if (![mailClass canSendMail]) {
-//                [Tools showAlertView:@"用户没有设置邮件账户" delegateViewController:nil];
-//                return;
-//            }     
-//            [self displayMailPicker];
+
             
             SendAdviseViewController *sendAdviseVC = [[SendAdviseViewController alloc] init];
             [self.navigationController pushViewController:sendAdviseVC animated:YES];
         }
-        else if(indexPath.row == 1)
+        else if(indexPath.row == 2)
         {
             if ([_trackViewUrl length] <= 0)
             {
@@ -365,6 +356,11 @@ MFMailComposeViewControllerDelegate>
                 return ;
             }
             [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@",_trackViewUrl]]];
+        }
+        else if(indexPath.row == 3)
+        {
+            UserProtocolViewController *userprotocol = [[UserProtocolViewController alloc] init];
+            [self.navigationController pushViewController:userprotocol animated:YES];
         }
     }
 }

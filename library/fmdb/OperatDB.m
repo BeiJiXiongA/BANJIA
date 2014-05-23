@@ -41,7 +41,7 @@
     {
         //chatMsg
         NSString *sql = [NSString stringWithFormat:@"CREATE TABLE %@ (\
-                         cityid VARCHAR(30),cityname VARCHAR(30),jianpin VARCHAR(10),quanpin VARCHAR(30),citylevel VARCHAR(10),pid VARCHAR(50))",CITYTABLE];
+                         cityid VARCHAR(30),cityname VARCHAR(30),jianpin VARCHAR(10),quanpin VARCHAR(30),citylevel VARCHAR(10),pid VARCHAR(50),fname VARCHAR(50))",CITYTABLE];
         BOOL res = [_db executeUpdate:sql];
         if (!res)
         {

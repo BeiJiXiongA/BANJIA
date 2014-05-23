@@ -15,6 +15,7 @@
 #import "SideMenuViewController.h"
 #import "MyClassesViewController.h"
 #import "FillInfoViewController.h"
+#import "KKNavigationController.h"
 
 #import <ShareSDK/ShareSDK.h>
 #import "WeiboApi.h"
@@ -49,6 +50,7 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+    self.view.backgroundColor = [UIColor blackColor];
     reg = 0;    
     self.backButton.hidden = YES;
     self.stateView.hidden = YES;
@@ -311,10 +313,12 @@ static int loginID;
                 }
                 else
                 {
+                    
                     SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
                     MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
-                    JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myClassesViewController menuController:sideMenuViewController];
-                    [self presentViewController:sideMenu animated:YES completion:^{
+                    KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClassesViewController];
+                    JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myClassesNav menuController:sideMenuViewController];
+                    [self.navigationController presentViewController:sideMenu animated:YES completion:^{
                         
                     }];
                 }

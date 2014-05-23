@@ -40,6 +40,7 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
     
+    
     [[NSUserDefaults standardUserDefaults] setObject:@"0010" forKey:@"currentVersion"];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
@@ -81,8 +82,8 @@
 //            [self getNewChat];
             SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
             MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
-            KKNavigationController *myclassNav = [[KKNavigationController alloc] initWithRootViewController:myClassesViewController];
-            JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myclassNav menuController:sideMenuViewController];
+            KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClassesViewController];
+            JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myClassesNav menuController:sideMenuViewController];
             self.window.rootViewController = sideMenu;
             
 //#ifdef DEBUG
@@ -130,6 +131,7 @@
         [tmpDict setObject:[dict objectForKey:@"name"] forKey:@"cityname"];
         [tmpDict setObject:[dict objectForKey:@"level"] forKey:@"citylevel"];
         [tmpDict setObject:[dict objectForKey:@"p_id"] forKey:@"pid"];
+        [tmpDict setObject:[dict objectForKey:@"fname"] forKey:@"fname"];
         [tmpDict setObject:[ChineseToPinyin jianPinFromChiniseString:[dict objectForKey:@"name"]] forKey:@"jianpin"];
         [tmpDict setObject:[ChineseToPinyin pinyinFromChiniseString:[dict objectForKey:@"name"]] forKey:@"quanpin"];
         if ([_db insertRecord:tmpDict  andTableName:CITYTABLE])

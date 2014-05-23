@@ -156,6 +156,7 @@ UIAlertViewDelegate>
     contactTableView.delegate = self;
     contactTableView.dataSource = self;
     contactTableView.tag = ContactTableViewTag;
+    contactTableView.sectionIndexTrackingBackgroundColor=[UIColor grayColor];
     if (SYSVERSION>=7)
     {
         contactTableView.sectionIndexBackgroundColor = [UIColor clearColor];
@@ -562,7 +563,7 @@ UIAlertViewDelegate>
             [self getLocalContacts];
         }
     }
-    if(button.tag == WeiXinTag)
+    else
     {
         inviteButton.hidden = YES;
     }
@@ -653,7 +654,14 @@ UIAlertViewDelegate>
                               };
         [contactArray addObject:dic];
     }
-    [self checkContacts:contactArray];
+    NSArray *tmpArray = [Tools getSpellSortArrayFromChineseArray:contactArray andKey:@"name"];
+    [groupContactArray addObjectsFromArray:tmpArray];
+    [contactTableView reloadData];
+    if ([Tools NetworkReachable])
+    {
+        [self checkContacts:contactArray];
+    }
+    
     CFRelease(results);
 }
 
@@ -710,6 +718,10 @@ UIAlertViewDelegate>
                 if ([num rangeOfString:@")"].length > 0)
                 {
                     [num deleteCharactersInRange:[num rangeOfString:@")"]];
+                }
+                if ([num rangeOfString:@" "].length > 0)
+                {
+                    [num replaceOccurrencesOfString:@" " withString:@"" options:NSRegularExpressionSearch range:NSMakeRange(0, [num length])];
                 }
                 if ([Tools isPhoneNumber:num])
                 {

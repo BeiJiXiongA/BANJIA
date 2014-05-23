@@ -79,6 +79,7 @@ SetStudentObject>
     
     self.titleLabel.text = @"个人信息";
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+    self.view.backgroundColor = [UIColor blackColor];
     
     dataDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     pArray = [[NSMutableArray alloc] initWithCapacity:0];
@@ -155,16 +156,17 @@ SetStudentObject>
     genderImageView.backgroundColor = [UIColor clearColor];
     [mainScrollView addSubview:genderImageView];
     
-    CGSize titleSize = [Tools getSizeWithString:title andWidth:200 andFont:[UIFont systemFontOfSize:13]];
-    titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(nameLabel.frame.origin.x, nameLabel.frame.size.height+nameLabel.frame.origin.y, titleSize.width, titleSize.height>0?(titleSize.height+10):40)];
-    titleLabel.font = [UIFont systemFontOfSize:13];
-    titleLabel.textColor = [UIColor lightGrayColor];
-    titleLabel.numberOfLines = 3;
-    titleLabel.lineBreakMode = NSLineBreakByWordWrapping;
-    titleLabel.backgroundColor = [UIColor clearColor];
+    
     if (![title isEqual:[NSNull null]])
     {
-         titleLabel.text = title;
+        CGSize titleSize = [Tools getSizeWithString:title andWidth:200 andFont:[UIFont systemFontOfSize:13]];
+        titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(nameLabel.frame.origin.x, nameLabel.frame.size.height+nameLabel.frame.origin.y, titleSize.width, titleSize.height>0?(titleSize.height+10):40)];
+        titleLabel.font = [UIFont systemFontOfSize:13];
+        titleLabel.textColor = [UIColor lightGrayColor];
+        titleLabel.numberOfLines = 3;
+        titleLabel.lineBreakMode = NSLineBreakByWordWrapping;
+        titleLabel.backgroundColor = [UIColor clearColor];
+        titleLabel.text = title;
     }
    
     [mainScrollView addSubview:titleLabel];
@@ -228,7 +230,15 @@ SetStudentObject>
     {
         if ([studentID length]>10)
         {
-            [self getUserInfo];
+            if([Tools NetworkReachable])
+            {
+                [self getUserInfo];
+            }
+            else
+            {
+                [infoView reloadData];
+            }
+            
         }
     }
 }
@@ -588,6 +598,7 @@ SetStudentObject>
     chatViewController.toID = studentID;
     chatViewController.name = studentName;
     chatViewController.imageUrl = headerImg;
+    chatViewController.fromClass = YES;
     [self.navigationController pushViewController:chatViewController animated:YES];
 }
 

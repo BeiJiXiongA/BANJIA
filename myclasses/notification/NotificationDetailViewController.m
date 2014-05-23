@@ -64,7 +64,19 @@ UIAlertViewDelegate>
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+    self.view.backgroundColor = [UIColor blackColor];
+    
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
+    
+    UIButton *delButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [delButton setTitle:@"删除" forState:UIControlStateNormal];
+    delButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
+    [delButton addTarget:self action:@selector(deleteNotice) forControlEvents:UIControlEventTouchUpInside];
+    [delButton setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2 || [byID isEqualToString:[Tools user_id]])
+    {
+        [self.navigationBarView addSubview:delButton];
+    }
     
     self.titleLabel.text = @"公告详情";
     readArray = [[NSMutableArray alloc] initWithCapacity:0];
@@ -167,6 +179,45 @@ UIAlertViewDelegate>
 -(void)unShowSelfViewController
 {
     [self.navigationController popViewControllerAnimated:YES];
+}
+
+-(void)deleteNotice
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"p_id":noticeID,
+                                                                      @"c_id":classID
+                                                                      } API:DELETENOTICE];
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"del notice responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                DDLOG(@"read success!");
+                
+                if ([self.readnotificationDetaildel respondsToSelector:@selector(readNotificationDetail)])
+                {
+                    [self.readnotificationDetaildel readNotificationDetail];
+                }
+                
+                [self.navigationController popViewControllerAnimated:YES];
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:self];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+        }];
+        [request startAsynchronous];
+    }
+
 }
 
 -(void)readNotice

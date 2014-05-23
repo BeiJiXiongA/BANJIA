@@ -22,6 +22,7 @@
 #import "KKNavigationController+JDSideMenu.h"
 #import "UINavigationController+JDSideMenu.h"
 #import "SearchSchoolViewController.h"
+#import "MoreViewController.h"
 
 #import "XDTabViewController.h"
 
@@ -68,6 +69,8 @@ FreshClassZone>
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
+    
+//    [self getcities];
     
     self.titleLabel.text = @"我的班级";
     self.titleLabel.font = [UIFont systemFontOfSize:19];
@@ -244,7 +247,11 @@ FreshClassZone>
                         {
                             [dict setObject:schoolName forKey:@"s_name"];
                         }
-                        
+                        NSString *schoolLevel = [NSString stringWithFormat:@"%d",[[dict2 objectForKey:@"s_level"] integerValue]];
+                        if ([schoolLevel length] > 0)
+                        {
+                            [dict setObject:schoolLevel forKey:@"s_level"];
+                        }
                         NSMutableArray *array2 = [[NSMutableArray alloc] initWithCapacity:0];
                         for (int m=0; m<[array count]; ++m)
                         {
@@ -365,6 +372,11 @@ FreshClassZone>
                             if ([schoolName length] > 0)
                             {
                                 [dict setObject:schoolName forKey:@"s_name"];
+                            }
+                            NSString *schoolLevel = [NSString stringWithFormat:@"%d",[[dict2 objectForKey:@"s_level"] integerValue]];
+                            if ([schoolLevel length] > 0)
+                            {
+                                [dict setObject:schoolLevel forKey:@"s_level"];
                             }
                             
                             NSMutableArray *array2 = [[NSMutableArray alloc] initWithCapacity:0];
@@ -500,7 +512,8 @@ FreshClassZone>
     headerLabel.textAlignment = NSTextAlignmentCenter;
     headerLabel.font = [UIFont systemFontOfSize:17];
     headerLabel.textColor = TITLE_COLOR;
-    headerLabel.text = [[tmpArray objectAtIndex:section] objectForKey:@"s_name"];
+    NSDictionary *tmpdict = [tmpArray objectAtIndex:section];
+    headerLabel.text = [NSString stringWithFormat:@"%@(%@)",[tmpdict objectForKey:@"s_name"],[schoolLevelArray objectAtIndex:[[tmpdict objectForKey:@"s_level"] integerValue]]];
     [headerView addSubview:headerLabel];
     return headerView;
 }
@@ -618,6 +631,8 @@ FreshClassZone>
     classMember.fromMsg = NO;
     
     ClassInfoViewController *classInfoViewController = [[ClassInfoViewController alloc] init];
+//    MoreViewController *moreVC = [[MoreViewController alloc] init];
+    
     
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     [ud setObject:classID forKey:@"classid"];
@@ -656,7 +671,7 @@ FreshClassZone>
     
     KKNavigationController *tabBarNav = [[KKNavigationController alloc] initWithRootViewController:tabViewController];
     [self.navigationController presentViewController:tabBarNav animated:YES completion:^{
-        
+
     }];
     [self.sideMenuController hideMenuAnimated:YES];
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
@@ -705,6 +720,45 @@ FreshClassZone>
     {
         [Tools showAlertView:@"请先到个人信息里绑定手机号" delegateViewController:nil];
     }
+}
+
+-(void)getcities
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token]
+                                                                      } API:GETCITIES];
+        
+        [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"get cities responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:self];
+            }
+            
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools hideProgress:self.bgView];
+        }];
+        [Tools showProgress:self.bgView];
+        [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
+
 }
 
 @end

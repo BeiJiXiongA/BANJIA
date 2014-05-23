@@ -110,7 +110,7 @@ SetClassInfoDel>
     imagePickerController = [[UIImagePickerController alloc] init];
     imagePickerController.delegate = self;
     
-    classInfoTableView = [[UITableView alloc] initWithFrame:CGRectMake(0,UI_NAVIGATION_BAR_HEIGHT , SCREEN_WIDTH, SCREEN_HEIGHT-10-UI_TAB_BAR_HEIGHT-UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
+    classInfoTableView = [[UITableView alloc] initWithFrame:CGRectMake(0,UI_NAVIGATION_BAR_HEIGHT , SCREEN_WIDTH, SCREEN_HEIGHT-UI_TAB_BAR_HEIGHT-UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
     classInfoTableView.delegate = self;
     classInfoTableView.dataSource = self;
     classInfoTableView.backgroundColor = [UIColor clearColor];
@@ -304,7 +304,7 @@ SetClassInfoDel>
         {
             SetClassInfoViewController *setClassInfoViewController = [[SetClassInfoViewController alloc] init];
             setClassInfoViewController.infoKey = @"name";
-            setClassInfoViewController.infoStr = className;
+            setClassInfoViewController.infoStr = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
             setClassInfoViewController.classID = classID;
             setClassInfoViewController.setClassInfoDel = self;
             [[XDTabViewController sharedTabViewController] .navigationController pushViewController:setClassInfoViewController animated:YES];
@@ -630,7 +630,7 @@ SetClassInfoDel>
                     classInfo = [[responseDict objectForKey:@"data"] objectForKey:@"info"];
                 }
                 
-                regionStr = [[[responseDict objectForKey:@"data"] objectForKey:@"school"] objectForKey:@"regions"];
+                regionStr = [[[[responseDict objectForKey:@"data"] objectForKey:@"school"] objectForKey:@"region"] objectForKey:@"name"];
                 [classInfoTableView reloadData];
                 
             }

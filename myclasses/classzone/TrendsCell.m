@@ -10,7 +10,7 @@
 #import "Header.h"
 
 @implementation TrendsCell
-@synthesize headerImageView,nameLabel,timeLabel,locationLabel,contentLabel,imagesScrollView,imagesView,transmitButton,praiseButton,commentButton,praiseImageView,commentImageView,bgView,nameTextField;
+@synthesize headerImageView,nameLabel,timeLabel,locationLabel,contentLabel,imagesScrollView,imagesView,transmitButton,praiseButton,commentButton,praiseImageView,commentImageView,bgView,nameTextField,transmitImageView;
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
@@ -67,6 +67,11 @@
         imagesView.frame = CGRectMake(5, contentLabel.frame.size.height+contentLabel.frame.origin.y, SCREEN_WIDTH-10, 120);
         imagesView.hidden = YES;
         [bgView addSubview:imagesView];
+        
+        transmitImageView = [[UIImageView alloc] init];
+        transmitImageView.hidden = YES;
+        [transmitImageView setImage:[UIImage imageNamed:@"icon_forwarding"]];
+        [bgView addSubview:transmitImageView];
         
         transmitButton = [UIButton buttonWithType:UIButtonTypeCustom];
         [transmitButton setTitleColor:[UIColor blueColor] forState:UIControlStateNormal];

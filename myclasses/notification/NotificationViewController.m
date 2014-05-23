@@ -103,7 +103,7 @@ NotificationDetailDelegate>
     [self getNotifications];
     
     tipLabel = [[UILabel alloc] init];
-    tipLabel.frame = CGRectMake(40, CENTER_POINT.y-100, SCREEN_WIDTH-80, 80);
+    tipLabel.frame = CGRectMake(40, 100, SCREEN_WIDTH-80, 80);
     tipLabel.backgroundColor = [UIColor clearColor];
     tipLabel.textColor = TITLE_COLOR;
     tipLabel.textAlignment = NSTextAlignmentCenter;
@@ -186,7 +186,14 @@ NotificationDetailDelegate>
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return [tmpArray count]+1;
+    if (page == 0 && [month length] == 0)
+    {
+        if ([tmpArray count] == 0)
+        {
+            tipLabel.hidden = NO;
+        }
+    }
+    return [tmpArray count]>0?([tmpArray count]+1):(0);
 }
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -378,7 +385,14 @@ NotificationDetailDelegate>
                         NSString *key = [requestUrlStr MD5Hash];
                         [FTWCache setObject:[responseString dataUsingEncoding:NSUTF8StringEncoding] forKey:key];
                     }
-                    [tmpArray addObjectsFromArray:[[responseDict objectForKey:@"data"] objectForKey:@"posts"]];
+                    NSArray *array = [[responseDict objectForKey:@"data"] objectForKey:@"posts"];
+                    for (int i = 0; i<[array count]; i++)
+                    {
+                        if (![[array objectAtIndex:i] isEqual:[NSNull null]])
+                        {
+                            [tmpArray addObject:[array objectAtIndex:i]];
+                        }
+                    }
                     page = [[[responseDict objectForKey:@"data"] objectForKey:@"page"] intValue];
                     month = [NSString stringWithFormat:@"%@",[[responseDict objectForKey:@"data"] objectForKey:@"month"]];
                     
@@ -424,7 +438,14 @@ NotificationDetailDelegate>
                         [Tools showAlertView:@"没有更多公告了！" delegateViewController:nil];
                     }
                     
+                    if (page == 0 && [month length] == 0)
+                    {
+                        [tmpArray removeAllObjects];
+                    }
                 }
+                [notificationTableView reloadData];
+                _reloading = NO;
+                [pullRefreshView egoRefreshScrollViewDataSourceDidFinishedLoading:notificationTableView];
             }
             else
             {
@@ -457,7 +478,14 @@ NotificationDetailDelegate>
     if ([[responseDict objectForKey:@"code"] intValue]== 1)
     {
         [tmpArray removeAllObjects];
-        [tmpArray addObjectsFromArray:[[responseDict objectForKey:@"data"] objectForKey:@"posts"]];
+        NSArray *array = [[responseDict objectForKey:@"data"] objectForKey:@"posts"];
+        for (int i = 0; i<[array count]; i++)
+        {
+            if (![[array objectAtIndex:i] isEqual:[NSNull null]])
+            {
+                [tmpArray addObject:[array objectAtIndex:i]];
+            }
+        }
         [notificationTableView reloadData];
     }
     if ([tmpArray count] <= 0)
