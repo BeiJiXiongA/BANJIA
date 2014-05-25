@@ -12,6 +12,7 @@
 #import "UITextField+AKNumericFormatter.h"
 #import "NSString+AKNumericFormatter.h"
 #import "AKNumericFormatter.h"
+#import "UserProtocolViewController.h"
 
 @interface RegistViewController ()<UITextFieldDelegate>
 {
@@ -38,6 +39,7 @@
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"注册";
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+    self.view.backgroundColor = [UIColor blackColor];
     
     UIImage*inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 3, 20, 2.3)];
     
@@ -105,11 +107,33 @@
     logoImageView.alpha = 0.5;
     logoImageView.frame = CGRectMake((SCREEN_WIDTH-imageW)/2,nextStepButton.frame.size.height+nextStepButton.frame.origin.y+oriY, imageW, imageH);
     [self.bgView addSubview:logoImageView];
+    
+    UILabel *tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(51, nextStepButton.frame.size.height+nextStepButton.frame.origin.y+10, 135, 20)];
+    tipLabel.text = @"注册本软件默认您已同意";
+    tipLabel.textColor = TITLE_COLOR;
+    tipLabel.backgroundColor = self.bgView.backgroundColor;
+    tipLabel.font = [UIFont systemFontOfSize:12];
+    [self.bgView addSubview:tipLabel];
+    
+    UIButton *proButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    proButton.frame = CGRectMake(185, nextStepButton.frame.size.height+nextStepButton.frame.origin.y+11, 100, 20);
+    proButton.backgroundColor = self.bgView.backgroundColor;
+    proButton.titleLabel.font = [UIFont systemFontOfSize:12.5];
+    [proButton setTitle:@"《软件用户协议》" forState:UIControlStateNormal];
+    [proButton setTitleColor:LIGHT_BLUE_COLOR forState:UIControlStateNormal];
+    [proButton addTarget:self action:@selector(openPro) forControlEvents:UIControlEventTouchUpInside];
+    [self.bgView addSubview:proButton];
 }
 
 -(void)unShowSelfViewController
 {
     [self.navigationController popViewControllerAnimated:YES];
+}
+
+-(void)openPro
+{
+    UserProtocolViewController *userprotocol = [[UserProtocolViewController alloc] init];
+    [self.navigationController pushViewController:userprotocol animated:YES];
 }
 
 -(void)verify

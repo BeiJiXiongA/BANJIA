@@ -18,5 +18,6 @@
 @property (nonatomic, strong) NSString *name;
 @property (nonatomic, strong) NSString *toID;
 @property (nonatomic, strong) NSString *imageUrl;
+@property (nonatomic, assign) BOOL fromClass;
 @property (nonatomic, strong) id<ChatVCDelegate> chatVcDel;
 @end

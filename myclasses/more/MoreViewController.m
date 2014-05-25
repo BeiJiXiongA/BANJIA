@@ -14,7 +14,8 @@
                                 UITableViewDelegate,
                                 UIPickerViewDataSource,
                                 UIPickerViewDelegate,
-UIAlertViewDelegate>
+UIAlertViewDelegate,
+UIActionSheetDelegate>
 {
     UITableView *classSettingTableView;
     NSArray *sectionArray;
@@ -54,6 +55,25 @@ UIAlertViewDelegate>
     return self;
 }
 
+-(void)moreClick
+{
+    UIActionSheet *moreAction = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"退出班级", nil];
+    moreAction.tag = 2000;
+    [moreAction showInView:self.bgView];
+}
+
+-(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (actionSheet.tag == 2000)
+    {
+        if (buttonIndex == 0)
+        {
+            //退出班级
+            [self signOut];
+        }
+    }
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -65,7 +85,17 @@ UIAlertViewDelegate>
         
     settingDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     
+    UIButton *inviteButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [inviteButton setImage:[UIImage imageNamed:@"icon_more"] forState:UIControlStateNormal];
+    inviteButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
+    [inviteButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] < 2)
+    {
+//        [self.navigationBarView addSubview:inviteButton];
+    }
+
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+    self.view.backgroundColor = [UIColor blackColor];
     
     [self.backButton addTarget:self action:@selector(backClick) forControlEvents:UIControlEventTouchUpInside];
     
@@ -109,7 +139,7 @@ UIAlertViewDelegate>
     accessClassZone = @"前10条可查看";
     accessTime = @"全时段";
     
-    classSettingTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT - UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
+    classSettingTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT - UI_NAVIGATION_BAR_HEIGHT-5) style:UITableViewStylePlain];
     classSettingTableView.delegate = self;
     classSettingTableView.dataSource = self;
     [self.bgView addSubview:classSettingTableView];
@@ -233,6 +263,7 @@ UIAlertViewDelegate>
 -(void)backClick
 {
     [self.navigationController popViewControllerAnimated:YES];
+//    [[XDTabViewController sharedTabViewController] dismissViewControllerAnimated:YES completion:nil];
 }
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {

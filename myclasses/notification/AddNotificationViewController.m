@@ -55,6 +55,7 @@ UITextViewDelegate>
     self.titleLabel.text = @"发布公告";
     replay = 1;
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+    self.view.backgroundColor = [UIColor blackColor];
     
     [self.backButton addTarget:self action:@selector(myBack) forControlEvents:UIControlEventTouchUpInside];
     
@@ -109,6 +110,9 @@ UITextViewDelegate>
     objectsTableView.delegate = self;
     objectsTableView.dataSource = self;
     [self.bgView addSubview:objectsTableView];
+    if ([objectsTableView respondsToSelector:@selector(setSeparatorInset:)]) {
+        [objectsTableView setSeparatorInset:UIEdgeInsetsZero];
+    }
     
     
     replayLabel = [[UILabel alloc] initWithFrame:CGRectMake(objectsTableView.frame.origin.x, objectsTableView.frame.origin.y+objectsTableView.frame.size.height+20, 150, 30)];

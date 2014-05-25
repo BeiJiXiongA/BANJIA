@@ -85,7 +85,7 @@
     editButton.backgroundColor = [UIColor clearColor];
     [editButton setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
     [editButton addTarget:self action:@selector(editTableView) forControlEvents:UIControlEventTouchUpInside];
-//    [self.navigationBarView addSubview:editButton];
+    [self.navigationBarView addSubview:editButton];
 
     
     db = [[OperatDB alloc] init];
@@ -114,7 +114,7 @@
     pullRefreshView.delegate = self;
     
     tipLabel = [[UILabel alloc] init];
-    tipLabel.frame = CGRectMake(40, CENTER_POINT.y-80, SCREEN_WIDTH-80, 80);
+    tipLabel.frame = CGRectMake(40, 100, SCREEN_WIDTH-80, 80);
     tipLabel.backgroundColor = [UIColor clearColor];
     tipLabel.textColor = TITLE_COLOR;
     tipLabel.textAlignment = NSTextAlignmentCenter;
@@ -144,39 +144,36 @@
             DDLOG(@"newchatlist responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                if ([[responseDict objectForKey:@"data"] count] > 0)
+                if ([[responseDict objectForKey:@"data"] isKindOfClass:[NSDictionary class]])
                 {
-                    if ([[responseDict objectForKey:@"data"] isKindOfClass:[NSDictionary class]])
+                    NSArray *array = [[responseDict objectForKey:@"data"] allValues];
+                    for (int i=0; i<[array count]; ++i)
                     {
-                        NSArray *array = [[responseDict objectForKey:@"data"] allValues];
-                        for (int i=0; i<[array count]; ++i)
+                        NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithCapacity:0];
+                        NSDictionary *dict = [array objectAtIndex:i];
+                        [tmpDict setObject:[dict objectForKey:@"tid"] forKey:@"fid"];
+                        if ([dict objectForKey:@"img_icon"])
                         {
-                            NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithCapacity:0];
-                            NSDictionary *dict = [array objectAtIndex:i];
-                            [tmpDict setObject:[dict objectForKey:@"tid"] forKey:@"fid"];
-                            if ([dict objectForKey:@"img_icon"])
+                            [tmpDict setObject:[dict objectForKey:@"img_icon"] forKey:@"ficon"];
+                        }
+                        if ([dict objectForKey:@"r_name"])
+                        {
+                            [tmpDict setObject:[dict objectForKey:@"r_name"] forKey:@"fname"];
+                        }
+                        NSString *mid = [[dict objectForKey:@"l_n"] objectForKey:@"_id"];
+                        [tmpDict setObject:mid forKey:@"mid"];
+                        [tmpDict setObject:[[dict objectForKey:@"l_n"] objectForKey:@"msg"] forKey:@"content"];
+                        [tmpDict setObject:[[dict objectForKey:@"l_n"] objectForKey:@"t"] forKey:@"time"];
+                        [tmpDict setObject:@"0" forKey:@"readed"];
+                        [tmpDict setObject:@"f" forKey:@"direct"];
+                        [tmpDict setObject:[Tools user_id] forKey:@"userid"];
+                        [tmpDict setObject:@"text" forKey:@"msgType"];
+                        [tmpDict setObject:[Tools user_id] forKey:@"tid"];
+                        if ([[db findSetWithDictionary:@{@"mid":mid,@"userid":[Tools user_id]} andTableName:CHATTABLE] count] <= 0)
+                        {
+                            if ([db insertRecord:tmpDict andTableName:@"chatMsg"])
                             {
-                                [tmpDict setObject:[dict objectForKey:@"img_icon"] forKey:@"ficon"];
-                            }
-                            if ([dict objectForKey:@"r_name"])
-                            {
-                                [tmpDict setObject:[dict objectForKey:@"r_name"] forKey:@"fname"];
-                            }
-                            NSString *mid = [[dict objectForKey:@"l_n"] objectForKey:@"_id"];
-                            [tmpDict setObject:mid forKey:@"mid"];
-                            [tmpDict setObject:[[dict objectForKey:@"l_n"] objectForKey:@"msg"] forKey:@"content"];
-                            [tmpDict setObject:[[dict objectForKey:@"l_n"] objectForKey:@"t"] forKey:@"time"];
-                            [tmpDict setObject:@"0" forKey:@"readed"];
-                            [tmpDict setObject:@"f" forKey:@"direct"];
-                            [tmpDict setObject:[Tools user_id] forKey:@"userid"];
-                            [tmpDict setObject:@"text" forKey:@"msgType"];
-                            [tmpDict setObject:[Tools user_id] forKey:@"tid"];
-                            if ([[db findSetWithDictionary:@{@"mid":mid} andTableName:CHATTABLE] count] <= 0)
-                            {
-                                if ([db insertRecord:tmpDict andTableName:@"chatMsg"])
-                                {
-                                    DDLOG(@"new msg insert success!");
-                                }
+                                DDLOG(@"new msg insert success!");
                             }
                         }
                     }
@@ -228,10 +225,12 @@
     [friendsListTableView reloadData];
     if ([chatFriendArray count] > 0)
     {
+        editButton.hidden = NO;
         tipLabel.hidden = YES;
     }
     else
     {
+        editButton.hidden = YES;
         tipLabel.hidden = NO;
     }
     if ([[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue] > 0)
@@ -425,6 +424,7 @@
     chat.toID = [dict objectForKey:@"fid"];
     chat.imageUrl = [dict objectForKey:@"ficon"];
     chat.chatVcDel = self;
+    chat.fromClass = NO;
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     [self.navigationController pushViewController:chat animated:YES];
 }
@@ -453,8 +453,13 @@
 
 -(void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
 {
-//    NSDictionary *dict = [chatFriendArray objectAtIndex:indexPath.row];
+    NSDictionary *dict = [chatFriendArray objectAtIndex:indexPath.row];
 //    DDLOG(@"dict == %@",dict);
+    
+    if ([db deleteRecordWithDict:@{@"userid":[Tools user_id],@"fid":[dict objectForKey:@"fid"]} andTableName:CHATTABLE])
+    {
+        DDLOG(@"delete chat log of %@ success",[dict objectForKey:@"fname"]);
+    }
     [chatFriendArray removeObjectAtIndex:indexPath.row];
     [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForItem:indexPath.row inSection:indexPath.section]] withRowAnimation:UITableViewRowAnimationFade];
     [tableView reloadData];

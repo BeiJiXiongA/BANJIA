@@ -35,6 +35,7 @@
     // Do any additional setup after loading the view.
     
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+    self.view.backgroundColor = [UIColor blackColor];
     
     UIButton *inviteButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [inviteButton setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
@@ -145,9 +146,9 @@
                 return ;
             }
             
-            if ([nameTextField.text length] <= 0)
+            if ([nameTextField.text length] < 4 || [nameTextField.text length] > 10)
             {
-                [Tools showAlertView:@"请填写学校名称" delegateViewController:nil];
+                [Tools showAlertView:@"学校名称应该在4~10个字符之间" delegateViewController:nil];
                 return ;
             }
             infoStr = nameTextField.text;
@@ -174,6 +175,12 @@
             DDLOG(@"signout responsedict %@",responseString);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
+                if ([infoKey isEqualToString:@"name"])
+                {
+                    [[NSUserDefaults standardUserDefaults] setObject:infoStr forKey:@"classname"];
+                    [[NSUserDefaults standardUserDefaults] synchronize];
+                }
+                
                 if ([self.setClassInfoDel respondsToSelector:@selector(updateClassInfo:value:)])
                 {
                     [self.setClassInfoDel updateClassInfo:infoKey value:infoStr];

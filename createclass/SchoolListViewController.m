@@ -11,7 +11,9 @@
 #import "CreateSchoolViewController.h"
 
 @interface SchoolListViewController ()<UITableViewDataSource,UITableViewDelegate>
-
+{
+    UIView *createSchoolView;
+}
 @end
 
 @implementation SchoolListViewController
@@ -40,7 +42,7 @@
     schoolListTableView.backgroundColor = [UIColor whiteColor];
     [self.bgView addSubview:schoolListTableView];
     
-    UIView *createSchoolView = [[UIView alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT-40, SCREEN_WIDTH, 40)];
+    createSchoolView = [[UIView alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT-40, SCREEN_WIDTH, 40)];
     createSchoolView.backgroundColor = RGB(254, 249, 198, 1);
     [self.bgView addSubview:createSchoolView];
     
@@ -108,6 +110,14 @@
 #pragma  mark - tableview
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
+    if ([schoolArray count] == 0)
+    {
+        createSchoolView.hidden = YES;
+    }
+    else
+    {
+        createSchoolView.hidden = NO;
+    }
     return [schoolArray count];
 }
 

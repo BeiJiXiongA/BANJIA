@@ -140,7 +140,7 @@ MsgDelegate>
     mySearchBar = [[UISearchBar alloc] initWithFrame:
                    CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH-0, 40)];
     mySearchBar.delegate = self;
-    mySearchBar.placeholder = @"输入学生姓名";
+    mySearchBar.placeholder = @"输入成员姓名";
     mySearchBar.backgroundColor = [UIColor whiteColor];
     [self.bgView addSubview:mySearchBar];
     
@@ -192,8 +192,20 @@ MsgDelegate>
     searchTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 40, SCREEN_WIDTH, 0) style:UITableViewStylePlain];
     searchTableView.delegate = self;
     searchTableView.dataSource = self;
+    searchTableView.backgroundColor = [UIColor whiteColor];
     searchTableView.tag = SearchTableViewTag;
     [searchView addSubview:searchTableView];
+    
+    if (SYSVERSION >= 7.0)
+    {
+        searchTableView.contentInset = UIEdgeInsetsMake(-20, 0, 0, 0);
+    }
+    
+    searchTableView.contentOffset = CGPointZero;
+
+    if ([searchTableView respondsToSelector:@selector(setSeparatorInset:)]) {
+        [searchTableView setSeparatorInset:UIEdgeInsetsZero];
+    }
     
     if ([Tools NetworkReachable])
     {
@@ -716,9 +728,14 @@ MsgDelegate>
     }
     else if (tableView.tag == SearchTableViewTag)
     {
-        CGFloat hei = [searchResultArray count]>8?240:[searchResultArray count]*40;
+        CGFloat hei = [searchResultArray count]>6?264:([searchResultArray count]*44);
+        
         [UIView animateWithDuration:0.2 animations:^{
             searchTableView.frame = CGRectMake(0, 0, SCREEN_WIDTH, hei);
+//            if (SYSVERSION >= 7.0)
+//            {
+//                searchTableView.contentSize = CGSizeMake(SCREEN_WIDTH, hei);
+//            }
         }];
         if ([searchResultArray count] > 0)
         {
@@ -751,7 +768,7 @@ MsgDelegate>
     }
     else if(tableView.tag == SearchTableViewTag)
     {
-        return 40;
+        return 44;
     }
     return 0.0f;
 }
@@ -930,7 +947,7 @@ MsgDelegate>
     }
     else if(tableView.tag == SearchTableViewTag)
     {
-        static NSString *searchCell = @"searchCell";
+        static NSString *searchCell = @"searchmemCell";
         UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:searchCell];
         if (cell == nil)
         {
@@ -1033,13 +1050,25 @@ MsgDelegate>
         if ([[dict objectForKey:@"role"] isEqualToString:@"students"])
         {
             StudentDetailViewController *studentDetail = [[StudentDetailViewController alloc] init];
-            studentDetail.studentID = [dict objectForKey:@"uid"];
+            if (![[dict objectForKey:@"uid"] isEqual:[NSNull null]])
+            {
+                studentDetail.studentID = [dict objectForKey:@"uid"];
+            }
+            if (![[dict objectForKey:@"title"] isEqual:[NSNull null]])
+            {
+                studentDetail.title = [dict objectForKey:@"title"];
+            }
             studentDetail.studentName = [dict objectForKey:@"name"];
-            studentDetail.title = [dict objectForKey:@"title"];
+            if (![[dict objectForKey:@"title"] isEqual:[NSNull null]])
+            {
+                studentDetail.title = [dict objectForKey:@"title"];
+            }
+            
             studentDetail.headerImg = [dict objectForKey:@"img_icon"];
-            studentDetail.role = [dict objectForKey:@"role"];
             studentDetail.memDel = self;
+            studentDetail.role = [dict objectForKey:@"role"];
             [[XDTabViewController sharedTabViewController].navigationController pushViewController:studentDetail animated:YES];
+
         }
         else if([[dict objectForKey:@"role"] isEqualToString:@"parents"])
         {

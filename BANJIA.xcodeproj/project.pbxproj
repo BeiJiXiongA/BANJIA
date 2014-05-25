@@ -278,6 +278,7 @@
 		389E110119091EAA00235799 /* renren@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 389E10FE19091EAA00235799 /* renren@2x.png */; };
 		389E110219091EAA00235799 /* sina@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 389E10FF19091EAA00235799 /* sina@2x.png */; };
 		389E110319091EAA00235799 /* QQ@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 389E110019091EAA00235799 /* QQ@2x.png */; };
+		38A2E40F192E483B00CA9EBD /* citys.plist in Resources */ = {isa = PBXBuildFile; fileRef = 38A2E40E192E483B00CA9EBD /* citys.plist */; };
 		38A715F41914971B000798D0 /* KKNavigationController+JDSideMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 38A715F31914971B000798D0 /* KKNavigationController+JDSideMenu.m */; };
 		38A715F71914C771000798D0 /* SendAdviseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 38A715F61914C771000798D0 /* SendAdviseViewController.m */; };
 		38AAE01018FBB6C800FCACE4 /* telephone@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38AAE00F18FBB6C800FCACE4 /* telephone@2x.png */; };
@@ -591,6 +592,7 @@
 		38AD6D1618EF04060065A5F2 /* tab_bar_bg.png in Resources */ = {isa = PBXBuildFile; fileRef = 38AD6BC618EF04050065A5F2 /* tab_bar_bg.png */; };
 		38AD6D1918EF04060065A5F2 /* unselectBtn@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38AD6BC918EF04050065A5F2 /* unselectBtn@2x.png */; };
 		38B0F2C9192C2A9000C0FC4B /* OtherAppointViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 38B0F2C8192C2A9000C0FC4B /* OtherAppointViewController.m */; };
+		38B0F2CC192C581B00C0FC4B /* UserProtocolViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 38B0F2CB192C581B00C0FC4B /* UserProtocolViewController.m */; };
 		38B2DDBA18F762A200782D0E /* inputbg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38B2DDB518F762A200782D0E /* inputbg@2x.png */; };
 		38B2DDC318F780D900782D0E /* KLSwitch.m in Sources */ = {isa = PBXBuildFile; fileRef = 38B2DDC218F780D900782D0E /* KLSwitch.m */; };
 		38B2DDC518F7959200782D0E /* line3@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38B2DDC418F7959200782D0E /* line3@2x.png */; };
@@ -602,7 +604,6 @@
 		38B4929D1921C56A00C0098D /* ResetPwdViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 38B4929C1921C56A00C0098D /* ResetPwdViewController.m */; };
 		38B492A01921F27700C0098D /* SearchSchoolViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 38B4929F1921F27700C0098D /* SearchSchoolViewController.m */; };
 		38B492A31921F81800C0098D /* DemoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 38B492A21921F81800C0098D /* DemoViewController.m */; };
-		38B492A71921FD7400C0098D /* citys.plist in Resources */ = {isa = PBXBuildFile; fileRef = 38B492A61921FD7400C0098D /* citys.plist */; };
 		38B492AA192225D600C0098D /* SelectSchoolLevelViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 38B492A9192225D600C0098D /* SelectSchoolLevelViewController.m */; };
 		38B492AD1922E83D00C0098D /* SchoolListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 38B492AC1922E83D00C0098D /* SchoolListViewController.m */; };
 		38B492B31923112900C0098D /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38B492B21923112900C0098D /* OpenGLES.framework */; };
@@ -1105,6 +1106,7 @@
 		389E10FE19091EAA00235799 /* renren@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "renren@2x.png"; sourceTree = "<group>"; };
 		389E10FF19091EAA00235799 /* sina@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sina@2x.png"; sourceTree = "<group>"; };
 		389E110019091EAA00235799 /* QQ@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "QQ@2x.png"; sourceTree = "<group>"; };
+		38A2E40E192E483B00CA9EBD /* citys.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = citys.plist; sourceTree = "<group>"; };
 		38A715F21914971B000798D0 /* KKNavigationController+JDSideMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "KKNavigationController+JDSideMenu.h"; sourceTree = "<group>"; };
 		38A715F31914971B000798D0 /* KKNavigationController+JDSideMenu.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "KKNavigationController+JDSideMenu.m"; sourceTree = "<group>"; };
 		38A715F51914C771000798D0 /* SendAdviseViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SendAdviseViewController.h; sourceTree = "<group>"; };
@@ -1428,6 +1430,8 @@
 		38AD6BC918EF04050065A5F2 /* unselectBtn@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "unselectBtn@2x.png"; sourceTree = "<group>"; };
 		38B0F2C7192C2A9000C0FC4B /* OtherAppointViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OtherAppointViewController.h; sourceTree = "<group>"; };
 		38B0F2C8192C2A9000C0FC4B /* OtherAppointViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OtherAppointViewController.m; sourceTree = "<group>"; };
+		38B0F2CA192C581B00C0FC4B /* UserProtocolViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserProtocolViewController.h; sourceTree = "<group>"; };
+		38B0F2CB192C581B00C0FC4B /* UserProtocolViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserProtocolViewController.m; sourceTree = "<group>"; };
 		38B2DDB518F762A200782D0E /* inputbg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "inputbg@2x.png"; sourceTree = "<group>"; };
 		38B2DDC118F780D900782D0E /* KLSwitch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KLSwitch.h; sourceTree = "<group>"; };
 		38B2DDC218F780D900782D0E /* KLSwitch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KLSwitch.m; sourceTree = "<group>"; };
@@ -1446,7 +1450,6 @@
 		38B4929F1921F27700C0098D /* SearchSchoolViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchSchoolViewController.m; sourceTree = "<group>"; };
 		38B492A11921F81800C0098D /* DemoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DemoViewController.h; sourceTree = "<group>"; };
 		38B492A21921F81800C0098D /* DemoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DemoViewController.m; sourceTree = "<group>"; };
-		38B492A61921FD7400C0098D /* citys.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = citys.plist; sourceTree = "<group>"; };
 		38B492A8192225D600C0098D /* SelectSchoolLevelViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SelectSchoolLevelViewController.h; sourceTree = "<group>"; };
 		38B492A9192225D600C0098D /* SelectSchoolLevelViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SelectSchoolLevelViewController.m; sourceTree = "<group>"; };
 		38B492AB1922E83D00C0098D /* SchoolListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SchoolListViewController.h; sourceTree = "<group>"; };
@@ -2121,6 +2124,8 @@
 				3893931D18EEF2030014F169 /* WelcomeViewController.m */,
 				38B570C71911523C00E7F2DB /* FiistLaunchViewController.h */,
 				38B570C81911523C00E7F2DB /* FiistLaunchViewController.m */,
+				38B0F2CA192C581B00C0FC4B /* UserProtocolViewController.h */,
+				38B0F2CB192C581B00C0FC4B /* UserProtocolViewController.m */,
 			);
 			path = login;
 			sourceTree = "<group>";
@@ -2128,7 +2133,7 @@
 		3893932818EEF53D0014F169 /* createclass */ = {
 			isa = PBXGroup;
 			children = (
-				38B492A61921FD7400C0098D /* citys.plist */,
+				38A2E40E192E483B00CA9EBD /* citys.plist */,
 				38B492A11921F81800C0098D /* DemoViewController.h */,
 				38B492A21921F81800C0098D /* DemoViewController.m */,
 				3893932918EEF53D0014F169 /* ChooseClassInfoViewController.h */,
@@ -3287,6 +3292,7 @@
 				38AD6CF618EF04060065A5F2 /* head_pic.jpg in Resources */,
 				38AD6CAC18EF04050065A5F2 /* btn_bg_green@2x.png in Resources */,
 				38AD6C6118EF04050065A5F2 /* emoji_rabbit.png in Resources */,
+				38A2E40F192E483B00CA9EBD /* citys.plist in Resources */,
 				38AD6D0018EF04060065A5F2 /* icon_return.png in Resources */,
 				38AD6C7418EF04050065A5F2 /* emoji_shit.png in Resources */,
 				38AAE01018FBB6C800FCACE4 /* telephone@2x.png in Resources */,
@@ -3478,7 +3484,6 @@
 				38AD6C8518EF04050065A5F2 /* emoji_speech_balloon.png in Resources */,
 				38AD6BFE18EF04050065A5F2 /* emoji_dog.png in Resources */,
 				38AD6CEF18EF04060065A5F2 /* icon_tel1@2x.png in Resources */,
-				38B492A71921FD7400C0098D /* citys.plist in Resources */,
 				38AD6CCD18EF04050065A5F2 /* pic@2x.png in Resources */,
 				38AD6CCC18EF04050065A5F2 /* pic.png in Resources */,
 				38AD6BFF18EF04050065A5F2 /* emoji_droplet.png in Resources */,
@@ -3643,6 +3648,7 @@
 				3893939C18EEF5620014F169 /* AddDongTaiViewController.m in Sources */,
 				38AD6A6918EF03010065A5F2 /* GzipCompressor.m in Sources */,
 				3893929618EEF1A40014F169 /* MJRefreshFooterView.m in Sources */,
+				38B0F2CC192C581B00C0FC4B /* UserProtocolViewController.m in Sources */,
 				38AD6A6C18EF03010065A5F2 /* Reachability.m in Sources */,
 				38AD6A6B18EF03010065A5F2 /* OpenUDID.m in Sources */,
 				389393A018EEF5620014F169 /* HeaderCell.m in Sources */,
@@ -3898,7 +3904,6 @@
 				ARCHS = "$(ARCHS_STANDARD)";
 				"ARCHS[sdk=*]" = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				"CODE_SIGN_ENTITLEMENTS[sdk=*]" = "";
 				CODE_SIGN_IDENTITY = "iPhone Developer: Rui Wang (VEUQ5JBY8P)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Rui Wang (VEUQ5JBY8P)";
 				FRAMEWORK_SEARCH_PATHS = (
@@ -3936,7 +3941,7 @@
 					"-Objc",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "8AD6FE30-D3A8-47E3-87CD-C062DA2BC374";
+				PROVISIONING_PROFILE = "D849FFB8-7929-4E53-AEFB-86AA3E02A6AE";
 				SDKROOT = iphoneos7.1;
 				VALID_ARCHS = "armv7 armv7s";
 				WRAPPER_EXTENSION = app;
@@ -3948,7 +3953,8 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Lanjing Tongchuang (Tianjin) Technology & Development Co., Ltd. (X7FQ79MF8R)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Lanjing Tongchuang (Tianjin) Technology & Development Co., Ltd. (X7FQ79MF8R)";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/library/ShareSDK/Connection",
@@ -3983,7 +3989,9 @@
 					"-alll_load",
 					"-Objc",
 				);
-				PROVISIONING_PROFILE = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "C72A2FCD-CA2C-4CAE-9A3E-3F0A7A823C75";
+				SDKROOT = iphoneos7.1;
 				VALID_ARCHS = "armv7 armv7s";
 				WRAPPER_EXTENSION = app;
 			};

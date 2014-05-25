@@ -83,6 +83,7 @@ UISearchBarDelegate>
     mySearchBar = [[UISearchBar alloc] initWithFrame:
                    CGRectMake(15, UI_NAVIGATION_BAR_HEIGHT+10, SCREEN_WIDTH-30, 40)];
     mySearchBar.delegate = self;
+    mySearchBar.placeholder = @"输入学校名称或所在地区";
     mySearchBar.backgroundColor = RGB(214, 214, 214, 1);
     [self.bgView addSubview:mySearchBar];
     
@@ -93,7 +94,6 @@ UISearchBarDelegate>
         {
             searchField = (UITextField*)subview;
             searchField.frame = CGRectMake(0, 0, mySearchBar.frame.size.width, 40);
-            searchField.placeholder = @"输入学校名称或所在地区";
             [searchField setBackground:nil];
             searchField.background = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
             [searchField setBackgroundColor:[UIColor clearColor]];

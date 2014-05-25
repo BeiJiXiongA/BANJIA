@@ -752,10 +752,9 @@ UIActionSheetDelegate>
                 {
                     cell.nameLabel.text = [NSString stringWithFormat:@"绑定手机"];
                     cell.textLabel.textColor = TITLE_COLOR;
-                    cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_angle"]];
-                    [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 10, 10, 20)];
                 }
-                
+                cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_angle"]];
+                [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 10, 10, 20)];
                 cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-150, 13, 124, 20);
                 cell.objectsLabel.text = [Tools phone_num];
                 cell.objectsLabel.font = [UIFont systemFontOfSize:16];
@@ -780,12 +779,12 @@ UIActionSheetDelegate>
             cell.nametf.frame = CGRectMake(60, 11, 170, 20);
             if (indexPath.row == 2)
             {
-                if ([ShareSDK hasAuthorizedWithType:ShareTypeQQSpace])
+                if ([[[NSUserDefaults standardUserDefaults] objectForKey:QQNICKNAME] length] >0)
                 {
                     cell.nametf.text = [[NSUserDefaults standardUserDefaults] objectForKey:QQNICKNAME];
-                    [cell.relateButton setTitle:@"解除" forState:UIControlStateNormal];
-                    [cell.relateButton removeTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-                    [cell.relateButton addTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
+                    [cell.relateButton setTitle:@"更改" forState:UIControlStateNormal];
+//                    [cell.relateButton removeTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
+                    [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
                 }
                 else
                 {
@@ -798,12 +797,12 @@ UIActionSheetDelegate>
             }
             else if(indexPath.row == 3)
             {
-                if ([ShareSDK hasAuthorizedWithType:ShareTypeSinaWeibo])
+                if ([[[NSUserDefaults standardUserDefaults] objectForKey:SINANICKNAME] length] > 0)
                 {
                     cell.nametf.text = [[NSUserDefaults standardUserDefaults] objectForKey:SINANICKNAME];
-                    [cell.relateButton setTitle:@"解除" forState:UIControlStateNormal];
-                    [cell.relateButton removeTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-                    [cell.relateButton addTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
+                    [cell.relateButton setTitle:@"更改" forState:UIControlStateNormal];
+//                    [cell.relateButton removeTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
+                    [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
                 }
                 else
                 {
@@ -816,12 +815,12 @@ UIActionSheetDelegate>
             }
             else if(indexPath.row == 4)
             {
-                if ([ShareSDK hasAuthorizedWithType:ShareTypeRenren])
+                if ([[[NSUserDefaults standardUserDefaults] objectForKey:RRNICKNAME] length] > 0)
                 {
                     cell.nametf.text = [[NSUserDefaults standardUserDefaults] objectForKey:RRNICKNAME];
-                    [cell.relateButton setTitle:@"解除" forState:UIControlStateNormal];
-                     [cell.relateButton removeTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-                    [cell.relateButton addTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
+                    [cell.relateButton setTitle:@"更改" forState:UIControlStateNormal];
+//                     [cell.relateButton removeTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
+                    [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
                 }
                 else
                 {
@@ -1205,6 +1204,25 @@ static int loginID;
                 else
                 {
                     isAuth = NO;
+                }
+                
+                if ([accountDict objectForKey:@"qq"] && [[accountDict objectForKey:@"qq"] length] > 0)
+                {
+                    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+                    [ud setObject:[accountDict objectForKey:@"qq"] forKey:QQNICKNAME];
+                    [ud synchronize];
+                }
+                if ([accountDict objectForKey:@"rr"] && [[accountDict objectForKey:@"rr"] length] > 0)
+                {
+                    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+                    [ud setObject:[accountDict objectForKey:@"rr"] forKey:RRNICKNAME];
+                    [ud synchronize];
+                }
+                if ([accountDict objectForKey:@"sw"] && [[accountDict objectForKey:@"sw"] length] > 0)
+                {
+                    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+                    [ud setObject:[accountDict objectForKey:@"sw"] forKey:SINANICKNAME];
+                    [ud synchronize];
                 }
                 [personalSettiongTableView reloadData];
             }

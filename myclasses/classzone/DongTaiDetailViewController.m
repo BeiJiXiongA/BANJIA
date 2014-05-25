@@ -76,6 +76,7 @@ ReturnFunctionDelegate>
     [super viewWillAppear:animated];
     self.titleLabel.text = @"空间详情";
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+    self.view.backgroundColor = [UIColor blackColor];
     
     faceViewHeight = 0;
     
@@ -408,11 +409,26 @@ ReturnFunctionDelegate>
             cell.imagesScrollView.frame = CGRectMake(5, cell.contentLabel.frame.size.height+cell.contentLabel.frame.origin.y, SCREEN_WIDTH-10, 0);
         }
         
-        cell.praiseImageView.frame = CGRectMake((SCREEN_WIDTH-20)/4-30, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+30, 13, 13);
-        cell.praiseButton.frame = CGRectMake(0, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+16, (SCREEN_WIDTH-0)/2, 30);
         
-        cell.commentImageView.frame = CGRectMake((SCREEN_WIDTH-20)*3/4-30, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+25, 13, 13);
-        cell.commentButton.frame = CGRectMake((SCREEN_WIDTH-0)/2, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+16, (SCREEN_WIDTH-0)/2, 30);
+        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] ==2 || [[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
+        {
+            cell.transmitButton.hidden = NO;
+//            cell.transmitImageView.hidden = NO;
+            cell.transmitImageView.frame = CGRectMake((SCREEN_WIDTH-20)/4-55, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+25, 13, 13);
+            
+            [cell.transmitButton setTitle:@"删除" forState:UIControlStateNormal];
+            cell.transmitButton.frame = CGRectMake(0, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+16, (SCREEN_WIDTH-0)/3, 30);
+            [cell.transmitButton addTarget:self action:@selector(deleteDiary) forControlEvents:UIControlEventTouchUpInside];
+        }
+        
+        
+        
+        
+        cell.praiseImageView.frame = CGRectMake((SCREEN_WIDTH-20)*2/4-20, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+30, 13, 13);
+        cell.praiseButton.frame = CGRectMake((SCREEN_WIDTH-0)/3, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+16, (SCREEN_WIDTH-0)/3, 30);
+        
+        cell.commentImageView.frame = CGRectMake((SCREEN_WIDTH-20)*3/4, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+25, 13, 13);
+        cell.commentButton.frame = CGRectMake((SCREEN_WIDTH-0)/3*2, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+16, (SCREEN_WIDTH-0)/3, 30);
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         
         [cell.praiseButton setTitle:[NSString stringWithFormat:@"赞(%d)",[[diaryDetailDict objectForKey:@"likes_num"] integerValue]] forState:UIControlStateNormal];
@@ -617,6 +633,42 @@ ReturnFunctionDelegate>
                 {
                     [self.addComDel addComment:YES];
                 }
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:self];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+        }];
+        [request startAsynchronous];
+    }
+}
+
+-(void)deleteDiary
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"p_id":dongtaiId,
+                                                                      @"c_id":classID,
+                                                                      } API:DELETEDIARY];
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"delete diary responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                [Tools showTips:@"日志删除成功" toView:diaryDetailTableView];
+                if ([self.addComDel respondsToSelector:@selector(addComment:)])
+                {
+                    [self.addComDel addComment:YES];
+                }
+                [self.navigationController popViewControllerAnimated:YES];
             }
             else
             {

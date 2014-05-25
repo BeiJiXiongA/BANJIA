@@ -40,7 +40,6 @@
         
         self.screenShotsList = [[NSMutableArray alloc]initWithCapacity:2];
         self.canDragBack = YES;
-        
     }
     return self;
 }
@@ -59,6 +58,7 @@
     [super viewDidLoad];
     
     self.bgView = [[UIView alloc] init];
+    self.bgView.frame = CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     self.navigationBar.barStyle = UIBarStyleBlackTranslucent;
     self.navigationBar.backgroundColor = [UIColor redColor];
@@ -80,8 +80,15 @@
     // Dispose of any resources that can be recreated.
 }
 
+//- (UIStatusBarStyle)preferredStatusBarStyle
+//{
+////    return self.topViewController.preferredStatusBarStyle;
+////    return UIStatusBarStyleLightContent;
+//}
+
 - (void)pushViewController:(UIViewController *)viewController animated:(BOOL)animated
 {
+    [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleDefault;
     [self.screenShotsList addObject:[self capture]];
 
     [super pushViewController:viewController animated:animated];
@@ -94,15 +101,17 @@
     return [super popViewControllerAnimated:animated];
 }
 
-#pragma mark - Utility Methods -
+#pragma mark - Utility Methods
 
 - (UIImage *)capture
 {
     UIGraphicsBeginImageContextWithOptions(self.view.bounds.size, self.view.opaque, 0.0);
-    [self.view.layer renderInContext:UIGraphicsGetCurrentContext()];
+    UIBezierPath *p = [UIBezierPath bezierPathWithRect:CGRectMake(0, YSTART, SCREEN_WIDTH, SCREEN_HEIGHT-YSTART)];
+    CGContextRef con = UIGraphicsGetCurrentContext();
+    CGContextAddPath(con, p.CGPath);
+    [self.view.layer renderInContext:con];
     
     UIImage * img = UIGraphicsGetImageFromCurrentImageContext();
-    
     UIGraphicsEndImageContext();
     
     return img;
@@ -127,14 +136,13 @@
     CGFloat lastScreenShotViewHeight = kkBackViewHeight;
     
     //TODO: FIX self.edgesForExtendedLayout = UIRectEdgeNone  SHOW BUG
-/**
- *  if u use self.edgesForExtendedLayout = UIRectEdgeNone; pls add
 
-    if (!iOS7) {
-        lastScreenShotViewHeight = lastScreenShotViewHeight - 20;
-    }
- *
- */
+// *  if u use self.edgesForExtendedLayout = UIRectEdgeNone; pls add
+
+//    if (SYSVERSION >= 7.0) {
+//        lastScreenShotViewHeight = lastScreenShotViewHeight - 20;
+//    }
+    
     [lastScreenShotView setFrame:CGRectMake(startBackViewX+y,
                                             0,
                                             kkBackViewWidth,
@@ -181,6 +189,8 @@
         {
             CGRect frame = self.view.frame;
             
+//            self.view.frame = CGRectMake(0, YSTART, frame.size.width , frame.size.height);
+            
             self.backgroundView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, frame.size.width , frame.size.height)];
             [self.view.superview insertSubview:self.backgroundView belowSubview:self.view];
             
@@ -197,13 +207,11 @@
         UIImage *lastScreenShot = [self.screenShotsList lastObject];
         
         lastScreenShotView = [[UIImageView alloc]initWithImage:lastScreenShot];
-        
         startBackViewX = startX;
         [lastScreenShotView setFrame:CGRectMake(startBackViewX,
                                                 lastScreenShotView.frame.origin.y,
                                                 lastScreenShotView.frame.size.height,
                                                 lastScreenShotView.frame.size.width)];
-
         [self.backgroundView insertSubview:lastScreenShotView belowSubview:blackMask];
         
     }else if (recoginzer.state == UIGestureRecognizerStateEnded){
@@ -251,6 +259,3 @@
     }
 }
 @end
-
-
-

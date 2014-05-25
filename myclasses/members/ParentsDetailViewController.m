@@ -61,6 +61,8 @@ SetRelateDel>
     self.titleLabel.text = @"个人信息";
     
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+    self.view.backgroundColor = [UIColor blackColor];
+    
     dataDict  = [[NSMutableDictionary alloc] initWithCapacity:0];
     db = [[OperatDB alloc] init];
     
@@ -164,8 +166,14 @@ SetRelateDel>
     {
         addFriendButton.hidden = YES;
     }
-    
-    [self getUserInfo];
+    if([Tools NetworkReachable])
+    {
+        [self getUserInfo];
+    }
+    else
+    {
+        [infoView reloadData];
+    }
 }
 
 - (void)didReceiveMemoryWarning
@@ -282,7 +290,8 @@ SetRelateDel>
     chatViewController.toID = parentID;
     chatViewController.name = parentName;
     chatViewController.imageUrl = headerImg;
-    [chatViewController showSelfViewController:self];
+    chatViewController.fromClass = YES;
+    [self.navigationController pushViewController:chatViewController animated:YES];
 }
 
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex

@@ -415,14 +415,14 @@ UITableViewDelegate>
                 {
                     if ([[dataDict objectForKey:@"img_icon"] length] > 10)
                     {
-                        [Tools fillImageView:headerImageView withImageFromURL:[dataDict objectForKey:@"img_icon"] andDefault:@""];
+                        [Tools fillImageView:headerImageView withImageFromURL:[dataDict objectForKey:@"img_icon"] andDefault:HEADERBG];
                     }
                 }
                 if (![[dataDict objectForKey:@"img_kb"] isEqual:[NSNull null]])
                 {
                     if ([[dataDict objectForKey:@"img_kb"] length] > 10)
                     {
-                        [Tools fillImageView:topicImageView withImageFromURL:[dataDict objectForKey:@"img_kb"] andDefault:@""];
+                        [Tools fillImageView:topicImageView withImageFromURL:[dataDict objectForKey:@"img_kb"] andDefault:@"toppic.jpg"];
                     }
                 }
                 if ([dataDict objectForKey:@"birth"])

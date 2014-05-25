@@ -49,6 +49,7 @@
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"手机号登陆";
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+    self.view.backgroundColor = [UIColor blackColor];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     
     DDLOG(@"accountid inlonin %@",accountID);
@@ -283,6 +284,7 @@
                 [ud setObject:[dict objectForKey:@"opt"] forKey:@"useropt"];
                 [ud synchronize];
                 
+                
                 SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
                 MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
                 KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClassesViewController];
@@ -328,7 +330,7 @@
             SettingPasswordViewController *setPw = [[SettingPasswordViewController alloc] init];
             setPw.phoneNum = phoneNum;
             setPw.forgetPwd =  NO;
-            [setPw showSelfViewController:self];
+            [self.navigationController pushViewController:setPw animated:YES];
         }
     }
 }

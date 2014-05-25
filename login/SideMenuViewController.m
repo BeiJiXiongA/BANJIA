@@ -44,6 +44,7 @@
     self.backButton.hidden = YES;
     self.navigationBarView.hidden = YES;
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+    self.view.backgroundColor = [UIColor whiteColor];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeIcon) name:@"changeicon" object:nil];
     

@@ -50,6 +50,7 @@
     
     self.titleLabel.text = @"设置关系";
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+    self.view.backgroundColor = [UIColor blackColor];
     
     showStudents = YES;
     showRelate = YES;

@@ -67,7 +67,7 @@ SelectAreaDelegate>
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     
     self.titleLabel.text = @"搜索学校";
-    cityname = @"请选择地区";
+    cityname = @"请选择城市";
     schoollevelName = @"请选择学校类别";
     
     areaname = @"全部";
@@ -77,7 +77,6 @@ SelectAreaDelegate>
     schoollevelId = @"-1";
     
     cellNameArray = [[NSArray alloc] initWithObjects:@"城市",@"地区",@"学校类别",@"学校名称", nil];
-    
     areaArray = [[NSMutableArray alloc] initWithCapacity:0];
     
     searchSchoolTableView = [[UITableView alloc] initWithFrame:CGRectMake(20, UI_NAVIGATION_BAR_HEIGHT+20, SCREEN_WIDTH-40, 280) style:UITableViewStylePlain];
@@ -87,6 +86,9 @@ SelectAreaDelegate>
     searchSchoolTableView.scrollEnabled = NO;
     searchSchoolTableView.backgroundColor = [UIColor whiteColor];
     [self.bgView addSubview:searchSchoolTableView];
+    if ([searchSchoolTableView respondsToSelector:@selector(setSeparatorInset:)]) {
+        [searchSchoolTableView setSeparatorInset:UIEdgeInsetsZero];
+    }
 }
 
 - (void)didReceiveMemoryWarning
@@ -205,27 +207,27 @@ SelectAreaDelegate>
 #pragma mark - tableView
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return 3;
+    return 2;
 }
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    if (section == 0 || section == 2)
+    if (section == 1)
     {
         return 1;
     }
     if ([areaArray count] > 0)
     {
-        searchSchoolTableView.frame = CGRectMake(20, UI_NAVIGATION_BAR_HEIGHT+20, SCREEN_WIDTH-40, 280);
+        searchSchoolTableView.frame = CGRectMake(20, UI_NAVIGATION_BAR_HEIGHT+20, SCREEN_WIDTH-40, 280-60);
     }
     else
     {
-        searchSchoolTableView.frame = CGRectMake(20, UI_NAVIGATION_BAR_HEIGHT+20, SCREEN_WIDTH-40, 240);
+        searchSchoolTableView.frame = CGRectMake(20, UI_NAVIGATION_BAR_HEIGHT+20, SCREEN_WIDTH-40, 240-60);
     }
     return 4;
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
-    if (section == 1 || section == 2)
+    if (section == 1)
     {
         return 20;
     }
@@ -241,11 +243,11 @@ SelectAreaDelegate>
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.section == 0 || indexPath.section == 2)
+    if (indexPath.section == 2)
     {
         return 40;
     }
-    if (indexPath.section == 1 && indexPath.row == 1)
+    if (indexPath.section == 0 && indexPath.row == 1)
     {
         if ([areaArray count] > 0)
         {
@@ -271,30 +273,31 @@ SelectAreaDelegate>
     cell.praiseButton.titleLabel.textAlignment = NSTextAlignmentCenter;
     cell.contentLabel.textColor = TITLE_COLOR;
     
-    if (indexPath.section == 0)
-    {
-        if (indexPath.row == 0)
-        {
-            cell.praiseButton.hidden = NO;
-            [cell.praiseButton setTitle:@"附近的学校" forState:UIControlStateNormal];
-            [cell.praiseButton addTarget:self action:@selector(getNearbySchool) forControlEvents:UIControlEventTouchUpInside];
-            cell.backgroundColor = [UIColor clearColor];
-//            [cell.praiseButton setBackgroundColor:RGB(234, 94, 58, 1)];
-//            cell.praiseButton.layer.cornerRadius = 5;
-//            cell.praiseButton.clipsToBounds = YES;
-            
-            cell.headerImageView.hidden = NO;
-            cell.headerImageView.frame = CGRectMake(65, 7, 15, 23);
-            cell.headerImageView.backgroundColor = [UIColor clearColor];
-            [cell.headerImageView setImage:[UIImage imageNamed:@"location"]];
-            
-            cell.bgView.frame = cell.praiseButton.frame;
-            cell.bgView.layer.cornerRadius = 5;
-            cell.bgView.clipsToBounds = YES;
-            cell.bgView.backgroundColor = RGB(234, 94, 58, 1);
-        }
-    }
-    else  if(indexPath.section == 1)
+//    if (indexPath.section == 0)
+//    {
+//        if (indexPath.row == 0)
+//        {
+//            cell.praiseButton.hidden = NO;
+//            [cell.praiseButton setTitle:@"附近的学校" forState:UIControlStateNormal];
+//            [cell.praiseButton addTarget:self action:@selector(getNearbySchool) forControlEvents:UIControlEventTouchUpInside];
+//            cell.backgroundColor = [UIColor clearColor];
+////            [cell.praiseButton setBackgroundColor:RGB(234, 94, 58, 1)];
+////            cell.praiseButton.layer.cornerRadius = 5;
+////            cell.praiseButton.clipsToBounds = YES;
+//            
+//            cell.headerImageView.hidden = NO;
+//            cell.headerImageView.frame = CGRectMake(65, 7, 15, 23);
+//            cell.headerImageView.backgroundColor = [UIColor clearColor];
+//            [cell.headerImageView setImage:[UIImage imageNamed:@"location"]];
+//            
+//            cell.bgView.frame = cell.praiseButton.frame;
+//            cell.bgView.layer.cornerRadius = 5;
+//            cell.bgView.clipsToBounds = YES;
+//            cell.bgView.backgroundColor = RGB(234, 94, 58, 1);
+//        }
+//    }
+//    else
+        if(indexPath.section == 0)
     {
         cell.nameLabel.frame  = CGRectMake(10, 5, 80, 30);
         cell.nameLabel.hidden = NO;
@@ -352,7 +355,7 @@ SelectAreaDelegate>
         cell.backgroundColor = [UIColor whiteColor];
         cell.contentView.backgroundColor = [UIColor whiteColor];
     }
-    else if(indexPath.section == 2)
+    else if(indexPath.section == 1)
     {
         if (indexPath.row == 0)
         {
@@ -370,7 +373,7 @@ SelectAreaDelegate>
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     [((MyTextField *)[searchSchoolTableView viewWithTag:3333]) resignFirstResponder];
-    if (indexPath.section == 1)
+    if (indexPath.section == 0)
     {
         if (indexPath.row == 0)
         {
@@ -393,13 +396,13 @@ SelectAreaDelegate>
             [self.navigationController pushViewController:selectSchoolLevel animated:YES];
         }
     }
-    else if(indexPath.section == 0)
-    {
-        if (indexPath.row == 0)
-        {
-            //附近的学校
-        }
-    }
+//    else if(indexPath.section == 0)
+//    {
+//        if (indexPath.row == 0)
+//        {
+//            //附近的学校
+//        }
+//    }
     else if(indexPath.section == 1)
     {
         if (indexPath.row == 0)
@@ -419,12 +422,12 @@ SelectAreaDelegate>
 {
     [((MyTextField *)[searchSchoolTableView viewWithTag:3333]) resignFirstResponder];
     
-//    if ([areaId length] <= 0)
-//    {
-//        [Tools showAlertView:@"请选择学校区域" delegateViewController:nil];
-//        return ;
-//    }
-//    
+    if ([tmpDityDict count] <= 0)
+    {
+        [Tools showAlertView:@"请选择城市" delegateViewController:nil];
+        return ;
+    }
+    
     if ([schoollevelId length] <= 0)
     {
         [Tools showAlertView:@"请选择学校类别" delegateViewController:nil];

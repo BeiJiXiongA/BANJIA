@@ -22,6 +22,11 @@
     
     NSString *checkCode;
     UIButton *startButton;
+    
+    UIButton *getCodeButton;
+    NSTimer *timer;
+    
+    NSInteger sec;
 }
 
 @end
@@ -47,6 +52,11 @@
     DDLOG(@"phone=%@ user=%@",phoneNum,user_id);
     checkCode = @"";
     
+    sec = 60;
+    
+    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+    self.view.backgroundColor = [UIColor blackColor];
+    
     UILabel *label = [[UILabel alloc] init];
     label.frame = CGRectMake(SCREEN_WIDTH/2-130, UI_NAVIGATION_BAR_HEIGHT+50, 200, 20);
     label.backgroundColor = [UIColor clearColor];
@@ -69,7 +79,7 @@
     [self.bgView addSubview:phoneNumTextfield];
     
     UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
-    UIButton *getCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    getCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
     getCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, phoneNumTextfield.frame.origin.y+5, 58, 25);
     [getCodeButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     [getCodeButton setTitle:@"短信验证" forState:UIControlStateNormal];
@@ -124,6 +134,12 @@
     
 }
 
+-(void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [timer invalidate];
+}
+
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
@@ -140,11 +156,11 @@
         [Tools showAlertView:@"请您填写验证码" delegateViewController:nil];
         return ;
     }
-    if (![codeTextField.text isEqualToString:checkCode])
-    {
-        [Tools showAlertView:@"验证码错误" delegateViewController:nil];
-        return ;
-    }
+//    if (![codeTextField.text isEqualToString:checkCode])
+//    {
+//        [Tools showAlertView:@"验证码错误" delegateViewController:nil];
+//        return ;
+//    }
     if ([passwordTextField.text length] == 0)
     {
         [Tools showAlertView:@"密码不能为空" delegateViewController:nil];
@@ -213,15 +229,12 @@
             DDLOG(@"pass responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                NSDictionary *dict = [responseDict objectForKey:@"data"];
-                NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
-                [ud setObject:[dict objectForKey:@"u_id"] forKey:USERID];
-                [ud setObject:[dict objectForKey:@"token"] forKey:CLIENT_TOKEN];
-                [ud setObject:phoneNum forKey:PHONENUM];
-                [ud setObject:verifyTextField.text forKey:PASSWORD];
-                [ud synchronize];
                 if (forgetPwd)
                 {
+                    [Tools showAlertView:@"密码重置成功" delegateViewController:nil];
+                    [self.navigationController popViewControllerAnimated:YES];
+                    return  ;
+                    
                     SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
                     MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
                     JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myClassesViewController menuController:sideMenuViewController];
@@ -257,6 +270,10 @@
 
 -(void)getCheckCode
 {
+    if (sec != 60)
+    {
+        return ;
+    }
     if ([phoneNumTextfield.text length] == 0)
     {
         [Tools showAlertView:@"请输入手机号码！" delegateViewController:nil];
@@ -279,9 +296,14 @@
             DDLOG(@"login responsedict %@",responseString);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
+                
+                timer = [NSTimer timerWithTimeInterval:1.0 target:self selector:@selector(timeRefresh)userInfo:nil repeats:YES];
+                [[NSRunLoop  currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
+                
+//                getCodeButton.enabled = NO;
 //                [[NSUserDefaults standardUserDefaults] setObject:[responseDict objectForKey:@"data"]forKey:USERID];
 //                [[NSUserDefaults standardUserDefaults] synchronize];
-                [self getVerifyCode];
+//                [self getVerifyCode];
             }
             else
             {
@@ -301,6 +323,21 @@
     else
     {
         [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
+}
+-(void)timeRefresh
+{
+    if (sec > 0)
+    {
+        sec--;
+        [getCodeButton setTitle:[NSString stringWithFormat:@"等待%d",sec] forState:UIControlStateNormal];
+    }
+    else
+    {
+        [getCodeButton setTitle:@"重新获取" forState:UIControlStateNormal];
+        getCodeButton.enabled = YES;
+        [timer invalidate];
+        sec = 60;
     }
 }
 -(void)getVerifyCode
@@ -361,6 +398,8 @@
                 user_id = [[responseDict objectForKey:@"data"] objectForKey:@"u_id"];
                 startButton.enabled = YES;
                 [Tools showAlertView:@"验证成功！" delegateViewController:nil];
+                getCodeButton.hidden = YES;
+                codeTextField.enabled = NO;
             }
             else
             {

@@ -16,6 +16,10 @@
     
     NSString *checkCode;
     UIButton *changeButton;
+    UIButton *getCodeButton;
+    
+    NSInteger sec;
+    NSTimer *timer;
 }
 @end
 
@@ -36,6 +40,8 @@
     // Do any additional setup after loading the view.
     self.titleLabel.text = @"绑定手机号";
     
+    sec = 60;
+    
     UIImage*inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 3, 20, 2.3)];
     
     phoneNumTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(29, UI_NAVIGATION_BAR_HEIGHT+100, SCREEN_WIDTH-58, 35)];
@@ -51,7 +57,7 @@
     [self.bgView addSubview:phoneNumTextfield];
     
     UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
-    UIButton *getCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    getCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
     getCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, phoneNumTextfield.frame.origin.y+5, 58, 25);
     [getCodeButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     [getCodeButton setTitle:@"短信验证" forState:UIControlStateNormal];
@@ -91,9 +97,15 @@
 }
 -(void)getVerifyCode
 {
+    if (sec != 60)
+    {
+        return ;
+    }
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id]} API:MB_AUTHCODE];
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"phone":[Tools getPhoneNumFromString:phoneNumTextfield.text]} API:BINDPHONE];
         
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
@@ -104,12 +116,9 @@
             {
                 if (![[responseDict objectForKey:@"data"] isEqual:[NSNull null]])
                 {
-                    codeTextField.text = [responseDict objectForKey:@"data"];
-                    changeButton.enabled = YES;
-                }
-                else
-                {
-                    [Tools dealRequestError:responseDict fromViewController:nil];
+                    timer = [NSTimer timerWithTimeInterval:1.0 target:self selector:@selector(timeRefresh)userInfo:nil repeats:YES];
+                    [[NSRunLoop  currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
+
                 }
             }
             else
@@ -134,6 +143,22 @@
     
 }
 
+-(void)timeRefresh
+{
+    if (sec > 0)
+    {
+        sec--;
+        [getCodeButton setTitle:[NSString stringWithFormat:@"等待%d",sec] forState:UIControlStateNormal];
+    }
+    else
+    {
+        [getCodeButton setTitle:@"重新获取" forState:UIControlStateNormal];
+        getCodeButton.enabled = YES;
+        [timer invalidate];
+        sec = 60;
+    }
+}
+
 -(void)verify
 {
     if ([codeTextField.text length] == 0)
@@ -143,7 +168,10 @@
     }
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],@"auth_code":codeTextField.text} API:MB_CHECKOUT];
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"auth_code":codeTextField.text}
+                                                                API:BINDPHONE];
         
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
