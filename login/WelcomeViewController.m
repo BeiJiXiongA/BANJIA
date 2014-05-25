@@ -135,7 +135,6 @@
             qqLoginButton.alpha = 1;
         }];
     }];
-    
 }
 
 - (void)didReceiveMemoryWarning
@@ -220,7 +219,6 @@ static int loginID;
                                    DDLOG(@"faile==%@==%ld==%d",[error errorDescription],(long)[error errorCode],[error errorLevel]);
                                }
                            }];
-    
 }
 
 -(void)loginWithName:(NSString *)name   //AccountID:(NSString *)accountID accountType:(NSString *)accountType andName:(NSString *)name
