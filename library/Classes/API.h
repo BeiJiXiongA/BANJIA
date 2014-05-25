@@ -12,11 +12,11 @@
 #pragma mark - 接口网址
 
 //
-#define HOST_URL       @"http://api.banjiaedu.com"
-#define IMAGEURL       @"http://img.banjiaedu.com"
+//#define HOST_URL       @"http://api.banjiaedu.com"
+//#define IMAGEURL       @"http://img.banjiaedu.com"
 
-//#define HOST_URL      @"http://mytest.banjiaedu.com"
-//#define IMAGEURL       @"http://imgtest.banjiaedu.com"
+#define HOST_URL      @"http://mytest.banjiaedu.com"
+#define IMAGEURL       @"http://imgtest.banjiaedu.com"
 
 #pragma mark - users
 #define MB_REG         @"/users/mbReg"
