@@ -443,9 +443,17 @@ UIAlertViewDelegate>
             {
                 [BPush setTag:[responseDict objectForKey:@"data"]];
                 
-                UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"您班级创建成功，快去查看吧！" delegate:self cancelButtonTitle:@"返回我的班级" otherButtonTitles: nil];
-                al.delegate = self;
-                [al show];
+//                UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"您班级创建成功，快去查看吧！" delegate:self cancelButtonTitle:@"返回我的班级" otherButtonTitles: nil];
+//                al.delegate = self;
+//                [al show];
+                
+                SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
+                MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
+                KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClassesViewController];
+                JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myClassesNav menuController:sideMenuViewController];
+                [self.navigationController presentViewController:sideMenu animated:YES completion:^{
+                    
+                }];
             }
             else
             {

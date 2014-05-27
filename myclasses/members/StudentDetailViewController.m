@@ -14,6 +14,9 @@
 #import "SettingStateLimitViewController.h"
 #import "InfoCell.h"
 #import "ParentsDetailViewController.h"
+#import <AddressBook/AddressBook.h>
+#import <AddressBookUI/AddressBookUI.h>
+#import <MessageUI/MessageUI.h>
 
 #define INFOLABELTAG  1000
 #define CALLBUTTONTAG  2000
@@ -27,7 +30,8 @@
 UITableViewDataSource,
 UITableViewDelegate,
 PareberDetailDelegate,
-SetStudentObject>
+SetStudentObject,
+MFMessageComposeViewControllerDelegate>
 {
     UIView *tmpBgView;
     UIImageView *genderImageView;
@@ -418,10 +422,12 @@ SetStudentObject>
                     userPhone = [dataDict objectForKey:@"phone"];
                 }
                 cell.contentLabel.text = userPhone;
+                [cell.button1 addTarget:self action:@selector(msgToUser) forControlEvents:UIControlEventTouchUpInside];
                 [cell.button2 addTarget:self action:@selector(callToUser) forControlEvents:UIControlEventTouchUpInside];
                 if ([studentID isEqualToString:[Tools user_id]])
                 {
                     cell.button2.hidden = YES;
+                    cell.button1.hidden = YES;
                 }
 
             }
@@ -460,9 +466,13 @@ SetStudentObject>
         cell.nameBgView.frame = CGRectMake(66, 1, SCREEN_WIDTH-66, 48);
         cell.nameBgView.backgroundColor = LIGHT_BLUE_COLOR;
         
-        cell.button2.frame = CGRectMake(SCREEN_WIDTH-50, 10, 30, 30);
+        cell.button1.frame = CGRectMake(SCREEN_WIDTH-110, 10, 30, 30);
+        cell.button2.frame = CGRectMake(SCREEN_WIDTH-60, 10, 30, 30);
         cell.button2.tag = indexPath.row+100;
         [cell.button2 addTarget:self action:@selector(callToParents:) forControlEvents:UIControlEventTouchUpInside];
+        
+        cell.button1.tag = indexPath.row+100;
+        [cell.button1 addTarget:self action:@selector(msgToParents:) forControlEvents:UIControlEventTouchUpInside];
         NSString *titleStr;
         if ([[dict objectForKey:@"title"] rangeOfString:@"."].length > 0)
         {
@@ -578,6 +588,45 @@ SetStudentObject>
 
     }
 }
+-(void)msgToParents:(UIButton *)button
+{
+    NSDictionary *dict = [pArray objectAtIndex:button.tag - 100];
+    if (![[dict objectForKey:@"phone"] isEqual:[NSNull null]])
+    {
+        if ([[dict objectForKey:@"phone"] length] > 8)
+        {
+            [self showMessageView:[dict objectForKey:@"phone"]];
+        }
+    }
+    else
+    {
+        NSDictionary *dict = [pArray objectAtIndex:button.tag - 100];
+        if ([studentID length] > 0)
+        {
+            ParentsDetailViewController *parentDetail = [[ParentsDetailViewController alloc] init];
+            parentDetail.parentID = [dict objectForKey:@"uid"];
+            parentDetail.parentName = [dict objectForKey:@"name"];
+            parentDetail.title = [dict objectForKey:@"title"];
+            parentDetail.headerImg = [dict objectForKey:@"img_icon"];
+            parentDetail.admin = NO;
+            parentDetail.memDel = self;
+            parentDetail.role = [dict objectForKey:@"role"];
+            [self.navigationController pushViewController:parentDetail animated:YES];
+        }
+        else
+        {
+            ParentsDetailViewController *parentDetail = [[ParentsDetailViewController alloc] init];
+            parentDetail.parentID = [dict objectForKey:@"uid"];
+            parentDetail.parentName = [dict objectForKey:@"name"];
+            parentDetail.title = [dict objectForKey:@"title"];
+            parentDetail.headerImg = [dict objectForKey:@"img_icon"];
+            parentDetail.admin = NO;
+            parentDetail.memDel = self;
+            parentDetail.role = [dict objectForKey:@"role"];
+            [self.navigationController pushViewController:parentDetail animated:YES];
+        }
+    }
+}
 
 -(void)callToUser
 {
@@ -618,7 +667,7 @@ SetStudentObject>
     {
         if (buttonIndex == 1)
         {
-//            [Tools dialPhoneNumber:phoneNum inView:self.bgView];
+            [Tools dialPhoneNumber:phoneNum inView:self.bgView];
         }
         
     }
@@ -626,7 +675,7 @@ SetStudentObject>
     {
         if (buttonIndex == 1)
         {
-            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"sms://%@",[dataDict objectForKey:@"phone"]]]];
+            [self showMessageView:userPhone];
         }
     }
     else if(alertView.tag == KICKALTAG)
@@ -650,6 +699,10 @@ SetStudentObject>
                 [self rmAdmin];
             }
         }
+    }
+    else if(alertView.tag == 3333)
+    {
+        ;
     }
 }
 
@@ -964,6 +1017,62 @@ SetStudentObject>
         [Tools showProgress:self.bgView];
         [request startAsynchronous];
     }
+}
+
+#pragma  mark - showmsg
+-(void)showMessageView:(NSString *)phoneStr
+{
+    if( [MFMessageComposeViewController canSendText] ){
+        
+        MFMessageComposeViewController * controller = [[MFMessageComposeViewController alloc]init]; //autorelease];
+        
+        controller.recipients = [NSArray arrayWithObject:phoneStr];
+        
+        NSString *msgBody;
+        
+        controller.body = msgBody;
+        controller.messageComposeDelegate = self;
+        
+        [self presentViewController:controller animated:YES completion:nil];
+        
+        [[[[controller viewControllers] lastObject] navigationItem] setTitle:@"测试短信"];//修改短信界面标题
+    }else{
+        [self alertWithTitle:@"提示信息" msg:@"设备没有短信功能"];
+    }
+}
+- (void)messageComposeViewController:(MFMessageComposeViewController *)controller didFinishWithResult:(MessageComposeResult)result{
+    
+    [controller dismissViewControllerAnimated:NO completion:nil];
+    
+    switch ( result ) {
+            
+        case MessageComposeResultCancelled:
+            
+//            [self alertWithTitle:@"提示信息" msg:@"发送取消"];
+            break;
+        case MessageComposeResultFailed:// send failed
+            [self alertWithTitle:@"提示信息" msg:@"发送失败"];
+            break;
+        case MessageComposeResultSent:
+            [self alertWithTitle:@"提示信息" msg:@"发送成功"];
+            break;
+        default:
+            break;
+    }
+}
+
+- (void) alertWithTitle:(NSString *)titles msg:(NSString *)msg {
+    
+    
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:titles
+                                                    message:msg
+                                                   delegate:self
+                                          cancelButtonTitle:nil
+                                          otherButtonTitles:@"确定", nil];
+    
+    alert.tag = 3333;
+    [alert show];
+    
 }
 
 @end

@@ -11,13 +11,16 @@
 #import "ChatViewController.h"
 #import "SetObjectViewController.h"
 #import "InfoCell.h"
+#import <AddressBook/AddressBook.h>
+#import <AddressBookUI/AddressBookUI.h>
+#import <MessageUI/MessageUI.h>
 
 #define INFOLABELTAG  1000
 #define CALLBUTTONTAG  2000
 #define MSGBUTTONTAG  3000
 #define TRANSADMINTAG  4000
 #define KICKALTAG    5000
-@interface MemberDetailViewController ()<UITableViewDelegate,UITableViewDataSource,SetObjectDelegate>
+@interface MemberDetailViewController ()<UITableViewDelegate,UITableViewDataSource,SetObjectDelegate,MFMessageComposeViewControllerDelegate>
 {
     UIView *tmpBgView;
     UIImageView *genderImageView;
@@ -278,6 +281,7 @@
         if ([teacherID isEqualToString:[Tools user_id]])
         {
             cell.button2.hidden = YES;
+            cell.button1.hidden = YES;
         }
     }
     UIImageView *bgImageBG = [[UIImageView alloc] init];
@@ -295,10 +299,7 @@
 
 -(void)msgToUser
 {
-    UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"您确定要发短信吗？" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"发信息", nil];
-    al.tag = MSGBUTTONTAG;
-    [al show];
-    
+    [self showMessageView];
 }
 
 -(void)moreClick
@@ -518,6 +519,10 @@
             [self excludeUser];
         }
     }
+    else if(alertView.tag == 3333)
+    {
+        ;
+    }
     else
     {
         [self.navigationController popViewControllerAnimated:YES];
@@ -620,5 +625,60 @@
     }
 }
 
+#pragma  mark - showmsg
+-(void)showMessageView
+{
+    if( [MFMessageComposeViewController canSendText] ){
+        
+        MFMessageComposeViewController * controller = [[MFMessageComposeViewController alloc]init]; //autorelease];
+        
+        controller.recipients = [NSArray arrayWithObject:userPhone];
+        
+        NSString *msgBody;
+        
+        controller.body = msgBody;
+        controller.messageComposeDelegate = self;
+        
+        [self presentViewController:controller animated:YES completion:nil];
+        
+        [[[[controller viewControllers] lastObject] navigationItem] setTitle:@"测试短信"];//修改短信界面标题
+    }else{
+        [self alertWithTitle:@"提示信息" msg:@"设备没有短信功能"];
+    }
+}
+- (void)messageComposeViewController:(MFMessageComposeViewController *)controller didFinishWithResult:(MessageComposeResult)result{
+    
+    [controller dismissViewControllerAnimated:NO completion:nil];
+    
+    switch ( result ) {
+            
+        case MessageComposeResultCancelled:
+            
+//            [self alertWithTitle:@"提示信息" msg:@"发送取消"];
+            break;
+        case MessageComposeResultFailed:// send failed
+            [self alertWithTitle:@"提示信息" msg:@"发送失败"];
+            break;
+        case MessageComposeResultSent:
+            [self alertWithTitle:@"提示信息" msg:@"发送成功"];
+            break;
+        default:
+            break;
+    }
+}
+
+- (void) alertWithTitle:(NSString *)titles msg:(NSString *)msg {
+    
+    
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:titles
+                                                    message:msg
+                                                   delegate:self
+                                          cancelButtonTitle:nil
+                                          otherButtonTitles:@"确定", nil];
+    alert.tag = 3333;
+    
+    [alert show];
+    
+}
 
 @end

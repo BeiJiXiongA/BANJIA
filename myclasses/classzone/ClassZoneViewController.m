@@ -128,7 +128,7 @@ UIActionSheetDelegate>
     [addButton addTarget:self action:@selector(addDongTaiClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:addButton];
     
-    noneDongTaiLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, bgImageViewHeight+50, SCREEN_WIDTH-40, 60)];
+    noneDongTaiLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, bgImageViewHeight+76, SCREEN_WIDTH-40, 60)];
     noneDongTaiLabel.text = @"这个班级还没有任何动态，你可以成为第一人发布动态的人哦！";
     noneDongTaiLabel.numberOfLines = 2;
     noneDongTaiLabel.lineBreakMode = NSLineBreakByWordWrapping;
@@ -234,7 +234,7 @@ UIActionSheetDelegate>
 {
     if (fromClasses)
     {
-        [Tools showAlertView:@"您还没有计入这个班级，快去申请加入吧！" delegateViewController:self];
+        [Tools showAlertView:@"您还没有进入这个班级，快去申请加入吧！" delegateViewController:self];
         return ;
     }
     page =0;
@@ -783,29 +783,29 @@ UIActionSheetDelegate>
                 he = 5;
             }
             
-            cell.transmitImageView.frame = CGRectMake((SCREEN_WIDTH-20)/4-55, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+22+he, 13, 13);
+            
             cell.transmitImageView.hidden = NO;
             
             cell.transmitButton.frame = CGRectMake(0, cellHeight+13, (SCREEN_WIDTH-0)/3, 30);
             [cell.transmitButton setTitle:@"转发" forState:UIControlStateNormal];
             cell.transmitButton.tag = indexPath.section*SectionTag+indexPath.row;
             [cell.transmitButton addTarget:self action:@selector(transmitDiary:) forControlEvents:UIControlEventTouchUpInside];
+            cell.transmitImageView.frame = CGRectMake((SCREEN_WIDTH-20)/4-55, cell.transmitButton.frame.size.height+cell.transmitButton.frame.origin.y-22, 13, 13);
             
-            cell.praiseImageView.frame = CGRectMake((SCREEN_WIDTH-20)*2/4-20, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+25+he, 13, 13);
-//            cell.praiseImageView.frame = CGRectMake((SCREEN_WIDTH-20)/4-30, cellHeight + 24, 13, 13);
             
             [cell.praiseButton setTitle:[NSString stringWithFormat:@"赞(%d)",[[dict objectForKey:@"likes_num"] integerValue]] forState:UIControlStateNormal];
             [cell.praiseButton addTarget:self action:@selector(praiseDiary:) forControlEvents:UIControlEventTouchUpInside];
             cell.praiseButton.tag = indexPath.section*SectionTag+indexPath.row;
             cell.praiseButton.frame = CGRectMake((SCREEN_WIDTH-0)/3, cellHeight+13, (SCREEN_WIDTH-0)/3, 30);
             
-//            cell.commentImageView.frame = CGRectMake((SCREEN_WIDTH-20)*3/4-30, cellHeight+22, 13, 13);
-            cell.commentImageView.frame = CGRectMake((SCREEN_WIDTH-20)*3/4, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+23+he, 13, 13);
+            cell.praiseImageView.frame = CGRectMake((SCREEN_WIDTH-20)*2/4-20, cell.praiseButton.frame.size.height+cell.praiseButton.frame.origin.y-19, 13, 13);
+            
             [cell.commentButton setTitle:[NSString stringWithFormat:@"评论(%d)",[[dict objectForKey:@"comments_num"] integerValue]] forState:UIControlStateNormal];
             cell.commentButton.frame = CGRectMake((SCREEN_WIDTH-0)/3*2, cellHeight+13, (SCREEN_WIDTH-0)/3, 30);
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
             cell.commentButton.tag = indexPath.section*SectionTag+indexPath.row;
             [cell.commentButton addTarget:self action:@selector(commentDiary:) forControlEvents:UIControlEventTouchUpInside];
+            cell.commentImageView.frame = CGRectMake((SCREEN_WIDTH-20)*3/4, cell.commentButton.frame.size.height+cell.commentButton.frame.origin.y-20, 13, 13);
             
             cell.bgView.frame = CGRectMake(3, 1.5, SCREEN_WIDTH-6, cellHeight+cell.praiseButton.frame.size.height+13);
             cell.bgView.backgroundColor = [UIColor whiteColor];

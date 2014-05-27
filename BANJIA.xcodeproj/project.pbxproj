@@ -294,7 +294,6 @@
 		38AD6BCB18EF04050065A5F2 /* noticeBg.png in Resources */ = {isa = PBXBuildFile; fileRef = 38AD6A7018EF04050065A5F2 /* noticeBg.png */; };
 		38AD6BCD18EF04050065A5F2 /* objectBg.png in Resources */ = {isa = PBXBuildFile; fileRef = 38AD6A7218EF04050065A5F2 /* objectBg.png */; };
 		38AD6BD318EF04050065A5F2 /* drawer@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38AD6A7918EF04050065A5F2 /* drawer@2x.png */; };
-		38AD6BD418EF04050065A5F2 /* abc in Resources */ = {isa = PBXBuildFile; fileRef = 38AD6A7B18EF04050065A5F2 /* abc */; };
 		38AD6BD518EF04050065A5F2 /* emoji_-1.png in Resources */ = {isa = PBXBuildFile; fileRef = 38AD6A7C18EF04050065A5F2 /* emoji_-1.png */; };
 		38AD6BD618EF04050065A5F2 /* emoji_alien.png in Resources */ = {isa = PBXBuildFile; fileRef = 38AD6A7D18EF04050065A5F2 /* emoji_alien.png */; };
 		38AD6BD718EF04050065A5F2 /* emoji_angel.png in Resources */ = {isa = PBXBuildFile; fileRef = 38AD6A7E18EF04050065A5F2 /* emoji_angel.png */; };
@@ -1131,7 +1130,6 @@
 		38AD6A7018EF04050065A5F2 /* noticeBg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = noticeBg.png; sourceTree = "<group>"; };
 		38AD6A7218EF04050065A5F2 /* objectBg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = objectBg.png; sourceTree = "<group>"; };
 		38AD6A7918EF04050065A5F2 /* drawer@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "drawer@2x.png"; sourceTree = "<group>"; };
-		38AD6A7B18EF04050065A5F2 /* abc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = abc; sourceTree = "<group>"; };
 		38AD6A7C18EF04050065A5F2 /* emoji_-1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "emoji_-1.png"; sourceTree = "<group>"; };
 		38AD6A7D18EF04050065A5F2 /* emoji_alien.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = emoji_alien.png; sourceTree = "<group>"; };
 		38AD6A7E18EF04050065A5F2 /* emoji_angel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = emoji_angel.png; sourceTree = "<group>"; };
@@ -2626,7 +2624,6 @@
 		38AD6A7A18EF04050065A5F2 /* emojiImage */ = {
 			isa = PBXGroup;
 			children = (
-				38AD6A7B18EF04050065A5F2 /* abc */,
 				38AD6B4C18EF04050065A5F2 /* emoji_yum.png */,
 				38AD6A7C18EF04050065A5F2 /* emoji_-1.png */,
 				38AD6A7D18EF04050065A5F2 /* emoji_alien.png */,
@@ -3390,7 +3387,6 @@
 				38AD6CFF18EF04060065A5F2 /* icon_heart@2x.png in Resources */,
 				38AD6C1818EF04050065A5F2 /* emoji_grimacing.png in Resources */,
 				38AD6D0E18EF04060065A5F2 /* selectBtn@2x.png in Resources */,
-				38AD6BD418EF04050065A5F2 /* abc in Resources */,
 				38AD6C9A18EF04050065A5F2 /* emoji_two_women_holding_hands.png in Resources */,
 				38AD6C5318EF04050065A5F2 /* emoji_pig.png in Resources */,
 				38AD6C6F18EF04050065A5F2 /* emoji_satisfied.png in Resources */,

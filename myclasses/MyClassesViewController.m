@@ -715,6 +715,8 @@ FreshClassZone>
 //        ChooseSchoolViewController *chooseViewController = [[ChooseSchoolViewController alloc] init];
 //        [chooseViewController.schoolArray addObjectsFromArray:tmpArray];
 //        [self.navigationController pushViewController:chooseViewController animated:YES];
+        
+        
     }
     else
     {

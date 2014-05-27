@@ -34,13 +34,13 @@
         [self.contentView addSubview:contentLabel];
         
         button1 = [UIButton buttonWithType:UIButtonTypeCustom];
-        button1.frame = CGRectMake(SCREEN_WIDTH - 120, 10, 30, 30);
+        button1.frame = CGRectMake(SCREEN_WIDTH - 120, 25, 30, 30);
         [button1 setImage:[UIImage imageNamed:@"icon_infor"] forState:UIControlStateNormal];
         button1.backgroundColor = [UIColor clearColor];
-//        [self.contentView addSubview:button1];
+        [self.contentView addSubview:button1];
         
         button2 = [UIButton buttonWithType:UIButtonTypeCustom];
-        button2.frame = CGRectMake(SCREEN_WIDTH-90, 25, 30, 30);
+        button2.frame = CGRectMake(SCREEN_WIDTH-70, 25, 30, 30);
         button2.backgroundColor = [UIColor clearColor];
         [button2 setImage:[UIImage imageNamed:@"icon_tel"] forState:UIControlStateNormal];
         [self.contentView addSubview:button2];

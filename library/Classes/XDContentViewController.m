@@ -156,7 +156,7 @@
     _navigationBarBg.image = [UIImage imageNamed:@"nav_bar_bg"];
     [_navigationBarView addSubview:_navigationBarBg];
     
-    _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(self.view.frame.size.width/2-90, 8, 180, 36)];
+    _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(self.view.frame.size.width/2-90, 4, 180, 36)];
     _titleLabel.font = [UIFont fontWithName:@"Courier" size:19];
     _titleLabel.backgroundColor = [UIColor clearColor];
     _titleLabel.textColor = UIColorFromRGB(0x666464);
@@ -246,7 +246,6 @@
 
 -(void)textViewDidBeginEditing:(UITextView *)textView
 {
-    
     
 }
 

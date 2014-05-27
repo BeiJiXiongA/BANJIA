@@ -54,6 +54,10 @@
     
     relateString = @"";
     
+    className = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
+    schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
+    classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
+    
     self.titleLabel.text = @"邀请学生家长";
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     
@@ -259,13 +263,13 @@
 //        controller.recipients = contactInviteArray;
         
         NSString *msgBody;
-        msgBody = [NSString stringWithFormat:@"%@的%@，您好，我是%@-%@的老师%@",name,relateString,schoolName,className,[Tools user_name]];
+        msgBody = [NSString stringWithFormat:@"%@的%@，您好，我是%@-%@的%@，您也一起来加入吧！http://www.banjiaedu.com",name,relateString,schoolName,className,[Tools user_name]];
         controller.body = msgBody;
         controller.messageComposeDelegate = self;
         
         [self presentViewController:controller animated:YES completion:nil];
         
-        [[[[controller viewControllers] lastObject] navigationItem] setTitle:@"测试短信"];//修改短信界面标题
+        [[[[controller viewControllers] lastObject] navigationItem] setTitle:@"短信邀请"];//修改短信界面标题
     }else{
         [self alertWithTitle:@"提示信息" msg:@"设备没有短信功能"];
     }

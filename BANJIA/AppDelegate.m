@@ -41,7 +41,7 @@
     // Override point for customization after application launch.
     
     
-    [[NSUserDefaults standardUserDefaults] setObject:@"0010" forKey:@"currentVersion"];
+    [[NSUserDefaults standardUserDefaults] setObject:@"0013" forKey:@"currentVersion"];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
     _db = [[OperatDB alloc] init];
@@ -79,20 +79,14 @@
         }
         else
         {
-//            [self getNewChat];
+            [self getNewChat];
             SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
             MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
             KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClassesViewController];
             JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myClassesNav menuController:sideMenuViewController];
             self.window.rootViewController = sideMenu;
             
-//#ifdef DEBUG
-            
             [self getNewVersion];
-//#else
-            
-//#endif
-
         }
     }
     else

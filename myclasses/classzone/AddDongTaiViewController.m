@@ -102,6 +102,8 @@ UIActionSheetDelegate
     
     CGFloat imageH;
     CGFloat imageW;
+    
+    BOOL isSelectPhoto;
 }
 @property (nonatomic, strong) ShowDetailImageViewController *showDetailImageViewController;
 @end
@@ -220,6 +222,10 @@ int count = 0;
 {
     [super viewWillDisappear:animated];
     [MobClick endLogPageView:@"PageOne"];
+    if (!isSelectPhoto)
+    {
+        count = 0;
+    }
 }
 
 
@@ -234,6 +240,8 @@ int count = 0;
     keyBoardHeight = 0.0f;
     imageW = 70;
     imageH = 70;
+    
+    isSelectPhoto = NO;
     
     sysImagePickerController = [[UIImagePickerController alloc] init];
     sysImagePickerController.delegate = self;
@@ -395,6 +403,7 @@ int count = 0;
             if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
             {
                 sysImagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
+                isSelectPhoto = YES;
                 [self presentViewController:sysImagePickerController animated:YES completion:nil];
             }
             else
@@ -409,8 +418,8 @@ int count = 0;
 {
     [sysImagePickerController dismissViewControllerAnimated:YES completion:nil];
     
-    DDLOG(@" imagepicker=%@",info);
     
+    isSelectPhoto = NO;
     UIImage *fullScreenImage = [info objectForKey:UIImagePickerControllerOriginalImage];
     
     [selectPhotosArray addObject:fullScreenImage];
@@ -470,6 +479,7 @@ int count = 0;
 
 -(void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
 {
+    isSelectPhoto = NO;
     [sysImagePickerController dismissViewControllerAnimated:YES completion:nil];
 }
 
@@ -969,13 +979,14 @@ int count = 0;
     DDLOG(@"count in openaction %d",count);
     if (count >= 12)
     {
-        [Tools showAlertView:@"图片不能多于7张,请删除后重新添加" delegateViewController:nil];
+        [Tools showAlertView:@"图片不能多于12张,请删除后重新添加" delegateViewController:nil];
         return;
     }
     // Show saved photos on top
     imagePickerController.shouldShowSavedPhotosOnTop = NO;
     imagePickerController.shouldChangeStatusBarStyle = YES;
     imagePickerController.toolbarItemsForManagingTheSelection = @[];
+    isSelectPhoto = YES;
     [self presentViewController:imagePickerController animated:YES completion:^{
         
     }];
@@ -985,6 +996,7 @@ int count = 0;
 {
     NSLog(@"Fail. Error: %@", error);
     [((XDContentViewController *)self.parentViewController.parentViewController).sideMenuController setPanGestureEnabled:NO];
+    isSelectPhoto = NO;
     if (error == nil) {
         NSLog(@"User has cancelled.");
         
@@ -1009,9 +1021,9 @@ int count = 0;
 - (void)agImagePickerController:(AGImagePickerController *)picker didFinishPickingMediaWithInfo:(NSArray *)info
 {
     [self dismissViewControllerAnimated:YES completion:^{
-        
-    }];
     
+    }];
+    isSelectPhoto = NO;
     if ([info count]+[selectPhotosArray count] > 12)
     {
         [Tools showAlertView:@"最多添加12张图片" delegateViewController:nil];

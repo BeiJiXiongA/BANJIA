@@ -169,6 +169,7 @@
                         [tmpDict setObject:[Tools user_id] forKey:@"userid"];
                         [tmpDict setObject:@"text" forKey:@"msgType"];
                         [tmpDict setObject:[Tools user_id] forKey:@"tid"];
+                        DDLOG(@"%@",[db findSetWithDictionary:@{@"mid":mid,@"userid":[Tools user_id]} andTableName:CHATTABLE]);
                         if ([[db findSetWithDictionary:@{@"mid":mid,@"userid":[Tools user_id]} andTableName:CHATTABLE] count] <= 0)
                         {
                             if ([db insertRecord:tmpDict andTableName:@"chatMsg"])
