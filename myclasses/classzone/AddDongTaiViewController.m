@@ -93,6 +93,7 @@ UIActionSheetDelegate
     MyTextField *locationTextView;
     CLLocationDegrees latitude;
     CLLocationDegrees longitude;
+    BOOL enableLocation;
     
     CGFloat keyBoardHeight;
     
@@ -142,23 +143,23 @@ int count = 0;
 
 -(void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation
 {
+    
     nowLocation = newLocation;
     //do something else
+    __block NSString *name;
     CLGeocoder *geocoder = [[CLGeocoder alloc]init];
     [geocoder reverseGeocodeLocation:newLocation completionHandler:^(NSArray *array,NSError *error){
         if ([array count]>0) {
             CLPlacemark * placemark = [array objectAtIndex:0];
-            NSString *name = placemark.name;
+            name = placemark.name;
             [UIView animateWithDuration:0.2 animations:^{
                 locationTextView.frame = CGRectMake(locationButton.frame.size.width+locationButton.frame.origin.x, locationButton.frame.origin.y-3, [name length]*14>280?280:([name length]*14),35);
             }];
-            
             locationTextView.text = name;
             latitude = newLocation.coordinate.latitude;
             longitude = newLocation.coordinate.longitude;
         }
     }];
-
 }
 
 -(void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
@@ -189,10 +190,18 @@ int count = 0;
     
     locationManager = [[CLLocationManager alloc] init];
     if ([CLLocationManager locationServicesEnabled]) {
-        locationManager.delegate = self;
-        locationManager.distanceFilter = 200;
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest;
-        [locationManager startUpdatingLocation];
+        
+        dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0ul);
+        dispatch_async(queue, ^{
+                locationManager.delegate = self;
+                locationManager.distanceFilter = 200;
+                locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+                [locationManager startUpdatingLocation];
+            dispatch_sync(dispatch_get_main_queue(), ^{
+                
+            });
+        });
+        
     }
 }
 
@@ -240,6 +249,8 @@ int count = 0;
     keyBoardHeight = 0.0f;
     imageW = 70;
     imageH = 70;
+    
+    enableLocation = YES;
     
     isSelectPhoto = NO;
     
@@ -359,7 +370,10 @@ int count = 0;
     
     mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, lateImageView.frame.size.height+lateImageView.frame.origin.y+20);
     
-    [self setupLocationManager];
+    if (enableLocation)
+    {
+        [self setupLocationManager];
+    }
 }
 
 
