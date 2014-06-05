@@ -16,7 +16,7 @@
     if (self) {
         // Initialization code
         
-        self.background = [[UIImage imageNamed:@"input"] resizableImageWithCapInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
+//        self.background = [[UIImage imageNamed:@"input"] resizableImageWithCapInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
         self.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
     }
     return self;

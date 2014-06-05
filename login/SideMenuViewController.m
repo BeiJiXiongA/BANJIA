@@ -68,7 +68,7 @@
     
     NSString *name = [Tools user_name];
     
-    UILabel *nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(150/2-[name length]*20/2, self.imageView.frame.size.height+self.imageView.frame.origin.y+2, [name length]*20, 30)];
+    UILabel *nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, self.imageView.frame.size.height+self.imageView.frame.origin.y+2, 150, 30)];
     nameLabel.font = [UIFont systemFontOfSize:17];
     nameLabel.backgroundColor = [UIColor clearColor];
     nameLabel.text = name;
