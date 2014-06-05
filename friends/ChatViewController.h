@@ -14,10 +14,17 @@
 
 @end
 
+@protocol FriendListDelegate <NSObject>
+
+-(void)updateFriendList:(BOOL)updata;
+
+@end
+
 @interface ChatViewController : XDContentViewController<UIImagePickerControllerDelegate,UINavigationControllerDelegate>
 @property (nonatomic, strong) NSString *name;
 @property (nonatomic, strong) NSString *toID;
 @property (nonatomic, strong) NSString *imageUrl;
 @property (nonatomic, assign) BOOL fromClass;
 @property (nonatomic, strong) id<ChatVCDelegate> chatVcDel;
+@property (nonatomic, strong) id<FriendListDelegate> friendVcDel;
 @end

@@ -13,6 +13,8 @@
 #import "MyClassesViewController.h"
 #import "JDSideMenu.h"
 #import "KKNavigationController.h"
+#import "UIImageView+WebCache.h"
+
 #define NAMETFTAG   1000
 
 @interface FillInfoViewController ()<UITextFieldDelegate,
@@ -109,7 +111,7 @@ MySwitchDel>
     
     if ([headerIcon length] > 0)
     {
-        [Tools fillImageView:headerImageView withImageFromURL:headerIcon];
+        [headerImageView setImageWithURL:[NSURL URLWithString:headerIcon] placeholderImage:[UIImage imageNamed:HEADERICON]];
     }
     
     UITapGestureRecognizer *selectHeaderImageTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(selectHeaderImage)];

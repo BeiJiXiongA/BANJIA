@@ -40,6 +40,9 @@
     
     self.titleLabel.text = @"申请加入";
     
+    schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
+    className = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
+    
     label = [[UILabel alloc] initWithFrame:CGRectMake(25, UI_NAVIGATION_BAR_HEIGHT+85, SCREEN_WIDTH-50, 80)];
     label.numberOfLines = 3;
     label.textColor = TITLE_COLOR;

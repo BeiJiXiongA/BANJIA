@@ -169,12 +169,16 @@
                         [tmpDict setObject:[Tools user_id] forKey:@"userid"];
                         [tmpDict setObject:@"text" forKey:@"msgType"];
                         [tmpDict setObject:[Tools user_id] forKey:@"tid"];
-                        DDLOG(@"%@",[db findSetWithDictionary:@{@"mid":mid,@"userid":[Tools user_id]} andTableName:CHATTABLE]);
+                        
                         if ([[db findSetWithDictionary:@{@"mid":mid,@"userid":[Tools user_id]} andTableName:CHATTABLE] count] <= 0)
                         {
                             if ([db insertRecord:tmpDict andTableName:@"chatMsg"])
                             {
                                 DDLOG(@"new msg insert success!");
+                            }
+                            else
+                            {
+                                DDLOG(@"new msg insert failed!");
                             }
                         }
                     }
@@ -408,13 +412,13 @@
     UIImageView *bgImageBG = [[UIImageView alloc] init];
     bgImageBG.image = [UIImage imageNamed:@"cell_bg"];
     cell.backgroundView = bgImageBG;
-    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    cell.selectionStyle = UITableViewCellSelectionStyleGray;
     return cell;
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
     NSDictionary *dict = [chatFriendArray objectAtIndex:indexPath.row];
     
     [db updeteKey:@"readed" toValue:@"1" withParaDict:@{@"fid":[dict objectForKey:@"fid"],@"userid":[Tools user_id]} andTableName:@"chatMsg"];
@@ -426,7 +430,6 @@
     chat.imageUrl = [dict objectForKey:@"ficon"];
     chat.chatVcDel = self;
     chat.fromClass = NO;
-    [tableView deselectRowAtIndexPath:indexPath animated:YES];
     [self.navigationController pushViewController:chat animated:YES];
 }
 

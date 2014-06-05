@@ -21,7 +21,7 @@
 UITableViewDelegate,
 EGORefreshTableHeaderDelegate,
 ChatDelegate,
-MsgDelegate>
+MsgDelegate,FriendListDelegate>
 {
     UITableView *friendsListTableView;
     NSMutableArray *tmpArray;
@@ -97,12 +97,12 @@ MsgDelegate>
     
     if([Tools NetworkReachable])
     {
-        [self operateFriendsList:nil];
+        [self operateFriendsList:[db findSetWithDictionary:@{@"uid":[Tools user_id]} andTableName:FRIENDSTABLE] andDataType:@"database"];
         [self getFriendList];
     }
     else
     {
-        [self operateFriendsList:nil];
+        [self operateFriendsList:[db findSetWithDictionary:@{@"uid":[Tools user_id]} andTableName:FRIENDSTABLE] andDataType:@"database"];
     }
     tipLabel = [[UILabel alloc] init];
     tipLabel.frame = CGRectMake(40, CENTER_POINT.y-80, SCREEN_WIDTH-80, 80);
@@ -394,11 +394,21 @@ MsgDelegate>
         chatViewController.name = [dict objectForKey:@"fname"];
         chatViewController.toID = [dict objectForKey:@"fid"];
         chatViewController.imageUrl = [dict objectForKey:@"ficon"];
+        chatViewController.friendVcDel = self;
         [self.sideMenuController hideMenuAnimated:YES];
         [self.navigationController pushViewController:chatViewController animated:YES];
 
     }
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
+}
+
+#pragma mark - friendsdelegate
+-(void)updateFriendList:(BOOL)updata
+{
+    if (updata)
+    {
+        [self operateFriendsList:[db findSetWithDictionary:@{@"uid":[Tools user_id]} andTableName:FRIENDSTABLE] andDataType:@"database"];
+    }
 }
 
 -(void)addFriend:(UIButton *)button
@@ -421,7 +431,7 @@ MsgDelegate>
                 {
                     DDLOG(@"delete friend apply success");
                 }
-                [self operateFriendsList:nil];
+                [self operateFriendsList:[db findSetWithDictionary:@{@"uid":[Tools user_id]} andTableName:FRIENDSTABLE] andDataType:@"database"];
             }
             else
             {
@@ -460,7 +470,7 @@ MsgDelegate>
                 {
                     DDLOG(@"delete friend apply success");
                 }
-                [self operateFriendsList:nil];
+                [self operateFriendsList:[db findSetWithDictionary:@{@"uid":[Tools user_id]} andTableName:FRIENDSTABLE] andDataType:@"database"];
             }
             else
             {
@@ -495,8 +505,7 @@ MsgDelegate>
                 if (![[responseDict objectForKey:@"data"] isEqual:[NSNull null]])
                 {
                     NSArray *array = [responseDict objectForKey:@"data"];
-                    DDLOG(@"array==%@",[array firstObject]);
-                    [self operateFriendsList:array];
+                    [self operateFriendsList:array andDataType:@"network"];
                     
                     _reloading = NO;
                     [pullRefreshView egoRefreshScrollViewDataSourceDidFinishedLoading:friendsListTableView];
@@ -522,27 +531,47 @@ MsgDelegate>
     }
 }
 
--(void)operateFriendsList:(NSArray *)tmpFriendsList
+-(void)operateFriendsList:(NSArray *)tmpFriendsList andDataType:(NSString *)datatype
 {
-    //uid VARCHAR(30),fname VARCHAR(20),ficon VARCHAR(30),fid VARCHAR(30),phone VARCHAR(15),checked VARCHAR(10)
     [newFriendsApply removeAllObjects];
     [tmpArray removeAllObjects];
     if ([tmpFriendsList count] > 0)
     {
         [db deleteRecordWithDict:@{@"uid":[Tools user_id]} andTableName:FRIENDSTABLE];
-        for (int i=0; i<[tmpFriendsList count]; ++i)
+        if ([datatype isEqualToString:@"database"])
         {
-            NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithCapacity:0];
-            NSDictionary *dict = [tmpFriendsList objectAtIndex:i];
-            [tmpDict setObject:[Tools user_id] forKey:@"uid"];
-            [tmpDict setObject:[dict objectForKey:@"_id"] forKey:@"fid"];
-            [tmpDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"checked"] intValue]] forKey:@"checked"];
-            [tmpDict setObject:[dict objectForKey:@"img_icon"] forKey:@"ficon"];
-            [tmpDict setObject:[dict objectForKey:@"name"] forKey:@"fname"];
-            [tmpDict setObject:@"" forKey:@"phone"];
-            [db insertRecord:tmpDict andTableName:FRIENDSTABLE];
+            for (int i=0; i<[tmpFriendsList count]; ++i)
+            {
+                NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithCapacity:0];
+                NSDictionary *dict = [tmpFriendsList objectAtIndex:i];
+                [tmpDict setObject:[Tools user_id] forKey:@"uid"];
+                [tmpDict setObject:[dict objectForKey:@"fid"] forKey:@"fid"];
+                [tmpDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"checked"] intValue]] forKey:@"checked"];
+                [tmpDict setObject:[dict objectForKey:@"ficon"] forKey:@"ficon"];
+                [tmpDict setObject:[dict objectForKey:@"fname"] forKey:@"fname"];
+                [tmpDict setObject:@"" forKey:@"phone"];
+                [db insertRecord:tmpDict andTableName:FRIENDSTABLE];
+            }
         }
-
+        else if([datatype isEqualToString:@"network"])
+        {
+            for (int i=0; i<[tmpFriendsList count]; ++i)
+            {
+                NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithCapacity:0];
+                NSDictionary *dict = [tmpFriendsList objectAtIndex:i];
+                [tmpDict setObject:[Tools user_id] forKey:@"uid"];
+                [tmpDict setObject:[dict objectForKey:@"_id"] forKey:@"fid"];
+                [tmpDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"checked"] intValue]] forKey:@"checked"];
+                [tmpDict setObject:[dict objectForKey:@"img_icon"] forKey:@"ficon"];
+                [tmpDict setObject:[dict objectForKey:@"name"] forKey:@"fname"];
+                [tmpDict setObject:@"" forKey:@"phone"];
+                [db insertRecord:tmpDict andTableName:FRIENDSTABLE];
+            }
+        }
+    }
+    else
+    {
+        [db deleteRecordWithDict:@{@"uid":[Tools user_id]} andTableName:FRIENDSTABLE];
     }
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:UCFRIENDSUM];
     [[NSUserDefaults standardUserDefaults] synchronize];

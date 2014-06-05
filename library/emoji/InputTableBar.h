@@ -26,6 +26,8 @@
     CGFloat keyBoardHeight;
     
     CGSize inputTextViewSize;
+    
+    NSArray *faceArray;
 }
 @property (nonatomic, strong) UITextView *inputTextView;
 @property (nonatomic, strong) UIView *inputBgView;

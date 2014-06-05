@@ -23,6 +23,7 @@
 #import "UINavigationController+JDSideMenu.h"
 #import "SearchSchoolViewController.h"
 #import "MoreViewController.h"
+#import "CreateClassViewController.h"
 
 #import "XDTabViewController.h"
 
@@ -247,10 +248,13 @@ FreshClassZone>
                         {
                             [dict setObject:schoolName forKey:@"s_name"];
                         }
-                        NSString *schoolLevel = [NSString stringWithFormat:@"%d",[[dict2 objectForKey:@"s_level"] integerValue]];
-                        if ([schoolLevel length] > 0)
+                        if ([dict2 objectForKey:@"s_level"])
                         {
-                            [dict setObject:schoolLevel forKey:@"s_level"];
+                            NSString *schoolLevel = [NSString stringWithFormat:@"%d",[[dict2 objectForKey:@"s_level"] integerValue]];
+                            if ([schoolLevel length] > 0)
+                            {
+                                [dict setObject:schoolLevel forKey:@"s_level"];
+                            }
                         }
                         NSMutableArray *array2 = [[NSMutableArray alloc] initWithCapacity:0];
                         for (int m=0; m<[array count]; ++m)
@@ -373,11 +377,16 @@ FreshClassZone>
                             {
                                 [dict setObject:schoolName forKey:@"s_name"];
                             }
-                            NSString *schoolLevel = [NSString stringWithFormat:@"%d",[[dict2 objectForKey:@"s_level"] integerValue]];
-                            if ([schoolLevel length] > 0)
+                            
+                            if ([dict2 objectForKey:@"s_level"])
                             {
-                                [dict setObject:schoolLevel forKey:@"s_level"];
+                                NSString *schoolLevel = [NSString stringWithFormat:@"%d",[[dict2 objectForKey:@"s_level"] integerValue]];
+                                if ([schoolLevel length] > 0)
+                                {
+                                    [dict setObject:schoolLevel forKey:@"s_level"];
+                                }
                             }
+                            
                             
                             NSMutableArray *array2 = [[NSMutableArray alloc] initWithCapacity:0];
                             for (int m=0; m<[array count]; ++m)
@@ -514,6 +523,7 @@ FreshClassZone>
     headerLabel.textColor = TITLE_COLOR;
     NSDictionary *tmpdict = [tmpArray objectAtIndex:section];
     headerLabel.text = [NSString stringWithFormat:@"%@(%@)",[tmpdict objectForKey:@"s_name"],[schoolLevelArray objectAtIndex:[[tmpdict objectForKey:@"s_level"] integerValue]]];
+//    headerLabel.text = [NSString stringWithFormat:@"%@",[tmpdict objectForKey:@"s_name"]];
     [headerView addSubview:headerLabel];
     return headerView;
 }
@@ -716,7 +726,8 @@ FreshClassZone>
 //        [chooseViewController.schoolArray addObjectsFromArray:tmpArray];
 //        [self.navigationController pushViewController:chooseViewController animated:YES];
         
-        
+//        CreateClassViewController *createClassViewController = [[CreateClassViewController alloc] init];
+//        [self.navigationController pushViewController:createClassViewController animated:YES];
     }
     else
     {

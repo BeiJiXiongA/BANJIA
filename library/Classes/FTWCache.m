@@ -30,9 +30,9 @@ static NSTimeInterval cacheTime =  (double)604800000000000;
 }
 
 + (NSData*) objectForKey:(NSString*)key {
+    
 	NSFileManager *fileManager = [NSFileManager defaultManager];
 	NSString *filename = [self.cacheDirectory stringByAppendingPathComponent:key];
-	
 	if ([fileManager fileExistsAtPath:filename])
 	{
 		NSDate *modificationDate = [[fileManager attributesOfItemAtPath:filename error:nil] objectForKey:NSFileModificationDate];

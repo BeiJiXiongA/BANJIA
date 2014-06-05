@@ -16,9 +16,9 @@
 #import "ChooseClassInfoViewController.h"
 #import "XDContentViewController+JDSideMenu.h"
 #import "NewDiariesViewController.h"
-#import "EGORefreshTableHeaderView.h"
 
-#import "UIImage+URBImageEffects.h"
+#import "EGORefreshTableHeaderView.h"
+#import "FooterView.h"
 
 #import "UIImageView+MJWebCache.h"
 #import "MJPhotoBrowser.h"
@@ -31,7 +31,9 @@
 #define SectionTag  10000
 #define RowTag     100
 
-#define ImageHeight  120
+#define ImageHeight  60.0f
+
+#define ImageCountPerRow  4
 
 @interface ClassZoneViewController ()<UITableViewDataSource,
 UITableViewDelegate,
@@ -40,6 +42,7 @@ NewDongtaiDelegate,
 ClassZoneDelegate,
 EGORefreshTableHeaderDelegate,
 DongTaiDetailAddCommentDelegate,
+EGORefreshTableDelegate,
 UIActionSheetDelegate>
 {
     UITableView *classZoneTableView;
@@ -61,6 +64,7 @@ UIActionSheetDelegate>
     int uncheckedCount;
     
     EGORefreshTableHeaderView *pullRefreshView;
+    FooterView *footerView;
     BOOL _reloading;
     
     UIButton *addButton;
@@ -181,7 +185,6 @@ UIActionSheetDelegate>
     pullRefreshView = [[EGORefreshTableHeaderView alloc] initWithScrollView:classZoneTableView orientation:EGOPullOrientationDown];
     pullRefreshView.delegate = self;
     
-    
     if ([Tools NetworkReachable])
     {
         addButton.hidden = YES;
@@ -242,7 +245,22 @@ UIActionSheetDelegate>
     [self getDongTaiList];
 }
 
+-(void)egoRefreshTableDidTriggerRefresh:(EGORefreshPos)aRefreshPos
+{
+    if (fromClasses)
+    {
+        [Tools showAlertView:@"您还没有进入这个班级，快去申请加入吧！" delegateViewController:self];
+        return ;
+    }
+    [self getMoreDongTai];
+}
+
 - (BOOL)egoRefreshTableHeaderDataSourceIsLoading:(EGORefreshTableHeaderView*)view
+{
+    return _reloading;
+}
+
+-(BOOL)egoRefreshTableDataSourceIsLoading:(UIView *)view
 {
     return _reloading;
 }
@@ -255,11 +273,16 @@ UIActionSheetDelegate>
 -(void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
     [pullRefreshView egoRefreshScrollViewDidScroll:classZoneTableView];
+    if (scrollView.contentOffset.y+(scrollView.frame.size.height) > scrollView.contentSize.height+65)
+    {
+        [footerView egoRefreshScrollViewDidScroll:classZoneTableView];
+    }
 }
 
 -(void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
 {
     [pullRefreshView egoRefreshScrollViewDidEndDragging:classZoneTableView];
+    [footerView egoRefreshScrollViewDidEndDragging:classZoneTableView];
 }
 
 #pragma mark - classzoneDelegate
@@ -415,10 +438,10 @@ UIActionSheetDelegate>
     if (section > 0)
     {
         NSDictionary *dict = [tmpArray objectAtIndex:section-1];
-        UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(5, 0, SCREEN_WIDTH-10, 40)];
+        UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(5, 0, SCREEN_WIDTH-10, 45)];
         headerLabel.text = [NSString stringWithFormat:@"  %@",[dict objectForKey:@"date"]];
         headerLabel.textColor = TITLE_COLOR;
-        headerLabel.backgroundColor = [UIColor clearColor];
+        headerLabel.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.8];
         headerLabel.font = [UIFont systemFontOfSize:20];
         return headerLabel;
     }
@@ -453,22 +476,12 @@ UIActionSheetDelegate>
     {
         if (section >0)
         {
-            if (section<[tmpArray count])
-            {
-                NSDictionary *dict = [tmpArray objectAtIndex:section-1];
-                NSArray *array = [dict objectForKey:@"diaries"];
-                return [array count];
-            }
-            else
-            {
-                NSDictionary *dict = [tmpArray objectAtIndex:section-1];
-                NSArray *array = [dict objectForKey:@"diaries"];
-                return [array count]+1;
-            }
+            NSDictionary *dict = [tmpArray objectAtIndex:section-1];
+            NSArray *array = [dict objectForKey:@"diaries"];
+            return [array count];
         }
         else
             return 2;
-        
     }
     return 0;
 }
@@ -477,7 +490,7 @@ UIActionSheetDelegate>
     CGFloat he=0;
     if (SYSVERSION>=7)
     {
-        he = 0;
+        he = 5;
     }
     if (indexPath.section >0)
     {
@@ -489,9 +502,20 @@ UIActionSheetDelegate>
             NSDictionary *dict = [array objectAtIndex:indexPath.row];
             NSString *content = [dict objectForKey:@"content"];
             NSArray *imgsArray = [[dict objectForKey:@"img"] count]>0?[dict objectForKey:@"img"]:nil;
-            CGFloat imgsHeight = [imgsArray count]>0?(imageViewHeight+10):10;
-            CGFloat contentHtight = [content length]>0?(35+he):0;
-            return 60+imgsHeight+contentHtight+55;
+            NSInteger imageCount = [imgsArray count];
+            NSInteger row = 0;
+            if (imageCount % ImageCountPerRow > 0)
+            {
+                row = (imageCount/ImageCountPerRow+1) > 3 ? 3:(imageCount / ImageCountPerRow + 1);
+            }
+            else
+            {
+                row = (imageCount/ImageCountPerRow) > 3 ? 3:(imageCount / ImageCountPerRow);
+            }
+           
+            CGFloat imgsHeight = row * (imageViewHeight+5);
+            CGFloat contentHtight = [content length] > 0 ? (45+he):5;
+            return 60+imgsHeight+contentHtight+60;
         }
         else
         {
@@ -499,13 +523,25 @@ UIActionSheetDelegate>
             NSArray *array = [groupDict objectForKey:@"diaries"];
             if (indexPath.row < [array count])
             {
+                //                CGFloat imageWidth = 60;
                 CGFloat imageViewHeight = ImageHeight;
                 NSDictionary *dict = [array objectAtIndex:indexPath.row];
                 NSString *content = [dict objectForKey:@"content"];
                 NSArray *imgsArray = [[dict objectForKey:@"img"] count]>0?[dict objectForKey:@"img"]:nil;
-                CGFloat imgsHeight = [imgsArray count]>0?(imageViewHeight+10):10;
-                CGFloat contentHtight = [content length]>0?(35+he):0;
-                return 60+imgsHeight+contentHtight+45;
+                NSInteger imageCount = [imgsArray count];
+                NSInteger row = 0;
+                if (imageCount % ImageCountPerRow > 0)
+                {
+                    row = (imageCount/ImageCountPerRow+1) > 3 ? 3:(imageCount / ImageCountPerRow + 1);
+                }
+                else
+                {
+                    row = (imageCount/ImageCountPerRow) > 3 ? 3:(imageCount / ImageCountPerRow);
+                }
+
+                CGFloat imgsHeight = row * (imageViewHeight+5);
+                CGFloat contentHtight = [content length]>0?(45+he):5;
+                return 60+imgsHeight+contentHtight+50;
             }
             else
             {
@@ -616,39 +652,6 @@ UIActionSheetDelegate>
     }
     else if(indexPath.section > 0)
     {
-        NSDictionary *groupDict = [tmpArray objectAtIndex:indexPath.section-1];
-        NSArray *array = [groupDict objectForKey:@"diaries"];
-        if ((indexPath.section == [tmpArray count]) && (indexPath.row==[array count]))
-        {
-            
-            static NSString *buttomCell = @"buttom";
-            UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:buttomCell];
-            if (cell == nil)
-            {
-                cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:buttomCell];
-            }
-            UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-            button.frame = CGRectMake(0, 0, SCREEN_WIDTH, 40);
-            button.backgroundColor = [UIColor clearColor];
-            if (classZoneTableView.contentSize.height > classZoneTableView.frame.size.height)
-            {
-                button.enabled = YES;
-                [button setTitle:@"加载更多" forState:UIControlStateNormal];
-            }
-            else
-            {
-                button.enabled = NO;
-                [button setTitle:@"" forState:UIControlStateNormal];
-            }
-            cell.selectionStyle = UITableViewCellSelectionStyleNone;
-            [button setTitleColor:[UIColor lightGrayColor] forState:UIControlStateNormal];
-            [button addTarget:self action:@selector(getMoreDongTai) forControlEvents:UIControlEventTouchUpInside];
-            [cell.contentView addSubview:button];
-            cell.backgroundColor = [UIColor clearColor];
-            return cell;
-        }
-        else
-        {
             static NSString *topImageView = @"trendcell";
             TrendsCell *cell = [tableView dequeueReusableCellWithIdentifier:topImageView];
             if (cell == nil)
@@ -711,7 +714,7 @@ UIActionSheetDelegate>
             cell.locationLabel.text = [dict objectForKey:@"add"];
             
             cell.contentLabel.hidden = YES;
-            for(UIView *v in cell.imagesScrollView.subviews)
+            for(UIView *v in cell.imagesView.subviews)
             {
                 if ([v isKindOfClass:[UIImageView class]])
                 {
@@ -723,7 +726,7 @@ UIActionSheetDelegate>
                 CGFloat he = 0;
                 if (SYSVERSION >= 7)
                 {
-                    he = 10;
+                    he = 5;
                 }
                 //有文字
                 cell.contentLabel.hidden = NO;
@@ -731,14 +734,13 @@ UIActionSheetDelegate>
                 cell.contentLabel.textColor = [UIColor blackColor];
                 if ([[dict objectForKey:@"content"] length] > 40)
                 {
-                    cell.contentLabel.text = cell.contentLabel.text = [NSString stringWithFormat:@"%@...",[[dict objectForKey:@"content"] substringToIndex:37]];
+                    cell.contentLabel.text  = [NSString stringWithFormat:@"%@...",[[dict objectForKey:@"content"] substringToIndex:37]];
                 }
                 else
                 {
                     cell.contentLabel.text = [dict objectForKey:@"content"];
                 }
-                CGSize size = [Tools getSizeWithString:[dict objectForKey:@"content"] andWidth:SCREEN_WIDTH-50 andFont:[UIFont systemFontOfSize:15]];
-                cell.contentLabel.frame = CGRectMake(10, 55, SCREEN_WIDTH-20, size.height>45?(45+he):(size.height+5+he));
+                cell.contentLabel.frame = CGRectMake(10, 55, SCREEN_WIDTH-20, 45);
             }
             else
             {
@@ -750,15 +752,18 @@ UIActionSheetDelegate>
             {
                 //有图片
                 
-                NSArray *imgsArray = [dict objectForKey:@"img"];                
-                cell.imagesScrollView.frame = CGRectMake(5, cell.contentLabel.frame.size.height+cell.contentLabel.frame.origin.y+7, SCREEN_WIDTH-20, imageViewHeight);
-                cell.imagesScrollView.contentSize = CGSizeMake((imageViewWidth+5)*[imgsArray count], imageViewHeight);
-                for (int i=0; i<[imgsArray count]; ++i)
+                NSArray *imgsArray = [dict objectForKey:@"img"];
+                NSInteger imageCount = [imgsArray count];
+                if (imageCount == -1)
                 {
+                    cell.imagesView.frame = CGRectMake((SCREEN_WIDTH-ImageHeight*ImageCountPerRow)/2,
+                                                       cell.contentLabel.frame.size.height +
+                                                       cell.contentLabel.frame.origin.y+7,
+                                                       100, 100);
                     UIImageView *imageView = [[UIImageView alloc] init];
-                    imageView.frame = CGRectMake(i*(imageViewWidth+5), 0, imageViewWidth, imageViewHeight);
+                    imageView.frame = CGRectMake(0, 0, 100, 100);
                     imageView.userInteractionEnabled = YES;
-                    imageView.tag = (indexPath.section-1)*SectionTag+indexPath.row*RowTag+i+333;
+                    imageView.tag = (indexPath.section-1)*SectionTag+indexPath.row*RowTag+333;
                     
                     imageView.userInteractionEnabled = YES;
                     [imageView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapImage:)]];
@@ -766,16 +771,50 @@ UIActionSheetDelegate>
                     // 内容模式
                     imageView.clipsToBounds = YES;
                     imageView.contentMode = UIViewContentModeScaleAspectFill;
-                    [Tools fillImageView:imageView withImageFromURL:[imgsArray objectAtIndex:i] andDefault:@"3100"];
-                    [cell.imagesScrollView addSubview:imageView];
+                    [Tools fillImageView:imageView withImageFromURL:[imgsArray firstObject] andDefault:@"3100"];
+                    [cell.imagesView addSubview:imageView];
+                }
+                else
+                {
+                    NSInteger row = 0;
+                    if (imageCount % ImageCountPerRow > 0)
+                    {
+                        row = (imageCount/ImageCountPerRow+1) > 3 ? 3:(imageCount / ImageCountPerRow + 1);
+                    }
+                    else
+                    {
+                        row = (imageCount/ImageCountPerRow) > 3 ? 3:(imageCount / ImageCountPerRow);
+                    }
+                    cell.imagesView.frame = CGRectMake((SCREEN_WIDTH-ImageHeight*ImageCountPerRow)/2,
+                                                       cell.contentLabel.frame.size.height +
+                                                       cell.contentLabel.frame.origin.y+7,
+                                                       SCREEN_WIDTH-20, (imageViewHeight+5) * row);
+                    
+                    for (int i=0; i<[imgsArray count]; ++i)
+                    {
+                        UIImageView *imageView = [[UIImageView alloc] init];
+                        imageView.frame = CGRectMake((i%(NSInteger)ImageCountPerRow)*(imageViewWidth+5), (imageViewWidth+5)*(i/(NSInteger)ImageCountPerRow), imageViewWidth, imageViewHeight);
+                        imageView.userInteractionEnabled = YES;
+                        imageView.tag = (indexPath.section-1)*SectionTag+indexPath.row*RowTag+i+333;
+                        
+                        imageView.userInteractionEnabled = YES;
+                        [imageView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapImage:)]];
+                        
+                        // 内容模式
+                        imageView.clipsToBounds = YES;
+                        imageView.contentMode = UIViewContentModeScaleAspectFill;
+                        [Tools fillImageView:imageView withImageFromURL:[imgsArray objectAtIndex:i] andDefault:@"3100"];
+                        [cell.imagesView addSubview:imageView];
+                    }
+
                 }
             }
             else
             {
-                cell.imagesScrollView.frame = CGRectMake(5, cell.contentLabel.frame.size.height+cell.contentLabel.frame.origin.y, SCREEN_WIDTH-10, 0);
+                cell.imagesView.frame = CGRectMake(5, cell.contentLabel.frame.size.height+cell.contentLabel.frame.origin.y, SCREEN_WIDTH-10, 0);
             }
             
-            CGFloat cellHeight = cell.headerImageView.frame.size.height+cell.contentLabel.frame.size.height+cell.imagesScrollView.frame.size.height+18;
+            CGFloat cellHeight = cell.headerImageView.frame.size.height+cell.contentLabel.frame.size.height+cell.imagesView.frame.size.height+18;
             
             CGFloat he = 0;
 //            if (SYSVERSION >= 7.0)
@@ -807,13 +846,14 @@ UIActionSheetDelegate>
             [cell.commentButton addTarget:self action:@selector(commentDiary:) forControlEvents:UIControlEventTouchUpInside];
             cell.commentImageView.frame = CGRectMake((SCREEN_WIDTH-20)*3/4, cell.commentButton.frame.size.height+cell.commentButton.frame.origin.y-20, 13, 13);
             
-            cell.bgView.frame = CGRectMake(3, 1.5, SCREEN_WIDTH-6, cellHeight+cell.praiseButton.frame.size.height+13);
+            cell.bgView.frame = CGRectMake(3, 1.5, SCREEN_WIDTH-6,
+                                           cell.praiseButton.frame.size.height+
+                                           cell.praiseButton.frame.origin.y);
             cell.bgView.backgroundColor = [UIColor whiteColor];
             cell.backgroundColor = [UIColor clearColor];
             
             return cell;
         }
-    }
     return nil;
 }
 
@@ -829,17 +869,13 @@ UIActionSheetDelegate>
     for (int i = 0; i<count; i++) {
         // 替换为中等尺寸图片
         NSString *url = [NSString stringWithFormat:@"%@%@",IMAGEURL,imgs[i]];
-        NSData *imgData = [FTWCache objectForKey:[url MD5Hash]];
-        UIImage *img = [UIImage imageWithData:imgData];
         MJPhoto *photo = [[MJPhoto alloc] init];
-//        photo.image = ((UIImageView *)[self.bgView viewWithTag:tap.view.tag]).image; // 图片路径
-        photo.image = img;
+        photo.url = [NSURL URLWithString:url];
         photo.srcImageView = (UIImageView *)[self.bgView viewWithTag:tap.view.tag]; // 来源于哪个UIImageView
         [photos addObject:photo];
     }
 
     // 2.显示相册
-    DDLOG(@"+++%d",((tap.view.tag-333)%SectionTag)%RowTag);
     MJPhotoBrowser *browser = [[MJPhotoBrowser alloc] init];
     browser.currentPhotoIndex = ((tap.view.tag-333)%SectionTag)%RowTag; // 弹出相册时显示的第一张图片是？
     browser.photos = photos; // 设置所有的图片
@@ -1508,8 +1544,7 @@ UIActionSheetDelegate>
                         classZoneTableView.hidden = NO;
                         [DongTaiArray addObjectsFromArray:array];
                         [self groupByTime:DongTaiArray];
-                        _reloading = NO;
-                        [pullRefreshView egoRefreshScrollViewDataSourceDidFinishedLoading:classZoneTableView];
+                       
                     }
                     page = [[[responseDict objectForKey:@"data"] objectForKey:@"page"] intValue];
                     monthStr = [NSString stringWithFormat:@"%@",[[responseDict objectForKey:@"data"] objectForKey:@"month"]];
@@ -1522,6 +1557,9 @@ UIActionSheetDelegate>
                 {
                     [Tools showAlertView:@"没有更多动态了" delegateViewController:nil];
                 }
+                _reloading = NO;
+                [footerView egoRefreshScrollViewDataSourceDidFinishedLoading:classZoneTableView];
+                [pullRefreshView egoRefreshScrollViewDataSourceDidFinishedLoading:classZoneTableView];
             }
             else
             {
@@ -1540,8 +1578,10 @@ UIActionSheetDelegate>
     }
     else
     {
-        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+        _reloading = NO;
+        [footerView egoRefreshScrollViewDataSourceDidFinishedLoading:classZoneTableView];
         [pullRefreshView egoRefreshScrollViewDataSourceDidFinishedLoading:classZoneTableView];
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
     }
 }
 
@@ -1607,6 +1647,17 @@ UIActionSheetDelegate>
         noneDongTaiLabel.hidden = NO;
     }
     [classZoneTableView reloadData];
+    if (footerView)
+    {
+        [footerView removeFromSuperview];
+        footerView = [[FooterView alloc] initWithScrollView:classZoneTableView];
+        footerView.delegate = self;
+    }
+    else
+    {
+        footerView = [[FooterView alloc] initWithScrollView:classZoneTableView];
+        footerView.delegate = self;
+    }
 }
 
 -(BOOL)haveThisTime:(NSString *)timeStr

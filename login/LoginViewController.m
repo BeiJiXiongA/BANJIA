@@ -17,7 +17,6 @@
 #import "NSString+AKNumericFormatter.h"
 #import "AKNumericFormatter.h"
 #import "SettingPasswordViewController.h"
-#import "UIImage+URBImageEffects.h"
 #import "UIImage-Helpers.h"
 #import "KKNavigationController.h"
 

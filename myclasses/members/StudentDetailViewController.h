@@ -7,6 +7,7 @@
 //
 
 #import "XDContentViewController.h"
+#import "ReportViewController.h"
 
 @protocol StuDetailDelegate <NSObject>
 

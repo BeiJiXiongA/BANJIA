@@ -417,7 +417,7 @@ UIAlertViewDelegate>
     }
     
     className = classNameTextField.text;
-    if ([className length] <4 || [className length] > 10)
+    if ([className length] <4 || [className length] > 20)
     {
         [Tools showAlertView:@"学校名称应该在4~10个字符之间" delegateViewController:nil];
         return ;

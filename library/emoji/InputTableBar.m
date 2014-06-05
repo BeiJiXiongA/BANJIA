@@ -81,16 +81,137 @@
                 [fileNameArray addObject:name];
             }
         }
-        for (;i<[fileNameArray count];)
+        faceArray = @[@"smile",
+                      @"wink",
+                      @"hushed",
+                      @"kissing_smiling_eyes",
+                      @"kissing",
+                      @"kissing_heart",
+                      @"laughing",
+                      @"tired_face",
+                      @"unamused",
+                      @"neutral_face",
+                      @"open_mouth",
+                      @"sleeping",
+                      @"stuck_out_tongue",
+                      @"stuck_out_tongue_closed_eyes",
+                      @"stuck_out_tongue_winking_eye",
+                      @"yum",
+                      @"astonished",
+                      @"flushed",
+                      @"frowning",
+                      @"grimacing",
+                      @"grinning",
+                      @"heart_eyes",
+                      @"sob",
+                      @"rage",
+                      @"joy",
+                      @"kissing_closed_eyes",
+                      @"kissing_heart",
+                      @"mask",
+                      @"no_mouth",
+                      @"pensive",
+                      @"sweat",
+                      @"sunglasses",
+                      @"innocent",
+                      @"sleepy",
+                      @"disappointed_relieved",
+                      @"sweat_smile",
+                      @"cold_sweat",
+                      @"fearful",
+                      @"scream",
+                      @"eyes",
+                      @"poop",
+                      @"pray",
+                      @"tongue",
+                      @"ear",
+                      @"thumbsup",
+                      @"thumbsdown",
+                      @"clap",
+                      @"raised_hand",
+                      @"wave",
+                      @"open_hands",
+                      @"raised_hands",
+                      @"ok_hand",
+                      @"point_up",
+                      @"v",
+                      @"point_up_2",
+                      @"point_left",
+                      @"point_down",
+                      @"point_right",
+                      @"punch",
+                      @"muscle",
+                      @"kiss",
+                      @"heart",
+                      @"broken_heart",
+                      @"heartpulse",
+                      @"heartbeat",
+                      @"cupid",
+                      @"smile_cat",
+                      @"smiley_cat",
+                      @"crying_cat_face",
+                      @"smirk_cat",
+                      @"pouting_cat",
+                      @"heart_eyes_cat",
+                      @"mouse",
+                      @"tiger",
+                      @"rabbit",
+                      @"snake",
+                      @"sheep",
+                      @"dog",
+                      @"pig",
+                      @"bird",
+                      @"frog",
+                      @"hear_no_evil",
+                      @"speak_no_evil",
+                      @"see_no_evil",
+                      @"monkey",
+                      @"bear",
+                      @"wolf",
+                      @"older_woman",
+                      @"person_with_blond_hair",
+                      @"princess",
+                      @"baby",
+                      @"bow",
+                      @"boy",
+                      @"man",
+                      @"older_man",
+                      @"girl",
+                      @"woman",
+                      @"bride_with_veil",
+                      @"older_woman",
+                      @"construction_worker",
+                      @"cop",
+                      @"guardsman",
+                      @"man_with_gua_pi_mao",
+                      @"no_good",
+                      @"person_frowning",
+                      @"couple_with_heart",
+                      @"couplekiss",
+                      @"family",
+                      @"cloud",
+                      @"zap",
+                      @"foggy",
+                      @"snowflake",
+                      @"exclamation",
+                      @"grey_exclamation",
+                      @"grey_question"];
+        
+        DDLOG(@"dddd ---\U00002653");
+        for (;i<[faceArray count];)
         {
-            NSString *fileName = [fileNameArray objectAtIndex:i];
-            UIImage *image = [UIImage imageNamed:[NSString stringWithFormat:@"%@",fileName]];
-            UIButton *faceButton = [UIButton buttonWithType:UIButtonTypeCustom];
-            faceButton.frame = CGRectMake(5+SCREEN_WIDTH*(count/(row*colum)) +faceWidth*((count%(row*colum))%colum),5+ faceHeight*((i%(row*colum))/colum), faceWidth-15, faceHeight-15);
-            faceButton.tag = i;
-            [faceButton setImage:image forState:UIControlStateNormal];
-            [faceButton addTarget:self action:@selector(faceClick:) forControlEvents:UIControlEventTouchUpInside];
-            [faceView addSubview:faceButton];
+            NSString *faceName = [NSString emojizedStringWithString:[NSString stringWithFormat:@":%@:",[faceArray objectAtIndex:i]]];
+            
+            UITapGestureRecognizer *faceTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(faceClick:)];
+            UILabel *faceLabel = [[UILabel alloc] initWithFrame:CGRectMake(5+SCREEN_WIDTH*(count/(row*colum)) +faceWidth*((count%(row*colum))%colum),5+ faceHeight*((i%(row*colum))/colum), faceWidth-5, faceHeight-5)];
+            faceLabel.tag = i;
+            faceLabel.text = faceName;
+            faceLabel.textAlignment = NSTextAlignmentCenter;
+            faceLabel.font = [UIFont systemFontOfSize:30];
+            faceLabel.backgroundColor = [UIColor clearColor];
+            faceLabel.userInteractionEnabled = YES;
+            [faceLabel addGestureRecognizer:faceTap];
+            [faceView addSubview:faceLabel];
             count++;
             i++;
         }
@@ -166,26 +287,16 @@
     face = !face;
 }
 
--(void)faceClick:(UIButton *)button
+-(void)faceClick:(UITapGestureRecognizer *)tgr
 {
     
-    if ((button.tag+1)%28 != 0)
+    if ((tgr.view.tag+1)%28 != 0)
     {
         NSString *text = [inputTextView text];
-        NSString *imageFileName = [[fileNameArray objectAtIndex:button.tag] emojizedString];
-        NSString *imagestr = [imageFileName stringByDeletingPathExtension];
-        NSString *faceKey = [imagestr substringFromIndex:[imagestr rangeOfString:@"_"].location+1];
-        NSString *emoKey = [NSString stringWithFormat:@":%@:",faceKey];
-        [sendString insertString:emoKey atIndex:[sendString length]];
+        NSString *imageFileName = [[faceArray objectAtIndex:tgr.view.tag] emojizedString];
+        [sendString insertString:[NSString emojizedStringWithString:[NSString stringWithFormat:@":%@:",imageFileName]] atIndex:[sendString length]];
         NSString *text2 = @"";
-        if ([[faceDict objectForKey:emoKey] length] > 0)
-        {
-            text2 = [text stringByAppendingString:[faceDict objectForKey:emoKey]];
-        }
-        else
-        {
-            text2 = [text stringByAppendingString:@""];
-        }
+        text2 = [text stringByAppendingString:[NSString emojizedStringWithString:[NSString stringWithFormat:@":%@:",imageFileName]]];
         inputTextView.text = text2;
     }
 }

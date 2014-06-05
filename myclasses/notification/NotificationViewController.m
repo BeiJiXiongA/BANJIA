@@ -12,19 +12,22 @@
 #import "AddNotificationViewController.h"
 #import "NotificationDetailViewController.h"
 #import "EGORefreshTableHeaderView.h"
+#import "FooterView.h"
 
 @interface NotificationViewController ()<
 UITableViewDataSource,
 UITableViewDelegate,
 EGORefreshTableHeaderDelegate,
 updateDelegate,
-NotificationDetailDelegate>
+NotificationDetailDelegate,
+EGORefreshTableDelegate>
 {
     UITableView *notificationTableView;
     NSMutableArray *tmpArray;
     NSInteger page;
     
     EGORefreshTableHeaderView *pullRefreshView;
+    FooterView *footerView;
     BOOL _reloading;
     
     NSString *month;
@@ -99,6 +102,7 @@ NotificationDetailDelegate>
     pullRefreshView = [[EGORefreshTableHeaderView alloc] initWithScrollView:notificationTableView orientation:EGOPullOrientationDown];
     pullRefreshView.delegate = self;
     
+    
     [self getCacheNotices];
     [self getNotifications];
     
@@ -147,7 +151,17 @@ NotificationDetailDelegate>
     [self getNotifications];
 }
 
+-(void)egoRefreshTableDidTriggerRefresh:(EGORefreshPos)aRefreshPos
+{
+    [self getMoreNotifications];
+}
+
 - (BOOL)egoRefreshTableHeaderDataSourceIsLoading:(EGORefreshTableHeaderView*)view
+{
+    return _reloading;
+}
+
+-(BOOL)egoRefreshTableDataSourceIsLoading:(UIView *)view
 {
     return _reloading;
 }
@@ -160,10 +174,16 @@ NotificationDetailDelegate>
 -(void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
     [pullRefreshView egoRefreshScrollViewDidScroll:notificationTableView];
+    if (scrollView.contentOffset.y+(scrollView.frame.size.height) > scrollView.contentSize.height+65)
+    {
+        [footerView egoRefreshScrollViewDidScroll:notificationTableView];
+    }
+
 }
 -(void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
 {
     [pullRefreshView egoRefreshScrollViewDidEndDragging:notificationTableView];
+    [footerView egoRefreshScrollViewDidEndDragging:notificationTableView];
 }
 
 -(void)backClick
@@ -193,22 +213,16 @@ NotificationDetailDelegate>
             tipLabel.hidden = NO;
         }
     }
-    return [tmpArray count]>0?([tmpArray count]+1):(0);
+    return [tmpArray count]>0?([tmpArray count]):(0);
 }
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.row==[tmpArray count])
-    {
-        return 40;
-    }
     return 105;
 }
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.row<[tmpArray count])
-    {
         static NSString *notiCell = @"notiCell";
         NotificationCell *cell = [tableView dequeueReusableCellWithIdentifier:notiCell];
         if (cell == nil)
@@ -219,10 +233,6 @@ NotificationDetailDelegate>
         NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
         
         [cell.bgImageView setImage:[UIImage imageNamed:@"noticeBg"]];
-//        cell.bgImageView.frame = CGRectMake(55, 10, SCREEN_WIDTH-60, 110);
-        
-        
-        
         cell.iconLabel.frame = CGRectMake(8, 20, 40, 40);
         
         NSString *byName = [[dict objectForKey:@"by"] objectForKey:@"name"];
@@ -296,38 +306,8 @@ NotificationDetailDelegate>
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         cell.backgroundColor = [UIColor clearColor];
         return cell;
-    }
-    else if(indexPath.row == [tmpArray count])
-    {
-        static NSString *buttomCell = @"buttom";
-        UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:buttomCell];
-        if (cell == nil)
-        {
-            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:buttomCell];
-        }
-        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-        button.frame = CGRectMake(0, 0, SCREEN_WIDTH, 40);
-        button.backgroundColor = [UIColor clearColor];
-        if (notificationTableView.contentSize.height > notificationTableView.frame.size.height)
-        {
-            button.enabled = YES;
-            [button setTitle:@"加载更多" forState:UIControlStateNormal];
-        }
-        else
-        {
-            button.enabled = NO;
-            [button setTitle:@"" forState:UIControlStateNormal];
-        }
-        cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        [button setTitleColor:[UIColor lightGrayColor] forState:UIControlStateNormal];
-        [button addTarget:self action:@selector(getMoreDongTai) forControlEvents:UIControlEventTouchUpInside];
-        [cell.contentView addSubview:button];
-        cell.backgroundColor = [UIColor clearColor];
-        return cell;
-    }
-    return nil;
 }
--(void)getMoreDongTai
+-(void)getMoreNotifications
 {
     page++;
     [self getNotifications];
@@ -415,9 +395,6 @@ NotificationDetailDelegate>
                     {
                         [self.readNoticedel readNotice:YES];
                     }
-                    [notificationTableView reloadData];
-                    _reloading = NO;
-                    [pullRefreshView egoRefreshScrollViewDataSourceDidFinishedLoading:notificationTableView];
                 }
                 else
                 {
@@ -444,7 +421,19 @@ NotificationDetailDelegate>
                     }
                 }
                 [notificationTableView reloadData];
+                if (footerView)
+                {
+                    [footerView removeFromSuperview];
+                    footerView = [[FooterView alloc] initWithScrollView:notificationTableView];
+                    footerView.delegate = self;
+                }
+                else
+                {
+                    footerView = [[FooterView alloc] initWithScrollView:notificationTableView];
+                    footerView.delegate = self;
+                }
                 _reloading = NO;
+                [footerView egoRefreshScrollViewDataSourceDidFinishedLoading:notificationTableView];
                 [pullRefreshView egoRefreshScrollViewDataSourceDidFinishedLoading:notificationTableView];
             }
             else

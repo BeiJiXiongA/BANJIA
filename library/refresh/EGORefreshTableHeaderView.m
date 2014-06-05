@@ -92,30 +92,6 @@
     return self;
 }
 
-- (void)adjustPosition {
-    CGSize size = _scrollView.frame.size;
-    CGPoint center = CGPointZero;
-    
-    switch (_orientation) {
-        case EGOPullOrientationDown:
-            center = CGPointMake(size.width/2, 0.0f-size.height/2);
-            break;
-        case EGOPullOrientationUp:
-            center = CGPointMake(size.width/2, _scrollView.contentSize.height+size.height/2);
-            break;
-        case EGOPullOrientationRight:
-            center = CGPointMake(0.0f-size.width/2, size.height/2);
-            break;
-        case EGOPullOrientationLeft:
-            center = CGPointMake(_scrollView.contentSize.width+size.width/2, size.height/2);
-            break;
-        default:
-            break;
-    }
-    
-    self.center = center;
-}
-
 - (id)initWithScrollView:(UIScrollView* )scrollView orientation:(EGOPullOrientation)orientation {
     CGSize size = scrollView.frame.size;
     CGPoint center = CGPointZero;
@@ -194,7 +170,7 @@
             if (refresh) {
                 _statusLabel.text = NSLocalizedString(@"松开刷新...", @"Release to refresh status");
             } else {
-                _statusLabel.text = NSLocalizedString(@"松开加载更多...", @"Release to load more status");
+                _statusLabel.text = NSLocalizedString(@"松开加载最新...", @"Release to load more status");
             }
 			
 			[CATransaction begin];
@@ -211,9 +187,9 @@
 			}
 			
             if (refresh) {
-                _statusLabel.text = NSLocalizedString(@"下拉加载更多...", @"Pull down to refresh status");
+                _statusLabel.text = NSLocalizedString(@"下拉加载最新...", @"Pull down to refresh status");
             } else {
-                _statusLabel.text = NSLocalizedString(@"下拉加载更多...", @"Pull down to load more status");
+                _statusLabel.text = NSLocalizedString(@"下拉加载最新...", @"Pull down to load more status");
             }
 			
 			[_activityView stopAnimating];
@@ -317,9 +293,7 @@
 		if (scrollView.contentInset.top != 0) {
 			scrollView.contentInset = UIEdgeInsetsZero;
 		}
-		
 	}
-	
 }
 
 - (void)egoRefreshScrollViewDidEndDragging:(UIScrollView *)scrollView {

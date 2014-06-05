@@ -15,6 +15,8 @@
 #import <AddressBook/AddressBook.h>
 #import <AddressBookUI/AddressBookUI.h>
 #import <MessageUI/MessageUI.h>
+#import "ReportViewController.h"
+
 
 #define INFOLABELTAG  1000
 #define CALLBUTTONTAG  2000
@@ -26,7 +28,8 @@ UIAlertViewDelegate,
 UITableViewDataSource,
 UITableViewDelegate,
 SetRelateDel,
-MFMessageComposeViewControllerDelegate>
+MFMessageComposeViewControllerDelegate,
+UIActionSheetDelegate>
 {
     UIView *tmpBgView;
     UIImageView *genderImageView;
@@ -70,18 +73,14 @@ MFMessageComposeViewControllerDelegate>
     dataDict  = [[NSMutableDictionary alloc] initWithCapacity:0];
     db = [[OperatDB alloc] init];
     
-    int adminNum = [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] intValue];
-    if (adminNum == 2)
+    UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    moreButton.frame = CGRectMake(SCREEN_WIDTH-60, 6, 50, 32);
+    [moreButton setImage:[UIImage imageNamed:@"icon_more"] forState:UIControlStateNormal];
+    [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
+    [self.navigationBarView addSubview:moreButton];
+    if ([parentID isEqualToString:[Tools user_id]])
     {
-        UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        moreButton.frame = CGRectMake(SCREEN_WIDTH-60, 6, 50, 32);
-        [moreButton setImage:[UIImage imageNamed:@"icon_more"] forState:UIControlStateNormal];
-        [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
-        [self.navigationBarView addSubview:moreButton];
-        if ([parentID isEqualToString:[Tools user_id]])
-        {
-            moreButton.hidden = YES;
-        }
+        moreButton.hidden = YES;
     }
     
     headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(33.5, UI_NAVIGATION_BAR_HEIGHT+11, 80, 80)];
@@ -146,7 +145,7 @@ MFMessageComposeViewControllerDelegate>
     infoView.backgroundColor = [UIColor clearColor];
     [self.bgView addSubview:infoView];
     
-    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
+    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
     
     UIButton *sendMsgButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [sendMsgButton setTitle:@"发消息" forState:UIControlStateNormal];
@@ -388,7 +387,7 @@ MFMessageComposeViewControllerDelegate>
             DDLOG(@"memberByClass responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                [Tools showAlertView:@"请求已申请，请等待对方答复！" delegateViewController:self];
+                [Tools showTips:@"请求已申请，请等待对方答复！" toView:self.bgView];
             }
             else
             {
@@ -408,93 +407,76 @@ MFMessageComposeViewControllerDelegate>
 
 -(void)moreClick
 {
-    NSArray *array = [[NSArray alloc] initWithObjects:@"踢出班级",@"设置发言权限",@"设置家长学生关系", nil];
-    [self showView:[NSMutableArray arrayWithArray:array]];
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
+    {
+        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"设置家长学生关系",@"设置发言权限",@"踢出班级",@"举报此人", nil];
+        ac.tag = 3333;
+        [ac showInView:self.bgView];
+    }
+    else
+    {
+        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"举报此人", nil];
+        ac.tag = 3333;
+        [ac showInView:self.bgView];
+    }
 }
 
--(void)showView:(NSMutableArray *)tmpArray
+-(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    tmpBgView = [[UIView alloc] init];
-    tmpBgView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.7];
-    tmpBgView.frame = CGRectMake(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, 0, 0);
-    [self.bgView addSubview:tmpBgView];
-    
-    tmpBgView.userInteractionEnabled = YES;
-    
-    UITapGestureRecognizer *taps = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(cancelPhone)];
-    [tmpBgView addGestureRecognizer:taps];
-    
-    UIButton *cancelButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [cancelButton setTitle:@"取消" forState:UIControlStateNormal];
-    [cancelButton addTarget:self action:@selector(cancelPhone) forControlEvents:UIControlEventTouchUpInside];
-    cancelButton.tag = 4000;
-    [cancelButton setBackgroundColor:[UIColor darkGrayColor]];
-    [tmpBgView addSubview:cancelButton];
-    
-    for (int i=0; i < [tmpArray count]; ++i)
+    if (actionSheet.tag == 3333)
     {
-        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-        [button setTitle:[tmpArray objectAtIndex:i] forState:UIControlStateNormal];
-        [button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-        button.tag = 4000+i+1;
-        [button addTarget:self action:@selector(phoneClick:) forControlEvents:UIControlEventTouchUpInside];
-        button.backgroundColor = [UIColor whiteColor];
-        [tmpBgView addSubview:button];
-    }
-    
-    [UIView animateWithDuration:0.2 animations:^{
-        tmpBgView.frame = CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-        for(int i=0;i<[tmpArray count]+1;++i)
+        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
         {
-            [tmpBgView viewWithTag:4000+i].frame = CGRectMake(SCREEN_WIDTH/2-100, SCREEN_HEIGHT - (i+1)*40-30, 200, 30);
+            if (buttonIndex == 0)
+            {
+                //设置关系
+                SettingRelateViewController *settingRelate = [[SettingRelateViewController alloc] init];
+                settingRelate.parentName = parentName;
+                settingRelate.title = title;
+                settingRelate.parentID = parentID;
+                settingRelate.admin = admin;
+                settingRelate.setRelate = self;
+                settingRelate.classID = classID;
+                [self.navigationController pushViewController:settingRelate animated:YES];
+            }
+            else if (buttonIndex == 1)
+            {
+                //设置发言权限
+                SettingStateLimitViewController *settingLimit = [[SettingStateLimitViewController alloc] init];
+                settingLimit.userid = parentID;
+                settingLimit.name = parentName;
+                settingLimit.role = role;
+                [self.navigationController pushViewController:settingLimit animated:YES];
+            }
+            else if (buttonIndex == 2)
+            {
+                //踢出班级
+                NSString *msg = [NSString stringWithFormat:@"您确定把%@踢出班级吗？",parentName];
+                UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:msg delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
+                al.tag = KICKALTAG;
+                [al show];
+            }
+            else if (buttonIndex == 3)
+            {
+                ReportViewController *reportVC = [[ReportViewController alloc] init];
+                reportVC.reportType = @"people";
+                reportVC.reportUserid = parentID;
+                reportVC.reportContentID = @"";
+                [self.navigationController pushViewController:reportVC animated:YES];
+            }
         }
-    }];
+        else
+        {
+            ReportViewController *reportVC = [[ReportViewController alloc] init];
+            reportVC.reportType = @"people";
+            reportVC.reportUserid = parentID;
+            reportVC.reportContentID = @"";
+            [self.navigationController pushViewController:reportVC animated:YES];
+
+        }
+    }
 }
--(void)cancelPhone
-{
-    for (UIView *v in tmpBgView.subviews)
-    {
-        [v removeFromSuperview];
-    }
-    [tmpBgView removeFromSuperview];
-}
--(void)phoneClick:(UIButton *)button
-{
-    DDLOG(@"%d",button.tag-4000-1);
-    if (button.tag-4000-1 == 2)
-    {
-        //设置关系
-        SettingRelateViewController *settingRelate = [[SettingRelateViewController alloc] init];
-        settingRelate.parentName = parentName;
-        settingRelate.title = title;
-        settingRelate.parentID = parentID;
-        settingRelate.admin = admin;
-        settingRelate.setRelate = self;
-        settingRelate.classID = classID;
-        [self cancelPhone];
-        [self.navigationController pushViewController:settingRelate animated:YES];
-    }
-    else if(button.tag-4000-1 == 1)
-    {
-        //设置发言权限
-        SettingStateLimitViewController *settingLimit = [[SettingStateLimitViewController alloc] init];
-        settingLimit.userid = parentID;
-        settingLimit.name = parentName;
-        settingLimit.role = role;
-        [self cancelPhone];
-        [self.navigationController pushViewController:settingLimit animated:YES];
-        
-    }
-    else if(button.tag-4000-1 == 0)
-    {
-        //踢出班级
-        NSString *msg = [NSString stringWithFormat:@"您确定把%@踢出班级吗？",parentName];
-        UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:msg delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
-        al.tag = KICKALTAG;
-        [al show];
-    }
-    [self cancelPhone];
-}
+
 
 -(void)getUserInfo
 {

@@ -161,6 +161,9 @@
     classesViewController.schoolLevel = [NSString stringWithFormat:@"%d",[[[schoolArray objectAtIndex:indexPath.row] objectForKey:@"level"] integerValue]];
     classesViewController.schoollID = [[schoolArray objectAtIndex:indexPath.row] objectForKey:@"_id"];
     classesViewController.schoolName = [[schoolArray objectAtIndex:indexPath.row] objectForKey:@"name"];
+    
+    [[NSUserDefaults standardUserDefaults] setObject:[[schoolArray objectAtIndex:indexPath.row] objectForKey:@"name"] forKey:@"schoolname"];
+    [[NSUserDefaults standardUserDefaults]synchronize];
     [self.navigationController pushViewController:classesViewController animated:YES];
 }
 

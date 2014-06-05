@@ -167,7 +167,17 @@ UITableViewDelegate>
 
 -(void)submitChange
 {
-    [self dateDone];
+//    if (![((UITextField *)[personInfoTableView viewWithTag:4]).text isEqualToString:@"请选择"] && ![[((UITextField *)[personInfoTableView viewWithTag:4]).text isEqualToString:[Tools user_birth]])
+//    {
+//        [self dateDone];
+//    }
+    
+    
+    if (!bgImage && !iconImage && [((UITextField *)[personInfoTableView viewWithTag:4]).text isEqualToString:[Tools user_birth]])
+    {
+        [Tools showAlertView:@"没做任何更改哦！" delegateViewController:nil];
+        return;
+    }
     
     if (bgImage)
     {
@@ -177,9 +187,14 @@ UITableViewDelegate>
     {
         [self uploadImage:iconImage andkey:@"img_icon"];
     }
+    
+    if ([((UITextField *)[personInfoTableView viewWithTag:4]).text isEqualToString:[Tools user_birth]])
+    {
+        
+        return ;
+    }
     if ([Tools NetworkReachable])
     {
-        DDLOG(@"%@==%@",[Tools user_id],[Tools client_token]);
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
                                                                       @"birth":[[NSString stringWithFormat:@"%@",datePicker.date] substringToIndex:10]}
@@ -422,11 +437,15 @@ UITableViewDelegate>
                 {
                     if ([[dataDict objectForKey:@"img_kb"] length] > 10)
                     {
+                        [[NSUserDefaults standardUserDefaults] setObject:[dataDict objectForKey:@"img_kb"] forKey:TOPIMAGE];
+                        [[NSUserDefaults standardUserDefaults] synchronize];
                         [Tools fillImageView:topicImageView withImageFromURL:[dataDict objectForKey:@"img_kb"] andDefault:@"toppic.jpg"];
                     }
                 }
                 if ([dataDict objectForKey:@"birth"])
                 {
+                    [[NSUserDefaults standardUserDefaults]setObject:[dataDict objectForKey:@"birth"] forKey:BIRTH];
+                    [[NSUserDefaults standardUserDefaults] synchronize];
                     ((UITextField *)[personInfoTableView viewWithTag:4]).text = [dataDict objectForKey:@"birth"];
                 }
                 else

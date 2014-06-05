@@ -741,7 +741,7 @@ UIAlertViewDelegate>
                                                                       @"contacts":[tmpStr substringWithRange:NSMakeRange(1, [tmpStr length]-2)]
                                                                       } API:CHECKCONTACTS];
         [request setCompletionBlock:^{
-            [Tools hideProgress:contactTableView];
+            [Tools hideProgress:self.bgView];
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
             DDLOG(@"checkcontact responsedict %@",responseDict);
@@ -847,9 +847,9 @@ UIAlertViewDelegate>
         [request setFailedBlock:^{
             NSError *error = [request error];
             DDLOG(@"error %@",error);
-            [Tools hideProgress:contactTableView];
+            [Tools hideProgress:self.bgView];
         }];
-        [Tools showProgress:contactTableView];
+        [Tools showProgress:self.bgView];
         [request startAsynchronous];
     }
 }

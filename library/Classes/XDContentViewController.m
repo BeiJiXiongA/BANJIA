@@ -134,6 +134,8 @@
 {
     [super viewDidLoad];
     
+//    self.tableView.frame = CGRectMake(0, 0, 0, 0);
+    
     _bgView = [[UIView alloc] initWithFrame:CGRectMake(0, YSTART,
                                                        UI_SCREEN_WIDTH,
                                                        UI_SCREEN_HEIGHT)];

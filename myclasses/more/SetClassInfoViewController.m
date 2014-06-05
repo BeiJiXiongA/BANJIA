@@ -146,7 +146,7 @@
                 return ;
             }
             
-            if ([nameTextField.text length] < 4 || [nameTextField.text length] > 10)
+            if ([nameTextField.text length] < 4 || [nameTextField.text length] > 20)
             {
                 [Tools showAlertView:@"学校名称应该在4~10个字符之间" delegateViewController:nil];
                 return ;

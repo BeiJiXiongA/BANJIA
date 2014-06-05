@@ -11,6 +11,7 @@
 #import "ChineseToPinyin.h"
 #import <AVFoundation/AVFoundation.h>
 #import "KKNavigationController.h"
+#import "UIImageView+MJWebCache.h"
 
 extern NSString *CTSettingCopyMyPhoneNumber();
 
@@ -28,108 +29,12 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     return (AppDelegate *)[[UIApplication sharedApplication] delegate];
 }
 
-+ (void)fillButtonImage:(UIButton *)button withImageFromURL:(NSString*)URL  {
-	NSURL *imageURL = [NSURL URLWithString:URL];
-	NSString *key = [URL MD5Hash];
-	NSData *data = [FTWCache objectForKey:key];
-	if (data) {
-		UIImage *image = [UIImage imageWithData:data];
-        [button setBackgroundImage:image forState:UIControlStateNormal];
-	} else {
-		dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0ul);
-		dispatch_async(queue, ^{
-            UIActivityIndicatorView *ac = [[UIActivityIndicatorView alloc] initWithFrame:button.bounds];
-            ac.activityIndicatorViewStyle = UIActivityIndicatorViewStyleGray;
-            [button addSubview:ac];
-            [ac startAnimating];
-			NSData *data = [NSData dataWithContentsOfURL:imageURL];
-			[FTWCache setObject:data forKey:key];
-			UIImage *image = [UIImage imageWithData:data];
-			dispatch_sync(dispatch_get_main_queue(), ^{
-                [ac stopAnimating];
-                [ac removeFromSuperview];
-                [button setBackgroundImage:image forState:UIControlStateNormal];
-			});
-		});
-	}
-}
-
 + (void) fillImageView:(UIImageView *)imageView withImageFromURL:(NSString*)URL andDefault:(NSString *)defaultName
 {
     NSString *urlStr = [NSString stringWithFormat:@"%@%@",IMAGEURL,URL];
     NSURL *imageURL = [NSURL URLWithString:urlStr];
-    
-	NSString *key = [urlStr MD5Hash];
-	NSData *data = [FTWCache objectForKey:key];
-	if (data) {
-        UIImage *image = [UIImage imageWithData:data];
-		imageView.image = image;
-	} else {
-        if ([defaultName length] > 0)
-        {
-            imageView.image = [UIImage imageNamed:defaultName];
-        }
-		dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0ul);
-		dispatch_async(queue, ^{
-//            UIActivityIndicatorView *ac = [[UIActivityIndicatorView alloc] initWithFrame:imageView.bounds];
-//            ac.activityIndicatorViewStyle = UIActivityIndicatorViewStyleGray;
-//            [imageView addSubview:ac];
-//            [ac startAnimating];
-			NSData *data = [NSData dataWithContentsOfURL:imageURL];
-			[FTWCache setObject:data forKey:key];
-			UIImage *image = [UIImage imageWithData:data];
-			dispatch_sync(dispatch_get_main_queue(), ^{
-//                [ac stopAnimating];
-//                [ac removeFromSuperview];
-                if (image == nil)
-                {
-                    imageView.image = [UIImage imageNamed:defaultName];
-                }
-                else
-                {
-                    imageView.image = image;
-                }
-				
-			});
-		});
-	}
+    [imageView setImageWithURL:imageURL placeholderImage:[UIImage imageNamed:defaultName]];
 }
-+ (void) fillImageView:(UIImageView *)imageView withImageFromURL:(NSString*)URL
-{
-	NSURL *imageURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@",URL]];
-	NSString *key = [URL MD5Hash];
-	NSData *data = [FTWCache objectForKey:key];
-	if (data) {
-        UIImage *image = [UIImage imageWithData:data];
-		imageView.image = image;
-	} else {
-		imageView.image = [UIImage imageNamed:@"0.jpg"];
-		dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0ul);
-		dispatch_async(queue, ^{
-            UIActivityIndicatorView *ac = [[UIActivityIndicatorView alloc] initWithFrame:imageView.bounds];
-            ac.activityIndicatorViewStyle = UIActivityIndicatorViewStyleGray;
-            [imageView addSubview:ac];
-            [ac startAnimating];
-			NSData *data = [NSData dataWithContentsOfURL:imageURL];
-			[FTWCache setObject:data forKey:key];
-			UIImage *image = [UIImage imageWithData:data];
-			dispatch_sync(dispatch_get_main_queue(), ^{
-                [ac stopAnimating];
-                [ac removeFromSuperview];
-                if (image == nil)
-                {
-                    imageView.image = [UIImage imageNamed:@"0.jpg"];
-                }
-                else
-                {
-                    imageView.image = image;
-                }
-				
-			});
-		});
-	}
-}
-
 +(BOOL)isPhoneNumber:(NSString *)numStr
 {
     NSString *mobileNum = @"^1(3[0-9]|5[0-35-9]|8[025-9])\\d{8}$";
@@ -670,10 +575,16 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 {
     if ([[[[errorDict objectForKey:@"message"] allKeys] firstObject] isEqualToString:@"NO_AUTH"])
     {
+        if (![self user_id])
+        {
+            return ;
+        }
+        [self exit];
         WelcomeViewController *login = [[WelcomeViewController alloc] init];
         KKNavigationController *loginNav = [[KKNavigationController alloc] initWithRootViewController:login];
-        [self exit];
         [viewController presentViewController:loginNav animated:YES completion:nil];
+        [Tools showAlertView:[[[errorDict objectForKey:@"message"] allValues] firstObject] delegateViewController:viewController];
+        return ;
     }
     [Tools showAlertView:[[[errorDict objectForKey:@"message"] allValues] firstObject] delegateViewController:viewController];
 
@@ -736,18 +647,12 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 #pragma mark - getLableSize
 +(CGSize)getSizeWithString:(NSString *)content andWidth:(CGFloat)width andFont:(UIFont *)font
 {
-    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
-    [label setNumberOfLines:0];
-    label.lineBreakMode = NSLineBreakByWordWrapping;
     CGSize size = CGSizeMake(width, 2000);
     if (font == nil)
     {
         font = [UIFont systemFontOfSize:16];
     }
     CGSize labelSize = [content sizeWithFont:font constrainedToSize:size lineBreakMode:NSLineBreakByWordWrapping];
-    
-    DDLOG(@"labelSize==%@",NSStringFromCGSize(labelSize));
-    [label setFrame:CGRectMake(0, 0, labelSize.width, labelSize.height)];
     return labelSize;
 }
 

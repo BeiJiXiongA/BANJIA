@@ -61,12 +61,30 @@
         
         imagesScrollView = [[UIScrollView alloc] init];
         imagesScrollView.frame = CGRectMake(5, contentLabel.frame.size.height+contentLabel.frame.origin.y, SCREEN_WIDTH-10, 120);
-        [bgView addSubview:imagesScrollView];
+//        [bgView addSubview:imagesScrollView];
         
         imagesView = [[UIView alloc] init];
         imagesView.frame = CGRectMake(5, contentLabel.frame.size.height+contentLabel.frame.origin.y, SCREEN_WIDTH-10, 120);
-        imagesView.hidden = YES;
         [bgView addSubview:imagesView];
+        
+//        CGFloat imageViewHeight = 60.0f;
+//        CGFloat imageViewWidth = 60.0f;
+//        NSInteger ImageCountPerRow = 4;
+//        
+//        for (int i=0; i < 12; ++i)
+//        {
+//            UIImageView *imageView = [[UIImageView alloc] init];
+//            imageView.frame = CGRectMake((i%(NSInteger)ImageCountPerRow)*(imageViewWidth+5), (imageViewWidth+5)*(i/(NSInteger)ImageCountPerRow), imageViewWidth, imageViewHeight);
+//            imageView.userInteractionEnabled = YES;
+//            imageView.tag = 33333+i;
+//            imageView.userInteractionEnabled = YES;
+//            
+//            // 内容模式
+//            imageView.clipsToBounds = YES;
+//            imageView.contentMode = UIViewContentModeScaleAspectFill;
+//            imageView.hidden = YES;
+//            [imagesView addSubview:imageView];
+//        }
         
         transmitImageView = [[UIImageView alloc] init];
         transmitImageView.hidden = YES;

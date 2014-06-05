@@ -234,13 +234,6 @@
                     [Tools showAlertView:@"密码重置成功" delegateViewController:nil];
                     [self.navigationController popViewControllerAnimated:YES];
                     return  ;
-                    
-                    SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
-                    MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
-                    JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myClassesViewController menuController:sideMenuViewController];
-                    [self presentViewController:sideMenu animated:YES completion:^{
-                        
-                    }];
                 }
                 else
                 {

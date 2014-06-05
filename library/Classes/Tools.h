@@ -21,8 +21,6 @@
 
 @interface Tools : NSObject
 + (NSDictionary *)JSonFromString:(NSString* )result;
-+ (void)fillButtonImage:(UIButton *)button withImageFromURL:(NSString*)URL;
-+ (void) fillImageView:(UIImageView *)imageView withImageFromURL:(NSString*)URL;
 + (void) fillImageView:(UIImageView *)imageView withImageFromURL:(NSString*)URL andDefault:(NSString *)defaultName;
 +(BOOL)isPhoneNumber:(NSString *)numStr;
 +(BOOL)isMailAddress:(NSString *)mailStr;

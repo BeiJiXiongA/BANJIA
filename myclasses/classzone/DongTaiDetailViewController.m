@@ -15,13 +15,15 @@
 #import "MJPhoto.h"
 #import "NSString+Emojize.h"
 #import "InputTableBar.h"
+#import "ReportViewController.h"
 
 #define additonalH  90
 
 @interface DongTaiDetailViewController ()<UITableViewDataSource,
 UITableViewDelegate,
 UITextFieldDelegate,
-ReturnFunctionDelegate>
+ReturnFunctionDelegate,
+UIActionSheetDelegate>
 {
     UITableView *diaryDetailTableView;
     NSDictionary *diaryDetailDict;
@@ -42,6 +44,8 @@ ReturnFunctionDelegate>
     
     OperatDB *db;
     NSString *classID;
+    
+    UIButton *moreButton;
 }
 @end
 
@@ -86,6 +90,12 @@ ReturnFunctionDelegate>
     
     self.bgView.frame = CGRectMake(0, YSTART, SCREEN_WIDTH, SCREEN_HEIGHT+200);
     
+    moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    moreButton.frame = CGRectMake(SCREEN_WIDTH-60, 6, 50, 32);
+    [moreButton setImage:[UIImage imageNamed:@"icon_more"] forState:UIControlStateNormal];
+    [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
+    [self.navigationBarView addSubview:moreButton];
+    moreButton.hidden = YES;
     
     commentStr = [[NSMutableString alloc] initWithCapacity:0];
     
@@ -129,6 +139,30 @@ ReturnFunctionDelegate>
 {
     [self.navigationController popViewControllerAnimated:YES];
 }
+
+#pragma mark - moreclick
+
+-(void)moreClick
+{
+    UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"举报", nil];
+    ac.tag = 3333;
+    [ac showInView:self.bgView];
+}
+-(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (actionSheet.tag == 3333)
+    {
+        if (buttonIndex == 0)
+        {
+            ReportViewController *reportVC = [[ReportViewController alloc] init];
+            reportVC.reportUserid = [[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"];
+            reportVC.reportContentID = dongtaiId;
+            reportVC.reportType = @"content";
+            [self.navigationController pushViewController:reportVC animated:YES];
+        }
+    }
+}
+
 #pragma mark - inputTabBarDel
 
 -(void)myReturnFunction
@@ -228,6 +262,7 @@ ReturnFunctionDelegate>
     headerLabel.text = @"    评论";
     return headerLabel;
 }
+#define ImageCountPerRow 4
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -236,10 +271,18 @@ ReturnFunctionDelegate>
         CGFloat imageViewHeight = 0;
         NSString *content = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"];
         NSArray *imgsArray = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"img"];
-        if ([imgsArray count]>0)
+        NSInteger imageCount = [imgsArray count];
+        NSInteger row = 0;
+        if (imageCount % ImageCountPerRow > 0)
         {
-            imageViewHeight = 134;
+            row = (imageCount/ImageCountPerRow+1) > 3 ? 3:(imageCount / ImageCountPerRow + 1);
         }
+        else
+        {
+            row = (imageCount/ImageCountPerRow) > 3 ? 3:(imageCount / ImageCountPerRow);
+        }
+        
+        imageViewHeight = row * (60+5);
         CGFloat he= 0;
         if (SYSVERSION>=7)
         {
@@ -254,7 +297,7 @@ ReturnFunctionDelegate>
         {
             contentHtight = -15;
         }
-        return 60+imageViewHeight+contentHtight+70+he;
+        return 60+imageViewHeight+contentHtight+75+he;
     }
     else if(indexPath.section == 1)
     {
@@ -284,6 +327,8 @@ ReturnFunctionDelegate>
     }
     return 0;
 }
+
+
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -337,13 +382,12 @@ ReturnFunctionDelegate>
         cell.locationLabel.text = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"add"];
         cell.headerImageView.layer.cornerRadius = cell.headerImageView.frame.size.width/2;
         cell.headerImageView.clipsToBounds = YES;
-        [Tools fillImageView:cell.headerImageView withImageFromURL:[[diaryDetailDict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:@"header_pic.jpg"];
+        [Tools fillImageView:cell.headerImageView withImageFromURL:[[diaryDetailDict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERICON];
         
         
         cell.headerImageView.hidden = NO;
         cell.contentLabel.hidden = YES;
         cell.imagesScrollView.hidden = YES;
-        cell.imagesView.hidden  = YES;
         cell.nameLabel.hidden = NO;
         cell.locationLabel.hidden = NO;
         cell.timeLabel.hidden = NO;
@@ -377,22 +421,35 @@ ReturnFunctionDelegate>
             cell.contentLabel.frame = CGRectMake(10, 60, 0, 0);
         }
         
-        CGFloat imageViewHeight = 134;
-        CGFloat imageViewWidth = 134;
+        CGFloat imageViewHeight = 60;
+        CGFloat imageViewWidth = 60;
         if ([[[diaryDetailDict objectForKey:@"detail"] objectForKey:@"img"] count] > 0)
         {
             //有图片
             cell.imagesScrollView.hidden = NO;
             
             NSArray *imgsArray = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"img"];
-            cell.imagesScrollView.frame = CGRectMake(5, cell.contentLabel.frame.size.height+cell.contentLabel.frame.origin.y+3, SCREEN_WIDTH-20, imageViewHeight);
-            cell.imagesScrollView.contentSize = CGSizeMake((imageViewWidth+5)*[imgsArray count], imageViewHeight);
+            NSInteger imageCount = [imgsArray count];
+            NSInteger row = 0;
+            if (imageCount % ImageCountPerRow > 0)
+            {
+                row = (imageCount/ImageCountPerRow+1) > 3 ? 3:(imageCount / ImageCountPerRow + 1);
+            }
+            else
+            {
+                row = (imageCount/ImageCountPerRow) > 3 ? 3:(imageCount / ImageCountPerRow);
+            }
+            cell.imagesView.frame = CGRectMake((SCREEN_WIDTH-imageViewHeight*ImageCountPerRow)/2,
+                                               cell.contentLabel.frame.size.height +
+                                               cell.contentLabel.frame.origin.y+7,
+                                               SCREEN_WIDTH-20, (imageViewHeight+5) * row);
+            
             for (int i=0; i<[imgsArray count]; ++i)
             {
                 UIImageView *imageView = [[UIImageView alloc] init];
-                imageView.frame = CGRectMake(i*(imageViewWidth+5), 0, imageViewWidth, imageViewHeight);
+                imageView.frame = CGRectMake((i%(NSInteger)ImageCountPerRow)*(imageViewWidth+5), (imageViewWidth+5)*(i/(NSInteger)ImageCountPerRow), imageViewWidth, imageViewHeight);
                 imageView.userInteractionEnabled = YES;
-                imageView.tag = (indexPath.row)*1000+i+1000;;
+                imageView.tag = (indexPath.row)*1000+i+1000;
                 
                 imageView.userInteractionEnabled = YES;
                 [imageView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapImage:)]];
@@ -400,13 +457,13 @@ ReturnFunctionDelegate>
                 // 内容模式
                 imageView.clipsToBounds = YES;
                 imageView.contentMode = UIViewContentModeScaleAspectFill;
-                [Tools fillImageView:imageView withImageFromURL:[imgsArray objectAtIndex:i] andDefault:@"0.jpg"];
-                [cell.imagesScrollView addSubview:imageView];
+                [Tools fillImageView:imageView withImageFromURL:[imgsArray objectAtIndex:i] andDefault:@"3100"];
+                [cell.imagesView addSubview:imageView];
             }
         }
         else
         {
-            cell.imagesScrollView.frame = CGRectMake(5, cell.contentLabel.frame.size.height+cell.contentLabel.frame.origin.y, SCREEN_WIDTH-10, 0);
+            cell.imagesView.frame = CGRectMake(5, cell.contentLabel.frame.size.height+cell.contentLabel.frame.origin.y, SCREEN_WIDTH-10, 0);
         }
         
         
@@ -414,21 +471,24 @@ ReturnFunctionDelegate>
         {
             cell.transmitButton.hidden = NO;
 //            cell.transmitImageView.hidden = NO;
-            cell.transmitImageView.frame = CGRectMake((SCREEN_WIDTH-20)/4-55, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+25, 13, 13);
+            cell.transmitImageView.frame = CGRectMake((SCREEN_WIDTH-20)/4-55, cell.imagesView.frame.size.height+cell.imagesView.frame.origin.y+25, 13, 13);
             
             [cell.transmitButton setTitle:@"删除" forState:UIControlStateNormal];
-            cell.transmitButton.frame = CGRectMake(0, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+16, (SCREEN_WIDTH-0)/3, 30);
+            cell.transmitButton.frame = CGRectMake(0, cell.imagesView.frame.size.height+cell.imagesView.frame.origin.y+16, (SCREEN_WIDTH-0)/3, 30);
             [cell.transmitButton addTarget:self action:@selector(deleteDiary) forControlEvents:UIControlEventTouchUpInside];
         }
         
+        if (![[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
+        {
+            moreButton.hidden = NO;
+        }
         
         
+        cell.praiseImageView.frame = CGRectMake((SCREEN_WIDTH-20)*2/4-20, cell.imagesView.frame.size.height+cell.imagesView.frame.origin.y+30, 13, 13);
+        cell.praiseButton.frame = CGRectMake((SCREEN_WIDTH-0)/3, cell.imagesView.frame.size.height+cell.imagesView.frame.origin.y+16, (SCREEN_WIDTH-0)/3, 30);
         
-        cell.praiseImageView.frame = CGRectMake((SCREEN_WIDTH-20)*2/4-20, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+30, 13, 13);
-        cell.praiseButton.frame = CGRectMake((SCREEN_WIDTH-0)/3, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+16, (SCREEN_WIDTH-0)/3, 30);
-        
-        cell.commentImageView.frame = CGRectMake((SCREEN_WIDTH-20)*3/4, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+25, 13, 13);
-        cell.commentButton.frame = CGRectMake((SCREEN_WIDTH-0)/3*2, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+16, (SCREEN_WIDTH-0)/3, 30);
+        cell.commentImageView.frame = CGRectMake((SCREEN_WIDTH-20)*3/4, cell.imagesView.frame.size.height+cell.imagesView.frame.origin.y+25, 13, 13);
+        cell.commentButton.frame = CGRectMake((SCREEN_WIDTH-0)/3*2, cell.imagesView.frame.size.height+cell.imagesView.frame.origin.y+16, (SCREEN_WIDTH-0)/3, 30);
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         
         [cell.praiseButton setTitle:[NSString stringWithFormat:@"赞(%d)",[[diaryDetailDict objectForKey:@"likes_num"] integerValue]] forState:UIControlStateNormal];
@@ -436,7 +496,10 @@ ReturnFunctionDelegate>
         [cell.commentButton setTitle:[NSString stringWithFormat:@"评论(%d)",[[diaryDetailDict objectForKey:@"comments_num"] integerValue]] forState:UIControlStateNormal];
         [cell.commentButton addTarget:self action:@selector(startCommit) forControlEvents:UIControlEventTouchUpInside];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        cell.bgView.frame = CGRectMake(5, 5, SCREEN_WIDTH-10, cell.headerImageView.frame.size.height+cell.contentLabel.frame.size.height+cell.imagesScrollView.frame.size.height+cell.praiseButton.frame.size.height+30);
+        cell.bgView.frame = CGRectMake(5, 5,
+                                       SCREEN_WIDTH-10,
+                                       cell.praiseButton.frame.size.height+
+                                       cell.praiseButton.frame.origin.y);
         cell.bgView.layer.borderWidth = 1;
         cell.backgroundColor = [UIColor clearColor];
         return cell;
@@ -532,8 +595,7 @@ ReturnFunctionDelegate>
         // 替换为中等尺寸图片
         NSString *url = [[NSString stringWithFormat:@"%@%@",IMAGEURL,imgs[i]] stringByReplacingOccurrencesOfString:@"thumbnail" withString:@"bmiddle"];
         MJPhoto *photo = [[MJPhoto alloc] init];
-        photo.image = [UIImage imageWithData:[FTWCache objectForKey:[url MD5Hash]]]; // 图片路径
-        photo.srcImageView = (UIImageView *)[self.bgView viewWithTag:tap.view.tag]; // 来源于哪个UIImageView
+        photo.url = [NSURL URLWithString:url];
         [photos addObject:photo];
     }
     

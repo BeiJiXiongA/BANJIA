@@ -12,11 +12,11 @@
 #pragma mark - 接口网址
 
 //
-//#define HOST_URL       @"http://api.banjiaedu.com"
-//#define IMAGEURL       @"http://img.banjiaedu.com"
+#define HOST_URL       @"http://api.banjiaedu.com"
+#define IMAGEURL       @"http://img.banjiaedu.com"
 
-#define HOST_URL      @"http://mytest.banjiaedu.com"
-#define IMAGEURL       @"http://imgtest.banjiaedu.com"
+//#define HOST_URL      @"http://mytest.banjiaedu.com"
+//#define IMAGEURL       @"http://imgtest.banjiaedu.com"
 
 #pragma mark - users
 #define MB_REG         @"/users/mbReg"
@@ -39,6 +39,7 @@
 #define MB_SETUSERSET      @"/users/mbSetUserSet"
 #define MB_GETUSERSET     @"/users/mbGetUserSet"
 #define MB_SETUSERINFO    @"/users/mbSetUserInfo"   //u_id,birth
+#define MB_RMFRIEND       @"/users/mbRmFriend"
 
 #define MB_SETUSERSETOFCLASS  @"/users/mbSetUserSetByClass"
 #define MB_GETUSERSETOFCLASS  @"/users/mbSetUserSetByClass"

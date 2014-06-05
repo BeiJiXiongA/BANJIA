@@ -60,7 +60,6 @@ typedef enum{
 @property(nonatomic,assign) id <EGORefreshTableHeaderDelegate> delegate;
 
 - (id)initWithScrollView:(UIScrollView* )scrollView orientation:(EGOPullOrientation)orientation;
-- (void)adjustPosition;
 
 - (void)refreshLastUpdatedDate;
 - (void)egoRefreshScrollViewDidScroll:(UIScrollView *)scrollView;

@@ -24,6 +24,7 @@
 #import "MobClick.h"
 #import "WXApi.h"
 #import "ChineseToPinyin.h"
+#import "NSString+Emojize.h"
 
 #define NewVersionTag  1000
 
@@ -40,8 +41,7 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
     
-    
-    [[NSUserDefaults standardUserDefaults] setObject:@"0013" forKey:@"currentVersion"];
+    [[NSUserDefaults standardUserDefaults] setObject:@"0014" forKey:@"currentVersion"];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
     _db = [[OperatDB alloc] init];

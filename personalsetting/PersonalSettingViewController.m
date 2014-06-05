@@ -791,7 +791,7 @@ UIActionSheetDelegate>
                     [cell.relateButton removeTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
                     [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
                     cell.nametf.text = @"";
-                    [cell.relateButton setTitle:@"关联" forState:UIControlStateNormal];
+                    [cell.relateButton setTitle:@"未关联" forState:UIControlStateNormal];
                 }
                 [cell.iconImageView setImage:[UIImage imageNamed:@"QQicon"]];
             }
@@ -809,7 +809,7 @@ UIActionSheetDelegate>
                     [cell.relateButton removeTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
                     [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
                     cell.nametf.text = @"";
-                    [cell.relateButton setTitle:@"关联" forState:UIControlStateNormal];
+                    [cell.relateButton setTitle:@"未关联" forState:UIControlStateNormal];
                 }
                 [cell.iconImageView setImage:[UIImage imageNamed:@"sinaicon"]];
             }
@@ -827,7 +827,7 @@ UIActionSheetDelegate>
                     [cell.relateButton removeTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
                     [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
                     cell.nametf.text = @"";
-                    [cell.relateButton setTitle:@"关联" forState:UIControlStateNormal];
+                    [cell.relateButton setTitle:@"未关联" forState:UIControlStateNormal];
                 }
                 [cell.iconImageView setImage:[UIImage imageNamed:@"renrenicon"]];
             }
@@ -1206,19 +1206,19 @@ static int loginID;
                     isAuth = NO;
                 }
                 
-                if ([accountDict objectForKey:@"qq"] && [[accountDict objectForKey:@"qq"] length] > 0)
+                if (![[accountDict objectForKey:@"qq"]isEqual:[NSNull null]] && [[accountDict objectForKey:@"qq"] length] > 0)
                 {
                     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
                     [ud setObject:[accountDict objectForKey:@"qq"] forKey:QQNICKNAME];
                     [ud synchronize];
                 }
-                if ([accountDict objectForKey:@"rr"] && [[accountDict objectForKey:@"rr"] length] > 0)
+                if (![[accountDict objectForKey:@"rr"]isEqual:[NSNull null]] && [[accountDict objectForKey:@"rr"] length] > 0)
                 {
                     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
                     [ud setObject:[accountDict objectForKey:@"rr"] forKey:RRNICKNAME];
                     [ud synchronize];
                 }
-                if ([accountDict objectForKey:@"sw"] && [[accountDict objectForKey:@"sw"] length] > 0)
+                if (![[accountDict objectForKey:@"sw"] isEqual:[NSNull null]] && [[accountDict objectForKey:@"sw"] length] > 0)
                 {
                     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
                     [ud setObject:[accountDict objectForKey:@"sw"] forKey:SINANICKNAME];

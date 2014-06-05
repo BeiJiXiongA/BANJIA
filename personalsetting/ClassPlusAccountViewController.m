@@ -39,6 +39,7 @@
     accountTableView.delegate = self;
     accountTableView.dataSource = self;
     accountTableView.tableHeaderView = nil;
+    accountTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     accountTableView.backgroundColor = [UIColor whiteColor];
     accountTableView.scrollEnabled = NO;
     [self.bgView addSubview:accountTableView];

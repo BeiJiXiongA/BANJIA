@@ -7,6 +7,7 @@
 //
 
 #import "SideMenuViewController.h"
+#import "HomeViewController.h"
 #import "MyClassesViewController.h"
 #import "MessageViewController.h"
 #import "FriendsViewController.h"
@@ -81,6 +82,7 @@
     for(int i=0;i<[menuNamesArray count];++i)
     {
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+//        button.showsTouchWhenHighlighted = YES;
         button.frame = CGRectMake(0, 166+43*i, 150, 40);
         button.backgroundColor = [UIColor clearColor];
         [button addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
@@ -224,6 +226,13 @@
 
 -(void)buttonClick:(UIButton *)button
 {
+//    if (button.tag == 1000)
+//    {
+//        HomeViewController *home = [[HomeViewController alloc] init];
+//        KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:home];
+//        [self.sideMenuController setContentController:homeNav animted:YES];
+//    }
+//    else
     if (button.tag == 1000)
     {
         MyClassesViewController *myClasses = [[MyClassesViewController alloc] init];

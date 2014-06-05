@@ -63,7 +63,7 @@
         for (NSUInteger i = 0 ; i < itemCount ; i++) {
             UIButton* button = [self buttonAtIndex:i
                                              width:self.frame.size.width / itemCount];
-            
+            button.showsTouchWhenHighlighted = YES;
             // Register for touch events
             [button addTarget:self
                        action:@selector(touchDownAction:)

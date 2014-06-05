@@ -127,7 +127,7 @@
     }
     [self.bgView addSubview:infoLabel];
     
-    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
+    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
     
     UIButton *allowButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [allowButton setTitle:@"同意申请" forState:UIControlStateNormal];

@@ -13,6 +13,7 @@
 #import "StudentDetailViewController.h"
 #import "ParentsDetailViewController.h"
 #import "MemberDetailViewController.h"
+#import "ReportViewController.h"
 
 #define UnreadTabelTag 2000
 #define ReadTableTag  3000
@@ -24,7 +25,8 @@
 UITableViewDataSource,
 UITableViewDelegate,
 UIScrollViewDelegate,
-UIAlertViewDelegate>
+UIAlertViewDelegate,
+UIActionSheetDelegate>
 {
     UITextView *contentTextView;
     NSMutableArray *buttonNamesArray;
@@ -44,6 +46,8 @@ UIAlertViewDelegate>
     NSString *phoneStr;
     
     NSString *classID;
+    
+    UIButton *moreButton;
     
 }
 @end
@@ -68,15 +72,12 @@ UIAlertViewDelegate>
     
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
-    UIButton *delButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [delButton setTitle:@"删除" forState:UIControlStateNormal];
-    delButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
-    [delButton addTarget:self action:@selector(deleteNotice) forControlEvents:UIControlEventTouchUpInside];
-    [delButton setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2 || [byID isEqualToString:[Tools user_id]])
-    {
-        [self.navigationBarView addSubview:delButton];
-    }
+    
+    moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    moreButton.frame = CGRectMake(SCREEN_WIDTH-60, 6, 50, 32);
+    [moreButton setImage:[UIImage imageNamed:@"icon_more"] forState:UIControlStateNormal];
+    [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
+    [self.navigationBarView addSubview:moreButton];
     
     self.titleLabel.text = @"公告详情";
     readArray = [[NSMutableArray alloc] initWithCapacity:0];
@@ -180,6 +181,69 @@ UIAlertViewDelegate>
 {
     [self.navigationController popViewControllerAnimated:YES];
 }
+
+-(void)moreClick
+{
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2 && [byID isEqualToString:[Tools user_id]])
+    {
+        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"删除", nil];
+        ac.tag = 3333;
+        [ac showInView:self.bgView];
+    }
+    else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2 && ![byID isEqualToString:[Tools user_id]])
+    {
+        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"删除",@"举报", nil];
+        ac.tag = 3333;
+        [ac showInView:self.bgView];
+    }
+    else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] != 2 && ![byID isEqualToString:[Tools user_id]])
+    {
+        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"举报", nil];
+        ac.tag = 3333;
+        [ac showInView:self.bgView];
+    }
+}
+-(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (actionSheet.tag == 3333)
+    {
+        
+        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2 && [byID isEqualToString:[Tools user_id]])
+        {
+            if (buttonIndex == 0)
+            {
+                [self deleteNotice];
+            }
+        }
+        else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2 && ![byID isEqualToString:[Tools user_id]])
+        {
+            if (buttonIndex == 0)
+            {
+                [self deleteNotice];
+            }
+            else if(buttonIndex == 1)
+            {
+                ReportViewController *reportVC = [[ReportViewController alloc] init];
+                reportVC.reportUserid = byID;
+                reportVC.reportContentID = noticeID;
+                reportVC.reportType = @"content";
+                [self.navigationController pushViewController:reportVC animated:YES];
+            }
+        }
+        else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] != 2 && ![byID isEqualToString:[Tools user_id]])
+        {
+            if (buttonIndex == 0)
+            {
+                ReportViewController *reportVC = [[ReportViewController alloc] init];
+                reportVC.reportUserid = byID;
+                reportVC.reportContentID = noticeID;
+                reportVC.reportType = @"content";
+                [self.navigationController pushViewController:reportVC animated:YES];
+            }
+        }
+    }
+}
+
 
 -(void)deleteNotice
 {

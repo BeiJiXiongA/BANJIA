@@ -14,6 +14,8 @@
 #import "OperatDB.h"
 #import "InputTableBar.h"
 #import "ClassZoneViewController.h"
+#import "UIImageView+MJWebCache.h"
+#import "ReportViewController.h"
 
 
 #define DIRECT  @"direct"
@@ -23,6 +25,7 @@
 
 #define Image_H 180
 #define additonalH  90
+#define MoreACTag   1000
 
 
 @interface ChatViewController ()<UITableViewDataSource,
@@ -30,7 +33,8 @@ UITableViewDelegate,
 UITextFieldDelegate,
 UIActionSheetDelegate,
 ChatDelegate,
-ReturnFunctionDelegate>
+ReturnFunctionDelegate,
+FriendListDelegate>
 {
     NSMutableArray *messageArray;
     UITableView *messageTableView;
@@ -57,7 +61,7 @@ ReturnFunctionDelegate>
     
     BOOL iseditting;
     
-    UIImage *fromHeaderImage;
+    NSString *fromImageStr;
 }
 @end
 
@@ -85,6 +89,12 @@ ReturnFunctionDelegate>
     
     faceViewHeight = 0;
     
+    UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    moreButton.frame = CGRectMake(SCREEN_WIDTH-60, 6, 50, 32);
+    [moreButton setImage:[UIImage imageNamed:@"icon_more"] forState:UIControlStateNormal];
+    [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
+    [self.navigationBarView addSubview:moreButton];
+    
     inputSize = CGSizeMake(250, 30);
     
     if (fromClass)
@@ -98,25 +108,17 @@ ReturnFunctionDelegate>
     
     if (imageUrl && [imageUrl length]>10)
     {
-        NSString *urlStr = [NSString stringWithFormat:@"%@%@",IMAGEURL,imageUrl];
-        
-        NSString *key = [urlStr MD5Hash];
-        NSData *data = [FTWCache objectForKey:key];
-        fromHeaderImage = [UIImage imageWithData:data];
+        fromImageStr = [NSString stringWithFormat:@"%@",imageUrl];
     }
     else if([[db findSetWithDictionary:@{@"uid":toID} andTableName:CLASSMEMBERTABLE] count] > 0)
     {
         NSArray *array = [db findSetWithDictionary:@{@"uid":toID} andTableName:CLASSMEMBERTABLE];
         
-        NSString *urlStr = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[array firstObject] objectForKey:@"img_icon"]];
-        
-        NSString *key = [urlStr MD5Hash];
-        NSData *data = [FTWCache objectForKey:key];
-        fromHeaderImage = [UIImage imageWithData:data];
+        fromImageStr = [NSString stringWithFormat:@"%@",[[array firstObject] objectForKey:@"img_icon"]];
     }
     else
     {
-        fromHeaderImage = [UIImage imageNamed:HEADERBG];
+        fromImageStr = HEADERICON;
     }
    
     edittingTableView = NO;
@@ -140,11 +142,6 @@ ReturnFunctionDelegate>
     messageTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     [self.bgView addSubview:messageTableView];
     
-    inputTabBar = [[InputTableBar alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT-20, SCREEN_WIDTH, 40)];
-    inputTabBar.backgroundColor = [UIColor whiteColor];
-    inputTabBar.returnFunDel = self;
-    inputTabBar.layer.anchorPoint = CGPointMake(0.5, 1);
-    [self.bgView addSubview:inputTabBar];
     if ([Tools NetworkReachable])
     {
         [self getChatLog];
@@ -156,10 +153,32 @@ ReturnFunctionDelegate>
     [self dealNewChatMsg:nil];
 }
 
+-(void)moreClick
+{
+    if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fid":toID} andTableName:FRIENDSTABLE] count] > 0)
+    {
+        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"解除好友关系",@"举报此人", nil];
+        ac.tag = MoreACTag;
+        [ac showInView:self.bgView];
+    }
+    else
+    {
+        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"添加为好友",@"举报此人", nil];
+        ac.tag = MoreACTag;
+        [ac showInView:self.bgView];
+    }
+}
+
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = self;
+    
+    inputTabBar = [[InputTableBar alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT-20, SCREEN_WIDTH, 40)];
+    inputTabBar.backgroundColor = [UIColor whiteColor];
+    inputTabBar.returnFunDel = self;
+    inputTabBar.layer.anchorPoint = CGPointMake(0.5, 1);
+    [self.bgView addSubview:inputTabBar];
     
     [MobClick beginLogPageView:@"PageOne"];
     [self uploadLastViewTime];
@@ -421,25 +440,125 @@ ReturnFunctionDelegate>
 
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    if (buttonIndex == 0)
+    if (actionSheet.tag == MoreACTag)
     {
-        if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
+        if (buttonIndex == 0)
         {
-            imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
+            if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fid":toID} andTableName:FRIENDSTABLE] count] > 0)
+            {
+                [self releaseFriend];
+            }
+            else
+            {
+                //添加为好友
+                [self addFriend];
+            }
         }
-        else
+        else if (buttonIndex == 1)
         {
-            UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"" message:@"相机不可用！" delegate:self cancelButtonTitle:@"确定" otherButtonTitles: nil];
-            [al show];
+            ReportViewController *reportVC = [[ReportViewController alloc] init];
+            reportVC.reportType = @"people";
+            reportVC.reportUserid = toID;
+            reportVC.reportContentID = @"";
+            [self.navigationController pushViewController:reportVC animated:YES];
         }
-        [self presentViewController:imagePickerController animated:YES completion:^{
-            
-        }];
     }
-    else if(buttonIndex == 1)
+    else
     {
-        imagePickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-        [self presentViewController:imagePickerController animated:YES completion:nil];
+        if (buttonIndex == 0)
+        {
+            if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
+            {
+                imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
+            }
+            else
+            {
+                UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"" message:@"相机不可用！" delegate:self cancelButtonTitle:@"确定" otherButtonTitles: nil];
+                [al show];
+            }
+            [self presentViewController:imagePickerController animated:YES completion:^{
+                
+            }];
+        }
+        else if(buttonIndex == 1)
+        {
+            imagePickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+            [self presentViewController:imagePickerController animated:YES completion:nil];
+        }
+    }
+}
+-(void)addFriend
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"f_id":toID
+                                                                      } API:MB_APPLY_FRIEND];
+        [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"memberByClass responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                [Tools showTips:@"请求已申请，请等待对方答复！" toView:self.bgView];
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:self];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools hideProgress:self.bgView];
+        }];
+        [Tools showProgress:self.bgView];
+        [request startAsynchronous];
+    }
+}
+
+-(void)releaseFriend
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"f_id":toID
+                                                                      } API:MB_RMFRIEND];
+        [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"addfriends responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                if ([db deleteRecordWithDict:@{@"uid":[Tools user_id],@"fid":toID} andTableName:FRIENDSTABLE])
+                {
+                    DDLOG(@"delete friend success");
+                    if ([self.friendVcDel respondsToSelector:@selector(updateFriendList:)])
+                    {
+                        [self.friendVcDel updateFriendList:YES];
+                    }
+                }
+                
+                [self.navigationController popViewControllerAnimated:YES];
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:self];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools hideProgress:self.bgView];
+        }];
+        [Tools showProgress:self.bgView];
+        [request startAsynchronous];
     }
 }
 
@@ -659,7 +778,7 @@ ReturnFunctionDelegate>
                 cell.timeLabel.hidden = YES;
             }
             
-            [cell.headerImageView setImage:fromHeaderImage];
+            [Tools fillImageView:cell.headerImageView withImageFromURL:[NSURL URLWithString:fromImageStr] andDefault:HEADERBG];
         }
     }
     else if([[dict objectForKey:DIRECT] isEqualToString:@"t"])
@@ -750,7 +869,7 @@ ReturnFunctionDelegate>
     NSRange range2 = [msgContent rangeOfString:@"["];
     NSRange range3 = [msgContent rangeOfString:@"—"];
     NSRange range4 = [msgContent rangeOfString:@"]"];
-    NSRange range5 = [msgContent rangeOfString:@"("];
+//    NSRange range5 = [msgContent rangeOfString:@"("];
     NSString *classID = [msgContent substringToIndex:range1.location];
     
     if ([self isInThisClass:classID])
@@ -760,9 +879,9 @@ ReturnFunctionDelegate>
     }
     
     NSString *schoolName;
-    if (range2.length >0 && range5.length > 0)
+    if (range2.length >0 && range4.length > 0)
     {
-        schoolName = [msgContent substringWithRange:NSMakeRange(range2.location+1,range5.location-range2.location-1)];
+        schoolName = [msgContent substringWithRange:NSMakeRange(range2.location+1,range4.location-range2.location-1)];
     }
     
     NSString *className;

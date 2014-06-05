@@ -246,8 +246,11 @@
 {
     NSDictionary *dict = [tmpArray objectAtIndex:indexPath.section];
     NSArray *array = [dict objectForKey:@"classes"];
-    NSString *classid = [[array objectAtIndex:indexPath.row] objectForKey:@"_id"];
-    NSString *className = [[array objectAtIndex:indexPath.row] objectForKey:@"name"];
+    NSDictionary *dict2  = [array objectAtIndex:indexPath.row];
+    DDLOG(@"dict2 = %@",dict2);
+    NSString *classid = [dict2 objectForKey:@"_id"];
+    NSString *className = [dict2 objectForKey:@"name"];
+    
     if ([self isInThisClass:classid])
     {
         [Tools showAlertView:@"您已经是这个班的一员了" delegateViewController:nil];
@@ -255,6 +258,32 @@
     else
     {
         ClassZoneViewController *classZoneViewController = [[ClassZoneViewController alloc] init];
+        
+        NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+        [ud setObject:classid forKey:@"classid"];
+        [ud setObject:className forKey:@"classname"];
+//        [ud setObject:[classDict objectForKey:@"s_id"] forKey:@"schoolid"];
+//        [ud setObject:[classDict objectForKey:@"s_name"] forKey:@"schoolname"];
+//        
+//        if (![[classDict objectForKey:@"img_kb"] isEqual:[NSNull null]] && [[classDict objectForKey:@"img_kb"] length] > 10)
+//        {
+//            [ud setObject:[classDict objectForKey:@"img_kb"] forKey:@"classkbimage"];
+//        }
+//        else
+//        {
+//            [ud setObject:@"" forKey:@"classkbimage"];
+//        }
+//        
+//        if (![[classDict objectForKey:@"img_icon"] isEqual:[NSNull null]] && [[classDict objectForKey:@"img_icon"] length] > 10)
+//        {
+//            [ud setObject:[classDict objectForKey:@"img_icon"] forKey:@"classiconimage"];
+//        }
+//        else
+//        {
+//            [ud setObject:@"" forKey:@"classiconimage"];
+//        }
+        
+        [ud synchronize];
         classZoneViewController.fromClasses = YES;
         [self.navigationController pushViewController:classZoneViewController animated:YES];
     }

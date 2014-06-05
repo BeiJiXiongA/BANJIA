@@ -630,7 +630,7 @@ SetClassInfoDel>
                     classInfo = [[responseDict objectForKey:@"data"] objectForKey:@"info"];
                 }
                 
-                regionStr = [[[[responseDict objectForKey:@"data"] objectForKey:@"school"] objectForKey:@"region"] objectForKey:@"name"];
+                regionStr = [[[responseDict objectForKey:@"data"] objectForKey:@"school"] objectForKey:@"regions"] ;
                 [classInfoTableView reloadData];
                 
             }

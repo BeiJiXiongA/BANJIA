@@ -12,10 +12,6 @@
 #import "AGIPCGridItem.h"
 #import "AGIPCToolbarItem.h"
 #import "Header.h"
-#import "BJGridItem.h"
-#import "UIView+URBMediaFocusViewController.h"
-#import "UIImage+URBImageEffects.h"
-#import "ShowDetailImageViewController.h"
 #import "TFIndicatorView.h"
 #import <CoreLocation/CoreLocation.h>
 #import "ImageCell.h"
@@ -48,7 +44,6 @@
 @interface AddDongTaiViewController ()<UIScrollViewDelegate,
 AGImagePickerControllerDelegate,
 UIGestureRecognizerDelegate,
-ShowDetailImageViewControllerDelegate,
 UITextViewDelegate,
 UITextFieldDelegate,
 CLLocationManagerDelegate,
@@ -106,7 +101,6 @@ UIActionSheetDelegate
     
     BOOL isSelectPhoto;
 }
-@property (nonatomic, strong) ShowDetailImageViewController *showDetailImageViewController;
 @end
 
 @implementation AddDongTaiViewController
@@ -152,12 +146,13 @@ int count = 0;
         if ([array count]>0) {
             CLPlacemark * placemark = [array objectAtIndex:0];
             name = placemark.name;
-            [UIView animateWithDuration:0.2 animations:^{
-                locationTextView.frame = CGRectMake(locationButton.frame.size.width+locationButton.frame.origin.x, locationButton.frame.origin.y-3, [name length]*14>280?280:([name length]*14),35);
-            }];
-            locationTextView.text = name;
-            latitude = newLocation.coordinate.latitude;
-            longitude = newLocation.coordinate.longitude;
+            
+                [UIView animateWithDuration:0.2 animations:^{
+                    locationTextView.frame = CGRectMake(locationButton.frame.size.width+locationButton.frame.origin.x, locationButton.frame.origin.y-3, [name length]*14>280?280:([name length]*14),35);
+                }];
+                locationTextView.text = name;
+                latitude = newLocation.coordinate.latitude;
+                longitude = newLocation.coordinate.longitude;
         }
     }];
 }
@@ -190,18 +185,10 @@ int count = 0;
     
     locationManager = [[CLLocationManager alloc] init];
     if ([CLLocationManager locationServicesEnabled]) {
-        
-        dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0ul);
-        dispatch_async(queue, ^{
                 locationManager.delegate = self;
                 locationManager.distanceFilter = 200;
                 locationManager.desiredAccuracy = kCLLocationAccuracyBest;
                 [locationManager startUpdatingLocation];
-            dispatch_sync(dispatch_get_main_queue(), ^{
-                
-            });
-        });
-        
     }
 }
 
@@ -225,6 +212,11 @@ int count = 0;
     [super viewWillAppear:animated];
     [MobClick beginLogPageView:@"PageOne"];
     [self getImgs];
+    
+//    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+//    dispatch_async(queue, ^{
+        [self setupLocationManager];
+//    });
 }
 
 -(void)viewWillDisappear:(BOOL)animated
@@ -369,11 +361,6 @@ int count = 0;
     [mainScrollView addSubview:latelyLabel];
     
     mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, lateImageView.frame.size.height+lateImageView.frame.origin.y+20);
-    
-    if (enableLocation)
-    {
-        [self setupLocationManager];
-    }
 }
 
 
@@ -1072,13 +1059,6 @@ int count = 0;
     [self reloadImages];
     [((XDContentViewController *)self.parentViewController).sideMenuController setPanGestureEnabled:NO];
 }
-
--(void)showDetailImage:(UIButton *)button
-{
-    UIView *fromView = [[UIView alloc] initWithFrame:CGRectMake(marginspace + (gridWith+5)*(button.tag%4), marginspace+(gridHight+betweenspace)*(button.tag/4), gridWith, gridHight)];
-    [self.showDetailImageViewController showImage:[selectPhotosArray objectAtIndex:button.tag] fromView:fromView withView:self.bgView];
-}
-
 
 #pragma mark - AGImagePickerControllerDelegate methods
 

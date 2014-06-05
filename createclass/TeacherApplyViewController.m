@@ -11,6 +11,7 @@
 #import "MyClassesViewController.h"
 #import "SideMenuViewController.h"
 #import "JDSideMenu.h"
+#import "KKNavigationController.h"
 
 @interface TeacherApplyViewController()<UIAlertViewDelegate,
 UITextFieldDelegate,
@@ -640,8 +641,9 @@ UIScrollViewDelegate>
     {
         SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
         MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
-        JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myClassesViewController menuController:sideMenuViewController];
-        [self presentViewController:sideMenu animated:YES completion:^{
+        KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClassesViewController];
+        JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myClassesNav menuController:sideMenuViewController];
+        [self.navigationController presentViewController:sideMenu animated:YES completion:^{
             
         }];
     }
