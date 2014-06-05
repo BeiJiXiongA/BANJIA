@@ -25,12 +25,19 @@
 
 @class AppDelegate;
 
-@interface WelcomeViewController ()<UITextViewDelegate,UIAlertViewDelegate>
+@interface WelcomeViewController ()<
+UITextViewDelegate,
+UIAlertViewDelegate,
+UITextFieldDelegate>
 {
     CGFloat logoY;
     int sexure;
     int reg;
     NSMutableDictionary *accountDict;
+    
+    UIScrollView *mainScrollview;
+    
+    UITextField *phoneNumTextfield;
 }
 @end
 
@@ -55,15 +62,33 @@
     self.backButton.hidden = YES;
     self.stateView.hidden = YES;
     self.navigationBarView.hidden = YES;
-    UIImage *logoImage = [UIImage imageNamed:@"logo"];
+//    UIImage *logoImage = [UIImage imageNamed:@"logo"];
     UIImageView *logoImageView = [[UIImageView alloc] init];
-    logoImageView.image = logoImage;
-    logoImageView.frame = CGRectMake((SCREEN_WIDTH-logoImage.size.width)/2,SCREEN_HEIGHT, logoImage.size.width, logoImage.size.height);
-    logoImageView.alpha = 0;
-    
+//    logoImageView.image = logoImage;
+    logoImageView.frame = CGRectMake(0,0, SCREEN_WIDTH, 247);
+    logoImageView.backgroundColor =  RGB(59, 189, 100, 1);
     [self.bgView addSubview:logoImageView];
     
     UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
+    
+    phoneNumTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(28, logoImageView.frame.size.height+logoImageView.frame.origin.y, SCREEN_WIDTH-56, 36)];
+    phoneNumTextfield.backgroundColor = [UIColor clearColor];
+    phoneNumTextfield.delegate = self;
+    phoneNumTextfield.keyboardType = UIKeyboardTypeNumberPad;
+    phoneNumTextfield.clearButtonMode = UITextFieldViewModeWhileEditing;
+    phoneNumTextfield.tag = 1000;
+    phoneNumTextfield.textColor = TITLE_COLOR;
+    phoneNumTextfield.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
+    phoneNumTextfield.background = inputImage;
+    phoneNumTextfield.numericFormatter = [AKNumericFormatter formatterWithMask:PHONE_FORMAT placeholderCharacter:'*'];
+    phoneNumTextfield.placeholder = @"手机号码";
+    [self.bgView addSubview:phoneNumTextfield];
+    
+    if ([[Tools last_phone_num] length] > 0)
+    {
+        phoneNumTextfield.text = [Tools last_phone_num];
+    }
+
     
     UIButton *loginButton = [UIButton buttonWithType:UIButtonTypeCustom];
     loginButton.frame = CGRectMake(10, SCREEN_HEIGHT-250.5, 186, 38);
@@ -77,64 +102,61 @@
     
     
     UIButton *registButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    registButton.frame = CGRectMake(loginButton.frame.origin.x+loginButton.frame.size.width+3, SCREEN_HEIGHT-250.5, SCREEN_WIDTH-loginButton.frame.size.width-20-3, 38);
-    [registButton setBackgroundImage:inputImage forState:UIControlStateNormal];
-    [registButton setTitle:@"注册" forState:UIControlStateNormal];
-    [registButton setTitleColor:UIColorFromRGB(0x898989) forState:UIControlStateNormal];
+    registButton.frame = CGRectMake(SCREEN_WIDTH-130, 10, 120, 38);
+//    [registButton setBackgroundImage:inputImage forState:UIControlStateNormal];
+    [registButton setTitle:@"注册新账号>>" forState:UIControlStateNormal];
+    registButton.titleLabel.font = [UIFont systemFontOfSize:14];
+    [registButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [registButton addTarget:self action:@selector(regist) forControlEvents:UIControlEventTouchUpInside];
-    registButton.alpha = 0;
     [self.bgView addSubview:registButton];
     
     UIButton *sinaLoginButton = [UIButton buttonWithType:UIButtonTypeCustom];
     sinaLoginButton.backgroundColor = [UIColor clearColor];
-    sinaLoginButton.frame = CGRectMake(10, SCREEN_HEIGHT-200, SCREEN_WIDTH-20, 40);
+    sinaLoginButton.frame = CGRectMake(100, SCREEN_HEIGHT-95, 50, 50);
     [sinaLoginButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-    sinaLoginButton.alpha = 0;
     sinaLoginButton.tag=100;
     [sinaLoginButton setImage:[UIImage imageNamed:@"sina"] forState:UIControlStateNormal];
     [self.bgView addSubview:sinaLoginButton];
     
     UIButton *qqLoginButton = [UIButton buttonWithType:UIButtonTypeCustom];
     qqLoginButton.backgroundColor = [UIColor clearColor];
-    qqLoginButton.frame = CGRectMake(10, SCREEN_HEIGHT-145, SCREEN_WIDTH-20, 40);
+    qqLoginButton.frame = CGRectMake(170, SCREEN_HEIGHT-95, 50, 50);
     [qqLoginButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-    qqLoginButton.alpha = 0;
     qqLoginButton.tag=101;
     [qqLoginButton setImage:[UIImage imageNamed:@"QQ"] forState:UIControlStateNormal];
     [self.bgView addSubview:qqLoginButton];
     
     UIButton *renrenLoginButton = [UIButton buttonWithType:UIButtonTypeCustom];
     renrenLoginButton.backgroundColor = [UIColor clearColor];
-    renrenLoginButton.frame = CGRectMake(10, SCREEN_HEIGHT-95, SCREEN_WIDTH-20, 40);
+    renrenLoginButton.frame = CGRectMake(240, SCREEN_HEIGHT-95, 50, 50);
     [renrenLoginButton setImage:[UIImage imageNamed:@"renren"] forState:UIControlStateNormal];
     [renrenLoginButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-    renrenLoginButton.alpha = 0;
     renrenLoginButton.tag=102;
     [self.bgView addSubview:renrenLoginButton];
     
-    logoY = 0;
-    if (FOURS)
-    {
-        logoY=40;
-    }
-    else
-    {
-        logoY = 85;
-    }
+//    logoY = 0;
+//    if (FOURS)
+//    {
+//        logoY=40;
+//    }
+//    else
+//    {
+//        logoY = 85;
+//    }
     
-    [UIView animateWithDuration:1.0 animations:^{
-        logoImageView.alpha = 1;
-        logoImageView.frame = CGRectMake((SCREEN_WIDTH-(logoImage.size.width+2.5))/2, logoY, logoImage.size.width+5, logoImage.size.height+5);
-        
-    } completion:^(BOOL finished) {
-        [UIView animateWithDuration:0.5 animations:^{
-            sinaLoginButton.alpha = 1;
-            registButton.alpha = 1;
-            loginButton.alpha = 1;
-            renrenLoginButton.alpha = 1;
-            qqLoginButton.alpha = 1;
-        }];
-    }];
+//    [UIView animateWithDuration:1.0 animations:^{
+//        logoImageView.alpha = 1;
+//        logoImageView.frame = CGRectMake((SCREEN_WIDTH-(logoImage.size.width+2.5))/2, logoY, logoImage.size.width+5, logoImage.size.height+5);
+//        
+//    } completion:^(BOOL finished) {
+//        [UIView animateWithDuration:0.5 animations:^{
+//            sinaLoginButton.alpha = 1;
+//            registButton.alpha = 1;
+//            loginButton.alpha = 1;
+//            renrenLoginButton.alpha = 1;
+//            qqLoginButton.alpha = 1;
+//        }];
+//    }];
 }
 
 - (void)didReceiveMemoryWarning
