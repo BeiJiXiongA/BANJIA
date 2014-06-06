@@ -9,6 +9,7 @@
 #import "Regist3ViewController.h"
 #import "Header.h"
 #import "FillInfoViewController.h"
+#import "APService.h"
 
 @interface Regist3ViewController ()<UITextFieldDelegate>
 {
@@ -164,72 +165,14 @@
 //        return ;
 //    }
     
-    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
-    NSString *channelStr = @"";
     NSString *userStr = @"";
-    id channel = [ud objectForKey:BPushRequestChannelIdKey];
-    if (channel == nil)
+    if ([[APService registrionID] length] > 0)
     {
-        channelStr = @"0";
+        userStr = [APService registrionID];
     }
-    else
-    {
-        channelStr = [ud objectForKey:BPushRequestChannelIdKey];
-    }
-    id user_id = [ud objectForKey:BPushRequestUserIdKey];
     
-    if (user_id == nil)
-    {
-        userStr = @"0";
-    }
-    else
-    {
-        userStr = [ud objectForKey:BPushRequestUserIdKey];
-    }
     NSDictionary *paraDict;
-    if ([accountID length] > 0)
-    {
-        NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
-        
-        NSString *channelStr,*userStr;
-        
-        id channel = [ud objectForKey:BPushRequestChannelIdKey];
-        if (channel == nil)
-        {
-            channelStr = @"0";
-        }
-        else
-        {
-            channelStr = [ud objectForKey:BPushRequestChannelIdKey];
-        }
-        id user_id = [ud objectForKey:BPushRequestUserIdKey];
-        
-        if (user_id == nil)
-        {
-            userStr = @"0";
-        }
-        else
-        {
-            userStr = [ud objectForKey:BPushRequestUserIdKey];
-        }
-        
-        paraDict = @{@"account":@"1",
-                     @"a_id":accountID,
-                     @"a_type":accountType,
-                     @"c_ver":[Tools client_ver],
-                     @"d_name":[Tools device_name],
-                     @"d_imei":[Tools device_uid],
-                     @"c_os":[Tools device_os],
-                     @"d_type":@"iOS",
-                     @"p_cid":channelStr,
-                     @"p_uid":userStr,
-                     @"r_name":nickName,
-                     @"sex":@"1"
-                     };
-    }
-    else
-    {
-        paraDict = @{@"u_id":[Tools user_id],
+    paraDict = @{@"u_id":[Tools user_id],
                      @"pwd":verifyTextField.text,
                      @"reg_method":[Tools reg_method],
                      @"d_name":[Tools device_name],
@@ -237,11 +180,10 @@
                      @"c_ver":[Tools client_ver],
                      @"c_os":[Tools device_version],
                      @"d_type":@"iOS",
-                     @"p_cid":channelStr,
+                     @"p_cid":@"123",
                      @"p_uid":userStr,
                      @"account":@"0"
                      };
-    }
 
     
     if ([Tools NetworkReachable])

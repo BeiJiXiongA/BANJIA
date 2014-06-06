@@ -19,6 +19,7 @@
 #import "SettingPasswordViewController.h"
 #import "UIImage-Helpers.h"
 #import "KKNavigationController.h"
+#import "APService.h"
 
 #define NOPWDTAG   787878
 
@@ -207,30 +208,16 @@
     
     if ([Tools NetworkReachable])
     {
-        NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
         
-        NSString *channelStr,*userStr;
-        
-        id channel = [ud objectForKey:BPushRequestChannelIdKey];
-        if (channel == nil)
+        NSString *userStr;
+        if ([[APService registrionID] length] > 0)
         {
-            channelStr = @"0";
+            userStr = [APService registrionID];
         }
         else
         {
-            channelStr = [ud objectForKey:BPushRequestChannelIdKey];
+            userStr = @"";
         }
-        id user_id = [ud objectForKey:BPushRequestUserIdKey];
-        
-        if (user_id == nil)
-        {
-            userStr = @"0";
-        }
-        else
-        {
-            userStr = [ud objectForKey:BPushRequestUserIdKey];
-        }
-        
         NSDictionary *paraDict;
         if ([accountID length] > 0)
         {
@@ -241,7 +228,7 @@
                          @"d_imei":[Tools device_uid],
                          @"c_os":[Tools device_os],
                          @"d_type":@"iOS",
-                         @"p_cid":channelStr,
+                         @"p_cid":@"123",
                          @"p_uid":userStr,
                          @"account":account,
                          @"a_type":accountType,
@@ -257,7 +244,7 @@
                          @"d_imei":[Tools device_uid],
                          @"c_os":[Tools device_os],
                          @"d_type":@"iOS",
-                         @"p_cid":channelStr,
+                         @"p_cid":@"123",
                          @"p_uid":userStr,
                          @"account":account
                          };

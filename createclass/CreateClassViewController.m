@@ -441,8 +441,6 @@ UIAlertViewDelegate>
             DDLOG(@"createclass responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                [BPush setTag:[responseDict objectForKey:@"data"]];
-                
 //                UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"您班级创建成功，快去查看吧！" delegate:self cancelButtonTitle:@"返回我的班级" otherButtonTitles: nil];
 //                al.delegate = self;
 //                [al show];

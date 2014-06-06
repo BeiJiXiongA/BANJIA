@@ -414,10 +414,6 @@ FreshClassZone>
                     {
                         haveNoClassLabel.hidden = YES;
                         classTableView.hidden = NO;
-                        if (inThisPage)
-                        {
-                            [self setBaiduTags];
-                        }
                     }
                     [classTableView reloadData];
                     _reloading = NO;
@@ -455,27 +451,6 @@ FreshClassZone>
     }
 }
 
--(void)setBaiduTags
-{
-    NSMutableString *tagsString = [[NSMutableString alloc] initWithCapacity:0];
-    for (int i=0; i<[tmpArray count]; ++i)
-    {
-        NSDictionary *dict = [tmpArray objectAtIndex:i];
-        NSArray *classArray = [dict objectForKey:@"classes"];
-        for (int j=0; j<[classArray count]; ++j)
-        {
-            NSDictionary *classDict = [classArray objectAtIndex:j];
-            NSString *classID = [classDict objectForKey:@"_id"];
-            [BPush setTag:classID];
-            [tagsString insertString:[NSString stringWithFormat:@"%@,",classID] atIndex:[tagsString length]];
-        }
-    }
-    if ([tmpArray count] > 0)
-    {
-        NSString *key = [TAGSARRAYKEY MD5Hash];
-        [FTWCache setObject:[tagsString dataUsingEncoding:NSUTF8StringEncoding] forKey:key];
-    }
-}
 
 -(BOOL)isExistInTmpArray:(NSString *)schoolID
 {

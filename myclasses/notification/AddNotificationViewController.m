@@ -270,8 +270,6 @@ UITextViewDelegate>
         [Tools showAlertView:@"请输入公告内容" delegateViewController:nil];
         return ;
     }
-    [BPush delTag:classID];
-    
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],

@@ -89,16 +89,6 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 
 +(void)exit
 {
-    NSString *key = [TAGSARRAYKEY MD5Hash];
-    NSData *tagsData = [FTWCache objectForKey:key];
-    NSString *tagsString = [[NSString alloc] initWithData:tagsData encoding:NSUTF8StringEncoding];
-    
-    NSArray *tagsArray = [tagsString componentsSeparatedByString:@","];
-    for (int i=0; i<[tagsArray count]; ++i)
-    {
-        [BPush delTag:[tagsArray objectAtIndex:i]];
-    }
-    
     if ([ShareSDK hasAuthorizedWithType:ShareTypeSinaWeibo])
     {
         [ShareSDK cancelAuthWithType:ShareTypeSinaWeibo];

@@ -19,7 +19,7 @@
     
     UIImageView *lastScreenShotView;
     UIView *blackMask;
-
+    UIPanGestureRecognizer *recognizer;
 }
 
 @property (nonatomic,retain) UIView *backgroundView;
@@ -68,10 +68,10 @@
     shadowImageView.frame = CGRectMake(-10, 0, 10, self.view.frame.size.height);
     [self.view addSubview:shadowImageView];
     
-    UIPanGestureRecognizer *recognizer = [[UIPanGestureRecognizer alloc]initWithTarget:self
-                                                                                action:@selector(paningGestureReceive:)];
+    recognizer = [[UIPanGestureRecognizer alloc]initWithTarget:self
+                                        action:@selector(paningGestureReceive:)];
     [recognizer delaysTouchesBegan];
-    [self.view addGestureRecognizer:recognizer];
+//    [self.view addGestureRecognizer:recognizer];
 }
 
 - (void)didReceiveMemoryWarning
@@ -80,17 +80,12 @@
     // Dispose of any resources that can be recreated.
 }
 
-//- (UIStatusBarStyle)preferredStatusBarStyle
-//{
-////    return self.topViewController.preferredStatusBarStyle;
-////    return UIStatusBarStyleLightContent;
-//}
-
 - (void)pushViewController:(UIViewController *)viewController animated:(BOOL)animated
 {
     [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleDefault;
     [self.screenShotsList addObject:[self capture]];
-
+    
+    [self.view addGestureRecognizer:recognizer];
     [super pushViewController:viewController animated:animated];
 }
 
@@ -163,8 +158,11 @@
 {
     if (self.viewControllers.count <= 1 || !self.canDragBack)
     {
+//        [self.sideMenuController panRecognized:recoginzer];
+        [self.view removeGestureRecognizer:recoginzer];
         if(recoginzer.state == UIGestureRecognizerStateEnded)
         {
+            
             if ([self.sideMenuController isMenuVisible])
             {
                 [self.sideMenuController hideMenuAnimated:YES];

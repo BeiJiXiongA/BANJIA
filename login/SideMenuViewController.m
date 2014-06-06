@@ -23,6 +23,8 @@
     UIImage *btnImage;
     
     OperatDB *db;
+    
+    NSArray *menuNamesArray;
 }
 @end
 
@@ -78,7 +80,7 @@
     
     btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
     greenImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg_green"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
-    NSArray *menuNamesArray = [NSArray arrayWithObjects:@"   我的班级",@"   我的好友",@"   聊天记录",@"   个人信息", nil];
+    menuNamesArray = [NSArray arrayWithObjects:@"   首页",@"   我的班级",@"   我的好友",@"   聊天记录",@"   个人信息", nil];
     for(int i=0;i<[menuNamesArray count];++i)
     {
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -121,9 +123,9 @@
     PersonalSettingViewController *personalSetting = [[PersonalSettingViewController alloc] init];
     KKNavigationController *personSettingNav = [[KKNavigationController alloc] initWithRootViewController:personalSetting];
     [self.sideMenuController setContentController:personSettingNav animted:YES];
-    for(int i=1000;i<1004;++i)
+    for(int i=1000;i<1000+[menuNamesArray count];++i)
     {
-        if (i==1003)
+        if (i==1000+[menuNamesArray count]-1)
         {
             [((UIButton *)[self.bgView viewWithTag:i]) setTitleColor:RGB(255, 108, 0, 1) forState:UIControlStateNormal];
         }
@@ -226,41 +228,41 @@
 
 -(void)buttonClick:(UIButton *)button
 {
-//    if (button.tag == 1000)
-//    {
-//        HomeViewController *home = [[HomeViewController alloc] init];
-//        KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:home];
-//        [self.sideMenuController setContentController:homeNav animted:YES];
-//    }
-//    else
     if (button.tag == 1000)
+    {
+        HomeViewController *home = [[HomeViewController alloc] init];
+        KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:home];
+        [self.sideMenuController setContentController:homeNav animted:NO];
+    }
+    else
+    if (button.tag == 1001)
     {
         MyClassesViewController *myClasses = [[MyClassesViewController alloc] init];
         KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClasses];
-        [self.sideMenuController setContentController:myClassesNav animted:YES];
-    }
-    else if(button.tag == 1001)
-    {
-        FriendsViewController *friends = [[FriendsViewController alloc] init];
-        KKNavigationController *friendsNav = [[KKNavigationController alloc] initWithRootViewController:friends];
-        [self.sideMenuController setContentController:friendsNav animted:YES];
-        
+        [self.sideMenuController setContentController:myClassesNav animted:NO];
     }
     else if(button.tag == 1002)
     {
-        MessageViewController *message = [[MessageViewController alloc] init];
-        KKNavigationController *messageNav = [[KKNavigationController alloc] initWithRootViewController:message];
-        [self.sideMenuController setContentController:messageNav animted:YES];
+        FriendsViewController *friends = [[FriendsViewController alloc] init];
+        KKNavigationController *friendsNav = [[KKNavigationController alloc] initWithRootViewController:friends];
+        [self.sideMenuController setContentController:friendsNav animted:NO];
+        
     }
     else if(button.tag == 1003)
     {
+        MessageViewController *message = [[MessageViewController alloc] init];
+        KKNavigationController *messageNav = [[KKNavigationController alloc] initWithRootViewController:message];
+        [self.sideMenuController setContentController:messageNav animted:NO];
+    }
+    else if(button.tag == 1004)
+    {
         PersonalSettingViewController *personalSetting = [[PersonalSettingViewController alloc] init];
         KKNavigationController *personSettingNav = [[KKNavigationController alloc] initWithRootViewController:personalSetting];
-        [self.sideMenuController setContentController:personSettingNav animted:YES];
+        [self.sideMenuController setContentController:personSettingNav animted:NO];
     }
     
     
-    for(int i=1000;i<1004;++i)
+    for(int i=1000;i<1000+[menuNamesArray count];++i)
     {
         if (i==button.tag)
         {

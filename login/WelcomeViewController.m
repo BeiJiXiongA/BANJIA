@@ -14,6 +14,7 @@
 #import "UIImageView+WebCache.h"
 #import "SideMenuViewController.h"
 #import "MyClassesViewController.h"
+#import "HomeViewController.h"
 #import "FillInfoViewController.h"
 #import "KKNavigationController.h"
 
@@ -101,6 +102,7 @@ UITextFieldDelegate>
     phoneNumTextfield.keyboardType = UIKeyboardTypeNumberPad;
     phoneNumTextfield.clearButtonMode = UITextFieldViewModeWhileEditing;
     phoneNumTextfield.tag = 1000;
+    phoneNumTextfield.background = nil;
     phoneNumTextfield.layer.cornerRadius = 3;
     phoneNumTextfield.textColor = TITLE_COLOR;
     phoneNumTextfield.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
@@ -117,6 +119,7 @@ UITextFieldDelegate>
     passwordTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(28, phoneNumTextfield.frame.origin.y+phoneNumTextfield.frame.size.height+space, SCREEN_WIDTH-56, 42)];
     passwordTextfield.backgroundColor = [UIColor whiteColor];
     passwordTextfield.delegate = self;
+    passwordTextfield.background = nil;
     passwordTextfield.layer.cornerRadius = 3;
     passwordTextfield.clearButtonMode = UITextFieldViewModeWhileEditing;
     passwordTextfield.secureTextEntry = YES;
@@ -289,29 +292,13 @@ static int loginID;
 
 -(void)loginWithName:(NSString *)name   //AccountID:(NSString *)accountID accountType:(NSString *)accountType andName:(NSString *)name
 {
-    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     
-    NSString *channelStr,*userStr;
+    NSString *userStr = @"";
+    if ([[APService registrionID] length] > 0)
+    {
+        userStr = [APService registrionID];
+    }
     
-    id channel = [ud objectForKey:BPushRequestChannelIdKey];
-    if (channel == nil)
-    {
-        channelStr = @"0";
-    }
-    else
-    {
-        channelStr = [ud objectForKey:BPushRequestChannelIdKey];
-    }
-    id user_id = [ud objectForKey:BPushRequestUserIdKey];
-    
-    if (user_id == nil)
-    {
-        userStr = @"0";
-    }
-    else
-    {
-        userStr = [ud objectForKey:BPushRequestUserIdKey];
-    }
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"a_id":[accountDict objectForKey:@"a_id"],
@@ -321,7 +308,7 @@ static int loginID;
                                                                       @"d_imei":[Tools device_uid],
                                                                       @"c_os":[Tools device_os],
                                                                       @"d_type":@"iOS",
-                                                                      @"p_cid":channelStr,
+                                                                      @"p_cid":@"123",
                                                                       @"p_uid":userStr,
                                                                       @"r_name":name,
                                                                       @"sex":@"1",
@@ -437,28 +424,10 @@ static int loginID;
     
     if ([Tools NetworkReachable])
     {
-        NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
-        
-        NSString *channelStr,*userStr;
-        
-        id channel = [ud objectForKey:BPushRequestChannelIdKey];
-        if (channel == nil)
+        NSString *userStr = @"";
+        if ([[APService registrionID] length] > 0)
         {
-            channelStr = @"0";
-        }
-        else
-        {
-            channelStr = [ud objectForKey:BPushRequestChannelIdKey];
-        }
-        id user_id = [ud objectForKey:BPushRequestUserIdKey];
-        
-        if (user_id == nil)
-        {
-            userStr = @"0";
-        }
-        else
-        {
-            userStr = [ud objectForKey:BPushRequestUserIdKey];
+            userStr = [APService registrionID];
         }
         
         NSDictionary *paraDict = @{@"phone":phoneNum,
@@ -468,7 +437,7 @@ static int loginID;
                                    @"d_imei":[Tools device_uid],
                                    @"c_os":[Tools device_os],
                                    @"d_type":@"iOS",
-                                   @"p_cid":channelStr,
+                                   @"p_cid":@"123",
                                    @"p_uid":userStr,
                                    @"account":@"0"
                                    };
@@ -495,9 +464,11 @@ static int loginID;
                 
                 
                 SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
-                MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
-                KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClassesViewController];
-                JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myClassesNav menuController:sideMenuViewController];
+//                MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
+//                KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClassesViewController];
+                HomeViewController *homeViewController = [[HomeViewController alloc] init];
+                KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:homeViewController];
+                JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:homeNav menuController:sideMenuViewController];
                 [self.navigationController presentViewController:sideMenu animated:YES completion:^{
                     
                 }];

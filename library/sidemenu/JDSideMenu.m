@@ -53,6 +53,8 @@ const CGFloat JDSideMenuDefaultCloseAnimationTime = 0.2;
     [self addChildViewController:self.contentController];
     [self.contentController didMoveToParentViewController:self];
     
+    self.view.backgroundColor = [UIColor clearColor];
+    
     // add subviews
     _containerView = [[UIView alloc] initWithFrame:self.view.bounds];
     _containerView.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleHeight;
@@ -100,9 +102,9 @@ const CGFloat JDSideMenuDefaultCloseAnimationTime = 0.2;
     
     // animate in
     __weak typeof(self) blockSelf = self;
-    CGFloat offset = JDSideMenuDefaultMenuWidth + (self.view.frame.size.width-JDSideMenuDefaultMenuWidth)/2.0;
+//    CGFloat offset = JDSideMenuDefaultMenuWidth + (self.view.frame.size.width-JDSideMenuDefaultMenuWidth)/2.0;
     [UIView animateWithDuration:JDSideMenuDefaultCloseAnimationTime/2.0 animations:^{
-        blockSelf.containerView.transform = CGAffineTransformMakeTranslation(offset, 0);
+//        blockSelf.containerView.transform = CGAffineTransformMakeTranslation(offset, 0);
 //        [blockSelf statusBarView].transform = blockSelf.containerView.transform;
     } completion:^(BOOL finished) {
         // move to container view
@@ -114,7 +116,7 @@ const CGFloat JDSideMenuDefaultCloseAnimationTime = 0.2;
         [previousController removeFromParentViewController];
         [previousController.view removeFromSuperview];
         
-        [blockSelf hideMenuAnimated:YES];
+        [blockSelf hideMenuAnimated:NO];
     }];
 }
 
@@ -126,7 +128,7 @@ const CGFloat JDSideMenuDefaultCloseAnimationTime = 0.2;
 
         
     } else {
-        [self hideMenuAnimated:YES];
+        [self hideMenuAnimated:NO];
         [self.containerView removeGestureRecognizer:self.tapRecognizer];
     }
 }

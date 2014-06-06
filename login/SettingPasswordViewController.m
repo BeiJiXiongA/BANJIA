@@ -182,28 +182,12 @@
         return ;
     }
     
-    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     
-    NSString *channelStr,*userStr;
+    NSString *userStr = @"";
     
-    id channel = [ud objectForKey:BPushRequestChannelIdKey];
-    if (channel == nil)
+    if ([[APService registrionID] length] > 0)
     {
-        channelStr = @"0";
-    }
-    else
-    {
-        channelStr = [ud objectForKey:BPushRequestChannelIdKey];
-    }
-    id user_id1 = [ud objectForKey:BPushRequestUserIdKey];
-    
-    if (user_id1 == nil)
-    {
-        userStr = @"0";
-    }
-    else
-    {
-        userStr = [ud objectForKey:BPushRequestUserIdKey];
+        userStr = [APService registrionID];
     }
 
     
@@ -217,7 +201,7 @@
                                                                       @"c_ver":[Tools client_ver],
                                                                       @"c_os":[Tools device_version],
                                                                       @"d_type":@"iOS",
-                                                                      @"p_cid":channelStr,
+                                                                      @"p_cid":@"123",
                                                                       @"p_uid":userStr,
                                                                       @"account":@"0"}
                                                                 API:MB_SUBPWD];

@@ -9,7 +9,6 @@
 #import "ChatViewController.h"
 #import "Header.h"
 #import "MessageCell.h"
-#import "Base64.h"
 #import "AppDelegate.h"
 #import "OperatDB.h"
 #import "InputTableBar.h"

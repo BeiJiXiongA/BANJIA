@@ -7,16 +7,16 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "BPush.h"
 #import "OperatDB.h"
 #import "BMapKit.h"
+#import "APService.h"
 
 
 
 @protocol ChatDelegate;
 @protocol MsgDelegate;
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate,BPushDelegate,UIAlertViewDelegate>
+@interface AppDelegate : UIResponder <UIApplicationDelegate,UIAlertViewDelegate>
 {
     NSString *updateUrl;
     BMKMapManager* _mapManager;

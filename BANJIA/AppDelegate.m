@@ -12,6 +12,7 @@
 #import "FillInfoViewController.h"
 #import "SideMenuViewController.h"
 #import "MyClassesViewController.h"
+#import "HomeViewController.h"
 #import "MCSoundBoard.h"
 #import "KKNavigationController.h"
 
@@ -81,9 +82,11 @@
         {
             [self getNewChat];
             SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
-            MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
-            KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClassesViewController];
-            JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myClassesNav menuController:sideMenuViewController];
+//            MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
+//            KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClassesViewController];
+            HomeViewController *homeViewController = [[HomeViewController alloc] init];
+            KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:homeViewController];
+            JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:homeNav menuController:sideMenuViewController];
             self.window.rootViewController = sideMenu;
             
             [self getNewVersion];
@@ -100,17 +103,15 @@
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
     
-    [BPush setupChannel:launchOptions];
-    [BPush setDelegate:self];
-    
     [ShareSDK registerApp:@"182899e1ea92"];
     [self shareAppKeysForEvery];
 
-    [application registerForRemoteNotificationTypes:
+    [APService registerForRemoteNotificationTypes:
      UIRemoteNotificationTypeAlert
      |UIRemoteNotificationTypeBadge
      |UIRemoteNotificationTypeSound];
     
+    [APService setupWithOption:launchOptions];
     return YES;
 }
 
@@ -295,8 +296,7 @@
 
 -(void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
 {
-    [BPush registerDeviceToken:deviceToken];
-    [BPush bindChannel];
+    [APService registerDeviceToken:deviceToken];
 }
 
 - (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url
@@ -307,32 +307,12 @@
     return [ShareSDK handleOpenURL:url sourceApplication:sourceApplication annotation:annotation wxDelegate:self];
 }
 
--(void)onMethod:(NSString *)method response:(NSDictionary *)data
-{
-    if ([BPushRequestMethod_Bind isEqualToString:method])
-    {
-        NSDictionary *res = [[NSDictionary alloc] initWithDictionary:data];
-        
-        NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
-        
-        NSString *appid = [res valueForKey:BPushRequestAppIdKey];
-        [ud setObject:appid forKey:BPushRequestAppIdKey];
-        NSString *userid = [res valueForKey:BPushRequestUserIdKey];
-        [ud setObject:userid forKey:BPushRequestUserIdKey];
-        NSString *channelid = [res valueForKey:BPushRequestChannelIdKey];
-        [ud setObject:channelid forKey:BPushRequestChannelIdKey];
-        int returnCode = [[res valueForKey:BPushRequestErrorCodeKey] intValue];
-        [ud setValue:[NSNumber numberWithInt:returnCode] forKey:BPushRequestErrorCodeKey];
-        NSString *requestid = [res valueForKey:BPushRequestRequestIdKey];
-        [ud setObject:requestid forKey:BPushRequestRequestIdKey];
-        [ud synchronize];
-    }
-}
-
 -(void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
 {
-    [BPush handleNotification:userInfo];
+    [APService handleRemoteNotification:userInfo];
     [[UIApplication sharedApplication] cancelAllLocalNotifications];
+    [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
+    [Tools showAlertView:[NSString stringWithFormat:@"%@",userInfo] delegateViewController:nil];
     DDLOG(@"push msg==%@",userInfo);
     if ([[Tools user_id] length] > 0)
     {

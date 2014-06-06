@@ -127,7 +127,6 @@
     if ([Tools NetworkReachable])
     {
         NSMutableString *jobTitle = [[NSMutableString alloc] initWithCapacity:0];
-        [BPush delTag:classID];
         if ([selectDict count] >0)
         {
             for(NSString *key in selectDict)

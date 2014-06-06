@@ -14,6 +14,7 @@
 #import "JDSideMenu.h"
 #import "KKNavigationController.h"
 #import "UIImageView+WebCache.h"
+#import "HomeViewController.h"
 
 #define NAMETFTAG   1000
 
@@ -255,7 +256,6 @@ MySwitchDel>
         takePictureButton.frame = CGRectMake(SCREEN_WIDTH/2-100, SCREEN_HEIGHT - 90, 200, 30);
         fromLibraryButton.frame = CGRectMake(SCREEN_WIDTH/2-100, SCREEN_HEIGHT-130, 200, 30);
     }];
-
 }
 
 -(void)selectPicture:(UIButton *)button
@@ -390,28 +390,10 @@ MySwitchDel>
     NSString *url;
     if ([accountID length] > 0)
     {
-        NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
-        
-        NSString *channelStr,*userStr;
-        
-        id channel = [ud objectForKey:BPushRequestChannelIdKey];
-        if (channel == nil)
+        NSString *userStr = @"";
+        if ([[APService registrionID] length] > 0)
         {
-            channelStr = @"0";
-        }
-        else
-        {
-            channelStr = [ud objectForKey:BPushRequestChannelIdKey];
-        }
-        id user_id = [ud objectForKey:BPushRequestUserIdKey];
-        
-        if (user_id == nil)
-        {
-            userStr = @"0";
-        }
-        else
-        {
-            userStr = [ud objectForKey:BPushRequestUserIdKey];
+            userStr = [APService registrionID];
         }
 
         paraDict = @{@"a_id":accountID,
@@ -421,7 +403,7 @@ MySwitchDel>
                       @"d_imei":[Tools device_uid],
                       @"c_os":[Tools device_os],
                       @"d_type":@"iOS",
-                      @"p_cid":channelStr,
+                      @"p_cid":@"123",
                       @"p_uid":userStr,
                       @"r_name":nameTextfield.text,
                       @"sex":sex,
@@ -462,9 +444,11 @@ MySwitchDel>
                 [[NSUserDefaults standardUserDefaults] synchronize];
                 
                 SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
-                MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
-                KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClassesViewController];
-                JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myClassesNav menuController:sideMenuViewController];
+//                MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
+//                KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClassesViewController];
+                HomeViewController *homeViewController = [[HomeViewController alloc] init];
+                KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:homeViewController];
+                JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:homeNav menuController:sideMenuViewController];
                 [self.navigationController presentViewController:sideMenu animated:YES completion:^{
                     
                 }];

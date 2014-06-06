@@ -27,6 +27,8 @@
 - (void)setContentController:(UIViewController*)contentController
                      animted:(BOOL)animated;
 
+- (void)panRecognized:(UIPanGestureRecognizer*)recognizer;
+
 // show / hide manually
 - (void)showMenuAnimated:(BOOL)animated;
 - (void)hideMenuAnimated:(BOOL)animated;
