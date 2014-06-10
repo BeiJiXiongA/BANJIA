@@ -724,8 +724,8 @@ UIActionSheetDelegate>
             {
                 [cell.authenticationSign setImage:[UIImage imageNamed:@"auth"]];
             }
-            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_angle"]];
-            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 53, 10, 20)];
+            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"discovery_arrow"]];
+            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 12.5, 10, 15)];
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
             return cell;
         }
@@ -753,8 +753,8 @@ UIActionSheetDelegate>
                     cell.nameLabel.text = [NSString stringWithFormat:@"绑定手机"];
                     cell.textLabel.textColor = TITLE_COLOR;
                 }
-                cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_angle"]];
-                [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 10, 10, 20)];
+                cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"discovery_arrow"]];
+                [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 12.5, 10, 15)];
                 cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-150, 13, 124, 20);
                 cell.objectsLabel.text = [Tools phone_num];
                 cell.objectsLabel.font = [UIFont systemFontOfSize:16];
@@ -904,8 +904,8 @@ UIActionSheetDelegate>
             }
             cell.textLabel.font = [UIFont systemFontOfSize:18];
             cell.textLabel.text = @"设置";
-            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_angle"]];
-            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 10, 10, 20)];
+            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"discovery_arrow"]];
+            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 12.5, 10, 15)];
             UIImageView *bgImageBG = [[UIImageView alloc] init];
             bgImageBG.image = [UIImage imageNamed:@"cell_bg2"];
             cell.backgroundView = bgImageBG;

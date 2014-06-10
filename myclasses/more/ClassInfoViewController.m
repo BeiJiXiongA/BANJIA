@@ -245,9 +245,10 @@ SetClassInfoDel>
             
             if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
             {
-                cell.authenticationSign.frame = CGRectMake(SCREEN_WIDTH-20, 60, 10, 20);
-                [cell.authenticationSign setImage:[UIImage imageNamed:@"icon_angle"]];
-
+                
+                cell.authenticationSign.frame = CGRectMake(SCREEN_WIDTH-20, 62.5, 10, 15);
+                [cell.authenticationSign setImage:[UIImage imageNamed:@"discovery_arrow"]];
+//                cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
             }
         }
         else if(indexPath.row == 1)
@@ -284,8 +285,8 @@ SetClassInfoDel>
         }
         if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
         {
-            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_angle"]];
-            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 60, 10, 20)];
+            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"discovery_arrow"]];
+            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 62.5, 10, 15)];
         }
     }
     UIImageView *bgImageBG = [[UIImageView alloc] init];

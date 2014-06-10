@@ -270,8 +270,8 @@ MFMailComposeViewControllerDelegate>
         }
         else
         {
-            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_angle"]];
-            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 11.5, 10, 20)];
+            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"discovery_arrow"]];
+            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 12.5, 10, 15)];
         }
         UIImageView *bgImageBG = [[UIImageView alloc] init];
         bgImageBG.image = [UIImage imageNamed:@"cell_bg2"];
@@ -296,8 +296,8 @@ MFMailComposeViewControllerDelegate>
         }
         else
         {
-            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_angle"]];
-            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 11.5, 10, 20)];
+            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"discovery_arrow"]];
+            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 12.5, 10, 15)];
             UIImageView *bgImageBG = [[UIImageView alloc] init];
             bgImageBG.image = [UIImage imageNamed:@"cell_bg2"];
             cell.backgroundView = bgImageBG;

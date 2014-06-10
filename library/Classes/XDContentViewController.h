@@ -13,6 +13,7 @@
 @interface XDContentViewController : UIViewController
 {
     UIPanGestureRecognizer *panGestureRecognier;
+    
 }
 
 @property (nonatomic, strong) UILabel *titleLabel;

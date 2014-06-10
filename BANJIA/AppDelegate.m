@@ -42,7 +42,7 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
     
-    [[NSUserDefaults standardUserDefaults] setObject:@"0014" forKey:@"currentVersion"];
+    [[NSUserDefaults standardUserDefaults] setObject:@"0010" forKey:@"currentVersion"];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
     _db = [[OperatDB alloc] init];
@@ -154,12 +154,45 @@
             {
                 if ([[responseDict objectForKey:@"data"] isKindOfClass:[NSDictionary class]])
                 {
-                    [[NSUserDefaults standardUserDefaults] setObject:[[responseDict objectForKey:@"data"] objectForKey:@"iOS_url"] forKey:@"iOS_url"];
-                    [[NSUserDefaults standardUserDefaults] synchronize];
-                    
-                    UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"新版本提示" message:@"有新版本哦，快去更新吧，加了好多功能的！" delegate:self cancelButtonTitle:@"一会在更新" otherButtonTitles:@"用最新的", nil];
-                    al.tag = NewVersionTag;
-                    [al show];
+                    if ([[responseDict objectForKey:@"data"] objectForKey:@"iOS_url"])
+                    {
+                        [[NSUserDefaults standardUserDefaults] setObject:[[responseDict objectForKey:@"data"] objectForKey:@"iOS_url"] forKey:@"iOS_url"];
+                        [[NSUserDefaults standardUserDefaults] synchronize];
+                        
+                        UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"新版本提示" message:@"有新版本哦，快去更新吧，加了好多功能的！" delegate:self cancelButtonTitle:@"一会在更新" otherButtonTitles:@"用最新的", nil];
+                        al.tag = NewVersionTag;
+                        [al show];
+
+                    }
+                    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+                    NSDictionary *template = [[responseDict objectForKey:@"data"] objectForKey:@"template"];
+                    NSString *item1 = [template objectForKey:@"tem1"];
+                    if ([ud objectForKey:@"item1"])
+                    {
+                        if (![[ud objectForKey:@"item1"] isEqualToString:item1])
+                        {
+                            [ud setObject:item1 forKey:@"item1"];
+                            [ud synchronize];
+                        }
+                    }
+                    NSString *item2 = [template objectForKey:@"tem2"];
+                    if ([ud objectForKey:@"item2"])
+                    {
+                        if (![[ud objectForKey:@"item2"] isEqualToString:item2])
+                        {
+                            [ud setObject:item2 forKey:@"item2"];
+                            [ud synchronize];
+                        }
+                    }
+                    NSString *item3 = [template objectForKey:@"tem3"];
+                    if ([ud objectForKey:@"item3"])
+                    {
+                        if (![[ud objectForKey:@"item3"] isEqualToString:item3])
+                        {
+                            [ud setObject:item3 forKey:@"item3"];
+                            [ud synchronize];
+                        }
+                    }
                 }
             }
             else

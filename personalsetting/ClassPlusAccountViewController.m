@@ -124,11 +124,11 @@
     {
         if (indexPath.row == 0)
         {
-            UIImageView *accImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_angle"]];
+            UIImageView *accImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"discovery_arrow"]];
             accImageView.backgroundColor = [UIColor whiteColor];
             cell.accessoryView = accImageView;
             cell.accessoryView.backgroundColor = [UIColor whiteColor];
-            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 53, 10, 20)];
+            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 55.5, 10, 15)];
         }
         cell.selectionStyle = UITableViewCellSelectionStyleGray;
     }

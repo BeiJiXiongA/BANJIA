@@ -12,21 +12,29 @@
 #import "KKNavigationController.h"
 #import "KKNavigationController+JDSideMenu.h"
 #import "UINavigationController+JDSideMenu.h"
+#import "PopView.h"
+#import "DemoVIew.h"
 
 @interface HomeViewController ()<UITableViewDataSource,UITableViewDelegate>
 {
     BOOL navOpen;
-    UIView *navView;
+    PopView *navView;
     
     BOOL addOpen;
-    UIView *addView;
+    PopView *addView;
     UIButton *addNoticeButton;
     UIButton *addDiaryButton;
+    
+    DemoVIew *demoView;
     
     
     UITapGestureRecognizer *tapTgr;
     
     UITableView *classTableView;
+    
+    UIImageView *navImageView;
+    
+    
 }
 @end
 
@@ -53,10 +61,19 @@
     self.titleLabel.hidden = YES;
     
     navOpen = NO;
-        
-    UIImageView *navImageView = [[UIImageView alloc] initWithFrame:CGRectMake(self.titleLabel.frame.origin.x+self.titleLabel.frame.size.width, self.titleLabel.frame.origin.y, 30, 30)];
-    navImageView.backgroundColor = [UIColor yellowColor];
+    addOpen = NO;
+    
+    navImageView = [[UIImageView alloc] initWithFrame:CGRectMake(self.titleLabel.frame.origin.x+self.titleLabel.frame.size.width, self.titleLabel.frame.origin.y + 5, 30, 20)];
+    navImageView.backgroundColor = [UIColor clearColor];
+    [navImageView setImage:[UIImage imageNamed:@"bind_open"]];
     [self.navigationBarView addSubview:navImageView];
+    
+    demoView = [[DemoVIew alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT)];
+    demoView.dataArray = [[NSMutableArray alloc] initWithObjects:@"aaa",@"bbb",@"ccc",@"ddd",@"eee",@"fff",@"ggg",@"aaa",@"bbb",@"ccc",@"ddd",@"eee",@"fff",@"ggg", nil];
+    [demoView layoutView];
+    [demoView.demoTableView reloadData];
+    [self.bgView addSubview:demoView];
+    
     
     UIButton *navButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [navButton setTitle:@"全部班级" forState:UIControlStateNormal];
@@ -80,48 +97,50 @@
     [addButton addTarget:self action:@selector(addButtonClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:addButton];
     
-    navView = [[UIView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH/2-80, UI_NAVIGATION_BAR_HEIGHT-10, 160, 0)];
-    navView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
+    navView = [[PopView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH/2-80, UI_NAVIGATION_BAR_HEIGHT-10, 160, 150)];
+    navView.wid = 4;
     [self.bgView addSubview:navView];
     
     
-    classTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 10, navView.frame.size.width, 0) style:UITableViewStylePlain];
+    classTableView = [[UITableView alloc] initWithFrame:CGRectMake(5, 20, navView.frame.size.width-10, navView.frame.size.height-20) style:UITableViewStylePlain];
     classTableView.delegate = self;
     classTableView.dataSource = self;
     classTableView.backgroundColor = [UIColor clearColor];
+    classTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     [navView addSubview:classTableView];
     if ([classTableView respondsToSelector:@selector(setSeparatorInset:)])
     {
         [classTableView setSeparatorInset:UIEdgeInsetsZero];
     }
+    navView.alpha = 0;
+    classTableView.alpha = 0;
     
-    addView = [[UIView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH-85, UI_NAVIGATION_BAR_HEIGHT-10, 80, 0)];
-    addView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
+    addView = [[PopView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH-125, UI_NAVIGATION_BAR_HEIGHT-10, 120, 85)];
+    addView.point = CGPointMake(100, 0);
+    addView.wid = 2;
     [self.bgView addSubview:addView];
     
     
     addNoticeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    addNoticeButton.frame = CGRectMake(3, 10, 80, 0);
+    addNoticeButton.frame = CGRectMake(35, 15, 80, 30);
+    addNoticeButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.5];
     addNoticeButton.alpha = 0;
     [addNoticeButton setTitle:@"添加通知" forState:UIControlStateNormal];
     [addView addSubview:addNoticeButton];
+    [addNoticeButton addTarget:self action:@selector(addNotice) forControlEvents:UIControlEventTouchUpInside];
     
     addDiaryButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    addDiaryButton.frame = CGRectMake(3, 50, 80, 0);
+    addDiaryButton.frame = CGRectMake(35, 50, 80, 30);
     addDiaryButton.alpha = 0;
+    addDiaryButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.5];
     [addDiaryButton setTitle:@"添加空间" forState:UIControlStateNormal];
     [addView addSubview:addDiaryButton];
+    [addDiaryButton addTarget:self action:@selector(addDongtai) forControlEvents:UIControlEventTouchUpInside];
     
-//    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-//    dispatch_async(queue, ^{
-//        [[MMProgressHUD sharedHUD] setOverlayMode:MMProgressHUDWindowOverlayModeGradient];
-//        [MMProgressHUD showWithTitle:@"Title" status:@"Custom Animated Image" images:nil];
-//        sleep(1);
-//        dispatch_async(dispatch_get_main_queue(), ^{
-//            [MMProgressHUD dismissWithSuccess:@"success!"];
-//        });
-//        
-//    });
+    
+    addView.alpha = 0;
+    addNoticeButton.alpha = 0;
+    addDiaryButton.alpha = 0;
 }
 
 - (void)didReceiveMemoryWarning
@@ -130,26 +149,36 @@
     // Dispose of any resources that can be recreated.
 }
 
+-(void)addNotice
+{
+    
+}
+-(void)addDongtai
+{
+    
+}
+
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    CGSize navSize = navView.frame.size;
-    CGSize addSize = addView.frame.size;
     for(UITouch *t in touches)
     {
-        DDLOG(@"%@==%@",NSStringFromCGPoint([t locationInView:navView]),NSStringFromCGPoint([t locationInView:addView]));
-        
-        if (!(([t locationInView:navView].x > 0 && [t locationInView:navView].x < navSize.width &&
-             [t locationInView:navView].y > 0 && [t locationInView:navView].y < navSize.height) ||
-             ([t locationInView:addView].x > 0 && [t locationInView:addView].x < addSize.width &&
-             [t locationInView:addView].y > 0 && [t locationInView:addView].y < addSize.height)))
+        if(!(CGRectContainsPoint(navView.frame, [t locationInView:navView]) ||
+             CGRectContainsPoint(addView.frame, [t locationInView:addView])))
         {
-            addOpen = NO;
-            navOpen = NO;
-            [self closeAdd];
-            [self closeNav];
+            if (addOpen)
+            {
+                addOpen = NO;
+                [self closeAdd];
+            }
+            if (navOpen)
+            {
+                navOpen = NO;
+                [self closeNav];
+            }
         }
     }
 }
+
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
@@ -168,13 +197,14 @@
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellname];
     }
     cell.textLabel.text = @"123";
+    cell.textLabel.textColor = [UIColor whiteColor];
+    cell.backgroundColor = [UIColor clearColor];
     return cell;
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     DDLOG(@"nav class clicked");
-    [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
     [self closeNav];
     navOpen = NO;
@@ -198,7 +228,9 @@
         self.navigationController.sideMenuController.tapGestureEnabled = NO;
         if (navOpen)
         {
+            navOpen = NO;
             [self closeNav];
+            demoView.userInteractionEnabled = NO;
         }
     }
     addOpen = !addOpen;
@@ -221,7 +253,9 @@
         self.navigationController.sideMenuController.tapGestureEnabled = NO;
         if (addOpen)
         {
+            addOpen = NO;
             [self closeAdd];
+            demoView.userInteractionEnabled = NO;
         }
     }
     navOpen = !navOpen;
@@ -230,11 +264,10 @@
 -(void)openAdd
 {
     [UIView animateWithDuration:0.2 animations:^{
-        addView.frame = CGRectMake(SCREEN_WIDTH-85, UI_NAVIGATION_BAR_HEIGHT-10, 80, 90);
-        addNoticeButton.frame = CGRectMake(3, 10, 80, 35);
-        addDiaryButton.frame = CGRectMake(3, 50, 80, 35);
+        addView.alpha = 1;
         addNoticeButton.alpha = 1;
         addDiaryButton.alpha = 1;
+        demoView.userInteractionEnabled = NO;
     }];
 
 }
@@ -242,30 +275,42 @@
 -(void)closeAdd
 {
     [UIView animateWithDuration:0.2 animations:^{
-        addView.frame = CGRectMake(SCREEN_WIDTH-85, UI_NAVIGATION_BAR_HEIGHT-10, 80, 0);
-        addNoticeButton.frame = CGRectMake(3, 10, 80, 0);
-        addDiaryButton.frame = CGRectMake(3, 50, 80, 0);
         addNoticeButton.alpha = 0;
         addDiaryButton.alpha = 0;
+        addView.alpha = 0;
         self.navigationController.sideMenuController.panGestureEnabled = YES;
         self.navigationController.sideMenuController.tapGestureEnabled = YES;
+        demoView.userInteractionEnabled = YES;
     }];
 }
 
 -(void)closeNav
 {
     [UIView animateWithDuration:0.2 animations:^{
-        navView.frame = CGRectMake(SCREEN_WIDTH/2-80, UI_NAVIGATION_BAR_HEIGHT-10, 160, 0);
-        classTableView.frame = CGRectMake(0, 10, navView.frame.size.width, 0);
         self.navigationController.sideMenuController.panGestureEnabled = YES;
         self.navigationController.sideMenuController.tapGestureEnabled = YES;
+        navView.alpha = 0;
+        classTableView.alpha = 0;
+        demoView.userInteractionEnabled = YES;
+        [UIView animateWithDuration:0.2 animations:^{
+            navImageView.transform = CGAffineTransformRotate(navImageView.transform, M_PI);
+        } completion:^(BOOL finished) {
+            
+        }];
     }];
 }
+
 -(void)openNav
 {
     [UIView animateWithDuration:0.2 animations:^{
-        navView.frame = CGRectMake(SCREEN_WIDTH/2-80, UI_NAVIGATION_BAR_HEIGHT-10, 160, 200);
-        classTableView.frame = CGRectMake(0, 10, navView.frame.size.width, navView.frame.size.height-10);
+        navView.alpha = 1;
+        classTableView.alpha = 1;
+        demoView.userInteractionEnabled = NO;
+        [UIView animateWithDuration:0.2 animations:^{
+            navImageView.transform = CGAffineTransformRotate(navImageView.transform, -M_PI);
+        } completion:^(BOOL finished) {
+            
+        }];
     }];
 }
 
@@ -294,35 +339,15 @@
 }
 */
 
-//-(void)sendPush
-//{
-//    if ([Tools NetworkReachable])
-//    {
-//        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"platform":@"all",@"audience":@"all",@"notification":@"{\"alert\":\"您有新的消息\"},\"options\":{\"sendno\":342377575}"}
-//                                                                API:@"https://api.jpush.cn/v3/push"];
-//        
-//        [request setCompletionBlock:^{
-//            [Tools hideProgress:self.bgView];
-//            NSString *responseString = [request responseString];
-//            NSDictionary *responseDict = [Tools JSonFromString:responseString];
-//            DDLOG(@"report== responsedict %@",responseString);
-//            
-//        }];
-//        
-//        [request setFailedBlock:^{
-//            NSError *error = [request error];
-//            DDLOG(@"error %@",error);
-//            [Tools hideProgress:self.bgView];
-//        }];
-//        [Tools showProgress:self.bgView];
-//        [request startAsynchronous];
-//    }
-//    else
-//    {
-//        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
-//    }
-//    
-//}
-
+//    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+//    dispatch_async(queue, ^{
+//        [[MMProgressHUD sharedHUD] setOverlayMode:MMProgressHUDWindowOverlayModeGradient];
+//        [MMProgressHUD showWithTitle:@"Title" status:@"Custom Animated Image" images:nil];
+//        sleep(1);
+//        dispatch_async(dispatch_get_main_queue(), ^{
+//            [MMProgressHUD dismissWithSuccess:@"success!"];
+//        });
+//
+//    });
 
 @end

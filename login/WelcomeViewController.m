@@ -158,25 +158,25 @@ UITextFieldDelegate>
     [self.bgView addSubview:tipLabel];
     
     UIButton *sinaLoginButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    sinaLoginButton.backgroundColor = [UIColor yellowColor];
+    sinaLoginButton.backgroundColor = [UIColor clearColor];
     sinaLoginButton.frame = CGRectMake(120, loginButton.frame.origin.y+loginButton.frame.size.height+7+space, 40, 40);
     [sinaLoginButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
     sinaLoginButton.tag=100;
-//    [sinaLoginButton setImage:[UIImage imageNamed:@"sinaicon"] forState:UIControlStateNormal];
+    [sinaLoginButton setImage:[UIImage imageNamed:@"sinaicon"] forState:UIControlStateNormal];
     [self.bgView addSubview:sinaLoginButton];
     
     UIButton *qqLoginButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    qqLoginButton.backgroundColor = [UIColor yellowColor];
+    qqLoginButton.backgroundColor = [UIColor clearColor];
     qqLoginButton.frame = CGRectMake(180, loginButton.frame.origin.y+loginButton.frame.size.height+7+space, 40, 40);
     [qqLoginButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
     qqLoginButton.tag=101;
-//    [qqLoginButton setImage:[UIImage imageNamed:@"QQicon"] forState:UIControlStateNormal];
+    [qqLoginButton setImage:[UIImage imageNamed:@"QQicon"] forState:UIControlStateNormal];
     [self.bgView addSubview:qqLoginButton];
     
     UIButton *renrenLoginButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    renrenLoginButton.backgroundColor = [UIColor yellowColor];
+    renrenLoginButton.backgroundColor = [UIColor clearColor];
     renrenLoginButton.frame = CGRectMake(240, loginButton.frame.origin.y+loginButton.frame.size.height+7+space, 40, 40);
-//    [renrenLoginButton setImage:[UIImage imageNamed:@"renrenicon"] forState:UIControlStateNormal];
+    [renrenLoginButton setImage:[UIImage imageNamed:@"renrenicon"] forState:UIControlStateNormal];
     [renrenLoginButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
     renrenLoginButton.tag=102;
     [self.bgView addSubview:renrenLoginButton];
