@@ -103,7 +103,7 @@ FreshClassZone>
     UIButton *addButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [addButton setTitle:@"添加" forState:UIControlStateNormal];
     addButton.backgroundColor = [UIColor clearColor];
-    [addButton setBackgroundImage:[UIImage imageNamed:@"navbtn"] forState:UIControlStateNormal];
+    [addButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     addButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
     [addButton addTarget:self action:@selector(addButtonClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:addButton];
@@ -160,6 +160,11 @@ FreshClassZone>
 {
     [super viewWillDisappear:animated];
     [MobClick endLogPageView:@"PageOne"];
+}
+-(void)dealloc
+{
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = self;
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = self;
 }
 
 #pragma mark - chatdelegate

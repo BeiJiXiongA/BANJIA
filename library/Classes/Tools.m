@@ -35,6 +35,13 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     NSURL *imageURL = [NSURL URLWithString:urlStr];
     [imageView setImageWithURL:imageURL placeholderImage:[UIImage imageNamed:defaultName]];
 }
+
++ (void) fillImageView:(UIImageView *)imageView withImageFromURL:(NSString*)URL imageWidth:(CGFloat)imageWidth andDefault:(NSString *)defaultName
+{
+    NSString *urlStr = [NSString stringWithFormat:@"%@%@%.0fw%@",IMAGEURL,[URL substringToIndex:[URL length]-4],imageWidth,[URL substringFromIndex:[URL rangeOfString:@"."].location]];
+    NSURL *imageURL = [NSURL URLWithString:urlStr];
+    [imageView setImageWithURL:imageURL placeholderImage:[UIImage imageNamed:defaultName]];
+}
 +(BOOL)isPhoneNumber:(NSString *)numStr
 {
     NSString *mobileNum = @"^1(3[0-9]|5[0-35-9]|8[025-9])\\d{8}$";
@@ -46,11 +53,30 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 {
     NSMutableString *tmpNum = [NSMutableString stringWithString:numStr];
     NSRange range = [tmpNum rangeOfString:@"-"];
-    while (range.location != NSNotFound)
+    while (range.length > 0)
     {
         [tmpNum deleteCharactersInRange:range];
         range = [tmpNum rangeOfString:@"-"];
     }
+    NSRange range1 = [tmpNum rangeOfString:@"("];
+    while (range1.length > 0)
+    {
+        [tmpNum deleteCharactersInRange:range1];
+        range1 = [tmpNum rangeOfString:@"("];
+    }
+    NSRange range2 = [tmpNum rangeOfString:@")"];
+    while (range2.length > 0)
+    {
+        [tmpNum deleteCharactersInRange:range2];
+        range2 = [tmpNum rangeOfString:@")"];
+    }
+    NSRange range3 = [tmpNum rangeOfString:@" "];
+    while (range3.length > 0)
+    {
+        [tmpNum deleteCharactersInRange:range3];
+        range3 = [tmpNum rangeOfString:@" "];
+    }
+
     return tmpNum;
 
 }

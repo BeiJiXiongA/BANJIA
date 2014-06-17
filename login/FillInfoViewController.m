@@ -367,7 +367,6 @@ MySwitchDel>
     [imagePickerController dismissViewControllerAnimated:YES completion:nil];
 }
 
-
 -(void)submitClick
 {
     
@@ -390,7 +389,7 @@ MySwitchDel>
     NSString *url;
     if ([accountID length] > 0)
     {
-        NSString *userStr = @"";
+        NSString *userStr = @"simu";
         if ([[APService registrionID] length] > 0)
         {
             userStr = [APService registrionID];
@@ -444,8 +443,6 @@ MySwitchDel>
                 [[NSUserDefaults standardUserDefaults] synchronize];
                 
                 SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
-//                MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
-//                KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClassesViewController];
                 HomeViewController *homeViewController = [[HomeViewController alloc] init];
                 KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:homeViewController];
                 JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:homeNav menuController:sideMenuViewController];

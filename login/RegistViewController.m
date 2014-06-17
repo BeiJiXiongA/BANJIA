@@ -203,11 +203,8 @@
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 codeStr = [responseDict objectForKey:@"data"];
-#ifdef DEBUG
                 codeTextField.text = codeStr;
-#else
                 
-#endif
             }
             else
             {
@@ -228,7 +225,6 @@
     {
         [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
     }
-    
 }
 
 

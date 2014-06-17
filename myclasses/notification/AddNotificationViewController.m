@@ -23,8 +23,6 @@ UITextViewDelegate>
     NSArray *objectsArray;
     NSArray *objectsValues;
     
-    UIButton *objectButton;
-    
     UILabel *replayLabel;
     MySwitchView *replaySwitch;
     NSInteger replay;
@@ -37,7 +35,7 @@ UITextViewDelegate>
 @end
 
 @implementation AddNotificationViewController
-@synthesize classID;
+@synthesize classID,fromClass;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -55,7 +53,14 @@ UITextViewDelegate>
     self.titleLabel.text = @"发布公告";
     replay = 1;
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-    self.view.backgroundColor = [UIColor blackColor];
+    if (fromClass)
+    {
+        self.view.backgroundColor = [UIColor blackColor];
+    }
+    else
+    {
+         self.view.backgroundColor = [UIColor whiteColor];
+    }
     
     [self.backButton addTarget:self action:@selector(myBack) forControlEvents:UIControlEventTouchUpInside];
     
@@ -77,13 +82,13 @@ UITextViewDelegate>
     contentHolder.backgroundColor = [UIColor clearColor];
     
     UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 3, 20, 2.3)];
-    UIImageView *inputImageView = [[UIImageView alloc] initWithFrame:CGRectMake(15, contentHolder.frame.origin.y-2, SCREEN_WIDTH-30, 120)];
+    UIImageView *inputImageView = [[UIImageView alloc] initWithFrame:CGRectMake(15, contentHolder.frame.origin.y-2, SCREEN_WIDTH-30, 210)];
     [inputImageView setImage:inputImage];
     [self.bgView addSubview:inputImageView];
     
     [self.bgView addSubview:contentHolder];
     
-    contentTextView = [[UITextView alloc] initWithFrame:CGRectMake(20, contentHolder.frame.origin.y, SCREEN_WIDTH-40, 110)];
+    contentTextView = [[UITextView alloc] initWithFrame:CGRectMake(20, contentHolder.frame.origin.y, SCREEN_WIDTH-40, 200)];
     contentTextView.backgroundColor = [UIColor clearColor];
     contentTextView.delegate = self;
     contentTextView.textColor = TITLE_COLOR;
@@ -95,16 +100,7 @@ UITextViewDelegate>
     objectLabel.textColor = TITLE_COLOR;
     objectLabel.font = [UIFont systemFontOfSize:16];
     objectLabel.backgroundColor = [UIColor clearColor];
-    [self.bgView addSubview:objectLabel];
-    
-    objectButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    objectButton.frame = CGRectMake(objectLabel.frame.size.width+contentHolder.frame.origin.x+10, objectLabel.frame.origin.y, 150, 30);
-    [objectButton setBackgroundImage:[UIImage imageNamed:@"objectBg"] forState:UIControlStateNormal];
-    [objectButton setTitle:objectString forState:UIControlStateNormal];
-    [objectButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
-    objectButton.titleLabel.font = [UIFont systemFontOfSize:16];
-    [objectButton addTarget:self action:@selector(openObjectTableView) forControlEvents:UIControlEventTouchUpInside];
-    [self.bgView addSubview:objectButton];
+//    [self.bgView addSubview:objectLabel];
     
     objectsTableView = [[UITableView alloc] initWithFrame:CGRectMake(objectLabel.frame.size.width+contentHolder.frame.origin.x+10, objectLabel.frame.origin.y+30, 150, 0) style:UITableViewStylePlain];
     objectsTableView.delegate = self;
@@ -114,8 +110,7 @@ UITextViewDelegate>
         [objectsTableView setSeparatorInset:UIEdgeInsetsZero];
     }
     
-    
-    replayLabel = [[UILabel alloc] initWithFrame:CGRectMake(objectsTableView.frame.origin.x, objectsTableView.frame.origin.y+objectsTableView.frame.size.height+20, 150, 30)];
+    replayLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, objectsTableView.frame.origin.y+objectsTableView.frame.size.height-30, 150, 30)];
     replayLabel.textColor = TITLE_COLOR;
     replayLabel.backgroundColor = [UIColor clearColor];
     replayLabel.font = [UIFont systemFontOfSize:16];
@@ -149,9 +144,10 @@ UITextViewDelegate>
     
     
     UIButton *sendButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    sendButton.backgroundColor = [UIColor clearColor];
+    [sendButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     sendButton.frame = CGRectMake(SCREEN_WIDTH-60, 6, 50, 35);
     [sendButton setTitle:@"发布" forState:UIControlStateNormal];
-    [sendButton setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
     [sendButton addTarget:self action:@selector(addNotification) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:sendButton];
 }
@@ -186,24 +182,6 @@ UITextViewDelegate>
 #pragma mark - tableView
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    if (objectOpen)
-    {
-        [UIView animateWithDuration:0.2 animations:^{
-            
-            objectsTableView.frame = CGRectMake(objectsTableView.frame.origin.x, objectsTableView.frame.origin.y, objectsTableView.frame.size.width, [objectsArray count]*30);
-            replayLabel.frame = CGRectMake(15, objectsTableView.frame.size.height+objectsTableView.frame.origin.y+10, 200, 30);
-            replaySwitch.frame = CGRectMake(SCREEN_WIDTH-200, replayLabel.frame.origin.y, 80, 30);
-        }];
-        return [objectsArray count];
-    }
-    else
-    {
-        [UIView animateWithDuration:0.2 animations:^{
-            objectsTableView.frame = CGRectMake(objectsTableView.frame.origin.x, objectsTableView.frame.origin.y, objectsTableView.frame.size.width, 0);
-            replayLabel.frame = CGRectMake(15, objectsTableView.frame.size.height+objectsTableView.frame.origin.y+10, 200, 30);
-            replaySwitch.frame = CGRectMake(SCREEN_WIDTH-200, replayLabel.frame.origin.y, 80, 30);
-        }];
-    }
     return 0;
 }
 
@@ -231,7 +209,7 @@ UITextViewDelegate>
     objectString = [objectsArray objectAtIndex:indexPath.row];
     objectsValueString = [objectsValues objectAtIndex:indexPath.row];
     objectString = [objectsArray objectAtIndex:indexPath.row];
-    [objectButton setTitle:objectString forState:UIControlStateNormal];
+//    [objectButton setTitle:objectString forState:UIControlStateNormal];
     objectOpen = NO;
     [objectsTableView reloadData];
 }
@@ -259,6 +237,11 @@ UITextViewDelegate>
 
 -(void)addNotification
 {
+    if (!fromClass)
+    {
+        [Tools showAlertView:@"请选择班级" delegateViewController:nil];
+        return ;
+    }
     if([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] <= 0)
     {
         [Tools showAlertView:@"您没有权限" delegateViewController:nil];

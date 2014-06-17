@@ -39,7 +39,8 @@
         
         memNameLabel = [[UILabel alloc] initWithFrame:CGRectMake(60, 10, 150, 30)];
         memNameLabel.backgroundColor = [UIColor clearColor];
-        memNameLabel.textColor = TITLE_COLOR;
+        memNameLabel.font = NAMEFONT;
+        memNameLabel.textColor = NAMECOLOR;
         [self.contentView addSubview:memNameLabel];
         
         contentLabel = [[UILabel alloc] initWithFrame:CGRectMake(70, 30, 150, 30)];

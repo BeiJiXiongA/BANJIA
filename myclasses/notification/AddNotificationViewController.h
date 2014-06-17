@@ -13,6 +13,7 @@
 @interface AddNotificationViewController : XDContentViewController
 @property (nonatomic, strong) NSString *classID;
 @property (nonatomic, assign) id<updateDelegate> updel;
+@property (nonatomic, assign) BOOL fromClass;
 @end
 
 @protocol updateDelegate <NSObject>

@@ -17,6 +17,7 @@
 #import "HomeViewController.h"
 #import "FillInfoViewController.h"
 #import "KKNavigationController.h"
+#import "SettingPasswordViewController.h"
 
 #import <ShareSDK/ShareSDK.h>
 #import "WeiboApi.h"
@@ -84,19 +85,32 @@ UITextFieldDelegate>
         logoImageHeight = 247;
         space = 15;
     }
-//    UIImage *logoImage = [UIImage imageNamed:@"logo"];
+    UIView *headerView = [[UIView alloc] init];\
+    headerView.frame = CGRectMake(0,0, SCREEN_WIDTH, logoImageHeight);
+    headerView.backgroundColor = RGB(59, 189, 100, 1);
+    [self.bgView addSubview:headerView];
+    
+    UIImage *logoImage = [UIImage imageNamed:@"logo"];
     UIImageView *logoImageView = [[UIImageView alloc] init];
-//    logoImageView.image = logoImage;
-    logoImageView.frame = CGRectMake(0,0, SCREEN_WIDTH, logoImageHeight);
-    logoImageView.backgroundColor =  RGB(59, 189, 100, 1);
-    [self.bgView addSubview:logoImageView];
+    logoImageView.image = logoImage;
+    logoImageView.frame = CGRectMake((SCREEN_WIDTH-logoImage.size.width)/2+10,(logoImageHeight-logoImage.size.height)/2
+                                     +20, logoImage.size.width, logoImage.size.height);
+    logoImageView.backgroundColor = [UIColor clearColor];
+    [headerView addSubview:logoImageView];
+    
+    UIImage *bancaImage = [UIImage imageNamed:@"icon"];
+    UIImageView *bancaImageView = [[UIImageView alloc] init];
+    bancaImageView.image = bancaImage;
+    bancaImageView.frame = CGRectMake(SCREEN_WIDTH-80, logoImageHeight-bancaImage.size.height, bancaImage.size.width,bancaImage.size.height);
+    bancaImageView.backgroundColor = [UIColor clearColor];
+    [headerView addSubview:bancaImageView];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
     
 //    UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
     
-    phoneNumTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(28, logoImageView.frame.size.height+logoImageView.frame.origin.y+10+space, SCREEN_WIDTH-56, 43)];
+    phoneNumTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(28, headerView.frame.size.height+headerView.frame.origin.y+space, SCREEN_WIDTH-56, 43)];
     phoneNumTextfield.backgroundColor = [UIColor whiteColor];
     phoneNumTextfield.delegate = self;
     phoneNumTextfield.keyboardType = UIKeyboardTypeNumberPad;
@@ -138,19 +152,29 @@ UITextFieldDelegate>
     loginButton.titleLabel.textAlignment = NSTextAlignmentLeft;
     [loginButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [loginButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+    [loginButton setTintColor:[[UIColor whiteColor]colorWithAlphaComponent:0.3]];
     [self.bgView addSubview:loginButton];
+    
+    UIButton *forgetPwdButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [forgetPwdButton setTitle:@"忘记密码?" forState:UIControlStateNormal];
+    [forgetPwdButton setBackgroundColor:[UIColor clearColor]];
+    forgetPwdButton.frame = CGRectMake(loginButton.frame.size.width+loginButton.frame.origin.x-100, loginButton.frame.size.height+loginButton.frame.origin.y+5, 100, 20);
+    forgetPwdButton.titleLabel.font = [UIFont systemFontOfSize:12];
+    forgetPwdButton.titleLabel.textColor = TITLE_COLOR;
+    [forgetPwdButton addTarget:self action:@selector(forgetPwd) forControlEvents:UIControlEventTouchUpInside];
+    [self.bgView addSubview:forgetPwdButton];
     
     
     UIButton *registButton = [UIButton buttonWithType:UIButtonTypeCustom];
     registButton.frame = CGRectMake(SCREEN_WIDTH-130, 10, 120, 38);
 //    [registButton setBackgroundImage:inputImage forState:UIControlStateNormal];
     [registButton setTitle:@"注册新账号>>" forState:UIControlStateNormal];
-    registButton.titleLabel.font = [UIFont systemFontOfSize:14];
+    registButton.titleLabel.font = [UIFont systemFontOfSize:16];
     [registButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [registButton addTarget:self action:@selector(regist) forControlEvents:UIControlEventTouchUpInside];
     [self.bgView addSubview:registButton];
     
-    UILabel *tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(26, loginButton.frame.origin.y+loginButton.frame.size.height+12+space, 100, 30)];
+    UILabel *tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(26, loginButton.frame.origin.y+loginButton.frame.size.height+25+space, 100, 30)];
     tipLabel.text = @"其他方式登录";
     tipLabel.textColor = TITLE_COLOR;
     tipLabel.font = [UIFont systemFontOfSize:13];
@@ -159,57 +183,51 @@ UITextFieldDelegate>
     
     UIButton *sinaLoginButton = [UIButton buttonWithType:UIButtonTypeCustom];
     sinaLoginButton.backgroundColor = [UIColor clearColor];
-    sinaLoginButton.frame = CGRectMake(120, loginButton.frame.origin.y+loginButton.frame.size.height+7+space, 40, 40);
+    sinaLoginButton.frame = CGRectMake(120, loginButton.frame.origin.y+loginButton.frame.size.height+20+space, 47, 47);
     [sinaLoginButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
     sinaLoginButton.tag=100;
-    [sinaLoginButton setImage:[UIImage imageNamed:@"sinaicon"] forState:UIControlStateNormal];
+    [sinaLoginButton setImage:[UIImage imageNamed:@"sina"] forState:UIControlStateNormal];
     [self.bgView addSubview:sinaLoginButton];
     
     UIButton *qqLoginButton = [UIButton buttonWithType:UIButtonTypeCustom];
     qqLoginButton.backgroundColor = [UIColor clearColor];
-    qqLoginButton.frame = CGRectMake(180, loginButton.frame.origin.y+loginButton.frame.size.height+7+space, 40, 40);
+    qqLoginButton.frame = CGRectMake(180, loginButton.frame.origin.y+loginButton.frame.size.height+20+space, 47, 47);
     [qqLoginButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
     qqLoginButton.tag=101;
-    [qqLoginButton setImage:[UIImage imageNamed:@"QQicon"] forState:UIControlStateNormal];
+    [qqLoginButton setImage:[UIImage imageNamed:@"qq"] forState:UIControlStateNormal];
     [self.bgView addSubview:qqLoginButton];
     
     UIButton *renrenLoginButton = [UIButton buttonWithType:UIButtonTypeCustom];
     renrenLoginButton.backgroundColor = [UIColor clearColor];
-    renrenLoginButton.frame = CGRectMake(240, loginButton.frame.origin.y+loginButton.frame.size.height+7+space, 40, 40);
-    [renrenLoginButton setImage:[UIImage imageNamed:@"renrenicon"] forState:UIControlStateNormal];
+    renrenLoginButton.frame = CGRectMake(240, loginButton.frame.origin.y+loginButton.frame.size.height+20+space, 47, 47);
+    [renrenLoginButton setImage:[UIImage imageNamed:@"rr"] forState:UIControlStateNormal];
     [renrenLoginButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
     renrenLoginButton.tag=102;
     [self.bgView addSubview:renrenLoginButton];
-    
-//    logoY = 0;
-//    if (FOURS)
-//    {
-//        logoY=40;
-//    }
-//    else
-//    {
-//        logoY = 85;
-//    }
-    
-//    [UIView animateWithDuration:1.0 animations:^{
-//        logoImageView.alpha = 1;
-//        logoImageView.frame = CGRectMake((SCREEN_WIDTH-(logoImage.size.width+2.5))/2, logoY, logoImage.size.width+5, logoImage.size.height+5);
-//        
-//    } completion:^(BOOL finished) {
-//        [UIView animateWithDuration:0.5 animations:^{
-//            sinaLoginButton.alpha = 1;
-//            registButton.alpha = 1;
-//            loginButton.alpha = 1;
-//            renrenLoginButton.alpha = 1;
-//            qqLoginButton.alpha = 1;
-//        }];
-//    }];
 }
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+-(void)forgetPwd
+{
+    if ([phoneNumTextfield.text length] <= 0)
+    {
+        [Tools showAlertView:@"请填写手机号码" delegateViewController:nil];
+        return ;
+    }
+    if (![Tools isPhoneNumber:[Tools getPhoneNumFromString:phoneNumTextfield.text]])
+    {
+        [Tools showAlertView:@"手机号格式不正确" delegateViewController:nil];
+        return ;
+    }
+    SettingPasswordViewController *setpwd = [[SettingPasswordViewController alloc] init];
+    setpwd.phoneNum = [Tools getPhoneNumFromString:phoneNumTextfield.text];
+    setpwd.forgetPwd = YES;
+    [self.navigationController pushViewController:setpwd animated:YES];
 }
 
 #pragma mark - loginAccount
@@ -293,7 +311,7 @@ static int loginID;
 -(void)loginWithName:(NSString *)name   //AccountID:(NSString *)accountID accountType:(NSString *)accountType andName:(NSString *)name
 {
     
-    NSString *userStr = @"";
+    NSString *userStr = @"simu";
     if ([[APService registrionID] length] > 0)
     {
         userStr = [APService registrionID];
@@ -366,9 +384,9 @@ static int loginID;
                 {
                     
                     SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
-                    MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
-                    KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClassesViewController];
-                    JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myClassesNav menuController:sideMenuViewController];
+                    HomeViewController *homeViewController = [[HomeViewController alloc] init];
+                    KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:homeViewController];
+                    JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:homeNav menuController:sideMenuViewController];
                     [self.navigationController presentViewController:sideMenu animated:YES completion:^{
                         
                     }];
@@ -424,7 +442,7 @@ static int loginID;
     
     if ([Tools NetworkReachable])
     {
-        NSString *userStr = @"";
+        NSString *userStr = @"simu";
         if ([[APService registrionID] length] > 0)
         {
             userStr = [APService registrionID];
@@ -462,10 +480,7 @@ static int loginID;
                 [ud setObject:[dict objectForKey:@"opt"] forKey:@"useropt"];
                 [ud synchronize];
                 
-                
                 SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
-//                MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
-//                KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClassesViewController];
                 HomeViewController *homeViewController = [[HomeViewController alloc] init];
                 KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:homeViewController];
                 JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:homeNav menuController:sideMenuViewController];

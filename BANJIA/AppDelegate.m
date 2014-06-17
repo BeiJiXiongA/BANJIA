@@ -26,7 +26,7 @@
 #import "WXApi.h"
 #import "ChineseToPinyin.h"
 #import "NSString+Emojize.h"
-
+//Õı»
 #define NewVersionTag  1000
 
 #import "FiistLaunchViewController.h"
@@ -42,7 +42,7 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
     
-    [[NSUserDefaults standardUserDefaults] setObject:@"0010" forKey:@"currentVersion"];
+    [[NSUserDefaults standardUserDefaults] setObject:@"0015" forKey:@"currentVersion"];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
     _db = [[OperatDB alloc] init];
@@ -50,7 +50,26 @@
     {
         NSString *filePath = [[NSBundle mainBundle] pathForResource:@"citys" ofType:@"plist"];
         NSDictionary *dict = [[NSDictionary alloc] initWithContentsOfFile:filePath];
-        [self dealCity:dict];
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            NSArray *array = [dict allValues];
+            for (int i=0; i<[array count]; i++)
+            {
+                NSDictionary *dict = [array objectAtIndex:i];
+                NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithCapacity:0];
+                [tmpDict setObject:[dict objectForKey:@"_id"] forKey:@"cityid"];
+                [tmpDict setObject:[dict objectForKey:@"name"] forKey:@"cityname"];
+                [tmpDict setObject:[dict objectForKey:@"level"] forKey:@"citylevel"];
+                [tmpDict setObject:[dict objectForKey:@"p_id"] forKey:@"pid"];
+                [tmpDict setObject:[dict objectForKey:@"fname"] forKey:@"fname"];
+                [tmpDict setObject:[ChineseToPinyin jianPinFromChiniseString:[dict objectForKey:@"name"]] forKey:@"jianpin"];
+                [tmpDict setObject:[ChineseToPinyin pinyinFromChiniseString:[dict objectForKey:@"name"]] forKey:@"quanpin"];
+                if ([_db insertRecord:tmpDict  andTableName:CITYTABLE])
+                {
+                    DDLOG(@"insert city success!");
+                }
+            }
+
+        });
     }
     
     _mapManager = [[BMKMapManager alloc]init];
@@ -82,14 +101,10 @@
         {
             [self getNewChat];
             SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
-//            MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
-//            KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClassesViewController];
             HomeViewController *homeViewController = [[HomeViewController alloc] init];
             KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:homeViewController];
             JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:homeNav menuController:sideMenuViewController];
             self.window.rootViewController = sideMenu;
-            
-            [self getNewVersion];
         }
     }
     else
@@ -114,28 +129,6 @@
     [APService setupWithOption:launchOptions];
     return YES;
 }
-
--(void)dealCity:(NSDictionary *)dict
-{
-    NSArray *array = [dict allValues];
-    for (int i=0; i<[array count]; i++)
-    {
-        NSDictionary *dict = [array objectAtIndex:i];
-        NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithCapacity:0];
-        [tmpDict setObject:[dict objectForKey:@"_id"] forKey:@"cityid"];
-        [tmpDict setObject:[dict objectForKey:@"name"] forKey:@"cityname"];
-        [tmpDict setObject:[dict objectForKey:@"level"] forKey:@"citylevel"];
-        [tmpDict setObject:[dict objectForKey:@"p_id"] forKey:@"pid"];
-        [tmpDict setObject:[dict objectForKey:@"fname"] forKey:@"fname"];
-        [tmpDict setObject:[ChineseToPinyin jianPinFromChiniseString:[dict objectForKey:@"name"]] forKey:@"jianpin"];
-        [tmpDict setObject:[ChineseToPinyin pinyinFromChiniseString:[dict objectForKey:@"name"]] forKey:@"quanpin"];
-        if ([_db insertRecord:tmpDict  andTableName:CITYTABLE])
-        {
-            DDLOG(@"insert city success!");
-        }
-    }
-}
-
 
 -(void)getNewVersion
 {
@@ -345,8 +338,8 @@
     [APService handleRemoteNotification:userInfo];
     [[UIApplication sharedApplication] cancelAllLocalNotifications];
     [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
-    [Tools showAlertView:[NSString stringWithFormat:@"%@",userInfo] delegateViewController:nil];
-    DDLOG(@"push msg==%@",userInfo);
+//    [Tools showAlertView:[NSString stringWithFormat:@"%@",userInfo] delegateViewController:nil];
+//    DDLOG(@"push msg==%@",userInfo);
     if ([[Tools user_id] length] > 0)
     {
         if ([[userInfo objectForKey:@"type"] isEqualToString:@"chat"])

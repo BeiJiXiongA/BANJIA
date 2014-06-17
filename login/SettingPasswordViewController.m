@@ -183,7 +183,7 @@
     }
     
     
-    NSString *userStr = @"";
+    NSString *userStr = @"simu";
     
     if ([[APService registrionID] length] > 0)
     {

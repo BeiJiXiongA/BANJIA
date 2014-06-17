@@ -58,9 +58,6 @@ MsgDelegate,FriendListDelegate>
     [[self.bgView layer] setShadowOpacity:1.0f];
     [[self.bgView layer] setShadowRadius:3.0f];
     self.returnImageView.hidden = YES;
-        
-    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = self;
-    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = self;
     
     db = [[OperatDB alloc] init];
     
@@ -117,6 +114,9 @@ MsgDelegate,FriendListDelegate>
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = self;
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = self;
     if ([self haveNewMsg] || [self haveNewNotice])
     {
         self.unReadLabel.hidden = NO;
@@ -128,9 +128,10 @@ MsgDelegate,FriendListDelegate>
 
     [self dealNewChatMsg:nil];
 }
--(void)viewWillDisappear:(BOOL)animated
+-(void)dealloc
 {
-    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = nil;
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = self;
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = self;
 }
 -(BOOL)haveNewMsg
 {
@@ -313,14 +314,14 @@ MsgDelegate,FriendListDelegate>
         NSDictionary *friendDict = [newFriendsApply objectAtIndex:indexPath.row];
         
         cell.headerImageView.frame = CGRectMake(10, 7, 46, 46);
-        cell.headerImageView.layer.cornerRadius = cell.headerImageView.frame.size.width/2;
+        cell.headerImageView.layer.cornerRadius = 5;
         cell.headerImageView.clipsToBounds = YES;
         
         cell.unreadedMsgLabel.hidden = YES;
         
         [Tools fillImageView:cell.headerImageView withImageFromURL:[friendDict objectForKey:@"ficon"] andDefault:HEADERDEFAULT];
         
-        cell.memNameLabel.frame = CGRectMake(70, 10, 150, 30);
+        cell.memNameLabel.frame = CGRectMake(70, 15, 150, 30);
         cell.memNameLabel.text = [friendDict objectForKey:@"fname"];
         
         cell.button1.hidden = NO;
@@ -358,13 +359,13 @@ MsgDelegate,FriendListDelegate>
         NSDictionary *friendDict = [array objectAtIndex:indexPath.row];
         
         cell.headerImageView.frame = CGRectMake(10, 7, 46, 46);
-        cell.headerImageView.layer.cornerRadius = cell.headerImageView.frame.size.width/2;
+        cell.headerImageView.layer.cornerRadius = 5;
         cell.headerImageView.clipsToBounds = YES;
         
         cell.unreadedMsgLabel.hidden = YES;
         [Tools fillImageView:cell.headerImageView withImageFromURL:[friendDict objectForKey:@"ficon"] andDefault:HEADERICON];
         
-        cell.memNameLabel.frame = CGRectMake(70, 7, 150, 20);
+        cell.memNameLabel.frame = CGRectMake(70, 15, 150, 30);
         cell.memNameLabel.text = [friendDict objectForKey:@"fname"];
         
         UIImageView *bgImageBG = [[UIImageView alloc] init];

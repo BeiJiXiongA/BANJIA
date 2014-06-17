@@ -75,7 +75,7 @@ UIActionSheetDelegate>
     
     moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
     moreButton.frame = CGRectMake(SCREEN_WIDTH-60, 6, 50, 32);
-    [moreButton setImage:[UIImage imageNamed:@"icon_more"] forState:UIControlStateNormal];
+    [moreButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
     [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:moreButton];
     
@@ -83,15 +83,16 @@ UIActionSheetDelegate>
     readArray = [[NSMutableArray alloc] initWithCapacity:0];
     unreaderArray = [[NSMutableArray alloc] initWithCapacity:0];
     
-    UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
-    UIImageView *inputBg = [[UIImageView alloc] initWithFrame:CGRectMake(4, UI_NAVIGATION_BAR_HEIGHT+5, SCREEN_WIDTH-8, 155)];
-    [inputBg setImage:inputImage];
-    [self.bgView addSubview:inputBg];
+//    UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
+//    UIImageView *inputBg = [[UIImageView alloc] initWithFrame:CGRectMake(4, UI_NAVIGATION_BAR_HEIGHT+5, SCREEN_WIDTH-8, 155)];
+//    [inputBg setImage:inputImage];
+//    [self.bgView addSubview:inputBg];
     
-    contentTextView = [[UITextView alloc] initWithFrame:CGRectMake(8, UI_NAVIGATION_BAR_HEIGHT+8, SCREEN_WIDTH-16, 152)];
-    contentTextView.backgroundColor = [UIColor clearColor];
+    contentTextView = [[UITextView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, 152)];
+    contentTextView.backgroundColor = [UIColor whiteColor];
     contentTextView.editable = NO;
-    contentTextView.contentInset = UIEdgeInsetsMake(0, 0, 18, 0);
+    contentTextView.scrollEnabled = NO;
+    contentTextView.contentInset = UIEdgeInsetsMake(10, 10, 18, 10);
     contentTextView.textColor = TITLE_COLOR;
     contentTextView.font = [UIFont systemFontOfSize:16];
     contentTextView.text = noticeContent;
@@ -103,39 +104,37 @@ UIActionSheetDelegate>
         unreadButton.hidden = YES;
         readButton.hidden = YES;
         contentTextView.frame = CGRectMake(8, UI_NAVIGATION_BAR_HEIGHT+8, SCREEN_WIDTH-16, SCREEN_HEIGHT-16-UI_NAVIGATION_BAR_HEIGHT);
-        inputBg.frame = CGRectMake(4, UI_NAVIGATION_BAR_HEIGHT+5, SCREEN_WIDTH-8, SCREEN_HEIGHT-10-UI_NAVIGATION_BAR_HEIGHT);
-        
         containerScrollView.hidden = YES;
     }
     else
     {
         buttonNamesArray = [[NSMutableArray alloc] initWithCapacity:2];
         
-        buttonHeight = 38;
-        
-        UIImage *buttonImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
+        buttonHeight = 40;
         
         readButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        readButton.frame = CGRectMake(0, contentTextView.frame.origin.y+contentTextView.frame.size.height, SCREEN_WIDTH/2, buttonHeight);
-        [readButton setBackgroundImage:buttonImage forState:UIControlStateNormal];
-        readButton.backgroundColor = [UIColor clearColor];
+        readButton.frame = CGRectMake(20, contentTextView.frame.origin.y+contentTextView.frame.size.height+7, 120, buttonHeight-10);
+        [readButton setBackgroundColor:RGB(56, 188, 99, 1)];
         readButton.tag = 1000;
-        [readButton setTitleColor:LIGHT_BLUE_COLOR forState:UIControlStateNormal];
+        readButton.layer.cornerRadius = 15;
+        readButton.clipsToBounds = YES;
+        [readButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         [readButton setTitle:[NSString stringWithFormat:@"已读(%d)",0] forState:UIControlStateNormal];
         [readButton addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
         [self.bgView addSubview:readButton];
         
         unreadButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        unreadButton.frame = CGRectMake(SCREEN_WIDTH/2, contentTextView.frame.origin.y+contentTextView.frame.size.height, SCREEN_WIDTH/2, buttonHeight);
+        unreadButton.frame = CGRectMake(SCREEN_WIDTH/2+20, contentTextView.frame.origin.y+contentTextView.frame.size.height+7, 120, buttonHeight-10);
         unreadButton.backgroundColor = [UIColor clearColor];
         unreadButton.tag = 1001;
-        [unreadButton setBackgroundImage:inputImage forState:UIControlStateNormal];
+        unreadButton.layer.cornerRadius = 15;
+        unreadButton.clipsToBounds = YES;
         [unreadButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
         [unreadButton setTitle:[NSString stringWithFormat:@"未读(%d)",0] forState:UIControlStateNormal];
         [unreadButton addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
         [self.bgView addSubview:unreadButton];
         
-        containerScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, readButton.frame.origin.y+readButton.frame.size.height, SCREEN_WIDTH,SCREEN_HEIGHT - readButton.frame.origin.y - readButton.frame.size.height)];
+        containerScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, readButton.frame.origin.y+buttonHeight, SCREEN_WIDTH,SCREEN_HEIGHT - readButton.frame.origin.y - buttonHeight)];
         containerScrollView.backgroundColor = [UIColor clearColor];
         containerScrollView.delegate = self;
         containerScrollView.tag = 1000;
@@ -332,13 +331,17 @@ UIActionSheetDelegate>
 {
     if (button.tag == 1000)
     {
-        [readButton setTitleColor:LIGHT_BLUE_COLOR forState:UIControlStateNormal];
+        [readButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [readButton setBackgroundColor:RGB(56, 188, 99, 1)];
+        unreadButton.backgroundColor = [UIColor clearColor];
         [unreadButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     }
     else if(button.tag == 1001)
     {
         [readButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
-        [unreadButton setTitleColor:LIGHT_BLUE_COLOR forState:UIControlStateNormal];
+        [unreadButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [unreadButton setBackgroundColor:RGB(56, 188, 99, 1)];
+        readButton.backgroundColor = [UIColor clearColor];
     }
     [UIView animateWithDuration:0.2 animations:^{
         containerScrollView.contentOffset = CGPointMake(SCREEN_WIDTH*(button.tag%1000), 0);
@@ -542,13 +545,17 @@ UIActionSheetDelegate>
         CGFloat offsetX = scrollView.contentOffset.x;
         if (offsetX/SCREEN_WIDTH == 0)
         {
-            [readButton setTitleColor:LIGHT_BLUE_COLOR forState:UIControlStateNormal];
+            [readButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+            [readButton setBackgroundColor:RGB(56, 188, 99, 1)];
             [unreadButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+            unreadButton.backgroundColor = [UIColor clearColor];
         }
         else
         {
             [readButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
-            [unreadButton setTitleColor:LIGHT_BLUE_COLOR forState:UIControlStateNormal];
+            [unreadButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+            readButton.backgroundColor = [UIColor clearColor];
+            [unreadButton setBackgroundColor:RGB(56, 188, 99, 1)];
         }
     }
     DDLOG(@"%f",scrollView.contentOffset.x);

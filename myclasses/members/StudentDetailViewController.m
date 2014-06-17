@@ -26,6 +26,8 @@
 #define INFOTABLEVIEWTAG  3333
 #define PARENTTABLEVIEWTAG  4444
 
+#define BGIMAGEHEIGHT  120
+
 @interface StudentDetailViewController ()<UIAlertViewDelegate,
 UITableViewDataSource,
 UITableViewDelegate,
@@ -34,31 +36,30 @@ SetStudentObject,
 MFMessageComposeViewControllerDelegate,
 UIActionSheetDelegate>
 {
-    UIView *tmpBgView;
-    UIImageView *genderImageView;
-    UILabel *nameLabel;
-    UIImageView *headerImageView;
-    UILabel *titleLabel;
     
-    NSMutableDictionary *dataDict;
     UITableView *infoView;
-    UIImageView *bgImageView;
     
     NSMutableArray *pArray;
-    UITableView *parentsTableView;
-    
-    NSString *phoneNum;
     
     NSString *otherUserAdmin;
     OperatDB *db;
     
     NSString *userPhone;
     
-    UIScrollView *mainScrollView;
-    
     NSString *schoolName;
     NSString *className;
     NSString *classID;
+    
+    NSString *phoneNum;
+    NSString *headerImageUrl;
+    NSString *bgImageUrl;
+    NSString *name;
+    NSString *qqnum;
+    NSString *sexureimage;
+    NSString *birth;
+    
+    
+    CGFloat bgImageHeight;
 }
 @end
 
@@ -82,11 +83,13 @@ UIActionSheetDelegate>
     className = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
+    qqnum = @"未绑定";
+    birth = @"未设置";
+    
     self.titleLabel.text = @"个人信息";
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     self.view.backgroundColor = [UIColor blackColor];
     
-    dataDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     pArray = [[NSMutableArray alloc] initWithCapacity:0];
     
     db = [[OperatDB alloc] init];
@@ -94,15 +97,10 @@ UIActionSheetDelegate>
     otherUserAdmin = @"0";
     role = @"students";
     
-    mainScrollView = [[UIScrollView alloc] init];
-    mainScrollView.frame = CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT);
-    
-    [self.bgView addSubview:mainScrollView];
-    
     UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
     moreButton.frame = CGRectMake(SCREEN_WIDTH-60, 6, 50, 32);
     moreButton.hidden = YES;
-    [moreButton setImage:[UIImage imageNamed:@"icon_more"] forState:UIControlStateNormal];
+    [moreButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
     [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
     if (![studentID isEqual:[NSNull null]])
     {
@@ -115,115 +113,38 @@ UIActionSheetDelegate>
             }
         }
     }
-    headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(33.5, 11, 80, 80)];
-    headerImageView.backgroundColor = [UIColor clearColor];
-    headerImageView.layer.cornerRadius = headerImageView.frame.size.width/2;
-    headerImageView.clipsToBounds = YES;
-    if (![headerImg isEqual:[NSNull null]])
-    {
-        [Tools fillImageView:headerImageView withImageFromURL:headerImg andDefault:HEADERBG];
-    }
-    else
-    {
-        [headerImageView setImage:[UIImage imageNamed:HEADERBG]];
-    }
-    [mainScrollView addSubview:headerImageView];
     
-    UITapGestureRecognizer *tapTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(moreClick)];
-    headerImageView.userInteractionEnabled = YES;
+    infoView  = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
+    infoView.delegate = self;
+    infoView.dataSource = self;
+    infoView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    infoView.backgroundColor = [UIColor clearColor];
+    [self.bgView addSubview:infoView];
+    
     if (![studentID isEqual:[NSNull null]])
     {
-        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
+        if ([studentID length] > 10)
         {
-            if ([studentID length]>10)
+            if ([[db findSetWithDictionary:@{@"uid":studentID} andTableName:CLASSMEMBERTABLE] count] > 0)
             {
-                if (![studentID isEqualToString:[Tools user_id]])
+                NSDictionary *dict = [[db findSetWithDictionary:@{@"uid":studentID} andTableName:CLASSMEMBERTABLE] firstObject];
+                DDLOG(@"database dict %@",dict);
+                if (![[dict objectForKey:@"phone"] isEqual:[NSNull null]])
                 {
-                    [headerImageView addGestureRecognizer:tapTgr];
+                    phoneNum = [dict objectForKey:@"phone"];
+                }
+                if (![[dict objectForKey:@"img_icon"] isEqual:[NSNull null]])
+                {
+                    headerImageUrl = [dict objectForKey:@"img_icon"];
+                }
+                if (![[dict objectForKey:@"birth"] isEqual:[NSNull null]])
+                {
+                    birth = [dict objectForKey:@"birth"];
                 }
             }
         }
     }
-
-    nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(headerImageView.frame.size.width+headerImageView.frame.origin.x+20, 36, [studentName length]*18>100?100:([studentName length]*18), 20)];
-    nameLabel.text = studentName;
-    nameLabel.textColor = [UIColor blackColor];
-    nameLabel.backgroundColor = [UIColor clearColor];
-    nameLabel.font = [UIFont systemFontOfSize:18];
-    [mainScrollView addSubview:nameLabel];
     
-    genderImageView = [[UIImageView alloc] initWithFrame:CGRectMake(nameLabel.frame.size.width+nameLabel.frame.origin.x, headerImageView.frame.origin.y, 15, 15)];
-    genderImageView.backgroundColor = [UIColor clearColor];
-    [mainScrollView addSubview:genderImageView];
-    
-    
-    if (![title isEqual:[NSNull null]])
-    {
-        CGSize titleSize = [Tools getSizeWithString:title andWidth:200 andFont:[UIFont systemFontOfSize:13]];
-        titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(nameLabel.frame.origin.x, nameLabel.frame.size.height+nameLabel.frame.origin.y, titleSize.width, titleSize.height>0?(titleSize.height+10):40)];
-        titleLabel.font = [UIFont systemFontOfSize:13];
-        titleLabel.textColor = [UIColor lightGrayColor];
-        titleLabel.numberOfLines = 3;
-        titleLabel.lineBreakMode = NSLineBreakByWordWrapping;
-        titleLabel.backgroundColor = [UIColor clearColor];
-        titleLabel.text = title;
-    }
-   
-    [mainScrollView addSubview:titleLabel];
-    
-    bgImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, titleLabel.frame.size.height+titleLabel.frame.origin.y+20, SCREEN_WIDTH, SCREEN_HEIGHT - headerImageView.frame.size.height-headerImageView.frame.origin.y+80)];
-    [bgImageView setImage:[UIImage imageNamed:@"bg.jpg"]];
-    [mainScrollView addSubview:bgImageView];
-    
-    parentsTableView  = [[UITableView alloc] initWithFrame:CGRectMake(0, headerImageView.frame.size.height+headerImageView.frame.origin.y+10, SCREEN_WIDTH, 0) style:UITableViewStylePlain];
-    parentsTableView.delegate = self;
-    parentsTableView.dataSource = self;
-    parentsTableView.tag = PARENTTABLEVIEWTAG;
-    parentsTableView.backgroundColor = [UIColor clearColor];
-    parentsTableView.scrollEnabled = NO;
-    [mainScrollView addSubview:parentsTableView];
-    
-    
-    
-    infoView  = [[UITableView alloc] initWithFrame:CGRectMake(10, parentsTableView.frame.size.height+parentsTableView.frame.origin.y+50, SCREEN_WIDTH-15, 210) style:UITableViewStylePlain];
-    infoView.delegate = self;
-    infoView.dataSource = self;
-    infoView.separatorStyle = UITableViewCellSeparatorStyleNone;
-    infoView.tag = INFOTABLEVIEWTAG;
-    infoView.scrollEnabled = NO;
-    infoView.backgroundColor = [UIColor clearColor];
-    [mainScrollView addSubview:infoView];
-    
-    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
-    UIButton *sendMsgButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [sendMsgButton setTitle:@"发消息" forState:UIControlStateNormal];
-    sendMsgButton.frame = CGRectMake(50, infoView.frame.size.height+infoView.frame.origin.y+5, SCREEN_WIDTH-100, 35);
-    [sendMsgButton setBackgroundImage:btnImage forState:UIControlStateNormal];
-    [sendMsgButton addTarget:self action:@selector(toChat) forControlEvents:UIControlEventTouchUpInside];
-    
-    UIButton *addFriendButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [addFriendButton setTitle:@"加好友" forState:UIControlStateNormal];
-    addFriendButton.frame = CGRectMake(50, sendMsgButton.frame.size.height+sendMsgButton.frame.origin.y+10, SCREEN_WIDTH-100, 35);
-    [addFriendButton addTarget:self action:@selector(addFriend) forControlEvents:UIControlEventTouchUpInside];
-    [addFriendButton setBackgroundImage:btnImage forState:UIControlStateNormal];
-    if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fname":studentName} andTableName:FRIENDSTABLE] count] > 0)
-    {
-        addFriendButton.hidden = YES;
-    }
-    if (![studentID isEqual:[NSNull null]])
-    {
-        if (![studentID isEqualToString:[Tools user_id]])
-        {
-            if ([studentID length] > 10)
-            {
-                [mainScrollView addSubview:addFriendButton];
-                [mainScrollView addSubview:sendMsgButton];
-            }
-        }
-    }
-    
-    mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, addFriendButton.frame.size.height+addFriendButton.frame.origin.y+20);
-    mainScrollView.bounces = NO;
     [self getParentsWithStudentName];
     
     if (![studentID isEqual:[NSNull null]])
@@ -238,7 +159,6 @@ UIActionSheetDelegate>
             {
                 [infoView reloadData];
             }
-            
         }
     }
 }
@@ -262,7 +182,6 @@ UIActionSheetDelegate>
     {
         [pArray addObjectsFromArray:tmpParentsArray];
     }
-    [parentsTableView reloadData];
     
 }
 
@@ -307,7 +226,6 @@ UIActionSheetDelegate>
 #pragma mark - setstuobj
 -(void)setStuObj:(NSString *)newTitle
 {
-    titleLabel.text = newTitle;
     if ([self.memDel respondsToSelector:@selector(updateChatList:)])
     {
         [self.memDel updateListWith:YES];
@@ -315,183 +233,251 @@ UIActionSheetDelegate>
 }
 
 #pragma mark - tableview
+
+-(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 3;
+}
+
+-(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+{
+    UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 5, SCREEN_WIDTH, 35)];
+    headerLabel.backgroundColor = [UIColor clearColor];
+    headerLabel.font = [UIFont systemFontOfSize:16];
+    headerLabel.backgroundColor = [UIColor clearColor];
+    headerLabel.textColor = TITLE_COLOR;
+    if (section == 1)
+    {
+        if ([pArray count] > 0)
+        {
+            headerLabel.text = @"   家长";
+            return headerLabel;
+        }
+        else
+            return nil;
+    }
+    else
+        headerLabel.text = @"   个人信息";
+        return headerLabel;
+}
+
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
-    if (tableView.tag == INFOTABLEVIEWTAG)
+    if (section == 1)
     {
-        return 30;
+        if ([pArray count] > 0)
+        {
+            return 35;
+        }
+        else
+            return 0;
+    }
+    else if(section == 2)
+    {
+        if ([studentID length] > 10)
+        {
+            return 35;
+        }
     }
     return 0;
 }
--(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
-{
-    if (tableView.tag == INFOTABLEVIEWTAG)
-    {
-        UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 100, 30)];
-        headerLabel.backgroundColor = [UIColor clearColor];
-        headerLabel.text = @"     个人信息";
-        //    headerLabel.font = [UIFont systemFontOfSize:14];
-        headerLabel.textColor = [UIColor whiteColor];
-        return headerLabel;
-    }
-    return nil;
-}
+
+
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (tableView.tag == INFOTABLEVIEWTAG)
+    if (indexPath.section == 0)
     {
-        return 60;
+        return BGIMAGEHEIGHT;
     }
-    else if(tableView.tag == PARENTTABLEVIEWTAG)
+    else if(indexPath.section == 1)
     {
-        return 50;
+        if ([pArray count] > 0)
+        {
+            return 60;
+        }
+        return 0;
+    }
+    else if (indexPath.section == 2)
+    {
+        if ([studentID length] > 10)
+        {
+            if (indexPath.row < 3)
+            {
+                return 40;
+            }
+            return 60;
+        }
     }
     return 0;
 }
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    if (tableView.tag == INFOTABLEVIEWTAG)
+    
+    if (section == 0)
     {
-        if(![studentID isEqual:[NSNull null]])
-        {
-            if ([studentID length]>10)
-            {
-                if ([[db findSetWithDictionary:@{@"uid":studentID,@"classid":classID} andTableName:CLASSMEMBERTABLE] count] > 0)
-                {
-                    NSArray *array = [db findSetWithDictionary:@{@"uid":studentID,@"classid":classID} andTableName:CLASSMEMBERTABLE];
-                    if (![[[array firstObject] objectForKey:@"phone"] isEqual:[NSNull null]])
-                    {
-                        if ([[[array firstObject] objectForKey:@"phone"] length] > 8)
-                        {
-                            return 1;
-                        }
-                    }
-                }
-            }
-        }
-        
-        return [[dataDict allKeys] count];
+        return 1;
     }
-    else if(tableView.tag == PARENTTABLEVIEWTAG)
+    else if(section == 1)
     {
-        if ([pArray count] > 0)
-        {
-            parentsTableView.frame = CGRectMake(0, headerImageView.frame.size.height+headerImageView.frame.origin.y+20, SCREEN_WIDTH, [pArray count]*50);
-            infoView.frame = CGRectMake(10, parentsTableView.frame.origin.y+parentsTableView.frame.size.height+40, SCREEN_WIDTH-15, 160);
-            bgImageView.frame = CGRectMake(0, parentsTableView.frame.size.height+parentsTableView.frame.origin.y, SCREEN_WIDTH, SCREEN_HEIGHT - headerImageView.frame.size.height-headerImageView.frame.origin.y-20);
-        }
         return [pArray count];
+    }
+    else if(section == 2)
+    {
+        if ([studentID length] > 10)
+        {
+            return 4;
+        }
     }
     return 0;
 }
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (tableView.tag == INFOTABLEVIEWTAG)
+    static NSString *infocell = @"infocell";
+    InfoCell *cell = [tableView dequeueReusableCellWithIdentifier:infocell];
+    if (cell == nil)
     {
-        static NSString *infocell = @"infocell";
-        InfoCell *cell = [tableView dequeueReusableCellWithIdentifier:infocell];
-        if (cell == nil)
+        cell = [[InfoCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:infocell];
+    }
+    cell.headerImageView.hidden = YES;
+    cell.bgImageView.hidden = YES;
+    cell.button1.hidden = YES;
+    cell.button2.hidden = YES;
+    cell.selectionStyle = UITableViewCellSelectionStyleGray;
+    if (indexPath.section == 0)
+    {
+        cell.headerImageView.hidden = NO;
+        cell.bgImageView.hidden = NO;
+        
+        cell.bgImageView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 120);
+        [cell.bgImageView setImage:[UIImage imageNamed:@"toppic.jpg"]];
+        
+        cell.headerImageView.frame = CGRectMake(15, BGIMAGEHEIGHT-DetailHeaderHeight-15, DetailHeaderHeight, DetailHeaderHeight);
+        if ([headerImageUrl isEqualToString:HEADERICON])
         {
-            cell = [[InfoCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:infocell];
+            [cell.headerImageView setImage:[UIImage imageNamed:HEADERICON]];
         }
-        if (indexPath.row == 0)
+        else
         {
-            cell.nameLabel.text = @"移动电话";
-            if (![studentID isEqual:[NSNull null]])
-            {
-                if ([studentID length]>10)
-                {
-                    if ([[db findSetWithDictionary:@{@"uid":studentID,@"classid":classID} andTableName:CLASSMEMBERTABLE] count] > 0)
-                    {
-                        NSArray *array = [db findSetWithDictionary:@{@"uid":studentID,@"classid":classID} andTableName:CLASSMEMBERTABLE];
-                        if (![[[array firstObject] objectForKey:@"phone"] isEqual:[NSNull null]])
-                        {
-                            if ([[[array firstObject] objectForKey:@"phone"] length] > 8)
-                            {
-                                userPhone = [[array firstObject]objectForKey:@"phone"];
-                            }
-                        }
-                    }
-                }
-                if ([dataDict count] > 0)
-                {
-                    userPhone = [dataDict objectForKey:@"phone"];
-                }
-                cell.contentLabel.text = userPhone;
-                [cell.button1 addTarget:self action:@selector(msgToUser) forControlEvents:UIControlEventTouchUpInside];
-                [cell.button2 addTarget:self action:@selector(callToUser) forControlEvents:UIControlEventTouchUpInside];
-                if ([studentID isEqualToString:[Tools user_id]])
-                {
-                    cell.button2.hidden = YES;
-                    cell.button1.hidden = YES;
-                }
-
-            }
+            [Tools fillImageView:cell.headerImageView withImageFromURL:headerImageUrl andDefault:HEADERICON];
         }
         
-        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        cell.headerImageView.layer.cornerRadius = 5;
+        cell.headerImageView.clipsToBounds = YES;
+        cell.headerImageView.layer.borderColor = [UIColor whiteColor].CGColor;
+        cell.headerImageView.layer.borderWidth = 2;
+        
+        cell.nameLabel.frame = CGRectMake(DetailHeaderHeight+30, 60, 100, 20);
+        cell.nameLabel.text = studentName;
+        cell.nameLabel.shadowColor = TITLE_COLOR;
+        cell.nameLabel.shadowOffset = CGSizeMake(0.5, 0.5);
+        cell.nameLabel.font = [UIFont boldSystemFontOfSize:18];
+        
+        cell.contentLabel.frame = CGRectMake(DetailHeaderHeight+30, 80, 100, 20);
+        cell.contentLabel.text = title;
+        cell.contentLabel.shadowOffset = CGSizeMake(0.5, 0.5);
+        cell.contentLabel.shadowColor = TITLE_COLOR;
+        cell.contentLabel.font = [UIFont boldSystemFontOfSize:14];
+        cell.backgroundColor = [UIColor whiteColor];
+    }
+    else if (indexPath.section == 1)
+    {
+        if ([pArray count] > 0)
+        {
+            cell.headerImageView.hidden = NO;
+            NSDictionary *parentDict = [pArray objectAtIndex:indexPath.row];
+            cell.headerImageView.frame = CGRectMake(15, 10, 40, 40);
+            cell.headerImageView.layer.cornerRadius = 3;
+            cell.headerImageView.clipsToBounds = YES;
+            [Tools fillImageView:cell.headerImageView withImageFromURL:[parentDict objectForKey:@"img_icon"] andDefault:HEADERICON];
+            cell.nameLabel.frame = CGRectMake(70, 15, 100, 30);
+            cell.nameLabel.text = [parentDict objectForKey:@"name"];
+            cell.nameLabel.font = NAMEFONT;
+            cell.nameLabel.textColor = NAMECOLOR;
+            
+            cell.contentLabel.frame = CGRectMake(SCREEN_WIDTH-100, 15, 80, 30);
+            cell.contentLabel.textAlignment = NSTextAlignmentRight;
+            cell.contentLabel.textColor = TITLE_COLOR;
+            cell.contentLabel.text = [[parentDict objectForKey:@"title"] substringFromIndex:[[parentDict objectForKey:@"title"] rangeOfString:@"."].location+1];
+        }
         UIImageView *bgImageBG = [[UIImageView alloc] init];
-        bgImageBG.image = [UIImage imageNamed:@"line3"];
+        bgImageBG.image = [UIImage imageNamed:@"line4"];
         bgImageBG.backgroundColor = [UIColor clearColor];
         cell.backgroundView = bgImageBG;
-        return cell;
-    }
-    else if(tableView.tag == PARENTTABLEVIEWTAG)
-    {
-        static NSString *parentcell = @"parentcell";
-        InfoCell *cell = [tableView dequeueReusableCellWithIdentifier:parentcell];
-        if (cell == nil)
-        {
-            cell = [[InfoCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:parentcell];
-        }
-        NSDictionary *dict = [pArray objectAtIndex:indexPath.row];
-        if ([dict objectForKey:@"img_icon"])
-        {
-            [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERBG];
-        }
-        else
-        {
-            [cell.headerImageView setImage:[UIImage imageNamed:HEADERDEFAULT]];
-        }
-        
-        cell.headerImageView.frame = CGRectMake(11, 5, 40, 40);
-        
-        cell.headerImageView.layer.cornerRadius = 20;
-        cell.headerImageView.clipsToBounds = YES;
-        
-        cell.nameBgView.frame = CGRectMake(66, 1, SCREEN_WIDTH-66, 48);
-        cell.nameBgView.backgroundColor = LIGHT_BLUE_COLOR;
-        
-        cell.button1.frame = CGRectMake(SCREEN_WIDTH-110, 10, 30, 30);
-        cell.button2.frame = CGRectMake(SCREEN_WIDTH-60, 10, 30, 30);
-        cell.button2.tag = indexPath.row+100;
-        [cell.button2 addTarget:self action:@selector(callToParents:) forControlEvents:UIControlEventTouchUpInside];
-        
-        cell.button1.tag = indexPath.row+100;
-        [cell.button1 addTarget:self action:@selector(msgToParents:) forControlEvents:UIControlEventTouchUpInside];
-        NSString *titleStr;
-        if ([[dict objectForKey:@"title"] rangeOfString:@"."].length > 0)
-        {
-            titleStr = [[dict objectForKey:@"title"] substringFromIndex:[[dict objectForKey:@"title"] rangeOfString:@"."].location+1];
-        }
-        else
-        {
-            titleStr = [dict objectForKey:@"title"];
-        }
-        NSString *name = [NSString stringWithFormat:@"%@（%@）",[dict objectForKey:@"name"],titleStr];
-        cell.nameLabel.frame = CGRectMake(83, 15, [name length]*20>150?150:[name length]*20, 20);
-        cell.nameLabel.text = name;
-        cell.selectionStyle = UITableViewCellSelectionStyleNone;
         cell.backgroundColor = [UIColor whiteColor];
-        return cell;
     }
-    return nil;
+    
+    else if(indexPath.section == 2)
+    {
+        if ([studentID length] < 10)
+        {
+            return nil;
+        }
+        if (indexPath.row < 3)
+        {
+            cell.nameLabel.frame = CGRectMake(15, 5, 100, 30);
+            cell.nameLabel.textColor = TITLE_COLOR;
+            cell.contentLabel.frame = CGRectMake(SCREEN_WIDTH-150, 5, 140, 30);
+            cell.contentLabel.textColor = TITLE_COLOR;
+            cell.contentLabel.textAlignment = NSTextAlignmentRight;
+            if (indexPath.row == 0)
+            {
+                cell.nameLabel.text = @"手机号";
+                cell.contentLabel.text = phoneNum;
+            }
+            else if(indexPath.row == 1)
+            {
+                cell.nameLabel.text = @"QQ";
+                cell.contentLabel.text = qqnum;
+            }
+            else if(indexPath.row == 2)
+            {
+                cell.nameLabel.text = @"生日";
+                cell.contentLabel.text = birth;
+            }
+            UIImageView *bgImageBG = [[UIImageView alloc] init];
+            bgImageBG.image = [UIImage imageNamed:@"line3"];
+            bgImageBG.backgroundColor = [UIColor clearColor];
+            cell.backgroundView = bgImageBG;
+            cell.backgroundColor = [UIColor whiteColor];
+        }
+        else
+        {
+            cell.nameLabel.hidden = YES;
+            cell.contentLabel.hidden = YES;
+            if (![studentID isEqualToString:[Tools user_id]])
+            {
+                cell.button1.hidden = NO;
+                cell.button2.hidden = NO;
+            }
+            
+            cell.button1.frame = CGRectMake(10, 10, 145, 40);
+            [cell.button1 setTitle:@"加好友" forState:UIControlStateNormal];
+            [cell.button1 setBackgroudimage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)]];
+            [cell.button1 setlayout];
+            
+            [cell.button1 addTarget:self action:@selector(addFriend) forControlEvents:UIControlEventTouchUpInside];
+            
+            cell.button2.frame = CGRectMake(165, 10, 145, 40);
+            [cell.button2 setTitle:@"聊私信" forState:UIControlStateNormal];
+            [cell.button2 setBackgroudimage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)]];
+            [cell.button2 setlayout];
+            
+            if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fname":studentName,@"checked":@"1"} andTableName:FRIENDSTABLE] count] > 0)
+            {
+                cell.button1.hidden = YES;
+                cell.button2.frame = CGRectMake((SCREEN_WIDTH-150)/2, 10, 150, 40);
+            }
+            
+            [cell.button2 addTarget:self action:@selector(toChat) forControlEvents:UIControlEventTouchUpInside];
+            cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        }
+    }
+    
+    return cell;
 }
-
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    
-    if (tableView.tag == PARENTTABLEVIEWTAG)
+    if (indexPath.section == 1)
     {
         NSDictionary *dict = [pArray objectAtIndex:indexPath.row];
         if (![studentID isEqual:[NSNull null]])
@@ -519,6 +505,17 @@ UIActionSheetDelegate>
             [self.navigationController pushViewController:parentDetail animated:YES];
         }
     }
+    else if(indexPath.section == 2)
+    {
+        if (indexPath.row == 0)
+        {
+            if (![studentID isEqualToString:[Tools user_id]])
+            {
+                [self callToUser];
+            }
+        }
+    }
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
 #pragma mark - parentDetailDelegate
@@ -540,7 +537,6 @@ UIActionSheetDelegate>
             }
             [self.navigationController popViewControllerAnimated:YES];
         }
-        [parentsTableView reloadData];
     }
 }
 
@@ -626,7 +622,7 @@ UIActionSheetDelegate>
 
 -(void)callToUser
 {
-    [Tools dialPhoneNumber:userPhone inView:self.bgView];
+    [Tools dialPhoneNumber:phoneNum inView:self.bgView];
 }
 
 -(void)msgToUser
@@ -837,6 +833,12 @@ UIActionSheetDelegate>
                 {
                     [self.memDel updateListWith:YES];
                 }
+                
+                if ([db updeteKey:@"admin" toValue:@"1" withParaDict:@{@"classid":classID,@"uid":studentID} andTableName:CLASSMEMBERTABLE])
+                {
+                    DDLOG(@"appoint %@ admin success!",studentName);
+                }
+                
                 [self.navigationController popViewControllerAnimated:YES];
             }
             else
@@ -875,6 +877,10 @@ UIActionSheetDelegate>
                 if ([self.memDel respondsToSelector:@selector(updateListWith:)])
                 {
                     [self.memDel updateListWith:YES];
+                }
+                if ([db updeteKey:@"admin" toValue:@"0" withParaDict:@{@"classid":classID,@"uid":studentID} andTableName:CLASSMEMBERTABLE])
+                {
+                    DDLOG(@"rm %@ admin success!",studentName);
                 }
                 [self.navigationController popViewControllerAnimated:YES];
             }
@@ -958,25 +964,35 @@ UIActionSheetDelegate>
                     
                     if ([dict objectForKey:@"phone"])
                     {
-                        [dataDict setObject:[dict objectForKey:@"phone"] forKey:@"phone"];
+                        if ([db updeteKey:@"phone" toValue:[dict objectForKey:@"phone"] withParaDict:@{@"uid":studentID,@"classid":classID} andTableName:CLASSMEMBERTABLE])
+                        {
+                            DDLOG(@"teach phone update success!");
+                        }
+                        phoneNum = [dict objectForKey:@"phone"];
+                        phoneNum = [dict objectForKey:@"phone"];
                     }
                     
                     if ([[dict objectForKey:@"sex"] intValue] == 1)
                     {
                         //男
-                        [genderImageView setImage:[UIImage imageNamed:@"male"]];
+                        sexureimage = @"male";
                     }
                     else if ([[dict objectForKey:@"sex"] intValue] == 0)
                     {
                         //
-                        [genderImageView setImage:[UIImage imageNamed:@"female"]];
+                        sexureimage = @"female";
                     }
-                    if ([[dataDict objectForKey:@"phone"] length] > 0)
+                    
+                    if ([dict objectForKey:@"birth"])
                     {
-                        [db updeteKey:@"phone" toValue:[dataDict objectForKey:@"phone"] withParaDict:@{@"uid":studentID,@"classid":classID} andTableName:CLASSMEMBERTABLE];
+                        if ([db updeteKey:@"birth" toValue:[dict objectForKey:@"birth"] withParaDict:@{@"uid":studentID,@"classid":classID} andTableName:CLASSMEMBERTABLE])
+                        {
+                            DDLOG(@"teach birth update success!");
+                        }
+                        birth = [dict objectForKey:@"birth"];
                     }
                     otherUserAdmin = [NSString stringWithFormat:@"%d",[[[dict objectForKey:@"classInfo"] objectForKey:@"admin"] integerValue]];
-                    [Tools fillImageView:headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERICON];
+                    headerImageUrl = [dict objectForKey:@"img_icon"];
                     [infoView reloadData];
                 }
             }

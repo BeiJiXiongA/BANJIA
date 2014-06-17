@@ -29,7 +29,6 @@
     // Do any additional setup after loading the view.
     
     NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",HOST_URL,USER_PROTOCOL]];
-//    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://www.banjiaedu.com%@",USER_PROTOCOL]];
     UIWebView *webView = [[UIWebView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT)];
     [webView loadRequest:[NSURLRequest requestWithURL:url]];
     [self.bgView addSubview:webView];

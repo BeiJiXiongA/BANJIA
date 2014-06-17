@@ -104,7 +104,7 @@ UIActionSheetDelegate
 @end
 
 @implementation AddDongTaiViewController
-@synthesize classID;
+@synthesize classID,fromCLass;
 int count = 0;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -236,7 +236,14 @@ int count = 0;
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"发布日记";
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-    self.view.backgroundColor = [UIColor blackColor];
+    if (fromCLass)
+    {
+        self.view.backgroundColor = [UIColor blackColor];
+    }
+    else
+    {
+        self.view.backgroundColor = [UIColor whiteColor];
+    }
     
     keyBoardHeight = 0.0f;
     imageW = 70;
@@ -748,6 +755,11 @@ int count = 0;
 -(void)emitClick
 {
     [contentTextView resignFirstResponder];
+    if (!fromCLass)
+    {
+        [Tools showAlertView:@"请选择班级" delegateViewController:nil];
+        return ;
+    }
     [self submitDongTai];
 }
 

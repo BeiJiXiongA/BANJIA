@@ -13,6 +13,7 @@
 @property (nonatomic, strong) NSMutableArray *tmpArray;
 @property (nonatomic, strong) NSString *classID;
 @property (nonatomic, assign) BOOL admin;
+@property (nonatomic, strong) NSString *titleString;
 @property (nonatomic, assign) id<SubGroupDelegate> subGroupDel;
 @end
 

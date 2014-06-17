@@ -270,8 +270,16 @@ MFMailComposeViewControllerDelegate>
         }
         else
         {
-            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"discovery_arrow"]];
-            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 12.5, 10, 15)];
+            if ([[NSUserDefaults standardUserDefaults] objectForKey:@"currentVersion"])
+            {
+                cell.markLabel.text = [NSString stringWithFormat:@"当前版本%@",[[NSUserDefaults standardUserDefaults] objectForKey:@"currentVersion"]];
+            }
+            else
+            {
+                cell.markLabel.text = [NSString stringWithFormat:@"当前版本%.1f",[[Tools client_ver] floatValue]];
+            }
+//            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"discovery_arrow"]];
+//            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 12.5, 10, 15)];
         }
         UIImageView *bgImageBG = [[UIImageView alloc] init];
         bgImageBG.image = [UIImage imageNamed:@"cell_bg2"];

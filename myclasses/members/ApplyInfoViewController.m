@@ -303,6 +303,7 @@
                     [self.applyDel updateList:YES];
                 }
                 [Tools showTips:[NSString stringWithFormat:@"您已经同意%@的申请",applyName] toView:self.bgView];
+                [self.navigationController popViewControllerAnimated:YES];
             }
             else
             {
@@ -346,12 +347,11 @@
                     DDLOG(@"c_apply %@ delete success!",[Tools user_id]);
                 }
                 
-                [self.applyDel updateList:YES];
-                
                 if ([self.applyDel respondsToSelector:@selector(updateList:)])
                 {
                     [self.applyDel updateList:YES];
                 }
+                [self.navigationController popViewControllerAnimated:YES];
             }
             else
             {

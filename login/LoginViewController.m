@@ -20,6 +20,7 @@
 #import "UIImage-Helpers.h"
 #import "KKNavigationController.h"
 #import "APService.h"
+#import "HomeViewController.h"
 
 #define NOPWDTAG   787878
 
@@ -216,7 +217,7 @@
         }
         else
         {
-            userStr = @"";
+            userStr = @"simu";
         }
         NSDictionary *paraDict;
         if ([accountID length] > 0)
@@ -272,9 +273,9 @@
                 
                 
                 SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
-                MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
-                KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClassesViewController];
-                JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:myClassesNav menuController:sideMenuViewController];
+                HomeViewController *homeViewController = [[HomeViewController alloc] init];
+                KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:homeViewController];
+                JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:homeNav menuController:sideMenuViewController];
                 [self.navigationController presentViewController:sideMenu animated:YES completion:^{
                     
                 }];

@@ -13,17 +13,20 @@
 #import "StudentDetailViewController.h"
 #import "MemberDetailViewController.h"
 #import "ParentsDetailViewController.h"
+#import "OperatDB.h"
+
 @interface SubGroupViewController ()<UITableViewDataSource,
 UITableViewDelegate,
 ApplyInfoDelegate,
 StuDetailDelegate>
 {
     UITableView *tmpTableView;
+    OperatDB *db;
 }
 @end
 
 @implementation SubGroupViewController
-@synthesize tmpArray,classID,admin,subGroupDel;
+@synthesize tmpArray,classID,admin,subGroupDel,titleString;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -39,8 +42,12 @@ StuDetailDelegate>
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     
+    db = [[OperatDB alloc] init];
+    
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     self.view.backgroundColor = [UIColor blackColor];
+    
+    self.titleLabel.text = titleString;
     
     tmpTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
     tmpTableView.delegate = self;
@@ -125,7 +132,6 @@ StuDetailDelegate>
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
-    DDLOG(@"dict ===%@",dict);
     if ([[dict objectForKey:@"checked"] intValue] == 0)
     {
         ApplyInfoViewController *applyInfoViewController = [[ApplyInfoViewController alloc] init];
@@ -201,11 +207,28 @@ StuDetailDelegate>
 {
     if (update)
     {
-        if ([self.subGroupDel respondsToSelector:@selector(subGroupUpdate:)])
+        if ([titleString isEqualToString:@"新申请"])
         {
-            [self.subGroupDel subGroupUpdate:YES];
+            [tmpArray removeAllObjects];
+            [tmpArray addObjectsFromArray:[db findSetWithDictionary:@{@"classid":classID,@"checked":@"0"} andTableName:CLASSMEMBERTABLE]];
+            [tmpTableView reloadData];
+            if ([self.subGroupDel respondsToSelector:@selector(subGroupUpdate:)])
+            {
+                [self.subGroupDel subGroupUpdate:YES];
+            }
+
         }
-        [self.navigationController popViewControllerAnimated:YES];
+        else if ([titleString isEqualToString:@"管理员"])
+        {
+            [tmpArray removeAllObjects];
+            [tmpArray addObjectsFromArray:[db findSetWithDictionary:@{@"classid":classID,@"admin":@"1"} andTableName:CLASSMEMBERTABLE]];
+            [tmpArray addObjectsFromArray:[db findSetWithDictionary:@{@"classid":classID,@"admin":@"2"} andTableName:CLASSMEMBERTABLE]];
+            [tmpTableView reloadData];
+            if ([self.subGroupDel respondsToSelector:@selector(subGroupUpdate:)])
+            {
+                [self.subGroupDel subGroupUpdate:YES];
+            }
+        }
     }
 }
 
@@ -215,11 +238,21 @@ StuDetailDelegate>
 {
     if (update)
     {
+        if ([titleString isEqualToString:@"管理员"])
+        {
+            [tmpArray removeAllObjects];
+            [tmpArray addObjectsFromArray:[db findSetWithDictionary:@{@"classid":classID,@"admin":@"1"} andTableName:CLASSMEMBERTABLE]];
+            [tmpArray addObjectsFromArray:[db findSetWithDictionary:@{@"classid":classID,@"admin":@"2"} andTableName:CLASSMEMBERTABLE]];
+            [tmpTableView reloadData];
+            if ([self.subGroupDel respondsToSelector:@selector(subGroupUpdate:)])
+            {
+                [self.subGroupDel subGroupUpdate:YES];
+            }
+        }
         if ([self.subGroupDel respondsToSelector:@selector(subGroupUpdate:)])
         {
             [self.subGroupDel subGroupUpdate:YES];
         }
-        [self.navigationController popViewControllerAnimated:YES];
     }
 }
 

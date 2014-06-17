@@ -50,7 +50,7 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:a]
 
 #define LIGHT_BLUE_COLOR  RGB(74, 188, 194, 1)
 #define LIGHT_GREEN_COLOR RGB(113, 192, 159, 1)
-#define TITLE_COLOR   UIColorFromRGB(0x727171)
+#define TITLE_COLOR   UIColorFromRGB(0x717070)
 
 #pragma mark - aboutCoordinate
 
@@ -118,6 +118,7 @@ return shared##className; \
 
 
 #define GETMOREOFFSET    70
+#define DetailHeaderHeight  70
 
 #pragma mark - 关于提示
 #define NOT_NETWORK    @"没有网络哦！"
@@ -129,6 +130,11 @@ return shared##className; \
 #define HEADERBG     @"headerbg"
 #define HEADERICON   @"headericon"
 #define NAVBTNBG    @"navbtn"
+#define NAVCOLOR    TITLE_COLOR
+#define CornerMore   @"corner_more"
+
+#define NAMEFONT   [UIFont boldSystemFontOfSize:16]
+#define NAMECOLOR  [UIColor blackColor]
 
 #define USERID    @"u_id"
 #define PHONENUM  @"phone_num"
@@ -136,6 +142,7 @@ return shared##className; \
 #define PASSWORD  @"password"
 #define USERNAME  @"user_name"
 #define USERSEX   @"sex"
+
 
 
 

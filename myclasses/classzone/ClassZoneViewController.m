@@ -127,7 +127,7 @@ UIActionSheetDelegate>
     addButton = [UIButton buttonWithType:UIButtonTypeCustom];
     addButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
     addButton.hidden = YES;
-    [addButton setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
+    [addButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [addButton setTitle:@"发布" forState:UIControlStateNormal];
     [addButton addTarget:self action:@selector(addDongTaiClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:addButton];
@@ -515,7 +515,7 @@ UIActionSheetDelegate>
            
             CGFloat imgsHeight = row * (imageViewHeight+5);
             CGFloat contentHtight = [content length] > 0 ? (45+he):5;
-            return 60+imgsHeight+contentHtight+60;
+            return 60+imgsHeight+contentHtight+55;
         }
         else
         {
@@ -598,15 +598,23 @@ UIActionSheetDelegate>
                 UIImage *topImage = [UIImage imageNamed:@"toppic.jpg"];
                 cell.headerImageView.image = topImage;
             }
-            cell.nameLabel.frame = CGRectMake(SCREEN_WIDTH-200, bgImageViewHeight-50, 190, 20);
+            
             cell.locationLabel.frame = CGRectMake(SCREEN_WIDTH-200, bgImageViewHeight-30, 190, 20);
+            cell.locationLabel.font = [UIFont boldSystemFontOfSize:16];
             cell.locationLabel.textAlignment = NSTextAlignmentCenter;
+            cell.locationLabel.textColor = [UIColor whiteColor];
+            cell.locationLabel.layer.shadowColor = [UIColor grayColor].CGColor;
+            cell.locationLabel.layer.shadowOffset = CGSizeMake(5, 5);
+
+            
             cell.nameLabel.textAlignment = NSTextAlignmentCenter;
-            cell.locationLabel.font = [UIFont systemFontOfSize:16];
+            cell.nameLabel.frame = CGRectMake(SCREEN_WIDTH-200, bgImageViewHeight-50, 190, 20);
             cell.nameLabel.font = [UIFont boldSystemFontOfSize:16];
             cell.nameLabel.textColor = [UIColor whiteColor];
-            cell.locationLabel.textColor = [UIColor whiteColor];
             cell.nameLabel.text = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
+            cell.nameLabel.layer.shadowColor = TITLE_COLOR.CGColor;
+            cell.nameLabel.layer.shadowOffset = CGSizeMake(0.5f, 0.5f);
+            
             if(SYSVERSION < 7)
             {
                 cell.nameLabel.backgroundColor = [UIColor clearColor];
@@ -652,118 +660,152 @@ UIActionSheetDelegate>
     }
     else if(indexPath.section > 0)
     {
-            static NSString *topImageView = @"trendcell";
-            TrendsCell *cell = [tableView dequeueReusableCellWithIdentifier:topImageView];
-            if (cell == nil)
+        static NSString *topImageView = @"trendcell";
+        TrendsCell *cell = [tableView dequeueReusableCellWithIdentifier:topImageView];
+        if (cell == nil)
+        {
+            cell = [[TrendsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:topImageView];
+        }
+        NSDictionary *groupDict = [tmpArray objectAtIndex:indexPath.section-1];
+        NSArray *array = [groupDict objectForKey:@"diaries"];
+        NSDictionary *dict = [array objectAtIndex:indexPath.row];
+        NSString *name = [[dict objectForKey:@"by"] objectForKey:@"name"];
+        
+        NSString *nameStr;
+        NSArray *classmen = [db findSetWithDictionary:@{@"uid":[[dict objectForKey:@"by"] objectForKey:@"_id"],@"classid":classID} andTableName:CLASSMEMBERTABLE];
+        if ([classmen count]>0)
+        {
+            NSDictionary *memdict = [classmen firstObject];
+            if (![[memdict objectForKey:@"title"] isEqual:[NSNull null]])
             {
-                cell = [[TrendsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:topImageView];
-            }
-            NSDictionary *groupDict = [tmpArray objectAtIndex:indexPath.section-1];
-            NSArray *array = [groupDict objectForKey:@"diaries"];
-            NSDictionary *dict = [array objectAtIndex:indexPath.row];
-            NSString *name = [[dict objectForKey:@"by"] objectForKey:@"name"];
-            
-            NSString *nameStr;
-            NSArray *classmen = [db findSetWithDictionary:@{@"uid":[[dict objectForKey:@"by"] objectForKey:@"_id"],@"classid":classID} andTableName:CLASSMEMBERTABLE];
-            if ([classmen count]>0)
-            {
-                NSDictionary *memdict = [classmen firstObject];
-                if (![[memdict objectForKey:@"title"] isEqual:[NSNull null]])
+                if ([[memdict objectForKey:@"title"] length] >0)
                 {
-                    if ([[memdict objectForKey:@"title"] length] >0)
-                    {
-                        nameStr = [NSString stringWithFormat:@"%@（%@）",name,[memdict objectForKey:@"title"]];
-                    }
-                    else
-                        nameStr = name;
+                    nameStr = [NSString stringWithFormat:@"%@（%@）",name,[memdict objectForKey:@"title"]];
                 }
                 else
-                {
                     nameStr = name;
-                }
             }
             else
             {
                 nameStr = name;
             }
-            
-            cell.headerImageView.hidden = NO;
-            cell.nameLabel.hidden = NO;
-            cell.timeLabel.hidden = NO;
-            cell.locationLabel.hidden = NO;
-            cell.praiseButton.hidden = NO;
-            cell.praiseImageView.hidden = NO;
-            cell.commentImageView.hidden = NO;
-            cell.commentButton.hidden = NO;
-            cell.transmitButton.hidden = NO;
-            
-            cell.nameLabel.frame = CGRectMake(60, 5, [nameStr length]*25>170?170:([nameStr length]*18), 30);
-            cell.nameLabel.text = nameStr;
-            cell.nameLabel.font = [UIFont systemFontOfSize:15];
-            cell.nameLabel.textColor = LIGHT_BLUE_COLOR;
-            cell.timeLabel.frame = CGRectMake(cell.nameLabel.frame.size.width+cell.nameLabel.frame.origin.x, 5, SCREEN_WIDTH-cell.nameLabel.frame.origin.x-cell.nameLabel.frame.size.width-20, 30);
-            cell.timeLabel.textAlignment = NSTextAlignmentRight;
-            cell.timeLabel.numberOfLines = 2;
-            cell.timeLabel.lineBreakMode = NSLineBreakByWordWrapping;
-            cell.timeLabel.text = [Tools showTime:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]];
-            cell.headerImageView.layer.cornerRadius = cell.headerImageView.frame.size.width/2;
-            cell.headerImageView.clipsToBounds = YES;
-            cell.headerImageView.backgroundColor = [UIColor clearColor];
-            [Tools fillImageView:cell.headerImageView withImageFromURL:[[dict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERBG];
-            cell.locationLabel.frame = CGRectMake(60, cell.nameLabel.frame.origin.y+cell.nameLabel.frame.size.height, SCREEN_WIDTH-80, 20);
-            cell.locationLabel.text = [dict objectForKey:@"add"];
-            
-            cell.contentLabel.hidden = YES;
-            for(UIView *v in cell.imagesView.subviews)
+        }
+        else
+        {
+            nameStr = name;
+        }
+        
+        cell.headerImageView.hidden = NO;
+        cell.nameLabel.hidden = NO;
+        cell.timeLabel.hidden = NO;
+        cell.locationLabel.hidden = NO;
+        cell.praiseButton.hidden = NO;
+        cell.praiseImageView.hidden = NO;
+        cell.commentImageView.hidden = NO;
+        cell.commentButton.hidden = NO;
+        cell.transmitButton.hidden = NO;
+        
+        cell.nameLabel.frame = CGRectMake(60, 5, [nameStr length]*25>170?170:([nameStr length]*18), 30);
+        cell.nameLabel.text = nameStr;
+        cell.nameLabel.font = NAMEFONT;
+        cell.nameLabel.textColor = NAMECOLOR;
+    
+        cell.timeLabel.frame = CGRectMake(cell.nameLabel.frame.size.width+cell.nameLabel.frame.origin.x, 5, SCREEN_WIDTH-cell.nameLabel.frame.origin.x-cell.nameLabel.frame.size.width-20, 30);
+        cell.timeLabel.textAlignment = NSTextAlignmentRight;
+        cell.timeLabel.numberOfLines = 2;
+        cell.timeLabel.lineBreakMode = NSLineBreakByWordWrapping;
+        cell.timeLabel.text = [Tools showTime:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]];
+        cell.headerImageView.layer.cornerRadius = cell.headerImageView.frame.size.width/2;
+        cell.headerImageView.clipsToBounds = YES;
+        cell.headerImageView.backgroundColor = [UIColor clearColor];
+        [Tools fillImageView:cell.headerImageView withImageFromURL:[[dict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERBG];
+        cell.locationLabel.frame = CGRectMake(60, cell.nameLabel.frame.origin.y+cell.nameLabel.frame.size.height, SCREEN_WIDTH-80, 20);
+        cell.locationLabel.text = [dict objectForKey:@"add"];
+        
+        cell.contentLabel.hidden = YES;
+        for(UIView *v in cell.imagesView.subviews)
+        {
+            if ([v isKindOfClass:[UIImageView class]])
             {
-                if ([v isKindOfClass:[UIImageView class]])
-                {
-                    [v removeFromSuperview];
-                }
+                [v removeFromSuperview];
             }
-            if (![[dict objectForKey:@"content"] length] <=0)
+        }
+        if (![[dict objectForKey:@"content"] length] <=0)
+        {
+            CGFloat he = 0;
+            if (SYSVERSION >= 7)
             {
-                CGFloat he = 0;
-                if (SYSVERSION >= 7)
-                {
-                    he = 5;
-                }
-                //有文字
-                cell.contentLabel.hidden = NO;
-                cell.contentLabel.editable = NO;
-                cell.contentLabel.textColor = [UIColor blackColor];
-                if ([[dict objectForKey:@"content"] length] > 40)
-                {
-                    cell.contentLabel.text  = [NSString stringWithFormat:@"%@...",[[dict objectForKey:@"content"] substringToIndex:37]];
-                }
-                else
-                {
-                    cell.contentLabel.text = [dict objectForKey:@"content"];
-                }
-                cell.contentLabel.frame = CGRectMake(10, 55, SCREEN_WIDTH-20, 45);
+                he = 5;
+            }
+            //有文字
+            cell.contentLabel.hidden = NO;
+            cell.contentLabel.editable = NO;
+            cell.contentLabel.textColor = [UIColor blackColor];
+            if ([[dict objectForKey:@"content"] length] > 40)
+            {
+                cell.contentLabel.text  = [NSString stringWithFormat:@"%@...",[[dict objectForKey:@"content"] substringToIndex:37]];
             }
             else
             {
-                cell.contentLabel.frame = CGRectMake(10, 60, 0, 0);
+                cell.contentLabel.text = [dict objectForKey:@"content"];
             }
-            CGFloat imageViewHeight = ImageHeight;
-            CGFloat imageViewWidth = ImageHeight;
-            if ([[dict objectForKey:@"img"] count] > 0)
+            cell.contentLabel.frame = CGRectMake(10, 55, SCREEN_WIDTH-20, 45);
+        }
+        else
+        {
+            cell.contentLabel.frame = CGRectMake(10, 60, 0, 0);
+        }
+        CGFloat imageViewHeight = ImageHeight;
+        CGFloat imageViewWidth = ImageHeight;
+        if ([[dict objectForKey:@"img"] count] > 0)
+        {
+            //有图片
+            
+            NSArray *imgsArray = [dict objectForKey:@"img"];
+            NSInteger imageCount = [imgsArray count];
+            if (imageCount == -1)
             {
-                //有图片
+                cell.imagesView.frame = CGRectMake((SCREEN_WIDTH-ImageHeight*ImageCountPerRow)/2,
+                                                   cell.contentLabel.frame.size.height +
+                                                   cell.contentLabel.frame.origin.y+7,
+                                                   100, 100);
+                UIImageView *imageView = [[UIImageView alloc] init];
+                imageView.frame = CGRectMake(0, 0, 100, 100);
+                imageView.userInteractionEnabled = YES;
+                imageView.tag = (indexPath.section-1)*SectionTag+indexPath.row*RowTag+333;
                 
-                NSArray *imgsArray = [dict objectForKey:@"img"];
-                NSInteger imageCount = [imgsArray count];
-                if (imageCount == -1)
+                imageView.userInteractionEnabled = YES;
+                [imageView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapImage:)]];
+                
+                // 内容模式
+                imageView.clipsToBounds = YES;
+                imageView.contentMode = UIViewContentModeScaleAspectFill;
+                [Tools fillImageView:imageView withImageFromURL:[imgsArray firstObject] imageWidth:100.0f andDefault:@"3100"];
+//                    [Tools fillImageView:imageView withImageFromURL:[imgsArray firstObject] ];
+                [cell.imagesView addSubview:imageView];
+            }
+            else
+            {
+                NSInteger row = 0;
+                if (imageCount % ImageCountPerRow > 0)
                 {
-                    cell.imagesView.frame = CGRectMake((SCREEN_WIDTH-ImageHeight*ImageCountPerRow)/2,
-                                                       cell.contentLabel.frame.size.height +
-                                                       cell.contentLabel.frame.origin.y+7,
-                                                       100, 100);
+                    row = (imageCount/ImageCountPerRow+1) > 3 ? 3:(imageCount / ImageCountPerRow + 1);
+                }
+                else
+                {
+                    row = (imageCount/ImageCountPerRow) > 3 ? 3:(imageCount / ImageCountPerRow);
+                }
+                cell.imagesView.frame = CGRectMake((SCREEN_WIDTH-ImageHeight*ImageCountPerRow)/2,
+                                                   cell.contentLabel.frame.size.height +
+                                                   cell.contentLabel.frame.origin.y+7,
+                                                   SCREEN_WIDTH-20, (imageViewHeight+5) * row);
+                
+                for (int i=0; i<[imgsArray count]; ++i)
+                {
                     UIImageView *imageView = [[UIImageView alloc] init];
-                    imageView.frame = CGRectMake(0, 0, 100, 100);
+                    imageView.frame = CGRectMake((i%(NSInteger)ImageCountPerRow)*(imageViewWidth+5), (imageViewWidth+5)*(i/(NSInteger)ImageCountPerRow), imageViewWidth, imageViewHeight);
                     imageView.userInteractionEnabled = YES;
-                    imageView.tag = (indexPath.section-1)*SectionTag+indexPath.row*RowTag+333;
+                    imageView.tag = (indexPath.section-1)*SectionTag+indexPath.row*RowTag+i+333;
                     
                     imageView.userInteractionEnabled = YES;
                     [imageView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapImage:)]];
@@ -771,89 +813,57 @@ UIActionSheetDelegate>
                     // 内容模式
                     imageView.clipsToBounds = YES;
                     imageView.contentMode = UIViewContentModeScaleAspectFill;
-                    [Tools fillImageView:imageView withImageFromURL:[imgsArray firstObject] andDefault:@"3100"];
+                    [Tools fillImageView:imageView withImageFromURL:[imgsArray objectAtIndex:i] andDefault:@"3100"];
                     [cell.imagesView addSubview:imageView];
                 }
-                else
-                {
-                    NSInteger row = 0;
-                    if (imageCount % ImageCountPerRow > 0)
-                    {
-                        row = (imageCount/ImageCountPerRow+1) > 3 ? 3:(imageCount / ImageCountPerRow + 1);
-                    }
-                    else
-                    {
-                        row = (imageCount/ImageCountPerRow) > 3 ? 3:(imageCount / ImageCountPerRow);
-                    }
-                    cell.imagesView.frame = CGRectMake((SCREEN_WIDTH-ImageHeight*ImageCountPerRow)/2,
-                                                       cell.contentLabel.frame.size.height +
-                                                       cell.contentLabel.frame.origin.y+7,
-                                                       SCREEN_WIDTH-20, (imageViewHeight+5) * row);
-                    
-                    for (int i=0; i<[imgsArray count]; ++i)
-                    {
-                        UIImageView *imageView = [[UIImageView alloc] init];
-                        imageView.frame = CGRectMake((i%(NSInteger)ImageCountPerRow)*(imageViewWidth+5), (imageViewWidth+5)*(i/(NSInteger)ImageCountPerRow), imageViewWidth, imageViewHeight);
-                        imageView.userInteractionEnabled = YES;
-                        imageView.tag = (indexPath.section-1)*SectionTag+indexPath.row*RowTag+i+333;
-                        
-                        imageView.userInteractionEnabled = YES;
-                        [imageView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapImage:)]];
-                        
-                        // 内容模式
-                        imageView.clipsToBounds = YES;
-                        imageView.contentMode = UIViewContentModeScaleAspectFill;
-                        [Tools fillImageView:imageView withImageFromURL:[imgsArray objectAtIndex:i] andDefault:@"3100"];
-                        [cell.imagesView addSubview:imageView];
-                    }
 
-                }
             }
-            else
-            {
-                cell.imagesView.frame = CGRectMake(5, cell.contentLabel.frame.size.height+cell.contentLabel.frame.origin.y, SCREEN_WIDTH-10, 0);
-            }
-            
-            CGFloat cellHeight = cell.headerImageView.frame.size.height+cell.contentLabel.frame.size.height+cell.imagesView.frame.size.height+18;
-            
-            CGFloat he = 0;
-//            if (SYSVERSION >= 7.0)
-            {
-                he = 5;
-            }
-            
-            
-            cell.transmitImageView.hidden = NO;
-            
-            cell.transmitButton.frame = CGRectMake(0, cellHeight+13, (SCREEN_WIDTH-0)/3, 30);
-            [cell.transmitButton setTitle:@"转发" forState:UIControlStateNormal];
-            cell.transmitButton.tag = indexPath.section*SectionTag+indexPath.row;
-            [cell.transmitButton addTarget:self action:@selector(transmitDiary:) forControlEvents:UIControlEventTouchUpInside];
-            cell.transmitImageView.frame = CGRectMake((SCREEN_WIDTH-20)/4-55, cell.transmitButton.frame.size.height+cell.transmitButton.frame.origin.y-22, 13, 13);
-            
-            
-            [cell.praiseButton setTitle:[NSString stringWithFormat:@"赞(%d)",[[dict objectForKey:@"likes_num"] integerValue]] forState:UIControlStateNormal];
-            [cell.praiseButton addTarget:self action:@selector(praiseDiary:) forControlEvents:UIControlEventTouchUpInside];
-            cell.praiseButton.tag = indexPath.section*SectionTag+indexPath.row;
-            cell.praiseButton.frame = CGRectMake((SCREEN_WIDTH-0)/3, cellHeight+13, (SCREEN_WIDTH-0)/3, 30);
-            
-            cell.praiseImageView.frame = CGRectMake((SCREEN_WIDTH-20)*2/4-20, cell.praiseButton.frame.size.height+cell.praiseButton.frame.origin.y-19, 13, 13);
-            
-            [cell.commentButton setTitle:[NSString stringWithFormat:@"评论(%d)",[[dict objectForKey:@"comments_num"] integerValue]] forState:UIControlStateNormal];
-            cell.commentButton.frame = CGRectMake((SCREEN_WIDTH-0)/3*2, cellHeight+13, (SCREEN_WIDTH-0)/3, 30);
-            cell.selectionStyle = UITableViewCellSelectionStyleNone;
-            cell.commentButton.tag = indexPath.section*SectionTag+indexPath.row;
-            [cell.commentButton addTarget:self action:@selector(commentDiary:) forControlEvents:UIControlEventTouchUpInside];
-            cell.commentImageView.frame = CGRectMake((SCREEN_WIDTH-20)*3/4, cell.commentButton.frame.size.height+cell.commentButton.frame.origin.y-20, 13, 13);
-            
-            cell.bgView.frame = CGRectMake(3, 1.5, SCREEN_WIDTH-6,
-                                           cell.praiseButton.frame.size.height+
-                                           cell.praiseButton.frame.origin.y);
-            cell.bgView.backgroundColor = [UIColor whiteColor];
-            cell.backgroundColor = [UIColor clearColor];
-            
-            return cell;
         }
+        else
+        {
+            cell.imagesView.frame = CGRectMake(5, cell.contentLabel.frame.size.height+cell.contentLabel.frame.origin.y, SCREEN_WIDTH-10, 0);
+        }
+        
+        CGFloat cellHeight = cell.headerImageView.frame.size.height+cell.contentLabel.frame.size.height+cell.imagesView.frame.size.height+18;
+        
+        CGFloat he = 0;
+//            if (SYSVERSION >= 7.0)
+        {
+            he = 5;
+        }
+        
+        
+        cell.transmitImageView.hidden = NO;
+        
+        cell.transmitButton.frame = CGRectMake(0, cellHeight+13, (SCREEN_WIDTH-0)/3, 30);
+        [cell.transmitButton setTitle:@"转发" forState:UIControlStateNormal];
+        cell.transmitButton.tag = indexPath.section*SectionTag+indexPath.row;
+        [cell.transmitButton addTarget:self action:@selector(transmitDiary:) forControlEvents:UIControlEventTouchUpInside];
+        cell.transmitImageView.frame = CGRectMake((SCREEN_WIDTH-20)/4-55, cell.transmitButton.frame.size.height+cell.transmitButton.frame.origin.y-22, 13, 13);
+        
+        
+        [cell.praiseButton setTitle:[NSString stringWithFormat:@"赞(%d)",[[dict objectForKey:@"likes_num"] integerValue]] forState:UIControlStateNormal];
+        [cell.praiseButton addTarget:self action:@selector(praiseDiary:) forControlEvents:UIControlEventTouchUpInside];
+        cell.praiseButton.tag = indexPath.section*SectionTag+indexPath.row;
+        cell.praiseButton.frame = CGRectMake((SCREEN_WIDTH-0)/3, cellHeight+13, (SCREEN_WIDTH-0)/3, 30);
+        
+        cell.praiseImageView.frame = CGRectMake((SCREEN_WIDTH-20)*2/4-20, cell.praiseButton.frame.size.height+cell.praiseButton.frame.origin.y-19, 13, 13);
+        
+        [cell.commentButton setTitle:[NSString stringWithFormat:@"评论(%d)",[[dict objectForKey:@"comments_num"] integerValue]] forState:UIControlStateNormal];
+        cell.commentButton.frame = CGRectMake((SCREEN_WIDTH-0)/3*2, cellHeight+13, (SCREEN_WIDTH-0)/3, 30);
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        cell.commentButton.tag = indexPath.section*SectionTag+indexPath.row;
+        [cell.commentButton addTarget:self action:@selector(commentDiary:) forControlEvents:UIControlEventTouchUpInside];
+        cell.commentImageView.frame = CGRectMake((SCREEN_WIDTH-20)*3/4, cell.commentButton.frame.size.height+cell.commentButton.frame.origin.y-20, 13, 13);
+        
+        cell.bgView.frame = CGRectMake(3, 0, SCREEN_WIDTH-6,
+                                       cell.praiseButton.frame.size.height+
+                                       cell.praiseButton.frame.origin.y);
+        cell.bgView.backgroundColor = [UIColor whiteColor];
+        cell.backgroundColor = [UIColor clearColor];
+        
+        return cell;
+    }
     return nil;
 }
 
@@ -1544,7 +1554,6 @@ UIActionSheetDelegate>
                         classZoneTableView.hidden = NO;
                         [DongTaiArray addObjectsFromArray:array];
                         [self groupByTime:DongTaiArray];
-                       
                     }
                     page = [[[responseDict objectForKey:@"data"] objectForKey:@"page"] intValue];
                     monthStr = [NSString stringWithFormat:@"%@",[[responseDict objectForKey:@"data"] objectForKey:@"month"]];

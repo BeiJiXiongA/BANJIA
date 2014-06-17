@@ -26,6 +26,7 @@
 #define MB_AUTHCODE    @"/users/mbAuthCode"
 #define CHECKPHONE     @"/users/mbCheckPhone"
 #define BINDPHONE      @"/users/mbBindPhone"
+#define HOMEDATA       @"/users/mbindex"
 
 #define MB_CHECKOUT    @"/users/mbCheckCode"
 #define MB_SUBPWD         @"/users/mbSubPwd"

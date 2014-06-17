@@ -43,12 +43,10 @@
         delegate = YCTabBarDelegate;
         
         // Add the background image
-        UIImage* backgroundImage = [delegate backgroundImage];
-        UIImageView* backgroundImageView = [[UIImageView alloc] initWithImage:backgroundImage];
+        UIImageView* backgroundImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"footer_box_bg"]];
         backgroundImageView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-//        backgroundImageView.frame = CGRectMake(0, UI_MAINSCREEN_HEIGHT - UI_TAB_BAR_HEIGHT, self.frame.size.width, backgroundImage.size.height);
-        backgroundImageView.frame = CGRectMake(0, UI_MAINSCREEN_HEIGHT - UI_TAB_BAR_HEIGHT-5, self.frame.size.width, UI_TAB_BAR_HEIGHT+10);
-        backgroundImageView.backgroundColor = [UIColor purpleColor];
+        backgroundImageView.frame = CGRectMake(0, SCREEN_HEIGHT - UI_TAB_BAR_HEIGHT, SCREEN_WIDTH, UI_TAB_BAR_HEIGHT);
+        backgroundImageView.backgroundColor = [UIColor whiteColor];
         [self addSubview:backgroundImageView];
         
         // Adjust our width based on the number of items & the width of each item
@@ -315,8 +313,6 @@
                            forState:UIControlStateHighlighted];
         [button3 setBackgroundImage:[delegate selectedItemImage]
                            forState:UIControlStateSelected];
-        
-        button3.adjustsImageWhenHighlighted = NO;
         
         label3 = [[UILabel alloc] init];
         label3.frame = CGRectMake(button1.frame.origin.x+button1.frame.size.width-27, button1.frame.origin.y-9, 14, 14);

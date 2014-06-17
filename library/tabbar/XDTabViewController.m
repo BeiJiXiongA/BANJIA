@@ -166,22 +166,24 @@ static XDTabViewController *_tabViewController = nil;
 
 - (UIImage*)imageFor:(XDTabBar*)tabBar atIndex:(NSUInteger)itemIndex {
     NSArray *images = [NSArray arrayWithObjects:
-                       @"tab_bar1",
-                       @"tab_bar2", @"tab_bar3", @"tab_bar4",
+                       @"icon_space",
+                       @"icon_announ", @"icon_members", @"icon_more",
                        nil];
+
     return [UIImage imageNamed:[images objectAtIndex:itemIndex]];
 }
 
 - (UIImage*)hightlightedImageFor:(XDTabBar*)tabBar atIndex:(NSUInteger)itemIndex {
     NSArray *images = [NSArray arrayWithObjects:
-                       @"tab_bar1_HL",
-                       @"tab_bar2_HL", @"tab_bar3_HL", @"tab_bar4",
+                       @"icon_space_on",
+                       @"icon_announ_on", @"icon_members_on", @"icon_more_on",
                        nil];
+
     return [UIImage imageNamed:[images objectAtIndex:itemIndex]];
 }
 
 - (UIImage *)backgroundImage {
-    return [UIImage imageNamed:@"tab_bar_bg"];
+    return [UIImage imageNamed:@"footer_box_bg"];
 }
 
 - (UIImage *)selectedItemBackgroundImage {

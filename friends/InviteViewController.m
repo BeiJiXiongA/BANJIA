@@ -161,7 +161,7 @@ UIAlertViewDelegate>
     {
         contactTableView.sectionIndexBackgroundColor = [UIColor clearColor];
     }
-    
+    contactTableView.backgroundColor = [UIColor clearColor];
     contactTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     [bgScrollView addSubview:contactTableView];
     
@@ -230,10 +230,14 @@ UIAlertViewDelegate>
                     NSString *first = [[groupContactArray objectAtIndex:j] objectForKey:@"key"];
                     if ([letter isEqualToString:first])
                     {
-                        [sectionArray addObject:letter];
+                        if (![sectionArray containsObject:letter])
+                        {
+                            [sectionArray addObject:letter];
+                        }
                     }
                 }
             }
+            DDLOG(@"sectionArray=%@",sectionArray);
             return sectionArray;
         }
     }
@@ -267,15 +271,6 @@ UIAlertViewDelegate>
                 return [array count];
             }
         }
-    }
-    else if(tableView.tag == TencentTableViewTag)
-    {
-        if ([tencentFriendsArray count] > 0)
-        {
-            tencentTableView.hidden = NO;
-            return [tencentFriendsArray count];
-        }
-        
     }
     return 0;
 }
@@ -316,6 +311,7 @@ UIAlertViewDelegate>
                 headerLabel.backgroundColor = RGB(234, 234, 234, 1);
                 headerLabel.font = [UIFont systemFontOfSize:14];
                 headerLabel.textColor = TITLE_COLOR;
+                headerLabel.backgroundColor = [UIColor whiteColor];
                 return headerLabel;
             }
         }
@@ -327,6 +323,7 @@ UIAlertViewDelegate>
             headerLabel.backgroundColor = RGB(234, 234, 234, 1);
             headerLabel.font = [UIFont systemFontOfSize:14];
             headerLabel.textColor = TITLE_COLOR;
+            headerLabel.backgroundColor = [UIColor whiteColor];
             return headerLabel;
         }
     }
@@ -363,13 +360,19 @@ UIAlertViewDelegate>
             {
                 cell = [[FriendsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellName];
             }
-            cell.nameLabel.frame = CGRectMake(10, 10, SCREEN_WIDTH - 80, 30);
+            cell.nameLabel.frame = CGRectMake(60, 10, SCREEN_WIDTH - 80, 30);
             cell.nameLabel.font = [UIFont systemFontOfSize:16];
             
             NSDictionary *dict = [alreadyUsers objectAtIndex:indexPath.row];
+            
+            cell.headerImageView.frame = CGRectMake(5, 5, 40, 40);
+            cell.headerImageView.layer.cornerRadius = 5;
+            cell.headerImageView.clipsToBounds = YES;
+            [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERICON];
+            
             cell.nameLabel.text = [dict objectForKey:@"r_name"];
             cell.inviteButton.hidden = NO;
-            cell.inviteButton.frame = CGRectMake(SCREEN_WIDTH-80, 10, 40, 30);
+            cell.inviteButton.frame = CGRectMake(SCREEN_WIDTH-60, 10, 40, 30);
             [cell.inviteButton setImage:[UIImage imageNamed:@"set_add"] forState:UIControlStateNormal];
             
             cell.inviteButton.enabled = YES;
@@ -410,7 +413,7 @@ UIAlertViewDelegate>
             
             NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
             cell.nameLabel.text = [dict objectForKey:@"name"];
-            cell.inviteButton.frame = CGRectMake(SCREEN_WIDTH-80, 10, 40, 30);
+            cell.inviteButton.frame = CGRectMake(SCREEN_WIDTH-60, 10, 40, 30);
             cell.inviteButton.backgroundColor = [UIColor clearColor];
             [cell.inviteButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
             cell.inviteButton.tag = indexPath.row+(ContactTableViewTag%tableViewTagBase)*tableViewTagBase+(indexPath.section-1)*10000;
@@ -434,6 +437,7 @@ UIAlertViewDelegate>
             bgImageBG.backgroundColor = [UIColor clearColor];
             cell.backgroundView = bgImageBG;
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
+            cell.backgroundColor = [UIColor clearColor];
             return cell;
         }
     }
@@ -747,89 +751,45 @@ UIAlertViewDelegate>
             DDLOG(@"checkcontact responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
+                [groupContactArray removeAllObjects];
+                [alreadyUsers addObjectsFromArray:[[responseDict objectForKey:@"data"] allObjects]];
+            
                 
-                [alreadyUsers removeAllObjects];
-                if ([[responseDict objectForKey:@"data"] isKindOfClass:[NSDictionary class]])
+                for (int i = 0; i < [alreadyUsers count]; ++i)
                 {
-                    NSArray *tmpArray = [[responseDict objectForKey:@"data"] allValues];
-                    
-                    for (int i=0; i<[tmpArray count]; i++)
+                    NSDictionary *alreadyDict = [alreadyUsers objectAtIndex:i];
+                    NSString *alreadyPhone = [alreadyDict objectForKey:@"phone"];
+                    for (int j=0; j<[contactArray count]; j++)
                     {
-                        NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithCapacity:0];
-                        NSDictionary *tmpDict = [tmpArray objectAtIndex:i];
-                        [dict setObject:[tmpDict objectForKey:@"_id"] forKey:@"_id"];
-                        [dict setObject:[tmpDict objectForKey:@"phone"] forKey:@"phone"];
-                        [dict setObject:[self getNameWithPhone:[tmpDict objectForKey:@"phone"]] forKey:@"r_name"];
-                        if (![[tmpDict objectForKey:@"phone"] isEqualToString:[Tools phone_num]])
+                        NSDictionary *contactDict = [contactArray objectAtIndex:j];
+                        NSString *contactPhone = [Tools getPhoneNumFromString:[contactDict objectForKey:@"home_phone"]];
+                        if ([contactPhone rangeOfString:alreadyPhone].length > 0)
                         {
-                             [alreadyUsers addObject:dict];
+                            [contactArray removeObjectAtIndex:j];
                         }
                     }
-                    
-                    NSMutableArray *alreadyInClassUsers = [[NSMutableArray alloc] initWithCapacity:0];
-                    NSMutableArray *alreadyFriends = [[NSMutableArray alloc] initWithCapacity:0];
-                    
-                    if (fromClass)
+                }
+                
+                if (fromClass)
+                {
+                    DDLOG(@"uid %@",[Tools user_id]);
+                    for (int i=0; i<[alreadyUsers count]; i++)
                     {
-                        for (int i=0; i<[alreadyUsers count]; ++i)
+                        NSDictionary *alreadyDict = [alreadyUsers objectAtIndex:i];
+                        if ([[db findSetWithDictionary:@{@"classid":classID,@"uid":[alreadyDict objectForKey:@"_id"]} andTableName:CLASSMEMBERTABLE] count] > 0)
                         {
-                            NSDictionary *dict = [alreadyUsers objectAtIndex:i];
-                            NSString *alreadyUserID = [dict objectForKey:@"_id"];
-                            if ([[db findSetWithDictionary:@{@"uid":alreadyUserID,@"classid":classID} andTableName:CLASSMEMBERTABLE] count] > 0)
-                            {
-                                [alreadyInClassUsers addObject:dict];
-                            }
-                            
-                            NSString *phone = [self getPhonesString:[dict objectForKey:@"phone"]];
-                            
-                            for (int j=0; j<[contactArray count]; ++j)
-                            {
-                                NSDictionary *dict2 = [contactArray objectAtIndex:j];
-                                NSString *phonesString = [self getPhonesString:[dict2 objectForKey:@"home_phone"]];
-                                if ([phonesString rangeOfString:phone].length > 0)
-                                {
-                                    [contactArray removeObject:dict2];
-                                }
-                            }
+                            [alreadyUsers removeObjectAtIndex:i];
                         }
                     }
-                    else
+                }
+                else
+                {
+                    for (int i=0; i<[alreadyUsers count]; i++)
                     {
-                        for (int i=0; i<[alreadyUsers count]; ++i)
+                        NSDictionary *alreadyDict = [alreadyUsers objectAtIndex:i];
+                        if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fid":[alreadyDict objectForKey:@"_id"]} andTableName:FRIENDSTABLE] count] > 0)
                         {
-                            NSDictionary *dict = [alreadyUsers objectAtIndex:i];
-                            NSString *alreadyUserID = [dict objectForKey:@"_id"];
-                            if ([[db findSetWithDictionary:@{@"fid":alreadyUserID} andTableName:FRIENDSTABLE] count] > 0)
-                            {
-                                [alreadyFriends addObject:dict];
-                            }
-                            
-                            NSString *phone = [self getPhonesString:[dict objectForKey:@"phone"]];
-                            
-                            for (int j=0; j<[contactArray count]; ++j)
-                            {
-                                NSDictionary *dict2 = [contactArray objectAtIndex:j];
-                                NSString *phonesString = [self getPhonesString:[dict2 objectForKey:@"home_phone"]];
-                                if ([phonesString rangeOfString:phone].length > 0)
-                                {
-                                    [contactArray removeObject:dict2];
-                                }
-                            }
-                        }
-
-                    }
-                    if (fromClass)
-                    {
-                        for (int i=0; i<[alreadyInClassUsers count]; i++)
-                        {
-                            [alreadyUsers removeObject:[alreadyInClassUsers objectAtIndex:i]];
-                        }
-                    }
-                    else
-                    {
-                        for (int i=0; i<[alreadyFriends count]; i++)
-                        {
-                            [alreadyUsers removeObject:[alreadyFriends objectAtIndex:i]];
+                            [alreadyUsers removeObjectAtIndex:i];
                         }
                     }
                 }

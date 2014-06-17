@@ -15,6 +15,7 @@ UIImagePickerControllerDelegate,
 UINavigationBarDelegate>
 @property (nonatomic, strong) NSString *classID;
 @property (nonatomic, assign) id<ClassZoneDelegate> classZoneDelegate;
+@property (nonatomic, assign) BOOL fromCLass;
 @end
 
 @protocol ClassZoneDelegate <NSObject>

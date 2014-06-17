@@ -10,8 +10,8 @@
 #import "MyLabel.h"
 
 @interface NotificationCell : UITableViewCell
-@property (nonatomic, strong) UILabel *iconLabel;
-//@property (nonatomic, strong) UIImageView *iconImageView;
+//@property (nonatomic, strong) UILabel *iconLabel;
+@property (nonatomic, strong) UIImageView *iconImageView;
 @property (nonatomic, strong) UIImageView *bgImageView;
 @property (nonatomic, strong) MyLabel *contentLabel;
 @property (nonatomic, strong) UILabel *nameLabel;

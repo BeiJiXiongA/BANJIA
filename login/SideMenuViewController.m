@@ -14,10 +14,19 @@
 #import "PersonalSettingViewController.h"
 #import "XDContentViewController+JDSideMenu.h"
 #import "Header.h"
+#import "MyButton.h"
+
+#import "ClassCell.h"
 
 #import "KKNavigationController.h"
 
-@interface SideMenuViewController ()
+#define HOMETAG     2000
+#define MYCLASSTAG  2001
+#define FRIENDSTAG  2002
+#define MESSAGETAG  2003
+#define PERSONTAG   2004
+
+@interface SideMenuViewController ()<UITableViewDataSource,UITableViewDelegate>
 {
     UIImage *greenImage;
     UIImage *btnImage;
@@ -25,6 +34,11 @@
     OperatDB *db;
     
     NSArray *menuNamesArray;
+    NSArray *menuIconArray;
+    
+    UITableView *buttonTableView;
+    
+    NSInteger selectIndex;
 }
 @end
 
@@ -51,9 +65,11 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeIcon) name:@"changeicon" object:nil];
     
+    selectIndex = 0;
+    
     db = [[OperatDB alloc] init];
     
-    self.bgView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"drawer"]];
+    self.bgView.backgroundColor = RGB(49, 54, 58, 1);
     
     self.imageView = [[UIImageView alloc] initWithFrame:CGRectMake(150/2-43, 30, 86, 86)];
     self.imageView.backgroundColor = [UIColor whiteColor];
@@ -78,46 +94,113 @@
     nameLabel.textAlignment = NSTextAlignmentCenter;
     [self.bgView addSubview:nameLabel];
     
-    btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
-    greenImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg_green"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
     menuNamesArray = [NSArray arrayWithObjects:@"   首页",@"   我的班级",@"   我的好友",@"   聊天记录",@"   个人信息", nil];
-    for(int i=0;i<[menuNamesArray count];++i)
+    menuIconArray = [NSArray arrayWithObjects:@"icon_home",@"icon_class",@"icon_friends",@"icon_chat",@"icon_setup", nil];
+    
+    buttonTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 166, 180, [menuNamesArray count] * 40) style:UITableViewStylePlain];
+    buttonTableView.delegate = self;
+    buttonTableView.dataSource = self;
+    buttonTableView.separatorColor = RGB(80, 80, 80, 1);
+    buttonTableView.backgroundColor = [UIColor clearColor];
+    [self.bgView addSubview:buttonTableView];
+    if ([buttonTableView respondsToSelector:@selector(setSeparatorInset:)])
     {
-        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-//        button.showsTouchWhenHighlighted = YES;
-        button.frame = CGRectMake(0, 166+43*i, 150, 40);
-        button.backgroundColor = [UIColor clearColor];
-        [button addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
-        [button setTitle:[menuNamesArray objectAtIndex:i] forState:UIControlStateNormal];
-        button.tag = 1000+i;
-        if (i==0)
-        {
-            [button setTitleColor:RGB(255, 108, 0, 1) forState:UIControlStateNormal];
-        }
-        else
-        {
-            [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        }
-        
-        [button setContentHorizontalAlignment:UIControlContentHorizontalAlignmentLeft];
-        [self.bgView addSubview:button];
-        
-        UILabel *unReadLabel = [[UILabel alloc] init];
-        unReadLabel.backgroundColor = [UIColor redColor];
-        unReadLabel.layer.cornerRadius = 7.5;
-        unReadLabel.layer.borderColor = [UIColor whiteColor].CGColor;
-        unReadLabel.layer.borderWidth = 2;
-        unReadLabel.clipsToBounds = YES;
-        unReadLabel.clipsToBounds = YES;
-        unReadLabel.tag = 2000+i;
-        unReadLabel.textAlignment = NSTextAlignmentCenter;
-        unReadLabel.font = [UIFont systemFontOfSize:10];
-        unReadLabel.textColor = [UIColor whiteColor];
-        unReadLabel.hidden = YES;
-        unReadLabel.frame = CGRectMake(100, button.frame.origin.y+12.5, 15, 15);
-        [self.bgView addSubview:unReadLabel];
+        [buttonTableView setSeparatorInset:UIEdgeInsetsZero];
     }
 }
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return [menuNamesArray count];
+}
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 40;
+}
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *sideButton = @"sidebuttoncell";
+    ClassCell *cell = [tableView dequeueReusableCellWithIdentifier:sideButton];
+    if (cell == nil)
+    {
+        cell = [[ClassCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:sideButton];
+    }
+    cell.headerImageView.frame = CGRectMake(10, 10, 20, 20);
+    [cell.headerImageView setImage:[UIImage imageNamed:[menuIconArray objectAtIndex:indexPath.row]]];
+    cell.nameLabel.frame = CGRectMake(30, 5, 100, 30);
+    cell.nameLabel.textColor = [UIColor whiteColor];
+    cell.nameLabel.text = [menuNamesArray objectAtIndex:indexPath.row];
+    cell.nameLabel.font = [UIFont systemFontOfSize:18];
+    if (indexPath.row == selectIndex)
+    {
+        cell.backgroundColor = RGB(58, 63, 67, 1);
+    }
+    else
+    {
+        cell.backgroundColor = [UIColor clearColor];
+    }
+    
+    cell.contentLable.frame = CGRectMake(140, 12.5, 15, 15);
+    cell.contentLable.backgroundColor = RGB(242, 87, 87, 1);
+    cell.contentLable.layer.cornerRadius = 7.5;
+    cell.contentLable.clipsToBounds = YES;
+    cell.contentLable.layer.borderColor = [UIColor whiteColor].CGColor;
+    cell.contentLable.layer.borderWidth = 2;
+    cell.contentLable.hidden = YES;
+    if (indexPath.row == 2)
+    {
+        if ([self haveNewFriendApply])
+        {
+            cell.contentLable.hidden = NO;
+        }
+    }
+    if (indexPath.row == 3)
+    {
+        if ([self haveNewMsg])
+        {
+            cell.contentLable.hidden = NO;
+        }
+    }
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    return cell;
+}
+
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    selectIndex = indexPath.row;
+    if (indexPath.row == HOMETAG-2000)
+    {
+        HomeViewController *home = [[HomeViewController alloc] init];
+        KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:home];
+        [self.sideMenuController setContentController:homeNav animted:NO];
+    }
+    else if(indexPath.row == MYCLASSTAG-2000)
+    {
+        MyClassesViewController *myClasses = [[MyClassesViewController alloc] init];
+        KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClasses];
+        [self.sideMenuController setContentController:myClassesNav animted:NO];
+    }
+    else if(indexPath.row == FRIENDSTAG-2000)
+    {
+        FriendsViewController *friends = [[FriendsViewController alloc] init];
+        KKNavigationController *friendsNav = [[KKNavigationController alloc] initWithRootViewController:friends];
+        [self.sideMenuController setContentController:friendsNav animted:NO];
+
+    }
+    else if(indexPath.row == MESSAGETAG-2000)
+    {
+        MessageViewController *message = [[MessageViewController alloc] init];
+        KKNavigationController *messageNav = [[KKNavigationController alloc] initWithRootViewController:message];
+        [self.sideMenuController setContentController:messageNav animted:NO];
+    }
+    else if(indexPath.row == PERSONTAG-2000)
+    {
+        PersonalSettingViewController *personalSetting = [[PersonalSettingViewController alloc] init];
+        KKNavigationController *personSettingNav = [[KKNavigationController alloc] initWithRootViewController:personalSetting];
+        [self.sideMenuController setContentController:personSettingNav animted:NO];
+    }
+    [tableView reloadData];
+}
+
 -(void)headerTap
 {
     PersonalSettingViewController *personalSetting = [[PersonalSettingViewController alloc] init];
@@ -139,43 +222,13 @@
 
 -(void)changeIcon
 {
-    DDLOG(@"changeicon==%@",[[NSUserDefaults standardUserDefaults] objectForKey:HEADERIMAGE]);
     [Tools fillImageView:self.imageView withImageFromURL:[Tools header_image] andDefault:HEADERBG];
 }
 
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
-    DDLOG(@"%@==%@",[ud objectForKey:@"count"],[ud objectForKey:@"ucfriendsnum"]);
-    if ([[ud objectForKey:@"count"] integerValue] > 0)
-    {
-        [self.bgView viewWithTag:2001].hidden = NO;
-    }
-    if ([[ud objectForKey:@"ucfriendsnum"] integerValue] > 0)
-    {
-        [self.bgView viewWithTag:2002].hidden = NO;
-        int ucfriends = [[ud  objectForKey:@"ucfriendsnum"] integerValue];
-        ((UILabel *)[self.bgView viewWithTag:2002]).text = [NSString stringWithFormat:@"%d",ucfriends];
-    }
-    
-    if ([self haveNewMsg])
-    {
-        [self.bgView viewWithTag:2002].hidden = NO;
-    }
-    else
-    {
-        [self.bgView viewWithTag:2002].hidden = YES;
-    }
-    if ([self haveNewFriendApply])
-    {
-        [self.bgView viewWithTag:2001].hidden = NO;
-    }
-    else
-    {
-        [self.bgView viewWithTag:2001].hidden = YES;
-    }
-    
+    [buttonTableView reloadData];
 }
 
 - (void)didReceiveMemoryWarning

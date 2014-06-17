@@ -30,11 +30,13 @@
         nameLabel.backgroundColor = [UIColor clearColor];
         nameLabel.textAlignment = NSTextAlignmentCenter;
         nameLabel.font = [UIFont systemFontOfSize:14];
+        nameLabel.textColor = TITLE_COLOR;
         [self.contentView addSubview:nameLabel];
         
         objectsLabel = [[UILabel alloc] initWithFrame:CGRectMake(70, 40, 100, 15)];
         objectsLabel.backgroundColor = [UIColor clearColor];
         objectsLabel.font = [UIFont systemFontOfSize:12];
+        objectsLabel.textColor = TITLE_COLOR;
         [self.contentView addSubview:objectsLabel];
         
         authenticationSign = [[UIImageView alloc] init];

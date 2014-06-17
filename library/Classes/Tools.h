@@ -22,6 +22,7 @@
 @interface Tools : NSObject
 + (NSDictionary *)JSonFromString:(NSString* )result;
 + (void) fillImageView:(UIImageView *)imageView withImageFromURL:(NSString*)URL andDefault:(NSString *)defaultName;
++ (void) fillImageView:(UIImageView *)imageView withImageFromURL:(NSString*)URL imageWidth:(CGFloat)imageWidth andDefault:(NSString *)defaultName;
 +(BOOL)isPhoneNumber:(NSString *)numStr;
 +(BOOL)isMailAddress:(NSString *)mailStr;
 +(BOOL)isPassWord:(NSString *)passStr;

@@ -33,7 +33,13 @@
 #define NOTICETAG  3000
 #define REPLAYTAG  10000
 
-@interface MessageViewController ()<UITableViewDataSource,UITableViewDelegate,ChatDelegate,EGORefreshTableHeaderDelegate,ChatVCDelegate>
+@interface MessageViewController ()<
+UITableViewDataSource,
+UITableViewDelegate,
+ChatDelegate,
+MsgDelegate,
+EGORefreshTableHeaderDelegate,
+ChatVCDelegate>
 {
     UITableView *friendsListTableView;
     NSMutableArray *chatFriendArray;
@@ -128,8 +134,27 @@
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = self;
+    
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).ChatDelegate = self;
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = self;
+    
     [self dealNewChatMsg:nil];
+    [self dealNewMsg:nil];
+
+}
+
+-(void)dealloc
+{
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).ChatDelegate = nil;
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = nil;
+}
+
+-(void)dealNewMsg:(NSDictionary *)dict
+{
+    if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"checked":@"0"} andTableName:FRIENDSTABLE] count] > 0)
+    {
+        self.unReadLabel.hidden = NO;
+    }
 }
 -(void)getChatList
 {

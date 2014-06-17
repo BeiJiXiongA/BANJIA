@@ -49,7 +49,7 @@ MsgDelegate>
     NSMutableArray *adminArray;
     NSMutableArray *parentsArray;
     NSMutableArray *withoutParentStuArray;
-    NSMutableArray *adminIDArray;
+    NSMutableDictionary *adminIDDict;
     
     NSArray *buttonNamesArray;
     UIView *selectView;
@@ -106,7 +106,7 @@ MsgDelegate>
     parentsArray = [[NSMutableArray alloc] initWithCapacity:0];
     studentArray = [[NSMutableArray alloc] initWithCapacity:0];
     withoutParentStuArray = [[NSMutableArray alloc] initWithCapacity:0];
-    adminIDArray = [[NSMutableArray alloc] initWithCapacity:0];
+    adminIDDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     allMembersArray = [[NSMutableArray alloc] initWithCapacity:0];
     searchResultArray = [[NSMutableArray alloc] initWithCapacity:0];
     
@@ -122,8 +122,8 @@ MsgDelegate>
     
     UIButton *inviteButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [inviteButton setTitle:@"邀请" forState:UIControlStateNormal];
-    [inviteButton setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
     [inviteButton setBackgroundColor:[UIColor clearColor]];
+    [inviteButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     inviteButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
     [inviteButton addTarget:self action:@selector(inviteClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:inviteButton];
@@ -209,15 +209,16 @@ MsgDelegate>
     
     if ([Tools NetworkReachable])
     {
-        NSArray *newApplyArray = [_db findSetWithDictionary:@{@"classid":classID,@"checked":@"0"} andTableName:CLASSMEMBERTABLE];
-        if ([newApplyArray count] > 0)
+//        NSArray *newApplyArray = [_db findSetWithDictionary:@{@"classid":classID,@"checked":@"0"} andTableName:CLASSMEMBERTABLE];
+//        if ([newApplyArray count] > 0)
+//        {
+//            [self getAdminCache];
+//            [self getAdmins];
+//        }
+//        else
         {
             [self getAdminCache];
             [self getAdmins];
-        }
-        else
-        {
-            [self getAdminCache];
         }
     }
     else
@@ -375,7 +376,6 @@ MsgDelegate>
 
 -(void)backClick
 {
-//    [[XDTabViewController sharedTabViewController] dismissViewControllerAnimated:YES completion:nil];
     [[XDTabViewController sharedTabViewController] dismissViewControllerAnimated:YES completion:nil];
 }
 
@@ -398,12 +398,11 @@ MsgDelegate>
         NSDictionary *responseDict = [Tools JSonFromString:responseString];
         if ([[responseDict objectForKey:@"code"] intValue]== 1)
         {
-            [adminIDArray removeAllObjects];
+            [adminIDDict removeAllObjects];
             
             if ([[responseDict objectForKey:@"data"] count] > 0)
             {
-                NSArray *array = [[responseDict objectForKey:@"data"] allKeys];
-                [adminIDArray addObjectsFromArray:array];
+                [adminIDDict setDictionary:[responseDict objectForKey:@"data"]];
                 [self manageClassMember];
             }
         }
@@ -437,12 +436,11 @@ MsgDelegate>
                 NSString *key = [urlStr MD5Hash];
                 [FTWCache setObject:[responseString dataUsingEncoding:NSUTF8StringEncoding] forKey:key];
                 
-                [adminIDArray removeAllObjects];
+                [adminIDDict removeAllObjects];
                 
                 if ([[responseDict objectForKey:@"data"] count] > 0)
                 {
-                    NSArray *array = [[responseDict objectForKey:@"data"] allKeys];
-                    [adminIDArray addObjectsFromArray:array];
+                    [adminIDDict setDictionary:[responseDict objectForKey:@"data"]];
                     [self getMembersByClass:@"all"];
                 }
             }
@@ -503,11 +501,7 @@ MsgDelegate>
                 
                 [allMembersArray addObjectsFromArray:[[responseDict objectForKey:@"data"] allValues]];
                 
-                
-                if ([allMembersArray count] > 0)
-                {
-                    [_db deleteRecordWithDict:@{@"classid":classID} andTableName:CLASSMEMBERTABLE];
-                }
+                [_db deleteRecordWithDict:@{@"classid":classID} andTableName:CLASSMEMBERTABLE];
                 
                 for(int i=0;i<[allMembersArray count];i++)
                 {
@@ -519,6 +513,16 @@ MsgDelegate>
                     [memDict setObject:[dict objectForKey:@"name"] forKey:@"name"];
                     [memDict setObject:classID forKey:@"classid"];
                     [memDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"checked"] integerValue]] forKey:@"checked"];
+                    
+                    if ([[adminIDDict objectForKey:[dict objectForKey:@"_id"]] intValue] > 0)
+                    {
+                        [memDict setObject:[NSString stringWithFormat:@"%d",[[adminIDDict objectForKey:[dict objectForKey:@"_id"]] integerValue]] forKey:@"admin"];
+                    }
+                    else
+                    {
+                        [memDict setObject:@"0" forKey:@"admin"];
+                    }
+                    
                     if ([dict objectForKey:@"re_id"])
                     {
                         [memDict setObject:[dict objectForKey:@"re_id"] forKey:@"re_id"];
@@ -629,21 +633,14 @@ MsgDelegate>
     [studentArray removeAllObjects];
     [withoutParentStuArray removeAllObjects];
     
-    DDLOG(@"CLASSMEMBER=====%@",[_db findSetWithDictionary:@{@"classid":classID} andTableName:CLASSMEMBERTABLE]);
-    
     [allMembersArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"checked":@"1"} andTableName:CLASSMEMBERTABLE]];
     
     [teachersArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"role":@"teachers"} andTableName:CLASSMEMBERTABLE]];
     
     [newAppleArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"checked":@"0"} andTableName:CLASSMEMBERTABLE]];
-    for (int i=0; i<[adminIDArray count]; ++i)
-    {
-        NSArray *tmpArray = [_db findSetWithDictionary:@{@"classid":classID,@"uid":[adminIDArray objectAtIndex:i]} andTableName:CLASSMEMBERTABLE];
-        if ([tmpArray count] > 0)
-        {
-            [adminArray addObject:[tmpArray firstObject]];
-        }
-    }
+    
+    [adminArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"admin":@"1"} andTableName:CLASSMEMBERTABLE]];
+    [adminArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"admin":@"2"} andTableName:CLASSMEMBERTABLE]];
     
     [parentsArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"role":@"parents"} andTableName:CLASSMEMBERTABLE]];
     studentArray = [_db findSetWithDictionary:@{@"classid":classID,@"role":@"students"} andTableName:CLASSMEMBERTABLE];
@@ -673,7 +670,7 @@ MsgDelegate>
             [studentArray removeObject:[newAppleArray objectAtIndex:i]];
         }
     }
-    
+
     self.titleLabel.text = [NSString stringWithFormat:@"班级成员(%d)",[teachersArray count]+[studentArray count]];
     
     [membersArray addObjectsFromArray:[Tools getSpellSortArrayFromChineseArray:studentArray andKey:@"name"]];
@@ -830,12 +827,17 @@ MsgDelegate>
                 cell = [[MemberCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:studentCell];
             }
             cell.headerImageView.hidden = YES;
-            cell.headerImageView.layer.cornerRadius = cell.headerImageView.frame.size.width/2;
+            cell.headerImageView.layer.cornerRadius = 3;
             cell.headerImageView.clipsToBounds = YES;
             cell.remarkLabel.hidden = NO;
             cell.memNameLabel.text = nil;
             cell.remarkLabel.text = nil;
-            cell.memNameLabel.frame = CGRectMake(10, 15, 150, 30);
+            cell.memNameLabel.frame = CGRectMake(60, 15, 150, 30);
+            
+            cell.markView.frame = CGRectMake(10, 10, 40, 40);
+            cell.markView.layer.cornerRadius = 3;
+            cell.markView.clipsToBounds = YES;
+            
             if (indexPath.row == 0)
             {
                 if ([newAppleArray count] > 0)
@@ -854,7 +856,6 @@ MsgDelegate>
             {
                 UIImage *image = [Tools getImageFromImage:[UIImage imageNamed:@"bg_bor_green"] andInsets:UIEdgeInsetsMake(0.2, 0, 0.2, 0)];
                 cell.markView.hidden = NO;
-                cell.markView.frame = CGRectMake(1.5, 0.5, image.size.width, 59);
                 [cell.markView setImage:image];
                 cell.memNameLabel.text = @"老师";
                 cell.remarkLabel.text = [NSString stringWithFormat:@"%d人",[teachersArray count]];
@@ -863,7 +864,6 @@ MsgDelegate>
             {
                 UIImage *image = [Tools getImageFromImage:[UIImage imageNamed:@"bg_bor_orang"] andInsets:UIEdgeInsetsMake(0.2, 0, 0.2, 0)];
                 cell.markView.hidden = NO;
-                cell.markView.frame = CGRectMake(1.5, 0.5, image.size.width, 59);
                 [cell.markView setImage:image];
                 cell.memNameLabel.text = @"班级管理员";
                 cell.remarkLabel.text = [NSString stringWithFormat:@"%d人",[adminArray count]];
@@ -872,7 +872,6 @@ MsgDelegate>
             {
                 UIImage *image = [Tools getImageFromImage:[UIImage imageNamed:@"bg_bor_red"] andInsets:UIEdgeInsetsMake(0.2, 0, 0.2, 0)];
                 cell.markView.hidden = NO;
-                cell.markView.frame = CGRectMake(1.5, 0.5, image.size.width, 59);
                 [cell.markView setImage:image];
                 cell.memNameLabel.text = @"应添加家长的学生";
                 cell.remarkLabel.text = [NSString stringWithFormat:@"%d人",[withoutParentStuArray count]];
@@ -893,9 +892,10 @@ MsgDelegate>
                 cell = [[MemberCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:studentCell];
             }
             NSDictionary *dict = [classLeadersArray objectAtIndex:indexPath.row];
+            cell.memNameLabel.frame = CGRectMake(60, 15, 150, 30);
             cell.memNameLabel.text = [dict objectForKey:@"name"];
             [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERBG];
-            cell.headerImageView.layer.cornerRadius = cell.headerImageView.frame.size.width/2;
+            cell.headerImageView.layer.cornerRadius = 3;
             cell.headerImageView.clipsToBounds = YES;
             cell.remarkLabel.frame = CGRectMake(SCREEN_WIDTH - 130, 15, 100, 30);
             cell.remarkLabel.hidden = NO;
@@ -922,9 +922,9 @@ MsgDelegate>
             {
                 cell = [[MemberCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:studentCell];
             }
-            DDLOG(@"%@+++%d==%d",membersArray,indexPath.section-2,indexPath.row);
             NSDictionary *dict = [[[membersArray objectAtIndex:indexPath.section-2] objectForKey:@"array"] objectAtIndex:indexPath.row];
-            cell.headerImageView.layer.cornerRadius = cell.headerImageView.frame.size.width/2;
+            cell.memNameLabel.frame = CGRectMake(60, 15, 150, 30);
+            cell.headerImageView.layer.cornerRadius = 3;
             cell.headerImageView.clipsToBounds = YES;
             cell.button2.hidden = YES;
             cell.memNameLabel.text = [dict objectForKey:@"name"];
@@ -977,6 +977,7 @@ MsgDelegate>
                 subGroup.classID = classID;
                 subGroup.subGroupDel = self;
                 subGroup.admin = NO;
+                subGroup.titleString = @"新申请";
                 [[XDTabViewController sharedTabViewController].navigationController pushViewController:subGroup animated:YES];
             }
             else if (indexPath.row == 1)
@@ -986,6 +987,7 @@ MsgDelegate>
                 subGroup.classID = classID;
                 subGroup.admin = NO;
                 subGroup.subGroupDel = self;
+                subGroup.titleString = @"老师";
                 [[XDTabViewController sharedTabViewController].navigationController pushViewController:subGroup animated:YES];
             }
             else if(indexPath.row == 2)
@@ -995,6 +997,7 @@ MsgDelegate>
                 subGroup.classID = classID;
                 subGroup.admin = YES;
                 subGroup.subGroupDel = self;
+                subGroup.titleString = @"管理员";
                 [[XDTabViewController sharedTabViewController].navigationController pushViewController:subGroup animated:YES];
             }
             else if(indexPath.row == 3)
@@ -1004,6 +1007,7 @@ MsgDelegate>
                 subGroup.classID = classID;
                 subGroup.admin = NO;
                 subGroup.subGroupDel = self;
+                subGroup.titleString = @"应添加家长学生";
                 [[XDTabViewController sharedTabViewController].navigationController pushViewController:subGroup animated:YES];
             }
         }

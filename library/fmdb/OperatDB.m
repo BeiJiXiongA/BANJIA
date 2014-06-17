@@ -186,7 +186,7 @@
     else
     {
         NSString *sql = [NSString stringWithFormat:@"CREATE TABLE %@ (userindex INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\
-                         classid VARCHAR(30),name VARCHAR(20),uid VARCHAR(30),img_icon VARCHAR(30),re_id VARCHAR(30),re_name VARCHAR(30),checked VARCHAR(5),phone VARCHAR(15),role VARCHAR(15),re_type VARCHAR(20),title VARCHAR(20))",CLASSMEMBERTABLE];
+                         classid VARCHAR(30),name VARCHAR(20),uid VARCHAR(30),img_icon VARCHAR(30),re_id VARCHAR(30),re_name VARCHAR(30),checked VARCHAR(5),phone VARCHAR(15),role VARCHAR(15),re_type VARCHAR(20),title VARCHAR(20),birth VARCHAR(20),admin VARCHAR(4))",CLASSMEMBERTABLE];
         BOOL res = [_db executeUpdate:sql];
         if (!res)
         {

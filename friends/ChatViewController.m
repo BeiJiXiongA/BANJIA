@@ -80,6 +80,12 @@ FriendListDelegate>
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.titleLabel.text = name;
+    
+    if (SYSVERSION > 7.0)
+    {
+        self.edgesForExtendedLayout =UIRectEdgeTop;
+    }
+    
         
     db = [[OperatDB alloc] init];
     self.bgView.backgroundColor = [UIColor whiteColor];
@@ -90,7 +96,7 @@ FriendListDelegate>
     
     UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
     moreButton.frame = CGRectMake(SCREEN_WIDTH-60, 6, 50, 32);
-    [moreButton setImage:[UIImage imageNamed:@"icon_more"] forState:UIControlStateNormal];
+    [moreButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
     [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:moreButton];
     

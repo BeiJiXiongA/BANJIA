@@ -57,6 +57,8 @@
 {
     [super viewDidLoad];
     
+//    [self.navigationBar setBarTintColor:[UIColor whiteColor]];
+    
     self.bgView = [[UIView alloc] init];
     self.bgView.frame = CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 

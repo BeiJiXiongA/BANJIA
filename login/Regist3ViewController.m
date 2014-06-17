@@ -154,18 +154,8 @@
         [Tools showAlertView:@"密码由6-12位字母或数字组成" delegateViewController:nil];
         return ;
     }
-//    if ([verifyTextField.text length] == 0)
-//    {
-//        [Tools showAlertView:@"再次输入密码" delegateViewController:nil];
-//        return ;
-//    }
-//    if (![passwordTextField.text isEqualToString:verifyTextField.text])
-//    {
-//        [Tools showAlertView:@"两次密码不一致" delegateViewController:nil];
-//        return ;
-//    }
     
-    NSString *userStr = @"";
+    NSString *userStr = @"simu";
     if ([[APService registrionID] length] > 0)
     {
         userStr = [APService registrionID];
@@ -204,7 +194,6 @@
                 [ud setObject:[dict objectForKey:@"u_id"] forKey:USERID];
                 [ud setObject:[dict objectForKey:@"token"] forKey:CLIENT_TOKEN];
                 [ud setObject:phoneNum forKey:PHONENUM];
-                DDLOG(@"phonenum==%@",phoneNum);
                 [ud setObject:verifyTextField.text forKey:PASSWORD];
                 [ud synchronize];
                 FillInfoViewController *fillInfoViewController = [[FillInfoViewController alloc] init];

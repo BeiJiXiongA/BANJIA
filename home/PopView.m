@@ -35,7 +35,7 @@
 //    
 //    CGFloat margin = 0;
     
-    [[[UIColor blackColor]colorWithAlphaComponent:0.5] set];
+    [[UIColor whiteColor] set];
     
     UIBezierPath *path = [UIBezierPath bezierPath];
     
@@ -67,9 +67,9 @@
     [path closePath];
     [path fill];
     
-//    path.lineWidth = 0.5;
-//    [[UIColor grayColor] set];
-//    [path stroke];
+    path.lineWidth = 0.3;
+    [[UIColor grayColor] set];
+    [path stroke];
 }
 
 //static inline CGAffineTransform CGAffineTransformMakeScaleTranslate(CGFloat sx,CGFloat sy,

@@ -10,40 +10,38 @@
 #import "Header.h"
 
 @implementation NotificationCell
-@synthesize iconLabel,bgImageView,contentLabel,timeLabel,statusLabel,contentTextView,nameLabel;
+@synthesize iconImageView,bgImageView,contentLabel,timeLabel,statusLabel,contentTextView,nameLabel;
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
     if (self) {
         // Initialization code
                 
-        bgImageView = [[UIImageView alloc] initWithFrame:CGRectMake(3, 10, SCREEN_WIDTH-6, 100)];
+        bgImageView = [[UIImageView alloc] init];
         bgImageView.backgroundColor = [UIColor clearColor];
         [self.contentView addSubview:bgImageView];
         
-        iconLabel = [[UILabel alloc] init];
-//        iconLabel.backgroundColor = RGB(234, 234, 234, 1);
-        [self.contentView addSubview:iconLabel];
+        iconImageView = [[UIImageView alloc] init];
+        [self.contentView addSubview:iconImageView];
         
         nameLabel = [[UILabel alloc] init];
         nameLabel.font = [UIFont systemFontOfSize:16];
         nameLabel.backgroundColor = [UIColor clearColor];
         [self.contentView addSubview:nameLabel];
         
-        contentLabel = [[MyLabel alloc] initWithFrame:CGRectMake(25, 20,  SCREEN_WIDTH-70, 75)];
+        contentLabel = [[MyLabel alloc] init];
         contentLabel.backgroundColor = [UIColor clearColor];
         contentLabel.font = [UIFont systemFontOfSize:14];
         contentLabel.numberOfLines = 3;
         contentLabel.lineBreakMode = NSLineBreakByWordWrapping|NSLineBreakByTruncatingTail;
         [self.contentView addSubview:contentLabel];
         
-        timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(25, 15, 165, 20)];
+        timeLabel = [[UILabel alloc] init];
         timeLabel.backgroundColor = [UIColor clearColor];
         timeLabel.font = [UIFont systemFontOfSize:18];
-        timeLabel.textAlignment = NSTextAlignmentRight;
         [self.contentView addSubview:timeLabel];
         
-        statusLabel = [[UILabel alloc] initWithFrame:CGRectMake(SCREEN_WIDTH - 150, 95, 130, 10)];
+        statusLabel = [[UILabel alloc] init];
         statusLabel.backgroundColor = [UIColor clearColor];
         statusLabel.font = [UIFont systemFontOfSize:10];
         statusLabel.textAlignment = NSTextAlignmentRight;

@@ -118,7 +118,7 @@
                 {
                     timer = [NSTimer timerWithTimeInterval:1.0 target:self selector:@selector(timeRefresh)userInfo:nil repeats:YES];
                     [[NSRunLoop  currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
-
+                    [self getcheckCode];
                 }
             }
             else
@@ -142,6 +142,47 @@
     }
     
 }
+
+-(void)getcheckCode
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id]} API:MB_AUTHCODE];
+        
+        [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"== responsedict %@",responseString);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+//                codeStr = [responseDict objectForKey:@"data"];
+                getCodeButton.hidden = YES;
+                changeButton.enabled = YES;
+                codeTextField.text = [responseDict objectForKey:@"data"];
+                
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:self];
+            }
+            
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools hideProgress:self.bgView];
+        }];
+        [Tools showProgress:self.bgView];
+        [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
+}
+
 
 -(void)timeRefresh
 {
@@ -170,6 +211,7 @@
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
+                                                                      @"phone":phoneNumTextfield.text,
                                                                       @"auth_code":codeTextField.text}
                                                                 API:BINDPHONE];
         
