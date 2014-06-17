@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface TrendsCell : UITableViewCell
+@interface TrendsCell : UITableViewCell<UITableViewDataSource,UITableViewDelegate>
 @property (nonatomic, strong) UIView *bgView;
 @property (nonatomic, strong) UIImageView *headerImageView;
 @property (nonatomic, strong) UILabel *nameLabel;
@@ -24,4 +24,6 @@
 @property (nonatomic, strong) UIImageView *commentImageView;
 @property (nonatomic, strong) UIImageView *transmitImageView;
 @property (nonatomic, strong) MyTextField *nameTextField;
+@property (nonatomic, strong) UITableView *commentsTableView;
+@property (nonatomic, strong) NSArray *commentsArray;
 @end

@@ -37,10 +37,11 @@
     
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 20);
     self.view.backgroundColor = [UIColor blackColor];
+    self.bgView.frame = CGRectMake(0, 0, SCREEN_WIDTH, self.view.frame.size.height);
     
     showScrollView = [[UIScrollView alloc] init];
     showScrollView.delegate = self;
-    showScrollView.frame = CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    showScrollView.frame = CGRectMake(0, 0, SCREEN_WIDTH, self.view.frame.size.height);
     [self.bgView addSubview:showScrollView];
     
     NSArray *showImages = [NSArray arrayWithObjects:@"first",@"sec",@"third", nil];

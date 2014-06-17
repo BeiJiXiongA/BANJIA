@@ -145,6 +145,8 @@ return shared##className; \
 
 
 
+#define BGVIEWCOLOR   UIColorFromRGB(0xf1f0ec)
+
 
 #define HEADERIMAGE  [NSString stringWithFormat:@"%@-img_icon",[Tools user_id]]
 #define TOPIMAGE    [NSString stringWithFormat:@"%@-top_image",[Tools user_id]]

@@ -503,7 +503,7 @@ MsgDelegate>
                 
                 [_db deleteRecordWithDict:@{@"classid":classID} andTableName:CLASSMEMBERTABLE];
                 
-                for(int i=0;i<[allMembersArray count];i++)
+                for(int i = 0;i < [allMembersArray count];i++)
                 {
                     
                     //classid VARCHAR(30),name VARCHAR(20),uid VARCHAR(30),img_icon VARCHAR(30),re_id VARCHAR(30),re_name VARCHAR(30),checked VARCHAR(5),phone VARCHAR(15)

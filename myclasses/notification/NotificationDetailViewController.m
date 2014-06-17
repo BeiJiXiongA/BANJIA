@@ -67,7 +67,7 @@ UIActionSheetDelegate>
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+//    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     self.view.backgroundColor = [UIColor blackColor];
     
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];

@@ -8,9 +8,10 @@
 
 #import "TrendsCell.h"
 #import "Header.h"
+#import "CommentCell.h"
 
 @implementation TrendsCell
-@synthesize headerImageView,nameLabel,timeLabel,locationLabel,contentLabel,imagesScrollView,imagesView,transmitButton,praiseButton,commentButton,praiseImageView,commentImageView,bgView,nameTextField,transmitImageView;
+@synthesize headerImageView,nameLabel,timeLabel,locationLabel,contentLabel,imagesScrollView,imagesView,transmitButton,praiseButton,commentButton,praiseImageView,commentImageView,bgView,nameTextField,transmitImageView,commentsTableView,commentsArray;
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
@@ -67,25 +68,6 @@
         imagesView.frame = CGRectMake(5, contentLabel.frame.size.height+contentLabel.frame.origin.y, SCREEN_WIDTH-10, 120);
         [bgView addSubview:imagesView];
         
-//        CGFloat imageViewHeight = 60.0f;
-//        CGFloat imageViewWidth = 60.0f;
-//        NSInteger ImageCountPerRow = 4;
-//        
-//        for (int i=0; i < 12; ++i)
-//        {
-//            UIImageView *imageView = [[UIImageView alloc] init];
-//            imageView.frame = CGRectMake((i%(NSInteger)ImageCountPerRow)*(imageViewWidth+5), (imageViewWidth+5)*(i/(NSInteger)ImageCountPerRow), imageViewWidth, imageViewHeight);
-//            imageView.userInteractionEnabled = YES;
-//            imageView.tag = 33333+i;
-//            imageView.userInteractionEnabled = YES;
-//            
-//            // 内容模式
-//            imageView.clipsToBounds = YES;
-//            imageView.contentMode = UIViewContentModeScaleAspectFill;
-//            imageView.hidden = YES;
-//            [imagesView addSubview:imageView];
-//        }
-        
         transmitImageView = [[UIImageView alloc] init];
         transmitImageView.hidden = YES;
         [transmitImageView setImage:[UIImage imageNamed:@"icon_forwarding"]];
@@ -127,6 +109,17 @@
         commentImageView.hidden = YES;
         [commentImageView setImage:[UIImage imageNamed:@"icon_comment"]];
         [bgView addSubview:commentImageView];
+        
+        commentsTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH-6, 0) style:UITableViewStylePlain];
+        commentsTableView.delegate = self;
+        commentsTableView.dataSource = self;
+        commentsTableView.scrollEnabled = NO;
+        commentsTableView.backgroundColor = BGVIEWCOLOR;
+        if ([commentsTableView respondsToSelector:@selector(setSeparatorInset:)])
+        {
+            [commentsTableView setSeparatorInset:UIEdgeInsetsZero];
+        }
+        [self.bgView addSubview:commentsTableView];
     }
     return self;
 }
@@ -138,4 +131,30 @@
     // Configure the view for the selected state
 }
 
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return [commentsArray count];
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 30;
+}
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *cellName = @"commentcell";
+    CommentCell *cell = [tableView dequeueReusableCellWithIdentifier:cellName];
+    if (cell == nil)
+    {
+        cell = [[CommentCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellName];
+    }
+    NSDictionary *commitDict = [commentsArray objectAtIndex:indexPath.row];
+    NSString *name = [[commitDict objectForKey:@"by"] objectForKey:@"name"];
+    NSString *content = [commitDict objectForKey:@"content"];
+    cell.nameButton.frame = CGRectMake(25, 0, [name length]*18, 30);
+    cell.commentContentLabel.frame = CGRectMake(cell.nameButton.frame.size.width+cell.nameButton.frame.origin.x, 0, 200, 30);
+    [cell.nameButton setTitle:[NSString stringWithFormat:@"%@:",name] forState:UIControlStateNormal];
+    cell.commentContentLabel.text = content;
+    return cell;
+}
 @end

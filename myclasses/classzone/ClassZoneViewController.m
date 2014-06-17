@@ -328,6 +328,7 @@ UIActionSheetDelegate>
     
     AddDongTaiViewController *addDongTaiViewController = [[AddDongTaiViewController alloc] init];
     addDongTaiViewController.classID = classID;
+    addDongTaiViewController.fromCLass = YES;
     addDongTaiViewController.classZoneDelegate = self;
     [[XDTabViewController sharedTabViewController].navigationController pushViewController:addDongTaiViewController animated:YES];
 //    [addDongTaiViewController showSelfViewController:[XDTabViewController sharedTabViewController]];

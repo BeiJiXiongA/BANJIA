@@ -88,7 +88,7 @@ UIActionSheetDelegate>
     
     UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
     moreButton.frame = CGRectMake(SCREEN_WIDTH-60, 6, 50, 32);
-    [moreButton setImage:[UIImage imageNamed:@"icon_more"] forState:UIControlStateNormal];
+    [moreButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
     [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:moreButton];
     if ([teacherID isEqualToString:[Tools user_id]])

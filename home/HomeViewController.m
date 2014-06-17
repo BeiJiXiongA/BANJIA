@@ -33,6 +33,10 @@
 
 @interface HomeViewController ()<UITableViewDataSource,UITableViewDelegate>
 {
+    NSString *page;
+    
+    CGFloat commentHeight;
+    
     BOOL addOpen;
     PopView *addView;
     UIButton *addNoticeButton;
@@ -69,6 +73,10 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
+    page = @"0";
+    
+    commentHeight = 0;
+    
     db = [[OperatDB alloc]init];
     
     self.backButton.hidden = YES;
@@ -102,7 +110,7 @@
     [addButton addTarget:self action:@selector(addButtonClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:addButton];
     
-    classTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT+0, SCREEN_WIDTH, SCREEN_HEIGHT-5-UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
+    classTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-5-UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
     classTableView.delegate = self;
     classTableView.dataSource = self;
     classTableView.showsVerticalScrollIndicator = NO;
@@ -157,8 +165,20 @@
 {
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
-                                                                      @"token":[Tools client_token]}
+        
+        NSDictionary *paraDict;
+        if ([page intValue] == 0)
+        {
+            paraDict = @{@"u_id":[Tools user_id],
+                         @"token":[Tools client_token]};
+        }
+        else
+        {
+            paraDict = @{@"u_id":[Tools user_id],
+                         @"token":[Tools client_token],
+                         @"page":page};
+        }
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:paraDict
                                                                 API:HOMEDATA];
         
         [request setCompletionBlock:^{
@@ -234,16 +254,17 @@
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
     UIView *headerView = [[UIView alloc] init];
-    UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 5, SCREEN_WIDTH, 30)];
-    headerLabel.backgroundColor = [UIColor clearColor];
+    headerView.backgroundColor = UIColorFromRGB(0xf1f0ec);
+    
+    UILabel *headerLabel = [[UILabel alloc] init];
     headerLabel.font = [UIFont systemFontOfSize:16];
-    headerLabel.backgroundColor = [UIColor clearColor];
+    headerLabel.backgroundColor = UIColorFromRGB(0xf1f0ec);
     headerLabel.textColor = TITLE_COLOR;
     if (section < [noticeArray count])
     {
         NSDictionary *noticeDict = [noticeArray objectAtIndex:section];
         headerLabel.text = [NSString stringWithFormat:@"    %@未读通知",[noticeDict objectForKey:@"name"]];
-        return headerLabel;
+        headerLabel.frame = CGRectMake(0, 5, SCREEN_WIDTH, 30);
     }
     else
     {
@@ -251,6 +272,7 @@
         headerLabel.text = @"   班级空间";
         headerLabel.font = [UIFont boldSystemFontOfSize:15];
         headerLabel.textColor = [UIColor whiteColor];
+        headerLabel.frame = CGRectMake(0, 5, SCREEN_WIDTH, 30);
     }
     [headerView addSubview:headerLabel];
     return headerView;
@@ -262,7 +284,6 @@
     {
         return [[[noticeArray objectAtIndex:section] objectForKey:@"news"] count];
     }
-    DDLOG(@"diaries %@",diariesArray);
     return [diariesArray count];
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -296,6 +317,17 @@
         
         CGFloat imgsHeight = row * (imageViewHeight+5);
         CGFloat contentHtight = [content length]>0?(45+he):5;
+        if ([[dict objectForKey:@"comments_num"] integerValue] > 0)
+        {
+            NSArray *array = [[dict objectForKey:@"detail"] objectForKey:@"comments"];
+            if ([array count] > 6)
+            {
+                return 60+imgsHeight+contentHtight+50 + 180;
+            }
+            return 60+imgsHeight+contentHtight+50 + [array count] *30;
+            
+        }
+
         return 60+imgsHeight+contentHtight+50;
     }
     return 0;
@@ -313,7 +345,7 @@
         NSDictionary *noticeDict = [noticeArray objectAtIndex:indexPath.section];
         NSArray *tmpArray = [noticeDict objectForKey:@"news"];
         
-        NSDictionary *dict = [tmpArray objectAtIndex:[tmpArray count]-indexPath.row-1];
+        NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
         
         NSString *byName = [[dict objectForKey:@"by"] objectForKey:@"name"];
         
@@ -380,34 +412,11 @@
         {
             cell = [[TrendsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:topImageView];
         }
-//        NSDictionary *groupDict = [diariesArray objectAtIndex:indexPath.section-1];
-//        NSArray *array = [groupDict objectForKey:@"diaries"];
+
         NSDictionary *dict = [diariesArray objectAtIndex:indexPath.row];
         NSString *name = [[dict objectForKey:@"by"] objectForKey:@"name"];
         
         NSString *nameStr = name;
-//        NSArray *classmen = [db findSetWithDictionary:@{@"uid":[[dict objectForKey:@"by"] objectForKey:@"_id"],@"classid":classID} andTableName:CLASSMEMBERTABLE];
-//        if ([classmen count]>0)
-//        {
-//            NSDictionary *memdict = [classmen firstObject];
-//            if (![[memdict objectForKey:@"title"] isEqual:[NSNull null]])
-//            {
-//                if ([[memdict objectForKey:@"title"] length] >0)
-//                {
-//                    nameStr = [NSString stringWithFormat:@"%@（%@）",name,[memdict objectForKey:@"title"]];
-//                }
-//                else
-//                    nameStr = name;
-//            }
-//            else
-//            {
-//                nameStr = name;
-//            }
-//        }
-//        else
-//        {
-//            nameStr = name;
-//        }
         
         cell.headerImageView.hidden = NO;
         cell.nameLabel.hidden = NO;
@@ -434,7 +443,7 @@
         cell.headerImageView.backgroundColor = [UIColor clearColor];
         [Tools fillImageView:cell.headerImageView withImageFromURL:[[dict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERBG];
         cell.locationLabel.frame = CGRectMake(60, cell.nameLabel.frame.origin.y+cell.nameLabel.frame.size.height, SCREEN_WIDTH-80, 20);
-        cell.locationLabel.text = [dict objectForKey:@"add"];
+        cell.locationLabel.text = [[dict objectForKey:@"detail"] objectForKey:@"add"];
         
         cell.contentLabel.hidden = YES;
         for(UIView *v in cell.imagesView.subviews)
@@ -547,7 +556,6 @@
             he = 5;
         }
         
-        
         cell.transmitImageView.hidden = NO;
         
         cell.transmitButton.frame = CGRectMake(0, cellHeight+13, (SCREEN_WIDTH-0)/3, 30);
@@ -571,12 +579,30 @@
 //        [cell.commentButton addTarget:self action:@selector(commentDiary:) forControlEvents:UIControlEventTouchUpInside];
         cell.commentImageView.frame = CGRectMake((SCREEN_WIDTH-20)*3/4, cell.commentButton.frame.size.height+cell.commentButton.frame.origin.y-20, 13, 13);
         
-        cell.bgView.frame = CGRectMake(3, 0, SCREEN_WIDTH-6,
-                                       cell.praiseButton.frame.size.height+
-                                       cell.praiseButton.frame.origin.y);
-        cell.bgView.backgroundColor = [UIColor whiteColor];
         cell.backgroundColor = [UIColor clearColor];
         
+        if ([[dict objectForKey:@"comments_num"] integerValue] > 0)
+        {
+            NSArray *array = [[dict objectForKey:@"detail"] objectForKey:@"comments"];
+            if ([array count] >6)
+            {
+                array = [array subarrayWithRange:NSMakeRange(0, 5)];
+            }
+            cell.commentsArray = array;
+            [cell.commentsTableView reloadData];
+            cell.commentsTableView.frame = CGRectMake(0, cell.praiseButton.frame.size.height+cell.praiseButton.frame.origin.y, SCREEN_WIDTH, cell.commentsTableView.contentSize.height);
+            cell.bgView.frame = CGRectMake(3, 0, SCREEN_WIDTH-6,
+                                           cell.commentsTableView.frame.size.height+
+                                           cell.commentsTableView.frame.origin.y);
+        }
+        else
+        {
+            cell.bgView.frame = CGRectMake(3, 0, SCREEN_WIDTH-6,
+                                           cell.praiseButton.frame.size.height+
+                                           cell.praiseButton.frame.origin.y);
+        }
+        
+        cell.bgView.backgroundColor = [UIColor whiteColor];
         return cell;
     }
     return nil;

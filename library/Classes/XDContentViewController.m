@@ -193,12 +193,10 @@
     
     _stateView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 20)];
     _stateView.backgroundColor = [UIColor whiteColor];
-    NSString *systemVersion = [[UIDevice currentDevice] systemVersion];
-    if ([systemVersion intValue] >= 7.0)
+    if (SYSVERSION >= 7.0)
     {
         [self.view addSubview:_stateView];
     }
-//    self.view.backgroundColor = [UIColor whiteColor];
 }
 
 -(void)viewWillAppear:(BOOL)animated

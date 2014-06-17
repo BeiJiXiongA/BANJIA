@@ -458,6 +458,7 @@
 		38D57CDB19260F530096B895 /* MBProgressHUD.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 38D57CD619260F530096B895 /* MBProgressHUD.bundle */; };
 		38D57CDC19260F530096B895 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 38D57CD819260F530096B895 /* MBProgressHUD.m */; };
 		38D57CDD19260F530096B895 /* MBProgressHUD+Add.m in Sources */ = {isa = PBXBuildFile; fileRef = 38D57CDA19260F530096B895 /* MBProgressHUD+Add.m */; };
+		38E8CAEE195004090075BDEC /* CommentCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 38E8CAED195004090075BDEC /* CommentCell.m */; };
 		38F366621904AB5C0024BD7E /* libMobClickLibrary.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 38F3665F1904AB5C0024BD7E /* libMobClickLibrary.a */; };
 		38F366631904AB5C0024BD7E /* libMobClickLibrary_armv6.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 38F366601904AB5C0024BD7E /* libMobClickLibrary_armv6.a */; };
 /* End PBXBuildFile section */
@@ -1158,6 +1159,8 @@
 		38D57CD819260F530096B895 /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
 		38D57CD919260F530096B895 /* MBProgressHUD+Add.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MBProgressHUD+Add.h"; sourceTree = "<group>"; };
 		38D57CDA19260F530096B895 /* MBProgressHUD+Add.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MBProgressHUD+Add.m"; sourceTree = "<group>"; };
+		38E8CAEC195004090075BDEC /* CommentCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommentCell.h; sourceTree = "<group>"; };
+		38E8CAED195004090075BDEC /* CommentCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommentCell.m; sourceTree = "<group>"; };
 		38F3665F1904AB5C0024BD7E /* libMobClickLibrary.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libMobClickLibrary.a; sourceTree = "<group>"; };
 		38F366601904AB5C0024BD7E /* libMobClickLibrary_armv6.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libMobClickLibrary_armv6.a; sourceTree = "<group>"; };
 		38F366611904AB5C0024BD7E /* MobClick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MobClick.h; sourceTree = "<group>"; };
@@ -1929,6 +1932,8 @@
 				3893936318EEF5620014F169 /* NewDiariesViewController.m */,
 				3893936418EEF5620014F169 /* TrendsCell.h */,
 				3893936518EEF5620014F169 /* TrendsCell.m */,
+				38E8CAEC195004090075BDEC /* CommentCell.h */,
+				38E8CAED195004090075BDEC /* CommentCell.m */,
 			);
 			path = classzone;
 			sourceTree = "<group>";
@@ -2876,6 +2881,7 @@
 				3893927B18EEF1A40014F169 /* MJPhotoProgressView.m in Sources */,
 				387AABD21936FFF700657087 /* SDWebImageDecoder.m in Sources */,
 				389392E118EEF1A40014F169 /* JDSideMenu.m in Sources */,
+				38E8CAEE195004090075BDEC /* CommentCell.m in Sources */,
 				3893934B18EEF5440014F169 /* FriendsViewController.m in Sources */,
 				387AABCE1936FFF700657087 /* MKAnnotationView+WebCache.m in Sources */,
 				38B570C61911498700E7F2DB /* AboutUsViewController.m in Sources */,
@@ -3147,7 +3153,7 @@
 					"-Objc",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "D849FFB8-7929-4E53-AEFB-86AA3E02A6AE";
+				PROVISIONING_PROFILE = "C4DF7E3D-61AC-4C8F-8F4A-29162A100A45";
 				SDKROOT = iphoneos7.1;
 				VALID_ARCHS = "armv7 armv7s";
 				WRAPPER_EXTENSION = app;
@@ -3198,7 +3204,7 @@
 					"-Objc",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "C72A2FCD-CA2C-4CAE-9A3E-3F0A7A823C75";
+				PROVISIONING_PROFILE = "174A8C45-0C8F-471C-BFFA-58ABB89B51F8";
 				SDKROOT = iphoneos7.1;
 				VALID_ARCHS = "armv7 armv7s";
 				WRAPPER_EXTENSION = app;

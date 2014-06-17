@@ -17,8 +17,6 @@ UIActionSheetDelegate,
 UITableViewDataSource,
 UITableViewDelegate>
 {
-    UIImageView *topicImageView;
-    UIImageView *headerImageView;
     UIImagePickerController *imagePickerController;
     
     NSString *imageUsed;
@@ -65,66 +63,16 @@ UITableViewDelegate>
     
     UIButton *inviteButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [inviteButton setTitle:@"保存" forState:UIControlStateNormal];
-    [inviteButton setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
+    [inviteButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     inviteButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
     [inviteButton addTarget:self action:@selector(submitChange) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:inviteButton];
     
-    UIImage *topImage = [UIImage imageNamed:@"toppic.jpg"];
-    topImage = [topImage blurredImage:2];
-    
-    NSString *topImageStr = [Tools top_image];
-    topicImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, 150)];
-    topicImageView.backgroundColor = [UIColor whiteColor];
-    topicImageView.image = topImage;
-    topicImageView.layer.contentsGravity = kCAGravityResizeAspectFill;
-    topicImageView.clipsToBounds = YES;
-    if ([topImageStr length] > 10)
-    {
-        [Tools fillImageView:topicImageView withImageFromURL:topImageStr andDefault:HEADERBG];
-    }
-    else
-    {
-        [topicImageView setImage:topImage];
-    }
-    
-    [self.bgView addSubview:topicImageView];
-    
-    UITapGestureRecognizer *topGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(changeTopImage)];
-    topicImageView.userInteractionEnabled = YES;
-    [topicImageView addGestureRecognizer:topGestureRecognizer];
-    
-    
-    NSString *headerImageStr = [Tools header_image];
-    headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(15, UI_NAVIGATION_BAR_HEIGHT + topicImageView.frame.size.height-44, 88, 88)];
-    headerImageView.backgroundColor = [UIColor whiteColor];
-    headerImageView.layer.cornerRadius = 44;
-    headerImageView.layer.borderColor = [UIColor whiteColor].CGColor;
-    headerImageView.layer.borderWidth = 2;
-    
-    if ([headerImageStr length]>10)
-    {
-        [Tools fillImageView:headerImageView withImageFromURL:headerImageStr andDefault:HEADERBG];
-    }
-    else
-    {
-        [headerImageView setImage:[UIImage imageNamed:HEADERBG]];
-    }
-    headerImageView.layer.masksToBounds = YES;
-    
-    
-    UITapGestureRecognizer *headerGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(changeHeaderImage)];
-    headerImageView.userInteractionEnabled = YES;
-    [headerImageView addGestureRecognizer:headerGestureRecognizer];
-    
-    UIImageView *bgImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, topicImageView.frame.size.height+topicImageView.frame.origin.y, SCREEN_WIDTH, SCREEN_HEIGHT-topicImageView.frame.size.height-UI_NAVIGATION_BAR_HEIGHT)];
-    [bgImageView  setImage:[UIImage imageNamed:@"bg.jpg"]];
-    [self.bgView addSubview:bgImageView];
     
     imagePickerController = [[UIImagePickerController alloc] init];
     imagePickerController.delegate = self;
     
-    personInfoTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, topicImageView.frame.size.height+topicImageView.frame.origin.y+43, SCREEN_WIDTH, SCREEN_HEIGHT-topicImageView.frame.size.height-UI_NAVIGATION_BAR_HEIGHT-70) style:UITableViewStylePlain];
+    personInfoTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
     personInfoTableView.delegate = self;
     personInfoTableView.dataSource = self;
     personInfoTableView.backgroundColor = [UIColor clearColor];
@@ -145,7 +93,6 @@ UITableViewDelegate>
     dateView.userInteractionEnabled = YES;
     [dateView addGestureRecognizer:dateTgr];
     
-    [self.bgView addSubview:headerImageView];
     [self.bgView addSubview:dateView];
     
     if (![Tools user_birth])
@@ -281,10 +228,6 @@ UITableViewDelegate>
     {
         cell = [[RelatedCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:personInfoCell];
     }
-//    cell.iconImageView.frame = CGRectMake(18, 16, 22, 22);
-//    cell.iconImageView.backgroundColor = [UIColor clearColor];
-//    [cell.iconImageView setImage:[UIImage imageNamed:@"set_del"]];
-//    cell.iconImageView.tag = indexPath.row+333;
     cell.iconImageView.backgroundColor = [UIColor clearColor];
     
     UITapGestureRecognizer *iconTag = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(editInfo:)];
@@ -430,7 +373,6 @@ UITableViewDelegate>
                 {
                     if ([[dataDict objectForKey:@"img_icon"] length] > 10)
                     {
-                        [Tools fillImageView:headerImageView withImageFromURL:[dataDict objectForKey:@"img_icon"] andDefault:HEADERBG];
                     }
                 }
                 if (![[dataDict objectForKey:@"img_kb"] isEqual:[NSNull null]])
@@ -439,7 +381,6 @@ UITableViewDelegate>
                     {
                         [[NSUserDefaults standardUserDefaults] setObject:[dataDict objectForKey:@"img_kb"] forKey:TOPIMAGE];
                         [[NSUserDefaults standardUserDefaults] synchronize];
-                        [Tools fillImageView:topicImageView withImageFromURL:[dataDict objectForKey:@"img_kb"] andDefault:@"toppic.jpg"];
                     }
                 }
                 if ([dataDict objectForKey:@"birth"])
@@ -552,12 +493,10 @@ UITableViewDelegate>
     if ([imageUsed isEqualToString:@"img_kb"])
     {
         bgImage = fullScreenImage;
-        [topicImageView setImage:fullScreenImage];
     }
     else if([imageUsed isEqualToString:@"img_icon"])
     {
         iconImage = fullScreenImage;
-        [headerImageView setImage:fullScreenImage];
     }
 }
 
