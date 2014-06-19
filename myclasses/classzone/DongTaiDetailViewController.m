@@ -413,7 +413,7 @@ UIActionSheetDelegate>
             CGSize contentSize = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-50 andFont:[UIFont systemFontOfSize:16]];
             cell.contentLabel.text = [[[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"] emojizedString];
             cell.contentLabel.textColor = [UIColor blackColor];
-            cell.contentLabel.frame = CGRectMake(15, 60, SCREEN_WIDTH-50, contentSize.height+8+he);
+            cell.contentLabel.frame = CGRectMake(15, 60, SCREEN_WIDTH-30, contentSize.height+8+he);
             
         }
         else
@@ -565,7 +565,7 @@ UIActionSheetDelegate>
         cell.timeLabel.textAlignment = NSTextAlignmentRight;
         cell.timeLabel.text = [Tools showTime:[[dict objectForKey:@"created"] objectForKey:@"sec"]];
         NSString *contentStr = [dict objectForKey:@"content"];
-        CGSize size = [Tools getSizeWithString:contentStr andWidth:SCREEN_WIDTH-50 andFont:nil];
+        CGSize size = [Tools getSizeWithString:contentStr andWidth:SCREEN_WIDTH-15 andFont:nil];
 
         cell.contentLabel.frame = CGRectMake(40, 35, SCREEN_WIDTH-90, size.height+22);
         cell.contentLabel.text = [[dict objectForKey:@"content"] emojizedString];

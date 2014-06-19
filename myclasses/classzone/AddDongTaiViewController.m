@@ -272,11 +272,30 @@ int count = 0;
     mainScrollView.userInteractionEnabled = YES;
     [mainScrollView addGestureRecognizer:scTap];
     
+    inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(10, 2, 10, 2)];
+    contentImageView = [[UIImageView alloc] init];
+    contentImageView.frame = CGRectMake(4, 7.5, SCREEN_WIDTH - 8,150);
+    [contentImageView setImage:inputImage];
+    [mainScrollView addSubview:contentImageView];
+    
+    placeHolderLabel = [[UITextView alloc] init];
+    placeHolderLabel.text = @"请填写要发布的内容";
+    placeHolderLabel.backgroundColor = [UIColor clearColor];
+    placeHolderLabel.textColor = [UIColor lightGrayColor];
+    placeHolderLabel.font = [UIFont systemFontOfSize:16];
+    [mainScrollView addSubview:placeHolderLabel];
+    
+    contentTextView = [[UITextView alloc] initWithFrame:CGRectMake(8, 17, SCREEN_WIDTH -18, 110)];
+    contentTextView.delegate = self;
+    contentTextView.tag = ContentTextViewTag;
+    contentTextView.backgroundColor = [UIColor clearColor];
+    contentTextView.font = [UIFont systemFontOfSize:15];
+    [mainScrollView addSubview:contentTextView];
     
     imageTipLabel = [UIButton buttonWithType:UIButtonTypeCustom];
     [imageTipLabel setImage:[UIImage imageNamed:@"addimage"] forState:UIControlStateNormal];
-    imageTipLabel.frame = CGRectMake(15, 10, 70, 70);
-//    [imageTipLabel setTitle:@"添加图片" forState:UIControlStateNormal];
+    imageTipLabel.frame = CGRectMake(15, 10+contentImageView.frame.size.height+contentImageView.frame.origin.y, 70, 70);
+    //    [imageTipLabel setTitle:@"添加图片" forState:UIControlStateNormal];
     imageTipLabel.backgroundColor = [UIColor clearColor];
     [imageTipLabel addTarget:self action:@selector(selectPhoto) forControlEvents:UIControlEventTouchUpInside];
     [imageTipLabel setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
@@ -289,36 +308,15 @@ int count = 0;
     [addImageButton setTitle: @"添加图片" forState:UIControlStateNormal];
     [addImageButton addTarget:self action:@selector(selectPhoto) forControlEvents:UIControlEventTouchUpInside];
     placeHolderLabel.frame = contentTextView.frame;
-
+    
     imageScrollView = [[UIScrollView alloc] init];
-    imageScrollView.frame = CGRectMake(4, 7.5, SCREEN_WIDTH-8, 80);
+    imageScrollView.frame = CGRectMake(4, 7.5+contentImageView.frame.size.height+contentImageView.frame.origin.y, SCREEN_WIDTH-8, 80);
     imageScrollView.backgroundColor = [UIColor clearColor];
     imageScrollView.contentSize = CGSizeMake(SCREEN_WIDTH-8, 80);
     [mainScrollView addSubview:imageScrollView];
     
     [mainScrollView addSubview:imageTipLabel];
     [mainScrollView addSubview:addImageButton];
-    
-    inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(10, 2, 10, 2)];
-    contentImageView = [[UIImageView alloc] init];
-    contentImageView.frame = CGRectMake(4, 7.5+imageScrollView.frame.size.height+imageScrollView.frame.origin.y, SCREEN_WIDTH - 8,150);
-    [contentImageView setImage:inputImage];
-    [mainScrollView addSubview:contentImageView];
-    
-    placeHolderLabel = [[UITextView alloc] init];
-    placeHolderLabel.text = @"请填写要发布的内容";
-    placeHolderLabel.backgroundColor = [UIColor clearColor];
-    placeHolderLabel.textColor = [UIColor lightGrayColor];
-    placeHolderLabel.font = [UIFont systemFontOfSize:16];
-    [mainScrollView addSubview:placeHolderLabel];
-    
-    contentTextView = [[UITextView alloc] initWithFrame:CGRectMake(8, 17+imageScrollView.frame.origin.y+imageScrollView.frame.size.height, SCREEN_WIDTH -18, 110)];
-    contentTextView.delegate = self;
-    contentTextView.tag = ContentTextViewTag;
-    contentTextView.backgroundColor = [UIColor clearColor];
-    contentTextView.font = [UIFont systemFontOfSize:15];
-    [mainScrollView addSubview:contentTextView];
-    
     placeHolderLabel.frame = contentTextView.frame;
     
 //    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
@@ -326,7 +324,7 @@ int count = 0;
     //位置
     locationEditing = NO;
     locationButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    locationButton.frame = CGRectMake(contentTextView.frame.origin.x, contentTextView.frame.origin.y+contentTextView.frame.size.height+40, 30, 30);
+    locationButton.frame = CGRectMake(imageScrollView.frame.origin.x, imageScrollView.frame.origin.y+imageScrollView.frame.size.height+40, 30, 30);
 //    [locationButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     [locationButton addTarget:self action:@selector(switchLocation) forControlEvents:UIControlEventTouchUpInside];
     [locationButton setImage:[UIImage imageNamed:@"icon_location"] forState:UIControlStateNormal];
@@ -348,8 +346,7 @@ int count = 0;
     emitButton = [UIButton buttonWithType:UIButtonTypeCustom];
     emitButton.frame = CGRectMake(SCREEN_WIDTH - 60, 4, 50, 36);
     emitButton.backgroundColor = [UIColor clearColor];
-//    [emitButton setTitleColor:[UIColor lightGrayColor] forState:UIControlStateNormal];
-    [emitButton setBackgroundImage:[UIImage imageNamed:@"navbtn"] forState:UIControlStateNormal];
+    [emitButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [emitButton addTarget:self action:@selector(emitClick) forControlEvents:UIControlEventTouchUpInside];
     [emitButton setTitle:@"确认" forState:UIControlStateNormal];
     [self.navigationBarView addSubview:emitButton];
@@ -368,9 +365,8 @@ int count = 0;
     [mainScrollView addSubview:latelyLabel];
     
     mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, lateImageView.frame.size.height+lateImageView.frame.origin.y+20);
+    
 }
-
-
 
 - (void)didReceiveMemoryWarning
 {
@@ -687,24 +683,19 @@ int count = 0;
     
     if (row<=3)
     {
-        imageScrollView.frame = CGRectMake(4, 7.5, SCREEN_WIDTH-8, row>1?(10+(imageH+5)*row):80);
+        imageScrollView.frame = CGRectMake(4, 7.5+contentImageView.frame.size.height+contentImageView.frame.origin.y, SCREEN_WIDTH-8, row>1?(10+(imageH+5)*row):80);
     }
     else
     {
-        imageScrollView.frame = CGRectMake(4, 7.5, SCREEN_WIDTH-8, (10+(imageH+5)*3));
+        imageScrollView.frame = CGRectMake(4, 7.5+contentImageView.frame.size.height+contentImageView.frame.origin.y, SCREEN_WIDTH-8, (10+(imageH+5)*3));
     }
     
     [UIView animateWithDuration:0.2 animations:^{
-        imageTipLabel.frame = CGRectMake(15+(imageW+5)*([thunImageArray count]%4), 13+(imageH+5)*([thunImageArray count]/4), imageW, imageH);
-        contentTextView.frame = CGRectMake(8, 17+imageScrollView.frame.origin.y+imageScrollView.frame.size.height, SCREEN_WIDTH -18, 110);
-        placeHolderLabel.frame = contentTextView.frame;
-        locationButton.frame = CGRectMake(contentTextView.frame.origin.x, contentTextView.frame.origin.y+contentTextView.frame.size.height+40, 40, 40);
-        contentImageView.frame = CGRectMake(4, 7.5+imageScrollView.frame.size.height+imageScrollView.frame.origin.y, SCREEN_WIDTH - 8,150);
-        inputImageView.frame = CGRectMake(locationButton.frame.size.width+locationButton.frame.origin.x, locationButton.frame.origin.y, SCREEN_WIDTH-locationButton.frame.size.width-locationButton.frame.origin.x*2, locationButton.frame.size.height);
+        imageTipLabel.frame = CGRectMake(15+(imageW+5)*([thunImageArray count]%4), 13+(imageH+5)*([thunImageArray count]/4)+contentImageView.frame.size.height+contentImageView.frame.origin.y, imageW, imageH);
+        locationButton.frame = CGRectMake(imageScrollView.frame.origin.x, imageScrollView.frame.origin.y+imageScrollView.frame.size.height+40, 40, 40);
         locationTextView.frame = CGRectMake(locationButton.frame.size.width+locationButton.frame.origin.x, locationButton.frame.origin.y-3, SCREEN_WIDTH-locationButton.frame.size.width-locationButton.frame.origin.x*2, 35);
         lateImageView.frame = CGRectMake(4, locationButton.frame.size.height+locationButton.frame.origin.y+10, SCREEN_WIDTH-8, 120);
         latelyLabel.frame = CGRectMake(lateImageView.frame.origin.x+10, lateImageView.frame.origin.y+3, 17*[latelyLabel.text length], 20);
-        
         mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, lateImageView.frame.size.height+lateImageView.frame.origin.y+20);
     }];
     
@@ -933,38 +924,38 @@ int count = 0;
 
 - (void)keyBoardWillHide:(NSNotification *)aNotification
 {
-    [UIView animateWithDuration:0.25 animations:^{
-        mainScrollView.contentOffset = CGPointMake(0,0);
-        keyBoardHeight = 0;
-        mainScrollView.scrollEnabled = YES;
-    }completion:^(BOOL finished) {
-        locationEditing = NO;
-    }];
+//    [UIView animateWithDuration:0.25 animations:^{
+//        mainScrollView.contentOffset = CGPointMake(0,0);
+//        keyBoardHeight = 0;
+//        mainScrollView.scrollEnabled = YES;
+//    }completion:^(BOOL finished) {
+//        locationEditing = NO;
+//    }];
 }
 
 - (void)keyboardWillShow:(NSNotification *)aNotification
 {
     //获取键盘的高度
-    NSDictionary *userInfo = [aNotification userInfo];
-    NSValue *aValue = [userInfo objectForKey:UIKeyboardFrameEndUserInfoKey];
-    CGRect keyboardRect = [aValue CGRectValue];
-    int height = keyboardRect.size.height;
+//    NSDictionary *userInfo = [aNotification userInfo];
+//    NSValue *aValue = [userInfo objectForKey:UIKeyboardFrameEndUserInfoKey];
+//    CGRect keyboardRect = [aValue CGRectValue];
+//    int height = keyboardRect.size.height;
     
-    if (FOURS)
-    {
-        keyBoardHeight = ABS(height + (mainScrollView.contentSize.height - mainScrollView.frame.size.height))-YSTART-130;
-    }
-    else
-    {
-        if (SYSVERSION>=7)
-        {
-            keyBoardHeight = ABS(height + (mainScrollView.contentSize.height - mainScrollView.frame.size.height))-YSTART-35;
-        }
-        else
-        {
-            keyBoardHeight = ABS(height + (mainScrollView.contentSize.height - mainScrollView.frame.size.height))-YSTART;
-        }
-    }
+//    if (FOURS)
+//    {
+//        keyBoardHeight = ABS(height + (mainScrollView.contentSize.height - mainScrollView.frame.size.height))-YSTART-130;
+//    }
+//    else
+//    {
+//        if (SYSVERSION>=7)
+//        {
+//            keyBoardHeight = ABS(height + (mainScrollView.contentSize.height - mainScrollView.frame.size.height))-YSTART-35;
+//        }
+//        else
+//        {
+//            keyBoardHeight = ABS(height + (mainScrollView.contentSize.height - mainScrollView.frame.size.height))-YSTART;
+//        }
+//    }
     mainScrollView.scrollEnabled = NO;
 }
 

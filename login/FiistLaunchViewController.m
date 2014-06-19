@@ -32,10 +32,11 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+
     
     self.navigationBarView.hidden = YES;
     
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 20);
+    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     self.view.backgroundColor = [UIColor blackColor];
     self.bgView.frame = CGRectMake(0, 0, SCREEN_WIDTH, self.view.frame.size.height);
     
@@ -44,16 +45,25 @@
     showScrollView.frame = CGRectMake(0, 0, SCREEN_WIDTH, self.view.frame.size.height);
     [self.bgView addSubview:showScrollView];
     
-    NSArray *showImages = [NSArray arrayWithObjects:@"first",@"sec",@"third", nil];
+    NSMutableArray *showImages = [[NSMutableArray alloc] initWithCapacity:0];
+    
+    if(FOURS)
+    {
+        [showImages addObjectsFromArray:@[@"41",@"42",@"43"]];
+    }
+    else
+    {
+        [showImages addObjectsFromArray:@[@"51",@"52",@"53"]];
+    }
+//    NSArray *showImages = [NSArray arrayWithObjects:@"first",@"sec",@"third", nil];
     for (int i=0 ; i<[showImages count]; i++)
     {
-        UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH*i, 0, SCREEN_WIDTH, SCREEN_HEIGHT)];
+        UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH*i, 0, SCREEN_WIDTH, self.view.frame.size.height)];
         [imageView setImage:[UIImage imageNamed:[showImages objectAtIndex:i]]];
         [showScrollView addSubview:imageView];
         
         if (i==2)
         {
-
             imageView.userInteractionEnabled = YES;
             UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(startBanJia)];
             [imageView addGestureRecognizer:tap];
@@ -62,15 +72,15 @@
     showScrollView.pagingEnabled = YES;
     showScrollView.bounces = NO;
     showScrollView.showsHorizontalScrollIndicator = NO;
-    showScrollView.contentSize = CGSizeMake(SCREEN_WIDTH*[showImages count]+10, SCREEN_HEIGHT);
+    showScrollView.contentSize = CGSizeMake(SCREEN_WIDTH*[showImages count]+10, self.view.frame.size.height);
     
-    showPageControl = [[UIPageControl alloc] initWithFrame:CGRectMake(SCREEN_WIDTH/2-50, SCREEN_HEIGHT-80, 100, 30)];
-    showPageControl.backgroundColor = [UIColor clearColor];
-    showPageControl.currentPage = 0;
-    showPageControl.numberOfPages = [showImages count];
-    showPageControl.pageIndicatorTintColor = [UIColor grayColor];
-    showPageControl.currentPageIndicatorTintColor = [UIColor redColor];
-    [self.bgView addSubview:showPageControl];
+//    showPageControl = [[UIPageControl alloc] initWithFrame:CGRectMake(SCREEN_WIDTH/2-50, SCREEN_HEIGHT-80, 100, 30)];
+//    showPageControl.backgroundColor = [UIColor clearColor];
+//    showPageControl.currentPage = 0;
+//    showPageControl.numberOfPages = [showImages count];
+//    showPageControl.pageIndicatorTintColor = [UIColor grayColor];
+//    showPageControl.currentPageIndicatorTintColor = [UIColor redColor];
+//    [self.bgView addSubview:showPageControl];
 }
 
 - (void)didReceiveMemoryWarning
@@ -81,7 +91,7 @@
 
 -(void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
 {
-    showPageControl.currentPage = scrollView.contentOffset.x/SCREEN_WIDTH;
+//    showPageControl.currentPage = scrollView.contentOffset.x/SCREEN_WIDTH;
 }
 
 -(void)scrollViewDidScroll:(UIScrollView *)scrollView

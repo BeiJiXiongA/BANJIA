@@ -168,7 +168,7 @@
     }
     if(![Tools isPassWord:passwordTextField.text])
     {
-        [Tools showAlertView:@"密码由6-12位字母或数字组成" delegateViewController:nil];
+        [Tools showAlertView:@"密码由6-20位字母或数字组成" delegateViewController:nil];
         return ;
     }
     if ([verifyTextField.text length] == 0)

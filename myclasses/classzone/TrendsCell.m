@@ -8,10 +8,11 @@
 
 #import "TrendsCell.h"
 #import "Header.h"
+#import "UIButton+WebCache.h"
 #import "CommentCell.h"
 
 @implementation TrendsCell
-@synthesize headerImageView,nameLabel,timeLabel,locationLabel,contentLabel,imagesScrollView,imagesView,transmitButton,praiseButton,commentButton,praiseImageView,commentImageView,bgView,nameTextField,transmitImageView,commentsTableView,commentsArray;
+@synthesize headerImageView,nameLabel,timeLabel,locationLabel,contentLabel,imagesScrollView,imagesView,transmitButton,praiseButton,commentButton,praiseImageView,commentImageView,bgView,nameTextField,transmitImageView,commentsTableView,commentsArray,praiseArray;
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
@@ -133,28 +134,107 @@
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return [commentsArray count];
+    return [commentsArray count]+1;
 }
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return 30;
+    if (indexPath.row == 0)
+    {
+        if ([praiseArray count] > 0)
+        {
+//            int row = [praiseArray count]%4 == 0 ? ([praiseArray count]/4):([praiseArray count]/4+1);
+            return 30;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    NSDictionary *commentDict = [commentsArray objectAtIndex:indexPath.row-1];
+    NSString *name = [[commentDict objectForKey:@"by"] objectForKey:@"name"];
+    NSString *content = [commentDict objectForKey:@"content"];
+    NSString *contentString = [NSString stringWithFormat:@"%@:%@",name,content];
+    CGSize s = [Tools getSizeWithString:contentString andWidth:SCREEN_WIDTH-6 andFont:[UIFont systemFontOfSize:14]];
+    return s.height>30?(s.height+0):30;
 }
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    static NSString *cellName = @"commentcell";
-    CommentCell *cell = [tableView dequeueReusableCellWithIdentifier:cellName];
-    if (cell == nil)
+    if (indexPath.row == 0)
     {
-        cell = [[CommentCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellName];
+        if ([praiseArray count] > 0)
+        {
+            static NSString *cellName = @"praisecell";
+            CommentCell *cell = [tableView dequeueReusableCellWithIdentifier:cellName];
+            if (cell == nil)
+            {
+                cell = [[CommentCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellName];
+            }
+            cell.commentContentLabel.frame = CGRectMake(25, 0, SCREEN_WIDTH-50, 30);
+            cell.commentContentLabel.text = [NSString stringWithFormat:@"%d人觉得很赞",[praiseArray count]];
+//            cell.nameButton.frame = CGRectMake(SCREEN_WIDTH-80, 0, 60, 30);
+//            cell.nameButton.backgroundColor = LIGHT_BLUE_COLOR;
+//            [cell.nameButton addTarget:self action:@selector() forControlEvents:UIControlEventTouchUpInside];
+            
+//            for (int i=0; i<[praiseArray count]; ++i)
+//            {
+//                NSDictionary *praiseDict = [praiseArray objectAtIndex:i];
+//                UIButton *headerButton = [UIButton buttonWithType:UIButtonTypeCustom];
+//                headerButton.frame = CGRectMake(45*(i%4), 45*(i/4), 40, 40);
+//                [Tools fillButtonView:headerButton withImageFromURL:[[praiseDict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERICON];
+//                headerButton.layer.cornerRadius = 20;
+//                headerButton.tag = 3333+i;
+//                headerButton.clipsToBounds = YES;
+//                [headerButton addTarget:self action:@selector(praiseClick:) forControlEvents:UIControlEventTouchUpInside];
+//                [cell.praiseView addSubview:headerButton];
+//            }
+//            int row = [praiseArray count]%4 == 0 ? ([praiseArray count]/4):([praiseArray count]/4+1);
+//            cell.praiseView.frame = CGRectMake(25, 30, 180, 50*row);
+            cell.selectionStyle = UITableViewCellSelectionStyleNone;
+            return cell;
+        }
+        return nil;
     }
-    NSDictionary *commitDict = [commentsArray objectAtIndex:indexPath.row];
-    NSString *name = [[commitDict objectForKey:@"by"] objectForKey:@"name"];
-    NSString *content = [commitDict objectForKey:@"content"];
-    cell.nameButton.frame = CGRectMake(25, 0, [name length]*18, 30);
-    cell.commentContentLabel.frame = CGRectMake(cell.nameButton.frame.size.width+cell.nameButton.frame.origin.x, 0, 200, 30);
-    [cell.nameButton setTitle:[NSString stringWithFormat:@"%@:",name] forState:UIControlStateNormal];
-    cell.commentContentLabel.text = content;
-    return cell;
+    else
+    {
+        static NSString *cellName = @"commentcell";
+        CommentCell *cell = [tableView dequeueReusableCellWithIdentifier:cellName];
+        if (cell == nil)
+        {
+            cell = [[CommentCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellName];
+        }
+        NSDictionary *commitDict = [commentsArray objectAtIndex:indexPath.row-1];
+        NSString *name = [[commitDict objectForKey:@"by"] objectForKey:@"name"];
+        NSString *content = [commitDict objectForKey:@"content"];
+        cell.commentDict = commitDict;
+        [cell setNeedsDisplay];
+        cell.nameButton.tag = 3333+(indexPath.row-1);
+        cell.nameButton.frame = CGRectMake(25, 0, [name length]*18, 30);
+        CGSize s = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-6 andFont:[UIFont systemFontOfSize:14]];
+        cell.commentContentLabel.frame = CGRectMake(cell.nameButton.frame.size.width+cell.nameButton.frame.origin.x, 0, 200, s.height>30?s.height:30);
+        [cell.nameButton setTitle:[NSString stringWithFormat:@"%@:",name] forState:UIControlStateNormal];
+        cell.commentContentLabel.text = content;
+        [cell.nameButton addTarget:self action:@selector(nameClick:) forControlEvents:UIControlEventTouchUpInside];
+        return cell;
+    }
+    return nil;
+}
+
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    if (indexPath.row > 0)
+    {
+        DDLOG(@"comment %@",[commentsArray objectAtIndex:indexPath.row-1]);
+    }
+}
+
+-(void)nameClick:(UIButton *)button
+{
+    DDLOG(@"comment %@",[commentsArray objectAtIndex:button.tag-3333]);
+}
+-(void)praiseClick:(UIButton *)button
+{
+    DDLOG(@"praise header %@",[praiseArray objectAtIndex:button.tag - 3333]);
 }
 @end

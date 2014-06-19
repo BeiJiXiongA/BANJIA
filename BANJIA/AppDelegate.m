@@ -45,6 +45,8 @@
     [[NSUserDefaults standardUserDefaults] setObject:@"0015" forKey:@"currentVersion"];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
+    DDLOG(@"%@",[UIFont familyNames]);
+    
     _db = [[OperatDB alloc] init];
     if ([[_db findSetWithDictionary:@{} andTableName:CITYTABLE] count] <= 0)
     {

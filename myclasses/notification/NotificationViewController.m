@@ -244,7 +244,7 @@ EGORefreshTableDelegate>
     dotView.backgroundColor = [UIColor redColor];
     
     UILabel *headerLabel = [[UILabel alloc] init];
-    headerLabel.backgroundColor = [UIColor clearColor];
+    headerLabel.backgroundColor = UIColorFromRGB(0xf1f0ec);
     headerLabel.font = [UIFont systemFontOfSize:18];
     headerLabel.textColor = TITLE_COLOR;
     [headerView addSubview:headerLabel];

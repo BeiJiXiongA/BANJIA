@@ -313,7 +313,7 @@ UIActionSheetDelegate>
             cell.headerImageView.frame = CGRectMake(10, 10, 40, 40);
             cell.headerImageView.layer.cornerRadius = 3;
             cell.headerImageView.clipsToBounds = YES;
-            [cell.headerImageView setImage:[UIImage imageNamed:@"logo80"]];
+            [cell.headerImageView setImage:[UIImage imageNamed:@"icon_bj"]];
             
             if ([Tools phone_num])
             {
@@ -398,7 +398,7 @@ UIActionSheetDelegate>
                     cell.nametf.text = @"";
                     [cell.relateButton setTitle:@"未关联" forState:UIControlStateNormal];
                 }
-                [cell.iconImageView setImage:[UIImage imageNamed:@"renrenicon"]];
+                [cell.iconImageView setImage:[UIImage imageNamed:@"icon_rr"]];
             }
             cell.nametf.tag = indexPath.row+333;
             cell.nametf.font = [UIFont systemFontOfSize:16];

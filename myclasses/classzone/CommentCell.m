@@ -10,7 +10,7 @@
 #import "PopView.h"
 
 @implementation CommentCell
-@synthesize nameButton,commentContentLabel;
+@synthesize nameButton,commentContentLabel,commentDict,praiseView;
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
@@ -25,7 +25,13 @@
         commentContentLabel = [[UILabel alloc] init];
         commentContentLabel.backgroundColor = RGB(252, 252, 252, 1);
         commentContentLabel.font = [UIFont systemFontOfSize:14];
+        commentContentLabel.numberOfLines = 100;
+        commentContentLabel.lineBreakMode = NSLineBreakByWordWrapping;
         [self.contentView addSubview:commentContentLabel];
+        
+        praiseView  = [[UIView alloc] init];
+        praiseView.backgroundColor = RGB(252, 252, 252, 1);
+        [self.contentView addSubview:praiseView];
         
         self.backgroundColor = RGB(252, 252, 252, 1);
         self.contentView.backgroundColor = RGB(252, 252, 252, 1);
@@ -43,6 +49,13 @@
     [super setSelected:selected animated:animated];
 
     // Configure the view for the selected state
+}
+
+-(void)drawRect:(CGRect)rect
+{
+    DDLOG(@"commentDict == %@",commentDict);
+//    NSString *name = [[commentDict objectForKey:@"by"] objectForKey:@"name"];
+//    NSString *
 }
 
 @end

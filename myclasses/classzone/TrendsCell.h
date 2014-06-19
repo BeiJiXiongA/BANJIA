@@ -26,4 +26,5 @@
 @property (nonatomic, strong) MyTextField *nameTextField;
 @property (nonatomic, strong) UITableView *commentsTableView;
 @property (nonatomic, strong) NSArray *commentsArray;
+@property (nonatomic, strong) NSArray *praiseArray;
 @end

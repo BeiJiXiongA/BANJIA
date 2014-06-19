@@ -11,4 +11,6 @@
 @interface CommentCell : UITableViewCell
 @property (nonatomic, strong) UIButton *nameButton;
 @property (nonatomic, strong) UILabel *commentContentLabel;
+@property (nonatomic, strong) NSDictionary *commentDict;
+@property (nonatomic, strong) UIView *praiseView;
 @end

@@ -28,6 +28,13 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 {
     return (AppDelegate *)[[UIApplication sharedApplication] delegate];
 }
++ (void) fillButtonView:(UIButton *)button withImageFromURL:(NSString*)URL andDefault:(NSString *)defaultName
+{
+    NSString *urlStr = [NSString stringWithFormat:@"%@%@",IMAGEURL,URL];
+    NSURL *imageURL = [NSURL URLWithString:urlStr];
+    [button setImage:[UIImage imageNamed:defaultName] forState:UIControlStateNormal];
+    [button setImageWithURL:imageURL forState:UIControlStateNormal];
+}
 
 + (void) fillImageView:(UIImageView *)imageView withImageFromURL:(NSString*)URL andDefault:(NSString *)defaultName
 {
@@ -92,7 +99,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 
 +(BOOL)isPassWord:(NSString *)passStr
 {
-    NSString *passwordRegex = @"^[a-z0-9A-Z]{6,12}$";
+    NSString *passwordRegex = @"^[a-z0-9A-Z]{6,20}$";
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF MATCHES %@",passwordRegex];
     BOOL isValid = [predicate evaluateWithObject:passStr];
     return isValid;
@@ -661,17 +668,30 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 }
 #import "dlfcn.h"
 #pragma mark - getLableSize
+
 +(CGSize)getSizeWithString:(NSString *)content andWidth:(CGFloat)width andFont:(UIFont *)font
 {
-    CGSize size = CGSizeMake(width, 2000);
-    if (font == nil)
-    {
-        font = [UIFont systemFontOfSize:16];
-    }
-    CGSize labelSize = [content sizeWithFont:font constrainedToSize:size lineBreakMode:NSLineBreakByWordWrapping];
-    return labelSize;
+    CGSize size;
+//    if (SYSVERSION < 7)
+//    {
+        UIFont *nameFont=[UIFont fontWithName:@"Helvetica" size:13];
+        
+        size=[content sizeWithFont:nameFont constrainedToSize:CGSizeMake(width, 200) lineBreakMode:NSLineBreakByCharWrapping];
+        
+//    }
+//    else
+//    {
+//        NSAttributedString* atrString = [[NSAttributedString alloc] initWithString:content];
+//        
+//        NSRange range = NSMakeRange(0, atrString.length);
+//        
+//        NSDictionary* dic = [atrString attributesAtIndex:0 effectiveRange:&range];
+//        
+//        size = [content boundingRectWithSize:CGSizeMake(width, 200)  options:NSStringDrawingUsesLineFragmentOrigin attributes:dic context:nil].size;
+//    }
+    
+    return  size;
 }
-
 
 +(NSString *)myNumber{
     void *lib = dlopen("/Symbols/System/Library/Framework/CoreTelephony.framework/CoreTelephony", RTLD_LAZY);

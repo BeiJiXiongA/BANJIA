@@ -715,7 +715,16 @@ UIActionSheetDelegate>
         cell.timeLabel.textAlignment = NSTextAlignmentRight;
         cell.timeLabel.numberOfLines = 2;
         cell.timeLabel.lineBreakMode = NSLineBreakByWordWrapping;
-        cell.timeLabel.text = [Tools showTime:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]];
+        NSString *timeStr = [Tools showTime:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]];
+        NSRange dayRange = [timeStr rangeOfString:@"日"];
+        if (dayRange.length > 0)
+        {
+            cell.timeLabel.text = [timeStr substringFromIndex:dayRange.location+1];
+        }
+        else
+        {
+            cell.timeLabel.text = timeStr;
+        }
         cell.headerImageView.layer.cornerRadius = cell.headerImageView.frame.size.width/2;
         cell.headerImageView.clipsToBounds = YES;
         cell.headerImageView.backgroundColor = [UIColor clearColor];
