@@ -200,6 +200,10 @@ ReturnFunctionDelegate>
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+-(void)dealloc
+{
+    inputTabBar.returnFunDel = nil;
+}
 
 -(void)getHomeData
 {

@@ -20,10 +20,34 @@
         [self createNoticeTabel];
         [self createCityTable];
         [self createFriendsTable];
+        if ([[Tools client_ver] isEqualToString:@"1.0"])
+        {
+            [self deleteTable:CLASSMEMBERTABLE];
+        }
         [self createClassMemTable];
         [self createImgIconTabel];
     }
     return self;
+}
+
+-(void)deleteTable:(NSString *)tablename
+{
+    FMResultSet *set = [_db executeQuery:[NSString stringWithFormat:@"select count(*) from sqlite_master where type ='table' and name = '%@'",tablename]];
+    [set next];
+    
+    NSInteger count = [set intForColumnIndex:0];
+    BOOL existTable = !!count;
+    if (existTable)
+    {
+        NSLog(@"table has exist!");
+        NSString *dropTableStr = [NSString stringWithFormat:@"DROP TABLE %@",tablename];
+        BOOL res = [_db executeUpdate:dropTableStr];
+        if (res)
+        {
+            DDLOG(@"drop %@ success!",tablename);
+        }
+    }
+
 }
 
 -(void)createCityTable

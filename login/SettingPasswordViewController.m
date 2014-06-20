@@ -280,7 +280,7 @@
 //                getCodeButton.enabled = NO;
 //                [[NSUserDefaults standardUserDefaults] setObject:[responseDict objectForKey:@"data"]forKey:USERID];
 //                [[NSUserDefaults standardUserDefaults] synchronize];
-//                [self getVerifyCode];
+                [self getVerifyCode];
             }
             else
             {
