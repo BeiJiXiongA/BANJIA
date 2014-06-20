@@ -14,11 +14,20 @@
 #define CLASSMEMBERTABLE   @"classmembertable"
 #define USERICONTABLE    @"usericontalble"
 #define CITYTABLE         @"citytable"
+#define USERINFO        @"userinfo"
 
 @interface OperatDB : NSObject
 {
     FMDatabase *_db;
 }
+
+-(BOOL)alterTableAdd:(NSString *)column
+          charLength:(NSInteger)charlength
+        defaultValue:(NSString *)defaultValue
+        andTableName:(NSString *)tableName;
+
+-(void)deleteTable:(NSString *)tablename;
+
 -(BOOL)insertRecord:(NSDictionary *)dict
        andTableName:(NSString *)tableName;
 

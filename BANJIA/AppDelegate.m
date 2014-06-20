@@ -48,6 +48,14 @@
     DDLOG(@"%@",[UIFont familyNames]);
     
     _db = [[OperatDB alloc] init];
+    
+    NSArray *array = [_db findSetWithDictionary:@{} andTableName:CLASSMEMBERTABLE];
+    NSDictionary *dict = [array firstObject];
+    if (![[dict allKeys] containsObject:@"admin"])
+    {
+        [_db alterTableAdd:@"admin" charLength:8 defaultValue:@"0" andTableName:CLASSMEMBERTABLE];
+    }
+    
     if ([[_db findSetWithDictionary:@{} andTableName:CITYTABLE] count] <= 0)
     {
         NSString *filePath = [[NSBundle mainBundle] pathForResource:@"citys" ofType:@"plist"];
@@ -102,6 +110,7 @@
         else
         {
             [self getNewChat];
+            [self getNewVersion];
             SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
             HomeViewController *homeViewController = [[HomeViewController alloc] init];
             KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:homeViewController];
@@ -144,7 +153,7 @@
         [request setCompletionBlock:^{
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"newversion responsedict %@",responseDict);
+            DDLOG(@"newversion responsedict %@",responseString);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 if ([[responseDict objectForKey:@"data"] isKindOfClass:[NSDictionary class]])

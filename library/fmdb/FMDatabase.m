@@ -1056,7 +1056,6 @@
     if (b) {
         _inTransaction = NO;
     }
-    
     return b;
 }
 

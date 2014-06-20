@@ -171,7 +171,6 @@ MFMailComposeViewControllerDelegate>
     cell.accessoryType = UITableViewCellAccessoryNone;
     cell.accessoryView = nil;
     
-    cell.accessoryType = UITableViewCellAccessoryNone;
     cell.contentLabel.frame = CGRectMake(10, 6.5, 150, 30);
     cell.contentLabel.textColor = TITLE_COLOR;
     cell.markLabel.text = @"";
@@ -255,9 +254,13 @@ MFMailComposeViewControllerDelegate>
         }
         cell.mySwitch.tag = indexPath.row*SWITCHTAG;
         [cell.mySwitch addTarget:self action:@selector(switchchange:) forControlEvents:UIControlEventValueChanged];
+       
         UIImageView *bgImageBG = [[UIImageView alloc] init];
-        bgImageBG.image = [UIImage imageNamed:@"cell_bg2"];
+        bgImageBG.image = [UIImage imageNamed:@"line4"];
+        bgImageBG.backgroundColor = [UIColor clearColor];
         cell.backgroundView = bgImageBG;
+        cell.backgroundColor = [UIColor whiteColor];
+        
     }
     else if (indexPath.section == 1)
     {
@@ -278,12 +281,15 @@ MFMailComposeViewControllerDelegate>
             {
                 cell.markLabel.text = [NSString stringWithFormat:@"当前版本%.1f",[[Tools client_ver] floatValue]];
             }
+            
 //            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"discovery_arrow"]];
 //            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 12.5, 10, 15)];
         }
         UIImageView *bgImageBG = [[UIImageView alloc] init];
-        bgImageBG.image = [UIImage imageNamed:@"cell_bg2"];
+        bgImageBG.image = [UIImage imageNamed:@"line4"];
+        bgImageBG.backgroundColor = [UIColor clearColor];
         cell.backgroundView = bgImageBG;
+//        cell.backgroundColor = [UIColor whiteColor];
     }
     else if(indexPath.section == 2)
     {
@@ -307,10 +313,13 @@ MFMailComposeViewControllerDelegate>
             cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"discovery_arrow"]];
             [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 12.5, 10, 15)];
             UIImageView *bgImageBG = [[UIImageView alloc] init];
-            bgImageBG.image = [UIImage imageNamed:@"cell_bg2"];
+            bgImageBG.image = [UIImage imageNamed:@"line4"];
+            bgImageBG.backgroundColor = [UIColor clearColor];
             cell.backgroundView = bgImageBG;
+//            cell.backgroundColor = [UIColor whiteColor];
         }
     }
+    
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     
     return cell;

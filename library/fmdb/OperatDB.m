@@ -20,19 +20,44 @@
         [self createNoticeTabel];
         [self createCityTable];
         [self createFriendsTable];
-        if ([[Tools client_ver] isEqualToString:@"1.0"])
-        {
-            [self deleteTable:CLASSMEMBERTABLE];
-        }
         [self createClassMemTable];
         [self createImgIconTabel];
+        [self createUserInfoTable];
     }
     return self;
 }
 
+#pragma mark - operatetable
+
+-(BOOL)alterTableAdd:(NSString *)column
+          charLength:(NSInteger)charlength
+        defaultValue:(NSString *)defaultValue
+        andTableName:(NSString *)tableName
+{
+    NSString *altertableStr = [NSString stringWithFormat:@"ALTER TABLE %@ ADD '%@' VARCHAR(%d) default '%@'",tableName,column,charlength,defaultValue];
+    BOOL res = [_db executeUpdate:altertableStr];
+    if (res)
+    {
+        DDLOG(@"add %@ to %@ success",column,tableName);
+    }
+    return res;
+}
+
 -(void)deleteTable:(NSString *)tablename
 {
-    FMResultSet *set = [_db executeQuery:[NSString stringWithFormat:@"select count(*) from sqlite_master where type ='table' and name = '%@'",tablename]];
+    NSString *dropTableStr = [NSString stringWithFormat:@"DROP TABLE %@",tablename];
+    BOOL res = [_db executeUpdate:dropTableStr];
+    if (res)
+    {
+        DDLOG(@"drop %@ success!",tablename);
+    }
+}
+
+#pragma mark - createtable
+
+-(void)createUserInfoTable
+{
+    FMResultSet *set = [_db executeQuery:[NSString stringWithFormat:@"select count(*) from sqlite_master where type ='table' and name = '%@'",USERINFO]];
     [set next];
     
     NSInteger count = [set intForColumnIndex:0];
@@ -40,11 +65,20 @@
     if (existTable)
     {
         NSLog(@"table has exist!");
-        NSString *dropTableStr = [NSString stringWithFormat:@"DROP TABLE %@",tablename];
-        BOOL res = [_db executeUpdate:dropTableStr];
-        if (res)
+    }
+    else
+    {
+        //chatMsg
+        NSString *sql = [NSString stringWithFormat:@"CREATE TABLE %@ (\
+                         userid VARCHAR(30),username VARCHAR(30),img_icon VARCHAR(30),img_kb VARCHAR(30),phone VARCHAR(20),birth VARCHAR(10),QQ VARCHAR(20),renren VARCHAR(20),sina VARCHAR(20),classes VARCHAR(50))",USERINFO];
+        BOOL res = [_db executeUpdate:sql];
+        if (!res)
         {
-            DDLOG(@"drop %@ success!",tablename);
+            NSLog(@"table %@ create failed!",USERINFO);
+        }
+        else
+        {
+            NSLog(@"table %@ create success!",USERINFO);
         }
     }
 
@@ -203,9 +237,8 @@
     BOOL existTable = !!count;
     if (existTable)
     {
-        {
-            NSLog(@"table has exist!");
-        }
+        
+        [self deleteTable:CLASSMEMBERTABLE];
     }
     else
     {
@@ -294,6 +327,11 @@
     {
         return NO;
     }
+}
+
+-(void)insertRecords:(NSArray *)records andTableName:(NSString *)tableName
+{
+    
 }
 
 -(NSMutableArray *)findSetWithKey:(NSString *)key

@@ -10,6 +10,7 @@
 #import "Header.h"
 #import "UIImage+Blur.h"
 #import "RelatedCell.h"
+#import "OperatDB.h"
 
 @interface PersonInfoSettingViewController ()<UIScrollViewDelegate,
 UITextFieldDelegate,
@@ -30,6 +31,7 @@ UITableViewDelegate>
     
     UIImage *bgImage;
     UIImage *iconImage;
+    OperatDB *db;
 }
 @end
 
@@ -49,12 +51,14 @@ UITableViewDelegate>
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     
-    self.titleLabel.text = @"个人设置";
+    self.titleLabel.text = @"我";
     
     imageUsed = @"";
     
     bgImage = nil;
     iconImage = nil;
+    
+    db = [[OperatDB alloc] init];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
@@ -95,10 +99,13 @@ UITableViewDelegate>
     
     [self.bgView addSubview:dateView];
     
-    if (![Tools user_birth])
-    {
-        [self getUserInfo];
-    }
+    [self getUserInfo];
+}
+
+-(void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification  object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillShowNotification object:nil];
 }
 
 - (void)didReceiveMemoryWarning
@@ -187,15 +194,7 @@ UITableViewDelegate>
 }
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    if (section == 0)
-    {
-        return 2;
-    }
-    else if(section == 1)
-    {
-        return [objectArray count]+1;
-    }
-    return 0;
+    return 5;
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
@@ -210,13 +209,13 @@ UITableViewDelegate>
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.section == 0)
+    if (indexPath.row == 0)
     {
-        return 46;
+        return 60;
     }
-    else if(indexPath.section == 1)
+    else
     {
-        return 42;
+        return 40;
     }
     return 0;
 }
@@ -237,7 +236,6 @@ UITableViewDelegate>
     cell.relateButton.frame = CGRectMake(45, 15, 40, 26);
     cell.relateButton.titleLabel.font = [UIFont systemFontOfSize:16];
     [cell.relateButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-//    [cell.relateButton addTarget:self action:@selector(editInfo:) forControlEvents:UIControlEventTouchUpInside];
     cell.relateButton.tag = indexPath.row+333;
     
     cell.nametf.frame = CGRectMake(100, 15, 150, 25);
@@ -305,9 +303,6 @@ UITableViewDelegate>
     DDLOG(@"buttontag==%d",tap.view.tag-333);
     if (tap.view.tag-333<1)
     {
-//        ((UITextField *)[personInfoTableView viewWithTag:tap.view.tag-330]).backgroundColor = [[UIColor whiteColor]colorWithAlphaComponent:0.5];
-//        ((UITextField *)[personInfoTableView viewWithTag:tap.view.tag-330]).enabled = YES;
-//        [((UITextField *)[personInfoTableView viewWithTag:tap.view.tag-330]) becomeFirstResponder];
     }
     else
     {
@@ -368,30 +363,47 @@ UITableViewDelegate>
             DDLOG(@"getuserinfo responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
+                if ([[db findSetWithDictionary:@{@"userid":[Tools user_id]} andTableName:USERINFO] count] > 0)
+                {
+                    if ([db deleteRecordWithDict:@{@"userid":[Tools user_id]} andTableName:USERINFO])
+                    {
+                        DDLOG(@"delete user info success!");
+                    }
+                }
+                
                 NSDictionary *dataDict = [responseDict objectForKey:@"data"];
+                NSMutableDictionary *userInfoDict = [[NSMutableDictionary alloc] initWithCapacity:0];
+                [userInfoDict setObject:[Tools user_id] forKey:@"userid"];
                 if (![[dataDict objectForKey:@"img_icon"] isEqual:[NSNull null]])
                 {
                     if ([[dataDict objectForKey:@"img_icon"] length] > 10)
                     {
+                        [userInfoDict setObject:[dataDict objectForKey:@"img_icon"] forKey:@"img_icon"];
                     }
                 }
                 if (![[dataDict objectForKey:@"img_kb"] isEqual:[NSNull null]])
                 {
                     if ([[dataDict objectForKey:@"img_kb"] length] > 10)
                     {
-                        [[NSUserDefaults standardUserDefaults] setObject:[dataDict objectForKey:@"img_kb"] forKey:TOPIMAGE];
-                        [[NSUserDefaults standardUserDefaults] synchronize];
+                        [userInfoDict setObject:[dataDict objectForKey:@"img_kb"] forKey:@"img_kb"];
                     }
                 }
                 if ([dataDict objectForKey:@"birth"])
                 {
-                    [[NSUserDefaults standardUserDefaults]setObject:[dataDict objectForKey:@"birth"] forKey:BIRTH];
-                    [[NSUserDefaults standardUserDefaults] synchronize];
-                    ((UITextField *)[personInfoTableView viewWithTag:4]).text = [dataDict objectForKey:@"birth"];
+                    [userInfoDict setObject:[dataDict objectForKey:@"birth"] forKey:@"birth"];
                 }
                 else
                 {
                     ((UITextField *)[personInfoTableView viewWithTag:4]).text = @"请选择生日";
+                }
+                if ([[dataDict objectForKey:@"classes"] isKindOfClass:[NSDictionary class]])
+                {
+                    [userInfoDict setObject:[dataDict objectForKey:@"classes"] forKey:@"classes"];
+                }
+                if ([db insertRecord:userInfoDict andTableName:USERINFO])
+                {
+                    DDLOG(@"insert userinfo success!");
+                    [personInfoTableView reloadData];
                 }
             }
             else

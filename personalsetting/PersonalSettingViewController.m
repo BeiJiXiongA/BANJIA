@@ -145,6 +145,12 @@ UIActionSheetDelegate>
     }
 }
 
+-(void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification  object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillShowNotification object:nil];
+}
+
 #pragma mark - chatdelegate
 -(void)dealNewChatMsg:(NSDictionary *)dict
 {
@@ -1222,4 +1228,5 @@ static int loginID;
         self.bgView.center = CGPointMake(CENTER_POINT.x,CENTER_POINT.y-height);
     }
 }
+
 @end
