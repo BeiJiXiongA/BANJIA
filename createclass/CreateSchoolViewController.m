@@ -332,7 +332,7 @@ UITextFieldDelegate>
             cell.nameTextField.hidden = NO;
             cell.nameTextField.background = nil;
             cell.nameTextField.backgroundColor = [UIColor whiteColor];
-            cell.nameTextField.placeholder = @"请输入关键字";
+            cell.nameTextField.placeholder = @"请输入学校名称";
             cell.nameTextField.tag = 3333;
             cell.nameTextField.delegate = self;
             cell.nameTextField.textColor = TITLE_COLOR;
@@ -415,6 +415,11 @@ UITextFieldDelegate>
             //搜索学校
         }
     }
+}
+
+-(void)textFieldDidEndEditing:(UITextField *)textField
+{
+    schoolName = textField.text;
 }
 
 -(void)createClassClick

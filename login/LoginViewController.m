@@ -21,6 +21,7 @@
 #import "KKNavigationController.h"
 #import "APService.h"
 #import "HomeViewController.h"
+#import "FillInfoViewController.h"
 
 #define NOPWDTAG   787878
 
@@ -266,12 +267,22 @@
                 [ud setObject:phoneNum forKey:PHONENUM];
                 [ud setObject:passwordTextfield.text forKey:PASSWORD];
                 [ud setObject:[dict objectForKey:@"token"] forKey:CLIENT_TOKEN];
-                [ud setObject:[dict objectForKey:@"img_icon"] forKey:HEADERIMAGE];
-                [ud setObject:[dict objectForKey:@"r_name"] forKey:USERNAME];
                 [ud setObject:[dict objectForKey:@"opt"] forKey:@"useropt"];
+                NSString *name = [dict objectForKey:@"r_name"];
+                if ([name isEqualToString:@"anonymity"])
+                {
+                    FillInfoViewController *fillInfoVC = [[FillInfoViewController alloc] init];
+                    fillInfoVC.fromRoot = YES;
+                    KKNavigationController *fillNav = [[KKNavigationController alloc] initWithRootViewController:fillInfoVC];
+                    [self.navigationController pushViewController:fillNav animated:YES];
+                }
+                else
+                {
+                    [ud setObject:[dict objectForKey:@"sex"] forKey:USERSEX];
+                    [ud setObject:[dict objectForKey:@"img_icon"] forKey:HEADERIMAGE];
+                    [ud setObject:[dict objectForKey:@"r_name"] forKey:USERNAME];
+                }
                 [ud synchronize];
-                
-                
                 SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
                 HomeViewController *homeViewController = [[HomeViewController alloc] init];
                 KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:homeViewController];

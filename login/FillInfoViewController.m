@@ -20,7 +20,8 @@
 
 @interface FillInfoViewController ()<UITextFieldDelegate,
 UIScrollViewDelegate,
-MySwitchDel>
+MySwitchDel,
+UIActionSheetDelegate>
 {
     UIScrollView *mainScrollView;
     UIImageView *headerImageView;
@@ -220,48 +221,25 @@ MySwitchDel>
 
 -(void)selectHeaderImage
 {
-    selectImageView = [[UIView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, 0, 0)];
-    selectImageView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.7];
-    [self.bgView addSubview:selectImageView];
+    [nameTextfield resignFirstResponder];
     
-    UITapGestureRecognizer *cancelSelectImage = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(cancelSelectImage)];
-    selectImageView.userInteractionEnabled = YES;
-    [selectImageView addGestureRecognizer:cancelSelectImage];
-    
-    UIButton *cancelSelectButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    cancelSelectButton.backgroundColor = [UIColor grayColor];
-    [cancelSelectButton setTitle:@"取消" forState:UIControlStateNormal];
-    [cancelSelectButton addTarget:self action:@selector(cancelSelectImage) forControlEvents:UIControlEventTouchUpInside];
-    [selectImageView addSubview:cancelSelectButton];
-    
-    UIButton *takePictureButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    takePictureButton.backgroundColor = [UIColor whiteColor];
-    takePictureButton.tag = 1000;
-    [takePictureButton addTarget:self action:@selector(selectPicture:) forControlEvents:UIControlEventTouchUpInside];
-    [takePictureButton setTitleColor:[UIColor blueColor] forState:UIControlStateNormal];
-    [takePictureButton setTitle:@"拍照" forState:UIControlStateNormal];
-    [selectImageView addSubview:takePictureButton];
-    
-    UIButton *fromLibraryButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    fromLibraryButton.backgroundColor = [UIColor whiteColor];
-    fromLibraryButton.tag = 1001;
-    [fromLibraryButton addTarget:self action:@selector(selectPicture:) forControlEvents:UIControlEventTouchUpInside];
-    [fromLibraryButton setTitleColor:[UIColor blueColor] forState:UIControlStateNormal];
-    [fromLibraryButton setTitle:@"从相册选取" forState:UIControlStateNormal];
-    [selectImageView addSubview:fromLibraryButton];
-    
-    [UIView animateWithDuration:0.2 animations:^{
-        selectImageView.frame = CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-        cancelSelectButton.frame = CGRectMake(SCREEN_WIDTH/2-100, SCREEN_HEIGHT - 50, 200, 30);
-        takePictureButton.frame = CGRectMake(SCREEN_WIDTH/2-100, SCREEN_HEIGHT - 90, 200, 30);
-        fromLibraryButton.frame = CGRectMake(SCREEN_WIDTH/2-100, SCREEN_HEIGHT-130, 200, 30);
-    }];
+    UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"从相册选取",@"拍照", nil];
+    [ac showInView:self.bgView];
 }
 
--(void)selectPicture:(UIButton *)button
+-(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
     imagePickerController.allowsEditing = YES;
-    if (button.tag == 1000)
+    if (buttonIndex == 0)
+    {
+        //相册
+        if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary])
+        {
+            imagePickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+            [self presentViewController:imagePickerController animated:YES completion:nil];
+        }
+    }
+    else if (buttonIndex == 1)
     {
         //拍照
         if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
@@ -274,25 +252,10 @@ MySwitchDel>
             [Tools showAlertView:@"相机不可用" delegateViewController:nil];
         }
     }
-    else if(button.tag == 1001)
-    {
-        //相册
-        if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary])
-        {
-            imagePickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-            [self presentViewController:imagePickerController animated:YES completion:nil];
-        }
-    }
-}
-
--(void)cancelSelectImage
-{
-    [selectImageView removeFromSuperview];
 }
 
 -(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
-    [self cancelSelectImage];
     [imagePickerController dismissViewControllerAnimated:YES completion:nil];
     
     fullScreenImage = [info objectForKey:UIImagePickerControllerEditedImage];
@@ -321,7 +284,6 @@ MySwitchDel>
 {
     if ([Tools NetworkReachable])
     {
-        
         UIActivityIndicatorView *indi = [[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(headerImageView.frame.size.width/2-20, headerImageView.frame.size.height/2-20, 40, 40)];
         indi .activityIndicatorViewStyle = UIActivityIndicatorViewStyleGray;
         [headerImageView addSubview:indi];
@@ -341,10 +303,7 @@ MySwitchDel>
             {
                 NSString *img_icon = [[responseDict objectForKey:@"data"] objectForKey:@"files"];
                 [[NSUserDefaults standardUserDefaults] setObject:img_icon forKey:HEADERIMAGE];
-                
                 [[NSUserDefaults standardUserDefaults] synchronize];
-                
-                [self submitClick];
             }
             else
             {
@@ -422,6 +381,11 @@ MySwitchDel>
     
     if ([Tools NetworkReachable])
     {
+        if (fullScreenImage)
+        {
+            [self uploadImage:fullScreenImage];
+        }
+        
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:paraDict
                                                                 API:url];
         

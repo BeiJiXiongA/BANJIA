@@ -19,6 +19,7 @@
     MyTextField *phoneNumTextfield;
     MyTextField *codeTextField;
     NSString *codeStr;
+    NSString *userid;
 }
 @end
 
@@ -156,6 +157,7 @@
             {
                 Regist3ViewController *regist3ViewController = [[Regist3ViewController alloc] init];
                 regist3ViewController.phoneNum = phoneNumTextfield.text;
+                regist3ViewController.userid = userid;
                 
                 if ([accountID length] > 0)
                 {
@@ -193,7 +195,7 @@
 {
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id]} API:MB_AUTHCODE];
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":userid} API:MB_AUTHCODE];
         
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
@@ -204,7 +206,6 @@
             {
                 codeStr = [responseDict objectForKey:@"data"];
                 codeTextField.text = codeStr;
-                
             }
             else
             {
@@ -252,8 +253,7 @@
             DDLOG(@"uploadPhoneNum responsedict %@",responseString);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                [[NSUserDefaults standardUserDefaults] setObject:[responseDict objectForKey:@"data"]forKey:USERID];
-                [[NSUserDefaults standardUserDefaults] synchronize];
+                userid = [responseDict objectForKey:@"data"];
                 [self getVerifyCode];
             }
             else

@@ -217,12 +217,11 @@
                 {
                     [Tools showAlertView:@"密码重置成功" delegateViewController:nil];
                     [self.navigationController popViewControllerAnimated:YES];
-                    return  ;
                 }
                 else
                 {
-                    FillInfoViewController *fillInfoViewController = [[FillInfoViewController alloc] init];
-                    [fillInfoViewController showSelfViewController:self];
+                    [Tools showAlertView:@"密码重置成功" delegateViewController:nil];
+                    [self.navigationController popViewControllerAnimated:YES];
                 }
             }
             else

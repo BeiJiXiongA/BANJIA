@@ -51,7 +51,8 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 }
 +(BOOL)isPhoneNumber:(NSString *)numStr
 {
-    NSString *mobileNum = @"^1(3[0-9]|5[0-35-9]|8[025-9])\\d{8}$";
+//    NSString *mobileNum = @"^1(3[0-9]|5[0-35-9]|8[025-9])\\d{8}$";
+    NSString *mobileNum = @"^1(3[0-9]|5[0-35-9]|8[025-9]|10|70)\\d{8}$";
     NSPredicate *mobilePredicate = [NSPredicate predicateWithFormat:@"SELF MATCHES %@",mobileNum];
     return [mobilePredicate evaluateWithObject:numStr];
 }
@@ -150,7 +151,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 
 #pragma mark - 用户信息
 
-+(NSString *)user_id
++ (NSString *)user_id
 {
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     NSString *user_id = [ud objectForKey:USERID];
@@ -202,6 +203,13 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     NSString *user_birth = [ud objectForKey:BIRTH];
     return user_birth;
+}
+
++(NSString *)user_sex
+{
+    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+    NSString *user_sex = [ud objectForKey:USERSEX];
+    return user_sex;
 }
 
 +(NSString *)device_os

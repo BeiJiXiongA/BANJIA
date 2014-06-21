@@ -105,7 +105,8 @@
         {
             FillInfoViewController *fillInfoVC = [[FillInfoViewController alloc] init];
             fillInfoVC.fromRoot = YES;
-            self.window.rootViewController = fillInfoVC;
+            KKNavigationController *fillNav = [[KKNavigationController alloc] initWithRootViewController:fillInfoVC];
+            self.window.rootViewController = fillNav;
         }
         else
         {

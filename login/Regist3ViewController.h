@@ -15,4 +15,5 @@
 @property (nonatomic, strong) NSString *account;
 @property (nonatomic, strong) NSString *accountID;
 @property (nonatomic, strong) NSString *accountType;
+@property (nonatomic, strong) NSString *userid;
 @end

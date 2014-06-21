@@ -45,6 +45,7 @@
 +(NSString *)device_version;
 +(NSString *)client_ver;
 +(NSString *)client_token;
++(NSString *)user_sex;
 
 +(void)showAlertView:(NSString *)message delegateViewController:(XDContentViewController *)viewController;
 + (void)showProgress:(UIView *) view;

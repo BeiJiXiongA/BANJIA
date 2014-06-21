@@ -25,6 +25,8 @@
 #import "AppDelegate.h"
 #import <QuartzCore/QuartzCore.h>
 
+#define NOPWDTAG   787878
+
 @class AppDelegate;
 
 @interface WelcomeViewController ()<
@@ -484,22 +486,34 @@ static int loginID;
                 [ud setObject:[dict objectForKey:@"r_name"] forKey:USERNAME];
                 [ud setObject:[dict objectForKey:@"opt"] forKey:@"useropt"];
                 [ud synchronize];
+                NSString *name = [dict objectForKey:@"r_name"];
+                if ([name isEqualToString:@"anonymity"])
+                {
+                    FillInfoViewController *fillInfoVC = [[FillInfoViewController alloc] init];
+                    fillInfoVC.fromRoot = YES;
+                    KKNavigationController *fillNav = [[KKNavigationController alloc] initWithRootViewController:fillInfoVC];
+                    [self.navigationController presentViewController:fillNav animated:YES completion:nil];
+                }
+                else
+                {
+                    [ud setObject:[dict objectForKey:@"sex"] forKey:USERSEX];
+                    [ud setObject:[dict objectForKey:@"img_icon"] forKey:HEADERIMAGE];
+                    [ud setObject:[dict objectForKey:@"r_name"] forKey:USERNAME];
+                }
                 
                 SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
                 HomeViewController *homeViewController = [[HomeViewController alloc] init];
                 KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:homeViewController];
                 JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:homeNav menuController:sideMenuViewController];
-                [self.navigationController presentViewController:sideMenu animated:YES completion:^{
-                    
-                }];
+                [self.navigationController presentViewController:sideMenu animated:YES completion:nil];
             }
             else
             {
                 if ([[[[responseDict objectForKey:@"message"] allKeys] firstObject] isEqualToString:@"NO_PASSWORD"])
                 {
-//                    UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:[[[responseDict objectForKey:@"message"] allValues] firstObject] delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"去设置密码", nil];
-//                    al.tag = NOPWDTAG;
-//                    [al show];
+                    UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:[[[responseDict objectForKey:@"message"] allValues] firstObject] delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"去设置密码", nil];
+                    al.tag = NOPWDTAG;
+                    [al show];
                 }
                 else
                 {
@@ -518,6 +532,20 @@ static int loginID;
     else
     {
         [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
+}
+
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (alertView.tag == NOPWDTAG)
+    {
+        if (buttonIndex == 1)
+        {
+            SettingPasswordViewController *setPw = [[SettingPasswordViewController alloc] init];
+            setPw.phoneNum = phoneNum;
+            setPw.forgetPwd =  NO;
+            [self.navigationController pushViewController:setPw animated:YES];
+        }
     }
 }
 

@@ -26,12 +26,18 @@ UITableViewDelegate>
     
     NSMutableArray *objectArray;
     
+    NSArray *cellNameArray;
+    
     UIView *dateView;
     UIDatePicker *datePicker;
     
     UIImage *bgImage;
     UIImage *iconImage;
     OperatDB *db;
+    
+    NSString *sex;
+    
+    NSMutableDictionary *userInfoDict;
 }
 @end
 
@@ -54,6 +60,11 @@ UITableViewDelegate>
     self.titleLabel.text = @"我";
     
     imageUsed = @"";
+    sex = [Tools user_sex];
+    
+    cellNameArray = @[@"我的头像",@"姓名",@"生日",@"性别",@"手机号"];
+    
+    userInfoDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     
     bgImage = nil;
     iconImage = nil;
@@ -76,10 +87,10 @@ UITableViewDelegate>
     imagePickerController = [[UIImagePickerController alloc] init];
     imagePickerController.delegate = self;
     
-    personInfoTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
+    personInfoTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT+14, SCREEN_WIDTH, 243) style:UITableViewStylePlain];
     personInfoTableView.delegate = self;
     personInfoTableView.dataSource = self;
-    personInfoTableView.backgroundColor = [UIColor clearColor];
+    personInfoTableView.backgroundColor = [UIColor whiteColor];
     personInfoTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     personInfoTableView.scrollEnabled = NO;
     [self.bgView addSubview:personInfoTableView];
@@ -151,7 +162,8 @@ UITableViewDelegate>
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
-                                                                      @"birth":[[NSString stringWithFormat:@"%@",datePicker.date] substringToIndex:10]}
+                                                                      @"birth":[[NSString stringWithFormat:@"%@",datePicker.date] substringToIndex:10],
+                                                                      @"sex":@"1"}
                                                                 API:MB_SETUSERINFO];
         
         [request setCompletionBlock:^{
@@ -188,34 +200,20 @@ UITableViewDelegate>
 }
 
 #pragma mark - tableview
--(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
-{
-    return 1;
-}
+
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     return 5;
-}
--(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
-{
-    return 13;
-}
-
--(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
-{
-    UIView *headerView = [[UIView alloc] init];
-    headerView.backgroundColor = [UIColor clearColor];
-    return headerView;
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (indexPath.row == 0)
     {
-        return 60;
+        return 54;
     }
     else
     {
-        return 40;
+        return 48;
     }
     return 0;
 }
@@ -228,66 +226,66 @@ UITableViewDelegate>
         cell = [[RelatedCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:personInfoCell];
     }
     cell.iconImageView.backgroundColor = [UIColor clearColor];
+    cell.textLabel.text = [cellNameArray objectAtIndex:indexPath.row];
+    cell.textLabel.font = [UIFont systemFontOfSize:15];
+    cell.textLabel.textColor = TITLE_COLOR;
     
     UITapGestureRecognizer *iconTag = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(editInfo:)];
     cell.iconImageView.userInteractionEnabled = YES;
     [cell.iconImageView addGestureRecognizer:iconTag];
     
+    cell.iconImageView.hidden = YES;
+    cell.nametf.hidden = YES;
+    
+    if (indexPath.row == 0)
+    {
+        cell.iconImageView.hidden = NO;
+        cell.iconImageView.frame = CGRectMake(SCREEN_WIDTH-80, 7, 40, 40);
+        [Tools fillImageView:cell.iconImageView withImageFromURL:[Tools header_image] andDefault:HEADERICON];
+    }
+    else if(indexPath.row == 1)
+    {
+        cell.nametf.hidden = NO;
+        cell.nametf.text = [Tools user_name];
+    }
+    else if(indexPath.row == 2)
+    {
+        cell.nametf.hidden = NO;
+        cell.nametf.text = [Tools user_birth];
+    }
+    else if (indexPath.row == 3)
+    {
+        cell.nametf.hidden = NO;
+        if ([[Tools user_sex] integerValue] == 1)
+        {
+            cell.nametf.text = @"男";
+        }
+        else
+        {
+            cell.nametf.text = @"女";
+        }
+    }
+    else if (indexPath.row == 4)
+    {
+        cell.nametf.hidden = NO;
+        cell.nametf.text = [Tools phone_num];
+    }
     cell.relateButton.frame = CGRectMake(45, 15, 40, 26);
     cell.relateButton.titleLabel.font = [UIFont systemFontOfSize:16];
     [cell.relateButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     cell.relateButton.tag = indexPath.row+333;
     
-    cell.nametf.frame = CGRectMake(100, 15, 150, 25);
-    cell.nametf.textColor = [UIColor whiteColor];
+    cell.nametf.frame = CGRectMake(SCREEN_WIDTH - 180, 10, 150, 28);
+    cell.nametf.textColor = TITLE_COLOR;
+    cell.nametf.textAlignment = NSTextAlignmentRight;
     cell.nametf.font = [UIFont systemFontOfSize:16];
     cell.nametf.enabled = NO;
-    cell.nametf.textAlignment = NSTextAlignmentLeft;
     
-    if (indexPath.section == 0)
-    {
-        if (indexPath.row == 0)
-        {
-            [cell.relateButton setTitle:@"姓名" forState:UIControlStateNormal];
-            cell.nametf.text = [Tools user_name];
-            [cell.bgImageView setImage:[UIImage imageNamed:@"line1"]];
-        }
-        else if(indexPath.row == 1)
-        {
-            [cell.relateButton setTitle:@"生日" forState:UIControlStateNormal];
-            cell.nametf.text = [Tools user_birth]?[Tools user_birth]:@"请选择";
-            [cell.bgImageView setImage:[UIImage imageNamed:@"line1"]];
-        }
-        cell.nametf.tag = indexPath.row+3;
-        cell.nametf.delegate = self;
-    }
-    else if(indexPath.section == 1)
-    {
-        if (indexPath.row == [tableView numberOfRowsInSection:1]-1)
-        {
-            cell.iconImageView.hidden = YES;
-            [cell.bgImageView setImage:[UIImage imageNamed:@"line2"]];
-            cell.relateButton.frame = CGRectMake(18, 16, 22, 22);
-            [cell.relateButton setImage:[UIImage imageNamed:@"set_add"] forState:UIControlStateNormal];
-            cell.nametf.frame = CGRectMake(45, 15, 130, 26);
-            [cell.nametf setText:@"添加任课科目"];
-            cell.nametf.delegate = self;
-            cell.nametf.tag = indexPath.row+3;
-//            [cell.relateButton addTarget:self action:@selector(addTeacherObject:) forControlEvents:UIControlEventTouchUpInside];
-        }
-        else
-        {
-            [cell.bgImageView setImage:[UIImage imageNamed:@"line2"]];
-            cell.relateButton.frame = CGRectMake(18, 16, 22, 22);
-            [cell.relateButton setImage:[UIImage imageNamed:@"set_del"] forState:UIControlStateNormal];
-            cell.relateButton.tag = indexPath.row+444;
-            cell.nametf.frame = CGRectMake(45, 15, 130, 26);
-            cell.nametf.tag = 3+indexPath.row;
-            [cell.nametf setText:[objectArray objectAtIndex:indexPath.row]];
-//            [cell.relateButton addTarget:self action:@selector(delTeacherObject:) forControlEvents:UIControlEventTouchUpInside];
-        }
-    }
+    [cell.bgImageView setImage:[UIImage imageNamed:@"line3"]];
     
+    cell.nametf.tag = indexPath.row+3;
+    cell.nametf.delegate = self;
+    cell.iconImageView.hidden = YES;
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     cell.backgroundColor = [UIColor clearColor];
     return cell;
@@ -295,7 +293,28 @@ UITableViewDelegate>
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    [self editInfo1:indexPath.row+333];
+    if (indexPath.row == 0)
+    {
+        //头像
+        
+    }
+    else if (indexPath.row == 1)
+    {
+        //姓名
+        
+    }
+    else if (indexPath.row == 2)
+    {
+        //姓名
+        [self editInfo1:indexPath.row+333];
+    }
+    else if (indexPath.row == 3)
+    {
+        //生日
+        
+    }
+    
+    
 }
 
 -(void)editInfo:(UITapGestureRecognizer *)tap
@@ -372,8 +391,8 @@ UITableViewDelegate>
                 }
                 
                 NSDictionary *dataDict = [responseDict objectForKey:@"data"];
-                NSMutableDictionary *userInfoDict = [[NSMutableDictionary alloc] initWithCapacity:0];
                 [userInfoDict setObject:[Tools user_id] forKey:@"userid"];
+                
                 if (![[dataDict objectForKey:@"img_icon"] isEqual:[NSNull null]])
                 {
                     if ([[dataDict objectForKey:@"img_icon"] length] > 10)
@@ -381,6 +400,7 @@ UITableViewDelegate>
                         [userInfoDict setObject:[dataDict objectForKey:@"img_icon"] forKey:@"img_icon"];
                     }
                 }
+                
                 if (![[dataDict objectForKey:@"img_kb"] isEqual:[NSNull null]])
                 {
                     if ([[dataDict objectForKey:@"img_kb"] length] > 10)
@@ -388,6 +408,7 @@ UITableViewDelegate>
                         [userInfoDict setObject:[dataDict objectForKey:@"img_kb"] forKey:@"img_kb"];
                     }
                 }
+                
                 if ([dataDict objectForKey:@"birth"])
                 {
                     [userInfoDict setObject:[dataDict objectForKey:@"birth"] forKey:@"birth"];
@@ -396,9 +417,15 @@ UITableViewDelegate>
                 {
                     ((UITextField *)[personInfoTableView viewWithTag:4]).text = @"请选择生日";
                 }
+                
                 if ([[dataDict objectForKey:@"classes"] isKindOfClass:[NSDictionary class]])
                 {
                     [userInfoDict setObject:[dataDict objectForKey:@"classes"] forKey:@"classes"];
+                }
+                
+                if ([dataDict objectForKey:@"sex"])
+                {
+                    [userInfoDict setObject:[dataDict objectForKey:@"sex"] forKey:@"sex"];
                 }
                 if ([db insertRecord:userInfoDict andTableName:USERINFO])
                 {

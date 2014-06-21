@@ -21,7 +21,7 @@
 @end
 
 @implementation Regist3ViewController
-@synthesize phoneNum;
+@synthesize phoneNum,userid;
 @synthesize headerIcon,nickName,accountID,accountType,account;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -166,7 +166,7 @@
     }
     
     NSDictionary *paraDict;
-    paraDict = @{@"u_id":[Tools user_id],
+    paraDict = @{@"u_id":userid,
                      @"pwd":verifyTextField.text,
                      @"reg_method":[Tools reg_method],
                      @"d_name":[Tools device_name],
