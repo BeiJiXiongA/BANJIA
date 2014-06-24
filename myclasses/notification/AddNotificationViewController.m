@@ -161,6 +161,7 @@ UITextViewDelegate>
 {
     [super viewWillDisappear:animated];
     [MobClick endLogPageView:@"PageOne"];
+    [contentTextView resignFirstResponder];
 }
 
 

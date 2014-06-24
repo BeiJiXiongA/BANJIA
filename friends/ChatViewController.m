@@ -830,7 +830,7 @@ FriendListDelegate>
             [Tools fillImageView:cell.headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERBG];
         }
     }
-    cell.headerImageView.layer.cornerRadius = cell.headerImageView.frame.size.width/2;
+    cell.headerImageView.layer.cornerRadius = 5;
     cell.headerImageView.clipsToBounds = YES;
     if (indexPath.row == 0)
     {

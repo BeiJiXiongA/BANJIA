@@ -361,18 +361,7 @@ MFMailComposeViewControllerDelegate>
         }
         else if(indexPath.row == 2)
         {
-            if ([_trackViewUrl length] <= 0)
-            {
-                UIAlertView *alert;
-                alert = [[UIAlertView alloc] initWithTitle:nil
-                                                   message:@"没有拿到APP地址，稍后再试试哦。"
-                                                  delegate: nil
-                                         cancelButtonTitle:@"好的"
-                                         otherButtonTitles: nil, nil];
-                [alert show];
-                return ;
-            }
-            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@",_trackViewUrl]]];
+            [self getNewVersionUrl];
         }
         else if(indexPath.row == 3)
         {
@@ -450,6 +439,54 @@ MFMailComposeViewControllerDelegate>
         }];
         [Tools showProgress:self.bgView];
         [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
+}
+
+-(void)getNewVersionUrl
+{
+    if ([Tools NetworkReachable])
+    {
+        NSString *appleID = @"862315597";
+        NSString *urlStr = [NSString stringWithFormat:@"http://itunes.apple.com/lookup?id=%@",appleID];
+        __weak ASIHTTPRequest *request = [Tools getRequestWithDict:@{} andHostUrl:urlStr];
+        
+        [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"newViewsion== responsedict %@",responseDict);
+            int resultCount = [[responseDict objectForKey:@"resultCount"] intValue];
+            if (resultCount >= 1) {
+                NSMutableArray *results = [responseDict objectForKey:@"results"];
+                NSDictionary *releaseInfo = [results objectAtIndex:0];
+                _trackViewUrl = [releaseInfo objectForKey:@"trackViewUrl"];
+                if ([_trackViewUrl length] <= 0)
+                {
+                    UIAlertView *alert;
+                    alert = [[UIAlertView alloc] initWithTitle:nil
+                                                       message:@"没有拿到APP地址，稍后再试试哦。"
+                                                      delegate: nil
+                                             cancelButtonTitle:@"好的"
+                                             otherButtonTitles: nil, nil];
+                    [alert show];
+                    return ;
+                }
+
+                [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@",_trackViewUrl]]];
+            }
+            }];
+            
+            [request setFailedBlock:^{
+                NSError *error = [request error];
+                DDLOG(@"error %@",error);
+                [Tools hideProgress:self.bgView];
+            }];
+            [Tools showProgress:self.bgView];
+            [request startAsynchronous];
     }
     else
     {

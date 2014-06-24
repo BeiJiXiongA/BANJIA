@@ -14,4 +14,5 @@
 @property (nonatomic, strong) UILabel *contentLable;
 @property (nonatomic, strong) UILabel *timeLabel;
 @property (nonatomic, strong) UIImageView *unReadImageView;
+@property (nonatomic, strong) UIView *bgView;
 @end

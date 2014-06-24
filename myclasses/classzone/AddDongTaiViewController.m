@@ -20,7 +20,7 @@
 #import "MJPhotoBrowser.h"
 #import "MJPhoto.h"
 
-#define NormalImageScale  1.5
+#define NormalImageScale  1
 #define BigImageScale    2
 
 #define ContentTextViewTag  1000
@@ -227,6 +227,7 @@ int count = 0;
     {
         count = 0;
     }
+    [self backKeyboard];
 }
 
 
@@ -451,15 +452,15 @@ int count = 0;
     {
         CGFloat imageHeight = 0.0f;
         CGFloat imageWidth = 0.0f;
-        if (originalImage.size.width>SCREEN_WIDTH*NormalImageScale)
+        if (originalImage.size.width > SCREEN_WIDTH*NormalImageScale)
         {
             imageWidth = SCREEN_WIDTH*NormalImageScale;
-            imageHeight = imageWidth*originalImage.size.height/originalImage.size.width;
+            imageHeight = imageWidth *originalImage.size.height/originalImage.size.width;
         }
         else
         {
-            imageHeight = SCREEN_HEIGHT*NormalImageScale;
-            imageWidth = imageHeight*originalImage.size.width/originalImage.size.height;
+            imageHeight = originalImage.size.height;
+            imageWidth = originalImage.size.width;
         }
         originalImage = [Tools thumbnailWithImageWithoutScale:originalImage size:CGSizeMake(imageWidth, imageHeight)];
     }
@@ -670,7 +671,7 @@ int count = 0;
     for (int i=0; i<[thunImageArray count]; ++i)
     {
         UIImageView *imageView = [[UIImageView alloc] init];
-        imageView.layer.contentsGravity = kCAGravityResizeAspectFill;
+//        imageView.layer.contentsGravity = kCAGravityResizeAspectFill;
         imageView.frame = CGRectMake(10+(imageW+5)*(i%4), 5+(imageH+5)*(i/4), imageW, imageH);
         [imageView setImage:[normalPhotosArray objectAtIndex:i]];
         imageView.tag = ImageTag + i;

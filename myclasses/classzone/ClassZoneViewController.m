@@ -23,6 +23,7 @@
 #import "UIImageView+MJWebCache.h"
 #import "MJPhotoBrowser.h"
 #import "MJPhoto.h"
+#import "InputTableBar.h"
 
 #define ImageViewTag  9999
 #define HeaderImageTag  7777
@@ -43,7 +44,8 @@ ClassZoneDelegate,
 EGORefreshTableHeaderDelegate,
 DongTaiDetailAddCommentDelegate,
 EGORefreshTableDelegate,
-UIActionSheetDelegate>
+UIActionSheetDelegate,
+ReturnFunctionDelegate>
 {
     UITableView *classZoneTableView;
     NSMutableArray *DongTaiArray;
@@ -72,12 +74,21 @@ UIActionSheetDelegate>
     OperatDB *db;
     
     NSDictionary *waitTransmitDict;
+    NSDictionary *waitCommentDict;
     
     NSString *className;
     NSString *classID;
     NSString *schoolID;
     NSString *schoolName;
     NSString *classTopImage;
+    
+    InputTableBar *inputTabBar;
+    CGFloat tmpheight;
+    CGSize inputSize;
+    CGFloat faceViewHeight;
+    
+    UITapGestureRecognizer *backTgr;
+    NSString *settingCacheString;
 }
 @end
 
@@ -195,12 +206,96 @@ UIActionSheetDelegate>
     {
         [self getCacheSetting];
     }
+    
+    inputTabBar = [[InputTableBar alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT, SCREEN_WIDTH, 40)];
+    inputTabBar.backgroundColor = [UIColor grayColor];
+    inputTabBar.returnFunDel = self;
+    [self.bgView addSubview:inputTabBar];
+    inputSize = CGSizeMake(250, 30);
+    
+    backTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(backInput)];
+}
+
+-(void)backInput
+{
+    [classZoneTableView removeGestureRecognizer:backTgr];
+    [UIView animateWithDuration:0.2 animations:^{
+        [inputTabBar.inputTextView resignFirstResponder];
+        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT, SCREEN_WIDTH, inputSize.height+10);
+    }];
+}
+
+-(void)myReturnFunction
+{
+    DDLOG(@"input text %@",inputTabBar.inputTextView.text);
+    if ([[inputTabBar analyString:inputTabBar.inputTextView.text] length] <= 0)
+    {
+        [Tools showAlertView:@"请输入评论内容！" delegateViewController:nil];
+        return ;
+    }
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"p_id":[waitCommentDict objectForKey:@"_id"],
+                                                                      @"c_id":classID,
+                                                                      @"content":[inputTabBar analyString:inputTabBar.inputTextView.text]
+                                                                      } API:COMMENT_DIARY];
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"commit diary responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                [Tools showTips:@"评论成功" toView:classZoneTableView];
+//                [self getDiaryDetail];
+                
+//                if ([self.addComDel respondsToSelector:@selector(addComment:)])
+//                {
+//                    [self.addComDel addComment:YES];
+//                }
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:self];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+        }];
+        [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
+    inputSize = CGSizeMake(250, 30);
+    [UIView animateWithDuration:0.2 animations:^{
+        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10, SCREEN_WIDTH, inputSize.height+10);
+        [self backInput];
+    }];
+
 }
 
 -(void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
     self.refreshDel = nil;
+    
+    inputTabBar.returnFunDel = nil;
+}
+
+-(void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    inputTabBar.returnFunDel = self;
+    inputSize = CGSizeMake(250, 30);
+//    [UIView animateWithDuration:0.2 animations:^{
+//        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10, SCREEN_WIDTH, inputSize.height+10);
+        [self backInput];
+//    }];
 }
 
 - (void)didReceiveMemoryWarning
@@ -242,7 +337,7 @@ UIActionSheetDelegate>
     }
     page =0;
     monthStr = @"";
-    [self getDongTaiList];
+    [self getCLassSettings];
 }
 
 -(void)egoRefreshTableDidTriggerRefresh:(EGORefreshPos)aRefreshPos
@@ -277,6 +372,8 @@ UIActionSheetDelegate>
     {
         [footerView egoRefreshScrollViewDidScroll:classZoneTableView];
     }
+    [self backInput];
+    [inputTabBar backKeyBoard];
 }
 
 -(void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
@@ -345,18 +442,24 @@ UIActionSheetDelegate>
         [request setCompletionBlock:^{
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"classsetting dict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 NSString *requestUrlStr = [NSString stringWithFormat:@"%@=%@=%@",GETSETTING,[Tools user_id],classID];
                 NSString *key = [requestUrlStr MD5Hash];
                 [FTWCache setObject:[responseString dataUsingEncoding:NSUTF8StringEncoding] forKey:key];
-                
-                [self dealClassSetting:responseDict];
+                if (![responseString isEqualToString:settingCacheString])
+                {
+                    [self dealClassSetting:responseDict];
+                }
             }
             else
             {
                 [Tools dealRequestError:responseDict fromViewController:self];
             }
+            _reloading = NO;
+            [footerView egoRefreshScrollViewDataSourceDidFinishedLoading:classZoneTableView];
+            [pullRefreshView egoRefreshScrollViewDataSourceDidFinishedLoading:classZoneTableView];
         }];
         
         [request setFailedBlock:^{
@@ -371,7 +474,7 @@ UIActionSheetDelegate>
     NSString *requestUrlStr = [NSString stringWithFormat:@"%@=%@=%@",GETSETTING,[Tools user_id],classID];
     NSString *key = [requestUrlStr MD5Hash];
     NSData *data = [FTWCache objectForKey:key];
-    NSString *settingCacheString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    settingCacheString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     NSDictionary *settingCacheDict = [Tools JSonFromString:settingCacheString];
     if ([settingCacheDict count] > 0)
     {
@@ -411,6 +514,8 @@ UIActionSheetDelegate>
     }
     else
     {
+        [tmpArray removeAllObjects];
+        [classZoneTableView reloadData];
         addButton.hidden = YES;
     }
     
@@ -701,8 +806,6 @@ UIActionSheetDelegate>
         cell.timeLabel.hidden = NO;
         cell.locationLabel.hidden = NO;
         cell.praiseButton.hidden = NO;
-        cell.praiseImageView.hidden = NO;
-        cell.commentImageView.hidden = NO;
         cell.commentButton.hidden = NO;
         cell.transmitButton.hidden = NO;
         
@@ -725,10 +828,11 @@ UIActionSheetDelegate>
         {
             cell.timeLabel.text = timeStr;
         }
-        cell.headerImageView.layer.cornerRadius = cell.headerImageView.frame.size.width/2;
+        cell.headerImageView.layer.cornerRadius = 0;
         cell.headerImageView.clipsToBounds = YES;
         cell.headerImageView.backgroundColor = [UIColor clearColor];
-        [Tools fillImageView:cell.headerImageView withImageFromURL:[[dict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERBG];
+//        [Tools fillImageView:cell.headerImageView withImageFromURL:[[dict objectForKey:@"by"] objectForKey:@"img_icon"] imageWidth:cell.headerImageView.frame.size.height andDefault:@"3100"];
+        [Tools fillImageView:cell.headerImageView withImageFromURL:[[dict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERICON];
         cell.locationLabel.frame = CGRectMake(60, cell.nameLabel.frame.origin.y+cell.nameLabel.frame.size.height, SCREEN_WIDTH-80, 20);
         cell.locationLabel.text = [dict objectForKey:@"add"];
         
@@ -750,7 +854,6 @@ UIActionSheetDelegate>
             //有文字
             cell.contentLabel.hidden = NO;
             cell.contentLabel.editable = NO;
-            cell.contentLabel.textColor = [UIColor blackColor];
             if ([[dict objectForKey:@"content"] length] > 40)
             {
                 cell.contentLabel.text  = [NSString stringWithFormat:@"%@...",[[dict objectForKey:@"content"] substringToIndex:37]];
@@ -790,8 +893,8 @@ UIActionSheetDelegate>
                 // 内容模式
                 imageView.clipsToBounds = YES;
                 imageView.contentMode = UIViewContentModeScaleAspectFill;
-                [Tools fillImageView:imageView withImageFromURL:[imgsArray firstObject] imageWidth:100.0f andDefault:@"3100"];
-//                    [Tools fillImageView:imageView withImageFromURL:[imgsArray firstObject] ];
+//                [Tools fillImageView:imageView withImageFromURL:[imgsArray firstObject] imageWidth:100.0f andDefault:@"3100"];
+                [Tools fillImageView:imageView withImageFromURL:[imgsArray firstObject] andDefault:@"3100"];
                 [cell.imagesView addSubview:imageView];
             }
             else
@@ -823,10 +926,10 @@ UIActionSheetDelegate>
                     // 内容模式
                     imageView.clipsToBounds = YES;
                     imageView.contentMode = UIViewContentModeScaleAspectFill;
+//                    [Tools fillImageView:imageView withImageFromURL:[imgsArray objectAtIndex:i] imageWidth:100.0f andDefault:@"3100"];
                     [Tools fillImageView:imageView withImageFromURL:[imgsArray objectAtIndex:i] andDefault:@"3100"];
                     [cell.imagesView addSubview:imageView];
                 }
-
             }
         }
         else
@@ -842,29 +945,23 @@ UIActionSheetDelegate>
             he = 5;
         }
         
-        
-        cell.transmitImageView.hidden = NO;
-        
         cell.transmitButton.frame = CGRectMake(0, cellHeight+13, (SCREEN_WIDTH-0)/3, 30);
         [cell.transmitButton setTitle:@"转发" forState:UIControlStateNormal];
         cell.transmitButton.tag = indexPath.section*SectionTag+indexPath.row;
         [cell.transmitButton addTarget:self action:@selector(transmitDiary:) forControlEvents:UIControlEventTouchUpInside];
-        cell.transmitImageView.frame = CGRectMake((SCREEN_WIDTH-20)/4-55, cell.transmitButton.frame.size.height+cell.transmitButton.frame.origin.y-22, 13, 13);
         
         
         [cell.praiseButton setTitle:[NSString stringWithFormat:@"赞(%d)",[[dict objectForKey:@"likes_num"] integerValue]] forState:UIControlStateNormal];
         [cell.praiseButton addTarget:self action:@selector(praiseDiary:) forControlEvents:UIControlEventTouchUpInside];
         cell.praiseButton.tag = indexPath.section*SectionTag+indexPath.row;
         cell.praiseButton.frame = CGRectMake((SCREEN_WIDTH-0)/3, cellHeight+13, (SCREEN_WIDTH-0)/3, 30);
-        
-        cell.praiseImageView.frame = CGRectMake((SCREEN_WIDTH-20)*2/4-20, cell.praiseButton.frame.size.height+cell.praiseButton.frame.origin.y-19, 13, 13);
+        cell.praiseButton.iconImageView.image = [UIImage imageNamed:@"icon_heart"];
         
         [cell.commentButton setTitle:[NSString stringWithFormat:@"评论(%d)",[[dict objectForKey:@"comments_num"] integerValue]] forState:UIControlStateNormal];
         cell.commentButton.frame = CGRectMake((SCREEN_WIDTH-0)/3*2, cellHeight+13, (SCREEN_WIDTH-0)/3, 30);
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         cell.commentButton.tag = indexPath.section*SectionTag+indexPath.row;
         [cell.commentButton addTarget:self action:@selector(commentDiary:) forControlEvents:UIControlEventTouchUpInside];
-        cell.commentImageView.frame = CGRectMake((SCREEN_WIDTH-20)*3/4, cell.commentButton.frame.size.height+cell.commentButton.frame.origin.y-20, 13, 13);
         
         cell.bgView.frame = CGRectMake(3, 0, SCREEN_WIDTH-6,
                                        cell.praiseButton.frame.size.height+
@@ -879,6 +976,11 @@ UIActionSheetDelegate>
 
 - (void)tapImage:(UITapGestureRecognizer *)tap
 {
+    if ([inputTabBar.inputTextView isFirstResponder])
+    {
+        [self backInput];
+        [inputTabBar backKeyBoard];
+    }
     NSDictionary *groupDict = [tmpArray objectAtIndex:(tap.view.tag-333)/SectionTag];
     NSArray *array = [groupDict objectForKey:@"diaries"];
     NSDictionary *dict = [array objectAtIndex:(tap.view.tag-333)%SectionTag/RowTag];
@@ -1474,12 +1576,47 @@ UIActionSheetDelegate>
     NSDictionary *groupDict = [tmpArray objectAtIndex:button.tag/SectionTag-1];
     NSArray *array = [groupDict objectForKey:@"diaries"];
     NSDictionary *dict = [array objectAtIndex:button.tag%SectionTag];
+    DDLOG(@"comment diary dict %@",dict);
+    waitCommentDict = dict;
+    [inputTabBar.inputTextView becomeFirstResponder];
     
-    DongTaiDetailViewController *dongtaiDetailViewController = [[DongTaiDetailViewController alloc] init];
-    dongtaiDetailViewController.dongtaiId = [dict objectForKey:@"_id"];
-    dongtaiDetailViewController.addComDel = self;
-    [[XDTabViewController sharedTabViewController].navigationController pushViewController:dongtaiDetailViewController animated:YES];
+//    DongTaiDetailViewController *dongtaiDetailViewController = [[DongTaiDetailViewController alloc] init];
+//    dongtaiDetailViewController.dongtaiId = [dict objectForKey:@"_id"];
+//    dongtaiDetailViewController.addComDel = self;
+//    [[XDTabViewController sharedTabViewController].navigationController pushViewController:dongtaiDetailViewController animated:YES];
 }
+
+-(void)showKeyBoard:(CGFloat)keyBoardHeight
+{
+    [classZoneTableView addGestureRecognizer:backTgr];
+    [UIView animateWithDuration:0.2 animations:^{
+        tmpheight = keyBoardHeight;
+        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10-keyBoardHeight, SCREEN_WIDTH, inputSize.height+10+ FaceViewHeight);
+    }];
+}
+
+-(void)changeInputType:(NSString *)changeType
+{
+    if ([changeType isEqualToString:@"face"])
+    {
+        faceViewHeight = FaceViewHeight;
+        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10-faceViewHeight, SCREEN_WIDTH, inputSize.height+10 + faceViewHeight);
+    }
+    else if([changeType isEqualToString:@"key"])
+    {
+        faceViewHeight = inputSize.height;
+        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10-tmpheight, SCREEN_WIDTH, inputSize.height+10 + faceViewHeight);
+    }
+}
+
+-(void)changeInputViewSize:(CGSize)size
+{
+    inputSize = size;
+    [UIView animateWithDuration:0.2 animations:^{
+        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-size.height-10-tmpheight, SCREEN_WIDTH, size.height+10+faceViewHeight);
+    }];
+}
+
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -1500,6 +1637,7 @@ UIActionSheetDelegate>
         DongTaiDetailViewController *dongtaiDetailViewController = [[DongTaiDetailViewController alloc] init];
         dongtaiDetailViewController.dongtaiId = [[array objectAtIndex:indexPath.row] objectForKey:@"_id"];
         dongtaiDetailViewController.addComDel = self;
+        dongtaiDetailViewController.fromclass = YES;
         [[XDTabViewController sharedTabViewController].navigationController pushViewController:dongtaiDetailViewController animated:YES];
         [tableView deselectRowAtIndexPath:indexPath animated:YES];
     }
@@ -1525,10 +1663,6 @@ UIActionSheetDelegate>
 #pragma mark - aboutNetWork
 -(void)getDongTaiList
 {
-    if (![self isInAccessTime])
-    {
-        return ;
-    }
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
@@ -1718,7 +1852,7 @@ UIActionSheetDelegate>
                 {
                     if ([hourStr integerValue] < 7)
                     {
-                        [Tools showAlertView:[NSString stringWithFormat:@"请晚上7点以后在访问空间"] delegateViewController:nil];
+                        [Tools showAlertView:[NSString stringWithFormat:@"空间访问时间为晚上7点以后"] delegateViewController:nil];
                         return NO;
                     }
                 }
@@ -1726,7 +1860,7 @@ UIActionSheetDelegate>
                 {
                     if ([hourStr integerValue] < 5)
                     {
-                        [Tools showAlertView:[NSString stringWithFormat:@"请晚上5点以后在访问空间"] delegateViewController:nil];
+                        [Tools showAlertView:[NSString stringWithFormat:@"空间访问时间为晚上5点以后"] delegateViewController:nil];
                         return NO;
                     }
                 }
@@ -1738,7 +1872,7 @@ UIActionSheetDelegate>
                 {
                     if ([hourStr integerValue] < 7+12)
                     {
-                        [Tools showAlertView:[NSString stringWithFormat:@"请晚上7点以后在访问空间"] delegateViewController:nil];
+                        [Tools showAlertView:[NSString stringWithFormat:@"空间访问时间为晚上7点以后"] delegateViewController:nil];
                         return NO;
                     }
                 }
@@ -1746,7 +1880,7 @@ UIActionSheetDelegate>
                 {
                     if ([hourStr integerValue] < 5+12)
                     {
-                        [Tools showAlertView:[NSString stringWithFormat:@"请晚上5点以后在访问空间"] delegateViewController:nil];
+                        [Tools showAlertView:[NSString stringWithFormat:@"空间访问时间为晚上5点以后"] delegateViewController:nil];
                         return NO;
                     }
                 }
@@ -1764,7 +1898,7 @@ UIActionSheetDelegate>
             {
                 if ([hourStr integerValue] < 19)
                 {
-                    [Tools showAlertView:[NSString stringWithFormat:@"请晚上19点以后在访问空间"] delegateViewController:nil];
+                    [Tools showAlertView:[NSString stringWithFormat:@"空间访问时间为晚上19点以后"] delegateViewController:nil];
                     return NO;
                 }
             }
@@ -1772,7 +1906,7 @@ UIActionSheetDelegate>
             {
                 if ([hourStr integerValue] < 17)
                 {
-                    [Tools showAlertView:[NSString stringWithFormat:@"请晚上17点以后在访问空间"] delegateViewController:nil];
+                    [Tools showAlertView:[NSString stringWithFormat:@"空间访问时间为晚上17点以后"] delegateViewController:nil];
                     return NO;
                 }
             }

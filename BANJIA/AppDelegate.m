@@ -45,8 +45,6 @@
     [[NSUserDefaults standardUserDefaults] setObject:@"0015" forKey:@"currentVersion"];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
-    DDLOG(@"%@",[UIFont familyNames]);
-    
     _db = [[OperatDB alloc] init];
     
     NSArray *array = [_db findSetWithDictionary:@{} andTableName:CLASSMEMBERTABLE];
@@ -276,7 +274,7 @@
                 NSString *responseString = [request responseString];
                 NSDictionary *responseDict = [Tools JSonFromString:responseString];
                 DDLOG(@"newchat responsedict %@",responseDict);
-                if ([[responseDict objectForKey:@"code"] intValue]== 1)
+                if ([[responseDict objectForKey:@"code"] intValue] == 1)
                 {
                     [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",[[responseDict objectForKey:@"data"] integerValue]] forKey:NewChatMsgNum];
                     [[NSUserDefaults standardUserDefaults] synchronize];

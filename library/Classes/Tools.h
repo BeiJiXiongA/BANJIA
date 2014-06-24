@@ -68,6 +68,7 @@
 
 #pragma mark - aboutTime
 +(NSString *)showTime:(NSString *)time;
++(NSString *)showTimeOfToday:(NSString *)time;
 
 #pragma mark - getimageFromView
 +(UIImage*)convertViewToImage:(UIView*)v;

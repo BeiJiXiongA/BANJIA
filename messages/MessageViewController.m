@@ -89,7 +89,7 @@ ChatVCDelegate>
     editButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
     [editButton setTitle:@"编辑" forState:UIControlStateNormal];
     editButton.backgroundColor = [UIColor clearColor];
-    [editButton setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
+    [editButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [editButton addTarget:self action:@selector(editTableView) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:editButton];
 
@@ -402,7 +402,7 @@ ChatVCDelegate>
         }
     }
     
-    cell.headerImageView.layer.cornerRadius = cell.headerImageView.frame.size.width/2;
+    cell.headerImageView.layer.cornerRadius = 5;
     cell.headerImageView.clipsToBounds = YES;
     
     cell.memNameLabel.frame = CGRectMake(70, 7, 150, 20);

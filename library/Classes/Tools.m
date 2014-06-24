@@ -45,8 +45,9 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 
 + (void) fillImageView:(UIImageView *)imageView withImageFromURL:(NSString*)URL imageWidth:(CGFloat)imageWidth andDefault:(NSString *)defaultName
 {
-    NSString *urlStr = [NSString stringWithFormat:@"%@%@%.0fw%@",IMAGEURL,[URL substringToIndex:[URL length]-4],imageWidth,[URL substringFromIndex:[URL rangeOfString:@"."].location]];
+    NSString *urlStr = [NSString stringWithFormat:@"%@%@@%.0fw%@",IMAGEURL,[URL substringToIndex:[URL length]-4],imageWidth,[URL substringFromIndex:[URL rangeOfString:@"."].location]];
     NSURL *imageURL = [NSURL URLWithString:urlStr];
+    DDLOG(@"image url %@",imageURL.absoluteString);
     [imageView setImageWithURL:imageURL placeholderImage:[UIImage imageNamed:defaultName]];
 }
 +(BOOL)isPhoneNumber:(NSString *)numStr
@@ -86,7 +87,6 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     }
 
     return tmpNum;
-
 }
 
 +(BOOL)isMailAddress:(NSString *)mailStr
@@ -575,13 +575,35 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     }
     else if (resultTime > MINUTE*10)
     {
-        {
-            long sec = (long)[time longLongValue];
-            NSDateFormatter *dateFormatter = [[NSDateFormatter alloc]init];
-            [dateFormatter setDateFormat:@"MM月dd日 hh:mm"];
-            NSDate *datetimeDate = [NSDate dateWithTimeIntervalSince1970:sec];
-            resultStr = [dateFormatter stringFromDate:datetimeDate];
-        }
+        long sec = (long)[time longLongValue];
+        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc]init];
+        [dateFormatter setDateFormat:@"MM月dd日 hh:mm"];
+        NSDate *datetimeDate = [NSDate dateWithTimeIntervalSince1970:sec];
+        resultStr = [dateFormatter stringFromDate:datetimeDate];
+    }
+    else
+    {
+        resultStr = [NSString stringWithFormat:@"%d分钟前",resultTime/MINUTE];
+    }
+    return resultStr;
+}
+
++(NSString *)showTimeOfToday:(NSString *)time
+{
+    NSDate *localDate = [NSDate date];
+    NSTimeInterval localTimeInterVal = [localDate timeIntervalSince1970];
+    NSString *localtimeStr = [NSString stringWithFormat:@"%.0lf",localTimeInterVal];
+    NSString *timeStr = [NSString stringWithFormat:@"%@",time];
+    int resultTime = [localtimeStr intValue] - [timeStr intValue];
+    
+    NSString *resultStr;
+    if (resultTime > MINUTE*10)
+    {
+        long sec = (long)[time longLongValue];
+        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc]init];
+        [dateFormatter setDateFormat:@"hh:mm"];
+        NSDate *datetimeDate = [NSDate dateWithTimeIntervalSince1970:sec];
+        resultStr = [dateFormatter stringFromDate:datetimeDate];
     }
     else
     {
@@ -682,9 +704,9 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     CGSize size;
 //    if (SYSVERSION < 7)
 //    {
-        UIFont *nameFont=[UIFont fontWithName:@"Helvetica" size:13];
-        
-        size=[content sizeWithFont:nameFont constrainedToSize:CGSizeMake(width, 200) lineBreakMode:NSLineBreakByCharWrapping];
+//        UIFont *nameFont=[UIFont fontWithName:@"Helvetica" size:13];
+    
+        size=[content sizeWithFont:font constrainedToSize:CGSizeMake(width, 2000) lineBreakMode:NSLineBreakByWordWrapping];
         
 //    }
 //    else

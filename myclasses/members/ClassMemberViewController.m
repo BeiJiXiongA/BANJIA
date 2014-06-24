@@ -553,7 +553,18 @@ MsgDelegate>
                     }
                     if ([dict objectForKey:@"title"])
                     {
-                        [memDict setObject:[dict objectForKey:@"title"] forKey:@"title"];
+                        if ([[adminIDDict objectForKey:[dict objectForKey:@"_id"]] intValue] == 2)
+                        {
+                            [memDict setObject:@"班主任" forKey:@"title"];
+                        }
+                        else if([[dict objectForKey:@"title"] isEqualToString:@"班主任"])
+                        {
+                            [memDict setObject:@"" forKey:@"title"];
+                        }
+                        else
+                        {
+                            [memDict setObject:[dict objectForKey:@"title"] forKey:@"title"];
+                        }
                     }
                     if ([dict objectForKey:@"role"])
                     {
@@ -634,13 +645,16 @@ MsgDelegate>
     [withoutParentStuArray removeAllObjects];
     
     [allMembersArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"checked":@"1"} andTableName:CLASSMEMBERTABLE]];
-    
+    //老师
     [teachersArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"role":@"teachers"} andTableName:CLASSMEMBERTABLE]];
     
+    //新申请
     [newAppleArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"checked":@"0"} andTableName:CLASSMEMBERTABLE]];
     
+    //管理员
     [adminArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"admin":@"1"} andTableName:CLASSMEMBERTABLE]];
     [adminArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"admin":@"2"} andTableName:CLASSMEMBERTABLE]];
+    
     
     [parentsArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"role":@"parents"} andTableName:CLASSMEMBERTABLE]];
     studentArray = [_db findSetWithDictionary:@{@"classid":classID,@"role":@"students"} andTableName:CLASSMEMBERTABLE];
@@ -652,7 +666,7 @@ MsgDelegate>
         NSArray *parentarray = [_db findSetWithDictionary:@{@"classid":classID,@"role":@"parents",@"re_name":[stuDict objectForKey:@"name"]} andTableName:CLASSMEMBERTABLE];
         if([parentarray count] == 0)
         {
-            [withoutParentStuArray addObject:[studentArray objectAtIndex:i]];
+//            [withoutParentStuArray addObject:[studentArray objectAtIndex:i]];
         }
         if (![[stuDict objectForKey:@"title"] isEqual:[NSNull null]])
         {
@@ -712,7 +726,7 @@ MsgDelegate>
     {
         if (section ==0)
         {
-            return 4;
+            return 3;
         }
         else if(section == 1)
         {

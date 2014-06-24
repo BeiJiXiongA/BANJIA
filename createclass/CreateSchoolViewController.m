@@ -429,7 +429,7 @@ UITextFieldDelegate>
         [Tools showAlertView:@"去选择学校区域" delegateViewController:nil];
         return;
     }
-    if ([levelValue integerValue] < 0)
+    if ([levelValue isEqualToString:@""])
     {
         [Tools showAlertView:@"请选择学校类型" delegateViewController:nil];
         return ;

@@ -9,9 +9,5 @@
 #import <UIKit/UIKit.h>
 
 @interface MyButton : UIButton
-@property (nonatomic, strong) UIImage *iconImage;
-@property (nonatomic, strong) UIImage *backgroudimage;
-@property (nonatomic) CGRect iconRect;
-
--(void)setlayout;
+@property (nonatomic, strong) UIImageView *iconImageView;
 @end

@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "MyButton.h"
 
 @interface TrendsCell : UITableViewCell<UITableViewDataSource,UITableViewDelegate>
 @property (nonatomic, strong) UIView *bgView;
@@ -17,12 +18,9 @@
 @property (nonatomic, strong) UITextView *contentLabel;
 @property (nonatomic, strong) UIScrollView *imagesScrollView;
 @property (nonatomic, strong) UIView *imagesView;
-@property (nonatomic, strong) UIButton *transmitButton;
-@property (nonatomic, strong) UIButton *praiseButton;
-@property (nonatomic, strong) UIButton *commentButton;
-@property (nonatomic, strong) UIImageView *praiseImageView;
-@property (nonatomic, strong) UIImageView *commentImageView;
-@property (nonatomic, strong) UIImageView *transmitImageView;
+@property (nonatomic, strong) MyButton *transmitButton;
+@property (nonatomic, strong) MyButton *praiseButton;
+@property (nonatomic, strong) MyButton *commentButton;
 @property (nonatomic, strong) MyTextField *nameTextField;
 @property (nonatomic, strong) UITableView *commentsTableView;
 @property (nonatomic, strong) NSArray *commentsArray;

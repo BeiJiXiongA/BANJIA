@@ -12,11 +12,14 @@
 #import "RelatedCell.h"
 #import "OperatDB.h"
 
+#define SEXTAG 6666
+
 @interface PersonInfoSettingViewController ()<UIScrollViewDelegate,
 UITextFieldDelegate,
 UIActionSheetDelegate,
 UITableViewDataSource,
-UITableViewDelegate>
+UITableViewDelegate,
+UIAlertViewDelegate>
 {
     UIImagePickerController *imagePickerController;
     
@@ -174,6 +177,7 @@ UITableViewDelegate>
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 [[NSUserDefaults standardUserDefaults] setObject:[[NSString stringWithFormat:@"%@",datePicker.date] substringToIndex:10] forKey:BIRTH];
+                [[NSUserDefaults standardUserDefaults] setObject:sex forKey:USERSEX];
                 [[NSUserDefaults standardUserDefaults] synchronize];
                 
                 [Tools showTips:@"修改成功" toView:self.bgView];
@@ -233,14 +237,22 @@ UITableViewDelegate>
     UITapGestureRecognizer *iconTag = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(editInfo:)];
     cell.iconImageView.userInteractionEnabled = YES;
     [cell.iconImageView addGestureRecognizer:iconTag];
-    
     cell.iconImageView.hidden = YES;
     cell.nametf.hidden = YES;
+    
+    cell.nametf.frame = CGRectMake(SCREEN_WIDTH - 180, 10, 150, 28);
+    cell.nametf.textColor = TITLE_COLOR;
+    cell.nametf.textAlignment = NSTextAlignmentRight;
+    cell.nametf.font = [UIFont systemFontOfSize:16];
+    cell.nametf.enabled = NO;
+    cell.nametf.tag = indexPath.row+3;
+    cell.nametf.delegate = self;
     
     if (indexPath.row == 0)
     {
         cell.iconImageView.hidden = NO;
         cell.iconImageView.frame = CGRectMake(SCREEN_WIDTH-80, 7, 40, 40);
+        cell.iconImageView.backgroundColor = [UIColor yellowColor];
         [Tools fillImageView:cell.iconImageView withImageFromURL:[Tools header_image] andDefault:HEADERICON];
     }
     else if(indexPath.row == 1)
@@ -256,7 +268,7 @@ UITableViewDelegate>
     else if (indexPath.row == 3)
     {
         cell.nametf.hidden = NO;
-        if ([[Tools user_sex] integerValue] == 1)
+        if ([sex integerValue] == 1)
         {
             cell.nametf.text = @"男";
         }
@@ -275,17 +287,10 @@ UITableViewDelegate>
     [cell.relateButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     cell.relateButton.tag = indexPath.row+333;
     
-    cell.nametf.frame = CGRectMake(SCREEN_WIDTH - 180, 10, 150, 28);
-    cell.nametf.textColor = TITLE_COLOR;
-    cell.nametf.textAlignment = NSTextAlignmentRight;
-    cell.nametf.font = [UIFont systemFontOfSize:16];
-    cell.nametf.enabled = NO;
-    
     [cell.bgImageView setImage:[UIImage imageNamed:@"line3"]];
     
-    cell.nametf.tag = indexPath.row+3;
-    cell.nametf.delegate = self;
-    cell.iconImageView.hidden = YES;
+    cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     cell.backgroundColor = [UIColor clearColor];
     return cell;
@@ -296,7 +301,7 @@ UITableViewDelegate>
     if (indexPath.row == 0)
     {
         //头像
-        
+        [self selectoo];
     }
     else if (indexPath.row == 1)
     {
@@ -305,21 +310,44 @@ UITableViewDelegate>
     }
     else if (indexPath.row == 2)
     {
-        //姓名
+        //生日
         [self editInfo1:indexPath.row+333];
     }
     else if (indexPath.row == 3)
     {
-        //生日
+        //性别
+        UIAlertView *al = [[UIAlertView alloc] initWithTitle:nil message:nil delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"男",@"女", nil];
+        al.tag = SEXTAG;
+        [al show];
+        
+    }
+    else if (indexPath.row == 3)
+    {
+        //手机号
         
     }
     
-    
 }
+
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (alertView.tag == SEXTAG)
+    {
+        if (buttonIndex == 1)
+        {
+            sex = @"1";
+        }
+        else if(buttonIndex == 2)
+        {
+            sex = @"0";
+        }
+        [personInfoTableView reloadData];
+    }
+}
+
 
 -(void)editInfo:(UITapGestureRecognizer *)tap
 {
-    DDLOG(@"buttontag==%d",tap.view.tag-333);
     if (tap.view.tag-333<1)
     {
     }
@@ -363,7 +391,7 @@ UITableViewDelegate>
     DDLOG(@"%@",[[NSString stringWithFormat:@"%@",datePicker.date] substringToIndex:10]);
     [UIView animateWithDuration:0.2 animations:^{
         dateView.frame = CGRectMake(0, SCREEN_HEIGHT, SCREEN_WIDTH, 0);
-        ((UITextField *)[personInfoTableView viewWithTag:4]).text = [[NSString stringWithFormat:@"%@",datePicker.date] substringToIndex:10];
+        ((UITextField *)[personInfoTableView viewWithTag:5]).text = [[NSString stringWithFormat:@"%@",datePicker.date] substringToIndex:10];
     }];
 }
 

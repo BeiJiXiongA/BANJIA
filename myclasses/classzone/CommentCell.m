@@ -23,14 +23,16 @@
         [self.contentView addSubview:nameButton];
         
         commentContentLabel = [[UILabel alloc] init];
-        commentContentLabel.backgroundColor = RGB(252, 252, 252, 1);
+//        commentContentLabel.backgroundColor = RGB(252, 252, 252, 1);
+        commentContentLabel.backgroundColor = [UIColor clearColor];
         commentContentLabel.font = [UIFont systemFontOfSize:14];
         commentContentLabel.numberOfLines = 100;
         commentContentLabel.lineBreakMode = NSLineBreakByWordWrapping;
         [self.contentView addSubview:commentContentLabel];
+        commentContentLabel.textColor = COMMENTCOLOR;
         
         praiseView  = [[UIView alloc] init];
-        praiseView.backgroundColor = RGB(252, 252, 252, 1);
+        praiseView.backgroundColor = RGB(252, 252, 252, 0);
         [self.contentView addSubview:praiseView];
         
         self.backgroundColor = RGB(252, 252, 252, 1);
@@ -53,7 +55,7 @@
 
 -(void)drawRect:(CGRect)rect
 {
-    DDLOG(@"commentDict == %@",commentDict);
+//    DDLOG(@"commentDict == %@",commentDict);
 //    NSString *name = [[commentDict objectForKey:@"by"] objectForKey:@"name"];
 //    NSString *
 }

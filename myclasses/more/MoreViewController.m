@@ -10,6 +10,11 @@
 #import "XDTabViewController.h"
 #import "ClassMoreCell.h"
 
+#define ParentSendDiaryTag  1000
+#define StudentSendDiaryTag  2000
+#define StudentAccessTimeTag  3000
+#define VisitorAccessTimeTag   4000
+
 @interface MoreViewController ()<UITableViewDataSource,
                                 UITableViewDelegate,
                                 UIPickerViewDataSource,
@@ -64,13 +69,29 @@ UIActionSheetDelegate>
 
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    if (actionSheet.tag == 2000)
+    DDLOG(@"button index %d",buttonIndex);
+    if (actionSheet.tag == ParentSendDiaryTag)
+    {
+        [self settingValue:[NSString stringWithFormat:@"%d",buttonIndex] forKay:ParentSendDiary];
+    }
+    else if(actionSheet.tag == StudentSendDiaryTag)
+    {
+        [self settingValue:[NSString stringWithFormat:@"%d",buttonIndex] forKay:ParentSendDiary];
+    }
+    else if (actionSheet.tag == StudentAccessTimeTag)
     {
         if (buttonIndex == 0)
         {
-            //退出班级
-            [self signOut];
+            [self settingValue:@"1" forKay:ParentSendDiary];
         }
+        else if (buttonIndex == 1)
+        {
+            [self settingValue:@"1" forKay:ParentSendDiary];
+        }
+    }
+    else if(actionSheet.tag == VisitorAccessTimeTag)
+    {
+        [self settingValue:[NSString stringWithFormat:@"%d",buttonIndex] forKay:ParentSendDiary];
     }
 }
 
@@ -223,11 +244,11 @@ UIActionSheetDelegate>
     
     if ([[settingDict objectForKey:StudentVisiteTime] intValue] == 0)
     {
-        accessTime = @"全时段";
+        accessTime = @"晚上17点后";
     }
     else if([[settingDict objectForKey:StudentVisiteTime] intValue] == 1)
     {
-        accessTime = @"晚上17点后";
+        accessTime = @"全时段";
     }
     else if([[settingDict objectForKey:StudentVisiteTime] intValue] == 2)
     {
@@ -236,11 +257,11 @@ UIActionSheetDelegate>
 
     if ([[settingDict objectForKey:VisitorAccess] intValue] == 0)
     {
-        accessClassZone = @"可查看前10条";
+        accessClassZone = @"不可查看";
     }
     else if([[settingDict objectForKey:VisitorAccess] intValue] == 1)
     {
-        accessClassZone = @"不可查看";
+        accessClassZone = @"可查看前10条";
     }
 
     [classSettingTableView reloadData];
@@ -580,33 +601,33 @@ UIActionSheetDelegate>
     {
         if (indexPath.row == 2)
         {
-            [optionArray removeAllObjects];
-            [optionArray addObjectsFromArray:[NSArray arrayWithObjects:@"需要审核",@"直接发布",@"不可发布", nil]];
-            [self showSettingView:optionArray withSection:indexPath.section+1 andIndexRow:indexPath.row];
+            UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"家长发布空间" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"需要审核",@"直接发布",@"不可发布", nil];
+            ac.tag = ParentSendDiaryTag;
+            [ac showInView:classSettingTableView];
         }
     }
     else if (indexPath.section == 1)
     {
         if (indexPath.row == 1)
         {
-            [optionArray removeAllObjects];
-            [optionArray addObjectsFromArray:[NSArray arrayWithObjects:@"需要审核",@"直接发布",@"不可发布", nil]];
-            [self showSettingView:optionArray withSection:indexPath.section+1 andIndexRow:indexPath.row];
+            UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"学生发布空间" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"需要审核",@"直接发布",@"不可发布", nil];
+            ac.tag = StudentSendDiaryTag;
+            [ac showInView:classSettingTableView];
         }
         else if(indexPath.row == 3)
         {
-            [optionArray removeAllObjects];
-            [optionArray addObjectsFromArray:[NSArray arrayWithObjects:@"晚上17点后",@"全时段",@"晚上19点后", nil]];
-            [self showSettingView:optionArray withSection:indexPath.section+1 andIndexRow:indexPath.row];
+            UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"学生访问空间时间" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"全时段",@"晚上17点后",@"晚上19点后", nil];
+            ac.tag = StudentAccessTimeTag;
+            [ac showInView:classSettingTableView];
         }
     }
     else if(indexPath.section == 3)
     {
         if (indexPath.row == 0)
         {
-            [optionArray removeAllObjects];
-            [optionArray addObjectsFromArray:[NSArray arrayWithObjects:@"不可查看",@"可查看10条", nil]];
-            [self showSettingView:optionArray withSection:indexPath.section+1 andIndexRow:indexPath.row];
+            UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"访客查看班级空间" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"不可查看",@"可查看10条", nil];
+            ac.tag = VisitorAccessTimeTag;
+            [ac showInView:classSettingTableView];
         }
     }
 }
@@ -616,74 +637,6 @@ UIActionSheetDelegate>
     UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"确定要退出这个班级吗？" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
     al.tag = 2222;
     [al show];
-}
--(void)showSettingView:(NSMutableArray *)titleArray withSection:(NSInteger)section andIndexRow:(NSInteger)row
-{
-    examineView = [[UIView alloc] init];
-    examineView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.7];
-    examineView.frame = CGRectMake(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, 0, 0);
-    [self.bgView addSubview:examineView];
-    
-    examineView.userInteractionEnabled = YES;
-    
-    UIView *buttonBg = [[UIView alloc] init];
-    buttonBg.backgroundColor = [UIColor whiteColor];
-    [examineView addSubview:buttonBg];
-    
-    UITapGestureRecognizer *taps = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(cancelPhone)];
-    [examineView addGestureRecognizer:taps];
-    
-    UIButton *cancelButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [cancelButton setTitle:@"取消" forState:UIControlStateNormal];
-    [cancelButton addTarget:self action:@selector(cancelPhone) forControlEvents:UIControlEventTouchUpInside];
-    cancelButton.tag = section*10000+row*1000;
-    [cancelButton setBackgroundColor:[UIColor darkGrayColor]];
-    [buttonBg addSubview:cancelButton];
-    
-    for (int i=0; i < [titleArray count]; ++i)
-    {
-        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-        [button setTitle:[titleArray objectAtIndex:i] forState:UIControlStateNormal];
-        [button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-        button.tag = 10000*section+row*1000+i+1;
-        button.layer.borderColor = [UIColor blackColor].CGColor;
-        button.layer.borderWidth = 1;
-        [button addTarget:self action:@selector(phoneClick:) forControlEvents:UIControlEventTouchUpInside];
-        button.backgroundColor = [UIColor whiteColor];
-        [buttonBg addSubview:button];
-    }
-    
-    [UIView animateWithDuration:0.2 animations:^{
-        examineView.frame = CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-        for(int i=0;i<[titleArray count]+1;++i)
-        {
-            buttonBg.frame = CGRectMake(30, SCREEN_HEIGHT/2-100, SCREEN_WIDTH-60, 200);
-            [examineView viewWithTag:10000*section+row*1000+i].frame = CGRectMake(buttonBg.frame.size.width/2-70, buttonBg.frame.size.height - (i+1)*40-30, 140, 30);
-        }
-    }];
-}
-
--(void)cancelPhone
-{
-    for (UIView *v in examineView.subviews)
-    {
-        [v removeFromSuperview];
-    }
-    [examineView removeFromSuperview];
-}
--(void)phoneClick:(UIButton *)button
-{
-    NSInteger section = button.tag/10000-1;
-    NSInteger row = button.tag%10000/1000;
-    
-    while (section > 0)
-    {
-        row += [[[sectionArray objectAtIndex:section-1] objectForKey:@"count"] intValue];
-        section--;
-    }
-    [self settingValue:[NSString stringWithFormat:@"%d",button.tag%1000-1] forKay:[settingKeysArray objectAtIndex:row]];
-    [classSettingTableView reloadData];
-    [self cancelPhone];
 }
 
 -(void)settingValue:(NSString *)value forKay:(NSString *)key

@@ -277,6 +277,7 @@ SelectAreaDelegate>
     [cell.praiseButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     cell.praiseButton.frame = CGRectMake(0, 0, SCREEN_WIDTH-40, 40);
     cell.praiseButton.titleLabel.textAlignment = NSTextAlignmentCenter;
+    
     cell.contentLabel.textColor = TITLE_COLOR;
     
 //    if (indexPath.section == 0)

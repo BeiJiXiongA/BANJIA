@@ -356,10 +356,11 @@ UIActionSheetDelegate>
             {
                 if ([[[NSUserDefaults standardUserDefaults] objectForKey:QQNICKNAME] length] >0)
                 {
+                    cell.nametf.frame = CGRectMake(SCREEN_WIDTH-150, 17, 120, 26);
                     cell.nametf.text = [[NSUserDefaults standardUserDefaults] objectForKey:QQNICKNAME];
-                    [cell.relateButton setTitle:@"更改" forState:UIControlStateNormal];
-//                    [cell.relateButton removeTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-                    [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
+                    [cell.relateButton setTitle:@"" forState:UIControlStateNormal];
+////                    [cell.relateButton removeTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
+//                    [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
                 }
                 else
                 {
@@ -375,9 +376,10 @@ UIActionSheetDelegate>
                 if ([[[NSUserDefaults standardUserDefaults] objectForKey:SINANICKNAME] length] > 0)
                 {
                     cell.nametf.text = [[NSUserDefaults standardUserDefaults] objectForKey:SINANICKNAME];
-                    [cell.relateButton setTitle:@"更改" forState:UIControlStateNormal];
-//                    [cell.relateButton removeTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-                    [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
+                    cell.nametf.frame = CGRectMake(SCREEN_WIDTH-150, 17, 120, 26);
+                    [cell.relateButton setTitle:@"" forState:UIControlStateNormal];
+////                    [cell.relateButton removeTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
+//                    [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
                 }
                 else
                 {
@@ -393,9 +395,10 @@ UIActionSheetDelegate>
                 if ([[[NSUserDefaults standardUserDefaults] objectForKey:RRNICKNAME] length] > 0)
                 {
                     cell.nametf.text = [[NSUserDefaults standardUserDefaults] objectForKey:RRNICKNAME];
-                    [cell.relateButton setTitle:@"更改" forState:UIControlStateNormal];
-//                     [cell.relateButton removeTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-                    [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
+                    [cell.relateButton setTitle:@"" forState:UIControlStateNormal];
+                    cell.nametf.frame = CGRectMake(SCREEN_WIDTH-150, 17, 120, 26);
+////                     [cell.relateButton removeTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
+//                    [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
                 }
                 else
                 {
@@ -503,7 +506,28 @@ UIActionSheetDelegate>
         }
         else
         {
-            [self bindThirdAccountWithIndex:indexPath.row];
+            if (indexPath.row == 1)
+            {
+                if ([[[NSUserDefaults standardUserDefaults] objectForKey:QQNICKNAME] length] <= 0)
+                {
+                    [self bindThirdAccountWithIndex:indexPath.row];
+                }
+            }
+            else if(indexPath.row == 2)
+            {
+                if ([[[NSUserDefaults standardUserDefaults] objectForKey:SINANICKNAME] length] <= 0)
+                {
+                    [self bindThirdAccountWithIndex:indexPath.row];
+                }
+            }
+            else if(indexPath.row == 3)
+            {
+                if ([[[NSUserDefaults standardUserDefaults] objectForKey:RRNICKNAME] length] <= 0)
+                {
+                    [self bindThirdAccountWithIndex:indexPath.row];
+                }
+            }
+            
         }
     }
     else if (indexPath.section == 2)
@@ -548,15 +572,15 @@ static int loginID;
 {
     switch (index)
     {
-        case 2:
+        case 1:
             loginID = ShareTypeQQSpace;
             
             break;
-        case 3:
+        case 2:
             loginID = ShareTypeSinaWeibo;
             
             break;
-        case 4:
+        case 3:
             loginID = ShareTypeRenren;
             break;
             

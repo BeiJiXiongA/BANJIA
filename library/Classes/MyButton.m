@@ -9,30 +9,25 @@
 #import "MyButton.h"
 
 @implementation MyButton
-@synthesize iconImage,backgroudimage,iconRect;
+@synthesize iconImageView;
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
     if (self) {
         // Initialization code
+        iconImageView = [[UIImageView alloc] init];
+        [self addSubview:iconImageView];
     }
     return self;
-}
--(void)setlayout
-{
-    UIImageView *iconImageView = [[UIImageView alloc] initWithFrame:iconRect];
-    [iconImageView setImage:iconImage];
-    [self addSubview:iconImageView];
-    [self setBackgroundImage:backgroudimage forState:UIControlStateNormal];
 }
 
 
 // Only override drawRect: if you perform custom drawing.
 // An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect
-{
-    // Drawing code
-}
+//- (void)drawRect:(CGRect)rect
+//{
+//    // Drawing code
+//}
 
 
 @end

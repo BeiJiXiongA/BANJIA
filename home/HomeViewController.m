@@ -22,6 +22,8 @@
 #import "MJPhotoBrowser.h"
 #import "MJPhoto.h"
 #import "InputTableBar.h"
+#import "MyButton.h"
+#import "DongTaiDetailViewController.h"
 
 #define ImageViewTag  9999
 #define HeaderImageTag  7777
@@ -30,7 +32,7 @@
 #define SectionTag  999999
 #define RowTag     100
 
-#define ImageHeight  60.0f
+#define ImageHeight  67.5f
 
 #define ImageCountPerRow  4
 
@@ -47,10 +49,11 @@ ReturnFunctionDelegate>
     CGFloat commentHeight;
     
     BOOL addOpen;
-    PopView *addView;
-    UIButton *addNoticeButton;
-    UIButton *addDiaryButton;
+    UIView *addView;
+    MyButton *addNoticeButton;
+    MyButton *addDiaryButton;
     NSDictionary *waitTransmitDict;
+    NSDictionary *waitCommentDict;
     DemoVIew *demoView;
     
     CGFloat tmpheight;
@@ -155,29 +158,32 @@ ReturnFunctionDelegate>
     footerView = [[FooterView alloc] initWithScrollView:classTableView];
     footerView.delegate = self;
     
-    addView = [[PopView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH-125, UI_NAVIGATION_BAR_HEIGHT-10, 120, 85)];
-    addView.point = CGPointMake(90, 0);
-    addView.wid = 2;
-    addView.backgroundColor = [UIColor clearColor];
+    addView = [[UIView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH-130, UI_NAVIGATION_BAR_HEIGHT-10, 128, 87.5)];
+//    addView.point = CGPointMake(90, 0);
+//    addView.wid = 2;
+    addView.backgroundColor = [UIColor yellowColor];
     [self.bgView addSubview:addView];
     
-    
-    addNoticeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    addNoticeButton.frame = CGRectMake(35, 15, 80, 30);
+    addNoticeButton = [MyButton buttonWithType:UIButtonTypeCustom];
+    addNoticeButton.frame = CGRectMake(5, 15, 110, 30);
     addNoticeButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.5];
     addNoticeButton.alpha = 0;
     [addNoticeButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
-    [addNoticeButton setTitle:@"添加通知" forState:UIControlStateNormal];
+    [addNoticeButton setTitle:@"   添加通知" forState:UIControlStateNormal];
+    addNoticeButton.iconImageView.image = [UIImage imageNamed:@"icon_addnoticeg"];
+    addNoticeButton.iconImageView.frame = CGRectMake(5, 5, 20, 20);
     [addView addSubview:addNoticeButton];
     [addNoticeButton addTarget:self action:@selector(addNotice) forControlEvents:UIControlEventTouchUpInside];
     
-    addDiaryButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    addDiaryButton.frame = CGRectMake(35, 50, 80, 30);
+    addDiaryButton = [MyButton buttonWithType:UIButtonTypeCustom];
+    addDiaryButton.frame = CGRectMake(5, 50, 110, 30);
     addDiaryButton.alpha = 0;
     [addDiaryButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     addDiaryButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.5];
-    [addDiaryButton setTitle:@"添加空间" forState:UIControlStateNormal];
+    [addDiaryButton setTitle:@"   添加空间" forState:UIControlStateNormal];
     [addView addSubview:addDiaryButton];
+    addDiaryButton.iconImageView.frame = CGRectMake(5, 5, 20, 20);
+    addDiaryButton.iconImageView.image = [UIImage imageNamed:@"icon_addspaceg"];
     [addDiaryButton addTarget:self action:@selector(addDongtai) forControlEvents:UIControlEventTouchUpInside];
     
     
@@ -203,6 +209,16 @@ ReturnFunctionDelegate>
 -(void)dealloc
 {
     inputTabBar.returnFunDel = nil;
+}
+-(void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [self backInput];
+}
+-(void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [self backInput];
 }
 
 -(void)getHomeData
@@ -285,28 +301,47 @@ ReturnFunctionDelegate>
 #pragma mark - inputtabbardel
 -(void)myReturnFunction
 {
-//    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"parents"])
-//    {
-//        if ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:ParentComment] integerValue] == 0)
-//        {
-//            [Tools showAlertView:@"本班日志不允许家长发表评论" delegateViewController:nil];
-//            return ;
-//        }
-//        else
-//        {
-////            [self commentdiary];
-//        }
-//    }
-//    else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"opt"] objectForKey:UserSendComment] == 0)
-//    {
-//        [Tools showAlertView:@"您没有评论日志的权限" delegateViewController:nil];
-//        return ;
-//    }
-//    else
-//    {
-////        [self commentdiary];
-//    }
     DDLOG(@"comment content in home %@",inputTabBar.inputTextView.text);
+    if ([[inputTabBar analyString:inputTabBar.inputTextView.text] length] <= 0)
+    {
+        [Tools showAlertView:@"请输入评论内容！" delegateViewController:nil];
+        return ;
+    }
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"p_id":[waitCommentDict objectForKey:@"_id"],
+                                                                      @"c_id":[waitCommentDict objectForKey:@"c_id"],
+                                                                      @"content":[inputTabBar analyString:inputTabBar.inputTextView.text]
+                                                                      } API:COMMENT_DIARY];
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"commit diary responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                [Tools showTips:@"评论成功" toView:classTableView];
+                [self getHomeData];
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:self];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+        }];
+        [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
+
+    
     inputSize = CGSizeMake(250, 30);
     [UIView animateWithDuration:0.2 animations:^{
         inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10, SCREEN_WIDTH, inputSize.height+10);
@@ -400,11 +435,24 @@ ReturnFunctionDelegate>
 
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
-    if (section == [noticeArray count])
+    if([noticeArray count] > 0)
     {
-        return 30;
+        if (section == [noticeArray count])
+        {
+            return 30;
+        }
+        return 40;
     }
-    return 40;
+    else
+    {
+        if (section == 0)
+        {
+            return 30;
+        }
+        else
+            return 40;
+    }
+    return 0;
 }
 
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
@@ -439,8 +487,8 @@ ReturnFunctionDelegate>
         dotView.layer.borderWidth = 1.5;
         dotView.backgroundColor = RGB(64, 196, 110, 1);
         [headerView addSubview:dotView];
-        int cha = [noticeArray count]>0?([noticeArray count]+1):0;
-        NSDictionary *groupDict = [groupDiaries objectAtIndex:section-cha];
+//        int cha = [noticeArray count]>0?([noticeArray count]+1):0;
+        NSDictionary *groupDict = [groupDiaries objectAtIndex:section-[noticeArray count]-1];
 //        headerLabel.backgroundColor = RGB(64, 196, 110, 1);
         headerLabel.text = [groupDict objectForKey:@"date"];
 //        headerLabel.font = [UIFont boldSystemFontOfSize:15];
@@ -459,10 +507,19 @@ ReturnFunctionDelegate>
     }
     else if(section > [noticeArray count])
     {
-        int cha = [noticeArray count]>0?([noticeArray count]+1):0;
-        NSDictionary *groupDict = [groupDiaries objectAtIndex:section-cha];
-        NSArray *tmpArray = [groupDict objectForKey:@"diaries"];
-        return [tmpArray count];
+        if ([noticeArray count] > 0)
+        {
+            int cha = [noticeArray count]>0?([noticeArray count]+1):0;
+            NSDictionary *groupDict = [groupDiaries objectAtIndex:section-cha];
+            NSArray *tmpArray = [groupDict objectForKey:@"diaries"];
+            return [tmpArray count];
+        }
+        else
+        {
+            NSDictionary *groupDict = [groupDiaries objectAtIndex:section-1];
+            NSArray *tmpArray = [groupDict objectForKey:@"diaries"];
+            return [tmpArray count];
+        }
     }
     return 0;
 }
@@ -482,7 +539,16 @@ ReturnFunctionDelegate>
             //                CGFloat imageWidth = 60;
         CGFloat imageViewHeight = ImageHeight;
         int cha = [noticeArray count]>0?([noticeArray count]+1):0;
-        NSDictionary *groupDict = [groupDiaries objectAtIndex:indexPath.section-cha];
+        NSDictionary *groupDict;
+        if ([noticeArray count] > 0)
+        {
+            groupDict = [groupDiaries objectAtIndex:indexPath.section-cha];
+        }
+        else
+        {
+            groupDict = [groupDiaries objectAtIndex:indexPath.section-1];
+        }
+        
         NSArray *tmpArray = [groupDict objectForKey:@"diaries"];
         NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
         NSString *content = [[dict objectForKey:@"detail"] objectForKey:@"content"];
@@ -510,17 +576,17 @@ ReturnFunctionDelegate>
                 NSString *name = [[dict objectForKey:@"by"] objectForKey:@"name"];
                 NSString *content = [dict objectForKey:@"content"];
                 NSString *contentString = [NSString stringWithFormat:@"%@:%@",name,content];
-                CGSize s = [Tools getSizeWithString:contentString andWidth:SCREEN_WIDTH-6 andFont:[UIFont systemFontOfSize:14]];
-                tmpcommentHeight += (s.height > 30 ? (s.height+0):30);
+                CGSize s = [Tools getSizeWithString:contentString andWidth:200 andFont:[UIFont systemFontOfSize:14]];
+                tmpcommentHeight += (s.height > 35 ? (s.height+8):35);
             }
             
         }
         if ([[dict objectForKey:@"likes_num"] integerValue] > 0)
         {
 //            int row = [[dict objectForKey:@"likes_num"] integerValue]%4 == 0 ? ([[dict objectForKey:@"likes_num"] integerValue]/4):([[dict objectForKey:@"likes_num"] integerValue]/4+1);
-            tmpcommentHeight+=30;
+            tmpcommentHeight+=36;
         }
-        return 60+imgsHeight+contentHtight+50 + tmpcommentHeight;
+        return 60+imgsHeight+contentHtight+50 + tmpcommentHeight+5;
     }
     return 0;
 }
@@ -598,7 +664,7 @@ ReturnFunctionDelegate>
     }
     else if(indexPath.section > [noticeArray count])
     {
-        static NSString *topImageView = @"trendcell";
+        static NSString *topImageView = @"hometrendcell";
         TrendsCell *cell = [tableView dequeueReusableCellWithIdentifier:topImageView];
         if (cell == nil)
         {
@@ -618,33 +684,36 @@ ReturnFunctionDelegate>
         cell.timeLabel.hidden = NO;
         cell.locationLabel.hidden = NO;
         cell.praiseButton.hidden = NO;
-        cell.praiseImageView.hidden = NO;
-        cell.commentImageView.hidden = NO;
         cell.commentButton.hidden = NO;
         cell.transmitButton.hidden = NO;
         
         cell.commentsTableView.frame = CGRectMake(0, 0, 0, 0);
         
-        cell.nameLabel.frame = CGRectMake(60, 5, [nameStr length]*25>170?170:([nameStr length]*18), 30);
+        cell.nameLabel.frame = CGRectMake(60, 5, [nameStr length]*18>170?170:([nameStr length]*18), 25);
         cell.nameLabel.text = nameStr;
         cell.nameLabel.font = NAMEFONT;
         cell.nameLabel.textColor = NAMECOLOR;
         
-        cell.timeLabel.frame = CGRectMake(cell.nameLabel.frame.size.width+cell.nameLabel.frame.origin.x, 5, SCREEN_WIDTH-cell.nameLabel.frame.origin.x-cell.nameLabel.frame.size.width-20, 30);
+        NSString *timeStr = [Tools showTimeOfToday:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]];
+        DDLOG(@"time %@",[[dict objectForKey:@"created"] objectForKey:@"sec"]);
+        NSString *c_name = [dict objectForKey:@"c_name"];
+        cell.timeLabel.text = c_name;
+        cell.timeLabel.frame = CGRectMake(SCREEN_WIDTH-[c_name length]*18-20, 2, [c_name length]*18, 35);
         cell.timeLabel.textAlignment = NSTextAlignmentRight;
         cell.timeLabel.numberOfLines = 2;
         cell.timeLabel.lineBreakMode = NSLineBreakByWordWrapping;
-        cell.timeLabel.text = [Tools showTime:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]];
-//        cell.headerImageView.layer.cornerRadius = cell.headerImageView.frame.size.width/2;
-//        cell.headerImageView.clipsToBounds = YES;
+        
         cell.headerImageView.backgroundColor = [UIColor clearColor];
         [Tools fillImageView:cell.headerImageView withImageFromURL:[[dict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERBG];
-        cell.locationLabel.frame = CGRectMake(60, cell.nameLabel.frame.origin.y+cell.nameLabel.frame.size.height, SCREEN_WIDTH-80, 20);
-        cell.locationLabel.text = [[dict objectForKey:@"detail"] objectForKey:@"add"];
+        cell.locationLabel.frame = CGRectMake(60, cell.nameLabel.frame.origin.y+cell.nameLabel.frame.size.height, SCREEN_WIDTH-80, 30);
+        cell.locationLabel.text = [NSString stringWithFormat:@"于%@在%@",timeStr,[[dict objectForKey:@"detail"] objectForKey:@"add"]];
+        cell.locationLabel.numberOfLines = 2;
+        cell.locationLabel.lineBreakMode = NSLineBreakByWordWrapping;
         
         cell.contentLabel.hidden = YES;
+        cell.contentLabel.backgroundColor = [UIColor clearColor];
         
-        int cha = [noticeArray count]>0?([noticeArray count]+1):0;
+        int cha = [noticeArray count]+1;
         
         for(UIView *v in cell.imagesView.subviews)
         {
@@ -664,7 +733,7 @@ ReturnFunctionDelegate>
             NSString *content = [[dict objectForKey:@"detail"] objectForKey:@"content"];
             cell.contentLabel.hidden = NO;
             cell.contentLabel.editable = NO;
-            cell.contentLabel.textColor = [UIColor blackColor];
+            cell.contentLabel.textColor = CONTENTCOLOR;
             if ([content length] > 40)
             {
                 cell.contentLabel.text  = [NSString stringWithFormat:@"%@...",[content substringToIndex:37]];
@@ -679,6 +748,7 @@ ReturnFunctionDelegate>
         {
             cell.contentLabel.frame = CGRectMake(10, 60, 0, 0);
         }
+        
         CGFloat imageViewHeight = ImageHeight;
         CGFloat imageViewWidth = ImageHeight;
         if ([[[dict objectForKey:@"detail"] objectForKey:@"img"] count] > 0)
@@ -696,7 +766,7 @@ ReturnFunctionDelegate>
                 UIImageView *imageView = [[UIImageView alloc] init];
                 imageView.frame = CGRectMake(0, 0, 100, 100);
                 imageView.userInteractionEnabled = YES;
-                imageView.tag = (indexPath.section-cha)*SectionTag+indexPath.row*RowTag+333;
+                imageView.tag = (indexPath.section-[noticeArray count]-1)*SectionTag+indexPath.row*RowTag+333;
                 
                 imageView.userInteractionEnabled = YES;
                 [imageView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapImage:)]];
@@ -719,17 +789,17 @@ ReturnFunctionDelegate>
                 {
                     row = (imageCount/ImageCountPerRow) > 3 ? 3:(imageCount / ImageCountPerRow);
                 }
-                cell.imagesView.frame = CGRectMake((SCREEN_WIDTH-ImageHeight*ImageCountPerRow)/2,
+                cell.imagesView.frame = CGRectMake(12,
                                                    cell.contentLabel.frame.size.height +
                                                    cell.contentLabel.frame.origin.y+7,
-                                                   SCREEN_WIDTH-20, (imageViewHeight+5) * row);
+                                                   SCREEN_WIDTH-44, (imageViewHeight+5) * row);
                 
                 for (int i=0; i<[imgsArray count]; ++i)
                 {
                     UIImageView *imageView = [[UIImageView alloc] init];
                     imageView.frame = CGRectMake((i%(NSInteger)ImageCountPerRow)*(imageViewWidth+5), (imageViewWidth+5)*(i/(NSInteger)ImageCountPerRow), imageViewWidth, imageViewHeight);
                     imageView.userInteractionEnabled = YES;
-                    imageView.tag = (indexPath.section-cha)*SectionTag+indexPath.row*RowTag+i+333;
+                    imageView.tag = (indexPath.section-[noticeArray count]-1)*SectionTag+indexPath.row*RowTag+i+333;
                     
                     imageView.userInteractionEnabled = YES;
                     [imageView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapImage:)]];
@@ -756,29 +826,52 @@ ReturnFunctionDelegate>
             he = 5;
         }
         
-        cell.transmitImageView.hidden = NO;
+        CGFloat buttonHeight = 35;
         
-        cell.transmitButton.frame = CGRectMake(0, cellHeight+13, (SCREEN_WIDTH-0)/3, 30);
+        cell.transmitButton.frame = CGRectMake((SCREEN_WIDTH-0)/3, cellHeight+13, (SCREEN_WIDTH-0)/3, buttonHeight);
         [cell.transmitButton setTitle:@"转发" forState:UIControlStateNormal];
+        cell.transmitButton.iconImageView.image = [UIImage imageNamed:@"icon_forwarding"];
         cell.transmitButton.tag = (indexPath.section-cha)*SectionTag+indexPath.row;
         [cell.transmitButton addTarget:self action:@selector(transmitDiary:) forControlEvents:UIControlEventTouchUpInside];
-        cell.transmitImageView.frame = CGRectMake((SCREEN_WIDTH-20)/4-55, cell.transmitButton.frame.size.height+cell.transmitButton.frame.origin.y-22, 13, 13);
+        cell.transmitButton.iconImageView.frame = CGRectMake(13, 7.5, 20, 20);
+        if ([[dict objectForKey:@"likes_num"] integerValue] > 0)
+        {
+            [cell.praiseButton setTitle:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"likes_num"] integerValue]] forState:UIControlStateNormal];
+        }
+        else
+        {
+            [cell.praiseButton setTitle:@"赞" forState:UIControlStateNormal];
+        }
+        if ([self havePraisedThisDiary:dict])
+        {
+            cell.praiseButton.iconImageView.image = [UIImage imageNamed:@"praised"];
+            cell.praiseButton.iconImageView.frame = CGRectMake(27, 7.5, 20, 20);
+        }
+        else
+        {
+            cell.praiseButton.iconImageView.image = [UIImage imageNamed:@"icon_heart"];
+            cell.praiseButton.iconImageView.frame = CGRectMake(25, 8.5, 18, 18);
+        }
         
-        
-        [cell.praiseButton setTitle:[NSString stringWithFormat:@"赞(%d)",[[dict objectForKey:@"likes_num"] integerValue]] forState:UIControlStateNormal];
         [cell.praiseButton addTarget:self action:@selector(praiseDiary:) forControlEvents:UIControlEventTouchUpInside];
         cell.praiseButton.tag = (indexPath.section-cha)*SectionTag+indexPath.row;
-        cell.praiseButton.frame = CGRectMake((SCREEN_WIDTH-0)/3, cellHeight+13, (SCREEN_WIDTH-0)/3, 30);
-        
-        cell.praiseImageView.frame = CGRectMake((SCREEN_WIDTH-20)*2/4-20, cell.praiseButton.frame.size.height+cell.praiseButton.frame.origin.y-19, 13, 13);
-        
-        [cell.commentButton setTitle:[NSString stringWithFormat:@"评论(%d)",[[dict objectForKey:@"comments_num"] integerValue]] forState:UIControlStateNormal];
-        cell.commentButton.frame = CGRectMake((SCREEN_WIDTH-0)/3*2, cellHeight+13, (SCREEN_WIDTH-0)/3, 30);
+        cell.praiseButton.frame = CGRectMake(0, cellHeight+13, (SCREEN_WIDTH-0)/3, buttonHeight);
+    
+        if ([[dict objectForKey:@"comments_num"] integerValue] > 0)
+        {
+            [cell.commentButton setTitle:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"comments_num"] integerValue]] forState:UIControlStateNormal];
+            cell.commentButton.iconImageView.frame = CGRectMake(18, 11, 17, 17);
+        }
+        else
+        {
+            [cell.commentButton setTitle:@"评论" forState:UIControlStateNormal];
+            cell.commentButton.iconImageView.frame = CGRectMake(15, 11, 17, 17);
+        }
+        cell.commentButton.frame = CGRectMake((SCREEN_WIDTH-0)/3*2, cellHeight+13, (SCREEN_WIDTH-0)/3, buttonHeight);
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         
         cell.commentButton.tag = (indexPath.section-cha)*SectionTag+indexPath.row;
         [cell.commentButton addTarget:self action:@selector(commentDiary:) forControlEvents:UIControlEventTouchUpInside];
-        cell.commentImageView.frame = CGRectMake((SCREEN_WIDTH-20)*3/4, cell.commentButton.frame.size.height+cell.commentButton.frame.origin.y-20, 13, 13);
         
         cell.backgroundColor = [UIColor clearColor];
         
@@ -825,6 +918,20 @@ ReturnFunctionDelegate>
     return nil;
 }
 
+-(BOOL)havePraisedThisDiary:(NSDictionary *)diaryDict
+{
+    NSArray *praiseArray = [[diaryDict objectForKey:@"detail"] objectForKey:@"likes"];
+    for (int i = 0; i < [praiseArray count]; i++)
+    {
+        NSDictionary *dict = [praiseArray objectAtIndex:i];
+        if ([[[dict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
+        {
+            return YES;
+        }
+    }
+    return NO;
+}
+
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (indexPath.section < [noticeArray count])
@@ -842,12 +949,29 @@ ReturnFunctionDelegate>
     }
     else
     {
+        NSDictionary *groupDict = [groupDiaries objectAtIndex:indexPath.section-[noticeArray count]-1];
+        NSArray *tmpArray = [groupDict objectForKey:@"diaries"];
+        NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
+        DongTaiDetailViewController *dongtaiDetailViewController = [[DongTaiDetailViewController alloc] init];
+        dongtaiDetailViewController.dongtaiId = [dict objectForKey:@"_id"];
+        dongtaiDetailViewController.fromclass = NO;
         
+        [[NSUserDefaults standardUserDefaults] setObject:[dict objectForKey:@"c_id"] forKey:@"classid"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+        
+//        dongtaiDetailViewController.addComDel = self;
+        [self.navigationController pushViewController:dongtaiDetailViewController animated:YES];
     }
 }
 
 - (void)tapImage:(UITapGestureRecognizer *)tap
 {
+    if ([inputTabBar.inputTextView isFirstResponder])
+    {
+        [self backInput];
+        [inputTabBar backKeyBoard];
+    }
+    
     NSDictionary *groupDict = [groupDiaries objectAtIndex:(tap.view.tag-333)/SectionTag];
     NSArray *array = [groupDict objectForKey:@"diaries"];
     NSDictionary *dict = [array objectAtIndex:(tap.view.tag-333)%SectionTag/RowTag];
@@ -880,34 +1004,31 @@ ReturnFunctionDelegate>
     DDLOG(@"home diary %@",[[dict objectForKey:@"detail"] objectForKey:@"content"]);
     if ([Tools NetworkReachable])
     {
-//        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
-//                                                                      @"token":[Tools client_token],
-//                                                                      @"p_id":[dict objectForKey:@"_id"],
-//                                                                      @"c_id":classID,
-//                                                                      } API:LIKE_DIARY];
-//        [request setCompletionBlock:^{
-//            NSString *responseString = [request responseString];
-//            NSDictionary *responseDict = [Tools JSonFromString:responseString];
-//            DDLOG(@"commit diary responsedict %@",responseDict);
-//            if ([[responseDict objectForKey:@"code"] intValue]== 1)
-//            {
-//                [Tools showTips:@"赞成功" toView:classZoneTableView];
-//                page = 0;
-//                monthStr = @"";
-//                NSString *title = [[button titleForState:UIControlStateNormal] substringFromIndex:2];
-//                [button setTitle:[NSString stringWithFormat:@"赞(%d)",[title integerValue]+1] forState:UIControlStateNormal];
-//            }
-//            else
-//            {
-//                [Tools dealRequestError:responseDict fromViewController:self];
-//            }
-//        }];
-//        
-//        [request setFailedBlock:^{
-//            NSError *error = [request error];
-//            DDLOG(@"error %@",error);
-//        }];
-//        [request startAsynchronous];
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"p_id":[dict objectForKey:@"_id"],
+                                                                      @"c_id":[dict objectForKey:@"c_id"],
+                                                                      } API:LIKE_DIARY];
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"commit diary responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                [Tools showTips:@"赞成功" toView:classTableView];
+                [self getHomeData];
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:self];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+        }];
+        [request startAsynchronous];
     }
     
 }
@@ -916,13 +1037,8 @@ ReturnFunctionDelegate>
 {
     NSDictionary *groupDict = [groupDiaries objectAtIndex:button.tag/SectionTag];
     NSArray *tmpArray = [groupDict objectForKey:@"diaries"];
-    NSDictionary *dict = [tmpArray objectAtIndex:button.tag%SectionTag];
-    DDLOG(@"home diary %@",[[dict objectForKey:@"detail"] objectForKey:@"content"]);
+    waitCommentDict = [tmpArray objectAtIndex:button.tag%SectionTag];
     [inputTabBar.inputTextView becomeFirstResponder];
-//    DongTaiDetailViewController *dongtaiDetailViewController = [[DongTaiDetailViewController alloc] init];
-//    dongtaiDetailViewController.dongtaiId = [dict objectForKey:@"_id"];
-//    dongtaiDetailViewController.addComDel = self;
-//    [[XDTabViewController sharedTabViewController].navigationController pushViewController:dongtaiDetailViewController animated:YES];
 }
 
 -(void)showKeyBoard:(CGFloat)keyBoardHeight

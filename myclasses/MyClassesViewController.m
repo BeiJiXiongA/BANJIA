@@ -119,10 +119,10 @@ FreshClassZone>
     haveNoClassLabel.hidden = YES;
     [self.bgView addSubview:haveNoClassLabel];
     
-    classTableView = [[UITableView alloc] initWithFrame:CGRectMake(4, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH-8, SCREEN_HEIGHT - UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
+    classTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT - UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
     classTableView.delegate = self;
     classTableView.dataSource = self;
-    classTableView.backgroundColor = UIColorFromRGB(0xf1f0ec);
+    classTableView.backgroundColor = self.bgView.backgroundColor;
     classTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     classTableView.showsVerticalScrollIndicator = NO;
     [self.bgView addSubview:classTableView];
@@ -482,28 +482,33 @@ FreshClassZone>
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
-    return 26.5;
+    return 30;
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return 55;
+    return 83;
 }
 
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
-    UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 26.5)];
+    UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 30)];
     
 //    headerView.backgroundColor = UIColorFromRGB(0xf1f0ec);
-    headerView.backgroundColor = RGB(234, 234, 234, 1);
-    UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 1.5, headerView.frame.size.width, 26.5)];
-//    headerLabel.backgroundColor = UIColorFromRGB(0x4abcc2);
+    if (section % 2 == 0)
+    {
+        headerView.backgroundColor = RGB(64, 196, 110, 1);
+    }
+    else
+    {
+        headerView.backgroundColor = RGB(65, 196, 182, 1);
+    }
+    UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, headerView.frame.size.width, 30)];
     headerLabel.backgroundColor = [UIColor clearColor];
-    headerLabel.textAlignment = NSTextAlignmentCenter;
-    headerLabel.font = [UIFont systemFontOfSize:17];
-    headerLabel.textColor = TITLE_COLOR;
+//    headerLabel.textAlignment = NSTextAlignmentCenter;
+    headerLabel.font = [UIFont boldSystemFontOfSize:16];
+    headerLabel.textColor = [UIColor whiteColor];
     NSDictionary *tmpdict = [tmpArray objectAtIndex:section];
-    headerLabel.text = [NSString stringWithFormat:@"%@(%@)",[tmpdict objectForKey:@"s_name"],[schoolLevelArray objectAtIndex:[[tmpdict objectForKey:@"s_level"] integerValue]]];
-//    headerLabel.text = [NSString stringWithFormat:@"%@",[tmpdict objectForKey:@"s_name"]];
+    headerLabel.text = [NSString stringWithFormat:@"   %@(%@)",[tmpdict objectForKey:@"s_name"],[schoolLevelArray objectAtIndex:[[tmpdict objectForKey:@"s_level"] integerValue]]];
     [headerView addSubview:headerLabel];
     return headerView;
 }
@@ -519,8 +524,8 @@ FreshClassZone>
     NSDictionary *dict = [tmpArray objectAtIndex:indexPath.section];
     NSArray *array = [dict objectForKey:@"classes"];
     NSDictionary *classDict = [array objectAtIndex:indexPath.row];
-    cell.headerImageView.frame = CGRectMake(16, 7.5, 40, 40);
-    cell.headerImageView.layer.cornerRadius = 5;
+    cell.headerImageView.frame = CGRectMake(10, 10, 50, 50);
+    cell.headerImageView.layer.cornerRadius = 3;
     cell.headerImageView.clipsToBounds =YES;
     if (![[classDict objectForKey:@"img_icon"] isEqual:[NSNull null]] && [[classDict objectForKey:@"img_icon"] length] > 10)
     {
@@ -530,7 +535,7 @@ FreshClassZone>
     {
         [cell.headerImageView setImage:[UIImage imageNamed:@"headpic.jpg"]];
     }
-    cell.nameLabel.frame = CGRectMake(80, 10, SCREEN_WIDTH-95, 30);
+    cell.nameLabel.frame = CGRectMake(70, 10, SCREEN_WIDTH-95, 30);
     cell.nameLabel.text = [classDict objectForKey:@"name"];
     int num = 0;
     
@@ -572,15 +577,15 @@ FreshClassZone>
     cell.contentLable.font = [UIFont systemFontOfSize:10];
     if (num >0)
     {
-        cell.contentLable.frame = CGRectMake(cell.headerImageView.frame.size.width+cell.headerImageView.frame.origin.x-5, cell.headerImageView.frame.origin.y-5, 15, 15);
-        cell.contentLable.layer.cornerRadius = 7.5;
+        cell.contentLable.frame = CGRectMake(SCREEN_WIDTH-70 , 25, 20, 20);
+        cell.contentLable.layer.cornerRadius = 10;
         cell.contentLable.clipsToBounds = YES;
         cell.contentLable.hidden = NO;
         cell.contentLable.text = [NSString stringWithFormat:@"%d",num];
     }
     else if([classDict objectForKey:UCDIARY] || [classDict objectForKey:DIARY])
     {
-        cell.contentLable.frame = CGRectMake(cell.headerImageView.frame.size.width+cell.headerImageView.frame.origin.x-3, cell.headerImageView.frame.origin.y-3, 6, 6);
+        cell.contentLable.frame = CGRectMake(SCREEN_WIDTH-60, 32, 6, 6);
         cell.contentLable.layer.cornerRadius = 3;
         cell.contentLable.clipsToBounds = YES;
         cell.contentLable.hidden = NO;
@@ -589,11 +594,13 @@ FreshClassZone>
     {
         cell.contentLable.hidden = YES;
     }
+    cell.bgView.frame = CGRectMake(7, 6.5, SCREEN_WIDTH-14, 70);
+    cell.bgView.backgroundColor = [UIColor whiteColor];
+    cell.bgView.layer.cornerRadius = 5;
+    cell.bgView.clipsToBounds = YES;
+    cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     cell.selectionStyle = UITableViewCellSelectionStyleGray;
-    UIImageView *bgImageBG = [[UIImageView alloc] init];
-    bgImageBG.image = [UIImage imageNamed:@"cell_bg"];
-    bgImageBG.backgroundColor = [UIColor clearColor];
-    cell.backgroundView = bgImageBG;
+    cell.backgroundColor = self.bgView.backgroundColor;
     return cell;
 }
 

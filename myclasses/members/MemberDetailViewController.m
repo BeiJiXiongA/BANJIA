@@ -320,15 +320,13 @@ UIActionSheetDelegate>
             
             cell.button1.frame = CGRectMake(10, 10, 145, 40);
             [cell.button1 setTitle:@"加好友" forState:UIControlStateNormal];
-            [cell.button1 setBackgroudimage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)]];
-            [cell.button1 setlayout];
+            [cell.button1 setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
             
             [cell.button1 addTarget:self action:@selector(addFriend) forControlEvents:UIControlEventTouchUpInside];
             
             cell.button2.frame = CGRectMake(165, 10, 145, 40);
             [cell.button2 setTitle:@"聊私信" forState:UIControlStateNormal];
-            [cell.button2 setBackgroudimage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)]];
-            [cell.button2 setlayout];
+            [cell.button2 setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
             
             if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fname":teacherName,@"checked":@"1"} andTableName:FRIENDSTABLE] count] > 0)
             {

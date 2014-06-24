@@ -196,6 +196,7 @@ EGORefreshTableDelegate>
     AddNotificationViewController *addNotificationViewController = [[AddNotificationViewController alloc] init];
     addNotificationViewController.classID = classID;
     addNotificationViewController.updel = self;
+    addNotificationViewController.fromClass = YES;
     [[XDTabViewController sharedTabViewController].navigationController pushViewController:addNotificationViewController animated:YES];
 }
 
@@ -238,7 +239,7 @@ EGORefreshTableDelegate>
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
     UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 35)];
-    headerView.backgroundColor = [UIColor clearColor];
+    headerView.backgroundColor = UIColorFromRGB(0xf1f0ec);
     
     UIView *dotView = [[UIView alloc] initWithFrame:CGRectMake(14, 11.5, 12, 12)];
     dotView.backgroundColor = [UIColor redColor];
