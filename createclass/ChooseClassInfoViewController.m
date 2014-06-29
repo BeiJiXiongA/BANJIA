@@ -54,11 +54,11 @@
     label.text = [NSString stringWithFormat:@"%@，您希望加入%@-%@，您的身份是？",[Tools user_name],schoolName,className];
     [self.bgView addSubview:label];
     
-    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
+    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
     
     UIButton *studentButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [studentButton setTitle:@"我是老师" forState:UIControlStateNormal];
-    studentButton.frame = CGRectMake(39, UI_NAVIGATION_BAR_HEIGHT+170, SCREEN_WIDTH-78, 33);
+    studentButton.frame = CGRectMake(39, UI_NAVIGATION_BAR_HEIGHT+170, SCREEN_WIDTH-78, 42);
     [studentButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     studentButton.titleLabel.font = [UIFont systemFontOfSize:16];
     [studentButton addTarget:self action:@selector(applyForJoinClass:) forControlEvents:UIControlEventTouchUpInside];
@@ -67,7 +67,7 @@
     
     UIButton *parentButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [parentButton setTitle:@"我是家长" forState:UIControlStateNormal];
-    parentButton.frame = CGRectMake(39, UI_NAVIGATION_BAR_HEIGHT+207, SCREEN_WIDTH-78, 33);
+    parentButton.frame = CGRectMake(39, UI_NAVIGATION_BAR_HEIGHT+216, SCREEN_WIDTH-78, 42);
     parentButton.titleLabel.font = [UIFont systemFontOfSize:16];
     [parentButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     [parentButton addTarget:self action:@selector(applyForJoinClass:) forControlEvents:UIControlEventTouchUpInside];
@@ -76,7 +76,7 @@
     
     UIButton *teacherButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [teacherButton setTitle:@"我是学生" forState:UIControlStateNormal];
-    teacherButton.frame = CGRectMake(39, UI_NAVIGATION_BAR_HEIGHT+247, SCREEN_WIDTH-78, 33);
+    teacherButton.frame = CGRectMake(39, UI_NAVIGATION_BAR_HEIGHT+262, SCREEN_WIDTH-78, 42);
     [teacherButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     teacherButton.titleLabel.font = [UIFont systemFontOfSize:16];
     [teacherButton addTarget:self action:@selector(applyForJoinClass:) forControlEvents:UIControlEventTouchUpInside];

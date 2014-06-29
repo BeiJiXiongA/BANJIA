@@ -38,8 +38,8 @@
     self.view.backgroundColor = [UIColor blackColor];
     
     UIButton *inviteButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [inviteButton setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
     [inviteButton setTitle:@"保存" forState:UIControlStateNormal];
+    [inviteButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     inviteButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
     [inviteButton addTarget:self action:@selector(setClassInfo) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:inviteButton];
@@ -49,9 +49,12 @@
     {
         self.titleLabel.text = @"设置班级名称";
         
-        nameTextField = [[MyTextField alloc] initWithFrame:CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT+10, SCREEN_WIDTH - 20, 40)];
+        nameTextField = [[MyTextField alloc] initWithFrame:CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT+10, SCREEN_WIDTH - 20, 45)];
         nameTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
         nameTextField.textColor = TITLE_COLOR;
+        nameTextField.background = nil;
+        
+        nameTextField.backgroundColor = [UIColor whiteColor];
         nameTextField.font = [UIFont systemFontOfSize:16];
         nameTextField.text = infoStr;
         [self.bgView addSubview:nameTextField];
@@ -127,7 +130,7 @@
         if ([textView.text length] > 50)
         {
             textView.text = [textView.text substringToIndex:50];
-            [Tools showAlertView:@"请把班级介绍字数限制在50个字符内" delegateViewController:nil];
+            [Tools showAlertView:@"请把班级介绍字数控制在50个字符内" delegateViewController:nil];
         }
         countLabel.text = [NSString stringWithFormat:@"%d/50",[textView.text length]];
     }

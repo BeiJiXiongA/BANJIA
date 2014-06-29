@@ -287,8 +287,7 @@
         KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:home];
         [self.sideMenuController setContentController:homeNav animted:NO];
     }
-    else
-    if (button.tag == 1001)
+    else if (button.tag == 1001)
     {
         MyClassesViewController *myClasses = [[MyClassesViewController alloc] init];
         KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClasses];

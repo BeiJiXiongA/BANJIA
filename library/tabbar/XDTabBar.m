@@ -195,7 +195,7 @@
         UIImage* rawButtonImage = [delegate imageFor:self atIndex:itemIndex];
         button0 = [UIButton buttonWithType:UIButtonTypeCustom];
         
-        button0.frame = CGRectMake(0.0, 10, rawButtonImage.size.width, rawButtonImage.size.height);
+        button0.frame = CGRectMake( 0, 0, width, UI_TAB_BAR_HEIGHT);
         UIImage* buttonPressedImage = [delegate hightlightedImageFor:self
                                                              atIndex:itemIndex];
         
@@ -229,7 +229,7 @@
         UIImage* rawButtonImage = [delegate imageFor:self atIndex:itemIndex];
         button1 = [UIButton buttonWithType:UIButtonTypeCustom];
         
-        button1.frame = CGRectMake(0.0, 10, rawButtonImage.size.width, rawButtonImage.size.height);
+        button1.frame = CGRectMake( 0, 0, width, UI_TAB_BAR_HEIGHT);
         UIImage* buttonPressedImage = [delegate hightlightedImageFor:self
                                                              atIndex:itemIndex];
         
@@ -266,7 +266,7 @@
         UIImage* rawButtonImage = [delegate imageFor:self atIndex:itemIndex];
         button2 = [UIButton buttonWithType:UIButtonTypeCustom];
         
-        button2.frame = CGRectMake(0.0, 10, rawButtonImage.size.width, rawButtonImage.size.height);
+        button2.frame = CGRectMake( 0, 0, width, UI_TAB_BAR_HEIGHT);
         UIImage* buttonPressedImage = [delegate hightlightedImageFor:self
                                                              atIndex:itemIndex];
         
@@ -301,7 +301,7 @@
         UIImage* rawButtonImage = [delegate imageFor:self atIndex:itemIndex];
         button3 = [UIButton buttonWithType:UIButtonTypeCustom];
         
-        button3.frame = CGRectMake(0.0, 10, rawButtonImage.size.width, rawButtonImage.size.height);
+        button3.frame = CGRectMake( 0, 0, width, UI_TAB_BAR_HEIGHT);
         UIImage* buttonPressedImage = [delegate hightlightedImageFor:self
                                                              atIndex:itemIndex];
         

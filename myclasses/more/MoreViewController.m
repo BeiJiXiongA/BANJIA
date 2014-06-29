@@ -72,26 +72,32 @@ UIActionSheetDelegate>
     DDLOG(@"button index %d",buttonIndex);
     if (actionSheet.tag == ParentSendDiaryTag)
     {
-        [self settingValue:[NSString stringWithFormat:@"%d",buttonIndex] forKay:ParentSendDiary];
+        if (buttonIndex == 0 || buttonIndex == 1 || buttonIndex == 2)
+        {
+            [self settingValue:[NSString stringWithFormat:@"%d",buttonIndex] forKay:ParentSendDiary];
+        }
     }
     else if(actionSheet.tag == StudentSendDiaryTag)
     {
-        [self settingValue:[NSString stringWithFormat:@"%d",buttonIndex] forKay:ParentSendDiary];
+        if (buttonIndex == 0 || buttonIndex == 1 || buttonIndex == 2)
+        {
+            [self settingValue:[NSString stringWithFormat:@"%d",buttonIndex] forKay:StudentSendDiary];
+        }
     }
     else if (actionSheet.tag == StudentAccessTimeTag)
     {
-        if (buttonIndex == 0)
+        if (buttonIndex == 0 || buttonIndex == 1 || buttonIndex == 2)
         {
-            [self settingValue:@"1" forKay:ParentSendDiary];
-        }
-        else if (buttonIndex == 1)
-        {
-            [self settingValue:@"1" forKay:ParentSendDiary];
+            [self settingValue:[NSString stringWithFormat:@"%d",buttonIndex] forKay:StudentVisiteTime];
         }
     }
     else if(actionSheet.tag == VisitorAccessTimeTag)
     {
-        [self settingValue:[NSString stringWithFormat:@"%d",buttonIndex] forKay:ParentSendDiary];
+        if (buttonIndex == 0 || buttonIndex == 1)
+        {
+            [self settingValue:[NSString stringWithFormat:@"%d",buttonIndex] forKay:VisitorAccess];
+        }
+        
     }
 }
 
@@ -616,7 +622,7 @@ UIActionSheetDelegate>
         }
         else if(indexPath.row == 3)
         {
-            UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"学生访问空间时间" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"全时段",@"晚上17点后",@"晚上19点后", nil];
+            UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"学生访问空间时间" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"晚上17点后",@"全时段",@"晚上19点后", nil];
             ac.tag = StudentAccessTimeTag;
             [ac showInView:classSettingTableView];
         }

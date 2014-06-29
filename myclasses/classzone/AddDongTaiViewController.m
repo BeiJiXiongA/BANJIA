@@ -20,6 +20,8 @@
 #import "MJPhotoBrowser.h"
 #import "MJPhoto.h"
 
+#import "ClassesListViewController.h"
+
 #define NormalImageScale  1
 #define BigImageScale    2
 
@@ -48,7 +50,8 @@ UITextViewDelegate,
 UITextFieldDelegate,
 CLLocationManagerDelegate,
 ASIProgressDelegate,
-UIActionSheetDelegate
+UIActionSheetDelegate,
+SelectClasses
 >
 {
     AGImagePickerController *imagePickerController;
@@ -148,7 +151,7 @@ int count = 0;
             name = placemark.name;
             
                 [UIView animateWithDuration:0.2 animations:^{
-                    locationTextView.frame = CGRectMake(locationButton.frame.size.width+locationButton.frame.origin.x, locationButton.frame.origin.y-3, [name length]*14>280?280:([name length]*14),35);
+                    locationTextView.frame = CGRectMake(locationButton.frame.size.width+locationButton.frame.origin.x, locationButton.frame.origin.y-3, [name length]*14>260?260:([name length]*14),35);
                 }];
                 locationTextView.text = name;
                 latitude = newLocation.coordinate.latitude;
@@ -247,8 +250,8 @@ int count = 0;
     }
     
     keyBoardHeight = 0.0f;
-    imageW = 70;
-    imageH = 70;
+    imageW = 67.5;
+    imageH = 67.5;
     
     enableLocation = YES;
     
@@ -273,73 +276,101 @@ int count = 0;
     mainScrollView.userInteractionEnabled = YES;
     [mainScrollView addGestureRecognizer:scTap];
     
-    inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(10, 2, 10, 2)];
+//    inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(10, 2, 10, 2)];
     contentImageView = [[UIImageView alloc] init];
-    contentImageView.frame = CGRectMake(4, 7.5, SCREEN_WIDTH - 8,150);
-    [contentImageView setImage:inputImage];
+    contentImageView.frame = CGRectMake(9.5, 8, SCREEN_WIDTH - 19,71);
+    contentImageView.layer.cornerRadius = 8;
+    contentImageView.backgroundColor = [UIColor whiteColor];
+    contentImageView.layer.borderColor = TIMECOLOR.CGColor;
+    contentImageView.layer.borderWidth = 0.3;
+//    [contentImageView setImage:inputImage];
     [mainScrollView addSubview:contentImageView];
     
     placeHolderLabel = [[UITextView alloc] init];
-    placeHolderLabel.text = @"请填写要发布的内容";
+    placeHolderLabel.text = @"说点什么吧...";
     placeHolderLabel.backgroundColor = [UIColor clearColor];
     placeHolderLabel.textColor = [UIColor lightGrayColor];
     placeHolderLabel.font = [UIFont systemFontOfSize:16];
     [mainScrollView addSubview:placeHolderLabel];
     
-    contentTextView = [[UITextView alloc] initWithFrame:CGRectMake(8, 17, SCREEN_WIDTH -18, 110)];
+    contentTextView = [[UITextView alloc] initWithFrame:CGRectMake(13, 12, SCREEN_WIDTH -26, 45)];
     contentTextView.delegate = self;
     contentTextView.tag = ContentTextViewTag;
     contentTextView.backgroundColor = [UIColor clearColor];
     contentTextView.font = [UIFont systemFontOfSize:15];
     [mainScrollView addSubview:contentTextView];
     
+    
+    imageScrollView = [[UIScrollView alloc] init];
+    imageScrollView.frame = CGRectMake(9.5, contentImageView.frame.size.height+contentImageView.frame.origin.y+12, SCREEN_WIDTH-19, imageH+23);
+    imageScrollView.backgroundColor = [UIColor whiteColor];
+    imageScrollView.layer.borderColor = TIMECOLOR.CGColor;
+    imageScrollView.layer.borderWidth = 0.3;
+    imageScrollView.clipsToBounds = YES;
+    imageScrollView.layer.cornerRadius = 8;
+    imageScrollView.contentSize = CGSizeMake(SCREEN_WIDTH-8, 80);
+    [mainScrollView addSubview:imageScrollView];
+    
     imageTipLabel = [UIButton buttonWithType:UIButtonTypeCustom];
-    [imageTipLabel setImage:[UIImage imageNamed:@"addimage"] forState:UIControlStateNormal];
-    imageTipLabel.frame = CGRectMake(15, 10+contentImageView.frame.size.height+contentImageView.frame.origin.y, 70, 70);
-    //    [imageTipLabel setTitle:@"添加图片" forState:UIControlStateNormal];
+    [imageTipLabel setImage:[UIImage imageNamed:@"diary_add_image"] forState:UIControlStateNormal];
+    imageTipLabel.frame = CGRectMake(19, imageScrollView.frame.origin.y+11.5, imageW, imageW);
     imageTipLabel.backgroundColor = [UIColor clearColor];
     [imageTipLabel addTarget:self action:@selector(selectPhoto) forControlEvents:UIControlEventTouchUpInside];
     [imageTipLabel setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     imageTipLabel.titleLabel.font = [UIFont systemFontOfSize:16];
     
     addImageButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    //    addImageButton.backgroundColor = [UIColor greenColor];
-    addImageButton.frame = CGRectMake(imageTipLabel.frame.origin.x+imageTipLabel.frame.size.width + 10, imageTipLabel.frame.origin.y+imageTipLabel.frame.size.height/2-15, 80, 30);
+    addImageButton.frame = CGRectMake(imageTipLabel.frame.origin.x+imageTipLabel.frame.size.width + 10, imageTipLabel.frame.origin.y, 80, imageH);
     [addImageButton setTitleColor:[UIColor lightGrayColor] forState:UIControlStateNormal];
-    [addImageButton setTitle: @"添加图片" forState:UIControlStateNormal];
+    addImageButton.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
+    [addImageButton setTitle: @"添加图片\n至多12张" forState:UIControlStateNormal];
+    addImageButton.titleLabel.numberOfLines = 2;
+    addImageButton.titleLabel.lineBreakMode = NSLineBreakByWordWrapping;
     [addImageButton addTarget:self action:@selector(selectPhoto) forControlEvents:UIControlEventTouchUpInside];
     placeHolderLabel.frame = contentTextView.frame;
-    
-    imageScrollView = [[UIScrollView alloc] init];
-    imageScrollView.frame = CGRectMake(4, 7.5+contentImageView.frame.size.height+contentImageView.frame.origin.y, SCREEN_WIDTH-8, 80);
-    imageScrollView.backgroundColor = [UIColor clearColor];
-    imageScrollView.contentSize = CGSizeMake(SCREEN_WIDTH-8, 80);
-    [mainScrollView addSubview:imageScrollView];
     
     [mainScrollView addSubview:imageTipLabel];
     [mainScrollView addSubview:addImageButton];
     placeHolderLabel.frame = contentTextView.frame;
+    
+    
+    lateImageView = [[UIView alloc] init];
+    lateImageView.frame = CGRectMake(9.5, imageScrollView.frame.size.height + imageScrollView.frame.origin.y+10.5, SCREEN_WIDTH-19, 125.5);
+    lateImageView.backgroundColor = [UIColor whiteColor];
+    lateImageView.layer.cornerRadius = 8;
+    lateImageView.layer.borderWidth = 0.3;
+    lateImageView.layer.borderColor = TIMECOLOR.CGColor;
+    [mainScrollView addSubview:lateImageView];
+    
+    latelyLabel = [[UILabel alloc] init];
+    latelyLabel.text = @"你可能想上传的照片";
+    latelyLabel.backgroundColor = [UIColor clearColor];
+    latelyLabel.frame = CGRectMake(lateImageView.frame.origin.x+10, lateImageView.frame.origin.y+6, 17*[latelyLabel.text length], 20);
+    latelyLabel.font = [UIFont systemFontOfSize:17];
+    latelyLabel.textColor = UIColorFromRGB(0x727171);
+    [mainScrollView addSubview:latelyLabel];
+
     
 //    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
     
     //位置
     locationEditing = NO;
     locationButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    locationButton.frame = CGRectMake(imageScrollView.frame.origin.x, imageScrollView.frame.origin.y+imageScrollView.frame.size.height+40, 30, 30);
+    locationButton.frame = CGRectMake(lateImageView.frame.origin.x, lateImageView.frame.origin.y+lateImageView.frame.size.height+9.5, 30, 30);
 //    [locationButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     [locationButton addTarget:self action:@selector(switchLocation) forControlEvents:UIControlEventTouchUpInside];
     [locationButton setImage:[UIImage imageNamed:@"icon_location"] forState:UIControlStateNormal];
     [mainScrollView addSubview:locationButton];
     
     locationTextView = [[MyTextField alloc] init];
-    locationTextView.frame = CGRectMake(locationButton.frame.size.width+locationButton.frame.origin.x, locationButton.frame.origin.y, 0,35);
+    locationTextView.frame = CGRectMake(locationButton.frame.size.width+locationButton.frame.origin.x, locationButton.frame.origin.y, 0,45);
     locationTextView.font = [UIFont systemFontOfSize:14];
-    locationTextView.backgroundColor = RGB(222, 222, 222, 1);
+    locationTextView.backgroundColor = [UIColor whiteColor];
     locationTextView.layer.cornerRadius = 3;
     locationTextView.clipsToBounds = YES;
     locationTextView.background = nil;
     locationTextView.delegate = self;
-    locationTextView.clearButtonMode = UITextFieldViewModeWhileEditing;
+    locationTextView.clearButtonMode = UITextFieldViewModeAlways;
     locationTextView.tag = LocationTextViewTag;
     [mainScrollView addSubview:locationTextView];
     
@@ -349,21 +380,8 @@ int count = 0;
     emitButton.backgroundColor = [UIColor clearColor];
     [emitButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [emitButton addTarget:self action:@selector(emitClick) forControlEvents:UIControlEventTouchUpInside];
-    [emitButton setTitle:@"确认" forState:UIControlStateNormal];
+    [emitButton setTitle:@"发布" forState:UIControlStateNormal];
     [self.navigationBarView addSubview:emitButton];
-    
-    lateImageView = [[UIView alloc] init];
-    lateImageView.frame = CGRectMake(4, locationButton.frame.size.height+locationButton.frame.origin.y+10, SCREEN_WIDTH-8, 120);
-    lateImageView.backgroundColor = [UIColor clearColor];
-    [mainScrollView addSubview:lateImageView];
-    
-    latelyLabel = [[UILabel alloc] init];
-    latelyLabel.text = @"你可能想上传的照片";
-    latelyLabel.backgroundColor = [UIColor clearColor];
-    latelyLabel.frame = CGRectMake(lateImageView.frame.origin.x+10, lateImageView.frame.origin.y+3, 17*[latelyLabel.text length], 20);
-    latelyLabel.font = [UIFont systemFontOfSize:17];
-    latelyLabel.textColor = UIColorFromRGB(0x727171);
-    [mainScrollView addSubview:latelyLabel];
     
     mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, lateImageView.frame.size.height+lateImageView.frame.origin.y+20);
     
@@ -581,7 +599,7 @@ int count = 0;
                 [latelyFullImageArray addObject:fullScreenImage];
                 
                 
-                UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(10+(70+5)*i, 35, 70, 70)];
+                UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(10+(67.5+5)*i, 37, 67.5, 67.5)];
                 imageView.layer.cornerRadius = 5;
                 imageView.clipsToBounds = YES;
                 imageView.tag = ImageTag+i;
@@ -657,7 +675,7 @@ int count = 0;
     }
     else
     {
-        [addImageButton setTitle:@"添加图片" forState:UIControlStateNormal];
+        [addImageButton setTitle:@"添加图片\n至多12张" forState:UIControlStateNormal];
         addImageButton.enabled = YES;
     }
     if (([thunImageArray count]+1)%4 == 0)
@@ -671,8 +689,8 @@ int count = 0;
     for (int i=0; i<[thunImageArray count]; ++i)
     {
         UIImageView *imageView = [[UIImageView alloc] init];
-//        imageView.layer.contentsGravity = kCAGravityResizeAspectFill;
-        imageView.frame = CGRectMake(10+(imageW+5)*(i%4), 5+(imageH+5)*(i/4), imageW, imageH);
+        imageView.layer.contentsGravity = kCAGravityResizeAspectFill;
+        imageView.frame = CGRectMake(10+(imageW+5)*(i%4), 11.5+(imageH+5)*(i/4), imageW, imageH);
         [imageView setImage:[normalPhotosArray objectAtIndex:i]];
         imageView.tag = ImageTag + i;
         imageView.layer.cornerRadius = 5;
@@ -688,21 +706,24 @@ int count = 0;
     }
     
     
-    if (row<=3)
+    if (row <= 3)
     {
-        imageScrollView.frame = CGRectMake(4, 7.5+contentImageView.frame.size.height+contentImageView.frame.origin.y, SCREEN_WIDTH-8, row>1?(10+(imageH+5)*row):80);
+        imageScrollView.frame = CGRectMake(9.5, 7.5+contentImageView.frame.size.height+contentImageView.frame.origin.y, SCREEN_WIDTH-19, row>1?(10+(imageH+5)*row):(imageW+23));
     }
     else
     {
-        imageScrollView.frame = CGRectMake(4, 7.5+contentImageView.frame.size.height+contentImageView.frame.origin.y, SCREEN_WIDTH-8, (10+(imageH+5)*3));
+        imageScrollView.frame = CGRectMake(9.5, 7.5+contentImageView.frame.size.height+contentImageView.frame.origin.y, SCREEN_WIDTH-19, (10+(imageH+5)*3));
     }
     
     [UIView animateWithDuration:0.2 animations:^{
-        imageTipLabel.frame = CGRectMake(15+(imageW+5)*([thunImageArray count]%4), 13+(imageH+5)*([thunImageArray count]/4)+contentImageView.frame.size.height+contentImageView.frame.origin.y, imageW, imageH);
-        locationButton.frame = CGRectMake(imageScrollView.frame.origin.x, imageScrollView.frame.origin.y+imageScrollView.frame.size.height+40, 40, 40);
-        locationTextView.frame = CGRectMake(locationButton.frame.size.width+locationButton.frame.origin.x, locationButton.frame.origin.y-3, SCREEN_WIDTH-locationButton.frame.size.width-locationButton.frame.origin.x*2, 35);
-        lateImageView.frame = CGRectMake(4, locationButton.frame.size.height+locationButton.frame.origin.y+10, SCREEN_WIDTH-8, 120);
-        latelyLabel.frame = CGRectMake(lateImageView.frame.origin.x+10, lateImageView.frame.origin.y+3, 17*[latelyLabel.text length], 20);
+        imageTipLabel.frame = CGRectMake(19+(imageW+5)*([thunImageArray count]%4), 11.5+(imageH+5)*([thunImageArray count]/4)+imageScrollView.frame.origin.y, imageW, imageH);
+        addImageButton.frame = CGRectMake(imageTipLabel.frame.origin.x+imageTipLabel.frame.size.width + 10, imageTipLabel.frame.origin.y, 80, imageH);
+        lateImageView.frame = CGRectMake(9.5, imageScrollView.frame.size.height+imageScrollView.frame.origin.y+10.5, SCREEN_WIDTH-19, 125.5);
+        latelyLabel.frame = CGRectMake(lateImageView.frame.origin.x+10, lateImageView.frame.origin.y+6, 17*[latelyLabel.text length], 20);
+        
+        locationButton.frame = CGRectMake(locationButton.frame.origin.x, lateImageView.frame.origin.y+lateImageView.frame.size.height+9.5, 40, 40);
+        locationTextView.frame = CGRectMake(locationButton.frame.size.width+locationButton.frame.origin.x, locationButton.frame.origin.y, locationTextView.frame.size.width, 35);
+        
         mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, lateImageView.frame.size.height+lateImageView.frame.origin.y+20);
     }];
     
@@ -755,13 +776,21 @@ int count = 0;
     [contentTextView resignFirstResponder];
     if (!fromCLass)
     {
-        [Tools showAlertView:@"请选择班级" delegateViewController:nil];
+        ClassesListViewController *classelistVC = [[ClassesListViewController alloc] init];
+        classelistVC.selectClassdel = self;
+        [self.navigationController pushViewController:classelistVC animated:YES];
         return ;
     }
-    [self submitDongTai];
+    [self submitDongTai:classID];
 }
 
--(void)submitDongTai
+-(void)selectClasses:(NSArray *)selectClassesArray
+{
+    DDLOG(@"selected classes %@",selectClassesArray);
+    [self submitDongTai:[selectClassesArray firstObject]];
+}
+
+-(void)submitDongTai:(NSString *)classid
 {
     if ([contentTextView.text length] <= 0 && [normalPhotosArray count] <= 0)
     {
@@ -776,7 +805,7 @@ int count = 0;
         [request setRequestMethod:@"POST"];
         [request setPostValue:[Tools client_token] forKey:@"token"];
         [request setPostValue:[Tools user_id] forKey:@"u_id"];
-        [request setPostValue:classID forKey:@"c_id"];
+        [request setPostValue:classid forKey:@"c_id"];
         [request setPostValue:contentTextView.text forKey:@"content"];
         [request setTimeOutSeconds:60];
         
@@ -815,10 +844,10 @@ int count = 0;
                 {
                     [self.classZoneDelegate haveAddDonfTai:YES];
                     [Tools showTips:@"发表成功！" toView:self.bgView];
+                    [self unShowSelfViewController];
                     count = 0;
                 }
                 emitButton.enabled = YES;
-                [self.navigationController popViewControllerAnimated:YES];
             }
             else
             {
@@ -877,7 +906,7 @@ int count = 0;
     if(textField.tag == LocationTextViewTag)
     {
         [UIView animateWithDuration:0.25 animations:^{
-            mainScrollView.contentOffset = CGPointMake(0,keyBoardHeight+80);
+            self.bgView.center = CGPointMake(CENTER_POINT.x, CENTER_POINT.y-100-(([normalPhotosArray count]+1)/4)*imageH);
             
         }completion:^(BOOL finished) {
         }];
@@ -904,7 +933,7 @@ int count = 0;
         }
         else if([textView.text length] == 0)
         {
-            placeHolderLabel.text = @"请填写要发布的内容";
+            placeHolderLabel.text = @"说点什么吧...";
         }
         if([textView.text length] > 140)
         {
@@ -931,13 +960,12 @@ int count = 0;
 
 - (void)keyBoardWillHide:(NSNotification *)aNotification
 {
-//    [UIView animateWithDuration:0.25 animations:^{
-//        mainScrollView.contentOffset = CGPointMake(0,0);
-//        keyBoardHeight = 0;
-//        mainScrollView.scrollEnabled = YES;
-//    }completion:^(BOOL finished) {
-//        locationEditing = NO;
-//    }];
+    [UIView animateWithDuration:0.25 animations:^{
+        self.bgView.center = CENTER_POINT;
+        mainScrollView.contentOffset = CGPointZero;
+    }completion:^(BOOL finished) {
+        locationEditing = NO;
+    }];
 }
 
 - (void)keyboardWillShow:(NSNotification *)aNotification

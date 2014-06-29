@@ -361,8 +361,7 @@ UIActionSheetDelegate>
                       @"d_imei":[Tools device_uid],
                       @"c_os":[Tools device_os],
                       @"d_type":@"iOS",
-                      @"p_cid":@"123",
-                      @"p_uid":userStr,
+                      @"registrationID":userStr,
                       @"r_name":nameTextfield.text,
                       @"sex":sex,
                       @"reg":@"1"

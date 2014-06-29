@@ -23,7 +23,7 @@
 #define MSGBUTTONTAG  3000
 #define KICKALTAG    4000
 
-#define BGIMAGEHEIGHT  120
+#define BGIMAGEHEIGHT  150
 
 @interface ParentsDetailViewController ()<
 UIAlertViewDelegate,
@@ -226,9 +226,10 @@ UIActionSheetDelegate>
     {
         cell.headerImageView.hidden = NO;
         cell.bgImageView.hidden = NO;
+        cell.sexureImageView.hidden = NO;
         
-        cell.bgImageView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 120);
-        [cell.bgImageView setImage:[UIImage imageNamed:@"toppic.jpg"]];
+        cell.bgImageView.frame = CGRectMake(0, 0, SCREEN_WIDTH, BGIMAGEHEIGHT);
+        [cell.bgImageView setImage:[UIImage imageNamed:@"toppic"]];
         
         cell.headerImageView.frame = CGRectMake(15, BGIMAGEHEIGHT-DetailHeaderHeight-15, DetailHeaderHeight, DetailHeaderHeight);
         if ([headerImageUrl isEqualToString:HEADERICON])
@@ -245,16 +246,19 @@ UIActionSheetDelegate>
         cell.headerImageView.layer.borderColor = [UIColor whiteColor].CGColor;
         cell.headerImageView.layer.borderWidth = 2;
         
-        cell.nameLabel.frame = CGRectMake(DetailHeaderHeight+30, 60, 100, 20);
+        cell.nameLabel.frame = CGRectMake(DetailHeaderHeight+30, cell.headerImageView.frame.origin.y+10, [parentName length]*18, 20);
         cell.nameLabel.text = parentName;
         cell.nameLabel.shadowColor = TITLE_COLOR;
         cell.nameLabel.shadowOffset = CGSizeMake(0.5, 0.5);
         cell.nameLabel.font = [UIFont boldSystemFontOfSize:18];
         
+       cell.sexureImageView.frame = CGRectMake(cell.nameLabel.frame.origin.x+cell.nameLabel.frame.size.width+10, cell.nameLabel.frame.origin.y, 20, 20);
+        [cell.sexureImageView setImage:[UIImage imageNamed:sexureimage]];
+        
         NSMutableString *titlestr = [[NSMutableString alloc] initWithString:title];
         [titlestr replaceCharactersInRange:[title rangeOfString:@"."] withString:@"的"];
         
-        cell.contentLabel.frame = CGRectMake(DetailHeaderHeight+30, 80, 100, 20);
+        cell.contentLabel.frame = CGRectMake(DetailHeaderHeight+30, cell.headerImageView.frame.origin.y+35, 100, 20);
         cell.contentLabel.text = titlestr;
         cell.contentLabel.shadowOffset = CGSizeMake(0.5, 0.5);
         cell.contentLabel.shadowColor = TITLE_COLOR;
@@ -301,20 +305,27 @@ UIActionSheetDelegate>
                 cell.button2.hidden = NO;
             }
             
-            cell.button1.frame = CGRectMake(10, 10, 145, 40);
-            [cell.button1 setTitle:@"加好友" forState:UIControlStateNormal];
+            cell.button1.frame = CGRectMake(10, 10, 145, 43.5);
+            [cell.button1 setTitle:ADDFRIEND forState:UIControlStateNormal];
             [cell.button1 setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
             
             [cell.button1 addTarget:self action:@selector(addFriend) forControlEvents:UIControlEventTouchUpInside];
             
-            cell.button2.frame = CGRectMake(165, 10, 145, 40);
-            [cell.button2 setTitle:@"聊私信" forState:UIControlStateNormal];
+            cell.button2.frame = CGRectMake(165, 10, 145, 43.5);
+            [cell.button2 setTitle:CHATTO forState:UIControlStateNormal];
             [cell.button2 setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+            
+            cell.button1.iconImageView.frame = CGRectMake(ALEFT, ATOP, CHATW, CHATH);
+            [cell.button1.iconImageView setImage:[UIImage imageNamed:@"add_friend"]];
+            
+            cell.button2.iconImageView.frame = CGRectMake(CLEFT, CTOP, ADDFRIW, ADDFRIH);
+            [cell.button2.iconImageView setImage:[UIImage imageNamed:@"chatto"]];
+
             
             if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fname":parentName,@"checked":@"1"} andTableName:FRIENDSTABLE] count] > 0)
             {
                 cell.button1.hidden = YES;
-                cell.button2.frame = CGRectMake((SCREEN_WIDTH-150)/2, 10, 150, 40);
+                cell.button2.frame = CGRectMake((SCREEN_WIDTH-150)/2, 10, 145, 43.5);
             }
             
             [cell.button2 addTarget:self action:@selector(toChat) forControlEvents:UIControlEventTouchUpInside];
@@ -385,7 +396,7 @@ UIActionSheetDelegate>
     }
     else
     {
-        [self.navigationController popViewControllerAnimated:YES];
+//        [self.navigationController popViewControllerAnimated:YES];
     }
 }
 -(void)excludeUser

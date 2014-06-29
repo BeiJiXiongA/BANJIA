@@ -83,6 +83,8 @@
 #define SIGNOUTCLASS    @"/classes/mbSignoutClass" //u_id,c_id,role
 #define SETCLASSIMAGE    @"/classes/mbUpdateClassImg"
 #define SETCLASSINFO     @"/classes/mbSetClassInfo"
+#define NEWCEATECLASS      @"/v11/classes/mbaddclass"
+#define SEARCHCLASS     @"/classes/mbSearchClass"
 
 #pragma mark - diaries
 #define ADDDIARY        @"/Diaries/mbAddDiaries"
@@ -106,7 +108,7 @@
 #define DELETENOTICE      @"/notices/mbDelNotice"
 
 #pragma mark - chat
-#define CREATE_CHAT_MSG  @"/chats/mbChat"
+#define CREATE_CHAT_MSG  @"/v11/chats/mbChat"
 #define GETCHATLOG       @"/chats/mbGetChatLog"
 #define GETCHATLIST     @"/chats/mbNewChatList"
 #define LASTVIEWTIME    @"/chats/mbLastViewTime"
@@ -116,7 +118,7 @@
 #pragma mark - mbnewchat
 #define MB_NEWCHAT     @"/chats/mbNewChat"
 #define MB_NEWCLASS    @"/classes/mbNewClass"
-#define MB_NEWVERSION   @"/debugs/mbGetNew"  //type:iOS  build:0007
+#define MB_NEWVERSION   @"/debugs/mbGetNew"
 
 #pragma mark - debugs
 #define MB_ADVISE     @"/debugs/mbAdvise"  //'u_id','content'

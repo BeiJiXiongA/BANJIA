@@ -150,7 +150,7 @@ EGORefreshTableDelegate>
     month = @"";
     [self getNotifications];
 }
-
+//@""
 -(void)egoRefreshTableDidTriggerRefresh:(EGORefreshPos)aRefreshPos
 {
     [self getMoreNotifications];
@@ -189,6 +189,8 @@ EGORefreshTableDelegate>
 -(void)backClick
 {
     [[XDTabViewController sharedTabViewController] dismissViewControllerAnimated:YES completion:nil];
+    [[NSUserDefaults standardUserDefaults] setObject:NOTFROMCLASS forKey:FROMWHERE];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 -(void)addClick
@@ -202,35 +204,27 @@ EGORefreshTableDelegate>
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return 2;
+    return 3;
 }
 
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
-    if ([readedArray count] > 0 && [unreadedArray count] > 0)
+    if (section == 0)
     {
-        return 35;
+        return 0;
     }
-    else if ([readedArray count] > 0 && [unreadedArray count] == 0)
+    else if (section == 1)
     {
-        if (section == 0)
-        {
-            return 0;
-        }
-        else if(section == 1)
+        if ([unreadedArray count] > 0)
         {
             return 35;
         }
     }
-    else if ([unreadedArray count] >0 && [readedArray count] == 0)
+    else if(section == 2)
     {
-        if (section == 0)
+        if ([readedArray count] > 0)
         {
             return 35;
-        }
-        else if(section == 1)
-        {
-            return 0;
         }
     }
     return 0;
@@ -249,20 +243,20 @@ EGORefreshTableDelegate>
     headerLabel.font = [UIFont systemFontOfSize:18];
     headerLabel.textColor = TITLE_COLOR;
     [headerView addSubview:headerLabel];
-    if (section == 0)
+    if (section == 1)
     {
         if ([unreadedArray count] > 0)
         {
             headerLabel.text = @"   未读通知";
-            headerLabel.frame = CGRectMake(13, 2.5, headerView.frame.size.width, 30);
-            dotView.layer.cornerRadius = 6;
-            dotView.clipsToBounds = YES;
-            [headerView addSubview:dotView];
+            headerLabel.frame = CGRectMake(0, 2.5, headerView.frame.size.width, 30);
+//            dotView.layer.cornerRadius = 6;
+//            dotView.clipsToBounds = YES;
+//            [headerView addSubview:dotView];
             return headerView;
         }
     }
     
-    if (section == 1)
+    if (section == 2)
     {
         if ([readedArray count] > 0)
         {
@@ -278,12 +272,16 @@ EGORefreshTableDelegate>
 {
     if (section == 0)
     {
+        return 2;
+    }
+    else if (section == 1)
+    {
         if ([unreadedArray count] > 0)
         {
             return [unreadedArray count];
         }
     }
-    else if (section == 1)
+    else if (section ==2)
     {
         if ([readedArray count] > 0)
         {
@@ -295,7 +293,27 @@ EGORefreshTableDelegate>
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return 105;
+    if (indexPath.section == 0)
+    {
+        if (indexPath.row == 0)
+        {
+            NSString *schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
+            if ([schoolName isEqualToString:@"未设置学校"])
+            {
+                return 56;
+            }
+            return 0;
+        }
+        else if(indexPath.row == 1)
+        {
+            if ([unreadedArray count] > 0 || [readedArray count] > 0)
+            {
+                return 32;
+            }
+            return 0;
+        }
+    }
+    return 88;
 }
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -306,98 +324,165 @@ EGORefreshTableDelegate>
     {
         cell = [[NotificationCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:notiCell];
     }
-    
-    NSDictionary *dict;
+    cell.contentLabel.hidden = YES;
+    cell.nameLabel.hidden = YES;
+    cell.contentLabel.backgroundColor = [UIColor whiteColor];
     if (indexPath.section == 0)
     {
-        if ([unreadedArray count] > 0)
+       
+        if (indexPath.row == 0)
         {
-            dict = [unreadedArray objectAtIndex:indexPath.row];
+            NSString *schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
+            if ([schoolName isEqualToString:@"未设置学校"])
+            {
+                cell.contentLabel.hidden = NO;
+                cell.nameLabel.hidden = NO;
+                cell.nameLabel.backgroundColor = RGB(255, 241, 134, 1);
+                cell.nameLabel.frame = CGRectMake(0, 0, SCREEN_WIDTH, 56);
+                cell.contentLabel.frame = CGRectMake(10, 0, SCREEN_WIDTH-20, 56);
+                cell.contentLabel.backgroundColor = RGB(255, 241, 134, 1);
+                cell.contentLabel.numberOfLines = 2;
+                cell.contentLabel.font = [UIFont systemFontOfSize:16];
+                cell.contentLabel.lineBreakMode = NSLineBreakByWordWrapping;
+                cell.contentLabel.text = @"您的班级未设置学校，设置班级后成员可以通过短信接收班级通知。";
+                cell.contentLabel.textColor = RGB(255, 102, 0, 1);
+            }
         }
-    }
-    else if (indexPath.section == 1)
-    {
-        if([readedArray count] > 0)
+        else if(indexPath.row == 1)
         {
-            dict = [readedArray objectAtIndex:indexPath.row];
+            if ([unreadedArray count] > 0 || [readedArray count] > 0)
+            {
+                cell.contentLabel.hidden = NO;
+                cell.nameLabel.hidden = NO;
+                cell.contentLabel.frame = CGRectMake(0, 0, SCREEN_WIDTH, 32);
+                cell.contentLabel.backgroundColor = RGB(56, 186, 98, 1);
+                cell.contentLabel.font = [UIFont systemFontOfSize:18];
+                cell.contentLabel.textColor = [UIColor whiteColor];
+                NSString *classname = [NSString stringWithFormat:@"   %@",[[NSUserDefaults standardUserDefaults] objectForKey:@"classname"]];
+                cell.contentLabel.text = classname;
+            }
         }
+        return cell;
     }
     else
     {
-        return nil;
-    }
-
-    
-    NSString *byName = [[dict objectForKey:@"by"] objectForKey:@"name"];
-
-    CGFloat he = 0;
-    if (SYSVERSION>=7)
-    {
-        he = 5;
-    }
-
-    NSString *noticeContent = [dict objectForKey:@"content"];
-    CGSize size = [Tools getSizeWithString:noticeContent andWidth:SCREEN_WIDTH-80 andFont:[UIFont systemFontOfSize:16]];
-    
-    CGFloat height = size.height>60?60:size.height;
-    
-    [cell.bgImageView setImage:[UIImage imageNamed:@"noticeBg"]];
-    cell.bgImageView.layer.cornerRadius = 10;
-    cell.bgImageView.clipsToBounds = YES;
-    cell.bgImageView.frame = CGRectMake(8, 4, SCREEN_WIDTH-16, 100);
-    
-    cell.contentLabel.text = noticeContent;
-    cell.contentLabel.backgroundColor = [UIColor clearColor];
-    cell.contentLabel.font = [UIFont systemFontOfSize:16];
-    cell.contentLabel.textColor = RGB(36, 38, 47, 1);
-    cell.contentLabel.contentMode = UIViewContentModeTop;
-    cell.contentLabel.frame = CGRectMake(20, 15, SCREEN_WIDTH-80, height);
-    
-    cell.iconImageView.frame = CGRectMake(SCREEN_WIDTH-50, 41.5, 22, 22);
-    
-    cell.statusLabel.textColor = TITLE_COLOR;
-    cell.statusLabel.frame = CGRectMake(SCREEN_WIDTH-150, 82.5, 130, 15);
-
-    cell.timeLabel.frame = CGRectMake(20, 80, 200, 20);
-    cell.timeLabel.font = [UIFont systemFontOfSize:13];
-    cell.timeLabel.text = [NSString stringWithFormat:@"%@发布于%@",byName,[Tools showTime:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]]];
-    cell.timeLabel.textColor = TITLE_COLOR;
-    
-    if (![[[dict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
-    {
-        if ([[dict objectForKey:@"new"] integerValue] == 0)
+        NSDictionary *dict;
+        if (indexPath.section == 1)
         {
-            [cell.iconImageView setImage:[UIImage imageNamed:@"icon_checked"]];
+            if ([unreadedArray count] > 0)
+            {
+                dict = [unreadedArray objectAtIndex:indexPath.row];
+            }
         }
-        else if([[dict objectForKey:@"new"] integerValue] == 1)
+        else if (indexPath.section == 2)
         {
-            [cell.iconImageView setImage:[UIImage imageNamed:@"unreadicon"]];;
-        }
-    }
-    else
-    {
-        [cell.iconImageView setImage:[UIImage imageNamed:@"icon_checked"]];
-    }
-    
-    if ([[dict objectForKey:@"c_read"] integerValue] == 0)
-    {
-        cell.statusLabel.hidden = YES;
-    }
-    else
-    {
-        if ([[[dict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
-        {
-            cell.statusLabel.text =[NSString stringWithFormat:@"%d人已读 %d人未读",[[dict objectForKey:@"read_num"] integerValue],[[dict objectForKey:@"unread_num"] integerValue]];
+            if([readedArray count] > 0)
+            {
+                dict = [readedArray objectAtIndex:indexPath.row];
+            }
         }
         else
         {
-            cell.statusLabel.text =[NSString stringWithFormat:@"%d人已读 %d人未读",[[dict objectForKey:@"read_num"] integerValue],[[dict objectForKey:@"unread_num"] integerValue]];
+            return nil;
         }
+        
+        
+        cell.contentLabel.hidden = NO;
+        cell.nameLabel.hidden = NO;
+        
+        NSString *byName = [[dict objectForKey:@"by"] objectForKey:@"name"];
+        
+        CGFloat he = 0;
+        if (SYSVERSION>=7)
+        {
+            he = 5;
+        }
+        
+        NSString *noticeContent = [dict objectForKey:@"content"];
+        CGSize size = [Tools getSizeWithString:noticeContent andWidth:SCREEN_WIDTH-80 andFont:[UIFont systemFontOfSize:16]];
+        
+        CGFloat height = size.height>40?40:size.height;
+        
+        [cell.bgImageView setImage:[UIImage imageNamed:@"noticeBg"]];
+        cell.bgImageView.layer.cornerRadius = 10;
+        cell.bgImageView.clipsToBounds = YES;
+        cell.bgImageView.frame = CGRectMake(8, 4, SCREEN_WIDTH-16, 80);
+        
+        cell.contentLabel.text = noticeContent;
+        cell.contentLabel.backgroundColor = [UIColor clearColor];
+        cell.contentLabel.font = [UIFont systemFontOfSize:16];
+        cell.contentLabel.textColor = CONTENTCOLOR;
+        cell.contentLabel.contentMode = UIViewContentModeTop;
+        
+        
+        
+        if (indexPath.section == 1)
+        {
+            cell.iconImageView.frame = CGRectMake(20, 17, 12, 12);
+            //        [cell.iconImageView setImage:[UIImage imageNamed:@"unreadicon"]];
+            cell.iconImageView.layer.cornerRadius = 6;
+            cell.iconImageView.clipsToBounds = YES;
+            cell.iconImageView.backgroundColor = RGB(228, 76, 76, 1);
+            cell.iconImageView.layer.borderColor = RGB(227, 63, 64, 1).CGColor;
+            cell.iconImageView.layer.borderWidth = 1;
+            
+            cell.contentLabel.frame = CGRectMake(40, 15, SCREEN_WIDTH-62, height);
+            cell.timeLabel.frame = CGRectMake(40, 58, 200, 20);
+            
+        }
+        else
+        {
+            cell.contentLabel.frame = CGRectMake(25, 15, SCREEN_WIDTH-42, height);
+            cell.iconImageView.frame = CGRectMake(20, 17, 0, 0);
+            cell.timeLabel.frame = CGRectMake(25, 58, 200, 20);
+        }
+        
+        
+        cell.statusLabel.textColor = TIMECOLOR;
+        cell.statusLabel.frame = CGRectMake(SCREEN_WIDTH-150, 60.5, 130, 15);
+        
+        
+        cell.timeLabel.font = [UIFont systemFontOfSize:13];
+        cell.timeLabel.text = [NSString stringWithFormat:@"%@发布于%@",byName,[Tools showTime:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]]];
+        cell.timeLabel.textColor = TIMECOLOR;
+        
+        //    if (![[[dict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
+        //    {
+        //        if ([[dict objectForKey:@"new"] integerValue] == 0)
+        //        {
+        //            [cell.iconImageView setImage:[UIImage imageNamed:@"icon_checked"]];
+        //        }
+        //        else if([[dict objectForKey:@"new"] integerValue] == 1)
+        //        {
+        //            [cell.iconImageView setImage:[UIImage imageNamed:@"unreadicon"]];;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        [cell.iconImageView setImage:[UIImage imageNamed:@"icon_checked"]];
+        //    }
+        
+        if ([[dict objectForKey:@"c_read"] integerValue] == 0)
+        {
+            cell.statusLabel.hidden = YES;
+        }
+        else
+        {
+            if ([[[dict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
+            {
+                cell.statusLabel.text =[NSString stringWithFormat:@"%d人已读 %d人未读",[[dict objectForKey:@"read_num"] integerValue],[[dict objectForKey:@"unread_num"] integerValue]];
+            }
+            else
+            {
+                cell.statusLabel.text =[NSString stringWithFormat:@"%d人已读 %d人未读",[[dict objectForKey:@"read_num"] integerValue],[[dict objectForKey:@"unread_num"] integerValue]];
+            }
+        }
+        
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        cell.backgroundColor = [UIColor clearColor];
+        return cell;
     }
-
-    cell.selectionStyle = UITableViewCellSelectionStyleNone;
-    cell.backgroundColor = [UIColor clearColor];
-    return cell;
+    return nil;
 }
 -(void)getMoreNotifications
 {
@@ -408,20 +493,26 @@ EGORefreshTableDelegate>
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSDictionary *dict;
-    if (indexPath.section == 0)
+    if (indexPath.section == 1)
     {
         dict = [unreadedArray objectAtIndex:indexPath.row];
     }
-    else
+    else if(indexPath.section == 2)
     {
         dict = [readedArray objectAtIndex:indexPath.row];
+    }
+    else
+    {
+        return ;
     }
     NotificationDetailViewController *notificationDetailViewController = [[NotificationDetailViewController alloc] init];
     notificationDetailViewController.noticeID = [dict objectForKey:@"_id"];
     notificationDetailViewController.noticeContent = [dict objectForKey:@"content"];
     notificationDetailViewController.c_read = [dict objectForKey:@"c_read"];
     notificationDetailViewController.readnotificationDetaildel = self;
+    notificationDetailViewController.fromClass = YES;
     notificationDetailViewController.byID = [[dict objectForKey:@"by"] objectForKey:@"_id"];
+    notificationDetailViewController.markString = [NSString stringWithFormat:@"%@发布于%@",[[dict objectForKey:@"by"] objectForKey:@"name"],[Tools showTime:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]]];
     if ([[dict objectForKey:@"new"] integerValue] == 1)
     {
         notificationDetailViewController.isnew = YES;

@@ -19,6 +19,8 @@
 #import "KKNavigationController.h"
 #import "SettingPasswordViewController.h"
 
+#import "OtherLoginViewController.h"
+
 #import <ShareSDK/ShareSDK.h>
 #import "WeiboApi.h"
 #import <TencentOpenAPI/QQApi.h>
@@ -36,8 +38,6 @@ UITextFieldDelegate>
 {
     CGFloat logoY;
     int sexure;
-    int reg;
-    NSMutableDictionary *accountDict;
     
     UIScrollView *mainScrollview;
     
@@ -70,7 +70,6 @@ UITextFieldDelegate>
 	// Do any additional setup after loading the view.
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     self.view.backgroundColor = [UIColor blackColor];
-    reg = 0;    
     self.backButton.hidden = YES;
     self.stateView.hidden = YES;
     self.navigationBarView.hidden = YES;
@@ -79,7 +78,7 @@ UITextFieldDelegate>
     CGFloat logoImageHeight = 0;
     if (FOURS)
     {
-        logoImageHeight = 230;
+        logoImageHeight = 200;
         space = 5;
     }
     else
@@ -166,46 +165,35 @@ UITextFieldDelegate>
     [forgetPwdButton addTarget:self action:@selector(forgetPwd) forControlEvents:UIControlEventTouchUpInside];
     [self.bgView addSubview:forgetPwdButton];
     
+    UIButton *otherButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    otherButton.frame = CGRectMake(0, SCREEN_HEIGHT-50, SCREEN_WIDTH/2+1, 50);
+    [otherButton setTitle:@"其它方式登录" forState:UIControlStateNormal];
+    [otherButton setTitleColor:RGB(153, 153, 153, 1) forState:UIControlStateNormal];
+    otherButton.titleLabel.font = [UIFont systemFontOfSize:16];
+    otherButton.layer.borderColor = RGB(216, 215, 213, 1).CGColor;
+    otherButton.layer.borderWidth = 1;
+    [otherButton addTarget:self action:@selector(otherlogin) forControlEvents:UIControlEventTouchUpInside];
+    [self.bgView addSubview:otherButton];
     
-    UIButton *registButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    registButton.frame = CGRectMake(SCREEN_WIDTH-130, 10, 120, 38);
-//    [registButton setBackgroundImage:inputImage forState:UIControlStateNormal];
-    [registButton setTitle:@"注册新账号>>" forState:UIControlStateNormal];
-    registButton.titleLabel.font = [UIFont systemFontOfSize:16];
-    [registButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [registButton addTarget:self action:@selector(regist) forControlEvents:UIControlEventTouchUpInside];
-    [self.bgView addSubview:registButton];
-    
+
     UILabel *tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(26, loginButton.frame.origin.y+loginButton.frame.size.height+25+space, 100, 30)];
     tipLabel.text = @"其他方式登录";
     tipLabel.textColor = TITLE_COLOR;
     tipLabel.font = [UIFont systemFontOfSize:13];
     tipLabel.backgroundColor = [UIColor clearColor];
-    [self.bgView addSubview:tipLabel];
+//    [self.bgView addSubview:tipLabel];
     
-    UIButton *sinaLoginButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    sinaLoginButton.backgroundColor = [UIColor clearColor];
-    sinaLoginButton.frame = CGRectMake(120, loginButton.frame.origin.y+loginButton.frame.size.height+20+space, 47, 47);
-    [sinaLoginButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-    sinaLoginButton.tag=100;
-    [sinaLoginButton setImage:[UIImage imageNamed:@"sina"] forState:UIControlStateNormal];
-    [self.bgView addSubview:sinaLoginButton];
     
-    UIButton *qqLoginButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    qqLoginButton.backgroundColor = [UIColor clearColor];
-    qqLoginButton.frame = CGRectMake(180, loginButton.frame.origin.y+loginButton.frame.size.height+20+space, 47, 47);
-    [qqLoginButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-    qqLoginButton.tag=101;
-    [qqLoginButton setImage:[UIImage imageNamed:@"qq"] forState:UIControlStateNormal];
-    [self.bgView addSubview:qqLoginButton];
-    
-    UIButton *renrenLoginButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    renrenLoginButton.backgroundColor = [UIColor clearColor];
-    renrenLoginButton.frame = CGRectMake(240, loginButton.frame.origin.y+loginButton.frame.size.height+20+space, 47, 47);
-    [renrenLoginButton setImage:[UIImage imageNamed:@"rr"] forState:UIControlStateNormal];
-    [renrenLoginButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-    renrenLoginButton.tag=102;
-    [self.bgView addSubview:renrenLoginButton];
+    UIButton *registButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    registButton.frame = CGRectMake(SCREEN_WIDTH/2, SCREEN_HEIGHT-50, SCREEN_WIDTH/2, 50);
+    [registButton setTitle:@"注册" forState:UIControlStateNormal];
+    [registButton setTitleColor:RGB(153, 153, 153, 1) forState:UIControlStateNormal];
+    registButton.titleLabel.font = [UIFont systemFontOfSize:16];
+    registButton.layer.borderColor = RGB(216, 215, 213, 1).CGColor;
+    registButton.layer.borderWidth = 1;
+    [registButton addTarget:self action:@selector(regist) forControlEvents:UIControlEventTouchUpInside];
+    [self.bgView addSubview:registButton];
+
 }
 
 - (void)didReceiveMemoryWarning
@@ -213,6 +201,13 @@ UITextFieldDelegate>
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
+-(void)otherlogin
+{
+    OtherLoginViewController *otherlogin = [[OtherLoginViewController alloc] init];
+    [self.navigationController pushViewController:otherlogin animated:YES];
+}
+
 -(void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification  object:nil];
@@ -235,191 +230,6 @@ UITextFieldDelegate>
     setpwd.phoneNum = [Tools getPhoneNumFromString:phoneNumTextfield.text];
     setpwd.forgetPwd = YES;
     [self.navigationController pushViewController:setpwd animated:YES];
-}
-
-#pragma mark - loginAccount
-static int loginID;
-- (void)clickedThirdLoginButton:(UIButton *)button{
-    
-    switch (button.tag-100) {
-        case 0:
-            
-            loginID=1;
-            
-            break;
-        case 1:
-            loginID=6;
-            
-            break;
-        case 2:
-            loginID=7;
-            break;
-            
-        default:
-            break;
-    }
-    //[ShareSDK cancelAuthWithType:loginID];
-    id<ISSAuthOptions> authOptions = [ShareSDK authOptionsWithAutoAuth:YES
-                                                         allowCallback:YES
-                                                         authViewStyle:SSAuthViewStyleFullScreenPopup
-                                                          viewDelegate:nil
-                                               authManagerViewDelegate:nil];
-    
-    //在授权页面中添加关注官方微博
-    [authOptions setFollowAccounts:[NSDictionary dictionaryWithObjectsAndKeys:
-                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
-                                    SHARE_TYPE_NUMBER(ShareTypeSinaWeibo),
-                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
-                                    SHARE_TYPE_NUMBER(ShareTypeTencentWeibo),
-                                    nil]];
-    
-    [ShareSDK getUserInfoWithType:loginID
-                      authOptions:authOptions
-                           result:^(BOOL result, id<ISSPlatformUser> userInfo, id<ICMErrorInfo> error){
-                               if (result)
-                               {
-                                   DDLOG(@"success==%@",[userInfo sourceData]);
-                                   
-                                   accountDict = [[NSMutableDictionary alloc] initWithCapacity:0];
-                                   [accountDict setObject:[userInfo uid] forKey:@"a_id"];
-                                   [accountDict setObject:[userInfo nickname] forKey:@"nickname"];
-                                   [accountDict setObject:[userInfo profileImage] forKey:@"header_icon"];
-                                   if (loginID == ShareTypeSinaWeibo)
-                                   {
-                                       //sina
-                                       
-                                       [accountDict setObject:@"sw" forKey:@"a_type"];
-                                       
-                                       [self loginWithName:[userInfo nickname]];
-                                   }
-                                   else if(loginID == ShareTypeQQSpace)
-                                   {
-                                       //qq
-                                      
-                                       [accountDict setObject:@"qq" forKey:@"a_type"];
-                                       [self loginWithName:[userInfo nickname]];
-                                   }
-                                   else if(loginID == ShareTypeRenren)
-                                   {
-                                       //ren ren
-                                       
-                                       DDLOG(@"rrnickname  %@",RRNICKNAME);
-                                       [accountDict setObject:@"rr" forKey:@"a_type"];
-                                       [self loginWithName:[userInfo nickname]];
-                                   }
-                               }
-                               else
-                               {
-                                   DDLOG(@"faile==%@==%ld==%d",[error errorDescription],(long)[error errorCode],[error errorLevel]);
-                               }
-                           }];
-}
-
--(void)loginWithName:(NSString *)name   //AccountID:(NSString *)accountID accountType:(NSString *)accountType andName:(NSString *)name
-{
-    
-    NSString *userStr = @"simu";
-    if ([[APService registrionID] length] > 0)
-    {
-        userStr = [APService registrionID];
-    }
-    
-    if ([Tools NetworkReachable])
-    {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"a_id":[accountDict objectForKey:@"a_id"],
-                                                                      @"a_type":[accountDict objectForKey:@"a_type"],
-                                                                      @"c_ver":[Tools client_ver],
-                                                                      @"d_name":[Tools device_name],
-                                                                      @"d_imei":[Tools device_uid],
-                                                                      @"c_os":[Tools device_os],
-                                                                      @"d_type":@"iOS",
-                                                                      @"p_cid":@"123",
-                                                                      @"p_uid":userStr,
-                                                                      @"r_name":name,
-                                                                      @"sex":@"1",
-                                                                      @"reg":[NSString stringWithFormat:@"%d",reg]
-                                                                      } API:LOGINBYAUTHOR];
-        
-        [request setCompletionBlock:^{
-            [Tools hideProgress:self.bgView];
-            NSString *responseString = [request responseString];
-            
-            NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"account login responsedict %@",responseDict);
-            
-            if ([[responseDict objectForKey:@"code"] intValue]== 1)
-            {
-                NSDictionary *dict = [responseDict objectForKey:@"data"];
-                NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
-                [ud setObject:[dict objectForKey:@"u_id"] forKey:USERID];
-                if ([Tools isPhoneNumber:[dict objectForKey:@"phone"]])
-                {
-                    [ud setObject:[dict objectForKey:@"phone"] forKey:PHONENUM];
-                }
-                [ud setObject:[dict objectForKey:@"token"] forKey:CLIENT_TOKEN];
-                [ud setObject:[dict objectForKey:@"img_icon"] forKey:HEADERIMAGE];
-                [ud setObject:[dict objectForKey:@"r_name"] forKey:USERNAME];
-                [ud setObject:[dict objectForKey:@"opt"] forKey:@"useropt"];
-                
-                NSString *a_type = [accountDict objectForKey:@"a_type"];
-                if ([a_type isEqualToString:@"qq"])
-                {
-                    [ud setObject:name forKey:QQNICKNAME];
-                }
-                else if([a_type isEqualToString:@"rr"])
-                {
-                    [ud setObject:name forKey:RRNICKNAME];
-                }
-                else if([a_type isEqualToString:@"sw"])
-                {
-                     [ud setObject:name forKey:SINANICKNAME];
-                }
-                
-                [ud synchronize];
-                
-                if (reg == 1)
-                {
-                    FillInfoViewController *fillInfo = [[FillInfoViewController alloc] init];
-                    fillInfo.headerIcon = [accountDict objectForKey:@"header_icon"];
-                    fillInfo.accountID = [accountDict objectForKey:@"a_id"];
-                    fillInfo.accountType = [accountDict objectForKey:@"a_type"];
-                    fillInfo.account = @"1";
-                    fillInfo.nickName = [accountDict objectForKey:@"nickname"];
-                    [self.navigationController pushViewController:fillInfo animated:YES];
-                }
-                else
-                {
-                    
-                    SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
-                    HomeViewController *homeViewController = [[HomeViewController alloc] init];
-                    KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:homeViewController];
-                    JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:homeNav menuController:sideMenuViewController];
-                    [self.navigationController presentViewController:sideMenu animated:YES completion:^{
-                        
-                    }];
-                }
-                
-            }
-            else if([[responseDict objectForKey:@"code"] intValue] == 0 && [[[responseDict objectForKey:@"message"] objectForKey:@"NO_THE_ACCOUNT"] length]>0)
-            {
-                reg = 1;
-                [self  loginWithName:name];
-            }
-        }];
-        
-        [request setFailedBlock:^{
-            NSError *error = [request error];
-            DDLOG(@"error %@",error);
-            [Tools hideProgress:self.bgView];
-        }];
-        [Tools showProgress:self.bgView];
-        [request startAsynchronous];
-        
-    }
-    else
-    {
-        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
-    }
 }
 
 -(void)login
@@ -453,6 +263,7 @@ static int loginID;
         if ([[APService registrionID] length] > 0)
         {
             userStr = [APService registrionID];
+//            [Tools showAlertView:userStr delegateViewController:nil];
         }
         
         NSDictionary *paraDict = @{@"phone":phoneNum,
@@ -462,8 +273,7 @@ static int loginID;
                                    @"d_imei":[Tools device_uid],
                                    @"c_os":[Tools device_os],
                                    @"d_type":@"iOS",
-                                   @"p_cid":@"123",
-                                   @"p_uid":userStr,
+                                   @"registrationID":userStr,
                                    @"account":@"0"
                                    };
         

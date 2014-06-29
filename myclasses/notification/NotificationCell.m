@@ -32,7 +32,8 @@
         contentLabel = [[MyLabel alloc] init];
         contentLabel.backgroundColor = [UIColor clearColor];
         contentLabel.font = [UIFont systemFontOfSize:14];
-        contentLabel.numberOfLines = 3;
+        contentLabel.numberOfLines = 2;
+        contentLabel.contentMode = UIViewContentModeTop;
         contentLabel.lineBreakMode = NSLineBreakByWordWrapping|NSLineBreakByTruncatingTail;
         [self.contentView addSubview:contentLabel];
         

@@ -67,6 +67,10 @@ UIAlertViewDelegate>
     NSString *schoolName;
     NSString *className;
     NSString *classID;
+    
+    NSArray *iconOnArray;
+    NSArray *iconArray;
+    UIScrollView *buttonScrollView;
 }
 @end
 
@@ -87,7 +91,12 @@ UIAlertViewDelegate>
 	// Do any additional setup after loading the view.
     
     self.titleLabel.text = @"邀请";
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 20);
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:FROMWHERE] isEqualToString:FROMCLASS])
+    {
+        self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+        self.view.backgroundColor = [UIColor blackColor];
+    }
+    
     
     schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
     className = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
@@ -110,12 +119,12 @@ UIAlertViewDelegate>
     
     inviteButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [inviteButton setTitle:@"邀请" forState:UIControlStateNormal];
-    [inviteButton setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
+    [inviteButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     inviteButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
     [inviteButton addTarget:self action:@selector(inviteClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:inviteButton];
     
-    UIScrollView *buttonScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, 70)];
+    buttonScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, 70)];
     buttonScrollView.backgroundColor = [UIColor clearColor];
     buttonScrollView.showsHorizontalScrollIndicator = NO;
     [self.bgView addSubview:buttonScrollView];
@@ -126,18 +135,24 @@ UIAlertViewDelegate>
     selectView.frame = CGRectMake(15, 0, 85, 70);
     [buttonScrollView addSubview:selectView];
     
-    NSArray *iconArray = @[@"phone",@"QQicon",@"weixin"];
+    iconOnArray = @[@"invite_phone_on",@"invite_QQ_on",@"invite_weichat_on"];
+    iconArray = @[@"invite_phone",@"invite_QQ",@"invite_weichat"];
     
-    for (int i=0; i<[iconArray count]; i++)
+    for (int i=0; i<[iconOnArray count]; i++)
     {
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
         button.frame = CGRectMake(35+103*i, 12.5, 45, 45);
         button.backgroundColor = [UIColor clearColor];
         button.tag = tableViewTagBase+i;
-//        button.layer.borderColor = LIGHT_BLUE_COLOR.CGColor;
-//        button.layer.borderWidth = 0.3;
         [button addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
-        [button setBackgroundImage:[UIImage imageNamed:[iconArray objectAtIndex:i]] forState:UIControlStateNormal];
+        if (i == 0)
+        {
+            [button setImage:[UIImage imageNamed:[iconOnArray objectAtIndex:i]] forState:UIControlStateNormal];
+        }
+        else
+        {
+            [button setImage:[UIImage imageNamed:[iconArray objectAtIndex:i]] forState:UIControlStateNormal];
+        }
         [buttonScrollView addSubview:button];
     }
     buttonScrollView.contentSize = CGSizeMake(35+103*[iconArray count], 70);
@@ -260,11 +275,14 @@ UIAlertViewDelegate>
         if ([groupContactArray count] > 0 || [alreadyUsers count] > 0)
         {
             contactTableView.hidden = NO;
-            if (section == 0)
-            {
-                return [alreadyUsers count];
-            }
-            else
+        }
+        if (section == 0)
+        {
+            return [alreadyUsers count];
+        }
+        else
+        {
+            if ([groupContactArray count] > 0)
             {
                 NSDictionary *groupDict = [groupContactArray objectAtIndex:section-1];
                 NSArray *array = [groupDict objectForKey:@"array"];
@@ -281,7 +299,7 @@ UIAlertViewDelegate>
     {
         if(section == 0)
         {
-            if ([alreadyUsers count]>0)
+            if ([alreadyUsers count] > 0)
             {
                 return 30;
             }
@@ -315,16 +333,19 @@ UIAlertViewDelegate>
                 return headerLabel;
             }
         }
-        else if(section >0)
+        else if(section > 0)
         {
-            NSDictionary *groupDict = [groupContactArray objectAtIndex:section-1];
-            UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 0, SCREEN_WIDTH-15, 27)];
-            headerLabel.text = [NSString stringWithFormat:@"   %@",[groupDict objectForKey:@"key"]];
-            headerLabel.backgroundColor = RGB(234, 234, 234, 1);
-            headerLabel.font = [UIFont systemFontOfSize:14];
-            headerLabel.textColor = TITLE_COLOR;
-            headerLabel.backgroundColor = [UIColor whiteColor];
-            return headerLabel;
+            if ([groupContactArray count] > 0)
+            {
+                NSDictionary *groupDict = [groupContactArray objectAtIndex:section-1];
+                UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 0, SCREEN_WIDTH-15, 27)];
+                headerLabel.text = [NSString stringWithFormat:@"   %@",[groupDict objectForKey:@"key"]];
+                headerLabel.backgroundColor = RGB(234, 234, 234, 1);
+                headerLabel.font = [UIFont systemFontOfSize:14];
+                headerLabel.textColor = TITLE_COLOR;
+                headerLabel.backgroundColor = [UIColor whiteColor];
+                return headerLabel;
+            }
         }
     }
     return nil;
@@ -396,7 +417,7 @@ UIAlertViewDelegate>
             return cell;
 
         }
-        else if(indexPath.section >0)
+        else if(indexPath.section > 0)
         {
             static NSString *cellName = @"contactcell";
             FriendsCell *cell = [tableView dequeueReusableCellWithIdentifier:cellName];
@@ -404,40 +425,43 @@ UIAlertViewDelegate>
             {
                 cell = [[FriendsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellName];
             }
-            
-            NSDictionary *groupDict = [groupContactArray objectAtIndex:indexPath.section-1];
-            NSArray *tmpArray = [groupDict objectForKey:@"array"];
-            
-            cell.nameLabel.frame = CGRectMake(10, 10, SCREEN_WIDTH - 80, 30);
-            cell.nameLabel.font = [UIFont systemFontOfSize:16];
-            
-            NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
-            cell.nameLabel.text = [dict objectForKey:@"name"];
-            cell.inviteButton.frame = CGRectMake(SCREEN_WIDTH-60, 10, 40, 30);
-            cell.inviteButton.backgroundColor = [UIColor clearColor];
-            [cell.inviteButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
-            cell.inviteButton.tag = indexPath.row+(ContactTableViewTag%tableViewTagBase)*tableViewTagBase+(indexPath.section-1)*10000;
-            NSArray *array = [self getPhoneArrayFromContactDict:dict];
-            for (int i=0; i<[array count]; ++i)
+            DDLOG(@"current section %d",indexPath.section);
+            if ([groupContactArray count] > 0)
             {
-                if ([self haveThisPhone:[array objectAtIndex:i]])
+                NSDictionary *groupDict = [groupContactArray objectAtIndex:indexPath.section-1];
+                NSArray *tmpArray = [groupDict objectForKey:@"array"];
+                
+                cell.nameLabel.frame = CGRectMake(10, 10, SCREEN_WIDTH - 80, 30);
+                cell.nameLabel.font = [UIFont systemFontOfSize:16];
+                
+                NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
+                cell.nameLabel.text = [dict objectForKey:@"name"];
+                cell.inviteButton.frame = CGRectMake(SCREEN_WIDTH-60, 10, 40, 30);
+                cell.inviteButton.backgroundColor = [UIColor clearColor];
+                [cell.inviteButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+                cell.inviteButton.tag = indexPath.row+(ContactTableViewTag%tableViewTagBase)*tableViewTagBase+(indexPath.section-1)*10000;
+                NSArray *array = [self getPhoneArrayFromContactDict:dict];
+                for (int i=0; i<[array count]; ++i)
                 {
-                    [cell.inviteButton setImage:[UIImage imageNamed:@"selectBtn"] forState:UIControlStateNormal];
-                    
+                    if ([self haveThisPhone:[array objectAtIndex:i]])
+                    {
+                        [cell.inviteButton setImage:[UIImage imageNamed:@"selectBtn"] forState:UIControlStateNormal];
+                        
+                    }
+                    else
+                    {
+                        [cell.inviteButton setImage:[UIImage imageNamed:@"unselectBtn"] forState:UIControlStateNormal];
+                        
+                    }
                 }
-                else
-                {
-                    [cell.inviteButton setImage:[UIImage imageNamed:@"unselectBtn"] forState:UIControlStateNormal];
-                    
-                }
+                [cell.inviteButton addTarget:self action:@selector(inviteButtonCLick:) forControlEvents:UIControlEventTouchUpInside];
+                UIImageView *bgImageBG = [[UIImageView alloc] init];
+                bgImageBG.image = [UIImage imageNamed:@"line3"];
+                bgImageBG.backgroundColor = [UIColor clearColor];
+                cell.backgroundView = bgImageBG;
+                cell.selectionStyle = UITableViewCellSelectionStyleNone;
+                cell.backgroundColor = [UIColor clearColor];
             }
-            [cell.inviteButton addTarget:self action:@selector(inviteButtonCLick:) forControlEvents:UIControlEventTouchUpInside];
-            UIImageView *bgImageBG = [[UIImageView alloc] init];
-            bgImageBG.image = [UIImage imageNamed:@"line3"];
-            bgImageBG.backgroundColor = [UIColor clearColor];
-            cell.backgroundView = bgImageBG;
-            cell.selectionStyle = UITableViewCellSelectionStyleNone;
-            cell.backgroundColor = [UIColor clearColor];
             return cell;
         }
     }
@@ -557,6 +581,17 @@ UIAlertViewDelegate>
     [UIView animateWithDuration:0.2 animations:^{
         selectView.frame = CGRectMake(35+103*(button.tag%tableViewTagBase)-20, 0, 85, 70);
     }];
+    for (int i = 0; i < 3; i++)
+    {
+        if (i == button.tag - tableViewTagBase)
+        {
+            [((UIButton *)[buttonScrollView viewWithTag:i+tableViewTagBase]) setImage:[UIImage imageNamed:[iconOnArray objectAtIndex:i]] forState:UIControlStateNormal];
+        }
+        else
+        {
+            [((UIButton *)[buttonScrollView viewWithTag:i+tableViewTagBase]) setImage:[UIImage imageNamed:[iconArray objectAtIndex:i]] forState:UIControlStateNormal];
+        }
+    }
     
     [contactInviteArray removeAllObjects];
     if(button.tag == ContactTableViewTag)

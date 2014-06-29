@@ -174,8 +174,7 @@
                      @"c_ver":[Tools client_ver],
                      @"c_os":[Tools device_version],
                      @"d_type":@"iOS",
-                     @"p_cid":@"123",
-                     @"p_uid":userStr,
+                     @"registrationID":userStr,
                      @"account":@"0"
                      };
 

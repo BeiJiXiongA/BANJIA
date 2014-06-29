@@ -83,6 +83,8 @@ SelectAreaDelegate>
     searchSchoolTableView.delegate = self;
     searchSchoolTableView.dataSource = self;
     searchSchoolTableView.bounces = NO;
+    searchSchoolTableView.layer.cornerRadius = 5;
+    searchSchoolTableView.clipsToBounds = YES;
     searchSchoolTableView.scrollEnabled = NO;
     searchSchoolTableView.backgroundColor = [UIColor whiteColor];
     [self.bgView addSubview:searchSchoolTableView];
@@ -304,14 +306,16 @@ SelectAreaDelegate>
 //        }
 //    }
 //    else
-        if(indexPath.section == 0)
+    if(indexPath.section == 0)
     {
         cell.nameLabel.frame  = CGRectMake(10, 5, 80, 30);
         cell.nameLabel.hidden = NO;
+        cell.nameLabel.textColor = CONTENTCOLOR;
         cell.nameLabel.text = [cellNameArray objectAtIndex:indexPath.row];
         
         cell.contentLabel.frame = CGRectMake(110, 0, 200, 40);
         cell.contentLabel.hidden = NO;
+        cell.contentLabel.textColor = COMMENTCOLOR;
         cell.contentLabel.font = [UIFont systemFontOfSize:18];
         if (indexPath.row == 0)
         {

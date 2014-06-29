@@ -701,26 +701,10 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 
 +(CGSize)getSizeWithString:(NSString *)content andWidth:(CGFloat)width andFont:(UIFont *)font
 {
-    CGSize size;
-//    if (SYSVERSION < 7)
-//    {
-//        UIFont *nameFont=[UIFont fontWithName:@"Helvetica" size:13];
     
-        size=[content sizeWithFont:font constrainedToSize:CGSizeMake(width, 2000) lineBreakMode:NSLineBreakByWordWrapping];
-        
-//    }
-//    else
-//    {
-//        NSAttributedString* atrString = [[NSAttributedString alloc] initWithString:content];
-//        
-//        NSRange range = NSMakeRange(0, atrString.length);
-//        
-//        NSDictionary* dic = [atrString attributesAtIndex:0 effectiveRange:&range];
-//        
-//        size = [content boundingRectWithSize:CGSizeMake(width, 200)  options:NSStringDrawingUsesLineFragmentOrigin attributes:dic context:nil].size;
-//    }
-    
-    return  size;
+    CGSize maxSize=CGSizeMake(width, 99999);
+    CGSize  strSize=[content sizeWithFont:font constrainedToSize:maxSize lineBreakMode:NSLineBreakByWordWrapping];
+    return strSize;
 }
 
 +(NSString *)myNumber{

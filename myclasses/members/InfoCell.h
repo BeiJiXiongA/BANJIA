@@ -17,6 +17,6 @@
 @property (nonatomic, strong) UILabel *contentLabel;
 @property (nonatomic, strong) MyButton *button1;
 @property (nonatomic, strong) MyButton *button2;
-
+@property (nonatomic, strong) UIImageView *sexureImageView;
 @property (nonatomic, strong) UIView *nameBgView;
 @end

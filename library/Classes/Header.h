@@ -123,7 +123,7 @@ return shared##className; \
 
 
 #define GETMOREOFFSET    70
-#define DetailHeaderHeight  70
+#define DetailHeaderHeight  53
 
 #pragma mark - 关于提示
 #define NOT_NETWORK    @"没有网络哦！"
@@ -139,7 +139,7 @@ return shared##className; \
 #define CornerMore   @"corner_more"
 
 #define NAMEFONT   [UIFont boldSystemFontOfSize:16]
-#define NAMECOLOR  [UIColor blackColor]
+#define NAMECOLOR  RGB(51, 51, 51, 1)
 
 #define USERID    @"u_id"
 #define PHONENUM  @"phone_num"
@@ -172,4 +172,19 @@ return shared##className; \
 #define HOUR                (60*60)
 #define MINUTE              60
 
+#define FROMCLASS   @"fromclass"
+#define NOTFROMCLASS  @"notfromclass"
+#define FROMWHERE   @"fromwhere"
 
+#define LOCATIONLABELHEI   18
+
+#define CHATTO   @"    聊私信"
+#define ADDFRIEND  @"    加好友"
+#define CHATW  15
+#define CHATH  15
+#define ADDFRIW  20
+#define ADDFRIH  20
+#define CTOP   11
+#define ATOP   13
+#define CLEFT  24
+#define ALEFT  33

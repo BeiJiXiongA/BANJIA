@@ -18,7 +18,7 @@
         // Initialization code
         headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 10, 40, 40)];
         headerImageView.backgroundColor = [UIColor clearColor];
-        headerImageView.layer.cornerRadius = headerImageView.frame.size.width/2;
+        headerImageView.layer.cornerRadius = 5;
         headerImageView.clipsToBounds = YES;
         [self.contentView addSubview:headerImageView];
         

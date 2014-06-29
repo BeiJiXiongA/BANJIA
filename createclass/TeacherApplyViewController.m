@@ -93,26 +93,28 @@ UIScrollViewDelegate>
     [mainScrollView addSubview:schoolInfoLabel];
     
     UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
-    nameTextField = [[MyTextField alloc] initWithFrame:CGRectMake(27.5, schoolInfoLabel.frame.size.height+schoolInfoLabel.frame.origin.y+20, SCREEN_WIDTH-55, 35)];
-    nameTextField.backgroundColor = [UIColor clearColor];
+    nameTextField = [[MyTextField alloc] initWithFrame:CGRectMake(27.5, schoolInfoLabel.frame.size.height+schoolInfoLabel.frame.origin.y+10, SCREEN_WIDTH-55, 45)];
+    nameTextField.layer.cornerRadius = 5;
+    nameTextField.clipsToBounds = YES;
+    nameTextField.backgroundColor = [UIColor whiteColor];
     nameTextField.tag = 1000;
-    nameTextField.background = inputImage;
+    nameTextField.background = nil;
     nameTextField.placeholder = @"请确认您的姓名";
     nameTextField.text = [Tools user_name];
     nameTextField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
     nameTextField.keyboardType = UIKeyboardAppearanceDefault;
     nameTextField.delegate = self;
-    nameTextField.textColor = TITLE_COLOR;
+    nameTextField.textColor = COMMENTCOLOR;
     nameTextField.returnKeyType = UIReturnKeyDone;
-    nameTextField.font = [UIFont systemFontOfSize:14];
+    nameTextField.font = [UIFont systemFontOfSize:16];
     [mainScrollView addSubview:nameTextField];
     
     UILabel *tip1 = [[UILabel alloc] init];
-    tip1.frame = CGRectMake(nameTextField.frame.origin.x, nameTextField.frame.origin.y+nameTextField.frame.size.height+10, 16*7, 24);
+    tip1.frame = CGRectMake(nameTextField.frame.origin.x, nameTextField.frame.origin.y+nameTextField.frame.size.height+10, 18*7, 24);
     tip1.text = @"您教授的课程是";
     tip1.backgroundColor = [UIColor clearColor];
-    tip1.font = [UIFont systemFontOfSize:16];
-    tip1.textColor = TITLE_COLOR;
+    tip1.font = [UIFont systemFontOfSize:18];
+    tip1.textColor = COMMENTCOLOR;
     [mainScrollView addSubview:tip1];
     
     showObjects = YES;
@@ -122,25 +124,33 @@ UIScrollViewDelegate>
     objectStr = [objectArray firstObject];
     
     showObjectButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    showObjectButton.backgroundColor = [UIColor clearColor];
-    showObjectButton.frame = CGRectMake(tip1.frame.origin.x, tip1.frame.origin.y+tip1.frame.size.height+2, 130, 35);
-    [showObjectButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
-    [showObjectButton setBackgroundImage:inputImage forState:UIControlStateNormal];
+    showObjectButton.backgroundColor = [UIColor whiteColor];
+    showObjectButton.frame = CGRectMake(tip1.frame.origin.x, tip1.frame.origin.y+tip1.frame.size.height+5, 130, 42);
+    [showObjectButton setTitleColor:COMMENTCOLOR forState:UIControlStateNormal];
+    showObjectButton.layer.cornerRadius = 5;
+    showObjectButton.clipsToBounds = YES;
     [showObjectButton setTitle:[objectArray firstObject] forState:UIControlStateNormal];
     [showObjectButton addTarget:self action:@selector(showObject) forControlEvents:UIControlEventTouchUpInside];
     [mainScrollView addSubview:showObjectButton];
     
     objectsTableView = [[UITableView alloc] initWithFrame:CGRectMake(showObjectButton.frame.origin.x, showObjectButton.frame.size.height+showObjectButton.frame.origin.y, showObjectButton.frame.size.width, 0) style:UITableViewStylePlain];
+    objectsTableView.layer.cornerRadius = 5;
+    objectsTableView.clipsToBounds = YES;
     objectsTableView.delegate = self;
     objectsTableView.dataSource = self;
     objectsTableView.tag = 2000;
+    objectsTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     objectsTableView.backgroundColor = [UIColor whiteColor];
     objectsTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     
     
-    objectTextField = [[MyTextField alloc] initWithFrame:CGRectMake(showObjectButton.frame.size.width+showObjectButton.frame.origin.x+10, showObjectButton.frame.origin.y, 130, 35)];
-    objectTextField.background = inputImage;
+    objectTextField = [[MyTextField alloc] initWithFrame:CGRectMake(showObjectButton.frame.size.width+showObjectButton.frame.origin.x+10, showObjectButton.frame.origin.y, 130, 42)];
     objectTextField.tag = 2000;
+    objectTextField.background = nil;
+    objectTextField.backgroundColor = [UIColor whiteColor];
+    objectTextField.layer.cornerRadius = 5;
+    objectTextField.clipsToBounds = YES;
+    objectTextField.textColor = COMMENTCOLOR;
     objectTextField.enabled = NO;
     objectTextField.delegate = self;
     objectTextField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
@@ -156,10 +166,10 @@ UIScrollViewDelegate>
     {
         UILabel *tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, objectTextField.frame.size.height+objectTextField.frame.origin.y+40, SCREEN_WIDTH-20, 20)];
         tipLabel.numberOfLines = 1;
-        tipLabel.font = [UIFont systemFontOfSize:14];
+        tipLabel.font = [UIFont systemFontOfSize:16];
         tipLabel.text = [NSString stringWithFormat:@"您已绑定手机：%@",[Tools phone_num]];
         tipLabel.textAlignment = NSTextAlignmentCenter;
-        tipLabel.textColor = TITLE_COLOR;
+        tipLabel.textColor = COMMENTCOLOR;
         tipLabel.backgroundColor = [UIColor clearColor];
         [mainScrollView addSubview:tipLabel];
     }
@@ -244,6 +254,11 @@ UIScrollViewDelegate>
 {
     [super viewWillDisappear:animated];
     [MobClick endLogPageView:@"PageOne"];
+}
+
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 -(void)returnKeyBoard
@@ -418,7 +433,7 @@ UIScrollViewDelegate>
     {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:objectCell];
     }
-    cell.textLabel.textColor = TITLE_COLOR;
+    cell.textLabel.textColor = COMMENTCOLOR;
     cell.textLabel.font = [UIFont systemFontOfSize:17];
     cell.textLabel.textAlignment = NSTextAlignmentCenter;
     cell.textLabel.text = [objectArray objectAtIndex:indexPath.row];

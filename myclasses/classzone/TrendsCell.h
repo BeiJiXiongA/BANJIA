@@ -9,6 +9,13 @@
 #import <UIKit/UIKit.h>
 #import "MyButton.h"
 
+#define ColumnPerRow  8
+#define PraiseW   31
+#define PraiseH   31
+#define PraiseCellHeight  37
+
+@protocol NameButtonDel;
+
 @interface TrendsCell : UITableViewCell<UITableViewDataSource,UITableViewDelegate>
 @property (nonatomic, strong) UIView *bgView;
 @property (nonatomic, strong) UIImageView *headerImageView;
@@ -25,4 +32,20 @@
 @property (nonatomic, strong) UITableView *commentsTableView;
 @property (nonatomic, strong) NSArray *commentsArray;
 @property (nonatomic, strong) NSArray *praiseArray;
+@property (nonatomic, assign) BOOL showAllComments;
+@property (nonatomic, assign) id<NameButtonDel> nameButtonDel;
+@property (nonatomic, strong) NSDictionary *diaryDetailDict;
+@property (nonatomic, strong) UIImageView *topImageView;
+
+@property (nonatomic, strong) UIView *geduan1;
+@property (nonatomic, strong) UIView *geduan2;
+
+
+@property (nonatomic, assign) BOOL openPraise;
+@end
+
+@protocol NameButtonDel <NSObject>
+
+-(void)nameButtonClick:(NSDictionary *)dict;
+
 @end

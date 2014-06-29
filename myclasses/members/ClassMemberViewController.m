@@ -141,6 +141,7 @@ MsgDelegate>
                    CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH-0, 40)];
     mySearchBar.delegate = self;
     mySearchBar.placeholder = @"输入成员姓名";
+    mySearchBar.contentMode = UIControlContentHorizontalAlignmentLeft;
     mySearchBar.backgroundColor = [UIColor whiteColor];
     [self.bgView addSubview:mySearchBar];
     
@@ -258,11 +259,6 @@ MsgDelegate>
     [[XDTabViewController sharedTabViewController] viewWillAppear:NO];
 }
 
--(void)mybackClick
-{
-    [self unShowSelfViewController];
-}
-
 #pragma mark - subGroupdelegate
 -(void)subGroupUpdate:(BOOL)update
 {
@@ -276,7 +272,7 @@ MsgDelegate>
 {
     if (update)
     {
-        [self getMembersByClass:@"all"];
+        [self manageClassMember];
         [[XDTabViewController sharedTabViewController] viewWillAppear:NO];
     }
 }
@@ -377,6 +373,8 @@ MsgDelegate>
 -(void)backClick
 {
     [[XDTabViewController sharedTabViewController] dismissViewControllerAnimated:YES completion:nil];
+    [[NSUserDefaults standardUserDefaults] setObject:NOTFROMCLASS forKey:FROMWHERE];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 -(void)inviteClick
@@ -646,7 +644,7 @@ MsgDelegate>
     
     [allMembersArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"checked":@"1"} andTableName:CLASSMEMBERTABLE]];
     //老师
-    [teachersArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"role":@"teachers"} andTableName:CLASSMEMBERTABLE]];
+    [teachersArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"role":@"teachers",@"checked":@"1"} andTableName:CLASSMEMBERTABLE]];
     
     //新申请
     [newAppleArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"checked":@"0"} andTableName:CLASSMEMBERTABLE]];
@@ -657,7 +655,7 @@ MsgDelegate>
     
     
     [parentsArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"role":@"parents"} andTableName:CLASSMEMBERTABLE]];
-    studentArray = [_db findSetWithDictionary:@{@"classid":classID,@"role":@"students"} andTableName:CLASSMEMBERTABLE];
+    studentArray = [_db findSetWithDictionary:@{@"classid":classID,@"role":@"students",@"checked":@"1"} andTableName:CLASSMEMBERTABLE];
     
     for (int i=0; i<[studentArray count]; ++i)
     {
@@ -811,17 +809,18 @@ MsgDelegate>
         {
             UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 0, SCREEN_WIDTH-15, 27)];
             headerLabel.text = @"    班干部";
-            headerLabel.backgroundColor = RGB(234, 234, 234, 1);
-            headerLabel.font = [UIFont boldSystemFontOfSize:16];
-            headerLabel.textColor = TITLE_COLOR;
+            headerLabel.backgroundColor = RGB(53, 188, 100, 1);
+            headerLabel.font = [UIFont systemFontOfSize:16];
+            headerLabel.textColor = [UIColor whiteColor];
             return headerLabel;
         }
         else
         {
             UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 0, SCREEN_WIDTH-15, 27)];
             headerLabel.text = [NSString stringWithFormat:@"    %@",[[membersArray objectAtIndex:section-2] objectForKey:@"key"]];
-            headerLabel.textColor = TITLE_COLOR;
-            headerLabel.backgroundColor = RGB(234, 234, 234, 1);
+            headerLabel.backgroundColor = RGB(196, 192, 200, 1);
+            headerLabel.font = [UIFont systemFontOfSize:14];
+            headerLabel.textColor = [UIColor whiteColor];
             return headerLabel;
         }
     }
@@ -846,7 +845,7 @@ MsgDelegate>
             cell.remarkLabel.hidden = NO;
             cell.memNameLabel.text = nil;
             cell.remarkLabel.text = nil;
-            cell.memNameLabel.frame = CGRectMake(60, 15, 150, 30);
+            cell.memNameLabel.frame = CGRectMake(60, 15, 130, 30);
             
             cell.markView.frame = CGRectMake(10, 10, 40, 40);
             cell.markView.layer.cornerRadius = 3;
@@ -856,31 +855,55 @@ MsgDelegate>
             {
                 if ([newAppleArray count] > 0)
                 {
-                    UIImage *image = [Tools getImageFromImage:[UIImage imageNamed:@"bg_bor_green"] andInsets:UIEdgeInsetsMake(0.2, 0, 0.2, 0)];
+                    cell.headerImageView.hidden = NO;
+                    cell.headerImageView.frame = CGRectMake(87, 20, 22, 20);
+                    [cell.headerImageView setImage:[UIImage imageNamed:@"newapplyheader"]];
                     
+                    cell.contentLabel.frame = CGRectMake(75, 8.5, 178, 47);
+                    cell.contentLabel.layer.cornerRadius = 8;
+                    cell.contentLabel.clipsToBounds = YES;
+                    cell.contentLabel.hidden = NO;
+                    cell.contentLabel.backgroundColor = [UIColor whiteColor];
+                    cell.contentLabel.layer.borderColor = TIMECOLOR.CGColor;
+                    cell.contentLabel.layer.borderWidth = 0.3;
+                    
+                    cell.memNameLabel.frame = CGRectMake(120, 16, 105, 30);
+                    cell.memNameLabel.text = [NSString stringWithFormat:@"%d个新申请",[newAppleArray count]];
+                    cell.memNameLabel.textColor = CONTENTCOLOR;
+                    
+                    cell.markView.frame = CGRectMake(226, 25, 8, 12);
+                    [cell.markView setImage:[UIImage imageNamed:@"discovery_arrow"]];
                     cell.markView.hidden = NO;
-                    cell.markView.frame = CGRectMake(1.5, 0.5, image.size.width, 59);
-                    [cell.markView setImage:image];
-                    cell.memNameLabel.text = @"新的成员申请";
-                    cell.remarkLabel.textColor = [UIColor redColor];
-                    cell.remarkLabel.text = [NSString stringWithFormat:@"%d人",[newAppleArray count]];
+                    cell.backgroundColor = self.bgView.backgroundColor;
+                }
+                else
+                {
+                    cell.memNameLabel.hidden = YES;
+                    cell.markView.hidden = YES;
+                    cell.remarkLabel.hidden = YES;
+                    cell.headerImageView.hidden = YES;
+                    cell.contentLabel.hidden = YES;
                 }
             }
             else if (indexPath.row == 1)
             {
-                UIImage *image = [Tools getImageFromImage:[UIImage imageNamed:@"bg_bor_green"] andInsets:UIEdgeInsetsMake(0.2, 0, 0.2, 0)];
+                UIImage *image = [Tools getImageFromImage:[UIImage imageNamed:@"teachers_icon"] andInsets:UIEdgeInsetsMake(0.2, 0, 0.2, 0)];
                 cell.markView.hidden = NO;
                 [cell.markView setImage:image];
                 cell.memNameLabel.text = @"老师";
                 cell.remarkLabel.text = [NSString stringWithFormat:@"%d人",[teachersArray count]];
+                cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+                cell.selectionStyle = UITableViewCellSelectionStyleGray;
             }
             else if(indexPath.row == 2)
             {
-                UIImage *image = [Tools getImageFromImage:[UIImage imageNamed:@"bg_bor_orang"] andInsets:UIEdgeInsetsMake(0.2, 0, 0.2, 0)];
+                UIImage *image = [Tools getImageFromImage:[UIImage imageNamed:@"admins_icon"] andInsets:UIEdgeInsetsMake(0.2, 0, 0.2, 0)];
                 cell.markView.hidden = NO;
                 [cell.markView setImage:image];
-                cell.memNameLabel.text = @"班级管理员";
+                cell.memNameLabel.text = @"管理员";
                 cell.remarkLabel.text = [NSString stringWithFormat:@"%d人",[adminArray count]];
+                cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+                cell.selectionStyle = UITableViewCellSelectionStyleGray;
             }
             else if(indexPath.row == 3)
             {
@@ -889,8 +912,10 @@ MsgDelegate>
                 [cell.markView setImage:image];
                 cell.memNameLabel.text = @"应添加家长的学生";
                 cell.remarkLabel.text = [NSString stringWithFormat:@"%d人",[withoutParentStuArray count]];
+                cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+                cell.selectionStyle = UITableViewCellSelectionStyleGray;
             }
-            cell.selectionStyle = UITableViewCellSelectionStyleGray;
+            
             UIImageView *bgImageBG = [[UIImageView alloc] init];
             bgImageBG.image = [UIImage imageNamed:@"line3"];
             bgImageBG.backgroundColor = [UIColor clearColor];
@@ -911,16 +936,13 @@ MsgDelegate>
             [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERBG];
             cell.headerImageView.layer.cornerRadius = 3;
             cell.headerImageView.clipsToBounds = YES;
-            cell.remarkLabel.frame = CGRectMake(SCREEN_WIDTH - 130, 15, 100, 30);
             cell.remarkLabel.hidden = NO;
-            cell.remarkLabel.font = [UIFont systemFontOfSize:16];
+//            cell.remarkLabel.font = [UIFont systemFontOfSize:16];
             if (![[dict objectForKey:@"title"] isEqual:[NSNull null]])
             {
                 cell.remarkLabel.text = [dict objectForKey:@"title"];
             }
-            cell.selectionStyle = UITableViewCellSelectionStyleGray;
-            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_angle"]];
-            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 20, 10, 16)];
+            
             UIImageView *bgImageBG = [[UIImageView alloc] init];
             bgImageBG.image = [UIImage imageNamed:@"line3"];
             bgImageBG.backgroundColor = [UIColor clearColor];
@@ -1055,8 +1077,14 @@ MsgDelegate>
             {
                 studentDetail.title = [dict objectForKey:@"title"];
             }
-            
-            studentDetail.headerImg = [dict objectForKey:@"img_icon"];
+            if(![[dict objectForKey:@"img_icon"] isEqual:[NSNull null]] && [[dict objectForKey:@"img_icon"] length] > 15)
+            {
+                studentDetail.headerImg = [dict objectForKey:@"img_icon"];
+            }
+            else
+            {
+                studentDetail.headerImg = @"";
+            }
             studentDetail.memDel = self;
             studentDetail.role = [dict objectForKey:@"role"];
             [[XDTabViewController sharedTabViewController].navigationController pushViewController:studentDetail animated:YES];

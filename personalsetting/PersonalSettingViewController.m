@@ -115,8 +115,8 @@ UIActionSheetDelegate>
     
     UIButton *shareButton = [UIButton buttonWithType:UIButtonTypeCustom];
     shareButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
-    [shareButton setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
     [shareButton setTitle:@"分享" forState:UIControlStateNormal];
+    [shareButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [shareButton addTarget:self action:@selector(shareAPP:) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:shareButton];
 }
@@ -352,15 +352,15 @@ UIActionSheetDelegate>
             cell.relateButton.tag = indexPath.row+1000;
             cell.relateButton.frame = CGRectMake(SCREEN_WIDTH-100, 17, 80, 26);
             cell.nametf.frame = CGRectMake(60, 15, 170, 30);
+            
             if (indexPath.row == 1)
             {
+                cell.contentLabel.text = [NSString stringWithFormat:@"QQ账号"];
                 if ([[[NSUserDefaults standardUserDefaults] objectForKey:QQNICKNAME] length] >0)
                 {
                     cell.nametf.frame = CGRectMake(SCREEN_WIDTH-150, 17, 120, 26);
                     cell.nametf.text = [[NSUserDefaults standardUserDefaults] objectForKey:QQNICKNAME];
                     [cell.relateButton setTitle:@"" forState:UIControlStateNormal];
-////                    [cell.relateButton removeTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-//                    [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
                 }
                 else
                 {
@@ -373,13 +373,12 @@ UIActionSheetDelegate>
             }
             else if(indexPath.row == 2)
             {
+                cell.contentLabel.text = [NSString stringWithFormat:@"新浪账号"];
                 if ([[[NSUserDefaults standardUserDefaults] objectForKey:SINANICKNAME] length] > 0)
                 {
                     cell.nametf.text = [[NSUserDefaults standardUserDefaults] objectForKey:SINANICKNAME];
                     cell.nametf.frame = CGRectMake(SCREEN_WIDTH-150, 17, 120, 26);
                     [cell.relateButton setTitle:@"" forState:UIControlStateNormal];
-////                    [cell.relateButton removeTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-//                    [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
                 }
                 else
                 {
@@ -392,13 +391,12 @@ UIActionSheetDelegate>
             }
             else if(indexPath.row == 3)
             {
+                cell.contentLabel.text = [NSString stringWithFormat:@"人人账号"];
                 if ([[[NSUserDefaults standardUserDefaults] objectForKey:RRNICKNAME] length] > 0)
                 {
                     cell.nametf.text = [[NSUserDefaults standardUserDefaults] objectForKey:RRNICKNAME];
                     [cell.relateButton setTitle:@"" forState:UIControlStateNormal];
                     cell.nametf.frame = CGRectMake(SCREEN_WIDTH-150, 17, 120, 26);
-////                     [cell.relateButton removeTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-//                    [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
                 }
                 else
                 {
@@ -413,7 +411,8 @@ UIActionSheetDelegate>
             cell.nametf.font = [UIFont systemFontOfSize:16];
             cell.nametf.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
             cell.nametf.enabled = NO;
-            
+            cell.contentLabel.frame = CGRectMake(cell.iconImageView.frame.size.width+cell.iconImageView.frame.origin.x+10, cell.iconImageView.frame.origin.y+4, 80, 30);
+            cell.contentLabel.font = [UIFont systemFontOfSize:18];
             cell.nametf.returnKeyType = UIReturnKeyDone;
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
             return cell;

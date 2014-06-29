@@ -98,18 +98,20 @@ UIScrollViewDelegate>
     schoolInfoLabel.textColor = TITLE_COLOR;
     [mainScrollView addSubview:schoolInfoLabel];
     
-    UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
-    childNameTextField = [[MyTextField alloc] initWithFrame:CGRectMake(27.5, schoolInfoLabel.frame.size.height+schoolInfoLabel.frame.origin.y+20, SCREEN_WIDTH-55, 35)];
-    childNameTextField.backgroundColor = [UIColor clearColor];
+//    UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
+    childNameTextField = [[MyTextField alloc] initWithFrame:CGRectMake(27.5, schoolInfoLabel.frame.size.height+schoolInfoLabel.frame.origin.y+20, SCREEN_WIDTH-55, 42)];
+    childNameTextField.backgroundColor = [UIColor whiteColor];
     childNameTextField.tag = 1000;
-    childNameTextField.background = inputImage;
+    childNameTextField.background = nil;
+    childNameTextField.layer.cornerRadius = 5;
+    childNameTextField.clipsToBounds = YES;
     childNameTextField.placeholder = @"请输入您的孩子姓名";
     childNameTextField.keyboardType = UIKeyboardAppearanceDefault;
     childNameTextField.delegate = self;
     childNameTextField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
     childNameTextField.textColor = TITLE_COLOR;
     childNameTextField.returnKeyType = UIReturnKeyDone;
-    childNameTextField.font = [UIFont systemFontOfSize:14];
+    childNameTextField.font = [UIFont systemFontOfSize:16];
     [mainScrollView addSubview:childNameTextField];
     
     UILabel *relateLabel = [[UILabel alloc] initWithFrame:CGRectMake(childNameTextField.frame.origin.x, childNameTextField.frame.origin.y+childNameTextField.frame.size.height+10, 85, 30)];
@@ -127,10 +129,11 @@ UIScrollViewDelegate>
     relateStr = [relateArray firstObject];
     
     relateButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    relateButton.backgroundColor = [UIColor clearColor];
-    relateButton.frame = CGRectMake(relateLabel.frame.origin.x, relateLabel.frame.origin.y+relateLabel.frame.size.height, 95, 35);
-    [relateButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
-    [relateButton setBackgroundImage:inputImage forState:UIControlStateNormal];
+    relateButton.backgroundColor = [UIColor whiteColor];
+    relateButton.layer.cornerRadius = 5;
+    relateButton.clipsToBounds = YES;
+    relateButton.frame = CGRectMake(relateLabel.frame.origin.x, relateLabel.frame.origin.y+relateLabel.frame.size.height, 95, 42);
+    [relateButton setTitleColor:COMMENTCOLOR forState:UIControlStateNormal];
     [relateButton setTitle:[relateArray firstObject] forState:UIControlStateNormal];
     [relateButton addTarget:self action:@selector(selectRelate) forControlEvents:UIControlEventTouchUpInside];
     [mainScrollView addSubview:relateButton];
@@ -139,19 +142,22 @@ UIScrollViewDelegate>
     relateTableView.delegate = self;
     relateTableView.dataSource = self;
     relateTableView.tag = 2000;
+    relateTableView.layer.cornerRadius = 5;
+    relateTableView.clipsToBounds = YES;
     relateTableView.backgroundColor = [UIColor whiteColor];
     relateTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     
 
-    relatetextField = [[MyTextField alloc] initWithFrame:CGRectMake(relateButton.frame.size.width+relateButton.frame.origin.x+10, relateButton.frame.origin.y, 83.5+relateLabel.frame.size.width, 35)];
-    relatetextField.background = inputImage;
+    relatetextField = [[MyTextField alloc] initWithFrame:CGRectMake(relateButton.frame.size.width+relateButton.frame.origin.x+10, relateButton.frame.origin.y, 83.5+relateLabel.frame.size.width, 42)];
+    relatetextField.background = nil;
     relatetextField.tag = 2000;
     relatetextField.placeholder = @"请输入";
     relatetextField.delegate = self;
+    relatetextField.backgroundColor = [UIColor whiteColor];
     relatetextField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
     relatetextField.clearButtonMode = UITextFieldViewModeWhileEditing;
     relatetextField.font = [UIFont systemFontOfSize:17];
-    relatetextField.textColor = TITLE_COLOR;
+    relatetextField.textColor = COMMENTCOLOR;
     [mainScrollView addSubview:relatetextField];
     
     relatetextField.hidden = YES;
@@ -160,10 +166,10 @@ UIScrollViewDelegate>
     {
         UILabel *tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, relatetextField.frame.size.height+relatetextField.frame.origin.y+40, SCREEN_WIDTH-20, 20)];
         tipLabel.numberOfLines = 1;
-        tipLabel.font = [UIFont systemFontOfSize:14];
+        tipLabel.font = [UIFont systemFontOfSize:16];
         tipLabel.text = [NSString stringWithFormat:@"您已绑定手机：%@",[Tools phone_num]];
         tipLabel.textAlignment = NSTextAlignmentCenter;
-        tipLabel.textColor = TITLE_COLOR;
+        tipLabel.textColor = COMMENTCOLOR;
         tipLabel.backgroundColor = [UIColor clearColor];
         [mainScrollView addSubview:tipLabel];
     }
@@ -211,7 +217,7 @@ UIScrollViewDelegate>
         [mainScrollView addSubview:checkCodeButton];
     }
     
-    UIImage *btnImage  =[Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
+    UIImage *btnImage  =[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
     studentButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [studentButton setTitle:@"提交" forState:UIControlStateNormal];
     studentButton.enabled = NO;
@@ -467,7 +473,7 @@ UIScrollViewDelegate>
     {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:relateCell];
     }
-    cell.textLabel.textColor = TITLE_COLOR;
+    cell.textLabel.textColor = COMMENTCOLOR;
     cell.textLabel.font = [UIFont systemFontOfSize:17];
     cell.textLabel.textAlignment = NSTextAlignmentCenter;
     cell.textLabel.text = [relateArray objectAtIndex:indexPath.row];

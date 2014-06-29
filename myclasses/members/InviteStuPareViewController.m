@@ -12,9 +12,15 @@
 #import <AddressBookUI/AddressBookUI.h>
 #import <MessageUI/MessageUI.h>
 
+#import "PersonalSettingCell.h"
+#import "ClassCell.h"
+
 #define TIPSLABEL_TAG 10086
 
 #define BUFFER_SIZE 1024 * 100
+
+#define InviteWayTag 22222
+#define ParentTableViewtag 33333
 
 @interface InviteStuPareViewController ()<UITableViewDataSource,UITableViewDelegate,UITextFieldDelegate,MFMessageComposeViewControllerDelegate>
 {
@@ -22,7 +28,6 @@
     NSArray *parentArray;
     UITextField *parentTextField;
     UILabel *parentLabel;
-    UIImageView *bg2;
     
     NSString *relateString;
     
@@ -31,6 +36,11 @@
     BOOL open;
     
     UILabel *tipLabel;
+    
+    UITableView *inviteWayTableview;
+    
+    NSArray *waynames;
+    NSArray *iconsArray;
 }
 @end
 
@@ -54,6 +64,9 @@
     
     relateString = @"";
     
+    self.stateView.frame = CGRectMake(0, YSTART, 0, 0);
+    self.view.backgroundColor = [UIColor blackColor];
+    
     className = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
     schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
@@ -61,76 +74,72 @@
     self.titleLabel.text = @"邀请学生家长";
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     
-    NSString *tipStr = [NSString stringWithFormat:@"您正在邀请%@的",name];
-    tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(30, UI_NAVIGATION_BAR_HEIGHT+45, [tipStr length]*18, 30)];
+    NSString *tipStr = [NSString stringWithFormat:@"您邀请%@的",name];
+    tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(27, UI_NAVIGATION_BAR_HEIGHT+20, 140, 30)];
     tipLabel.text = tipStr;
-    tipLabel.textColor = [UIColor grayColor];
-    tipLabel.backgroundColor = [UIColor clearColor];
-    [self.bgView addSubview:tipLabel];    
+    tipLabel.textColor = CONTENTCOLOR;
+    tipLabel.backgroundColor = self.bgView.backgroundColor;
+    [self.bgView addSubview:tipLabel];
     
-    UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
+    UIButton *parentButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    parentButton.frame = CGRectMake(tipLabel.frame.origin.x, tipLabel.frame.size.height+tipLabel.frame.origin.y+20, 140, 42);
+//    parentButton.backgroundColor = [UIColor clearColor];
+//    [parentButton addTarget:self action:@selector(opentableview) forControlEvents:UIControlEventTouchUpInside];
+
     
-    CGFloat yyy = tipLabel.frame.size.height+tipLabel.frame.origin.y;
+    parentLabel = [[UILabel alloc] initWithFrame:CGRectMake(tipLabel.frame.origin.x, tipLabel.frame.size.height+tipLabel.frame.origin.y+20, 140, 42)];
+    parentLabel.backgroundColor = [UIColor whiteColor];
+    parentLabel.textColor = CONTENTCOLOR;
+    parentLabel.text = @"    爸爸";
+    parentLabel.layer.cornerRadius = 8;
+    parentLabel.clipsToBounds = YES;
+    parentLabel.font = [UIFont systemFontOfSize:16];
+    [self.bgView addSubview:parentLabel];
     
-    bg2 = [[UIImageView alloc] initWithFrame:CGRectMake(27, yyy+20, 134, 30)];
-    [bg2 setImage:inputImage];
-    [self.bgView addSubview:bg2];
+    UITapGestureRecognizer *openTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(opentableview)];
+    parentLabel.userInteractionEnabled = YES;
+    [parentLabel addGestureRecognizer:openTgr];
     
-    parentsTableView = [[UITableView alloc] initWithFrame:CGRectMake(27, bg2.frame.size.height+bg2.frame.origin.y, bg2.frame.size.width, 0) style:UITableViewStylePlain];
+    parentsTableView = [[UITableView alloc] initWithFrame:CGRectMake(27, parentLabel.frame.size.height+parentLabel.frame.origin.y+10, tipLabel.frame.size.width, 0) style:UITableViewStylePlain];
     parentsTableView.delegate = self;
     parentsTableView.dataSource = self;
-    parentsTableView.tag = 1000;
+    parentsTableView.tag = ParentTableViewtag;
     parentsTableView.backgroundColor = [UIColor whiteColor];
     [self.bgView addSubview:parentsTableView];
+    parentsTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    parentsTableView.layer.cornerRadius = 5;
+    parentsTableView.clipsToBounds = YES;
     
-    parentLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 5, 60, 20)];
-    parentLabel.backgroundColor = [UIColor clearColor];
-    parentLabel.textColor = [UIColor grayColor];
-    parentLabel.text = @"爸爸";
-    parentLabel.textAlignment = NSTextAlignmentCenter;
-    parentLabel.font = [UIFont systemFontOfSize:15];
-    [bg2 addSubview:parentLabel];
+//    [self.bgView addSubview:parentButton];
 
-    UIButton *parentButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    parentButton.frame = CGRectMake(parentsTableView.frame.origin.x, parentsTableView.frame.size.height+parentsTableView.frame.origin.y-30, parentsTableView.frame.size.width, 30);
-    parentButton.backgroundColor = [UIColor clearColor];
-    [parentButton addTarget:self action:@selector(opentableview) forControlEvents:UIControlEventTouchUpInside];
-    [self.bgView addSubview:parentButton];
-    
     parentArray = [[NSArray alloc] initWithObjects:@"爸爸",@"妈妈",@"爷爷",@"奶奶",@"输入", nil];
     
-    parentTextField = [[UITextField alloc] initWithFrame:CGRectMake(parentButton.frame.size.width+parentButton.frame.origin.x+20 , parentButton.frame.origin.y, 100, 30)];
+    parentTextField = [[UITextField alloc] initWithFrame:CGRectMake(parentButton.frame.size.width+parentButton.frame.origin.x+20 , parentButton.frame.origin.y, 100, 42)];
     parentTextField.enabled = NO;
     parentTextField.hidden = YES;
     parentTextField.placeholder = @"输入";
     parentTextField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
     parentTextField.delegate = self;
+    parentTextField.backgroundColor = [UIColor whiteColor];
     parentTextField.textAlignment = NSTextAlignmentCenter;
-    parentTextField.background = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
     parentTextField.font = [UIFont systemFontOfSize:15];
     [self.bgView addSubview:parentTextField];
+    parentTextField.clipsToBounds = YES;
+    parentTextField.layer.cornerRadius = 5;
     
     
     UITapGestureRecognizer *tgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(opentableview)];
     parentTextField.userInteractionEnabled = YES;
     [parentTextField addGestureRecognizer:tgr];
     
-    NSArray *array = [[NSArray alloc] initWithObjects:@"QQ好友邀请",@"微信好友邀请",@"手机短信邀请", nil];
-    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
-
-    buttonView = [[UIView alloc] initWithFrame:CGRectMake(30, parentsTableView.frame.size.height+parentsTableView.frame.origin.y+20, SCREEN_WIDTH-60, 40*[array count])];
-    [self.bgView addSubview:buttonView];
+    waynames = [[NSArray alloc] initWithObjects:@"微信",@"QQ好友",@"手机短信",@"邀请好友", nil];
+    iconsArray = @[@"weichat",@"QQicon",@"mesginviteicon",@"invitefriendicon"];
     
-    for (int i=0; i<[array count]; ++i)
-    {
-        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-        button.frame = CGRectMake(0, 40*i, SCREEN_WIDTH-60, 38);
-        [button setTitle:[array objectAtIndex:i] forState:UIControlStateNormal];
-        [button addTarget:self action:@selector(inviteButtonClick:) forControlEvents:UIControlEventTouchUpInside];
-        button.tag = 1000+i;
-        [button setBackgroundImage:btnImage forState:UIControlStateNormal];
-        [buttonView addSubview:button];
-    }
+    inviteWayTableview = [[UITableView alloc] initWithFrame:CGRectMake(0, 159, SCREEN_WIDTH, 200) style:UITableViewStylePlain];
+    inviteWayTableview.tag = InviteWayTag;
+    inviteWayTableview.delegate = self;
+    inviteWayTableview.dataSource = self;
+    [self.bgView addSubview:inviteWayTableview];
     
     [self.bgView addSubview:parentsTableView];
 }
@@ -152,90 +161,153 @@
     {
         
         [UIView animateWithDuration:0.2 animations:^{
-            parentsTableView.frame = CGRectMake(27, parentsTableView.frame.origin.y, bg2.frame.size.width, [parentArray count]*30);
-            buttonView.frame = CGRectMake(30, parentsTableView.frame.size.height+parentsTableView.frame.origin.y+10, SCREEN_WIDTH-60, 120);
+            parentsTableView.frame = CGRectMake(27, parentsTableView.frame.origin.y, tipLabel.frame.size.width, [parentArray count]*42);
         }];
     }
     else
     {
         [UIView animateWithDuration:0.2 animations:^{
-            parentsTableView.frame = CGRectMake(27, parentsTableView.frame.origin.y, bg2.frame.size.width, 0);
-            buttonView.frame = CGRectMake(30, parentsTableView.frame.size.height+parentsTableView.frame.origin.y+20, SCREEN_WIDTH-60, 120);
-
+            parentsTableView.frame = CGRectMake(27, parentsTableView.frame.origin.y, tipLabel.frame.size.width, 0);
         }];
     }
     open = !open;
     [parentsTableView reloadData];
 }
 
+-(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+{
+    if (tableView.tag == InviteWayTag)
+    {
+        return 50;
+    }
+    return 0;
+}
+
+-(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+{
+    if (tableView.tag == InviteWayTag)
+    {
+        UILabel *headerlabel = [[UILabel alloc] init];
+        headerlabel.font = [UIFont systemFontOfSize:16];
+        headerlabel.textColor = CONTENTCOLOR;
+        headerlabel.text = @"      通过哪种方式邀请:";
+        headerlabel.backgroundColor = self.bgView.backgroundColor;
+        return headerlabel;
+    }
+    return nil;
+}
+
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return [parentArray count];
+    if (tableView.tag == ParentTableViewtag)
+    {
+        return [parentArray count];
+    }
+    else
+    {
+        return 3;
+    }
 }
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return 30;
+    if (tableView.tag == ParentTableViewtag)
+    {
+        return 42;
+    }
+    return 50;
 }
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    static NSString *relateCell = @"relateCell";
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:relateCell];
-    if (cell == nil)
+    if (tableView.tag == ParentTableViewtag)
     {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:relateCell];
+        static NSString *parentcell = @"invitepareobject";
+        ClassCell *cell = [tableView dequeueReusableCellWithIdentifier:parentcell];
+        if (cell == nil)
+        {
+            cell = [[ClassCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:parentcell];
+        }
+        cell.nameLabel.text = [parentArray objectAtIndex:indexPath.row];
+        cell.nameLabel.frame = CGRectMake(20, 6, 150, 30);
+        return cell;
     }
-    cell.textLabel.text = [parentArray objectAtIndex:indexPath.row];
-    cell.contentView.backgroundColor = [UIColor clearColor];
-    cell.textLabel.textColor = [UIColor grayColor];
-    cell.textLabel.font = [UIFont systemFontOfSize:14];
-    cell.selectionStyle = UITableViewCellSelectionStyleNone;
-    return cell;
+    else if(tableView.tag == InviteWayTag)
+    {
+        static NSString *authcell = @"section0";
+        PersonalSettingCell *cell = [tableView dequeueReusableCellWithIdentifier:authcell];
+        if (cell == nil)
+        {
+            cell = [[PersonalSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:authcell];
+        }
+        cell.nameLabel.font = [UIFont systemFontOfSize:18];
+        cell.nameLabel.textAlignment = NSTextAlignmentLeft;
+        cell.nameLabel.frame = CGRectMake(60, 10, 100, 30);
+        cell.nameLabel.textColor = TITLE_COLOR;
+        
+        cell.headerImageView.frame = CGRectMake(10, 8, 34, 34);
+        cell.headerImageView.layer.cornerRadius = 3;
+        cell.headerImageView.clipsToBounds = YES;
+        [cell.headerImageView setImage:[UIImage imageNamed:[iconsArray objectAtIndex:indexPath.row]]];
+        
+        cell.nameLabel.text = [waynames objectAtIndex:indexPath.row];
+        
+        if ([cell respondsToSelector:@selector(setSeparatorInset:)])
+        {
+            [cell setSeparatorInset:UIEdgeInsetsMake(0, 50, 0, 0)];
+        }
+        
+        cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"discovery_arrow"]];
+        [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 15, 10, 15)];
+        
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        return cell;
+    }
+    return nil;
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.row == [parentArray count]-1)
+    [parentTextField resignFirstResponder];
+    if (tableView.tag == ParentTableViewtag)
     {
-        parentLabel.text = nil;
-        parentTextField.enabled = YES;
-        parentTextField.hidden = NO;
-        [parentTextField becomeFirstResponder];
-        [tableView deselectRowAtIndexPath:indexPath animated:YES];
-        [self opentableview];
+        if (indexPath.row == [parentArray count]-1)
+        {
+            parentLabel.text = nil;
+            parentTextField.enabled = YES;
+            parentTextField.hidden = NO;
+            [parentTextField becomeFirstResponder];
+            [tableView deselectRowAtIndexPath:indexPath animated:YES];
+            [self opentableview];
+        }
+        else
+        {
+            parentLabel.text = [NSString stringWithFormat:@"    %@",[parentArray objectAtIndex:indexPath.row]];
+            [tableView deselectRowAtIndexPath:indexPath animated:YES];
+            parentTextField.enabled = NO;
+            parentTextField.hidden = YES;
+            parentTextField.text = nil;
+            [self opentableview];
+        }
     }
-    else
+    else if(tableView.tag == InviteWayTag)
     {
-        parentLabel.text = [parentArray objectAtIndex:indexPath.row];
-        [tableView deselectRowAtIndexPath:indexPath animated:YES];
-        parentTextField.enabled = NO;
-        parentTextField.hidden = YES;
-        parentTextField.text = nil;
-        [self opentableview];
-    }
-}
-
--(void)inviteButtonClick:(UIButton *)button
-{
-    if (button.tag == 1000)
-    {
-        //QQ好友邀请
-        [self shareToQQFriendClickHandler:nil];
-    }
-    else if(button.tag == 1001)
-    {
-        //微信好友邀请
-        [self inviteWeiXin];
-    }
-    else if(button.tag == 1002)
-    {
-        //手机短信邀请
-        [self showMessageView];
-    }
-    else if(button.tag == 1003)
-    {
-        //邀请好友
+        if(indexPath.row == 0)
+        {
+            [self inviteWeiXin];
+        }
+        else if(indexPath.row == 1)
+        {
+            [self shareToQQFriendClickHandler:nil];
+        }
+        else if(indexPath.row == 2)
+        {
+            [self showMessageView];
+        }
+        else if(indexPath.row == 3)
+        {
+            
+        }
     }
 }
 

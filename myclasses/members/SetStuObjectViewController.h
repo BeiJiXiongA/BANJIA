@@ -19,4 +19,5 @@
 @property (nonatomic, strong) NSString *userid;
 @property (nonatomic, strong) NSString *classID;
 @property (nonatomic, strong) id<SetStudentObject> setStudel;
+@property (nonatomic, strong) NSString *title;
 @end

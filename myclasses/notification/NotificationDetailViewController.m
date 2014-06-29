@@ -53,7 +53,7 @@ UIActionSheetDelegate>
 @end
 
 @implementation NotificationDetailViewController
-@synthesize noticeContent,noticeID,c_read,byID,readnotificationDetaildel,isnew;
+@synthesize noticeContent,noticeID,c_read,byID,readnotificationDetaildel,isnew,fromClass,markString;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -67,8 +67,13 @@ UIActionSheetDelegate>
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-//    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-    self.view.backgroundColor = [UIColor blackColor];
+
+    if (fromClass)
+    {
+        self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+        self.view.backgroundColor = [UIColor blackColor];
+    }
+    
     
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
@@ -79,24 +84,30 @@ UIActionSheetDelegate>
     [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:moreButton];
     
-    self.titleLabel.text = @"公告详情";
+    self.titleLabel.text = @"通知详情";
     readArray = [[NSMutableArray alloc] initWithCapacity:0];
     unreaderArray = [[NSMutableArray alloc] initWithCapacity:0];
     
-//    UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
-//    UIImageView *inputBg = [[UIImageView alloc] initWithFrame:CGRectMake(4, UI_NAVIGATION_BAR_HEIGHT+5, SCREEN_WIDTH-8, 155)];
-//    [inputBg setImage:inputImage];
-//    [self.bgView addSubview:inputBg];
+    UIImageView *inputBg = [[UIImageView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, 155)];
+    inputBg.backgroundColor = [UIColor whiteColor];
+    [self.bgView addSubview:inputBg];
     
-    contentTextView = [[UITextView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, 152)];
+    contentTextView = [[UITextView alloc] initWithFrame:CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH-20, 115)];
     contentTextView.backgroundColor = [UIColor whiteColor];
     contentTextView.editable = NO;
-    contentTextView.scrollEnabled = NO;
-    contentTextView.contentInset = UIEdgeInsetsMake(10, 10, 18, 10);
-    contentTextView.textColor = TITLE_COLOR;
+//    contentTextView.scrollEnabled = NO;
+//    contentTextView.contentInset = UIEdgeInsetsMake(10, 10, 18, 10);
+    contentTextView.textColor = CONTENTCOLOR;
     contentTextView.font = [UIFont systemFontOfSize:16];
     contentTextView.text = noticeContent;
     [self.bgView addSubview:contentTextView];
+    
+    
+    UILabel *markLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 155-40, SCREEN_WIDTH-15, 25)];
+    markLabel.text = markString;
+    markLabel.textColor = TIMECOLOR;
+    markLabel.font = [UIFont systemFontOfSize:12];
+    [inputBg addSubview:markLabel];
 
     
     if ([c_read integerValue] == 0)
@@ -113,7 +124,7 @@ UIActionSheetDelegate>
         buttonHeight = 40;
         
         readButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        readButton.frame = CGRectMake(20, contentTextView.frame.origin.y+contentTextView.frame.size.height+7, 120, buttonHeight-10);
+        readButton.frame = CGRectMake(20, inputBg.frame.origin.y+inputBg.frame.size.height+9, 120, buttonHeight-10);
         [readButton setBackgroundColor:RGB(56, 188, 99, 1)];
         readButton.tag = 1000;
         readButton.layer.cornerRadius = 15;
@@ -124,7 +135,7 @@ UIActionSheetDelegate>
         [self.bgView addSubview:readButton];
         
         unreadButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        unreadButton.frame = CGRectMake(SCREEN_WIDTH/2+20, contentTextView.frame.origin.y+contentTextView.frame.size.height+7, 120, buttonHeight-10);
+        unreadButton.frame = CGRectMake(SCREEN_WIDTH/2+20, inputBg.frame.origin.y+inputBg.frame.size.height+9, 120, buttonHeight-10);
         unreadButton.backgroundColor = [UIColor clearColor];
         unreadButton.tag = 1001;
         unreadButton.layer.cornerRadius = 15;
@@ -183,62 +194,102 @@ UIActionSheetDelegate>
 
 -(void)moreClick
 {
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2 && [byID isEqualToString:[Tools user_id]])
+    if (fromClass)
     {
-        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"删除", nil];
-        ac.tag = 3333;
-        [ac showInView:self.bgView];
+        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2 && [byID isEqualToString:[Tools user_id]])
+        {
+            UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"删除", nil];
+            ac.tag = 3333;
+            [ac showInView:self.bgView];
+        }
+        else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2 && ![byID isEqualToString:[Tools user_id]])
+        {
+            UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"删除",@"举报", nil];
+            ac.tag = 3333;
+            [ac showInView:self.bgView];
+        }
+        else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] != 2 && ![byID isEqualToString:[Tools user_id]])
+        {
+            UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"举报", nil];
+            ac.tag = 3333;
+            [ac showInView:self.bgView];
+        }
     }
-    else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2 && ![byID isEqualToString:[Tools user_id]])
+    else
     {
-        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"删除",@"举报", nil];
-        ac.tag = 3333;
-        [ac showInView:self.bgView];
+        if ([byID isEqualToString:[Tools user_id]])
+        {
+            UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"删除", nil];
+            ac.tag = 3333;
+            [ac showInView:self.bgView];
+        }
+        else
+        {
+            UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"举报", nil];
+            ac.tag = 3333;
+            [ac showInView:self.bgView];
+        }
     }
-    else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] != 2 && ![byID isEqualToString:[Tools user_id]])
-    {
-        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"举报", nil];
-        ac.tag = 3333;
-        [ac showInView:self.bgView];
-    }
+    
 }
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
     if (actionSheet.tag == 3333)
     {
-        
-        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2 && [byID isEqualToString:[Tools user_id]])
+        if (fromClass)
         {
-            if (buttonIndex == 0)
+            if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2 && [byID isEqualToString:[Tools user_id]])
             {
-                [self deleteNotice];
+                if (buttonIndex == 0)
+                {
+                    [self deleteNotice];
+                }
+            }
+            else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2 && ![byID isEqualToString:[Tools user_id]])
+            {
+                if (buttonIndex == 0)
+                {
+                    [self deleteNotice];
+                }
+                else if(buttonIndex == 1)
+                {
+                    ReportViewController *reportVC = [[ReportViewController alloc] init];
+                    reportVC.reportUserid = byID;
+                    reportVC.reportContentID = noticeID;
+                    reportVC.reportType = @"content";
+                    [self.navigationController pushViewController:reportVC animated:YES];
+                }
+            }
+            else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] != 2 && ![byID isEqualToString:[Tools user_id]])
+            {
+                if (buttonIndex == 0)
+                {
+                    ReportViewController *reportVC = [[ReportViewController alloc] init];
+                    reportVC.reportUserid = byID;
+                    reportVC.reportContentID = noticeID;
+                    reportVC.reportType = @"content";
+                    [self.navigationController pushViewController:reportVC animated:YES];
+                }
             }
         }
-        else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2 && ![byID isEqualToString:[Tools user_id]])
+        else
         {
             if (buttonIndex == 0)
             {
-                [self deleteNotice];
+                if ([byID isEqualToString:[Tools user_id]])
+                {
+                     [self deleteNotice];
+                }
+                else
+                {
+                    ReportViewController *reportVC = [[ReportViewController alloc] init];
+                    reportVC.reportUserid = byID;
+                    reportVC.reportContentID = noticeID;
+                    reportVC.reportType = @"content";
+                    [self.navigationController pushViewController:reportVC animated:YES];
+                }
             }
-            else if(buttonIndex == 1)
-            {
-                ReportViewController *reportVC = [[ReportViewController alloc] init];
-                reportVC.reportUserid = byID;
-                reportVC.reportContentID = noticeID;
-                reportVC.reportType = @"content";
-                [self.navigationController pushViewController:reportVC animated:YES];
-            }
-        }
-        else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] != 2 && ![byID isEqualToString:[Tools user_id]])
-        {
-            if (buttonIndex == 0)
-            {
-                ReportViewController *reportVC = [[ReportViewController alloc] init];
-                reportVC.reportUserid = byID;
-                reportVC.reportContentID = noticeID;
-                reportVC.reportType = @"content";
-                [self.navigationController pushViewController:reportVC animated:YES];
-            }
+            
         }
     }
 }
@@ -398,7 +449,7 @@ UIActionSheetDelegate>
             cell.nameLabel.text = [dict objectForKey:@"name"];
         }
         cell.nameLabel.backgroundColor = [UIColor clearColor];
-        cell.nameLabel.textColor = TITLE_COLOR;
+        cell.nameLabel.textColor = NAMECOLOR;
         cell.contactButton.hidden = YES;
         [cell.contactButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
         [cell.contactButton setImage:[UIImage imageNamed:@"telephone1"] forState:UIControlStateNormal];
@@ -441,7 +492,7 @@ UIActionSheetDelegate>
         }
         cell.nameLabel.frame = CGRectMake(60, 8.75, 200, 30);
         cell.nameLabel.backgroundColor = [UIColor clearColor];
-        cell.nameLabel.textColor = TITLE_COLOR;
+        cell.nameLabel.textColor = NAMECOLOR;
         cell.contactButton.hidden = NO;
         [cell.contactButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
         [cell.contactButton setImage:[UIImage imageNamed:@"telephone1"] forState:UIControlStateNormal];

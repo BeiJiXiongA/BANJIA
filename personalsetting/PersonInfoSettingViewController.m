@@ -39,6 +39,9 @@ UIAlertViewDelegate>
     OperatDB *db;
     
     NSString *sex;
+    NSString *birth;
+    UIImage *headerImage;
+    
     
     NSMutableDictionary *userInfoDict;
 }
@@ -64,6 +67,8 @@ UIAlertViewDelegate>
     
     imageUsed = @"";
     sex = [Tools user_sex];
+    birth = [Tools user_birth];
+    headerImage = [UIImage imageNamed:[Tools header_image]];
     
     cellNameArray = @[@"我的头像",@"姓名",@"生日",@"性别",@"手机号"];
     
@@ -151,9 +156,9 @@ UIAlertViewDelegate>
     {
         [self uploadImage:bgImage andkey:@"img_kb"];
     }
-    if (iconImage)
+    if (headerImage)
     {
-        [self uploadImage:iconImage andkey:@"img_icon"];
+        [self uploadImage:headerImage andkey:@"img_icon"];
     }
     
     if ([((UITextField *)[personInfoTableView viewWithTag:4]).text isEqualToString:[Tools user_birth]])
@@ -245,7 +250,7 @@ UIAlertViewDelegate>
     cell.nametf.textAlignment = NSTextAlignmentRight;
     cell.nametf.font = [UIFont systemFontOfSize:16];
     cell.nametf.enabled = NO;
-    cell.nametf.tag = indexPath.row+3;
+    cell.nametf.tag = indexPath.row+3000;
     cell.nametf.delegate = self;
     
     if (indexPath.row == 0)
@@ -253,17 +258,41 @@ UIAlertViewDelegate>
         cell.iconImageView.hidden = NO;
         cell.iconImageView.frame = CGRectMake(SCREEN_WIDTH-80, 7, 40, 40);
         cell.iconImageView.backgroundColor = [UIColor yellowColor];
-        [Tools fillImageView:cell.iconImageView withImageFromURL:[Tools header_image] andDefault:HEADERICON];
+        if (headerImage)
+        {
+            [cell.iconImageView setImage:headerImage];
+        }
+        else
+        {
+            [Tools fillImageView:cell.iconImageView withImageFromURL:[Tools header_image] andDefault:HEADERICON];
+        }
     }
     else if(indexPath.row == 1)
     {
         cell.nametf.hidden = NO;
-        cell.nametf.text = [Tools user_name];
+        
+        if ([Tools user_name])
+        {
+            cell.nametf.text = [Tools user_name];
+        }
+        else
+        {
+            cell.nametf.text = @"";
+        }
+        
     }
     else if(indexPath.row == 2)
     {
         cell.nametf.hidden = NO;
-        cell.nametf.text = [Tools user_birth];
+        if (birth)
+        {
+            cell.nametf.text = birth;
+        }
+        else
+        {
+            cell.nametf.text = @"请设置生日";
+        }
+        
     }
     else if (indexPath.row == 3)
     {
@@ -289,7 +318,10 @@ UIAlertViewDelegate>
     
     [cell.bgImageView setImage:[UIImage imageNamed:@"line3"]];
     
-    cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    if (indexPath.row < 4)
+    {
+        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    }
     
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     cell.backgroundColor = [UIColor clearColor];
@@ -301,6 +333,7 @@ UIAlertViewDelegate>
     if (indexPath.row == 0)
     {
         //头像
+        imageUsed = @"img_icon";
         [self selectoo];
     }
     else if (indexPath.row == 1)
@@ -443,7 +476,7 @@ UIAlertViewDelegate>
                 }
                 else
                 {
-                    ((UITextField *)[personInfoTableView viewWithTag:4]).text = @"请选择生日";
+                    ((UITextField *)[personInfoTableView viewWithTag:3002]).text = @"请设置生日";
                 }
                 
                 if ([[dataDict objectForKey:@"classes"] isKindOfClass:[NSDictionary class]])
@@ -563,7 +596,8 @@ UIAlertViewDelegate>
     }
     else if([imageUsed isEqualToString:@"img_icon"])
     {
-        iconImage = fullScreenImage;
+        headerImage = fullScreenImage;
+        [personInfoTableView reloadData];
     }
 }
 

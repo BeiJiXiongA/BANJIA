@@ -11,6 +11,7 @@
 @interface RelatedCell : UITableViewCell
 @property (nonatomic, strong) UIImageView *bgImageView;
 @property (nonatomic, strong) UIImageView *iconImageView;
-@property (nonatomic, strong) UITextField *nametf;
+@property (nonatomic, strong) MyTextField *nametf;
 @property (nonatomic, strong) UIButton *relateButton;
+@property (nonatomic, strong) UILabel *contentLabel;
 @end

@@ -40,10 +40,12 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    // Override point for customization after application launch.
+    // Override point for cupstomization after application launch.
     
-    [[NSUserDefaults standardUserDefaults] setObject:@"0015" forKey:@"currentVersion"];
+    [[NSUserDefaults standardUserDefaults] setObject:@"0016" forKey:@"currentVersion"];
     [[NSUserDefaults standardUserDefaults] synchronize];
+    
+    [application setStatusBarHidden:NO withAnimation:UIStatusBarAnimationFade];
     
     _db = [[OperatDB alloc] init];
     
@@ -349,7 +351,7 @@
     [[UIApplication sharedApplication] cancelAllLocalNotifications];
     [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
 //    [Tools showAlertView:[NSString stringWithFormat:@"%@",userInfo] delegateViewController:nil];
-//    DDLOG(@"push msg==%@",userInfo);
+    DDLOG(@"push msg==%@",userInfo);
     if ([[Tools user_id] length] > 0)
     {
         if ([[userInfo objectForKey:@"type"] isEqualToString:@"chat"])
@@ -446,7 +448,7 @@
                 }
 
             }
-            [self getClassInfo:userInfo];
+//            [self getClassInfo:userInfo];
         }
         else if([[userInfo objectForKey:@"type"] isEqualToString:@"f_apply"])
         {

@@ -9,6 +9,7 @@
 #import "DongTaiDetailViewController.h"
 #import "Header.h"
 #import "TrendsCell.h"
+#import "CommentCell.h"
 
 #import "UIImageView+MJWebCache.h"
 #import "MJPhotoBrowser.h"
@@ -151,9 +152,37 @@ UIActionSheetDelegate>
 
 -(void)moreClick
 {
-    UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"举报", nil];
-    ac.tag = 3333;
-    [ac showInView:self.bgView];
+    if (fromclass)
+    {
+        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] ==2 || [[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
+        {
+            UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"删除",@"举报", nil];
+            ac.tag = 3333;
+            [ac showInView:self.bgView];
+        }
+        else
+        {
+            UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"举报", nil];
+            ac.tag = 3333;
+            [ac showInView:self.bgView];
+        }
+        
+    }
+    else
+    {
+        if ([[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
+        {
+            UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"删除",@"举报", nil];
+            ac.tag = 3333;
+            [ac showInView:self.bgView];
+        }
+        else
+        {
+            UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"举报", nil];
+            ac.tag = 3333;
+            [ac showInView:self.bgView];
+        }
+    }
 }
 
 #pragma mark - inputTabBarDel
@@ -302,18 +331,21 @@ UIActionSheetDelegate>
                 NSString *content = [dict objectForKey:@"content"];
                 NSString *contentString = [NSString stringWithFormat:@"%@:%@",name,content];
                 CGSize s = [Tools getSizeWithString:contentString andWidth:200 andFont:[UIFont systemFontOfSize:14]];
-                tmpcommentHeight += (s.height > 30 ? (s.height+8):30);
+                tmpcommentHeight += (s.height > 25 ? (s.height+13):35);
             }
             
         }
         if ([[diaryDetailDict objectForKey:@"likes_num"] integerValue] > 0)
         {
 //            int row = [[diaryDetailDict objectForKey:@"likes_num"] integerValue]%4 == 0 ? ([[diaryDetailDict objectForKey:@"likes_num"] integerValue]/4):([[diaryDetailDict objectForKey:@"likes_num"] integerValue]/4+1);
-            tmpcommentHeight+=30;
+            int likes_num = [[diaryDetailDict objectForKey:@"likes_num"] integerValue];
+            
+            int row = likes_num % ColumnPerRow == 0 ? (likes_num/ColumnPerRow):(likes_num/ColumnPerRow+1);
+            tmpcommentHeight+=(36+(PraiseW+5)*row);
         }
 
         
-        return 60+imageViewHeight+contentHtight+75+he+tmpcommentHeight;
+        return 60+imageViewHeight+contentHtight+75+he+tmpcommentHeight+5;
     }
     else if(indexPath.section == 1)
     {
@@ -344,214 +376,257 @@ UIActionSheetDelegate>
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.section == 0)
+    static NSString *topImageView = @"trendcell";
+    TrendsCell *cell = [tableView dequeueReusableCellWithIdentifier:topImageView];
+    if (cell == nil)
     {
-        static NSString *topImageView = @"trendcell";
-        TrendsCell *cell = [tableView dequeueReusableCellWithIdentifier:topImageView];
-        if (cell == nil)
+        cell = [[TrendsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:topImageView];
+    }
+    
+    cell.showAllComments = YES;
+    
+    NSString *name = [[diaryDetailDict objectForKey:@"by"] objectForKey:@"name"];
+    
+    NSString *nameStr;
+    NSArray *classmen = [db findSetWithDictionary:@{@"uid":[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"],@"classid":classID} andTableName:CLASSMEMBERTABLE];
+    if ([classmen count]>0)
+    {
+        NSDictionary *memdict = [classmen firstObject];
+        if (![[memdict objectForKey:@"title"] isEqual:[NSNull null]])
         {
-            cell = [[TrendsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:topImageView];
-        }
-        
-        NSString *name = [[diaryDetailDict objectForKey:@"by"] objectForKey:@"name"];
-        
-        NSString *nameStr;
-        NSArray *classmen = [db findSetWithDictionary:@{@"uid":[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"],@"classid":classID} andTableName:CLASSMEMBERTABLE];
-        if ([classmen count]>0)
-        {
-            NSDictionary *memdict = [classmen firstObject];
-            if (![[memdict objectForKey:@"title"] isEqual:[NSNull null]])
+            if ([[memdict objectForKey:@"title"] length] >0)
             {
-                if ([[memdict objectForKey:@"title"] length] >0)
-                {
-                    nameStr = [NSString stringWithFormat:@"%@（%@）",name,[memdict objectForKey:@"title"]];
-                }
-                else
-                    nameStr = name;
+                nameStr = [NSString stringWithFormat:@"%@（%@）",name,[memdict objectForKey:@"title"]];
             }
             else
-            {
                 nameStr = name;
-            }
         }
         else
         {
             nameStr = name;
         }
-        
-        cell.nameLabel.frame = CGRectMake(60, 5, [nameStr length]*25>170?170:([nameStr length]*18), 30);
-        cell.nameLabel.text = nameStr;
-        cell.nameLabel.font = [UIFont systemFontOfSize:15];
-        cell.nameLabel.textColor = LIGHT_BLUE_COLOR;
-        cell.timeLabel.frame = CGRectMake(cell.nameLabel.frame.size.width+cell.nameLabel.frame.origin.x, 5, SCREEN_WIDTH-cell.nameLabel.frame.origin.x-cell.nameLabel.frame.size.width-20, 30);
-        cell.timeLabel.textAlignment = NSTextAlignmentRight;
-        cell.timeLabel.numberOfLines = 2;
-        cell.timeLabel.lineBreakMode = NSLineBreakByWordWrapping;
-        
-        cell.nameLabel.text = nameStr;
-        cell.timeLabel.text = [Tools showTime:[NSString stringWithFormat:@"%d",[[[diaryDetailDict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]];
-        cell.locationLabel.frame = CGRectMake(60, cell.nameLabel.frame.origin.y+cell.nameLabel.frame.size.height, SCREEN_WIDTH-80, 20);
-        cell.locationLabel.text = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"add"];
-        cell.headerImageView.layer.cornerRadius = 0;
-        cell.headerImageView.clipsToBounds = YES;
-        [Tools fillImageView:cell.headerImageView withImageFromURL:[[diaryDetailDict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERICON];
-        
-        
-        cell.headerImageView.hidden = NO;
-        cell.contentLabel.hidden = YES;
-        cell.imagesScrollView.hidden = YES;
-        cell.nameLabel.hidden = NO;
-        cell.locationLabel.hidden = NO;
-        cell.timeLabel.hidden = NO;
-        cell.praiseButton.hidden = NO;
-        cell.commentButton.hidden = NO;
-        
-        for(UIView *v in cell.imagesScrollView.subviews)
+    }
+    else
+    {
+        nameStr = name;
+    }
+    
+    cell.nameLabel.frame = CGRectMake(60, 5, [nameStr length]*25>170?170:([nameStr length]*18), 30);
+    cell.nameLabel.text = nameStr;
+    cell.nameLabel.font = [UIFont systemFontOfSize:15];
+    cell.nameLabel.textColor = NAMECOLOR;
+    cell.timeLabel.frame = CGRectMake(cell.nameLabel.frame.size.width+cell.nameLabel.frame.origin.x, 5, SCREEN_WIDTH-cell.nameLabel.frame.origin.x-cell.nameLabel.frame.size.width-20, 30);
+    cell.timeLabel.textAlignment = NSTextAlignmentRight;
+    cell.timeLabel.numberOfLines = 1;
+    cell.timeLabel.lineBreakMode = NSLineBreakByWordWrapping | NSLineBreakByTruncatingTail;
+    
+    cell.nameLabel.text = nameStr;
+    cell.timeLabel.text = [Tools showTime:[NSString stringWithFormat:@"%d",[[[diaryDetailDict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]];
+    
+    cell.locationLabel.frame = CGRectMake(60, cell.headerImageView.frame.origin.y+cell.headerImageView.frame.size.height-20, SCREEN_WIDTH-80, 20);
+    
+    cell.locationLabel.text = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"add"];
+    cell.locationLabel.numberOfLines = 2;
+    cell.locationLabel.lineBreakMode = NSLineBreakByWordWrapping;
+    cell.headerImageView.layer.cornerRadius = 0;
+    cell.headerImageView.clipsToBounds = YES;
+    
+    [Tools fillImageView:cell.headerImageView withImageFromURL:[[diaryDetailDict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERICON];
+    cell.locationLabel.numberOfLines = 1;
+    cell.locationLabel.lineBreakMode = NSLineBreakByWordWrapping | NSLineBreakByTruncatingTail;
+    
+    cell.headerImageView.hidden = NO;
+    cell.contentLabel.hidden = YES;
+    cell.imagesScrollView.hidden = YES;
+    cell.nameLabel.hidden = NO;
+    cell.locationLabel.hidden = NO;
+    cell.timeLabel.hidden = NO;
+    cell.praiseButton.hidden = NO;
+    cell.commentButton.hidden = NO;
+    
+    for(UIView *v in cell.imagesScrollView.subviews)
+    {
+        [v removeFromSuperview];
+    }
+    if (!([[[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"] length] <= 0))
+    {
+        CGFloat he = 0;
+        if (SYSVERSION >= 7)
         {
-            [v removeFromSuperview];
+            he = 10;
         }
-        if (!([[[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"] length] <= 0))
-        {
-            CGFloat he = 0;
-            if (SYSVERSION >= 7)
-            {
-                he = 10;
-            }
-            //有文字
-            cell.contentLabel.hidden = NO;
-            NSString *content = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"];
-            CGSize contentSize = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-50 andFont:[UIFont systemFontOfSize:16]];
-            cell.contentLabel.text = [[[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"] emojizedString];
-            cell.contentLabel.textColor = [UIColor blackColor];
-            cell.contentLabel.frame = CGRectMake(15, 60, SCREEN_WIDTH-30, contentSize.height+8+he);
-            
-        }
-        else
-        {
-            cell.contentLabel.frame = CGRectMake(10, 60, 0, 0);
-        }
+        //有文字
+        cell.contentLabel.hidden = NO;
+        NSString *content = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"];
+        CGSize contentSize = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-50 andFont:[UIFont systemFontOfSize:16]];
+        cell.contentLabel.text = [[[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"] emojizedString];
+        cell.contentLabel.textColor = [UIColor blackColor];
+        cell.contentLabel.frame = CGRectMake(15, 60, SCREEN_WIDTH-30, contentSize.height+8+he);
+    }
+    else
+    {
+        cell.contentLabel.frame = CGRectMake(10, 60, 0, 0);
+    }
+    
+    CGFloat imageViewHeight = 67.5f;
+    CGFloat imageViewWidth = 67.5f;
+    if ([[[diaryDetailDict objectForKey:@"detail"] objectForKey:@"img"] count] > 0)
+    {
+        //有图片
+        cell.imagesScrollView.hidden = NO;
         
-        CGFloat imageViewHeight = 60;
-        CGFloat imageViewWidth = 60;
-        if ([[[diaryDetailDict objectForKey:@"detail"] objectForKey:@"img"] count] > 0)
+        NSArray *imgsArray = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"img"];
+        NSInteger imageCount = [imgsArray count];
+        NSInteger row = 0;
+        if (imageCount % ImageCountPerRow > 0)
         {
-            //有图片
-            cell.imagesScrollView.hidden = NO;
-            
-            NSArray *imgsArray = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"img"];
-            NSInteger imageCount = [imgsArray count];
-            NSInteger row = 0;
-            if (imageCount % ImageCountPerRow > 0)
-            {
-                row = (imageCount/ImageCountPerRow+1) > 3 ? 3:(imageCount / ImageCountPerRow + 1);
-            }
-            else
-            {
-                row = (imageCount/ImageCountPerRow) > 3 ? 3:(imageCount / ImageCountPerRow);
-            }
-            cell.imagesView.frame = CGRectMake((SCREEN_WIDTH-imageViewHeight*ImageCountPerRow)/2,
-                                               cell.contentLabel.frame.size.height +
-                                               cell.contentLabel.frame.origin.y+7,
-                                               SCREEN_WIDTH-20, (imageViewHeight+5) * row);
-            
-            for (int i=0; i<[imgsArray count]; ++i)
-            {
-                UIImageView *imageView = [[UIImageView alloc] init];
-                imageView.frame = CGRectMake((i%(NSInteger)ImageCountPerRow)*(imageViewWidth+5), (imageViewWidth+5)*(i/(NSInteger)ImageCountPerRow), imageViewWidth, imageViewHeight);
-                imageView.userInteractionEnabled = YES;
-                imageView.tag = (indexPath.row)*1000+i+1000;
-                
-                imageView.userInteractionEnabled = YES;
-                [imageView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapImage:)]];
-                
-                // 内容模式
-                imageView.clipsToBounds = YES;
-                imageView.contentMode = UIViewContentModeScaleAspectFill;
-                [Tools fillImageView:imageView withImageFromURL:[imgsArray objectAtIndex:i] andDefault:@"3100"];
-                [cell.imagesView addSubview:imageView];
-            }
+            row = (imageCount/ImageCountPerRow+1) > 3 ? 3:(imageCount / ImageCountPerRow + 1);
         }
         else
         {
-            cell.imagesView.frame = CGRectMake(5, cell.contentLabel.frame.size.height+cell.contentLabel.frame.origin.y, SCREEN_WIDTH-10, 0);
+            row = (imageCount/ImageCountPerRow) > 3 ? 3:(imageCount / ImageCountPerRow);
         }
+        cell.imagesView.frame = CGRectMake(12,
+                                           cell.contentLabel.frame.size.height +
+                                           cell.contentLabel.frame.origin.y+7,
+                                           SCREEN_WIDTH-20, (imageViewHeight+5) * row);
         
-        
-        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] ==2 || [[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
+        for (int i=0; i<[imgsArray count]; ++i)
         {
-            cell.transmitButton.hidden = NO;
-            [cell.transmitButton setTitle:@"转发" forState:UIControlStateNormal];
-            cell.transmitButton.frame = CGRectMake(0, cell.imagesView.frame.size.height+cell.imagesView.frame.origin.y+16, (SCREEN_WIDTH-0)/3, 30);
-            [cell.transmitButton addTarget:self action:@selector(shareAPP) forControlEvents:UIControlEventTouchUpInside];
+            UIImageView *imageView = [[UIImageView alloc] init];
+            imageView.frame = CGRectMake((i%(NSInteger)ImageCountPerRow)*(imageViewWidth+5), (imageViewWidth+5)*(i/(NSInteger)ImageCountPerRow), imageViewWidth, imageViewHeight);
+            imageView.userInteractionEnabled = YES;
+            imageView.tag = (indexPath.row)*1000+i+1000;
+            
+            imageView.userInteractionEnabled = YES;
+            [imageView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapImage:)]];
+            
+            // 内容模式
+            imageView.clipsToBounds = YES;
+            imageView.contentMode = UIViewContentModeScaleAspectFill;
+            [Tools fillImageView:imageView withImageFromURL:[imgsArray objectAtIndex:i] andDefault:@"3100"];
+            [cell.imagesView addSubview:imageView];
         }
-        
-        if (![[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
-        {
-            moreButton.hidden = NO;
-        }
-        
-        
-        cell.praiseButton.frame = CGRectMake((SCREEN_WIDTH-0)/3, cell.imagesView.frame.size.height+cell.imagesView.frame.origin.y+16, (SCREEN_WIDTH-0)/3, 30);
-        
-        cell.commentButton.frame = CGRectMake((SCREEN_WIDTH-0)/3*2, cell.imagesView.frame.size.height+cell.imagesView.frame.origin.y+16, (SCREEN_WIDTH-0)/3, 30);
-        cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        
-        [cell.praiseButton setTitle:[NSString stringWithFormat:@"赞(%d)",[[diaryDetailDict objectForKey:@"likes_num"] integerValue]] forState:UIControlStateNormal];
-        [cell.praiseButton addTarget:self action:@selector(praiseDiary) forControlEvents:UIControlEventTouchUpInside];
-        cell.praiseButton.iconImageView.image = [UIImage imageNamed:@"icon_heart"];
+    }
+    else
+    {
+        cell.imagesView.frame = CGRectMake(5, cell.contentLabel.frame.size.height+cell.contentLabel.frame.origin.y, SCREEN_WIDTH-10, 0);
+    }
+    
+    CGFloat buttonHeight = 37;
+    CGFloat iconH = 18;
+    CGFloat iconTop = 9;
 
-        [cell.commentButton setTitle:[NSString stringWithFormat:@"评论(%d)",[[diaryDetailDict objectForKey:@"comments_num"] integerValue]] forState:UIControlStateNormal];
-        [cell.commentButton addTarget:self action:@selector(startCommit) forControlEvents:UIControlEventTouchUpInside];
-        
-        if ([[diaryDetailDict objectForKey:@"comments_num"] integerValue] > 0 || [diaryDetailDict objectForKey:@"likes_num"] > 0)
+    cell.transmitButton.hidden = NO;
+    [cell.transmitButton setTitle:@"   转发" forState:UIControlStateNormal];
+    cell.transmitButton.frame = CGRectMake(0, cell.imagesView.frame.size.height+cell.imagesView.frame.origin.y+16, (SCREEN_WIDTH-10)/3, buttonHeight);
+    [cell.transmitButton addTarget:self action:@selector(shareAPP) forControlEvents:UIControlEventTouchUpInside];
+    cell.transmitButton.iconImageView.frame = CGRectMake(18, iconTop+1, iconH, iconH);
+    cell.transmitButton.backgroundColor = UIColorFromRGB(0xfcfcfc);
+    
+    cell.praiseButton.frame = CGRectMake((SCREEN_WIDTH-10)/3, cell.imagesView.frame.size.height+cell.imagesView.frame.origin.y+16, (SCREEN_WIDTH-10)/3, buttonHeight);
+    if ([[diaryDetailDict objectForKey:@"likes_num"] integerValue] > 0)
+    {
+        [cell.praiseButton setTitle:[NSString stringWithFormat:@"   %d",[[diaryDetailDict objectForKey:@"likes_num"] integerValue]] forState:UIControlStateNormal];
+    }
+    else
+    {
+        [cell.praiseButton setTitle:@"   赞" forState:UIControlStateNormal];
+    }
+    if ([self havePraisedThisDiary:diaryDetailDict])
+    {
+        cell.praiseButton.iconImageView.image = [UIImage imageNamed:@"praised"];
+        cell.praiseButton.iconImageView.frame = CGRectMake(27, iconTop, iconH, iconH);
+    }
+    else
+    {
+        cell.praiseButton.iconImageView.image = [UIImage imageNamed:@"icon_heart"];
+        cell.praiseButton.iconImageView.frame = CGRectMake(25, iconTop, iconH, iconH);
+    }
+    cell.praiseButton.backgroundColor = UIColorFromRGB(0xfcfcfc);
+    
+    
+     cell.commentButton.frame = CGRectMake((SCREEN_WIDTH-10)/3*2, cell.imagesView.frame.size.height+cell.imagesView.frame.origin.y+16, (SCREEN_WIDTH-10)/3, buttonHeight);
+    if ([[diaryDetailDict objectForKey:@"comments_num"] integerValue] > 0)
+    {
+        [cell.commentButton setTitle:[NSString stringWithFormat:@"   %d",[[diaryDetailDict objectForKey:@"comments_num"] integerValue]] forState:UIControlStateNormal];
+        cell.commentButton.iconImageView.frame = CGRectMake(25, iconTop, iconH, iconH);
+    }
+    else
+    {
+        [cell.commentButton setTitle:@"  评论" forState:UIControlStateNormal];
+        cell.commentButton.iconImageView.frame = CGRectMake(18, iconTop, iconH, iconH);
+    }
+    cell.commentButton.backgroundColor = UIColorFromRGB(0xfcfcfc);
+
+    cell.geduan1.hidden = NO;
+    cell.geduan2.hidden = NO;
+    cell.geduan1.frame = CGRectMake(cell.transmitButton.frame.size.width+cell.transmitButton.frame.origin.x, cell.transmitButton.frame.origin.y+9.5, 1, 18);
+    cell.geduan2.frame = CGRectMake(cell.praiseButton.frame.size.width+cell.praiseButton.frame.origin.x, cell.praiseButton.frame.origin.y+9.5, 1, 18);
+    
+    [cell.praiseButton addTarget:self action:@selector(praiseDiary) forControlEvents:UIControlEventTouchUpInside];
+
+    [cell.commentButton addTarget:self action:@selector(startCommit) forControlEvents:UIControlEventTouchUpInside];
+    
+    if ([[diaryDetailDict objectForKey:@"comments_num"] integerValue] > 0 || [diaryDetailDict objectForKey:@"likes_num"] > 0)
+    {
+        NSArray *comArray = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"comments"];
+        if ([comArray count] > 0)
         {
-            NSArray *comArray = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"comments"];
-            if ([comArray count] > 0)
-            {
-                cell.commentsArray = comArray;
-            }
-            else
-            {
-                cell.commentsArray = nil;
-            }
-            NSArray *praiseArray = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"likes"];
-            if ([praiseArray count] > 0)
-            {
-                cell.praiseArray = praiseArray;
-            }
-            else
-            {
-                cell.praiseArray = nil;
-            }
-            [cell.commentsTableView reloadData];
-            cell.commentsTableView.frame = CGRectMake(0, cell.praiseButton.frame.size.height+cell.praiseButton.frame.origin.y, SCREEN_WIDTH, cell.commentsTableView.contentSize.height);
-            cell.bgView.frame = CGRectMake(5, 0, SCREEN_WIDTH-10,
-                                           cell.commentsTableView.frame.size.height+
-                                           cell.commentsTableView.frame.origin.y);
+            cell.commentsArray = comArray;
         }
         else
         {
             cell.commentsArray = nil;
-            cell.praiseArray = nil;
-            [cell.commentsTableView reloadData];
-            cell.bgView.frame = CGRectMake(5, 0, SCREEN_WIDTH-10,
-                                           cell.praiseButton.frame.size.height+
-                                           cell.praiseButton.frame.origin.y);
         }
-
-        
-        cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        cell.bgView.frame = CGRectMake(5, 5,
-                                       SCREEN_WIDTH-10,
+        NSArray *praiseArray = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"likes"];
+        if ([praiseArray count] > 0)
+        {
+            cell.praiseArray = praiseArray;
+        }
+        else
+        {
+            cell.praiseArray = nil;
+        }
+        [cell.commentsTableView reloadData];
+        cell.commentsTableView.frame = CGRectMake(0, cell.praiseButton.frame.size.height+cell.praiseButton.frame.origin.y, SCREEN_WIDTH, cell.commentsTableView.contentSize.height);
+        cell.bgView.frame = CGRectMake(5, 5, SCREEN_WIDTH-10,
+                                       cell.commentsTableView.frame.size.height+
+                                       cell.commentsTableView.frame.origin.y);
+    }
+    else
+    {
+        cell.commentsArray = nil;
+        cell.praiseArray = nil;
+        [cell.commentsTableView reloadData];
+        cell.bgView.frame = CGRectMake(5, 5, SCREEN_WIDTH-10,
                                        cell.praiseButton.frame.size.height+
                                        cell.praiseButton.frame.origin.y);
-        cell.bgView.layer.borderWidth = 1;
-        cell.backgroundColor = [UIColor clearColor];
-        return cell;
-
     }
-    return nil;
+    
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    cell.bgView.layer.borderWidth = 1;
+    cell.bgView.layer.cornerRadius = 5;
+    cell.bgView.clipsToBounds = YES;
+    cell.backgroundColor = [UIColor clearColor];
+    return cell;
+   
 }
+
+-(BOOL)havePraisedThisDiary:(NSDictionary *)diaryDict
+{
+    NSArray *praiseArray = [[diaryDict objectForKey:@"detail"] objectForKey:@"likes"];
+    for (int i = 0; i < [praiseArray count]; i++)
+    {
+        NSDictionary *dict = [praiseArray objectAtIndex:i];
+        if ([[[dict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
+        {
+            return YES;
+        }
+    }
+    return NO;
+}
+
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -738,6 +813,23 @@ UIActionSheetDelegate>
             {
                 diaryDetailTableView.hidden = NO;
                 diaryDetailDict = [[NSDictionary alloc] initWithDictionary:[responseDict objectForKey:@"data"]];
+                
+                if (fromclass)
+                {
+                    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] ==2 || [[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
+                    {
+                        moreButton.hidden = NO;
+                    }
+                }
+                else
+                {
+                    if ([[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
+                    {
+                        moreButton.hidden = NO;
+                    }
+
+                }
+                
                 waitTransDict = [diaryDetailDict objectForKey:@"detail"];
                 [commentsArray removeAllObjects];
                 [commentsArray addObjectsFromArray:[[[responseDict objectForKey:@"data"] objectForKey:@"detail"] objectForKey:@"comments"]];
@@ -804,13 +896,31 @@ UIActionSheetDelegate>
     }
     else if (actionSheet.tag == 3333)
     {
-        if (buttonIndex == 0)
+        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] ==2 || [[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
         {
-            ReportViewController *reportVC = [[ReportViewController alloc] init];
-            reportVC.reportUserid = [[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"];
-            reportVC.reportContentID = dongtaiId;
-            reportVC.reportType = @"content";
-            [self.navigationController pushViewController:reportVC animated:YES];
+            if (buttonIndex == 0)
+            {
+                [self deleteDiary];
+            }
+            else if(buttonIndex == 1)
+            {
+                ReportViewController *reportVC = [[ReportViewController alloc] init];
+                reportVC.reportUserid = [[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"];
+                reportVC.reportContentID = dongtaiId;
+                reportVC.reportType = @"content";
+                [self.navigationController pushViewController:reportVC animated:YES];
+            }
+        }
+        else
+        {
+            if(buttonIndex == 0)
+            {
+                ReportViewController *reportVC = [[ReportViewController alloc] init];
+                reportVC.reportUserid = [[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"];
+                reportVC.reportContentID = dongtaiId;
+                reportVC.reportType = @"content";
+                [self.navigationController pushViewController:reportVC animated:YES];
+            }
         }
     }
 }

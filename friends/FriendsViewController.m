@@ -17,11 +17,14 @@
 #import "NSString+Emojize.h"
 #import "UINavigationController+JDSideMenu.h"
 
+#import "SubGroupViewController.h"
+
 @interface FriendsViewController ()<UITableViewDataSource,
 UITableViewDelegate,
 EGORefreshTableHeaderDelegate,
 ChatDelegate,
-MsgDelegate,FriendListDelegate>
+MsgDelegate,FriendListDelegate,
+OperateFriends>
 {
     UITableView *friendsListTableView;
     NSMutableArray *tmpArray;
@@ -94,7 +97,8 @@ MsgDelegate,FriendListDelegate>
     
     if([Tools NetworkReachable])
     {
-        [self operateFriendsList:[db findSetWithDictionary:@{@"uid":[Tools user_id]} andTableName:FRIENDSTABLE] andDataType:@"database"];
+        NSArray *array = [db findSetWithDictionary:@{@"uid":[Tools user_id]} andTableName:FRIENDSTABLE];
+        [self operateFriendsList:array andDataType:@"database"];
         [self getFriendList];
     }
     else
@@ -125,8 +129,6 @@ MsgDelegate,FriendListDelegate>
     {
         self.unReadLabel.hidden = YES;
     }
-
-    [self dealNewChatMsg:nil];
 }
 -(void)dealloc
 {
@@ -171,9 +173,7 @@ MsgDelegate,FriendListDelegate>
 #pragma mark -chatDelegate
 -(void)dealNewChatMsg:(NSDictionary *)dict
 {
-    [newMessageArray removeAllObjects];
-    [newMessageArray addObjectsFromArray:[db findSetWithDictionary:@{@"readed":@"0"} andTableName:@"chatMsg"]];
-    [friendsListTableView reloadData];
+    [self viewWillAppear:YES];
 }
 
 -(NSInteger)newMsgCountOfUser:(NSString *)fid
@@ -221,7 +221,6 @@ MsgDelegate,FriendListDelegate>
     [pullRefreshView egoRefreshScrollViewDidEndDragging:friendsListTableView];
 }
 
-
 -(void)moreOpen
 {
     if (![[self.navigationController sideMenuController] isMenuVisible])
@@ -250,44 +249,31 @@ MsgDelegate,FriendListDelegate>
 {
     if (section == 0)
     {
-        if ([newFriendsApply count] > 0)
-        {
-            return 28;
-        }
-        else
-            return 0;
+        return 0;
     }
-    return 28;
+    return 26.5;
 }
 
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
-    if (section == 0)
-    {
-        UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 1, SCREEN_WIDTH-15, 26)];
-        headerLabel.text = [NSString stringWithFormat:@"   好友申请"];
-        headerLabel.backgroundColor = RGB(234, 234, 234, 1);
-        headerLabel.font = [UIFont boldSystemFontOfSize:16];
-        headerLabel.textColor = TITLE_COLOR;
-        return headerLabel;
-    }
-    else
+    if (section > 0)
     {
         NSDictionary *groupDict = [tmpArray objectAtIndex:section-1];
         UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 1, SCREEN_WIDTH-15, 26)];
         headerLabel.text = [NSString stringWithFormat:@"   %@",[groupDict objectForKey:@"key"]];
-        headerLabel.backgroundColor = RGB(234, 234, 234, 1);
-        headerLabel.font = [UIFont boldSystemFontOfSize:16];
-        headerLabel.textColor = TITLE_COLOR;
+        headerLabel.backgroundColor = RGB(196, 192, 200, 1);
+        headerLabel.font = [UIFont systemFontOfSize:14];
+        headerLabel.textColor = [UIColor whiteColor];
         return headerLabel;
     }
     return nil;
 }
+
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     if(section == 0)
     {
-        return [newFriendsApply count];
+        return 1;
     }
     else
     {
@@ -297,8 +283,17 @@ MsgDelegate,FriendListDelegate>
     }
     return 0;
 }
+
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    if (indexPath.section == 0)
+    {
+        if ([newFriendsApply count] > 0)
+        {
+            return 62;
+        }
+        return 0;
+    }
     return 60;
 }
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -311,39 +306,40 @@ MsgDelegate,FriendListDelegate>
         {
             cell = [[MemberCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:friendsCell];
         }
-        NSDictionary *friendDict = [newFriendsApply objectAtIndex:indexPath.row];
+        if ([newFriendsApply count] > 0)
+        {
+            cell.headerImageView.hidden = NO;
+            cell.headerImageView.frame = CGRectMake(87, 21, 22, 20);
+            [cell.headerImageView setImage:[UIImage imageNamed:@"newapplyheader"]];
+            
+            cell.contentLabel.frame = CGRectMake(75, 7.5, 178, 47);
+            cell.contentLabel.layer.cornerRadius = 8;
+            cell.contentLabel.clipsToBounds = YES;
+            cell.contentLabel.hidden = NO;
+            cell.contentLabel.backgroundColor = [UIColor whiteColor];
+            cell.contentLabel.layer.borderColor = TIMECOLOR.CGColor;
+            cell.contentLabel.layer.borderWidth = 0.3;
+            
+            cell.memNameLabel.frame = CGRectMake(115, 16, 115, 30);
+            cell.memNameLabel.hidden = NO;
+            cell.memNameLabel.text = [NSString stringWithFormat:@"您有%d个新好友",[newFriendsApply count]];
+            cell.memNameLabel.font = [UIFont systemFontOfSize:16];
+            
+            cell.markView.frame = CGRectMake(236, 25, 8, 12);
+            [cell.markView setImage:[UIImage imageNamed:@"discovery_arrow"]];
+            cell.markView.hidden = NO;
+            cell.backgroundColor = self.bgView.backgroundColor;
+            
+            cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        }
         
-        cell.headerImageView.frame = CGRectMake(10, 7, 46, 46);
-        cell.headerImageView.layer.cornerRadius = 5;
-        cell.headerImageView.clipsToBounds = YES;
-        
-        cell.unreadedMsgLabel.hidden = YES;
-        
-        [Tools fillImageView:cell.headerImageView withImageFromURL:[friendDict objectForKey:@"ficon"] andDefault:HEADERDEFAULT];
-        
-        cell.memNameLabel.frame = CGRectMake(70, 15, 150, 30);
-        cell.memNameLabel.text = [friendDict objectForKey:@"fname"];
-        
-        cell.button1.hidden = NO;
-        cell.button2.hidden = NO;
-        [cell.button1 setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        [cell.button2 setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        [cell.button1 setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
-        [cell.button2 setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
-        cell.button1.frame = CGRectMake(SCREEN_WIDTH-120, 15, 50, 30);
-        cell.button2.frame = CGRectMake(SCREEN_WIDTH-60, 15, 50, 30);
-        
-        [cell.button1 setTitle:@"同意" forState:UIControlStateNormal];
-        cell.button1.tag =indexPath.section*1000 + indexPath.row;
-        [cell.button1 addTarget:self action:@selector(addFriend:) forControlEvents:UIControlEventTouchUpInside];
-        [cell.button2 setTitle:@"忽略" forState:UIControlStateNormal];
-        cell.button2.tag = indexPath.section*1000 + indexPath.row;
-        [cell.button2 addTarget:self action:@selector(refuseFriend:) forControlEvents:UIControlEventTouchUpInside];
-        
-        UIImageView *bgImageBG = [[UIImageView alloc] init];
-        bgImageBG.image = [UIImage imageNamed:@"cell_bg"];
-        cell.backgroundView = bgImageBG;
-        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        else
+        {
+            cell.headerImageView.hidden = YES;
+            cell.contentLabel.hidden = YES;
+            cell.memNameLabel.hidden = YES;
+            cell.markView.hidden = YES;
+        }
         return cell;
     }
     else
@@ -380,16 +376,17 @@ MsgDelegate,FriendListDelegate>
 {
     if (indexPath.section == 0)
     {
-        
+        SubGroupViewController *newApplyVC = [[SubGroupViewController alloc] init];
+        newApplyVC.titleString = @"好友申请";
+        newApplyVC.tmpArray = newFriendsApply;
+        newApplyVC.operateFriDel = self;
+        [self.navigationController pushViewController:newApplyVC animated:YES];
     }
     else
     {
         NSDictionary *groupDict = [tmpArray objectAtIndex:indexPath.section-1];
         NSArray *array = [groupDict objectForKey:@"array"];
         NSDictionary *dict = [array objectAtIndex:indexPath.row];
-        
-        [db updeteKey:@"readed" toValue:@"1" withParaDict:@{@"fid":[dict objectForKey:@"fid"]} andTableName:@"chatMsg"];
-        [self dealNewChatMsg:nil];
         
         ChatViewController *chatViewController = [[ChatViewController alloc] init];
         chatViewController.name = [dict objectForKey:@"fname"];
@@ -403,6 +400,15 @@ MsgDelegate,FriendListDelegate>
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
 }
 
+#pragma mark - operatefrienddel
+-(void)updataFriends:(BOOL)uperate
+{
+    if (uperate)
+    {
+        [self getFriendList];
+    }
+}
+
 #pragma mark - friendsdelegate
 -(void)updateFriendList:(BOOL)updata
 {
@@ -410,84 +416,6 @@ MsgDelegate,FriendListDelegate>
     {
         [self operateFriendsList:[db findSetWithDictionary:@{@"uid":[Tools user_id]} andTableName:FRIENDSTABLE] andDataType:@"database"];
     }
-}
-
--(void)addFriend:(UIButton *)button
-{
-    NSDictionary *dict = [newFriendsApply objectAtIndex:button.tag%1000];
-    if ([Tools NetworkReachable])
-    {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
-                                                                      @"token":[Tools client_token],
-                                                                      @"f_id":[dict objectForKey:@"fid"]
-                                                                      } API:MB_ADD_FRIEND];
-        [request setCompletionBlock:^{
-            [Tools hideProgress:self.bgView];
-            NSString *responseString = [request responseString];
-            NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"addfriends responsedict %@",responseDict);
-            if ([[responseDict objectForKey:@"code"] intValue]== 1)
-            {
-                if ([db updeteKey:@"checked" toValue:@"1" withParaDict:@{@"fid":[dict objectForKey:@"fid"],@"uid":[Tools user_id]} andTableName:FRIENDSTABLE])
-                {
-                    DDLOG(@"delete friend apply success");
-                }
-                [self operateFriendsList:[db findSetWithDictionary:@{@"uid":[Tools user_id]} andTableName:FRIENDSTABLE] andDataType:@"database"];
-            }
-            else
-            {
-                [Tools dealRequestError:responseDict fromViewController:self];
-            }
-        }];
-        
-        [request setFailedBlock:^{
-            NSError *error = [request error];
-            DDLOG(@"error %@",error);
-            [Tools hideProgress:self.bgView];
-        }];
-        [Tools showProgress:self.bgView];
-        [request startAsynchronous];
-    }
-
-    
-}
--(void)refuseFriend:(UIButton *)button
-{
-    NSDictionary *dict = [newFriendsApply objectAtIndex:button.tag%1000];
-    if ([Tools NetworkReachable])
-    {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
-                                                                      @"token":[Tools client_token],
-                                                                      @"f_id":[dict objectForKey:@"fid"]
-                                                                      } API:MB_REFUSE_FRIEND];
-        [request setCompletionBlock:^{
-            [Tools hideProgress:self.bgView];
-            NSString *responseString = [request responseString];
-            NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"refusefriends responsedict %@",responseDict);
-            if ([[responseDict objectForKey:@"code"] intValue]== 1)
-            {
-                if ([db deleteRecordWithDict:@{@"fid":[dict objectForKey:@"fid"],@"uid":[Tools user_id]} andTableName:FRIENDSTABLE])
-                {
-                    DDLOG(@"delete friend apply success");
-                }
-                [self operateFriendsList:[db findSetWithDictionary:@{@"uid":[Tools user_id]} andTableName:FRIENDSTABLE] andDataType:@"database"];
-            }
-            else
-            {
-                [Tools dealRequestError:responseDict fromViewController:self];
-            }
-        }];
-        
-        [request setFailedBlock:^{
-            NSError *error = [request error];
-            DDLOG(@"error %@",error);
-            [Tools hideProgress:self.bgView];
-        }];
-        [Tools showProgress:self.bgView];
-        [request startAsynchronous];
-    }
-
 }
 
 #pragma mark - getFriendList
@@ -538,10 +466,13 @@ MsgDelegate,FriendListDelegate>
     [tmpArray removeAllObjects];
     if ([tmpFriendsList count] > 0)
     {
-        [db deleteRecordWithDict:@{@"uid":[Tools user_id]} andTableName:FRIENDSTABLE];
+        if ([db deleteRecordWithDict:@{@"uid":[Tools user_id]} andTableName:FRIENDSTABLE])
+        {
+            DDLOG(@"clear chat success!");
+        }
         if ([datatype isEqualToString:@"database"])
         {
-            for (int i=0; i<[tmpFriendsList count]; ++i)
+            for (int i=0; i < [tmpFriendsList count]; ++i)
             {
                 NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithCapacity:0];
                 NSDictionary *dict = [tmpFriendsList objectAtIndex:i];
@@ -556,7 +487,7 @@ MsgDelegate,FriendListDelegate>
         }
         else if([datatype isEqualToString:@"network"])
         {
-            for (int i=0; i<[tmpFriendsList count]; ++i)
+            for (int i=0; i < [tmpFriendsList count]; ++i)
             {
                 NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithCapacity:0];
                 NSDictionary *dict = [tmpFriendsList objectAtIndex:i];
@@ -572,13 +503,20 @@ MsgDelegate,FriendListDelegate>
     }
     else
     {
-        [db deleteRecordWithDict:@{@"uid":[Tools user_id]} andTableName:FRIENDSTABLE];
+        if ([db deleteRecordWithDict:@{@"uid":[Tools user_id]} andTableName:FRIENDSTABLE])
+        {
+            DDLOG(@"clear chat success!");
+        }
     }
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:UCFRIENDSUM];
     [[NSUserDefaults standardUserDefaults] synchronize];
     [newFriendsApply addObjectsFromArray:[db findSetWithDictionary:@{@"uid":[Tools user_id],@"checked":@"0"} andTableName:FRIENDSTABLE]];
     NSArray *tmpListArray = [db findSetWithDictionary:@{@"uid":[Tools user_id],@"checked":@"1"} andTableName:FRIENDSTABLE];
-    [tmpArray addObjectsFromArray:[Tools getSpellSortArrayFromChineseArray:tmpListArray andKey:@"fname"]];
+    if ([tmpListArray count] > 0)
+    {
+        [tmpArray addObjectsFromArray:[Tools getSpellSortArrayFromChineseArray:tmpListArray andKey:@"fname"]];
+    }
+    
     [friendsListTableView reloadData];
     
     if ([newFriendsApply count] > 0 || [tmpArray count] > 0)

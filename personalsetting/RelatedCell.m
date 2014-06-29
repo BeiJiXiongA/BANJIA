@@ -10,7 +10,7 @@
 #import "Header.h"
 
 @implementation RelatedCell
-@synthesize iconImageView,nametf,relateButton,bgImageView;
+@synthesize iconImageView,nametf,relateButton,bgImageView,contentLabel;
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
@@ -24,11 +24,12 @@
         iconImageView.backgroundColor = [UIColor whiteColor];
         [self.contentView addSubview:iconImageView];
         
-        nametf = [[UITextField alloc] initWithFrame:CGRectMake(SCREEN_WIDTH-120, 5, 100, 20)];
+        nametf = [[MyTextField alloc] initWithFrame:CGRectMake(SCREEN_WIDTH-120, 5, 100, 20)];
         nametf.font = [UIFont systemFontOfSize:16];
         nametf.textAlignment = NSTextAlignmentRight;
         nametf.hidden = NO;
-        nametf.textColor = TITLE_COLOR;
+        nametf.background = nil;
+        nametf.textColor = CONTENTCOLOR;
 //        nametf.enabled = NO;
         [self.contentView addSubview:nametf];
         
@@ -37,6 +38,11 @@
         [relateButton setTitle:@"关联" forState:UIControlStateNormal];
         [relateButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
         [self.contentView addSubview:relateButton];
+        
+        contentLabel = [[UILabel alloc] init];
+        contentLabel.textColor = CONTENTCOLOR;
+        contentLabel.font = [UIFont systemFontOfSize:16];
+        [self.contentView addSubview:contentLabel];
         
     }
     return self;

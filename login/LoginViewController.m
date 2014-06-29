@@ -215,6 +215,7 @@
         if ([[APService registrionID] length] > 0)
         {
             userStr = [APService registrionID];
+//            [Tools showAlertView:userStr delegateViewController:nil];
         }
         else
         {
@@ -230,8 +231,7 @@
                          @"d_imei":[Tools device_uid],
                          @"c_os":[Tools device_os],
                          @"d_type":@"iOS",
-                         @"p_cid":@"123",
-                         @"p_uid":userStr,
+                         @"registrationID":userStr,
                          @"account":account,
                          @"a_type":accountType,
                          @"a_id":accountID
@@ -246,8 +246,7 @@
                          @"d_imei":[Tools device_uid],
                          @"c_os":[Tools device_os],
                          @"d_type":@"iOS",
-                         @"p_cid":@"123",
-                         @"p_uid":userStr,
+                         @"registrationID":userStr,
                          @"account":account
                          };
 

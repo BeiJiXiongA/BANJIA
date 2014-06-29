@@ -166,8 +166,8 @@ static XDTabViewController *_tabViewController = nil;
 
 - (UIImage*)imageFor:(XDTabBar*)tabBar atIndex:(NSUInteger)itemIndex {
     NSArray *images = [NSArray arrayWithObjects:
-                       @"icon_space",
-                       @"icon_announ", @"icon_members", @"icon_more",
+                       @"1-2",
+                       @"2-2", @"3-2", @"4-2",
                        nil];
 
     return [UIImage imageNamed:[images objectAtIndex:itemIndex]];
@@ -175,8 +175,8 @@ static XDTabViewController *_tabViewController = nil;
 
 - (UIImage*)hightlightedImageFor:(XDTabBar*)tabBar atIndex:(NSUInteger)itemIndex {
     NSArray *images = [NSArray arrayWithObjects:
-                       @"icon_space_on",
-                       @"icon_announ_on", @"icon_members_on", @"icon_more_on",
+                       @"1",
+                       @"2", @"3", @"4",
                        nil];
 
     return [UIImage imageNamed:[images objectAtIndex:itemIndex]];

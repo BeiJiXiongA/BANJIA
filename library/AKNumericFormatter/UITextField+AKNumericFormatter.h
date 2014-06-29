@@ -3,7 +3,7 @@
 // file 'LICENSE', which is part of this source code package.
 //
 
-@import UIKit;
+//@import UIKit;
 @class AKNumericFormatter;
 
 @interface UITextField(AKNumericFormatter)

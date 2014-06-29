@@ -20,6 +20,8 @@
 #import "EGORefreshTableHeaderView.h"
 #import "FooterView.h"
 
+#import "PersonalSettingCell.h"
+
 #import "UIImageView+MJWebCache.h"
 #import "MJPhotoBrowser.h"
 #import "MJPhoto.h"
@@ -32,7 +34,7 @@
 #define SectionTag  10000
 #define RowTag     100
 
-#define ImageHeight  60.0f
+#define ImageHeight  67.5f
 
 #define ImageCountPerRow  4
 
@@ -248,7 +250,7 @@ ReturnFunctionDelegate>
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 [Tools showTips:@"评论成功" toView:classZoneTableView];
-//                [self getDiaryDetail];
+                [self getDongTaiList];
                 
 //                if ([self.addComDel respondsToSelector:@selector(addComment:)])
 //                {
@@ -318,6 +320,8 @@ ReturnFunctionDelegate>
     else
     {
         [[XDTabViewController sharedTabViewController] dismissViewControllerAnimated:YES completion:nil];
+        [[NSUserDefaults standardUserDefaults] setObject:NOTFROMCLASS forKey:FROMWHERE];
+        [[NSUserDefaults standardUserDefaults] synchronize];
     }
 }
 
@@ -689,33 +693,54 @@ ReturnFunctionDelegate>
             cell.headerImageView.hidden = NO;
             cell.nameLabel.hidden = NO;
             cell.locationLabel.hidden = NO;
+            cell.topImageView.hidden = NO;
             
-            cell.headerImageView.frame = CGRectMake(0, 0, SCREEN_WIDTH, bgImageViewHeight);
-            cell.headerImageView.layer.contentsGravity = kCAGravityResizeAspectFill;
-            cell.headerImageView.clipsToBounds = YES;
-            
+            cell.topImageView.frame = CGRectMake(0, 0, SCREEN_WIDTH, bgImageViewHeight);
             NSString *topurlstring = [[NSUserDefaults standardUserDefaults] objectForKey:@"classkbimage"];
             if ([topurlstring length] >10)
             {
-                [Tools fillImageView:cell.headerImageView withImageFromURL:topurlstring andDefault:@"toppic.jpg"];
+                [Tools fillImageView:cell.topImageView withImageFromURL:topurlstring andDefault:@"toppic"];
             }
             else
             {
-                UIImage *topImage = [UIImage imageNamed:@"toppic.jpg"];
-                cell.headerImageView.image = topImage;
+                UIImage *topImage = [UIImage imageNamed:@"toppic"];
+                cell.topImageView.image = topImage;
             }
             
-            cell.locationLabel.frame = CGRectMake(SCREEN_WIDTH-200, bgImageViewHeight-30, 190, 20);
-            cell.locationLabel.font = [UIFont boldSystemFontOfSize:16];
-            cell.locationLabel.textAlignment = NSTextAlignmentCenter;
+            cell.headerImageView.frame = CGRectMake(10, 84.5, 53, 53);
+            cell.headerImageView.layer.contentsGravity = kCAGravityResizeAspectFill;
+            cell.headerImageView.clipsToBounds = YES;
+            cell.headerImageView.layer.cornerRadius = 5;
+            cell.headerImageView.clipsToBounds = YES;
+            cell.headerImageView.layer.borderColor = [UIColor whiteColor].CGColor;
+            cell.headerImageView.layer.borderWidth = 2;
+            
+            NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+            if (![[ud objectForKey:@"classiconimage"] isEqual:[NSNull null]] && [[ud objectForKey:@"classiconimage"] length] > 10)
+            {
+                [Tools fillImageView:cell.headerImageView withImageFromURL:[ud objectForKey:@"classiconimage"] andDefault:@"headpic.jpg"];
+            }
+            else
+            {
+                [cell.headerImageView setImage:[UIImage imageNamed:@"headpic.jpg"]];
+            }
+            
+            
+            cell.locationLabel.frame = CGRectMake(cell.headerImageView.frame.size.width+cell.headerImageView.frame.origin.x+7, cell.headerImageView.frame.origin.y+5, 190, 20);
+            cell.locationLabel.font = [UIFont systemFontOfSize:18];
+            cell.locationLabel.shadowColor = TITLE_COLOR;
+            cell.locationLabel.shadowOffset = CGSizeMake(0.5, 0.5);
+            cell.locationLabel.textAlignment = NSTextAlignmentLeft;
             cell.locationLabel.textColor = [UIColor whiteColor];
             cell.locationLabel.layer.shadowColor = [UIColor grayColor].CGColor;
             cell.locationLabel.layer.shadowOffset = CGSizeMake(5, 5);
 
             
-            cell.nameLabel.textAlignment = NSTextAlignmentCenter;
-            cell.nameLabel.frame = CGRectMake(SCREEN_WIDTH-200, bgImageViewHeight-50, 190, 20);
-            cell.nameLabel.font = [UIFont boldSystemFontOfSize:16];
+            cell.nameLabel.textAlignment = NSTextAlignmentLeft;
+            cell.nameLabel.frame = CGRectMake(cell.headerImageView.frame.size.width+cell.headerImageView.frame.origin.x+7, cell.headerImageView.frame.origin.y+30, 190, 20);
+            cell.nameLabel.shadowOffset = CGSizeMake(0.5, 0.5);
+            cell.nameLabel.shadowColor = TITLE_COLOR;
+            cell.nameLabel.font = [UIFont systemFontOfSize:16];
             cell.nameLabel.textColor = [UIColor whiteColor];
             cell.nameLabel.text = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
             cell.nameLabel.layer.shadowColor = TITLE_COLOR.CGColor;
@@ -731,9 +756,9 @@ ReturnFunctionDelegate>
             if (fromClasses)
             {
                 cell.praiseButton.hidden = NO;
-                cell.praiseButton.frame = CGRectMake(35, bgImageViewHeight+21, SCREEN_WIDTH-70, 35);
+                cell.praiseButton.frame = CGRectMake(35, bgImageViewHeight+18, SCREEN_WIDTH-70, 42);
                 [cell.praiseButton setTitle:@"申请加入" forState:UIControlStateNormal];
-                [cell.praiseButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)] forState:UIControlStateNormal];
+                [cell.praiseButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
                 [cell.praiseButton addTarget:self action:@selector(applyJoin) forControlEvents:UIControlEventTouchUpInside];
                 cell.praiseButton.titleLabel.font = [UIFont systemFontOfSize:18];
                 [cell.praiseButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
@@ -813,7 +838,7 @@ ReturnFunctionDelegate>
         cell.nameLabel.text = nameStr;
         cell.nameLabel.font = NAMEFONT;
         cell.nameLabel.textColor = NAMECOLOR;
-    
+        
         cell.timeLabel.frame = CGRectMake(cell.nameLabel.frame.size.width+cell.nameLabel.frame.origin.x, 5, SCREEN_WIDTH-cell.nameLabel.frame.origin.x-cell.nameLabel.frame.size.width-20, 30);
         cell.timeLabel.textAlignment = NSTextAlignmentRight;
         cell.timeLabel.numberOfLines = 2;
@@ -831,9 +856,9 @@ ReturnFunctionDelegate>
         cell.headerImageView.layer.cornerRadius = 0;
         cell.headerImageView.clipsToBounds = YES;
         cell.headerImageView.backgroundColor = [UIColor clearColor];
-//        [Tools fillImageView:cell.headerImageView withImageFromURL:[[dict objectForKey:@"by"] objectForKey:@"img_icon"] imageWidth:cell.headerImageView.frame.size.height andDefault:@"3100"];
+
         [Tools fillImageView:cell.headerImageView withImageFromURL:[[dict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERICON];
-        cell.locationLabel.frame = CGRectMake(60, cell.nameLabel.frame.origin.y+cell.nameLabel.frame.size.height, SCREEN_WIDTH-80, 20);
+        cell.locationLabel.frame = CGRectMake(60, cell.headerImageView.frame.origin.y+cell.headerImageView.frame.size.height-LOCATIONLABELHEI, SCREEN_WIDTH-80, LOCATIONLABELHEI);
         cell.locationLabel.text = [dict objectForKey:@"add"];
         
         cell.contentLabel.hidden = YES;
@@ -908,7 +933,7 @@ ReturnFunctionDelegate>
                 {
                     row = (imageCount/ImageCountPerRow) > 3 ? 3:(imageCount / ImageCountPerRow);
                 }
-                cell.imagesView.frame = CGRectMake((SCREEN_WIDTH-ImageHeight*ImageCountPerRow)/2,
+                cell.imagesView.frame = CGRectMake(12,
                                                    cell.contentLabel.frame.size.height +
                                                    cell.contentLabel.frame.origin.y+7,
                                                    SCREEN_WIDTH-20, (imageViewHeight+5) * row);
@@ -926,7 +951,6 @@ ReturnFunctionDelegate>
                     // 内容模式
                     imageView.clipsToBounds = YES;
                     imageView.contentMode = UIViewContentModeScaleAspectFill;
-//                    [Tools fillImageView:imageView withImageFromURL:[imgsArray objectAtIndex:i] imageWidth:100.0f andDefault:@"3100"];
                     [Tools fillImageView:imageView withImageFromURL:[imgsArray objectAtIndex:i] andDefault:@"3100"];
                     [cell.imagesView addSubview:imageView];
                 }
@@ -944,8 +968,8 @@ ReturnFunctionDelegate>
         {
             he = 5;
         }
-        
-        cell.transmitButton.frame = CGRectMake(0, cellHeight+13, (SCREEN_WIDTH-0)/3, 30);
+        CGFloat buttonHeight = 35;
+        cell.transmitButton.frame = CGRectMake(0, cellHeight+13, (SCREEN_WIDTH-0)/3, buttonHeight);
         [cell.transmitButton setTitle:@"转发" forState:UIControlStateNormal];
         cell.transmitButton.tag = indexPath.section*SectionTag+indexPath.row;
         [cell.transmitButton addTarget:self action:@selector(transmitDiary:) forControlEvents:UIControlEventTouchUpInside];
@@ -954,11 +978,11 @@ ReturnFunctionDelegate>
         [cell.praiseButton setTitle:[NSString stringWithFormat:@"赞(%d)",[[dict objectForKey:@"likes_num"] integerValue]] forState:UIControlStateNormal];
         [cell.praiseButton addTarget:self action:@selector(praiseDiary:) forControlEvents:UIControlEventTouchUpInside];
         cell.praiseButton.tag = indexPath.section*SectionTag+indexPath.row;
-        cell.praiseButton.frame = CGRectMake((SCREEN_WIDTH-0)/3, cellHeight+13, (SCREEN_WIDTH-0)/3, 30);
+        cell.praiseButton.frame = CGRectMake((SCREEN_WIDTH-0)/3, cellHeight+13, (SCREEN_WIDTH-0)/3, buttonHeight);
         cell.praiseButton.iconImageView.image = [UIImage imageNamed:@"icon_heart"];
         
         [cell.commentButton setTitle:[NSString stringWithFormat:@"评论(%d)",[[dict objectForKey:@"comments_num"] integerValue]] forState:UIControlStateNormal];
-        cell.commentButton.frame = CGRectMake((SCREEN_WIDTH-0)/3*2, cellHeight+13, (SCREEN_WIDTH-0)/3, 30);
+        cell.commentButton.frame = CGRectMake((SCREEN_WIDTH-0)/3*2, cellHeight+13, (SCREEN_WIDTH-0)/3, buttonHeight);
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         cell.commentButton.tag = indexPath.section*SectionTag+indexPath.row;
         [cell.commentButton addTarget:self action:@selector(commentDiary:) forControlEvents:UIControlEventTouchUpInside];
@@ -1924,6 +1948,7 @@ ReturnFunctionDelegate>
 {
     NSString *requestUrlStr = [NSString stringWithFormat:@"%@=%@=%@",GETDIARIESLIST,[Tools user_id],classID];
     NSString *key = [requestUrlStr MD5Hash];
+    DDLOG(@"classzone cache key %@",key);
     NSData *cacheData = [FTWCache objectForKey:key];
     if ([cacheData length] > 0)
     {

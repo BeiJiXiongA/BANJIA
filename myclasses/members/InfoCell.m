@@ -9,7 +9,7 @@
 #import "InfoCell.h"
 
 @implementation InfoCell
-@synthesize nameLabel,contentLabel,button1,button2,headerImageView,bgImageView,nameBgView;
+@synthesize nameLabel,contentLabel,button1,button2,headerImageView,bgImageView,nameBgView,sexureImageView;
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
@@ -36,6 +36,12 @@
         contentLabel.backgroundColor = [UIColor clearColor];
         contentLabel.textColor = [UIColor whiteColor];
         [self.contentView addSubview:contentLabel];
+        
+        sexureImageView = [[UIImageView alloc] init];
+        sexureImageView.hidden = YES;
+        sexureImageView.layer.cornerRadius = 3;
+        sexureImageView.clipsToBounds = YES;
+        [self.contentView addSubview:sexureImageView];
         
         button1 = [MyButton buttonWithType:UIButtonTypeCustom];
         button1.backgroundColor = [UIColor clearColor];

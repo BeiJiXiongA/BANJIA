@@ -10,12 +10,14 @@
 #import "AddNotificationViewController.h"
 #import "MySwitchView.h"
 #import "Header.h"
+#import "ClassesListViewController.h"
 
 @interface AddNotificationViewController ()<UITableViewDataSource,
 UITableViewDelegate,
 UITextViewDelegate,
 MySwitchDel,
-UITextViewDelegate>
+UITextViewDelegate,
+SelectClasses>
 {
     UITextView *contentHolder;
     UITextView *contentTextView;
@@ -31,6 +33,8 @@ UITextViewDelegate>
     
     NSString *objectString;
     NSString *objectsValueString;
+    
+    UIButton *sendButton;
 }
 @end
 
@@ -50,7 +54,7 @@ UITextViewDelegate>
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     
-    self.titleLabel.text = @"发布公告";
+    self.titleLabel.text = @"发布通知";
     replay = 1;
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     if (fromClass)
@@ -75,24 +79,28 @@ UITextViewDelegate>
     objectString = [objectsArray firstObject];
     objectsValueString = @"all";
     
-    contentHolder = [[UITextView alloc] initWithFrame:CGRectMake(18, UI_NAVIGATION_BAR_HEIGHT+8, 200, 30)];
-    contentHolder.text = @"请填写公告内容";
-    contentHolder.font = [UIFont systemFontOfSize:16];
+    contentHolder = [[UITextView alloc] initWithFrame:CGRectMake(18, UI_NAVIGATION_BAR_HEIGHT+48, 200, 30)];
+    contentHolder.text = @"请填写通知内容";
+    contentHolder.textColor = COMMENTCOLOR;
+    contentHolder.font = [UIFont systemFontOfSize:18];
     contentHolder.textColor = [UIColor lightGrayColor];
     contentHolder.backgroundColor = [UIColor clearColor];
     
-    UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 3, 20, 2.3)];
-    UIImageView *inputImageView = [[UIImageView alloc] initWithFrame:CGRectMake(15, contentHolder.frame.origin.y-2, SCREEN_WIDTH-30, 210)];
-    [inputImageView setImage:inputImage];
+    UIImageView *inputImageView = [[UIImageView alloc] initWithFrame:CGRectMake((SCREEN_WIDTH - 300)/2, UI_NAVIGATION_BAR_HEIGHT+38.5, 300, 95)];
+    inputImageView.layer.cornerRadius = 7;
+    inputImageView.clipsToBounds = YES;
+    inputImageView.layer.borderWidth = 0.3;
+    inputImageView.layer.borderColor = TIMECOLOR.CGColor;
+    inputImageView.backgroundColor = [UIColor whiteColor];
     [self.bgView addSubview:inputImageView];
     
     [self.bgView addSubview:contentHolder];
     
-    contentTextView = [[UITextView alloc] initWithFrame:CGRectMake(20, contentHolder.frame.origin.y, SCREEN_WIDTH-40, 200)];
+    contentTextView = [[UITextView alloc] initWithFrame:CGRectMake(20, contentHolder.frame.origin.y, SCREEN_WIDTH-40, 85)];
     contentTextView.backgroundColor = [UIColor clearColor];
     contentTextView.delegate = self;
     contentTextView.textColor = TITLE_COLOR;
-    contentTextView.font = [UIFont systemFontOfSize:17];
+    contentTextView.font = [UIFont systemFontOfSize:19];
     [self.bgView addSubview:contentTextView];
     
     UILabel *objectLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, contentTextView.frame.size.height+contentTextView.frame.origin.y+20, 80, 30)];
@@ -110,15 +118,15 @@ UITextViewDelegate>
         [objectsTableView setSeparatorInset:UIEdgeInsetsZero];
     }
     
-    replayLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, objectsTableView.frame.origin.y+objectsTableView.frame.size.height-30, 150, 30)];
-    replayLabel.textColor = TITLE_COLOR;
+    replayLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, UI_NAVIGATION_BAR_HEIGHT+9, 150, 30)];
+    replayLabel.textColor = COMMENTCOLOR;
     replayLabel.backgroundColor = [UIColor clearColor];
-    replayLabel.font = [UIFont systemFontOfSize:16];
-    replayLabel.text = @"是否需要回执";
+    replayLabel.font = [UIFont systemFontOfSize:18];
+    replayLabel.text = @"填写通知内容";
     [self.bgView addSubview:replayLabel];
     
     replaySwitch = [[MySwitchView alloc] initWithFrame:CGRectMake(replayLabel.frame.size.width+replaySwitch.frame.origin.x+20, replayLabel.frame.origin.y, 80, 30)];
-    [self.bgView addSubview:replaySwitch];
+//    [self.bgView addSubview:replaySwitch];
     replaySwitch.selectView.backgroundColor = [UIColor whiteColor];
     replaySwitch.selectView.frame = CGRectMake(replaySwitch.frame.size.width/2, 0, replaySwitch.frame.size.width/2, replaySwitch.frame.size.height);
     replaySwitch.mySwitchDel = self;
@@ -143,13 +151,21 @@ UITextViewDelegate>
     [replaySwitch.rightView addSubview:rightLabel];
     
     
-    UIButton *sendButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    sendButton = [UIButton buttonWithType:UIButtonTypeCustom];
     sendButton.backgroundColor = [UIColor clearColor];
-    [sendButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     sendButton.frame = CGRectMake(SCREEN_WIDTH-60, 6, 50, 35);
     [sendButton setTitle:@"发布" forState:UIControlStateNormal];
-    [sendButton addTarget:self action:@selector(addNotification) forControlEvents:UIControlEventTouchUpInside];
+    [sendButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+    [sendButton addTarget:self action:@selector(sendnotice) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:sendButton];
+    
+    UIButton *sendButton1 = [UIButton buttonWithType:UIButtonTypeCustom];
+    sendButton1.backgroundColor = [UIColor clearColor];
+    [sendButton1 setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+    sendButton1.frame = CGRectMake((SCREEN_WIDTH-300)/2, inputImageView.frame.size.height+inputImageView.frame.origin.y+10, 300, 42);
+    [sendButton1 setTitle:@"发布" forState:UIControlStateNormal];
+    [sendButton1 addTarget:self action:@selector(sendnotice) forControlEvents:UIControlEventTouchUpInside];
+    [self.bgView addSubview:sendButton1];
 }
 
 -(void)viewWillAppear:(BOOL)animated
@@ -236,14 +252,30 @@ UITextViewDelegate>
     }
 }
 
--(void)addNotification
+-(void)sendnotice
 {
     if (!fromClass)
     {
-        [Tools showAlertView:@"请选择班级" delegateViewController:nil];
+        ClassesListViewController *classelistVC = [[ClassesListViewController alloc] init];
+        classelistVC.selectClassdel = self;
+        [self.navigationController pushViewController:classelistVC animated:YES];
         return ;
     }
-    if([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] <= 0)
+    [self addNotification:classID];
+}
+
+-(void)selectClasses:(NSArray *)selectClassesArray
+{
+    if ([selectClassesArray count] > 0)
+    {
+        [self addNotification:[selectClassesArray firstObject]];
+    }
+}
+
+-(void)addNotification:(NSString *)classid
+{
+    
+    if(fromClass && [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] <= 0)
     {
         [Tools showAlertView:@"您没有权限" delegateViewController:nil];
         return ;
@@ -258,26 +290,26 @@ UITextViewDelegate>
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
-                                                                      @"c_id":classID,
+                                                                      @"c_id":classid,
                                                                       @"content":contentTextView.text,
                                                                       @"view":objectsValueString,
                                                                       @"c_read":[NSNumber numberWithInteger:replay]
 //                                                                      @"role":[[NSUserDefaults standardUserDefaults] objectForKey:@"role"]
                                                                       } API:ADDNOTIFICATION];
         [request setCompletionBlock:^{
+            sendButton.enabled = YES;
+            [Tools hideProgress:self.bgView];
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
             DDLOG(@"addNoti===%@",responseString);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                [self readNotice:[responseDict objectForKey:@"data"]];
+                [self readNotice:[responseDict objectForKey:@"data"]  andClassid:classid];
                 
                 if ([self.updel respondsToSelector:@selector(update:)])
                 {
-                    sleep(5);
                     [self.updel update:YES];
                 }
-                [self.navigationController popViewControllerAnimated:YES];
             }
             else
             {
@@ -286,21 +318,25 @@ UITextViewDelegate>
         }];
         
         [request setFailedBlock:^{
+            [Tools hideProgress:self.bgView];
             NSError *error = [request error];
             DDLOG(@"error %@",error);
+            sendButton.enabled = YES;
         }];
+        [Tools showProgress:self.bgView];
+        sendButton.enabled = NO;
         [request startAsynchronous];
     }
 }
 
--(void)readNotice:(NSString *)noticeID
+-(void)readNotice:(NSString *)noticeID andClassid:(NSString *)classid
 {
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
                                                                       @"p_id":noticeID,
-                                                                      @"c_id":classID
+                                                                      @"c_id":classid
                                                                       } API:READNTICES];
         [request setCompletionBlock:^{
             NSString *responseString = [request responseString];
@@ -336,7 +372,7 @@ UITextViewDelegate>
     {
         contentHolder.text = @"请填写公告内容";
     }
-    if ([textView.text length]>200)
+    if ([textView.text length] > 200)
     {
         textView.text = [textView.text substringToIndex:201];
         [Tools showAlertView:@"公告内容不能超多200字" delegateViewController:nil];

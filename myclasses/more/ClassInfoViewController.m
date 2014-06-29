@@ -45,8 +45,11 @@ SetClassInfoDel>
     NSString *schoolName;
     NSString *classID;
     NSString *className;
-    
+    NSString *schoolLevel;
+    NSString *classNumber;
     NSString *regionStr;
+    
+    NSArray *schoolLevelArray;
 }
 @end
 
@@ -71,6 +74,8 @@ SetClassInfoDel>
     classInfo = @"";
     regionStr = @"";
     
+    schoolLevelArray = [NSArray arrayWithObjects:@"小学",@"中学",@"夏令营",@"社团",@"职业学校",@"幼儿园",@"其他", nil];
+    
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     className = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
     schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
@@ -86,16 +91,32 @@ SetClassInfoDel>
     topicImageView.backgroundColor = [UIColor whiteColor];
     topicImageView.layer.contentsGravity = kCAGravityResizeAspectFill;
     topicImageView.clipsToBounds = YES;
-    [topicImageView setImage:[UIImage imageNamed:@"toppic.jpg"]];
+    [topicImageView setImage:[UIImage imageNamed:@"toppic"]];
+    
+    UILabel *classNameLabel = [[UILabel alloc] initWithFrame:CGRectMake(70, -60, 200, 20)];
+    classNameLabel.text = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
+    classNameLabel.backgroundColor = [UIColor clearColor];
+    classNameLabel.textColor = [UIColor whiteColor];
+    classNameLabel.font = [UIFont systemFontOfSize:18];
+    classNameLabel.shadowColor = TITLE_COLOR;
+    classNameLabel.shadowOffset = CGSizeMake(0.5, 0.5);
+    
+    UILabel *schoolNameLabel = [[UILabel alloc] initWithFrame:CGRectMake(70, -34, 200, 20)];
+    schoolNameLabel.text = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
+    schoolNameLabel.backgroundColor = [UIColor clearColor];
+    schoolNameLabel.textColor = [UIColor whiteColor];
+    schoolNameLabel.font = [UIFont systemFontOfSize:16];
+    schoolNameLabel.shadowColor = TITLE_COLOR;
+    schoolNameLabel.shadowOffset = CGSizeMake(0.5, 0.5);
 
     
     UITapGestureRecognizer *topGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(changeTopImage)];
     topicImageView.userInteractionEnabled = YES;
     [topicImageView addGestureRecognizer:topGestureRecognizer];
     
-    headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(15, -40, 80, 80)];
+    headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(10, -65, 53, 53)];
     headerImageView.backgroundColor = [UIColor whiteColor];
-    headerImageView.layer.cornerRadius = 10;
+    headerImageView.layer.cornerRadius = 5;
     [headerImageView setImage:[UIImage imageNamed:@"headpic.jpg"]];
     headerImageView.layer.borderColor = [UIColor whiteColor].CGColor;
     headerImageView.layer.borderWidth = 2;
@@ -117,10 +138,12 @@ SetClassInfoDel>
     classInfoTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     [self.bgView addSubview:classInfoTableView];
     
-    classInfoTableView.contentInset = UIEdgeInsetsMake(TOP_HEIGHT+40, 0, 0, 0);
+    classInfoTableView.contentInset = UIEdgeInsetsMake(TOP_HEIGHT+30, 0, 0, 0);
     
     [classInfoTableView addSubview:topicImageView];
     [classInfoTableView addSubview:headerImageView];
+    [classInfoTableView addSubview:classNameLabel];
+    [classInfoTableView addSubview:schoolNameLabel];
     
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     if (![[ud objectForKey:@"classkbimage"] isEqual:[NSNull null]] && [[ud objectForKey:@"classkbimage"] length] > 10)
@@ -129,12 +152,12 @@ SetClassInfoDel>
     }
     else
     {
-        [topicImageView setImage:[UIImage imageNamed:@"toppic.jpg"]];
+        [topicImageView setImage:[UIImage imageNamed:@"toppic"]];
     }
     
     if (![[ud objectForKey:@"classiconimage"] isEqual:[NSNull null]] && [[ud objectForKey:@"classiconimage"] length] > 10)
     {
-        [Tools fillImageView:headerImageView withImageFromURL:[[NSUserDefaults standardUserDefaults] objectForKey:@"classiconimage"] andDefault:@""];
+        [Tools fillImageView:headerImageView withImageFromURL:[[NSUserDefaults standardUserDefaults] objectForKey:@"classiconimage"] andDefault:@"headpic.jpg"];
     }
     else
     {
@@ -158,6 +181,8 @@ SetClassInfoDel>
 -(void)unShowSelfViewController
 {
     [[XDTabViewController sharedTabViewController] dismissViewControllerAnimated:YES completion:nil];
+    [[NSUserDefaults standardUserDefaults] setObject:NOTFROMCLASS forKey:FROMWHERE];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 #pragma mark - aboutNotification
@@ -190,30 +215,19 @@ SetClassInfoDel>
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return 4;
+    return 7;
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     
-    if (indexPath.row < 3)
+    if (indexPath.row < 6)
     {
-        if (indexPath.row == 0)
-        {
-            NSString *classNamestr = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
-            CGSize classNameSize = [Tools getSizeWithString:classNamestr andWidth:SCREEN_WIDTH-150 andFont:[UIFont systemFontOfSize:16]];
-            return classNameSize.height>20?(classNameSize.height+70):90;
-        }
-        else if (indexPath.row == 1)
-        {
-            CGSize schoolNameSize = [Tools getSizeWithString:schoolName andWidth:SCREEN_WIDTH-150 andFont:[UIFont systemFontOfSize:16]];
-            return schoolNameSize.height>20?(schoolNameSize.height+20):40;
-        }
-        return 40;
+        return 47;
     }
     else
     {
         CGSize size = [Tools getSizeWithString:classInfo andWidth:SCREEN_WIDTH-150 andFont:[UIFont systemFontOfSize:16]];
-        return size.height+20>40?(size.height+20):40;
+        return size.height+20>40?(size.height+20+30):(40+30);
     }
     return 0;
 }
@@ -226,53 +240,87 @@ SetClassInfoDel>
         cell = [[PersonalSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:classInfoCell];
     }
     cell.headerImageView.hidden = YES;
+    cell.nameLabel.textColor = CONTENTCOLOR;
     cell.nameLabel.font = [UIFont systemFontOfSize:15];
     cell.objectsLabel.font = [UIFont systemFontOfSize:15];
+    cell.objectsLabel.textColor = COMMENTCOLOR;
     cell.objectsLabel.numberOfLines = 10;
     cell.objectsLabel.lineBreakMode = NSLineBreakByWordWrapping;
+    cell.objectsLabel.textAlignment = NSTextAlignmentRight;
     cell.nameLabel.textAlignment = NSTextAlignmentLeft;
-    if (indexPath.row < 3)
+    
+    CGFloat left = 210;
+    if (indexPath.row < 6)
     {
-        cell.nameLabel.frame = CGRectMake(10, 10, 80, 20);
+        cell.nameLabel.frame = CGRectMake(10, 10, 80, 27);
         if (indexPath.row == 0)
         {
-            cell.nameLabel.text = @"班级名称";
-            cell.nameLabel.frame = CGRectMake(10, 60, 80, 20);
-            NSString *classNamestr = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
-            CGSize classNameSize = [Tools getSizeWithString:classNamestr andWidth:SCREEN_WIDTH-150 andFont:[UIFont systemFontOfSize:16]];
-            cell.objectsLabel.frame = CGRectMake(100, 60, SCREEN_WIDTH-150, classNameSize.height);
-            cell.objectsLabel.text = classNamestr;
+            cell.nameLabel.text = @"我的身份";
+            cell.nameLabel.frame = CGRectMake(10, 10, 80, 27);
             
-            if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
+            cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-220, 10, 180,27);
+            NSString *role = [[NSUserDefaults standardUserDefaults] objectForKey:@"role"];
+            if ([role isEqualToString:@"students"])
             {
-                
-                cell.authenticationSign.frame = CGRectMake(SCREEN_WIDTH-20, 62.5, 10, 15);
-                [cell.authenticationSign setImage:[UIImage imageNamed:@"discovery_arrow"]];
-//                cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+                cell.objectsLabel.text = @"学生";
+            }
+            else if ([role isEqualToString:@"teachers"])
+            {
+                cell.objectsLabel.text = @"老师";
+            }
+            else if ([role isEqualToString:@"parents"])
+            {
+                cell.objectsLabel.text = @"家长";
             }
         }
-        else if(indexPath.row == 1)
+        else if (indexPath.row == 1)
         {
-            schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
-            CGSize schoolNameSize = [Tools getSizeWithString:schoolName andWidth:SCREEN_WIDTH-150 andFont:[UIFont systemFontOfSize:16]];
-            cell.objectsLabel.frame = CGRectMake(100, 10, SCREEN_WIDTH-130, schoolNameSize.height);
-            
-            cell.nameLabel.text = @"学校名称";
-            cell.objectsLabel.text = schoolName;
+            cell.nameLabel.text = @"班级名称";
+            cell.nameLabel.frame = CGRectMake(10, 10, 80, 27);
+            NSString *classNamestr = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
+            cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-left, 10, 180, 27);
+            cell.objectsLabel.text = classNamestr;
         }
         else if(indexPath.row == 2)
         {
-            cell.nameLabel.text = @"地区";
-            cell.objectsLabel.frame = CGRectMake(100, 10, SCREEN_WIDTH-150, 20);
+            cell.nameLabel.text = @"班      号";
+            cell.nameLabel.frame = CGRectMake(10, 10, 80, 27);
+            
+            cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-left, 10, 180, 27);
+            cell.objectsLabel.text = classNumber;
+        }
+        else if(indexPath.row == 3)
+        {
+            cell.nameLabel.text = @"班级类型";
+            cell.nameLabel.frame = CGRectMake(10, 10, 80, 27);
+            
+            cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-left, 10, 180, 27);
+            cell.objectsLabel.text = [NSString stringWithFormat:@"%@",[schoolLevelArray objectAtIndex:[[[NSUserDefaults standardUserDefaults] objectForKey:@"schoollevel"] integerValue]]];
+        }
+        
+        else if(indexPath.row == 4)
+        {
+            schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
+            CGSize schoolNameSize = [Tools getSizeWithString:schoolName andWidth:SCREEN_WIDTH-150 andFont:[UIFont systemFontOfSize:16]];
+            cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-left, 10, 180, schoolNameSize.height>27?schoolNameSize.height:27);
+            
+            cell.nameLabel.text = @"学      校";
+            cell.objectsLabel.text = schoolName;
+        }
+        else if(indexPath.row == 5)
+        {
+            cell.nameLabel.text = @"地      区";
+            cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-left, 10, 180, 27);
             cell.objectsLabel.text = regionStr;
         }
         
     }
-    else if(indexPath.row == 3)
+    else if(indexPath.row == 6)
     {
         CGSize size = [Tools getSizeWithString:classInfo andWidth:SCREEN_WIDTH-150 andFont:[UIFont systemFontOfSize:16]];
-        cell.nameLabel.frame = CGRectMake(10, 10, 80, 20);
-        cell.objectsLabel.frame = CGRectMake(100, 10, SCREEN_WIDTH-150, size.height>20?size.height:20);
+        cell.nameLabel.frame = CGRectMake(10, 10, 80, 27);
+        cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-left, 10, 180, size.height>27?size.height:27);
+        cell.objectsLabel.textAlignment = NSTextAlignmentLeft;
         cell.nameLabel.text = @"班级介绍";
         if ([classInfo length] > 0)
         {
@@ -283,15 +331,17 @@ SetClassInfoDel>
         {
             cell.objectsLabel.text = @"请填写班级介绍";
         }
-        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
-        {
-            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"discovery_arrow"]];
-            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 62.5, 10, 15)];
-        }
     }
     UIImageView *bgImageBG = [[UIImageView alloc] init];
     bgImageBG.image = [UIImage imageNamed:@"cell_bg2"];
     cell.backgroundView = bgImageBG;
+    if (indexPath.row != 0)
+    {
+        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
+        {
+            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+        }
+    }
 
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
@@ -299,7 +349,7 @@ SetClassInfoDel>
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.row == 0)
+    if (indexPath.row == 1)
     {
         if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
         {
@@ -311,7 +361,7 @@ SetClassInfoDel>
             [[XDTabViewController sharedTabViewController] .navigationController pushViewController:setClassInfoViewController animated:YES];
         }
     }
-    else if(indexPath.row == 3)
+    else if(indexPath.row == 6)
     {
         if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
         {
@@ -612,7 +662,7 @@ SetClassInfoDel>
             {
                 if ([[[responseDict objectForKey:@"data"] objectForKey:@"img_icon"] length] > 10)
                 {
-                    [Tools fillImageView:((UIImageView *)[classInfoTableView viewWithTag:2222]) withImageFromURL:[[responseDict objectForKey:@"data"] objectForKey:@"img_icon"] andDefault:@"toppic.jpg"];
+                    [Tools fillImageView:((UIImageView *)[classInfoTableView viewWithTag:2222]) withImageFromURL:[[responseDict objectForKey:@"data"] objectForKey:@"img_icon"] andDefault:@"toppic"];
                 }
                 else
                 {
@@ -620,20 +670,41 @@ SetClassInfoDel>
                 }
                 if ([[[responseDict objectForKey:@"data"] objectForKey:@"img_kb"] length] > 10)
                 {
-                    [Tools fillImageView:((UIImageView *)[classInfoTableView viewWithTag:3333]) withImageFromURL:[[responseDict objectForKey:@"data"] objectForKey:@"img_kb"] andDefault:@"toppic.jpg"];
+                    [Tools fillImageView:((UIImageView *)[classInfoTableView viewWithTag:3333]) withImageFromURL:[[responseDict objectForKey:@"data"] objectForKey:@"img_kb"] andDefault:@"toppic"];
                 }
                 else
                 {
-                    [topicImageView setImage:[UIImage imageNamed:@"toppic.jpg"]];
+                    [topicImageView setImage:[UIImage imageNamed:@"toppic"]];
                 }
                 if ([[responseDict objectForKey:@"data"] objectForKey:@"info"])
                 {
                     classInfo = [[responseDict objectForKey:@"data"] objectForKey:@"info"];
                 }
                 
-                regionStr = [[[responseDict objectForKey:@"data"] objectForKey:@"school"] objectForKey:@"regions"] ;
-                [classInfoTableView reloadData];
+                if (![[[responseDict objectForKey:@"data"] objectForKey:@"school"] isEqual:[NSNull null]])
+                {
+                    regionStr = [[[[responseDict objectForKey:@"data"] objectForKey:@"school"] objectForKey:@"region"] objectForKey:@"name"] ;
+                }
                 
+                if ([[responseDict objectForKey:@"data"]objectForKey:@"number"] &&
+                    ![[[responseDict objectForKey:@"data"]objectForKey:@"number"] isEqual:[NSNull null]])
+                {
+                    NSString *tmpclassnumber = [NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"]objectForKey:@"number"] integerValue]];
+                    if ([tmpclassnumber isEqualToString:@"0"])
+                    {
+                        classNumber = @"未获取到";
+                    }
+                    else
+                    {
+                        classNumber = tmpclassnumber;
+                    }
+                }
+                else
+                {
+                    classNumber = @"未获取到";
+                }
+                
+                [classInfoTableView reloadData];
             }
             else
             {

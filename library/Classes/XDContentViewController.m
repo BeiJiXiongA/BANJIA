@@ -158,7 +158,7 @@
     _navigationBarBg.image = [UIImage imageNamed:@"nav_bar_bg"];
     [_navigationBarView addSubview:_navigationBarBg];
     
-    _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(self.view.frame.size.width/2-90, 4, 180, 36)];
+    _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(self.view.frame.size.width/2-90, 6, 180, 36)];
     _titleLabel.font = [UIFont fontWithName:@"Courier" size:19];
     _titleLabel.backgroundColor = [UIColor clearColor];
     _titleLabel.textColor = UIColorFromRGB(0x666464);
@@ -166,17 +166,17 @@
     [_navigationBarView addSubview:_titleLabel];
     
     
-    returnImageView = [[UIImageView alloc] initWithFrame:CGRectMake(7, 10, 15, UI_NAVIGATION_BAR_HEIGHT-20)];
+    returnImageView = [[UIImageView alloc] initWithFrame:CGRectMake(11, 13, 11, 18)];
     [returnImageView setImage:[UIImage imageNamed:@"icon_return"]];
     [self.navigationBarView addSubview:returnImageView];
     
-    _backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 5, 60 , UI_NAVIGATION_BAR_HEIGHT-10)];
-    [_backButton setTitle:@"  返回" forState:UIControlStateNormal];
+    _backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 5, 58 , UI_NAVIGATION_BAR_HEIGHT-10)];
+    [_backButton setTitle:@"返回" forState:UIControlStateNormal];
     [_backButton setBackgroundColor:[UIColor clearColor]];
     [_backButton setTitleColor:UIColorFromRGB(0x727171) forState:UIControlStateNormal];
     [_backButton addTarget:self action:@selector(unShowSelfViewController) forControlEvents:UIControlEventTouchUpInside];
     _backButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentRight;
-    _backButton.titleLabel.font = [UIFont systemFontOfSize:17];
+    _backButton.titleLabel.font = [UIFont systemFontOfSize:16.5];
     
     unReadLabel = [[UILabel alloc] initWithFrame:CGRectMake(35, 13, 15, 15)];
     unReadLabel.backgroundColor = [UIColor redColor];

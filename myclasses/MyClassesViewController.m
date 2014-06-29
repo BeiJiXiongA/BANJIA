@@ -25,7 +25,15 @@
 #import "MoreViewController.h"
 #import "CreateClassViewController.h"
 
+#import "SearchClassViewController.h"
+
 #import "XDTabViewController.h"
+
+#define DEFAULTSCHOOLNAME  @"未指定学校的班级"
+#define DEFAULTSCHOOLID    @"123"
+#define DEFAULTSCHOOLLEVEL  @"1"
+
+#define ADDACTIONSHEETTAG   3000
 
 @interface MyClassesViewController ()<UITableViewDataSource,
 UITableViewDelegate,
@@ -33,7 +41,8 @@ EGORefreshTableHeaderDelegate,
 ChatDelegate,
 MsgDelegate,
 ReadNoticeDelegate,
-FreshClassZone>
+FreshClassZone,
+UIActionSheetDelegate>
 {
     BOOL moreOpen;
     UITableView *classTableView;
@@ -239,23 +248,39 @@ FreshClassZone>
                 for (int i=0; i<[array count]; ++i)
                 {
                     NSDictionary *dict2 = [array objectAtIndex:i];
-                    if (![self isExistInTmpArray:[dict2 objectForKey:@"s_id"]])
+                    NSString *s_id = [dict2 objectForKey:@"s_id"];
+                    if ([s_id isEqual:[NSNull null]])
+                    {
+                        s_id = DEFAULTSCHOOLID;
+                    }
+                    if (![self isExistInTmpArray:s_id])
                     {
                         NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithCapacity:0];
-                        NSString *schoolID = [dict2 objectForKey:@"s_id"];
+                        NSString *schoolID = s_id;
                         if ([schoolID length] > 0)
                         {
                             [dict setObject:schoolID forKey:@"s_id"];
                         }
                         
                         NSString *schoolName = [dict2 objectForKey:@"s_name"];
+                        if ([schoolName isEqual:[NSNull null]])
+                        {
+                            schoolName = DEFAULTSCHOOLNAME;
+                        }
                         if ([schoolName length] > 0)
                         {
                             [dict setObject:schoolName forKey:@"s_name"];
                         }
+                        
+                        NSString *s_level = [dict2 objectForKey:@"s_level"];
+                        if ([s_level isEqual:[NSNull null]])
+                        {
+                            s_level = DEFAULTSCHOOLLEVEL;
+                        }
+                        
                         if ([dict2 objectForKey:@"s_level"])
                         {
-                            NSString *schoolLevel = [NSString stringWithFormat:@"%d",[[dict2 objectForKey:@"s_level"] integerValue]];
+                            NSString *schoolLevel = [NSString stringWithFormat:@"%d",[s_level integerValue]];
                             if ([schoolLevel length] > 0)
                             {
                                 [dict setObject:schoolLevel forKey:@"s_level"];
@@ -265,7 +290,10 @@ FreshClassZone>
                         for (int m=0; m<[array count]; ++m)
                         {
                             NSString *schoolID2 = [[array objectAtIndex:m] objectForKey:@"s_id"];
-                            
+                            if ([schoolID2 isEqual:[NSNull null]])
+                            {
+                                schoolID2 = DEFAULTSCHOOLID;
+                            }
                             if ([schoolID2 isEqualToString:schoolID])
                             {
                                 [array2 addObject:[array objectAtIndex:m]];
@@ -368,22 +396,36 @@ FreshClassZone>
                     for (int i=0; i<[array count]; ++i)
                     {
                         NSDictionary *dict2 = [array objectAtIndex:i];
-                        if (![self isExistInTmpArray:[dict2 objectForKey:@"s_id"]])
+                        NSString *s_id = [dict2 objectForKey:@"s_id"];
+                        if ([s_id isEqual:[NSNull null]])
+                        {
+                            s_id = DEFAULTSCHOOLID;
+                        }
+                        if (![self isExistInTmpArray:s_id])
                         {
                             NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithCapacity:0];
-                            NSString *schoolID = [dict2 objectForKey:@"s_id"];
+                            NSString *schoolID = s_id;
                             if ([schoolID length] > 0)
                             {
                                 [dict setObject:schoolID forKey:@"s_id"];
                             }
                             
                             NSString *schoolName = [dict2 objectForKey:@"s_name"];
+                            if ([schoolName isEqual:[NSNull null]])
+                            {
+                                schoolName = DEFAULTSCHOOLNAME;
+                            }
                             if ([schoolName length] > 0)
                             {
                                 [dict setObject:schoolName forKey:@"s_name"];
                             }
                             
-                            if ([dict2 objectForKey:@"s_level"])
+                            NSString *s_level = [dict2 objectForKey:@"s_level"];
+                            if ([s_level isEqual:[NSNull null]])
+                            {
+                                s_level = DEFAULTSCHOOLLEVEL;
+                            }
+                            else if ([dict2 objectForKey:@"s_level"])
                             {
                                 NSString *schoolLevel = [NSString stringWithFormat:@"%d",[[dict2 objectForKey:@"s_level"] integerValue]];
                                 if ([schoolLevel length] > 0)
@@ -397,7 +439,10 @@ FreshClassZone>
                             for (int m=0; m<[array count]; ++m)
                             {
                                 NSString *schoolID2 = [[array objectAtIndex:m] objectForKey:@"s_id"];
-                                
+                                if ([schoolID2 isEqual:[NSNull null]])
+                                {
+                                    schoolID2 = DEFAULTSCHOOLID;
+                                }
                                 if ([schoolID2 isEqualToString:schoolID])
                                 {
                                     [array2 addObject:[array objectAtIndex:m]];
@@ -508,7 +553,15 @@ FreshClassZone>
     headerLabel.font = [UIFont boldSystemFontOfSize:16];
     headerLabel.textColor = [UIColor whiteColor];
     NSDictionary *tmpdict = [tmpArray objectAtIndex:section];
-    headerLabel.text = [NSString stringWithFormat:@"   %@(%@)",[tmpdict objectForKey:@"s_name"],[schoolLevelArray objectAtIndex:[[tmpdict objectForKey:@"s_level"] integerValue]]];
+    if ([[tmpdict objectForKey:@"s_name"] isEqualToString:DEFAULTSCHOOLNAME])
+    {
+         headerLabel.text = [NSString stringWithFormat:@"   %@",[tmpdict objectForKey:@"s_name"]];
+    }
+    else
+    {
+         headerLabel.text = [NSString stringWithFormat:@"   %@(%@)",[tmpdict objectForKey:@"s_name"],[schoolLevelArray objectAtIndex:[[tmpdict objectForKey:@"s_level"] integerValue]]];
+    }
+   
     [headerView addSubview:headerLabel];
     return headerView;
 }
@@ -585,8 +638,8 @@ FreshClassZone>
     }
     else if([classDict objectForKey:UCDIARY] || [classDict objectForKey:DIARY])
     {
-        cell.contentLable.frame = CGRectMake(SCREEN_WIDTH-60, 32, 6, 6);
-        cell.contentLable.layer.cornerRadius = 3;
+        cell.contentLable.frame = CGRectMake(SCREEN_WIDTH-60, 30, 10, 10);
+        cell.contentLable.layer.cornerRadius = 5;
         cell.contentLable.clipsToBounds = YES;
         cell.contentLable.hidden = NO;
     }
@@ -594,7 +647,24 @@ FreshClassZone>
     {
         cell.contentLable.hidden = YES;
     }
-    cell.bgView.frame = CGRectMake(7, 6.5, SCREEN_WIDTH-14, 70);
+    
+    
+    int studentNum = 0;
+    if(![[classDict objectForKey:@"students_num"] isEqual:[NSNull null]])
+    {
+        studentNum = [[classDict objectForKey:@"students_num"] integerValue];
+    }
+    int parentNum = 0;
+    if(![[classDict objectForKey:@"parents_num"] isEqual:[NSNull null]])
+    {
+        parentNum = [[classDict objectForKey:@"parents_num"] integerValue];
+    }
+    cell.timeLabel.frame = CGRectMake(cell.nameLabel.frame.origin.x, cell.nameLabel.frame.origin.y+cell.nameLabel.frame.size.height, 180, 20);
+    cell.timeLabel.textColor = TIMECOLOR;
+    cell.timeLabel.text = [NSString stringWithFormat:@"%d名学生  %d名家长",studentNum,parentNum];
+    
+    
+    cell.bgView.frame = CGRectMake(10, 6.5, SCREEN_WIDTH-20, 70);
     cell.bgView.backgroundColor = [UIColor whiteColor];
     cell.bgView.layer.cornerRadius = 5;
     cell.bgView.clipsToBounds = YES;
@@ -632,10 +702,29 @@ FreshClassZone>
     
     
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+    
+    [ud setObject:FROMCLASS forKey:FROMWHERE];
     [ud setObject:classID forKey:@"classid"];
     [ud setObject:[classDict objectForKey:@"name"] forKey:@"classname"];
-    [ud setObject:[classDict objectForKey:@"s_id"] forKey:@"schoolid"];
-    [ud setObject:[classDict objectForKey:@"s_name"] forKey:@"schoolname"];
+    NSString *s_id = [classDict objectForKey:@"s_id"];
+    if ([s_id isEqual:[NSNull null]])
+    {
+        s_id = @"未设置学校";
+    }
+    [ud setObject:s_id forKey:@"schoolid"];
+    NSString *s_name = [classDict objectForKey:@"s_name"];
+    if ([s_name isEqual:[NSNull null]])
+    {
+        s_name = @"未设置学校";
+    }
+    [ud setObject:s_name forKey:@"schoolname"];
+    
+    NSString *s_level = [classDict objectForKey:@"s_level"];
+    if ([s_level isEqual:[NSNull null]])
+    {
+        s_level = @"未设置学校";
+    }
+    [ud setObject:s_level forKey:@"schoollevel"];
     
     if (![[classDict objectForKey:@"img_kb"] isEqual:[NSNull null]] && [[classDict objectForKey:@"img_kb"] length] > 10)
     {
@@ -707,8 +796,12 @@ FreshClassZone>
 {
     if ([Tools phone_num])
     {
-        SearchSchoolViewController *searchSchoolViewController = [[SearchSchoolViewController alloc] init];
-        [self.navigationController pushViewController:searchSchoolViewController animated:YES];
+        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"创建班级",@"加入班级", nil];
+        ac.tag = ADDACTIONSHEETTAG;
+        [ac showInView:classTableView];
+        
+        //        SearchSchoolViewController *searchSchoolViewController = [[SearchSchoolViewController alloc] init];
+//        [self.navigationController pushViewController:searchSchoolViewController animated:YES];
 //        ChooseSchoolViewController *chooseViewController = [[ChooseSchoolViewController alloc] init];
 //        [chooseViewController.schoolArray addObjectsFromArray:tmpArray];
 //        [self.navigationController pushViewController:chooseViewController animated:YES];
@@ -719,6 +812,23 @@ FreshClassZone>
     else
     {
         [Tools showAlertView:@"请先到个人信息里绑定手机号" delegateViewController:nil];
+    }
+}
+
+-(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (actionSheet.tag == ADDACTIONSHEETTAG)
+    {
+        if (buttonIndex == 0)
+        {
+            CreateClassViewController *createClass = [[CreateClassViewController alloc] init];
+            [self.navigationController pushViewController:createClass animated:YES];
+        }
+        else if(buttonIndex == 1)
+        {
+            SearchClassViewController *searchclassVC = [[SearchClassViewController alloc] init];
+            [self.navigationController pushViewController:searchclassVC animated:YES];
+        }
     }
 }
 

@@ -21,4 +21,6 @@
 @property (nonatomic, strong) NSString *byID;
 @property (nonatomic, assign) BOOL isnew;
 @property (nonatomic, assign) id<NotificationDetailDelegate> readnotificationDetaildel;
+@property (nonatomic, assign) BOOL fromClass;
+@property (nonatomic, strong) NSString *markString;
 @end
