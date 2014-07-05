@@ -15,6 +15,7 @@
 #define USERICONTABLE    @"usericontalble"
 #define CITYTABLE         @"citytable"
 #define USERINFO        @"userinfo"
+#define MYCLASSTABLE    @"myclassestable"
 
 @interface OperatDB : NSObject
 {

@@ -13,6 +13,7 @@
 #import "NSString+AKNumericFormatter.h"
 #import "AKNumericFormatter.h"
 #import "UserProtocolViewController.h"
+#import "FillInfo2ViewController.h"
 
 @interface RegistViewController ()<UITextFieldDelegate>
 {
@@ -42,24 +43,27 @@
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     self.view.backgroundColor = [UIColor blackColor];
     
-    UIImage*inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 3, 20, 2.3)];
+//    UIImage*inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 3, 20, 2.3)];
     
-    phoneNumTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(29, 104+UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH-29-24.5, 36.5)];
+    phoneNumTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(29, 104+UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH-29-24.5, 42)];
     phoneNumTextfield.delegate = self;
+    phoneNumTextfield.background = nil;
+    phoneNumTextfield.layer.cornerRadius = 5;
+    
+    phoneNumTextfield.backgroundColor = [UIColor whiteColor];
     phoneNumTextfield.keyboardType = UIKeyboardTypeNumberPad;
     phoneNumTextfield.clearButtonMode = UITextFieldViewModeWhileEditing;
     phoneNumTextfield.tag = 1000;
     phoneNumTextfield.font = [UIFont systemFontOfSize:15];
     phoneNumTextfield.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
-    phoneNumTextfield.background = inputImage;
     phoneNumTextfield.textColor = UIColorFromRGB(0x727171);
     phoneNumTextfield.placeholder = @"手机号码";
     phoneNumTextfield.numericFormatter = [AKNumericFormatter formatterWithMask:@"***********" placeholderCharacter:'*'];
     [self.bgView addSubview:phoneNumTextfield];
     
-    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
+    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
     UIButton *getCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    getCodeButton.frame = CGRectMake(SCREEN_WIDTH-90, phoneNumTextfield.frame.origin.y+5, 60, 26.5);
+    getCodeButton.frame = CGRectMake(SCREEN_WIDTH-100, phoneNumTextfield.frame.origin.y+5, 70, 32);
     [getCodeButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     [getCodeButton setTitle:@"短信验证" forState:UIControlStateNormal];
     getCodeButton.layer.cornerRadius = 1;
@@ -68,21 +72,23 @@
     [getCodeButton addTarget:self action:@selector(nextStep) forControlEvents:UIControlEventTouchUpInside];
     [self.bgView addSubview:getCodeButton];
     
-    codeTextField = [[MyTextField alloc] initWithFrame:CGRectMake(29, phoneNumTextfield.frame.origin.y+phoneNumTextfield.frame.size.height+1.5, SCREEN_WIDTH-29-24.5, 36.5)];
+    codeTextField = [[MyTextField alloc] initWithFrame:CGRectMake(29, phoneNumTextfield.frame.origin.y+phoneNumTextfield.frame.size.height+5, SCREEN_WIDTH-29-24.5, 42)];
     codeTextField.delegate = self;
+    codeTextField.background = nil;
+    codeTextField.backgroundColor = [UIColor whiteColor];
+    codeTextField.layer.cornerRadius = 5;
     codeTextField.font = [UIFont systemFontOfSize:15];
     codeTextField.keyboardType = UIKeyboardTypeNumberPad;
     codeTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
     codeTextField.tag = 1000;
     codeTextField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
-    codeTextField.background = inputImage;
     codeTextField.textColor = UIColorFromRGB(0x727171);
     codeTextField.placeholder = @"验证码";
     [self.bgView addSubview:codeTextField];
     
     UIButton *nextStepButton = [UIButton buttonWithType:UIButtonTypeCustom];
     nextStepButton.frame = CGRectMake(51, codeTextField.frame.origin.y+codeTextField.frame.size.height+46, SCREEN_WIDTH-102, 40);
-    nextStepButton.backgroundColor = [UIColor grayColor];
+    nextStepButton.backgroundColor = self.bgView.backgroundColor;
     [nextStepButton setTitle:@"下一步" forState:UIControlStateNormal];
     [nextStepButton addTarget:self action:@selector(verify) forControlEvents:
     UIControlEventTouchUpInside];
@@ -146,7 +152,10 @@
     }
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"phone":[Tools getPhoneNumFromString:phoneNumTextfield.text],@"auth_code":codeTextField.text} API:MB_CHECKOUT];
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"phone":[Tools getPhoneNumFromString:phoneNumTextfield.text],
+                                                                      @"auth_code":codeTextField.text,
+                                                                      @"regist":@"1"}
+                                                                API:MB_CHECKOUT];
         
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
@@ -155,23 +164,33 @@
             DDLOG(@"verify responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                Regist3ViewController *regist3ViewController = [[Regist3ViewController alloc] init];
-                regist3ViewController.phoneNum = phoneNumTextfield.text;
-                regist3ViewController.userid = userid;
                 
-                if ([accountID length] > 0)
-                {
-                    regist3ViewController.accountID = accountID;
-                    regist3ViewController.accountType = accountType;
-                    regist3ViewController.nickName = nickName;
-                    regist3ViewController.headerIcon = headerIcon;
-                    regist3ViewController.account = account;
-                }
-                [self.navigationController pushViewController:regist3ViewController animated:YES];
+                [[NSUserDefaults standardUserDefaults] setObject:[[responseDict objectForKey:@"data"] objectForKey:@"u_id"] forKey:USERID];
+                [[NSUserDefaults standardUserDefaults] setObject:[[responseDict objectForKey:@"data"] objectForKey:@"token"] forKey:CLIENT_TOKEN];
+                [[NSUserDefaults standardUserDefaults] setObject:phoneNumTextfield.text forKey:PHONENUM];
+                [[NSUserDefaults standardUserDefaults] synchronize];
+                
+                FillInfo2ViewController *fillInfo = [[FillInfo2ViewController alloc] init];
+                fillInfo.userid = [[responseDict objectForKey:@"data"] objectForKey:@"u_id"];
+                fillInfo.token = [[responseDict objectForKey:@"data"] objectForKey:@"token"];
+                [self.navigationController pushViewController:fillInfo animated:YES];
+//                Regist3ViewController *regist3ViewController = [[Regist3ViewController alloc] init];
+//                regist3ViewController.phoneNum = phoneNumTextfield.text;
+//                regist3ViewController.userid = userid;
+//                
+//                if ([accountID length] > 0)
+//                {
+//                    regist3ViewController.accountID = accountID;
+//                    regist3ViewController.accountType = accountType;
+//                    regist3ViewController.nickName = nickName;
+//                    regist3ViewController.headerIcon = headerIcon;
+//                    regist3ViewController.account = account;
+//                }
+//                [self.navigationController pushViewController:regist3ViewController animated:YES];
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
             
         }];
@@ -209,7 +228,7 @@
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
             
         }];
@@ -258,7 +277,7 @@
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
             
         }];

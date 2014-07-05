@@ -29,6 +29,8 @@
     NSString *studentName;
     NSString *re_type;
     NSString *studentID;
+    
+    UIButton *studentButton;
 }
 @end
 
@@ -49,100 +51,98 @@
 	// Do any additional setup after loading the view.
     
     self.titleLabel.text = @"设置关系";
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-    self.view.backgroundColor = [UIColor blackColor];
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:FROMWHERE] isEqualToString:FROMCLASS])
+    {
+        self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+        self.view.backgroundColor = [UIColor blackColor];
+    }
     
     showStudents = YES;
     showRelate = YES;
     
-    studentName = @"";
+    OperatDB *db = [[OperatDB alloc] init];
+    NSDictionary *parentDict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":parentID} andTableName:CLASSMEMBERTABLE] firstObject];
+    studentName = [parentDict objectForKey:@"re_name"];
     studentID = @"";
     
     studentsArray = [[NSMutableArray alloc] initWithCapacity:0];
     
-    UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
-    
-    yyy = 140;
-    UIImageView *bg1 = [[UIImageView alloc] initWithFrame:CGRectMake(27, yyy, SCREEN_WIDTH-124, 40)];
-    [bg1 setImage:inputImage];
-    [self.bgView addSubview:bg1];
-    
-    UILabel *tipLabel1 = [[UILabel alloc] initWithFrame:CGRectMake(32, yyy-30, SCREEN_WIDTH-54, 30)];
+    UILabel *tipLabel1 = [[UILabel alloc] initWithFrame:CGRectMake(32, UI_NAVIGATION_BAR_HEIGHT + 30, SCREEN_WIDTH-54, 30)];
     tipLabel1.text = [NSString stringWithFormat:@"设置%@为哪位学生的家长:",parentName];
-    tipLabel1.font = [UIFont systemFontOfSize:16];
-    tipLabel1.textColor = [UIColor grayColor];
+    tipLabel1.font = [UIFont systemFontOfSize:18];
+    tipLabel1.textColor = COMMENTCOLOR;
     tipLabel1.backgroundColor = [UIColor clearColor];
     [self.bgView addSubview:tipLabel1];
     
-    UIButton *studentButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    studentButton.frame = bg1.frame;
-    studentButton.backgroundColor = [UIColor clearColor];
-//    [studentButton setImage:[UIImage imageNamed:@"icon_peo"] forState:UIControlStateNormal];
+    studentButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    studentButton.frame = CGRectMake(tipLabel1.frame.origin.x, tipLabel1.frame.size.height+tipLabel1.frame.origin.y+10, SCREEN_WIDTH-62, 42);
+    studentButton.backgroundColor = [UIColor whiteColor];
+    studentButton.layer.cornerRadius = 5;
+    studentButton.clipsToBounds = YES;
+    [studentButton setTitle:@"请选择" forState:UIControlStateNormal];
+    studentButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
+    [studentButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [studentButton addTarget:self action:@selector(showStudents) forControlEvents:UIControlEventTouchUpInside];
+    [studentButton setTitle:[NSString stringWithFormat:@"   %@",studentName] forState:UIControlStateNormal];
     [self.bgView addSubview:studentButton];
     
-    studentsTableView = [[UITableView alloc] initWithFrame:CGRectMake(27, yyy+40, SCREEN_WIDTH-124, 0) style:UITableViewStylePlain];
+    studentsTableView = [[UITableView alloc] initWithFrame:CGRectMake(studentButton.frame.origin.x, studentButton.frame.size.height+studentButton.frame.origin.y, studentButton.frame.size.width, 0) style:UITableViewStylePlain];
     studentsTableView.delegate = self;
     studentsTableView.dataSource = self;
     studentsTableView.tag = 1000;
+    studentsTableView.layer.cornerRadius = 5;
+    studentsTableView.clipsToBounds = YES;
+    studentsTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     studentsTableView.backgroundColor = [UIColor whiteColor];
-    [self.bgView addSubview:studentsTableView];
     
-    studentNameLabel = [[UILabel alloc] initWithFrame:CGRectMake(30, yyy+5, 60, 30)];
-    studentNameLabel.backgroundColor = [UIColor clearColor];
-    studentNameLabel.textColor = [UIColor grayColor];
-    studentNameLabel.textAlignment = NSTextAlignmentCenter;
-    studentNameLabel.font = [UIFont systemFontOfSize:15];
-    studentNameLabel.text = @"学生姓名";
-    [self.bgView addSubview:studentNameLabel];
     
-    bg2 = [[UIImageView alloc] initWithFrame:CGRectMake(27, yyy+90, 134, 40)];
-    [bg2 setImage:inputImage];
-    [self.bgView addSubview:bg2];
+    UILabel *tipLabel2 = [[UILabel alloc] initWithFrame:CGRectMake(tipLabel1.frame.origin.x, studentButton.frame.size.height+studentButton.frame.origin.y+10, SCREEN_WIDTH-64, 30)];
+    tipLabel2.text = [NSString stringWithFormat:@"设置%@与学生的关系为:",parentName];
+    tipLabel2.font = [UIFont systemFontOfSize:18];
+    tipLabel2.textColor = COMMENTCOLOR;
+    tipLabel2.backgroundColor = self.bgView.backgroundColor;
+    [self.bgView addSubview:tipLabel2];
     
-    UILabel *tipLabel2 = [[UILabel alloc] initWithFrame:CGRectMake(5, -30, SCREEN_WIDTH-54, 30)];
-    tipLabel2.text = [NSString stringWithFormat:@"设置%@与同学的关系为:",parentName];
-    tipLabel2.font = [UIFont systemFontOfSize:16];
-    tipLabel2.textColor = [UIColor grayColor];
-    tipLabel2.backgroundColor = [UIColor clearColor];
-    [bg2 addSubview:tipLabel2];
-    
-    relateArray = [[NSArray alloc] initWithObjects:@"爸爸",@"妈妈",@"爷爷",@"奶奶",@"输入", nil];
-    
-    relateLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 5, bg2.frame.size.width-40, 30)];
-    relateLabel.backgroundColor = [UIColor clearColor];
-    relateLabel.font = [UIFont systemFontOfSize:16];
-    relateLabel.textColor = TITLE_COLOR;
-    relateLabel.text = [relateArray firstObject];
-    [bg2 addSubview:relateLabel];
-    
+    relateArray = RELATEARRAY;
     
     relateButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    relateButton.backgroundColor = [UIColor clearColor];
-    relateButton.frame = CGRectMake(bg2.frame.origin.x, bg2.frame.origin.y, 134, bg2.frame.size.height);
+    relateButton.backgroundColor = [UIColor whiteColor];
+    relateButton.layer.cornerRadius = 5;
+    [relateButton setContentHorizontalAlignment:UIControlContentHorizontalAlignmentLeft];
+    relateButton.clipsToBounds = YES;
+    relateButton.frame = CGRectMake(studentButton.frame.origin.x, tipLabel2.frame.origin.y+tipLabel2.frame.size.height, 134, studentButton.frame.size.height);
+    [relateButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [relateButton addTarget:self action:@selector(selectRelate) forControlEvents:UIControlEventTouchUpInside];
     [self.bgView addSubview:relateButton];
     
-    relateTableView = [[UITableView alloc] initWithFrame:CGRectMake(bg2.frame.origin.x, bg2.frame.size.height+bg2.frame.origin.y, bg2.frame.size.width, 0) style:UITableViewStylePlain];
+    relateTableView = [[UITableView alloc] initWithFrame:CGRectMake(relateButton.frame.origin.x, relateButton.frame.size.height+relateButton.frame.origin.y, relateButton.frame.size.width, 0) style:UITableViewStylePlain];
     relateTableView.delegate = self;
     relateTableView.dataSource = self;
     relateTableView.tag = 2000;
+    relateTableView.layer.cornerRadius = 5;
+    relateTableView.clipsToBounds = YES;
     relateTableView.backgroundColor = [UIColor whiteColor];
     [self.bgView addSubview:relateTableView];
     
-    relatextField = [[MyTextField alloc] initWithFrame:CGRectMake(bg2.frame.size.width+bg2.frame.origin.x+30, bg2.frame.origin.y, 90, 40)];
-    relatextField.background = inputImage;
+    relatextField = [[MyTextField alloc] initWithFrame:CGRectMake(relateButton.frame.size.width+relateButton.frame.origin.x+20, relateButton.frame.origin.y, 90, 40)];
+    relatextField.background = nil;
     relatextField.enabled = NO;
+    relatextField.backgroundColor = [UIColor whiteColor];
+    relatextField.layer.cornerRadius = 5;
+    relatextField.clipsToBounds = YES;
     relatextField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
     relatextField.placeholder = @"输入";
     relatextField.font = [UIFont systemFontOfSize:16];
     relatextField.hidden = YES;
     [self.bgView addSubview:relatextField];
     
+    [self.bgView addSubview:studentsTableView];
+    
+    
     UIButton *submitButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [submitButton setTitle:@"提交" forState:UIControlStateNormal];
     submitButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
-    [submitButton setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
+    [submitButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [submitButton addTarget:self action:@selector(submitChange) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:submitButton];
     
@@ -165,13 +165,13 @@
     if (showRelate)
     {
         [UIView animateWithDuration:0.2 animations:^{
-            relateTableView.frame = CGRectMake(bg2.frame.origin.x, bg2.frame.size.height+bg2.frame.origin.y, bg2.frame.size.width, [relateArray count]*40);
+            relateTableView.frame = CGRectMake(relateButton.frame.origin.x, relateButton.frame.size.height+relateButton.frame.origin.y, relateButton.frame.size.width, [relateArray count]*40);
         }];
     }
     else
     {
         [UIView animateWithDuration:0.2 animations:^{
-            relateTableView.frame = CGRectMake(bg2.frame.origin.x, bg2.frame.size.height+bg2.frame.origin.y, bg2.frame.size.width, 0);
+            relateTableView.frame = CGRectMake(relateButton.frame.origin.x, relateButton.frame.size.height+relateButton.frame.origin.y, relateButton.frame.size.width, 0);
         }];
     }
     showRelate = !showRelate;
@@ -183,19 +183,13 @@
     {
         
         [UIView animateWithDuration:0.2 animations:^{
-            studentsTableView.frame = CGRectMake(27, yyy+40, SCREEN_WIDTH-124, [studentsArray count]*40);
-            bg2.frame = CGRectMake(27, studentsTableView.frame.size.height+studentsTableView.frame.origin.y+40, 134, 40);
-            relateButton.frame = CGRectMake(bg2.frame.origin.x, bg2.frame.origin.y, 134, 40);
-            relatextField.frame = CGRectMake(relateButton.frame.size.width+relateButton.frame.origin.x+30, relateButton.frame.origin.y, 90, 40);
+            studentsTableView.frame = CGRectMake(studentButton.frame.origin.x, studentButton.frame.size.height+studentButton.frame.origin.y, studentButton.frame.size.width, [studentsArray count]*40);
         }];
     }
     else
     {
         [UIView animateWithDuration:0.2 animations:^{
-            studentsTableView.frame = CGRectMake(27, yyy+40, SCREEN_WIDTH-124, 0);
-            bg2.frame = CGRectMake(27, yyy+90, 134, 40);
-            relateButton.frame = CGRectMake(bg2.frame.origin.x, bg2.frame.origin.y, 134, 40);
-            relatextField.frame = CGRectMake(relateButton.frame.size.width+relateButton.frame.origin.x+30, relateButton.frame.origin.y, 90, 40);
+            studentsTableView.frame = CGRectMake(studentButton.frame.origin.x, studentButton.frame.size.height+studentButton.frame.origin.y, studentButton.frame.size.width, 0);
         }];
     }
     showStudents = !showStudents;
@@ -252,16 +246,17 @@
 {
     if (tableView.tag == 1000)
     {
-        studentNameLabel.text = [[studentsArray objectAtIndex:indexPath.row] objectForKey:@"name"];
-        [tableView deselectRowAtIndexPath:indexPath animated:YES];
         studentName = [[studentsArray objectAtIndex:indexPath.row] objectForKey:@"name"];
+        [studentButton setTitle:[NSString stringWithFormat:@"   %@",studentName] forState:UIControlStateNormal];
+        [tableView deselectRowAtIndexPath:indexPath animated:YES];
         [self showStudents];
     }
     else if(tableView.tag == 2000)
     {
         if (indexPath.row == [relateArray count]-1)
         {
-            relateLabel.text = nil;
+            re_type = [relateArray objectAtIndex:indexPath.row];
+            [relateButton setTitle:[NSString stringWithFormat:@"  %@",re_type] forState:UIControlStateNormal];
             relatextField.enabled = YES;
             relatextField.hidden = NO;
             [relatextField becomeFirstResponder];
@@ -270,7 +265,8 @@
         }
         else
         {
-            relateLabel.text = [relateArray objectAtIndex:indexPath.row];
+            re_type = [relateArray objectAtIndex:indexPath.row];
+            [relateButton setTitle:[NSString stringWithFormat:@"  %@",re_type] forState:UIControlStateNormal];
             [tableView deselectRowAtIndexPath:indexPath animated:YES];
             relatextField.enabled = NO;
             relatextField.hidden = YES;
@@ -287,7 +283,7 @@
 -(void)getStudents
 {
     OperatDB *db = [[OperatDB alloc] init];
-    [studentsArray addObjectsFromArray:[db findSetWithDictionary:@{@"classid":classID,@"role":@"students"} andTableName:CLASSMEMBERTABLE]];
+    [studentsArray addObjectsFromArray:[db findSetWithDictionary:@{@"classid":classID,@"role":@"students",@"checked":@"1"} andTableName:CLASSMEMBERTABLE]];
     [studentsTableView reloadData];
 }
 
@@ -300,13 +296,13 @@
             [Tools showAlertView:@"请选择学生" delegateViewController:nil];
             return ;
         }
-        if ([relateLabel.text length] > 0)
-        {
-            re_type = relateLabel.text;
-        }
-        else if([relatextField.text length] >0)
+        if([relatextField.text length] > 0)
         {
             re_type = relatextField.text;
+        }
+        else if(![re_type isEqualToString:@"其他"])
+        {
+            ;
         }
         else
         {
@@ -330,15 +326,24 @@
             DDLOG(@"setRelate responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                if ([self.setRelate respondsToSelector:@selector(changePareTitle:)])
+                
+                OperatDB *db = [[OperatDB alloc] init];
+                
+                if ([db updeteKey:@"re_name" toValue:studentName withParaDict:@{@"uid":parentID,@"classid":classID} andTableName:CLASSMEMBERTABLE])
                 {
-                    [self.setRelate changePareTitle:title];
+                    DDLOG(@"update update success");
                 }
-                [self unShowSelfViewController];
+                if ([db updeteKey:@"re_type" toValue:re_type withParaDict:@{@"uid":parentID,@"classid":classID} andTableName:CLASSMEMBERTABLE])
+                {
+                    DDLOG(@"update re_type success");
+                }
+                
+                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
+                [self.navigationController popToRootViewControllerAnimated:YES];
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -348,7 +353,5 @@
         }];
         [request startAsynchronous];
     }
-
 }
-
 @end

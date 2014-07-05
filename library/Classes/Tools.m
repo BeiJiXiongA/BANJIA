@@ -43,6 +43,8 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     [imageView setImageWithURL:imageURL placeholderImage:[UIImage imageNamed:defaultName]];
 }
 
+//+(void)setHeaderImageView;
+
 + (void) fillImageView:(UIImageView *)imageView withImageFromURL:(NSString*)URL imageWidth:(CGFloat)imageWidth andDefault:(NSString *)defaultName
 {
     NSString *urlStr = [NSString stringWithFormat:@"%@%@@%.0fw%@",IMAGEURL,[URL substringToIndex:[URL length]-4],imageWidth,[URL substringFromIndex:[URL rangeOfString:@"."].location]];
@@ -144,7 +146,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     [ud removeObjectForKey:HEADERIMAGE];
     [ud removeObjectForKey:USERNAME];
     [ud removeObjectForKey:@"useropt"];
-    [ud setObject:[ud objectForKey:PHONENUM] forKey:LAST_PHONENUM];
+    [ud setObject:[Tools phone_num] forKey:LAST_PHONENUM];
     [ud removeObjectForKey:PHONENUM];
     [ud synchronize];
 }
@@ -177,6 +179,14 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     NSString *phone_num = [ud objectForKey:LAST_PHONENUM];
     return phone_num;
 }
+
++ (NSString *)banjia_num
+{
+    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+    NSString *banjia_num = [ud objectForKey:BANJIANUM];
+    return banjia_num;
+}
+
 +(NSString *)pwd
 {
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
@@ -632,10 +642,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
         {
             return ;
         }
-        [self exit];
-        WelcomeViewController *login = [[WelcomeViewController alloc] init];
-        KKNavigationController *loginNav = [[KKNavigationController alloc] initWithRootViewController:login];
-        [viewController presentViewController:loginNav animated:YES completion:nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"logout" object:nil];
         [Tools showAlertView:[[[errorDict objectForKey:@"message"] allValues] firstObject] delegateViewController:viewController];
         return ;
     }
@@ -650,22 +657,41 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     
     NSArray *letters = [NSArray arrayWithObjects:@"A",@"B",@"C",@"D",@"E",@"F",@"G",@"H",@"I",@"J",@"K",@"L",@"M",@"N",@"O",@"P",@"Q",@"R",@"S",@"T",@"U",@"V",@"W",@"X",@"Y",@"Z", nil];
     
-    for (int i=0; i<[letters count]; ++i)
+    for (int i=0; i<[letters count]+1; ++i)
     {
         NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
-        [dict setObject:[letters objectAtIndex:i] forKey:@"key"];
         NSMutableArray *array = [[NSMutableArray alloc] initWithCapacity:0];
         int count = 0;
-        for (int j = 0; j < [sourceArray count]; ++j)
+        if (i == [letters count])
         {
-            NSDictionary *dict = [sourceArray objectAtIndex:j];
-            NSString *first = [NSString stringWithFormat:@"%c",[[ChineseToPinyin jianPinFromChiniseString:[dict objectForKey:key]] characterAtIndex:0]];
-            if ([[letters objectAtIndex:i]isEqualToString:first])
+            for (int j = 0; j < [sourceArray count]; ++j)
             {
-                [array addObject:dict];
-                count++;
+                NSDictionary *dict = [sourceArray objectAtIndex:j];
+                NSString *first = [NSString stringWithFormat:@"%c",[[ChineseToPinyin jianPinFromChiniseString:[dict objectForKey:key]] characterAtIndex:0]];
+                if (![letters containsObject:first])
+                {
+                    [array addObject:dict];
+                    count ++;
+                }
+            }
+            [dict setObject:@"#" forKey:@"key"];
+        }
+        else
+        {
+            
+            [dict setObject:[letters objectAtIndex:i] forKey:@"key"];
+            for (int j = 0; j < [sourceArray count]; ++j)
+            {
+                NSDictionary *dict = [sourceArray objectAtIndex:j];
+                NSString *first = [NSString stringWithFormat:@"%c",[[ChineseToPinyin jianPinFromChiniseString:[dict objectForKey:key]] characterAtIndex:0]];
+                if ([[letters objectAtIndex:i]isEqualToString:first])
+                {
+                    [array addObject:dict];
+                    count++;
+                }
             }
         }
+        
         
         for (int i=0; i<[array count]; i++)
         {

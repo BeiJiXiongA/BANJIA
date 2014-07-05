@@ -11,6 +11,7 @@
 #import "PersonalSettingCell.h"
 #import "MoreViewController.h"
 #import "SetClassInfoViewController.h"
+#import "SearchSchoolViewController.h"
 
 
 #define MOREACTIONSHEETTAG    1000
@@ -74,7 +75,11 @@ SetClassInfoDel>
     classInfo = @"";
     regionStr = @"";
     
-    schoolLevelArray = [NSArray arrayWithObjects:@"小学",@"中学",@"夏令营",@"社团",@"职业学校",@"幼儿园",@"其他", nil];
+    schoolLevelArray = SCHOOLLEVELARRAY;
+    
+    schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getClassInfo) name:CHANGECLASSINFO object:nil];
     
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     className = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
@@ -83,7 +88,7 @@ SetClassInfoDel>
     
     UIButton *inviteButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [inviteButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
-    inviteButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
+    inviteButton.frame = CGRectMake(SCREEN_WIDTH - CORNERMORERIGHT, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
     [inviteButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:inviteButton];
     
@@ -300,7 +305,6 @@ SetClassInfoDel>
         
         else if(indexPath.row == 4)
         {
-            schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
             CGSize schoolNameSize = [Tools getSizeWithString:schoolName andWidth:SCREEN_WIDTH-150 andFont:[UIFont systemFontOfSize:16]];
             cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-left, 10, 180, schoolNameSize.height>27?schoolNameSize.height:27);
             
@@ -312,8 +316,11 @@ SetClassInfoDel>
             cell.nameLabel.text = @"地      区";
             cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-left, 10, 180, 27);
             cell.objectsLabel.text = regionStr;
+            if ([regionStr length] == 0)
+            {
+                cell.objectsLabel.text = @"未设置学校";
+            }
         }
-        
     }
     else if(indexPath.row == 6)
     {
@@ -335,9 +342,12 @@ SetClassInfoDel>
     UIImageView *bgImageBG = [[UIImageView alloc] init];
     bgImageBG.image = [UIImage imageNamed:@"cell_bg2"];
     cell.backgroundView = bgImageBG;
-    if (indexPath.row != 0)
+    if (indexPath.row == 1 || indexPath.row == 4 || indexPath.row == 6 || indexPath.row == 3)
     {
-        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
+        OperatDB *db = [[OperatDB alloc] init];
+        NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
+        int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+        if (userAdmin == 2)
         {
             cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         }
@@ -351,7 +361,10 @@ SetClassInfoDel>
 {
     if (indexPath.row == 1)
     {
-        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
+        OperatDB *db = [[OperatDB alloc] init];
+        NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
+        int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+        if (userAdmin == 2)
         {
             SetClassInfoViewController *setClassInfoViewController = [[SetClassInfoViewController alloc] init];
             setClassInfoViewController.infoKey = @"name";
@@ -363,7 +376,10 @@ SetClassInfoDel>
     }
     else if(indexPath.row == 6)
     {
-        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
+        OperatDB *db = [[OperatDB alloc] init];
+        NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
+        int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+        if (userAdmin == 2)
         {
             SetClassInfoViewController *setClassInfoViewController = [[SetClassInfoViewController alloc] init];
             setClassInfoViewController.infoKey = @"info";
@@ -372,11 +388,29 @@ SetClassInfoDel>
             [[XDTabViewController sharedTabViewController] .navigationController pushViewController:setClassInfoViewController animated:YES];
         }
     }
+    else if (indexPath.row == 4)
+    {
+        OperatDB *db = [[OperatDB alloc] init];
+        NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
+        int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+        if (userAdmin == 2)
+        {
+            SearchSchoolViewController  *searchSchoolInfoViewController = [[SearchSchoolViewController alloc] init];
+            
+            [[NSUserDefaults standardUserDefaults] setObject:BINDCLASSTOSCHOOL forKey:SEARCHSCHOOLTYPE];
+            [[NSUserDefaults standardUserDefaults] synchronize];
+            
+            [[XDTabViewController sharedTabViewController] .navigationController pushViewController:searchSchoolInfoViewController animated:YES];
+        }
+    }
 }
 
 -(void)moreClick
 {
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
+    OperatDB *db = [[OperatDB alloc] init];
+    NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
+    int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+    if (userAdmin == 2)
     {
         UIActionSheet *moreAction = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"班级设置", nil];
         moreAction.tag = MOREACTIONSHEETTAG;
@@ -437,15 +471,12 @@ SetClassInfoDel>
             DDLOG(@"signout responsedict %@",responseString);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                if ([self.signOutDel respondsToSelector:@selector(signOutClass:)])
-                {
-                    [self.signOutDel signOutClass:YES];
-                }
+                [[NSNotificationCenter defaultCenter] postNotificationName:CHANGECLASSINFO object:nil];
                 [self unShowSelfViewController];
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -463,7 +494,10 @@ SetClassInfoDel>
 {
     if (actionSheet.tag == MOREACTIONSHEETTAG)
     {
-        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
+        OperatDB *db = [[OperatDB alloc] init];
+        NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
+        int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+        if (userAdmin == 2)
         {
             if (buttonIndex == 0)
             {
@@ -507,14 +541,15 @@ SetClassInfoDel>
 
 -(void)selectoo
 {
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] < 2)
+    OperatDB *db = [[OperatDB alloc] init];
+    NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
+    int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+    if (userAdmin == 2)
     {
-        return ;
+        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"从相册选取",@"拍照", nil];
+        ac.tag = TAKEPICTURETAG;
+        [ac showInView:self.bgView];
     }
-    
-    UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"从相册选取",@"拍照", nil];
-    ac.tag = TAKEPICTURETAG;
-    [ac showInView:self.bgView];
 }
 
 -(void)selectPicture:(NSInteger)selectIndex
@@ -626,7 +661,7 @@ SetClassInfoDel>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -684,6 +719,7 @@ SetClassInfoDel>
                 if (![[[responseDict objectForKey:@"data"] objectForKey:@"school"] isEqual:[NSNull null]])
                 {
                     regionStr = [[[[responseDict objectForKey:@"data"] objectForKey:@"school"] objectForKey:@"region"] objectForKey:@"name"] ;
+                    schoolName = [[[responseDict objectForKey:@"data"] objectForKey:@"school"] objectForKey:@"name"];
                 }
                 
                 if ([[responseDict objectForKey:@"data"]objectForKey:@"number"] &&
@@ -703,12 +739,11 @@ SetClassInfoDel>
                 {
                     classNumber = @"未获取到";
                 }
-                
                 [classInfoTableView reloadData];
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         

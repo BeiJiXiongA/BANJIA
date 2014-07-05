@@ -33,7 +33,6 @@ UITableViewDelegate,
 MFMessageComposeViewControllerDelegate,
 UIAlertViewDelegate>
 {
-    UIImageView *selectView;
     UIScrollView *bgScrollView;
     
     
@@ -129,12 +128,6 @@ UIAlertViewDelegate>
     buttonScrollView.showsHorizontalScrollIndicator = NO;
     [self.bgView addSubview:buttonScrollView];
     
-    selectView = [[UIImageView alloc] init];
-    [selectView setImage:[UIImage imageNamed:@"selectBg"]];
-    selectView.backgroundColor = [UIColor clearColor];
-    selectView.frame = CGRectMake(15, 0, 85, 70);
-    [buttonScrollView addSubview:selectView];
-    
     iconOnArray = @[@"invite_phone_on",@"invite_QQ_on",@"invite_weichat_on"];
     iconArray = @[@"invite_phone",@"invite_QQ",@"invite_weichat"];
     
@@ -182,15 +175,15 @@ UIAlertViewDelegate>
     
     
     inviteTencentButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [inviteTencentButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)] forState:UIControlStateNormal];
-    inviteTencentButton.frame = CGRectMake(CENTER_POINT.x-80+SCREEN_WIDTH*(TencentTableViewTag%tableViewTagBase), bgScrollView.frame.size.height/2-35, 160, 35);
+    [inviteTencentButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+    inviteTencentButton.frame = CGRectMake(CENTER_POINT.x-80+SCREEN_WIDTH*(TencentTableViewTag%tableViewTagBase), bgScrollView.frame.size.height/2-35, 160, 42);
     [inviteTencentButton setTitle:@"邀请QQ好友" forState:UIControlStateNormal];
     [inviteTencentButton addTarget:self action:@selector(shareToQQFriendClickHandler:) forControlEvents:UIControlEventTouchUpInside];
     [bgScrollView addSubview:inviteTencentButton];
     
     UIButton *inviteWeiXinButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [inviteWeiXinButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)] forState:UIControlStateNormal];
-    inviteWeiXinButton.frame = CGRectMake(CENTER_POINT.x-80+SCREEN_WIDTH*(WeiXinTag%tableViewTagBase), bgScrollView.frame.size.height/2-35, 160, 35);
+    [inviteWeiXinButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+    inviteWeiXinButton.frame = CGRectMake(CENTER_POINT.x-80+SCREEN_WIDTH*(WeiXinTag%tableViewTagBase), bgScrollView.frame.size.height/2-35, 160, 42);
     [inviteWeiXinButton setTitle:@"邀请微信好友" forState:UIControlStateNormal];
     [inviteWeiXinButton addTarget:self action:@selector(inviteWeiXin) forControlEvents:UIControlEventTouchUpInside];
     [bgScrollView addSubview:inviteWeiXinButton];
@@ -326,10 +319,9 @@ UIAlertViewDelegate>
                 
                 UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 0, SCREEN_WIDTH-15, 27)];
                 headerLabel.text = @"    注册联系人";
-                headerLabel.backgroundColor = RGB(234, 234, 234, 1);
+                headerLabel.backgroundColor = RGB(54, 188, 59, 1);
                 headerLabel.font = [UIFont systemFontOfSize:14];
-                headerLabel.textColor = TITLE_COLOR;
-                headerLabel.backgroundColor = [UIColor whiteColor];
+                headerLabel.textColor = [UIColor whiteColor];
                 return headerLabel;
             }
         }
@@ -340,10 +332,9 @@ UIAlertViewDelegate>
                 NSDictionary *groupDict = [groupContactArray objectAtIndex:section-1];
                 UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 0, SCREEN_WIDTH-15, 27)];
                 headerLabel.text = [NSString stringWithFormat:@"   %@",[groupDict objectForKey:@"key"]];
-                headerLabel.backgroundColor = RGB(234, 234, 234, 1);
+                headerLabel.backgroundColor = RGB(238, 239, 233, 1);
                 headerLabel.font = [UIFont systemFontOfSize:14];
-                headerLabel.textColor = TITLE_COLOR;
-                headerLabel.backgroundColor = [UIColor whiteColor];
+                headerLabel.textColor = COMMENTCOLOR;
                 return headerLabel;
             }
         }
@@ -393,8 +384,8 @@ UIAlertViewDelegate>
             
             cell.nameLabel.text = [dict objectForKey:@"r_name"];
             cell.inviteButton.hidden = NO;
-            cell.inviteButton.frame = CGRectMake(SCREEN_WIDTH-60, 10, 40, 30);
-            [cell.inviteButton setImage:[UIImage imageNamed:@"set_add"] forState:UIControlStateNormal];
+            cell.inviteButton.frame = CGRectMake(SCREEN_WIDTH-50, 12.5, 25, 25);
+            [cell.inviteButton setImage:[UIImage imageNamed:@"roundadd"] forState:UIControlStateNormal];
             
             cell.inviteButton.enabled = YES;
             
@@ -436,7 +427,7 @@ UIAlertViewDelegate>
                 
                 NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
                 cell.nameLabel.text = [dict objectForKey:@"name"];
-                cell.inviteButton.frame = CGRectMake(SCREEN_WIDTH-60, 10, 40, 30);
+                cell.inviteButton.frame = CGRectMake(SCREEN_WIDTH-50, 12.5, 25, 25);
                 cell.inviteButton.backgroundColor = [UIColor clearColor];
                 [cell.inviteButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
                 cell.inviteButton.tag = indexPath.row+(ContactTableViewTag%tableViewTagBase)*tableViewTagBase+(indexPath.section-1)*10000;
@@ -446,12 +437,10 @@ UIAlertViewDelegate>
                     if ([self haveThisPhone:[array objectAtIndex:i]])
                     {
                         [cell.inviteButton setImage:[UIImage imageNamed:@"selectBtn"] forState:UIControlStateNormal];
-                        
                     }
                     else
                     {
                         [cell.inviteButton setImage:[UIImage imageNamed:@"unselectBtn"] forState:UIControlStateNormal];
-                        
                     }
                 }
                 [cell.inviteButton addTarget:self action:@selector(inviteButtonCLick:) forControlEvents:UIControlEventTouchUpInside];
@@ -500,14 +489,8 @@ UIAlertViewDelegate>
     if (scrollView.tag == 5000)
     {
         [UIView animateWithDuration:0.2 animations:^{
-            selectView.frame = CGRectMake(scrollView.contentOffset.x/SCREEN_WIDTH*103+35-20, 0, 84, 70);
             
-            for (int i=1000; i<1000+3; i++)
-            {
-                
-            }
-            
-           if(scrollView.contentOffset.x/SCREEN_WIDTH == ContactTableViewTag%tableViewTagBase)
+            if(scrollView.contentOffset.x/SCREEN_WIDTH == ContactTableViewTag%tableViewTagBase)
             {
                  inviteButton.hidden = NO;
                  [self getLocalContacts];
@@ -579,7 +562,7 @@ UIAlertViewDelegate>
 -(void)buttonClick:(UIButton *)button
 {
     [UIView animateWithDuration:0.2 animations:^{
-        selectView.frame = CGRectMake(35+103*(button.tag%tableViewTagBase)-20, 0, 85, 70);
+        
     }];
     for (int i = 0; i < 3; i++)
     {
@@ -808,24 +791,45 @@ UIAlertViewDelegate>
                 if (fromClass)
                 {
                     DDLOG(@"uid %@",[Tools user_id]);
+                    
+                    NSMutableArray *waitRemoveArray = [[NSMutableArray alloc] initWithCapacity:0];
+                    
                     for (int i=0; i<[alreadyUsers count]; i++)
                     {
                         NSDictionary *alreadyDict = [alreadyUsers objectAtIndex:i];
                         if ([[db findSetWithDictionary:@{@"classid":classID,@"uid":[alreadyDict objectForKey:@"_id"]} andTableName:CLASSMEMBERTABLE] count] > 0)
                         {
-                            [alreadyUsers removeObjectAtIndex:i];
+                            [waitRemoveArray addObject:alreadyDict];
                         }
+                    }
+                    
+                    for (int i=0; i<[waitRemoveArray count]; i++)
+                    {
+                        NSDictionary *alreadyDict = [waitRemoveArray objectAtIndex:i];
+                        [alreadyUsers removeObject:alreadyDict];
                     }
                 }
                 else
                 {
+                    NSMutableArray *waitRemoveArray = [[NSMutableArray alloc] initWithCapacity:0];
+                    
                     for (int i=0; i<[alreadyUsers count]; i++)
                     {
                         NSDictionary *alreadyDict = [alreadyUsers objectAtIndex:i];
                         if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fid":[alreadyDict objectForKey:@"_id"]} andTableName:FRIENDSTABLE] count] > 0)
                         {
-                            [alreadyUsers removeObjectAtIndex:i];
+                            [waitRemoveArray addObject:alreadyDict];
                         }
+                        else if([[alreadyDict objectForKey:@"_id"] isEqualToString:[Tools user_id]])
+                        {
+                            [waitRemoveArray addObject:alreadyDict];
+                        }
+                    }
+                    
+                    for (int i=0; i<[waitRemoveArray count]; i++)
+                    {
+                        NSDictionary *alreadyDict = [waitRemoveArray objectAtIndex:i];
+                        [alreadyUsers removeObject:alreadyDict];
                     }
                 }
                 
@@ -835,7 +839,7 @@ UIAlertViewDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -872,9 +876,25 @@ UIAlertViewDelegate>
 {
     //创建分享内容
 //    NSString *imagePath = [[NSBundle mainBundle] pathForResource:IMAGE_NAME ofType:IMAGE_EXT];
-    id<ISSContent> publishContent = [ShareSDK content:ShareContent
+    
+    NSString *msgBody;
+    if (fromClass)
+    {
+        NSMutableString *inviteBody = [[NSMutableString alloc] initWithString:InviteClassMember];
+        
+        [inviteBody replaceOccurrencesOfString:@"#school" withString:schoolName options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+        [inviteBody replaceOccurrencesOfString:@"#class" withString:className options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+        
+        msgBody = inviteBody;
+    }
+    else
+    {
+        msgBody = ShareContent;
+    }
+    
+    id<ISSContent> publishContent = [ShareSDK content:msgBody
                                        defaultContent:@""
-                                                image:nil
+                                                image:[ShareSDK jpegImageWithImage:[UIImage imageNamed:@"logo120"] quality:1]
                                                 title:@"班家"
                                                   url:ShareUrl
                                           description:nil
@@ -932,15 +952,31 @@ UIAlertViewDelegate>
     NSData* data = [NSData dataWithBytes:pBuffer length:BUFFER_SIZE];
     free(pBuffer);
     
-    id<ISSContent> content = [ShareSDK content:NSLocalizedString(@"今天你班家了吗？", @"图标边上的")
-                                defaultContent:nil
-                                         image:[ShareSDK jpegImageWithImage:[UIImage imageNamed:@""] quality:1]
+    
+    
+    NSMutableString *inviteBody;
+    if (fromClass)
+    {
+        inviteBody = [[NSMutableString alloc] initWithString:InviteClassMember];
+        
+        [inviteBody replaceOccurrencesOfString:@"#school" withString:schoolName options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+        [inviteBody replaceOccurrencesOfString:@"#class" withString:className options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+        
+    }
+    else
+    {
+        inviteBody = ShareContent;
+    }
+    
+    id<ISSContent> content = [ShareSDK content:inviteBody
+                                defaultContent:inviteBody
+                                         image:[ShareSDK jpegImageWithImage:[UIImage imageNamed:@"logo120"] quality:1]
                                          title:NSLocalizedString(@"班家", @"这是App消息")
                                            url:ShareUrl
-                                   description:ShareContent
+                                   description:inviteBody
                                      mediaType:SSPublishContentMediaTypeNews];
     [content addWeixinSessionUnitWithType:INHERIT_VALUE
-                                  content:ShareContent
+                                  content:inviteBody
                                     title:INHERIT_VALUE
                                       url:INHERIT_VALUE
                                     image:INHERIT_VALUE
@@ -1005,11 +1041,16 @@ UIAlertViewDelegate>
         NSString *msgBody;
         if (fromClass)
         {
-            msgBody = [NSString stringWithFormat:@"我在%@-%@，快来加入吧！",schoolName,className];
+            NSMutableString *inviteBody = [[NSMutableString alloc] initWithString:InviteClassMember];
+            
+           [inviteBody replaceOccurrencesOfString:@"#school" withString:schoolName options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+            [inviteBody replaceOccurrencesOfString:@"#class" withString:className options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+            
+            msgBody = inviteBody;
         }
         else
         {
-            msgBody = @"测试，快来班家吧！";
+            msgBody = ShareContent;
         }
         controller.body = msgBody;
         controller.messageComposeDelegate = self;
@@ -1068,6 +1109,7 @@ UIAlertViewDelegate>
 -(void)inviteFriend:(UIButton *)button
 {
     NSDictionary *dict = [alreadyUsers objectAtIndex:button.tag-ContactTableViewTag-3333];
+    
     NSString *sendMsg = [NSString stringWithFormat:@"%@$!#我是%@,我在[%@—%@],你也一起加入吧！",classID,[Tools user_name],schoolName,className];
     [self sendMsgWithString:sendMsg andUserID:[dict objectForKey:@"_id"] andUserInfo:dict];
 }
@@ -1077,16 +1119,10 @@ UIAlertViewDelegate>
 {
     if ([Tools NetworkReachable])
     {
-        NSDate *date = [NSDate date];
-        NSTimeInterval timeinterval = [date timeIntervalSince1970];
-        NSString *str = [NSString stringWithFormat:@"%@%.0f",[Tools user_id],timeinterval];
-        NSData *data = [str dataUsingEncoding:NSUTF8StringEncoding];
-        NSString *messageID = [data base64Encoding];
         
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
                                                                       @"t_id":uid,
-                                                                      @"m_id":messageID,
                                                                       @"content":msgContent
                                                                       } API:CREATE_CHAT_MSG];
         [request setCompletionBlock:^{
@@ -1097,13 +1133,14 @@ UIAlertViewDelegate>
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 NSMutableDictionary *chatDict = [[NSMutableDictionary alloc] initWithCapacity:0];
+                NSString *messageID = [[responseDict objectForKey:@"data"] objectForKey:@"m_id"];
                 [chatDict setObject:messageID forKey:@"mid"];
                 [chatDict setObject:msgContent forKey:@"content"];
                 [chatDict setObject:[Tools user_id] forKey:@"userid"];
                 [chatDict setObject:[Tools user_id] forKey:@"fid"];
                 [chatDict setObject:[Tools user_name] forKey:@"fname"];
                 [chatDict setObject:@"null" forKey:@"ficon"];
-                [chatDict setObject:[NSString stringWithFormat:@"%d",[[responseDict objectForKey:@"data"] integerValue]] forKey:@"time"];
+                [chatDict setObject:[NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"] objectForKey:@"time"] integerValue]] forKey:@"time"];
                 [chatDict setObject:@"t" forKey:@"direct"];
                 [chatDict setObject:@"text" forKey:@"msgType"];
                 [chatDict setObject:uid forKey:@"tid"];
@@ -1119,7 +1156,7 @@ UIAlertViewDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -1157,7 +1194,7 @@ UIAlertViewDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         

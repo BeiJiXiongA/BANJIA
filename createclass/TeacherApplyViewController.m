@@ -48,6 +48,8 @@ UIScrollViewDelegate>
     NSString *schoolName;
     NSString *className;
     NSString *classID;
+    
+    UIButton *getCodeButton;
 }
 @end
 
@@ -92,7 +94,6 @@ UIScrollViewDelegate>
     schoolInfoLabel.textColor = TITLE_COLOR;
     [mainScrollView addSubview:schoolInfoLabel];
     
-    UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
     nameTextField = [[MyTextField alloc] initWithFrame:CGRectMake(27.5, schoolInfoLabel.frame.size.height+schoolInfoLabel.frame.origin.y+10, SCREEN_WIDTH-55, 45)];
     nameTextField.layer.cornerRadius = 5;
     nameTextField.clipsToBounds = YES;
@@ -120,7 +121,7 @@ UIScrollViewDelegate>
     showObjects = YES;
     checkCode = @"";
     
-    objectArray = [[NSArray alloc] initWithObjects:@"语文",@"数学",@"英语",@"输入", nil];
+    objectArray = @[@"语文老师",@"数学老师",@"英语老师",@"历史老师",@"其他"];
     objectStr = [objectArray firstObject];
     
     showObjectButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -190,12 +191,12 @@ UIScrollViewDelegate>
         [mainScrollView addSubview:phoneNumTextfield];
         
         UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
-        UIButton *getCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        getCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
         getCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, phoneNumTextfield.frame.origin.y+5, 58, 25);
         [getCodeButton setBackgroundImage:btnImage forState:UIControlStateNormal];
         [getCodeButton setTitle:@"短信验证" forState:UIControlStateNormal];
         getCodeButton.titleLabel.font = [UIFont boldSystemFontOfSize:13];
-        [getCodeButton addTarget:self action:@selector(bindPhone) forControlEvents:UIControlEventTouchUpInside];
+        [getCodeButton addTarget:self action:@selector(getVerifyCode) forControlEvents:UIControlEventTouchUpInside];
         [mainScrollView addSubview:getCodeButton];
         
         codeTextField = [[MyTextField alloc] initWithFrame:CGRectMake(29, phoneNumTextfield.frame.size.height+phoneNumTextfield.frame.origin.y+3, SCREEN_WIDTH-58, 35)];
@@ -213,7 +214,7 @@ UIScrollViewDelegate>
         [checkCodeButton setBackgroundImage:btnImage forState:UIControlStateNormal];
         [checkCodeButton setTitle:@"验证" forState:UIControlStateNormal];
         checkCodeButton.titleLabel.font = [UIFont boldSystemFontOfSize:13];
-        [checkCodeButton addTarget:self action:@selector(bindPhone) forControlEvents:UIControlEventTouchUpInside];
+        [checkCodeButton addTarget:self action:@selector(verify) forControlEvents:UIControlEventTouchUpInside];
         [mainScrollView addSubview:checkCodeButton];
     }
 
@@ -290,48 +291,99 @@ UIScrollViewDelegate>
 }
 
 #pragma mark - 验证码
--(void)bindPhone
+-(void)getVerifyCode
 {
-    if ([checkCode length] > 0)
-    {
-        if ([codeTextField.text length] <= 0)
-        {
-            [Tools showAlertView:@"请填写验证码" delegateViewController:nil];
-            return ;
-        }
-        if (![codeTextField.text isEqualToString:checkCode])
-        {
-            [Tools showAlertView:@"验证码填写错误" delegateViewController:nil];
-            return ;
-        }
-    }
-    else
-    {
-        if ([phoneNumTextfield.text length] <= 0)
-        {
-            [Tools showAlertView:@"请填写手机号" delegateViewController:nil];
-            return ;
-        }
-        if (![Tools isPhoneNumber:phoneNumTextfield.text])
-        {
-            [Tools showAlertView:@"手机号格式不正确" delegateViewController:nil];
-            return ;
-        }
-    }
-    
-    NSDictionary *paraDict;
-    if ([checkCode length] > 0)
-    {
-        paraDict = @{@"u_id":[Tools user_id],@"token":[Tools client_token],@"phone":phoneNumTextfield.text,@"auth_code":checkCode};
-    }
-    else
-    {
-        paraDict = @{@"u_id":[Tools user_id],@"token":[Tools client_token],@"phone":phoneNumTextfield.text};
-    }
-    
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:paraDict API:BINDPHONE];
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"phone":[Tools getPhoneNumFromString:phoneNumTextfield.text]} API:BINDPHONE];
+        
+        [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"get code %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                [self getcheckCode];
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+            
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools hideProgress:self.bgView];
+        }];
+        [Tools showProgress:self.bgView];
+        [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
+    
+}
+
+-(void)getcheckCode
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id]} API:MB_AUTHCODE];
+        
+        [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"== responsedict %@",responseString);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                //                codeStr = [responseDict objectForKey:@"data"];
+                getCodeButton.hidden = YES;
+                codeTextField.text = [responseDict objectForKey:@"data"];
+                
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+            
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools hideProgress:self.bgView];
+        }];
+        [Tools showProgress:self.bgView];
+        [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
+}
+
+
+-(void)verify
+{
+    if ([codeTextField.text length] == 0)
+    {
+        [Tools showAlertView:@"请您填写验证码" delegateViewController:nil];
+        return ;
+    }
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"phone":phoneNumTextfield.text,
+                                                                      @"auth_code":codeTextField.text}
+                                                                API:BINDPHONE];
         
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
@@ -340,25 +392,17 @@ UIScrollViewDelegate>
             DDLOG(@"verify responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                if([checkCode length] > 0)
-                {
-//                    UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"设置密码" message:nil delegate:self cancelButtonTitle:@"提交密码" otherButtonTitles:@"手机后6位默认密码", nil];
-//                    al.alertViewStyle = UIAlertViewStyleSecureTextInput;
-                    
-                    UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"默认密码手机后6位" delegate:self cancelButtonTitle:@"好的" otherButtonTitles:nil];
-                    al.tag = 5555;
-                    [al show];
-                    
-                    studentButton.enabled = YES;
-                }
-                else
-                {
-                    [self getVerifyCode];
-                }
+                [Tools showTips:@"绑定成功" toView:self.bgView];
+                
+                [[NSUserDefaults standardUserDefaults] setObject:phoneNumTextfield.text forKey:PHONENUM];
+                [[NSUserDefaults standardUserDefaults] synchronize];
+                
+                studentButton.enabled = YES;
+                [studentButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
             
         }];
@@ -376,45 +420,6 @@ UIScrollViewDelegate>
         [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
     }
 }
-
--(void)getVerifyCode
-{
-    if ([Tools NetworkReachable])
-    {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],@"token":[Tools client_token],@"phone":phoneNumTextfield.text} API:MB_AUTHCODE];
-        
-        [request setCompletionBlock:^{
-            [Tools hideProgress:self.bgView];
-            NSString *responseString = [request responseString];
-            NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"checkphone responsedict %@",responseString);
-            if ([[responseDict objectForKey:@"code"] intValue]== 1)
-            {
-                checkCode = [responseDict objectForKey:@"data"];
-                codeTextField.text = checkCode;
-            }
-            else
-            {
-                [Tools dealRequestError:responseDict fromViewController:self];
-            }
-            
-        }];
-        
-        [request setFailedBlock:^{
-            NSError *error = [request error];
-            DDLOG(@"error %@",error);
-            [Tools hideProgress:self.bgView];
-        }];
-        [Tools showProgress:self.bgView];
-        [request startAsynchronous];
-    }
-    else
-    {
-        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
-    }
-    
-}
-
 
 #pragma mark - tableview
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -543,7 +548,7 @@ UIScrollViewDelegate>
                                                                       @"token":[Tools client_token],
                                                                       @"c_id":classID,
                                                                       @"role":@"teachers",
-                                                                      @"title":[NSString stringWithFormat:@"%@老师",objectStr]
+                                                                      @"title":[NSString stringWithFormat:@"%@",objectStr]
                                                                       } API:JOINCLASS];
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
@@ -555,11 +560,10 @@ UIScrollViewDelegate>
                 UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"你的申请已经提交，请等待班主任的审核！" delegate:self cancelButtonTitle:@"回到班级列表" otherButtonTitles: nil];
                 al.tag = 3333;
                 [al show];
-                
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -603,7 +607,7 @@ UIScrollViewDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -615,7 +619,6 @@ UIScrollViewDelegate>
         [request startAsynchronous];
     }
 }
-
 
 -(void)getClassInfo
 {
@@ -637,7 +640,7 @@ UIScrollViewDelegate>
             }
             else if([[responseDict objectForKey:@"code"] intValue]== 0)
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         

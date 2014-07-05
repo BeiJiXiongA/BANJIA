@@ -29,7 +29,6 @@
 UIAlertViewDelegate,
 UITableViewDataSource,
 UITableViewDelegate,
-SetRelateDel,
 MFMessageComposeViewControllerDelegate,
 UIActionSheetDelegate>
 {
@@ -54,12 +53,13 @@ UIActionSheetDelegate>
     NSString *qqnum;
     NSString *sexureimage;
     NSString *birth;
-
+    
+    NSDictionary *parentDict;
 }
 @end
 
 @implementation ParentsDetailViewController
-@synthesize parentID,parentName,title,admin,headerImg,role,memDel;
+@synthesize parentID,parentName,title,admin,headerImg,role,studentName;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -88,7 +88,7 @@ UIActionSheetDelegate>
     db = [[OperatDB alloc] init];
     
     UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    moreButton.frame = CGRectMake(SCREEN_WIDTH-60, 6, 50, 32);
+    moreButton.frame = CGRectMake(SCREEN_WIDTH-CORNERMORERIGHT, 6, 50, 32);
     [moreButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
     [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:moreButton];
@@ -104,23 +104,22 @@ UIActionSheetDelegate>
     infoView.backgroundColor = [UIColor clearColor];
     [self.bgView addSubview:infoView];
     
-    if ([[db findSetWithDictionary:@{@"uid":parentID} andTableName:CLASSMEMBERTABLE] count] > 0)
+    if ([[db findSetWithDictionary:@{@"uid":parentID,@"classid":classID} andTableName:CLASSMEMBERTABLE] count] > 0)
     {
-        NSDictionary *dict = [[db findSetWithDictionary:@{@"uid":parentID} andTableName:CLASSMEMBERTABLE] firstObject];
-        if (![[dict objectForKey:@"phone"] isEqual:[NSNull null]])
+        parentDict = [[db findSetWithDictionary:@{@"uid":parentID,@"classid":classID} andTableName:CLASSMEMBERTABLE] firstObject];
+        if (![[parentDict objectForKey:@"phone"] isEqual:[NSNull null]])
         {
-            phoneNum = [dict objectForKey:@"phone"];
+            phoneNum = [parentDict objectForKey:@"phone"];
         }
-        if (![[dict objectForKey:@"img_icon"] isEqual:[NSNull null]])
+        if (![[parentDict objectForKey:@"img_icon"] isEqual:[NSNull null]])
         {
-            headerImageUrl = [dict objectForKey:@"img_icon"];
+            headerImageUrl = [parentDict objectForKey:@"img_icon"];
         }
-        if (![[dict objectForKey:@"birth"] isEqual:[NSNull null]])
+        if (![[parentDict objectForKey:@"birth"] isEqual:[NSNull null]])
         {
-            birth = [dict objectForKey:@"birth"];
+            birth = [parentDict objectForKey:@"birth"];
         }
     }
-
     
     if([Tools NetworkReachable])
     {
@@ -141,15 +140,6 @@ UIActionSheetDelegate>
 -(void)unShowSelfViewController
 {
     [self.navigationController popViewControllerAnimated:YES];
-}
-#pragma mark - setRelate
--(void)changePareTitle:(NSString *)newTitle
-{
-    jobLabel.text = newTitle;
-    if ([self.memDel respondsToSelector:@selector(updateListWith:)])
-    {
-        [self.memDel updateListWith:YES];
-    }
 }
 
 #pragma mark - tableview
@@ -176,7 +166,7 @@ UIActionSheetDelegate>
     }
     else if(section == 1)
     {
-        return 4;
+        return 3;
     }
     return 0;
 }
@@ -201,7 +191,7 @@ UIActionSheetDelegate>
     }
     else if (indexPath.section == 1)
     {
-        if (indexPath.row < 3)
+        if (indexPath.row < 2)
         {
             return 40;
         }
@@ -267,7 +257,7 @@ UIActionSheetDelegate>
     }
     else if (indexPath.section == 1)
     {
-        if (indexPath.row < 3)
+        if (indexPath.row < 2)
         {
             cell.nameLabel.frame = CGRectMake(15, 5, 100, 30);
             cell.nameLabel.textColor = TITLE_COLOR;
@@ -280,11 +270,6 @@ UIActionSheetDelegate>
                 cell.contentLabel.text = phoneNum;
             }
             else if(indexPath.row == 1)
-            {
-                cell.nameLabel.text = @"QQ";
-                cell.contentLabel.text = qqnum;
-            }
-            else if(indexPath.row == 2)
             {
                 cell.nameLabel.text = @"生日";
                 cell.contentLabel.text = birth;
@@ -416,20 +401,31 @@ UIActionSheetDelegate>
             DDLOG(@"kickuser responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                
-                if ([db deleteRecordWithDict:@{@"uid":parentID,@"classid":classID,@"role":@"parents"} andTableName:CLASSMEMBERTABLE])
+                NSDictionary *studentDict = [[db findSetWithDictionary:@{@"classid":classID,@"name":[parentDict objectForKey:@"re_name"]} andTableName:CLASSMEMBERTABLE] firstObject];
+                if ([[studentDict objectForKey:@"uid"] isEqual:[NSNull null]] || ([[studentDict objectForKey:@"uid"] length]==0))
                 {
-                    DDLOG(@"delete parent success!");
+                    if ([db deleteRecordWithDict:@{@"name":[parentDict objectForKey:@"re_name"],@"classid":classID} andTableName:CLASSMEMBERTABLE])
+                    {
+                        DDLOG(@"delete student success!");
+                        if ([db deleteRecordWithDict:@{@"uid":parentID,@"classid":classID} andTableName:CLASSMEMBERTABLE])
+                        {
+                            DDLOG(@"delete parent success!");
+                        }
+                    }
                 }
-                if ([self.memDel respondsToSelector:@selector(updateListWith:)])
+                else
                 {
-                    [self.memDel updateListWith:YES];
+                    if ([db deleteRecordWithDict:@{@"uid":parentID,@"classid":classID} andTableName:CLASSMEMBERTABLE])
+                    {
+                        DDLOG(@"delete parent success!");
+                    }
                 }
-                [self unShowSelfViewController];
+                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
+                [self.navigationController popToRootViewControllerAnimated:YES];
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -464,7 +460,7 @@ UIActionSheetDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -480,7 +476,9 @@ UIActionSheetDelegate>
 
 -(void)moreClick
 {
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
+    NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
+    int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+    if (userAdmin == 2)
     {
         UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"设置家长学生关系",@"设置发言权限",@"踢出班级",@"举报此人", nil];
         ac.tag = 3333;
@@ -498,7 +496,9 @@ UIActionSheetDelegate>
 {
     if (actionSheet.tag == 3333)
     {
-        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
+        NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
+        int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+        if (userAdmin == 2)
         {
             if (buttonIndex == 0)
             {
@@ -508,7 +508,6 @@ UIActionSheetDelegate>
                 settingRelate.title = title;
                 settingRelate.parentID = parentID;
                 settingRelate.admin = admin;
-                settingRelate.setRelate = self;
                 settingRelate.classID = classID;
                 [self.navigationController pushViewController:settingRelate animated:YES];
             }
@@ -538,7 +537,7 @@ UIActionSheetDelegate>
                 [self.navigationController pushViewController:reportVC animated:YES];
             }
         }
-        else
+        else if(buttonIndex == 0)
         {
             ReportViewController *reportVC = [[ReportViewController alloc] init];
             reportVC.reportType = @"people";
@@ -614,7 +613,7 @@ UIActionSheetDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         

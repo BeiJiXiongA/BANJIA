@@ -22,7 +22,7 @@
 
 #import "ClassesListViewController.h"
 
-#define NormalImageScale  1
+#define NormalImageScale  2
 #define BigImageScale    2
 
 #define ContentTextViewTag  1000
@@ -851,7 +851,7 @@ int count = 0;
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -935,10 +935,10 @@ int count = 0;
         {
             placeHolderLabel.text = @"说点什么吧...";
         }
-        if([textView.text length] > 140)
+        if([textView.text length] > 200)
         {
-            textView.text = [textView.text substringToIndex:141];
-            [Tools showAlertView:@"字数不能超过140个字" delegateViewController:nil];
+            textView.text = [textView.text substringToIndex:201];
+            [Tools showAlertView:@"字数不能超过200个字" delegateViewController:nil];
         }
     }
 }

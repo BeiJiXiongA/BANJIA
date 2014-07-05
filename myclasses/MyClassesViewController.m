@@ -89,9 +89,11 @@ UIActionSheetDelegate>
     
     db = [[OperatDB alloc] init];
     
-    schoolLevelArray = [NSArray arrayWithObjects:@"幼儿园",@"小学",@"中学",@"中专技校",@"培训机构",@"其他", nil];
+    schoolLevelArray = SCHOOLLEVELARRAY;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeClassInfo) name:@"changeClassInfo" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getClassesByUser) name:UPDATECLASSMEMBERLIST object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getClassesByUser) name:CHANGECLASSINFO object:nil];
     
     [[self.bgView layer] setShadowOffset:CGSizeMake(-5.0f, 5.0f)];
     [[self.bgView layer] setShadowColor:[UIColor darkGrayColor].CGColor];
@@ -172,8 +174,8 @@ UIActionSheetDelegate>
 }
 -(void)dealloc
 {
-    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = self;
-    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = self;
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = nil;
 }
 
 #pragma mark - chatdelegate
@@ -275,10 +277,10 @@ UIActionSheetDelegate>
                         NSString *s_level = [dict2 objectForKey:@"s_level"];
                         if ([s_level isEqual:[NSNull null]])
                         {
-                            s_level = DEFAULTSCHOOLLEVEL;
+                            s_level = @"";
+                            [dict setObject:s_level forKey:@"s_level"];
                         }
-                        
-                        if ([dict2 objectForKey:@"s_level"])
+                        else if ([dict2 objectForKey:@"s_level"])
                         {
                             NSString *schoolLevel = [NSString stringWithFormat:@"%d",[s_level integerValue]];
                             if ([schoolLevel length] > 0)
@@ -393,10 +395,13 @@ UIActionSheetDelegate>
                     haveNoClassLabel.hidden = YES;
                     classTableView.hidden = NO;
                     NSArray *array = [dict1 objectForKey:@"classes"];
+                    [self updateDataBase:array];
+                    
                     for (int i=0; i<[array count]; ++i)
                     {
                         NSDictionary *dict2 = [array objectAtIndex:i];
                         NSString *s_id = [dict2 objectForKey:@"s_id"];
+                        
                         if ([s_id isEqual:[NSNull null]])
                         {
                             s_id = DEFAULTSCHOOLID;
@@ -423,7 +428,8 @@ UIActionSheetDelegate>
                             NSString *s_level = [dict2 objectForKey:@"s_level"];
                             if ([s_level isEqual:[NSNull null]])
                             {
-                                s_level = DEFAULTSCHOOLLEVEL;
+                                s_level = @"";
+                                [dict setObject:s_level forKey:@"s_level"];
                             }
                             else if ([dict2 objectForKey:@"s_level"])
                             {
@@ -477,7 +483,7 @@ UIActionSheetDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
 
@@ -501,6 +507,44 @@ UIActionSheetDelegate>
     }
 }
 
+-(void)updateDataBase:(NSArray *)classArray
+{
+    if ([db deleteRecordWithDict:@{@"uid":[Tools user_id]} andTableName:MYCLASSTABLE])
+    {
+        DDLOG(@"delete userid success");
+    }
+    
+    for (int i=0; i<[classArray count]; i++)
+    {
+        NSDictionary *classdict = [classArray objectAtIndex:i];
+        NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithCapacity:0];
+        [dict setObject:[classdict objectForKey:@"_id"] forKey:@"classid"];
+        [dict setObject:[classdict objectForKey:@"name"] forKey:@"classname"];
+        [dict setObject:[classdict objectForKey:@"img_icon"] forKey:@"img_icon"];
+        [dict setObject:[classdict objectForKey:@"img_kb"] forKey:@"img_kb"];
+        [dict setObject:@"" forKey:@"s_id"];
+        [dict setObject:@"" forKey:@"s_level"];
+        [dict setObject:@"" forKey:@"s_name"];
+        if ([db insertRecord:dict andTableName:MYCLASSTABLE])
+        {
+            DDLOG(@"insert class success");
+        }
+        
+    }
+}
+
+-(BOOL)containThisClass:(NSArray *)array classId:(NSString *)classId
+{
+    for (int i=0; i<[array count]; i++)
+    {
+        NSDictionary *dict = [array objectAtIndex:i];
+        if ([[dict objectForKey:@"_id"] isEqualToString:classId])
+        {
+            return YES;
+        }
+    }
+    return NO;
+}
 
 -(BOOL)isExistInTmpArray:(NSString *)schoolID
 {
@@ -559,7 +603,14 @@ UIActionSheetDelegate>
     }
     else
     {
-         headerLabel.text = [NSString stringWithFormat:@"   %@(%@)",[tmpdict objectForKey:@"s_name"],[schoolLevelArray objectAtIndex:[[tmpdict objectForKey:@"s_level"] integerValue]]];
+        if ([[tmpdict objectForKey:@"s_level"] length] == 0)
+        {
+            headerLabel.text = [NSString stringWithFormat:@"   %@",[tmpdict objectForKey:@"s_name"]];
+        }
+        else
+        {
+            headerLabel.text = [NSString stringWithFormat:@"   %@(%@)",[tmpdict objectForKey:@"s_name"],[schoolLevelArray objectAtIndex:[[tmpdict objectForKey:@"s_level"] integerValue]]];
+        }
     }
    
     [headerView addSubview:headerLabel];
@@ -588,8 +639,9 @@ UIActionSheetDelegate>
     {
         [cell.headerImageView setImage:[UIImage imageNamed:@"headpic.jpg"]];
     }
-    cell.nameLabel.frame = CGRectMake(70, 10, SCREEN_WIDTH-95, 30);
+    cell.nameLabel.frame = CGRectMake(70, 12.5, SCREEN_WIDTH-95, 25);
     cell.nameLabel.text = [classDict objectForKey:@"name"];
+    cell.nameLabel.backgroundColor = [UIColor clearColor];
     int num = 0;
     
     if ([[classDict objectForKey:@"notice"] integerValue] > 0)
@@ -636,7 +688,8 @@ UIActionSheetDelegate>
         cell.contentLable.hidden = NO;
         cell.contentLable.text = [NSString stringWithFormat:@"%d",num];
     }
-    else if([classDict objectForKey:UCDIARY] || [classDict objectForKey:DIARY])
+    else if(([classDict objectForKey:UCDIARY] && [[classDict objectForKey:UCDIARY] integerValue] > 0)
+            || ([classDict objectForKey:DIARY] && [[classDict objectForKey:DIARY] integerValue] > 0))
     {
         cell.contentLable.frame = CGRectMake(SCREEN_WIDTH-60, 30, 10, 10);
         cell.contentLable.layer.cornerRadius = 5;
@@ -659,16 +712,28 @@ UIActionSheetDelegate>
     {
         parentNum = [[classDict objectForKey:@"parents_num"] integerValue];
     }
-    cell.timeLabel.frame = CGRectMake(cell.nameLabel.frame.origin.x, cell.nameLabel.frame.origin.y+cell.nameLabel.frame.size.height, 180, 20);
-    cell.timeLabel.textColor = TIMECOLOR;
-    cell.timeLabel.text = [NSString stringWithFormat:@"%d名学生  %d名家长",studentNum,parentNum];
     
+    [cell.timeLabel cnv_setUILabelText:[NSString stringWithFormat:@"%d名学生",studentNum]
+                            andKeyWord:[NSString stringWithFormat:@"%d",studentNum]];
+    cell.timeLabel.frame = CGRectMake(cell.nameLabel.frame.origin.x, cell.nameLabel.frame.origin.y+cell.nameLabel.frame.size.height+3, [cell.timeLabel.text lengthOfBytesUsingEncoding:NSUTF8StringEncoding]*6.5, 20);
+    cell.timeLabel.font = [UIFont systemFontOfSize:16];
+    [cell.timeLabel cnv_setUIlabelTextColor:TIMECOLOR andKeyWordColor:RGB(51, 204, 102, 0.8)];
+    
+    cell.timeLabel2.frame = CGRectMake(cell.timeLabel.frame.origin.x+cell.timeLabel.frame.size.width, cell.nameLabel.frame.origin.y+cell.nameLabel.frame.size.height+3, 110, 20);
+    [cell.timeLabel2 cnv_setUILabelText:[NSString stringWithFormat:@"%d名家长已加入",parentNum]
+                            andKeyWord:[NSString stringWithFormat:@"%d",parentNum]];
+    cell.timeLabel2.font = [UIFont systemFontOfSize:16];
+    [cell.timeLabel2 cnv_setUIlabelTextColor:TIMECOLOR andKeyWordColor:RGB(51, 204, 102, 0.8)];
     
     cell.bgView.frame = CGRectMake(10, 6.5, SCREEN_WIDTH-20, 70);
+    
+    cell.arrowImageView.frame = CGRectMake(cell.bgView.frame.size.width-20, 27.5, 10, 15);
+    [cell.arrowImageView setImage:[UIImage imageNamed:@"discovery_arrow"]];
+    cell.arrowImageView.backgroundColor = [UIColor whiteColor];
+    
     cell.bgView.backgroundColor = [UIColor whiteColor];
     cell.bgView.layer.cornerRadius = 5;
     cell.bgView.clipsToBounds = YES;
-    cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     cell.selectionStyle = UITableViewCellSelectionStyleGray;
     cell.backgroundColor = self.bgView.backgroundColor;
     return cell;
@@ -794,25 +859,16 @@ UIActionSheetDelegate>
 
 -(void)addButtonClick
 {
-    if ([Tools phone_num])
-    {
+//    if ([Tools phone_num])
+//    {
         UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"创建班级",@"加入班级", nil];
         ac.tag = ADDACTIONSHEETTAG;
         [ac showInView:classTableView];
-        
-        //        SearchSchoolViewController *searchSchoolViewController = [[SearchSchoolViewController alloc] init];
-//        [self.navigationController pushViewController:searchSchoolViewController animated:YES];
-//        ChooseSchoolViewController *chooseViewController = [[ChooseSchoolViewController alloc] init];
-//        [chooseViewController.schoolArray addObjectsFromArray:tmpArray];
-//        [self.navigationController pushViewController:chooseViewController animated:YES];
-        
-//        CreateClassViewController *createClassViewController = [[CreateClassViewController alloc] init];
-//        [self.navigationController pushViewController:createClassViewController animated:YES];
-    }
-    else
-    {
-        [Tools showAlertView:@"请先到个人信息里绑定手机号" delegateViewController:nil];
-    }
+//    }
+//    else
+//    {
+//        [Tools showAlertView:@"请先到个人信息里绑定手机号" delegateViewController:nil];
+//    }
 }
 
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
@@ -827,6 +883,7 @@ UIActionSheetDelegate>
         else if(buttonIndex == 1)
         {
             SearchClassViewController *searchclassVC = [[SearchClassViewController alloc] init];
+            
             [self.navigationController pushViewController:searchclassVC animated:YES];
         }
     }
@@ -851,7 +908,7 @@ UIActionSheetDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
             
         }];

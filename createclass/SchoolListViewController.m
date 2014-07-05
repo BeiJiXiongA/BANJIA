@@ -9,6 +9,7 @@
 #import "SchoolListViewController.h"
 #import "ClassesViewController.h"
 #import "CreateSchoolViewController.h"
+#import "SchoolInfoViewController.h"
 
 @interface SchoolListViewController ()<UITableViewDataSource,UITableViewDelegate>
 {
@@ -157,14 +158,25 @@
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    ClassesViewController *classesViewController = [[ClassesViewController alloc] init];
-    classesViewController.schoolLevel = [NSString stringWithFormat:@"%d",[[[schoolArray objectAtIndex:indexPath.row] objectForKey:@"level"] integerValue]];
-    classesViewController.schoollID = [[schoolArray objectAtIndex:indexPath.row] objectForKey:@"_id"];
-    classesViewController.schoolName = [[schoolArray objectAtIndex:indexPath.row] objectForKey:@"name"];
     
-    [[NSUserDefaults standardUserDefaults] setObject:[[schoolArray objectAtIndex:indexPath.row] objectForKey:@"name"] forKey:@"schoolname"];
-    [[NSUserDefaults standardUserDefaults]synchronize];
-    [self.navigationController pushViewController:classesViewController animated:YES];
+    if([[[NSUserDefaults standardUserDefaults] objectForKey:SEARCHSCHOOLTYPE] isEqualToString:BINDCLASSTOSCHOOL])
+    {
+        SchoolInfoViewController *schoolInfo = [[SchoolInfoViewController alloc] init];
+        schoolInfo.schoolid = [[schoolArray objectAtIndex:indexPath.row] objectForKey:@"_id"];
+        schoolInfo.schoolName = [[schoolArray objectAtIndex:indexPath.row] objectForKey:@"name"];
+        [self.navigationController pushViewController:schoolInfo animated:YES];
+    }
+    else
+    {
+        ClassesViewController *classesViewController = [[ClassesViewController alloc] init];
+        classesViewController.schoolLevel = [NSString stringWithFormat:@"%d",[[[schoolArray objectAtIndex:indexPath.row] objectForKey:@"level"] integerValue]];
+        classesViewController.schoollID = [[schoolArray objectAtIndex:indexPath.row] objectForKey:@"_id"];
+        classesViewController.schoolName = [[schoolArray objectAtIndex:indexPath.row] objectForKey:@"name"];
+        
+        [[NSUserDefaults standardUserDefaults] setObject:[[schoolArray objectAtIndex:indexPath.row] objectForKey:@"name"] forKey:@"schoolname"];
+        [[NSUserDefaults standardUserDefaults]synchronize];
+        [self.navigationController pushViewController:classesViewController animated:YES];
+    }
 }
 
 /*

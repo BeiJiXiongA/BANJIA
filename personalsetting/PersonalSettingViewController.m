@@ -103,7 +103,7 @@ UIActionSheetDelegate>
     personalSettiongTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT - UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
     personalSettiongTableView.delegate = self;
     personalSettiongTableView.backgroundView = tableViewBg;
-    personalSettiongTableView.backgroundColor = [UIColor clearColor];
+    personalSettiongTableView.backgroundColor = [UIColor whiteColor];
     personalSettiongTableView.dataSource = self;
     if ([personalSettiongTableView respondsToSelector:@selector(setSeparatorInset:)])
     {
@@ -149,7 +149,9 @@ UIActionSheetDelegate>
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification  object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillShowNotification object:nil];
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
 }
+
 
 #pragma mark - chatdelegate
 -(void)dealNewChatMsg:(NSDictionary *)dict
@@ -295,9 +297,13 @@ UIActionSheetDelegate>
             {
                 [cell.authenticationSign setImage:[UIImage imageNamed:@"auth"]];
             }
-            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"discovery_arrow"]];
-            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 12.5, 10, 15)];
-            cell.selectionStyle = UITableViewCellSelectionStyleNone;
+            
+            cell.arrowImageView.hidden = NO;
+            [cell.arrowImageView setFrame:CGRectMake(SCREEN_WIDTH-20, 37.5, 10, 15)];
+            [cell.arrowImageView setImage:[UIImage imageNamed:@"discovery_arrow"]];
+            cell.selectionStyle = UITableViewCellSelectionStyleGray;
+            cell.backgroundColor = [UIColor whiteColor];
+            cell.contentView.backgroundColor = [UIColor whiteColor];
             return cell;
         }
     }
@@ -335,10 +341,12 @@ UIActionSheetDelegate>
             cell.objectsLabel.font = [UIFont systemFontOfSize:18];
             cell.objectsLabel.textColor = TITLE_COLOR;
             
-            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"discovery_arrow"]];
-            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 15, 10, 15)];
-            
-            cell.selectionStyle = UITableViewCellSelectionStyleNone;
+            cell.arrowImageView.hidden = NO;
+            [cell.arrowImageView setFrame:CGRectMake(SCREEN_WIDTH-20, 22.5, 10, 15)];
+            [cell.arrowImageView setImage:[UIImage imageNamed:@"discovery_arrow"]];
+            cell.selectionStyle = UITableViewCellSelectionStyleGray;
+            cell.backgroundColor = [UIColor whiteColor];
+            cell.contentView.backgroundColor = [UIColor whiteColor];
             return cell;
         }
         else
@@ -414,7 +422,10 @@ UIActionSheetDelegate>
             cell.contentLabel.frame = CGRectMake(cell.iconImageView.frame.size.width+cell.iconImageView.frame.origin.x+10, cell.iconImageView.frame.origin.y+4, 80, 30);
             cell.contentLabel.font = [UIFont systemFontOfSize:18];
             cell.nametf.returnKeyType = UIReturnKeyDone;
-            cell.selectionStyle = UITableViewCellSelectionStyleNone;
+            cell.selectionStyle = UITableViewCellSelectionStyleGray;
+            cell.backgroundColor = [UIColor whiteColor];
+            cell.contentView.backgroundColor = [UIColor whiteColor];
+            cell.accessoryView.backgroundColor = [UIColor whiteColor];
             return cell;
         }
     }
@@ -459,6 +470,8 @@ UIActionSheetDelegate>
             }
             else
                 cell.nameLabel.hidden = YES;
+            cell.selectionStyle = UITableViewCellSelectionStyleGray;
+            cell.contentView.backgroundColor = [UIColor whiteColor];
             return cell;
         }
         else if (indexPath.row == 1)
@@ -470,11 +483,11 @@ UIActionSheetDelegate>
                 cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:authcell];
             }
             cell.textLabel.font = [UIFont systemFontOfSize:18];
-            cell.textLabel.text = @"设置";
+            cell.textLabel.text = @" 设置";
             cell.textLabel.textColor = TITLE_COLOR;
-            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"discovery_arrow"]];
-            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 12.5, 10, 15)];
-            cell.selectionStyle = UITableViewCellSelectionStyleNone;
+            
+            cell.selectionStyle = UITableViewCellSelectionStyleGray;
+            cell.contentView.backgroundColor = [UIColor whiteColor];
             return cell;
         }
     }
@@ -724,7 +737,7 @@ static int loginID;
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -809,11 +822,17 @@ static int loginID;
                     [ud setObject:[accountDict objectForKey:@"sw"] forKey:SINANICKNAME];
                     [ud synchronize];
                 }
+                if (![[accountDict objectForKey:@"phone"]isEqual:[NSNull null]] && [[accountDict objectForKey:@"phone"] length] > 0)
+                {
+                    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+                    [ud setObject:[accountDict objectForKey:@"phone"] forKey:PHONENUM];
+                    [ud synchronize];
+                }
                 [personalSettiongTableView reloadData];
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         

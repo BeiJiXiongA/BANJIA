@@ -41,6 +41,8 @@
     
     NSArray *waynames;
     NSArray *iconsArray;
+    
+    UIImageView *arrowImageView;
 }
 @end
 
@@ -96,6 +98,13 @@
     parentLabel.font = [UIFont systemFontOfSize:16];
     [self.bgView addSubview:parentLabel];
     
+    arrowImageView = [[UIImageView alloc] init];
+    arrowImageView.frame = CGRectMake(parentLabel.frame.origin.x + parentLabel.frame.size.width- 30, parentLabel.frame.origin.y+16, 18, 10);
+    arrowImageView.backgroundColor = [UIColor whiteColor];
+    [arrowImageView setImage:[UIImage imageNamed:@"arrow_down"]];
+    [self.bgView addSubview:arrowImageView];
+    
+    
     UITapGestureRecognizer *openTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(opentableview)];
     parentLabel.userInteractionEnabled = YES;
     [parentLabel addGestureRecognizer:openTgr];
@@ -112,7 +121,7 @@
     
 //    [self.bgView addSubview:parentButton];
 
-    parentArray = [[NSArray alloc] initWithObjects:@"爸爸",@"妈妈",@"爷爷",@"奶奶",@"输入", nil];
+    parentArray = [[NSArray alloc] initWithObjects:@"爸爸",@"妈妈",@"爷爷",@"奶奶",@"其他", nil];
     
     parentTextField = [[UITextField alloc] initWithFrame:CGRectMake(parentButton.frame.size.width+parentButton.frame.origin.x+20 , parentButton.frame.origin.y, 100, 42)];
     parentTextField.enabled = NO;
@@ -273,6 +282,7 @@
     {
         if (indexPath.row == [parentArray count]-1)
         {
+            parentLabel.text = [NSString stringWithFormat:@"    %@",[parentArray objectAtIndex:indexPath.row]];
             parentLabel.text = nil;
             parentTextField.enabled = YES;
             parentTextField.hidden = NO;
@@ -335,7 +345,17 @@
 //        controller.recipients = contactInviteArray;
         
         NSString *msgBody;
-        msgBody = [NSString stringWithFormat:@"%@的%@，您好，我是%@-%@的%@，您也一起来加入吧！http://www.banjiaedu.com",name,relateString,schoolName,className,[Tools user_name]];
+        NSMutableString *inviteBody = [[NSMutableString alloc] initWithString:InviteParent];
+        
+        NSString *parentString = [NSString stringWithFormat:@"%@的%@",name,relateString];
+        [inviteBody replaceOccurrencesOfString:@"#parent" withString:parentString options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+        
+        [inviteBody replaceOccurrencesOfString:@"#school" withString:schoolName options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+        [inviteBody replaceOccurrencesOfString:@"#class" withString:className options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+        [inviteBody replaceOccurrencesOfString:@"#name" withString:[Tools user_name] options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+        
+        msgBody = inviteBody;
+
         controller.body = msgBody;
         controller.messageComposeDelegate = self;
         
@@ -403,9 +423,21 @@
         relateString = parentLabel.text;
     }
     //创建分享内容
-    NSString *content = [NSString stringWithFormat:@"%@的%@，您好，我是%@-%@的老师%@",name,relateString,schoolName,className,[Tools user_name]];
+    
+    NSString *msgBody;
+    NSMutableString *inviteBody = [[NSMutableString alloc] initWithString:InviteParent];;
+    
+    NSString *parentString = [NSString stringWithFormat:@"%@的%@",name,relateString];
+    [inviteBody replaceOccurrencesOfString:@"#parent" withString:parentString options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+    
+    [inviteBody replaceOccurrencesOfString:@"#school" withString:schoolName options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+    [inviteBody replaceOccurrencesOfString:@"#class" withString:className options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+    [inviteBody replaceOccurrencesOfString:@"#name" withString:[Tools user_name] options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+    
+    msgBody = inviteBody;
+    
 //    NSString *imagePath = [[NSBundle mainBundle] pathForResource:IMAGE_NAME ofType:IMAGE_EXT];
-    id<ISSContent> publishContent = [ShareSDK content:content
+    id<ISSContent> publishContent = [ShareSDK content:msgBody
                                        defaultContent:@""
                                                 image:nil
                                                 title:@"班家"
@@ -476,16 +508,25 @@
     memset(pBuffer, 0, BUFFER_SIZE);
     NSData* data = [NSData dataWithBytes:pBuffer length:BUFFER_SIZE];
     free(pBuffer);
-     NSString *contentstr = [NSString stringWithFormat:@"%@的%@，您好，我是%@-%@的老师%@",name,relateString,schoolName,className,[Tools user_name]];
-    id<ISSContent> content = [ShareSDK content:contentstr
+    
+    NSMutableString *inviteBody = [[NSMutableString alloc] initWithString:InviteParent];;
+    
+    NSString *parentString = [NSString stringWithFormat:@"%@的%@",name,relateString];
+    [inviteBody replaceOccurrencesOfString:@"#parent" withString:parentString options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+    
+    [inviteBody replaceOccurrencesOfString:@"#school" withString:schoolName options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+    [inviteBody replaceOccurrencesOfString:@"#class" withString:className options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+    [inviteBody replaceOccurrencesOfString:@"#name" withString:[Tools user_name] options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+    
+    id<ISSContent> content = [ShareSDK content:inviteBody
                                 defaultContent:nil
                                          image:nil
                                          title:NSLocalizedString(@"班家", @"这是App消息")
                                            url:@"http://www.banjiaedu.com"
-                                   description:contentstr
+                                   description:inviteBody
                                      mediaType:SSPublishContentMediaTypeApp];
     [content addWeixinSessionUnitWithType:INHERIT_VALUE
-                                  content:contentstr
+                                  content:inviteBody
                                     title:INHERIT_VALUE
                                       url:INHERIT_VALUE
                                     image:INHERIT_VALUE

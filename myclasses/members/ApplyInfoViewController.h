@@ -15,12 +15,4 @@
 @property (nonatomic, strong) NSString *j_id;
 @property (nonatomic, strong) NSString *applyName;
 @property (nonatomic, strong) NSString *title;
-@property (nonatomic, assign) id<ApplyInfoDelegate> applyDel;
-@property (nonatomic, strong) NSString *headerImg;
-@end
-
-@protocol ApplyInfoDelegate <NSObject>
-
--(void)updateList:(BOOL)update;
-
 @end

@@ -40,11 +40,13 @@ UIActionSheetDelegate>
     
     UIView *selectImageView;
     UIImagePickerController *imagePickerController;
+    
+    MyTextField *passwordTextField;
 }
 @end
 
 @implementation FillInfoViewController
-@synthesize headerIcon,nickName,accountID,accountType,account,fromRoot;
+@synthesize headerIcon,nickName,accountID,accountType,account,fromRoot,token;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -99,16 +101,16 @@ UIActionSheetDelegate>
     imagePickerController = [[UIImagePickerController alloc] init];
     imagePickerController.delegate = self;
     
-    UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 46, 80, 30)];
-    headerLabel.text = @"真人露相";
+    UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 21, 80, 30)];
+    headerLabel.text = @"上传头像";
     headerLabel.font = [UIFont systemFontOfSize:16];
-    headerLabel.textColor = TITLE_COLOR;
+    headerLabel.textColor = COMMENTCOLOR;
     headerLabel.backgroundColor = [UIColor clearColor];
     [mainScrollView addSubview:headerLabel];
     
-    headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(headerLabel.frame.origin.x+headerLabel.frame.size.width+10, 39, 100, 100)];
-    [headerImageView setImage:[UIImage imageNamed:HEADERBG]];
-    headerImageView.backgroundColor = [UIColor clearColor];
+    headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(headerLabel.frame.origin.x+headerLabel.frame.size.width+10, 21, 85, 85)];
+    [headerImageView setImage:[UIImage imageNamed:@"diary_add_image"]];
+    headerImageView.backgroundColor = [UIColor whiteColor];
     [mainScrollView addSubview:headerImageView];
     
     if ([headerIcon length] > 0)
@@ -120,11 +122,21 @@ UIActionSheetDelegate>
     headerImageView.userInteractionEnabled = YES;
     [headerImageView addGestureRecognizer:selectHeaderImageTgr];
     
-    nameTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(29, headerImageView.frame.origin.y+headerImageView.frame.size.height+27, SCREEN_WIDTH-29-24.5, 35)];
+    UILabel *nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(17, headerImageView.frame.size.height+headerImageView.frame.origin.y+16.5, 85, 42)];
+    nameLabel.text = @"真人姓名:";
+    nameLabel.textColor = COMMENTCOLOR;
+    nameLabel.backgroundColor = [UIColor blackColor];
+//    nameLabel.backgroundColor = self.bgView.backgroundColor;
+    [self.bgView addSubview:nameLabel];
+    
+    nameTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(nameLabel.frame.size.width+nameLabel.frame.origin.x, nameLabel.frame.origin.y+nameLabel.frame.size.height+27, 200, 42)];
+    nameTextfield.background = nil;
     nameTextfield.tag = NAMETFTAG;
     nameTextfield.delegate = self;
     nameTextfield.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
-    nameTextfield.background = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
+    nameTextfield.backgroundColor = [UIColor whiteColor];
+    nameTextfield.layer.cornerRadius = 5;
+    nameTextfield.clipsToBounds = YES;
     if ([nickName length] > 0)
     {
         nameTextfield.text = nickName;
@@ -134,44 +146,59 @@ UIActionSheetDelegate>
         nameTextfield.placeholder = @"姓名";
     }
     nameTextfield.clearButtonMode = UITextFieldViewModeWhileEditing;
+    
+    UILabel *sexLabel = [[UILabel alloc] initWithFrame:CGRectMake(17, nameTextfield.frame.size.height+nameTextfield.frame.origin.y+9, 85, 42)];
+    sexLabel.text = @"性        别:";
+    sexLabel.textColor = COMMENTCOLOR;
+    sexLabel.backgroundColor = self.bgView.backgroundColor;
+    [self.bgView addSubview:sexLabel];
+    
     [mainScrollView addSubview:nameTextfield];
     
-    sexSwitch = [[MySwitchView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH/2-40, nameTextfield.frame.size.height+nameTextfield.frame.origin.y+10, 70, 30)];
-    sexSwitch.selectView.frame = CGRectMake(sexSwitch.frame.size.width/2, 0, sexSwitch.frame.size.width/2, sexSwitch.frame.size.height);
-    sexSwitch.mySwitchDel = self;
-    sexSwitch.backgroundColor = RGB(65, 181, 186, 1);
-    sexSwitch.leftView.layer.borderWidth = 0;
-    sexSwitch.rightView.layer.borderWidth = 0;
-    UILabel *maleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, sexSwitch.frame.size.width/2, sexSwitch.frame.size.height)];
-    maleLabel.text = @"男";
-    maleLabel.textAlignment = NSTextAlignmentCenter;
-    maleLabel.backgroundColor = [UIColor clearColor];
-    maleLabel.textColor = [UIColor whiteColor];
-    [sexSwitch.leftView addSubview:maleLabel];
-    UILabel *fmaleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, sexSwitch.frame.size.width/2, sexSwitch.frame.size.height)];
-    fmaleLabel.text = @"女";
-    fmaleLabel.textColor = [UIColor whiteColor];
-    fmaleLabel.textAlignment = NSTextAlignmentCenter;
-    fmaleLabel.backgroundColor = [UIColor clearColor];
-    [sexSwitch.rightView addSubview:fmaleLabel];
-    [mainScrollView addSubview:sexSwitch];
+    UIButton *sexButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    sexButton.frame = CGRectMake(95, sexLabel.frame.size.height+sexLabel.frame.origin.y, 200, 42);
+    sexButton.backgroundColor = [UIColor whiteColor];
+    sexButton.layer.cornerRadius = 5;
+    sexButton.clipsToBounds = YES;
+    [sexButton setTitleColor:COMMENTCOLOR forState:UIControlStateNormal];
+    [sexButton setTitle:@"男" forState:UIControlStateNormal];
+    [self.bgView addSubview:sexButton];
     
-    showDatePicker = NO;
     
-    datePicker = [[UIDatePicker alloc] initWithFrame:CGRectMake(10, SCREEN_HEIGHT, SCREEN_WIDTH - 20, 100)];
-    datePicker.locale = [[NSLocale alloc] initWithLocaleIdentifier:@"zh_CN"] ;
-    datePicker.datePickerMode = UIDatePickerModeDate;
-//    [mainScrollView addSubview:datePicker];
+    UIImageView *sexImageView = [[UIImageView alloc] init];
+    sexImageView.frame = CGRectMake(SCREEN_WIDTH - 38, sexButton.frame.origin.y+10, 20, 20);
+    [sexImageView setImage:[UIImage imageNamed:@"discovery_arrow"]];
+    [self.bgView addSubview:sexImageView];
     
-    NSDate *date = [datePicker date];
-    formatter = [[NSDateFormatter alloc] init];
-    [formatter setDateFormat:@"YYYY年MM月dd日"];
-    [birthdayButton setTitle:[formatter stringFromDate:date] forState:UIControlStateNormal];
+    CGFloat start = sexButton.frame.size.height+sexButton.frame.origin.y+26;
+    
+    if ([token length] > 0)
+    {
+        UILabel *passwordLabel = [[UILabel alloc] initWithFrame:CGRectMake(17, sexButton.frame.origin.y+sexButton.frame.size.height, 85, 42)];
+        passwordLabel.text = @"设置密码:";
+        passwordLabel.textColor = COMMENTCOLOR;
+        passwordLabel.backgroundColor = self.bgView.backgroundColor;
+        [self.bgView addSubview:passwordLabel];
+        
+        passwordTextField = [[MyTextField alloc] initWithFrame:CGRectMake(29, headerImageView.frame.origin.y+headerImageView.frame.size.height+27, 200, 42)];
+        passwordTextField.background = nil;
+        passwordTextField.tag = NAMETFTAG;
+        passwordTextField.delegate = self;
+        [self.bgView addSubview:passwordTextField];
+        
+        passwordTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
+        
+        start = passwordTextField.frame.size.height+passwordTextField.frame.origin.y+26;
+    }
+    
+    
+    
+
     
     UIButton *submitButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    submitButton.frame = CGRectMake(50, sexSwitch.frame.origin.y+sexSwitch.frame.size.height+45, SCREEN_WIDTH-100, 40);
+    submitButton.frame = CGRectMake(36.5, start, SCREEN_WIDTH-73, 40);
     submitButton.backgroundColor = [UIColor clearColor];
-    [submitButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)] forState:UIControlStateNormal];
+    [submitButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
     [submitButton setTitle:@"立即开始" forState:UIControlStateNormal];
     [submitButton addTarget:self action:@selector(submitClick) forControlEvents:UIControlEventTouchUpInside];
     [mainScrollView addSubview:submitButton];
@@ -307,7 +334,7 @@ UIActionSheetDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -348,7 +375,7 @@ UIActionSheetDelegate>
     NSString *url;
     if ([accountID length] > 0)
     {
-        NSString *userStr = @"simu";
+        NSString *userStr = @"";
         if ([[APService registrionID] length] > 0)
         {
             userStr = [APService registrionID];
@@ -415,7 +442,7 @@ UIActionSheetDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         

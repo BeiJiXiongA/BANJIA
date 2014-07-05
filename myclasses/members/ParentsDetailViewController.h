@@ -8,11 +8,6 @@
 
 #import "XDContentViewController.h"
 
-@protocol PareberDetailDelegate <NSObject>
-
--(void)updateListWith:(BOOL)update;
-
-@end
 
 @interface ParentsDetailViewController : XDContentViewController
 @property (nonatomic, strong) NSString *parentName;
@@ -21,5 +16,5 @@
 @property (nonatomic, assign) BOOL admin;
 @property (nonatomic, strong) NSString *headerImg;
 @property (nonatomic, strong) NSString *role;
-@property (nonatomic, strong) id<PareberDetailDelegate> memDel;
+@property (nonatomic, strong) NSString *studentName;
 @end

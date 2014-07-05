@@ -31,6 +31,7 @@
 UITableViewDelegate,
 UITextFieldDelegate,
 UIActionSheetDelegate,
+UIAlertViewDelegate,
 ChatDelegate,
 ReturnFunctionDelegate,
 FriendListDelegate>
@@ -86,19 +87,28 @@ FriendListDelegate>
         self.edgesForExtendedLayout =UIRectEdgeTop;
     }
     
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:FROMWHERE]isEqualToString:FROMCLASS])
+    {
+        self.view.backgroundColor = [UIColor blackColor];
+        self.stateView.frame = CGRectMake(0, 0, YSTART, 0);
+    }
+    
         
     db = [[OperatDB alloc] init];
-    self.bgView.backgroundColor = [UIColor whiteColor];
+    
     currentSec = 0;
     iseditting = NO;
     
     faceViewHeight = 0;
     
     UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    moreButton.frame = CGRectMake(SCREEN_WIDTH-60, 6, 50, 32);
+    moreButton.frame = CGRectMake(SCREEN_WIDTH-CORNERMORERIGHT, 6, 50, 32);
     [moreButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
     [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
-    [self.navigationBarView addSubview:moreButton];
+    if (![toID isEqualToString:OurTeamID])
+    {
+        [self.navigationBarView addSubview:moreButton];
+    }
     
     inputSize = CGSizeMake(250, 30);
     
@@ -108,8 +118,8 @@ FriendListDelegate>
         self.view.backgroundColor = [UIColor blackColor];
     }
     
-    fromImage = [Tools getImageFromImage:[UIImage imageNamed:@"f"] andInsets:UIEdgeInsetsMake(35, 40, 17, 40)];
-    toImage = [Tools getImageFromImage:[UIImage imageNamed:@"t"] andInsets:UIEdgeInsetsMake(35, 40, 17, 40)];
+    fromImage = [Tools getImageFromImage:[UIImage imageNamed:@"f"] andInsets:UIEdgeInsetsMake(40, 40, 17, 40)];
+    toImage = [Tools getImageFromImage:[UIImage imageNamed:@"t2"] andInsets:UIEdgeInsetsMake(35, 40, 17, 40)];
     
     if (imageUrl && [imageUrl length]>10)
     {
@@ -160,18 +170,22 @@ FriendListDelegate>
 
 -(void)moreClick
 {
-    if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fid":toID} andTableName:FRIENDSTABLE] count] > 0)
-    {
-        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"解除好友关系",@"举报此人", nil];
+//    if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fid":toID} andTableName:FRIENDSTABLE] count] > 0)
+//    {
+//        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"解除好友关系",@"举报此人", nil];
+//        ac.tag = MoreACTag;
+//        [ac showInView:self.bgView];
+//    }
+//    else
+//    {
+//        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"添加为好友",@"举报此人", nil];
+//        ac.tag = MoreACTag;
+//        [ac showInView:self.bgView];
+//    }
+    
+        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"举报此人", nil];
         ac.tag = MoreACTag;
         [ac showInView:self.bgView];
-    }
-    else
-    {
-        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"添加为好友",@"举报此人", nil];
-        ac.tag = MoreACTag;
-        [ac showInView:self.bgView];
-    }
 }
 
 -(void)viewWillAppear:(BOOL)animated
@@ -195,10 +209,13 @@ FriendListDelegate>
     
     inputTabBar.returnFunDel = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:inputTabBar];
-    
-    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
-    
+        
     [self uploadLastViewTime];
+}
+
+-(void)dealloc
+{
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
 }
 
 -(void)unShowSelfViewController
@@ -253,24 +270,24 @@ FriendListDelegate>
                             [chatDict setObject:name forKey:@"fname"];
                             [chatDict setObject:@"f" forKey:@"direct"];
                         }
-                        
-                        NSArray *dataMsgArray = [db findSetWithKey:@"mid" andValue:[dict objectForKey:@"_id"] andTableName:@"chatMsg"];
-                        if ([dataMsgArray count] <= 0)
+                
+                        NSArray *dataMsgArray = [db findSetWithDictionary:@{@"mid":[dict objectForKey:@"_id"],@"userid":[Tools user_id]} andTableName:CHATTABLE];
+                        if ([dataMsgArray count] == 0)
                         {
-                            [db insertRecord:chatDict andTableName:@"chatMsg"];
+                            [db insertRecord:chatDict andTableName:CHATTABLE];
                         }
-                        else if ([[[dataMsgArray firstObject] objectForKey:@"content"] isEqualToString:@"您有一条新的邀请"]||
-                                 [[[dataMsgArray firstObject] objectForKey:@"content"] isEqualToString:@"您有一条新的消息"])
+                        else if ([[[dataMsgArray firstObject] objectForKey:@"content"] isEqualToString:@"给您发来一条新消息"]||
+                                 [[[dataMsgArray firstObject] objectForKey:@"content"] isEqualToString:@"给您发来一条新邀请"])
                         {
                             [db deleteRecordWithDict:@{@"mid":[dict objectForKey:@"_id"]} andTableName:CHATTABLE];
-                            [db insertRecord:chatDict andTableName:@"chatMsg"];
+                            [db insertRecord:chatDict andTableName:CHATTABLE];
                         }
                     }
                     [self dealNewChatMsg:nil];
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -304,7 +321,7 @@ FriendListDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         [request setFailedBlock:^{
@@ -408,9 +425,10 @@ FriendListDelegate>
 -(void)dealNewChatMsg:(NSDictionary *)dict
 {
     [messageArray removeAllObjects];
-    [messageArray addObjectsFromArray:[db findChatLogWithUid:[Tools user_id] andOtherId:toID andTableName:@"chatMsg"]];
-    if ([[dict objectForKey:@"content"] isEqualToString:@"您有一条新的邀请"]||
-        [[dict objectForKey:@"content"] isEqualToString:@"您有一条新的消息"])
+    [messageArray addObjectsFromArray:[db findChatLogWithUid:[Tools user_id] andOtherId:toID andTableName:CHATTABLE]];
+    
+    if ([[dict objectForKey:@"content"] isEqualToString:@"给您发来一条新消息"]||
+        [[dict objectForKey:@"content"] isEqualToString:@"给您发来一条新邀请"])
     {
         [self getChatLog];
     }
@@ -419,7 +437,7 @@ FriendListDelegate>
         for (int i=0; i<[messageArray count]; ++i)
         {
             NSDictionary *tmpDict = [messageArray objectAtIndex:i];
-            [db updeteKey:@"readed" toValue:@"1" withParaDict:@{@"fid":[tmpDict objectForKey:@"fid"],@"userid":[Tools user_id]} andTableName:@"chatMsg"];
+            [db updeteKey:@"readed" toValue:@"1" withParaDict:@{@"fid":[tmpDict objectForKey:@"fid"],@"userid":[Tools user_id]} andTableName:CHATTABLE];
         }
         
         [messageTableView reloadData];
@@ -447,19 +465,21 @@ FriendListDelegate>
 {
     if (actionSheet.tag == MoreACTag)
     {
+//        if (buttonIndex == 0)
+//        {
+//            if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fid":toID} andTableName:FRIENDSTABLE] count] > 0)
+//            {
+//                UIAlertView *al = [[UIAlertView alloc] initWithTitle:nil message:[NSString stringWithFormat:@"您确定与%@解除好友关系吗？",name] delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定解除", nil];
+//                al.tag = 3333;
+//                [al show];
+//            }
+//            else
+//            {
+//                //添加为好友
+//                [self addFriend];
+//            }
+//        }
         if (buttonIndex == 0)
-        {
-            if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fid":toID} andTableName:FRIENDSTABLE] count] > 0)
-            {
-                [self releaseFriend];
-            }
-            else
-            {
-                //添加为好友
-                [self addFriend];
-            }
-        }
-        else if (buttonIndex == 1)
         {
             ReportViewController *reportVC = [[ReportViewController alloc] init];
             reportVC.reportType = @"people";
@@ -492,6 +512,18 @@ FriendListDelegate>
         }
     }
 }
+
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (alertView.tag == 3333)
+    {
+        if (buttonIndex == 1)
+        {
+            [self releaseFriend];
+        }
+    }
+}
+
 -(void)addFriend
 {
     if ([Tools NetworkReachable])
@@ -511,7 +543,7 @@ FriendListDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -553,7 +585,7 @@ FriendListDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -690,6 +722,7 @@ FriendListDelegate>
         cell = [[MessageCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:messageCell];
     }
     
+    cell.timeLabel.backgroundColor = RGB(203, 203, 203, 1);
     NSDictionary *dict = [messageArray objectAtIndex:indexPath.row];
     CGFloat messageBgY = 30;
     CGFloat messageTfY = 5;
@@ -719,7 +752,7 @@ FriendListDelegate>
             NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
             cell.timeLabel.text = timeStr;
             
-            cell.chatBg.frame = CGRectMake(55, messageBgY-10, size.width+20, size.height+20);
+            cell.chatBg.frame = CGRectMake(55, messageBgY, size.width+20, size.height+20);
             [cell.chatBg setImage:fromImage];
             
             CGFloat he = 0;
@@ -729,6 +762,7 @@ FriendListDelegate>
             }
             
             cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x + 10,cell.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+10+he);
+//            cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x + 10,cell.chatBg.frame.origin.y + messageTfY,size.width+12, 0);
             cell.messageTf.text = [[dict objectForKey:@"content"] emojizedString];
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
             
@@ -737,6 +771,7 @@ FriendListDelegate>
                 
                 NSString *msgContent = [dict objectForKey:@"content"];
                 NSRange range = [msgContent rangeOfString:@"$!#"];
+                
                 cell.messageTf.text = [msgContent substringFromIndex:range.location+range.length];
                 
                 size = [self sizeWithText:[[msgContent substringFromIndex:range.location+range.length] emojizedString]];
@@ -804,6 +839,7 @@ FriendListDelegate>
             [cell.chatBg setImage:toImage];
             
             cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x+ 5-x,cell.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+20);
+//            cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x+ 5-x,cell.chatBg.frame.origin.y + messageTfY, size.width+12, 0);
             cell.messageTf.text = [[dict objectForKey:@"content"] emojizedString];
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
             cell.button.hidden = YES;
@@ -830,6 +866,9 @@ FriendListDelegate>
             [Tools fillImageView:cell.headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERBG];
         }
     }
+    cell.timeLabel.layer.cornerRadius = cell.timeLabel.frame.size.height/2;
+    cell.timeLabel.clipsToBounds = YES;
+    cell.timeLabel.textColor = [UIColor whiteColor];
     cell.headerImageView.layer.cornerRadius = 5;
     cell.headerImageView.clipsToBounds = YES;
     if (indexPath.row == 0)
@@ -852,17 +891,9 @@ FriendListDelegate>
 
 -(BOOL)isInThisClass:(NSString *)classId
 {
-    NSString *key = [TAGSARRAYKEY MD5Hash];
-    NSData *tagsData = [FTWCache objectForKey:key];
-    NSString *tagsString = [[NSString alloc] initWithData:tagsData encoding:NSUTF8StringEncoding];
-    
-    NSArray *tagsArray = [tagsString componentsSeparatedByString:@","];
-    for (int i=0; i<[tagsArray count]; ++i)
+    if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"classid":classId} andTableName:MYCLASSTABLE] count]> 0)
     {
-        if ([classId isEqualToString:[tagsArray objectAtIndex:i]])
-        {
-            return YES;
-        }
+        return YES;
     }
     return NO;
 }
@@ -930,39 +961,35 @@ FriendListDelegate>
 {
     if ([Tools NetworkReachable])
     {
-        NSDate *date = [NSDate date];
-        NSTimeInterval timeinterval = [date timeIntervalSince1970];
-        NSString *str = [NSString stringWithFormat:@"%@%.0f",[Tools user_id],timeinterval];
-        NSData *data = [str dataUsingEncoding:NSUTF8StringEncoding];
-        NSString *messageID = [data base64Encoding];
-        
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
                                                                       @"t_id":toID,
-                                                                      @"m_id":messageID,
                                                                       @"content":msgContent
                                                                       } API:CREATE_CHAT_MSG];
         [request setCompletionBlock:^{
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"chat responsedict %@",responseString);
+            DDLOG(@"chat responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 NSMutableDictionary *chatDict = [[NSMutableDictionary alloc] initWithCapacity:0];
+                NSString *messageID = [[responseDict objectForKey:@"data"] objectForKey:@"m_id"];
+                
                 [chatDict setObject:messageID forKey:@"mid"];
                 [chatDict setObject:msgContent forKey:@"content"];
                 [chatDict setObject:[Tools user_id] forKey:@"userid"];
                 [chatDict setObject:[Tools user_id] forKey:@"fid"];
                 [chatDict setObject:[Tools user_name] forKey:@"fname"];
                 [chatDict setObject:@"null" forKey:@"ficon"];
-                [chatDict setObject:[NSString stringWithFormat:@"%d",[[responseDict objectForKey:@"data"] integerValue]] forKey:@"time"];
+                [chatDict setObject:[NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"] objectForKey:@"time"] integerValue]] forKey:@"time"];
                 [chatDict setObject:@"t" forKey:@"direct"];
                 [chatDict setObject:@"text" forKey:@"msgType"];
                 [chatDict setObject:toID forKey:@"tid"];
                 [chatDict setObject:@"1" forKey:@"readed"];
-                if ([[db findSetWithKey:@"mid" andValue:messageID andTableName:@"chatMsg"] count] <= 0)
+                
+                if ([[db findSetWithDictionary:@{@"mid":messageID,@"userid":[Tools user_id]} andTableName:CHATTABLE] count] == 0)
                 {
-                    [db insertRecord:chatDict andTableName:@"chatMsg"];
+                    [db insertRecord:chatDict andTableName:CHATTABLE];
                 }
                 if ([self.chatVcDel respondsToSelector:@selector(updateChatList:)])
                 {
@@ -972,7 +999,7 @@ FriendListDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         

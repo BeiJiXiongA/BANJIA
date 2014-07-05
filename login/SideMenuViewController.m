@@ -39,6 +39,7 @@
     UITableView *buttonTableView;
     
     NSInteger selectIndex;
+    UILabel *nameLabel;
 }
 @end
 
@@ -84,12 +85,10 @@
     self.imageView.userInteractionEnabled = YES;
     [self.imageView addGestureRecognizer:headerTap];
     
-    NSString *name = [Tools user_name];
     
-    UILabel *nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, self.imageView.frame.size.height+self.imageView.frame.origin.y+2, 150, 30)];
+    nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, self.imageView.frame.size.height+self.imageView.frame.origin.y+2, 150, 30)];
     nameLabel.font = [UIFont systemFontOfSize:17];
     nameLabel.backgroundColor = [UIColor clearColor];
-    nameLabel.text = name;
     nameLabel.textColor = [UIColor whiteColor];
     nameLabel.textAlignment = NSTextAlignmentCenter;
     [self.bgView addSubview:nameLabel];
@@ -100,6 +99,7 @@
     buttonTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 166, 180, [menuNamesArray count] * 40) style:UITableViewStylePlain];
     buttonTableView.delegate = self;
     buttonTableView.dataSource = self;
+    buttonTableView.scrollEnabled = NO;
     buttonTableView.separatorColor = RGB(80, 80, 80, 1);
     buttonTableView.backgroundColor = [UIColor clearColor];
     [self.bgView addSubview:buttonTableView];
@@ -228,6 +228,7 @@
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    nameLabel.text = [Tools user_name];
     [buttonTableView reloadData];
 }
 

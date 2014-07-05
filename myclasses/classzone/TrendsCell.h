@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "MyButton.h"
+#import "PersonDetailViewController.h"
 
 #define ColumnPerRow  8
 #define PraiseW   31
@@ -47,5 +48,7 @@
 @protocol NameButtonDel <NSObject>
 
 -(void)nameButtonClick:(NSDictionary *)dict;
-
+@optional
+-(void)showPersonDetail:(NSDictionary *)dict;
+-(void)cellCommentDiary:(NSDictionary *)dict;
 @end

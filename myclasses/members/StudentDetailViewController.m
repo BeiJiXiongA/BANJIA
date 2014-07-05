@@ -31,7 +31,6 @@
 @interface StudentDetailViewController ()<UIAlertViewDelegate,
 UITableViewDataSource,
 UITableViewDelegate,
-PareberDetailDelegate,
 SetStudentObject,
 MFMessageComposeViewControllerDelegate,
 UIActionSheetDelegate>
@@ -98,14 +97,14 @@ UIActionSheetDelegate>
     role = @"students";
     
     UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    moreButton.frame = CGRectMake(SCREEN_WIDTH-60, 6, 50, 32);
+    moreButton.frame = CGRectMake(SCREEN_WIDTH-CORNERMORERIGHT, 6, 50, 32);
     moreButton.hidden = YES;
     [moreButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
     [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
-    if (![studentID isEqual:[NSNull null]])
+    if (![studentID isEqual:[NSNull null]] && [studentID length] > 0)
     {
         [self.navigationBarView addSubview:moreButton];
-        if ([studentID length]>10)
+        if ([studentID length] > 10)
         {
             if (![studentID isEqualToString:[Tools user_id]])
             {
@@ -185,7 +184,6 @@ UIActionSheetDelegate>
     {
         [pArray addObjectsFromArray:tmpParentsArray];
     }
-    
 }
 
 - (void)didReceiveMemoryWarning
@@ -213,7 +211,7 @@ UIActionSheetDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -306,7 +304,7 @@ UIActionSheetDelegate>
     {
         if ([studentID length] > 10)
         {
-            if (indexPath.row < 3)
+            if (indexPath.row < 2)
             {
                 return 40;
             }
@@ -330,7 +328,7 @@ UIActionSheetDelegate>
     {
         if ([studentID length] > 10)
         {
-            return 4;
+            return 3;
         }
     }
     return 0;
@@ -421,7 +419,7 @@ UIActionSheetDelegate>
         {
             return nil;
         }
-        if (indexPath.row < 3)
+        if (indexPath.row < 2)
         {
             cell.nameLabel.frame = CGRectMake(15, 5, 100, 30);
             cell.nameLabel.textColor = TITLE_COLOR;
@@ -434,11 +432,6 @@ UIActionSheetDelegate>
                 cell.contentLabel.text = phoneNum;
             }
             else if(indexPath.row == 1)
-            {
-                cell.nameLabel.text = @"QQ";
-                cell.contentLabel.text = qqnum;
-            }
-            else if(indexPath.row == 2)
             {
                 cell.nameLabel.text = @"生日";
                 cell.contentLabel.text = birth;
@@ -502,7 +495,6 @@ UIActionSheetDelegate>
             parentDetail.title = [dict objectForKey:@"title"];
             parentDetail.headerImg = [dict objectForKey:@"img_icon"];
             parentDetail.admin = NO;
-            parentDetail.memDel = self;
             parentDetail.role = [dict objectForKey:@"role"];
             [self.navigationController pushViewController:parentDetail animated:YES];
         }
@@ -514,7 +506,6 @@ UIActionSheetDelegate>
             parentDetail.title = [dict objectForKey:@"title"];
             parentDetail.headerImg = [dict objectForKey:@"img_icon"];
             parentDetail.admin = NO;
-            parentDetail.memDel = self;
             parentDetail.role = [dict objectForKey:@"role"];
             [self.navigationController pushViewController:parentDetail animated:YES];
         }
@@ -538,18 +529,9 @@ UIActionSheetDelegate>
     if (update)
     {
         [pArray removeAllObjects];
-        NSArray *tmpParentsArray = [db findSetWithDictionary:@{@"classid":classID,@"role":@"parents",@"re_name":studentName} andTableName:CLASSMEMBERTABLE];
-        if ([tmpParentsArray count] > 0)
+        if ([self.memDel respondsToSelector:@selector(updateListWith:)])
         {
-            [pArray addObjectsFromArray:tmpParentsArray];
-        }
-        else
-        {
-            if ([self.memDel respondsToSelector:@selector(updateListWith:)])
-            {
-                [self.memDel updateListWith:YES];
-            }
-            [self.navigationController popViewControllerAnimated:YES];
+            [self.memDel updateListWith:YES];
         }
     }
 }
@@ -575,7 +557,6 @@ UIActionSheetDelegate>
             parentDetail.title = [dict objectForKey:@"title"];
             parentDetail.headerImg = [dict objectForKey:@"img_icon"];
             parentDetail.admin = NO;
-            parentDetail.memDel = self;
             parentDetail.role = [dict objectForKey:@"role"];
             [self.navigationController pushViewController:parentDetail animated:YES];
         }
@@ -587,7 +568,6 @@ UIActionSheetDelegate>
             parentDetail.title = [dict objectForKey:@"title"];
             parentDetail.headerImg = [dict objectForKey:@"img_icon"];
             parentDetail.admin = NO;
-            parentDetail.memDel = self;
             parentDetail.role = [dict objectForKey:@"role"];
             [self.navigationController pushViewController:parentDetail animated:YES];
         }
@@ -615,7 +595,6 @@ UIActionSheetDelegate>
             parentDetail.title = [dict objectForKey:@"title"];
             parentDetail.headerImg = [dict objectForKey:@"img_icon"];
             parentDetail.admin = NO;
-            parentDetail.memDel = self;
             parentDetail.role = [dict objectForKey:@"role"];
             [self.navigationController pushViewController:parentDetail animated:YES];
         }
@@ -627,7 +606,6 @@ UIActionSheetDelegate>
             parentDetail.title = [dict objectForKey:@"title"];
             parentDetail.headerImg = [dict objectForKey:@"img_icon"];
             parentDetail.admin = NO;
-            parentDetail.memDel = self;
             parentDetail.role = [dict objectForKey:@"role"];
             [self.navigationController pushViewController:parentDetail animated:YES];
         }
@@ -714,7 +692,9 @@ UIActionSheetDelegate>
 
 -(void)moreClick
 {
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
+    NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
+    int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+    if (userAdmin == 2)
     {
         if ([otherUserAdmin integerValue] == 0)
         {
@@ -742,14 +722,16 @@ UIActionSheetDelegate>
 {
     if (actionSheet.tag == 3333)
     {
-        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
+        NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
+        int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+        if (userAdmin == 2)
         {
             if (buttonIndex == 0)
             {
                 if ([otherUserAdmin integerValue] == 0)
                 {
                     //任命为普通管理员
-                    UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:[NSString stringWithFormat:@"您确定要任命%@为管理员吗？",studentName] delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
+                    UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:[NSString stringWithFormat:@"设置为管理员后，%@可以进行处理班级申请、审核班级日志、发布班级公告等操作。",studentName] delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
                     al.tag = SETADMINTAG;
                     [al show];
                 }
@@ -839,21 +821,16 @@ UIActionSheetDelegate>
             DDLOG(@"appointadmin responsedict %@",responseString);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                if ([self.memDel respondsToSelector:@selector(updateListWith:)])
-                {
-                    [self.memDel updateListWith:YES];
-                }
-                
                 if ([db updeteKey:@"admin" toValue:@"1" withParaDict:@{@"classid":classID,@"uid":studentID} andTableName:CLASSMEMBERTABLE])
                 {
                     DDLOG(@"appoint %@ admin success!",studentName);
                 }
-                
-                [self.navigationController popViewControllerAnimated:YES];
+                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
+                [self.navigationController popToRootViewControllerAnimated:YES];
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -884,19 +861,16 @@ UIActionSheetDelegate>
             DDLOG(@"rmadmin responsedict %@",responseString);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                if ([self.memDel respondsToSelector:@selector(updateListWith:)])
-                {
-                    [self.memDel updateListWith:YES];
-                }
                 if ([db updeteKey:@"admin" toValue:@"0" withParaDict:@{@"classid":classID,@"uid":studentID} andTableName:CLASSMEMBERTABLE])
                 {
                     DDLOG(@"rm %@ admin success!",studentName);
                 }
-                [self.navigationController popViewControllerAnimated:YES];
+                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
+                [self.navigationController popToRootViewControllerAnimated:YES];
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -929,15 +903,36 @@ UIActionSheetDelegate>
             DDLOG(@"kickuser responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                if ([self.memDel respondsToSelector:@selector(updateListWith:)])
+//                for (int i=0 ; i<[pArray count]; i++)
+//                {
+//                    NSDictionary *pDict = [pArray objectAtIndex:i];
+//                    if ([db deleteRecordWithDict:@{@"uid":[pDict objectForKey:@"uid"],@"class":classID,@"re_id":studentID} andTableName:CLASSMEMBERTABLE])
+//                    {
+//                        DDLOG(@"delete stu parents success");
+//                    }
+//                }
+                
+                if ([pArray count] > 0)
                 {
-                    [self.memDel updateListWith:YES];
+                    if ([db updeteKey:@"uid" toValue:@"" withParaDict:@{@"classid":classID,@"uid":studentID} andTableName:CLASSMEMBERTABLE])
+                    {
+                        DDLOG(@"update stu success with parents");
+                    }
                 }
-                [self.navigationController popViewControllerAnimated:YES];
+                else
+                {
+                    if ([db deleteRecordWithDict:@{@"classid":classID,@"uid":studentID} andTableName:CLASSMEMBERTABLE])
+                    {
+                        DDLOG(@"delete stu success without parents");
+                    }
+                }
+                
+                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
+                [self.navigationController popToRootViewControllerAnimated:YES];
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -1008,7 +1003,7 @@ UIActionSheetDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         

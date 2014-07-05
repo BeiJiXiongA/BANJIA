@@ -79,7 +79,7 @@ UIActionSheetDelegate>
     
     
     moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    moreButton.frame = CGRectMake(SCREEN_WIDTH-60, 6, 50, 32);
+    moreButton.frame = CGRectMake(SCREEN_WIDTH-CORNERMORERIGHT, 6, 50, 32);
     [moreButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
     [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:moreButton];
@@ -196,19 +196,22 @@ UIActionSheetDelegate>
 {
     if (fromClass)
     {
-        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2 && [byID isEqualToString:[Tools user_id]])
+        OperatDB *db = [[OperatDB alloc] init];
+        NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
+        int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+        if (userAdmin == 2 && [byID isEqualToString:[Tools user_id]])
         {
             UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"删除", nil];
             ac.tag = 3333;
             [ac showInView:self.bgView];
         }
-        else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2 && ![byID isEqualToString:[Tools user_id]])
+        else if (userAdmin == 2 && ![byID isEqualToString:[Tools user_id]])
         {
             UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"删除",@"举报", nil];
             ac.tag = 3333;
             [ac showInView:self.bgView];
         }
-        else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] != 2 && ![byID isEqualToString:[Tools user_id]])
+        else if (userAdmin != 2 && ![byID isEqualToString:[Tools user_id]])
         {
             UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"举报", nil];
             ac.tag = 3333;
@@ -238,14 +241,17 @@ UIActionSheetDelegate>
     {
         if (fromClass)
         {
-            if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2 && [byID isEqualToString:[Tools user_id]])
+            OperatDB *db = [[OperatDB alloc] init];
+            NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
+            int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+            if (userAdmin == 2 && [byID isEqualToString:[Tools user_id]])
             {
                 if (buttonIndex == 0)
                 {
                     [self deleteNotice];
                 }
             }
-            else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2 && ![byID isEqualToString:[Tools user_id]])
+            else if (userAdmin == 2 && ![byID isEqualToString:[Tools user_id]])
             {
                 if (buttonIndex == 0)
                 {
@@ -260,7 +266,7 @@ UIActionSheetDelegate>
                     [self.navigationController pushViewController:reportVC animated:YES];
                 }
             }
-            else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] != 2 && ![byID isEqualToString:[Tools user_id]])
+            else if (userAdmin != 2 && ![byID isEqualToString:[Tools user_id]])
             {
                 if (buttonIndex == 0)
                 {
@@ -321,7 +327,7 @@ UIActionSheetDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -364,7 +370,7 @@ UIActionSheetDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -678,7 +684,7 @@ UIActionSheetDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         

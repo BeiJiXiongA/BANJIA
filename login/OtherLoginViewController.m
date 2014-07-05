@@ -7,7 +7,7 @@
 //
 
 #import "OtherLoginViewController.h"
-#import "FillInfoViewController.h"
+#import "FillInfo2ViewController.h"
 #import "SideMenuViewController.h"
 #import "MyClassesViewController.h"
 #import "HomeViewController.h"
@@ -158,7 +158,7 @@ static int loginID;
 -(void)loginWithName:(NSString *)name   //AccountID:(NSString *)accountID accountType:(NSString *)accountType andName:(NSString *)name
 {
     
-    NSString *userStr = @"simu";
+    NSString *userStr = @"";
     if ([[APService registrionID] length] > 0)
     {
         userStr = [APService registrionID];
@@ -175,6 +175,7 @@ static int loginID;
                                                                       @"c_os":[Tools device_os],
                                                                       @"d_type":@"iOS",
                                                                       @"registrationID":userStr,
+                                                                      @"n_name":name,
                                                                       @"r_name":name,
                                                                       @"sex":@"1",
                                                                       @"reg":[NSString stringWithFormat:@"%d",reg]
@@ -217,33 +218,24 @@ static int loginID;
                 
                 [ud synchronize];
                 
-                if (reg == 1)
-                {
-                    FillInfoViewController *fillInfo = [[FillInfoViewController alloc] init];
-                    fillInfo.headerIcon = [accountDict objectForKey:@"header_icon"];
-                    fillInfo.accountID = [accountDict objectForKey:@"a_id"];
-                    fillInfo.accountType = [accountDict objectForKey:@"a_type"];
-                    fillInfo.account = @"1";
-                    fillInfo.nickName = [accountDict objectForKey:@"nickname"];
-                    [self.navigationController pushViewController:fillInfo animated:YES];
-                }
-                else
-                {
+                SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
+                HomeViewController *homeViewController = [[HomeViewController alloc] init];
+                KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:homeViewController];
+                JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:homeNav menuController:sideMenuViewController];
+                [self.navigationController presentViewController:sideMenu animated:YES completion:^{
                     
-                    SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
-                    HomeViewController *homeViewController = [[HomeViewController alloc] init];
-                    KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:homeViewController];
-                    JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:homeNav menuController:sideMenuViewController];
-                    [self.navigationController presentViewController:sideMenu animated:YES completion:^{
-                        
-                    }];
-                }
+                }];
                 
             }
             else if([[responseDict objectForKey:@"code"] intValue] == 0 && [[[responseDict objectForKey:@"message"] objectForKey:@"NO_THE_ACCOUNT"] length]>0)
             {
-                reg = 1;
-                [self  loginWithName:name];
+                FillInfo2ViewController *fillInfo = [[FillInfo2ViewController alloc] init];
+                fillInfo.headerIcon = [accountDict objectForKey:@"header_icon"];
+                fillInfo.accountID = [accountDict objectForKey:@"a_id"];
+                fillInfo.accountType = [accountDict objectForKey:@"a_type"];
+                fillInfo.account = @"1";
+                fillInfo.nickName = [accountDict objectForKey:@"nickname"];
+                [self.navigationController pushViewController:fillInfo animated:YES];
             }
         }];
         

@@ -10,12 +10,16 @@
 #import "Header.h"
 
 @implementation PersonalSettingCell
-@synthesize headerImageView,nameLabel,objectsLabel,authenticationSign,topImageView;
+@synthesize headerImageView,nameLabel,objectsLabel,authenticationSign,topImageView,arrowImageView,bgView;
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
     if (self) {
         // Initialization code
+        
+        bgView = [[UIView alloc] init];
+        [self.contentView addSubview:bgView];
+        
         topImageView = [[UIImageView alloc] initWithFrame:self.frame];
         topImageView.backgroundColor = [UIColor clearColor];
         [self.contentView addSubview:topImageView];
@@ -42,6 +46,11 @@
         authenticationSign = [[UIImageView alloc] init];
         authenticationSign.backgroundColor = [UIColor clearColor];
         [self.contentView addSubview:authenticationSign];
+        
+        arrowImageView = [[UIImageView alloc] init];
+        [self.contentView addSubview:arrowImageView];
+        
+        
     }
     return self;
 }

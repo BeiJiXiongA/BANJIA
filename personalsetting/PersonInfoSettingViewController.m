@@ -11,6 +11,7 @@
 #import "UIImage+Blur.h"
 #import "RelatedCell.h"
 #import "OperatDB.h"
+#import "EditNameViewController.h"
 
 #define SEXTAG 6666
 
@@ -19,7 +20,8 @@ UITextFieldDelegate,
 UIActionSheetDelegate,
 UITableViewDataSource,
 UITableViewDelegate,
-UIAlertViewDelegate>
+UIAlertViewDelegate,
+EditNameDone>
 {
     UIImagePickerController *imagePickerController;
     
@@ -42,6 +44,9 @@ UIAlertViewDelegate>
     NSString *birth;
     UIImage *headerImage;
     
+    NSString *userName;
+    
+    NSString *uidNum;
     
     NSMutableDictionary *userInfoDict;
 }
@@ -68,7 +73,12 @@ UIAlertViewDelegate>
     imageUsed = @"";
     sex = [Tools user_sex];
     birth = [Tools user_birth];
-    headerImage = [UIImage imageNamed:[Tools header_image]];
+    userName = [Tools user_name];
+    
+    if ([[Tools header_image] isKindOfClass:[NSString class]])
+    {
+        headerImage = [UIImage imageNamed:[Tools header_image]];
+    }
     
     cellNameArray = @[@"我的头像",@"姓名",@"生日",@"性别",@"手机号"];
     
@@ -171,7 +181,8 @@ UIAlertViewDelegate>
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
                                                                       @"birth":[[NSString stringWithFormat:@"%@",datePicker.date] substringToIndex:10],
-                                                                      @"sex":@"1"}
+                                                                      @"sex":sex,
+                                                                      @"r_name":userName}
                                                                 API:MB_SETUSERINFO];
         
         [request setCompletionBlock:^{
@@ -183,13 +194,14 @@ UIAlertViewDelegate>
             {
                 [[NSUserDefaults standardUserDefaults] setObject:[[NSString stringWithFormat:@"%@",datePicker.date] substringToIndex:10] forKey:BIRTH];
                 [[NSUserDefaults standardUserDefaults] setObject:sex forKey:USERSEX];
+                [[NSUserDefaults standardUserDefaults] setObject:userName forKey:USERNAME];
                 [[NSUserDefaults standardUserDefaults] synchronize];
-                
+                [[NSNotificationCenter defaultCenter] postNotificationName:CHANGEHEADERICON object:nil];
                 [Tools showTips:@"修改成功" toView:self.bgView];
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
             
         }];
@@ -264,6 +276,7 @@ UIAlertViewDelegate>
         }
         else
         {
+//            [SetImageTools fillHeaderImage:cell.iconImageView withUserid:[Tools user_id] imageType:@"img_icon" defultImage:HEADERICON];
             [Tools fillImageView:cell.iconImageView withImageFromURL:[Tools header_image] andDefault:HEADERICON];
         }
     }
@@ -271,9 +284,9 @@ UIAlertViewDelegate>
     {
         cell.nametf.hidden = NO;
         
-        if ([Tools user_name])
+        if ([userName length] > 0)
         {
-            cell.nametf.text = [Tools user_name];
+            cell.nametf.text = userName;
         }
         else
         {
@@ -339,6 +352,10 @@ UIAlertViewDelegate>
     else if (indexPath.row == 1)
     {
         //姓名
+        EditNameViewController *editNameViewController = [[EditNameViewController alloc] init];
+        editNameViewController.name = userName;
+        editNameViewController.editnameDoneDel = self;
+        [self.navigationController pushViewController:editNameViewController animated:YES];
         
     }
     else if (indexPath.row == 2)
@@ -362,11 +379,17 @@ UIAlertViewDelegate>
     
 }
 
+-(void)editNameDone:(NSString *)name
+{
+    userName = name;
+    [personInfoTableView reloadData];
+}
+
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
     if (alertView.tag == SEXTAG)
     {
-        if (buttonIndex == 1)
+        if (buttonIndex ==1)
         {
             sex = @"1";
         }
@@ -456,15 +479,19 @@ UIAlertViewDelegate>
                 
                 if (![[dataDict objectForKey:@"img_icon"] isEqual:[NSNull null]])
                 {
-                    if ([[dataDict objectForKey:@"img_icon"] length] > 10)
+                    if ([[dataDict objectForKey:@"img_icon"] isKindOfClass:[NSString class]])
                     {
                         [userInfoDict setObject:[dataDict objectForKey:@"img_icon"] forKey:@"img_icon"];
                     }
+//                    else
+//                    {
+//                        uidNum = [NSString stringWithFormat:@"%d",[[dataDict objectForKey:@"img_icon"] integerValue]];
+//                    }
                 }
                 
                 if (![[dataDict objectForKey:@"img_kb"] isEqual:[NSNull null]])
                 {
-                    if ([[dataDict objectForKey:@"img_kb"] length] > 10)
+                    if ([[dataDict objectForKey:@"img_kb"] isKindOfClass:[NSString class]])
                     {
                         [userInfoDict setObject:[dataDict objectForKey:@"img_kb"] forKey:@"img_kb"];
                     }
@@ -491,12 +518,12 @@ UIAlertViewDelegate>
                 if ([db insertRecord:userInfoDict andTableName:USERINFO])
                 {
                     DDLOG(@"insert userinfo success!");
-                    [personInfoTableView reloadData];
                 }
+                 [personInfoTableView reloadData];
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -632,12 +659,12 @@ UIAlertViewDelegate>
                     
                     [[NSUserDefaults standardUserDefaults] synchronize];
                     
-                    [[NSNotificationCenter defaultCenter] postNotificationName:@"changeicon" object:nil];
+                    [[NSNotificationCenter defaultCenter] postNotificationName:CHANGEHEADERICON object:nil];
                 }
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         

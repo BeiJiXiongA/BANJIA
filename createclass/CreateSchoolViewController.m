@@ -13,7 +13,7 @@
 #import "AreasViewController.h"
 #import "TrendsCell.h"
 #import "SelectSchoolLevelViewController.h"
-
+#import "SchoolInfoViewController.h"
 @interface CreateSchoolViewController ()<
 UITableViewDataSource,
 UITableViewDelegate,
@@ -197,7 +197,7 @@ UITextFieldDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
             
         }];
@@ -456,16 +456,27 @@ UITextFieldDelegate>
             DDLOG(@"createclass responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                NSString *schoolID = [responseDict objectForKey:@"data"];
-                CreateClassViewController *createClassViewController = [[CreateClassViewController alloc] init];
-                createClassViewController.schoolName = ((MyTextField *)[searchSchoolTableView viewWithTag:3333]).text;
-                createClassViewController.schoolLevel = levelValue;
-                createClassViewController.schoollID = schoolID;
-                [self.navigationController pushViewController:createClassViewController animated:YES];
+                
+                if([[[NSUserDefaults standardUserDefaults] objectForKey:SEARCHSCHOOLTYPE] isEqualToString:BINDCLASSTOSCHOOL])
+                {
+                    SchoolInfoViewController *schoolInfo = [[SchoolInfoViewController alloc] init];
+                    schoolInfo.schoolid = [responseDict objectForKey:@"data"];
+                    schoolInfo.schoolName = ((MyTextField *)[searchSchoolTableView viewWithTag:3333]).text;
+                    [self.navigationController pushViewController:schoolInfo animated:YES];
+                }
+                else
+                {
+                    NSString *schoolID = [responseDict objectForKey:@"data"];
+                    CreateClassViewController *createClassViewController = [[CreateClassViewController alloc] init];
+                    createClassViewController.schoolName = ((MyTextField *)[searchSchoolTableView viewWithTag:3333]).text;
+                    createClassViewController.schoolLevel = levelValue;
+                    createClassViewController.schoollID = schoolID;
+                    [self.navigationController pushViewController:createClassViewController animated:YES];
+                }
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
             
         }];

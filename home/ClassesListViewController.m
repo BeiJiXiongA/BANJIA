@@ -69,7 +69,7 @@ UITableViewDelegate>
 {
     if ([selectedClassids count] == 0)
     {
-        [Tools showAlertView:@"您还为选择任何班级哦!" delegateViewController:nil];
+        [Tools showAlertView:@"您还未选择任何班级哦!" delegateViewController:nil];
         return ;
     }
     if ([self.selectClassdel respondsToSelector:@selector(selectClasses:)])
@@ -160,7 +160,7 @@ UITableViewDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         

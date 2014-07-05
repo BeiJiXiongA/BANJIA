@@ -183,12 +183,12 @@
     }
     
     
-    NSString *userStr = @"simu";
+    NSString *userStr = @"";
     
     if ([[APService registrionID] length] > 0)
     {
         userStr = [APService registrionID];
-        [Tools showAlertView:userStr delegateViewController:nil];
+//        [Tools showAlertView:userStr delegateViewController:nil];
     }
 
     
@@ -226,7 +226,7 @@
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -283,7 +283,7 @@
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
             
         }];
@@ -334,7 +334,7 @@
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
             
         }];
@@ -379,7 +379,7 @@
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
             
         }];

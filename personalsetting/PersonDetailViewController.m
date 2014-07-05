@@ -23,13 +23,15 @@
 #define TRANSADMINTAG  4000
 #define KICKALTAG    5000
 
+#define MoreACTag   6000
+
 #define BGIMAGEHEIGHT   120
 
 @interface PersonDetailViewController ()<
 UITableViewDelegate,
 UITableViewDataSource,
 MFMessageComposeViewControllerDelegate,
-UIActionSheetDelegate>
+UIActionSheetDelegate,UIAlertViewDelegate>
 {
     UIView *tmpBgView;
     UIImageView *genderImageView;
@@ -43,7 +45,7 @@ UIActionSheetDelegate>
     OperatDB *db;
     
     NSString *userPhone;
-    NSString *classID;
+//    NSString *classID;
     
     NSString *phoneNum;
     NSString *headerImageUrl;
@@ -52,6 +54,8 @@ UIActionSheetDelegate>
     NSString *qqnum;
     NSString *sexureimage;
     NSString *birth;
+    
+    NSString *email;
 }
 @end
 
@@ -73,24 +77,33 @@ UIActionSheetDelegate>
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     
-    classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
+//    classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
+    
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:FROMWHERE] isEqualToString:FROMCLASS])
+    {
+        self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+        self.view.backgroundColor = [UIColor blackColor];
+    }
     
     qqnum = @"未绑定";
     birth = @"未设置";
     
     self.titleLabel.text = @"个人信息";
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-    self.view.backgroundColor = [UIColor blackColor];
+    
     
     dataDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     db = [[OperatDB alloc] init];
     
     UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    moreButton.frame = CGRectMake(SCREEN_WIDTH-60, 6, 50, 32);
+    moreButton.frame = CGRectMake(SCREEN_WIDTH-CORNERMORERIGHT, 6, 50, 32);
     [moreButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
     [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:moreButton];
     if ([personID isEqualToString:[Tools user_id]])
+    {
+        moreButton.hidden = YES;
+    }
+    if ([personID isEqualToString:OurTeamID])
     {
         moreButton.hidden = YES;
     }
@@ -175,7 +188,7 @@ UIActionSheetDelegate>
     }
     else if(section == 1)
     {
-        return 4;
+        return 3;
     }
     return 0;
 }
@@ -265,28 +278,39 @@ UIActionSheetDelegate>
     }
     else if (indexPath.section == 1)
     {
-        if (indexPath.row < 3)
+        if (indexPath.row < 2)
         {
             cell.nameLabel.frame = CGRectMake(15, 5, 100, 30);
             cell.nameLabel.textColor = TITLE_COLOR;
-            cell.contentLabel.frame = CGRectMake(SCREEN_WIDTH-150, 5, 140, 30);
+            cell.contentLabel.frame = CGRectMake(SCREEN_WIDTH-200, 5, 190, 30);
             cell.contentLabel.textColor = TITLE_COLOR;
             cell.contentLabel.textAlignment = NSTextAlignmentRight;
             if (indexPath.row == 0)
             {
-                cell.nameLabel.text = @"手机号";
-                cell.contentLabel.text = phoneNum;
+                if ([phoneNum length] > 0)
+                {
+                    cell.nameLabel.text = @"手机号";
+                    cell.contentLabel.text = phoneNum;
+                }
+                else if([email length] > 0)
+                {
+                    cell.nameLabel.text = @"邮箱";
+                    cell.contentLabel.text = email;
+                }
             }
             else if(indexPath.row == 1)
             {
-                cell.nameLabel.text = @"QQ";
-                cell.contentLabel.text = qqnum;
-            }
-            else if(indexPath.row == 2)
-            {
-                cell.nameLabel.text = @"生日";
+                if ([personID isEqualToString:OurTeamID])
+                {
+                    cell.nameLabel.text = @"创建时间";
+                }
+                else
+                {
+                    cell.nameLabel.text = @"生日";
+                }
                 cell.contentLabel.text = birth;
             }
+            
             UIImageView *bgImageBG = [[UIImageView alloc] init];
             bgImageBG.image = [UIImage imageNamed:@"line3"];
             bgImageBG.backgroundColor = [UIColor clearColor];
@@ -350,7 +374,10 @@ UIActionSheetDelegate>
 
 -(void)callToUser
 {
-    [Tools dialPhoneNumber:phoneNum inView:self.bgView];
+    if ([phoneNum length] > 0)
+    {
+        [Tools dialPhoneNumber:phoneNum inView:self.bgView];
+    }
 }
 
 -(void)msgToUser
@@ -361,16 +388,16 @@ UIActionSheetDelegate>
 -(void)moreClick
 {
     
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
+    if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fid":personID} andTableName:FRIENDSTABLE] count] > 0)
     {
-        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"设置班级角色",@"任命为班主任",@"踢出班级",@"举报此人", nil];
-        ac.tag = 3333;
+        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"解除好友关系",@"举报此人", nil];
+        ac.tag = MoreACTag;
         [ac showInView:self.bgView];
     }
     else
     {
         UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"举报此人", nil];
-        ac.tag = 3333;
+        ac.tag = MoreACTag;
         [ac showInView:self.bgView];
     }
 }
@@ -378,47 +405,19 @@ UIActionSheetDelegate>
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
     
-    if (actionSheet.tag == 3333)
+    if(actionSheet.tag == MoreACTag)
     {
-        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
+        if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fid":personID} andTableName:FRIENDSTABLE] count] > 0)
         {
             if (buttonIndex == 0)
             {
-                //设置班级角色
-                SetObjectViewController *setobject = [[SetObjectViewController alloc] init];
-                setobject.name = personName;
-                setobject.userid = personID;
-                setobject.classID = classID;
-                setobject.title = jobLabel.text;
-                setobject.setobject= self;
-                [self.navigationController pushViewController:setobject animated:YES];
-            }
-            else if(buttonIndex == 1)
-            {
-                //任命为班主任
-                NSString *message = [NSString stringWithFormat:@"您确定要转交班主任权限给%@吗？",personName];
-                UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:message delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
-                al.tag = TRANSADMINTAG;
+                UIAlertView *al = [[UIAlertView alloc] initWithTitle:nil message:[NSString stringWithFormat:@"您确定与%@解除好友关系吗？",personName] delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定解除", nil];
+                al.tag = 3333;
                 [al show];
             }
-            else if(buttonIndex == 2)
-            {
-                //踢出班级
-                NSString *msg = [NSString stringWithFormat:@"您确定把%@踢出班级吗？",personName];
-                UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:msg delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
-                al.tag = KICKALTAG;
-                [al show];
-            }
-            else if (buttonIndex == 3)
-            {
-                ReportViewController *reportVC = [[ReportViewController alloc] init];
-                reportVC.reportType = @"people";
-                reportVC.reportUserid = personID;
-                reportVC.reportContentID = @"";
-                [self.navigationController pushViewController:reportVC animated:YES];
-            }
+
         }
-        else
+        else if (buttonIndex == 0)
         {
             ReportViewController *reportVC = [[ReportViewController alloc] init];
             reportVC.reportType = @"people";
@@ -429,29 +428,42 @@ UIActionSheetDelegate>
     }
 }
 
--(void)transAdminTo
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (alertView.tag == 3333)
+    {
+        if (buttonIndex == 1)
+        {
+            [self releaseFriend];
+        }
+    }
+}
+
+-(void)releaseFriend
 {
     if ([Tools NetworkReachable])
     {
-        
-        DDLOG(@"%@=%@=%@=%@",[Tools user_id],[Tools client_token],personName,classID);
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
-                                                                      @"o_id":personID,
-                                                                      @"c_id":classID
-                                                                      } API:TRANSADMIN];
+                                                                      @"f_id":personID
+                                                                      } API:MB_RMFRIEND];
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"transadmin responsedict %@",responseString);
+            DDLOG(@"addfriends responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
+                if ([db deleteRecordWithDict:@{@"uid":[Tools user_id],@"fid":personID} andTableName:FRIENDSTABLE])
+                {
+                    DDLOG(@"delete friend success");
+                }
+                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATEFRIENDSLIST object:nil];
                 [self.navigationController popViewControllerAnimated:YES];
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -463,15 +475,15 @@ UIActionSheetDelegate>
         [Tools showProgress:self.bgView];
         [request startAsynchronous];
     }
-    
 }
+
 
 
 -(void)toChat
 {
     ChatViewController *chatViewController = [[ChatViewController alloc] init];
     chatViewController.toID = personID;
-    chatViewController.name = personID;
+    chatViewController.name = personName;
     chatViewController.imageUrl = headerImg;
     chatViewController.fromClass = YES;
     [self.navigationController pushViewController:chatViewController animated:YES];
@@ -488,39 +500,6 @@ UIActionSheetDelegate>
     }
 }
 
--(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-    if(alertView.tag == MSGBUTTONTAG)
-    {
-        if (buttonIndex == 1)
-        {
-            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"sms://%@",[dataDict objectForKey:@"phone"]]]];
-        }
-    }
-    else if(alertView.tag == TRANSADMINTAG)
-    {
-        if (buttonIndex == 1)
-        {
-            [self transAdminTo];
-        }
-    }
-    else if(alertView.tag == KICKALTAG)
-    {
-        if (buttonIndex == 1)
-        {
-            
-        }
-    }
-    else if(alertView.tag == 3333)
-    {
-        ;
-    }
-    else
-    {
-        [self.navigationController popViewControllerAnimated:YES];
-    }
-    
-}
 
 -(void)addFriend
 {
@@ -541,7 +520,7 @@ UIActionSheetDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -562,8 +541,7 @@ UIActionSheetDelegate>
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
-                                                                      @"other_id":personID,
-                                                                      @"c_id":classID
+                                                                      @"other_id":personID
                                                                       } API:MB_GETUSERINFO];
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
@@ -587,18 +565,15 @@ UIActionSheetDelegate>
                     }
                     if ([dict objectForKey:@"phone"])
                     {
-                        if ([db updeteKey:@"phone" toValue:[dict objectForKey:@"phone"] withParaDict:@{@"uid":personID,@"classid":classID} andTableName:CLASSMEMBERTABLE])
-                        {
-                            DDLOG(@"teach phone update success!");
-                        }
                         phoneNum = [dict objectForKey:@"phone"];
+                    }
+                    
+                    if ([dict objectForKey:@"email"])
+                    {
+                        email = [dict objectForKey:@"email"];
                     }
                     if ([dict objectForKey:@"birth"])
                     {
-                        if ([db updeteKey:@"birth" toValue:[dict objectForKey:@"birth"] withParaDict:@{@"uid":personID,@"classid":classID} andTableName:CLASSMEMBERTABLE])
-                        {
-                            DDLOG(@"teach birth update success!");
-                        }
                         birth = [dict objectForKey:@"birth"];
                     }
                     if (![[dict objectForKey:@"img_icon"] isEqual:[NSNull null]])
@@ -619,7 +594,7 @@ UIActionSheetDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         

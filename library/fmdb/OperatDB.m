@@ -23,6 +23,7 @@
         [self createClassMemTable];
         [self createImgIconTabel];
         [self createUserInfoTable];
+        [self createMyClassTable];
     }
     return self;
 }
@@ -84,6 +85,35 @@
 
 }
 
+-(void)createMyClassTable
+{
+    FMResultSet *set = [_db executeQuery:[NSString stringWithFormat:@"select count(*) from sqlite_master where type ='table' and name = '%@'",MYCLASSTABLE]];
+    [set next];
+    
+    NSInteger count = [set intForColumnIndex:0];
+    BOOL existTable = !!count;
+    if (existTable)
+    {
+        NSLog(@"table has exist!");
+    }
+    else
+    {
+        //chatMsg
+        NSString *sql = [NSString stringWithFormat:@"CREATE TABLE %@ (\
+                         uid VARCHAR(30),classid VARCHAR(30),classname VARCHAR(10),img_icon VARCHAR(30),img_kb VARCHAR(10),s_name VARCHAR(50),s_level VARCHAR(50),s_id VARCHAR(50))",MYCLASSTABLE];
+        BOOL res = [_db executeUpdate:sql];
+        if (!res)
+        {
+            NSLog(@"table %@ create failed!",MYCLASSTABLE);
+        }
+        else
+        {
+            NSLog(@"table %@ create success!",MYCLASSTABLE);
+        }
+    }
+}
+
+
 -(void)createCityTable
 {
     FMResultSet *set = [_db executeQuery:[NSString stringWithFormat:@"select count(*) from sqlite_master where type ='table' and name = '%@'",CITYTABLE]];
@@ -127,7 +157,8 @@
     else
     {
         //chatMsg
-        NSString *sql = [NSString stringWithFormat:@"CREATE TABLE %@ (mid VARCHAR(30) PRIMARY KEY NOT NULL,\
+        NSString *sql = [NSString stringWithFormat:@"CREATE TABLE %@ (userindex INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\
+                         mid VARCHAR(30) NOT NULL,\
                          userid VARCHAR(30),fid VARCHAR(30),fname VARCHAR(30),ficon VARCHAR(50),tid VARCHAR(30),direct VARCHAR(2),readed VARCHAR(2), content VARCHAR(20),msgType VARCHAR(8),time VARCHAR(15))",TableName];
         BOOL res = [_db executeUpdate:sql];
         if (!res)
@@ -314,6 +345,7 @@
         [values appendString:@"?,"];
         [arguments addObject:[dict objectForKey:key]];
     }
+
     [keys appendString:@") "];
     [values appendString:@") "];
     [query appendFormat:@" %@ VALUES %@",

@@ -9,7 +9,7 @@
 #import "LimitCell.h"
 
 @implementation LimitCell
-@synthesize contentLabel,mySwitch,markLabel;
+@synthesize contentLabel,mySwitch,markLabel,arrowImageView;
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
@@ -30,6 +30,9 @@
         markLabel.font = [UIFont systemFontOfSize:14];
         markLabel.backgroundColor = [UIColor clearColor];
         [self.contentView addSubview:markLabel];
+        
+        arrowImageView = [[UIImageView alloc] init];
+        [self.contentView addSubview:arrowImageView];
     }
     return self;
 }

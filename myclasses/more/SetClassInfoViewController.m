@@ -80,17 +80,18 @@
         placeHolderTextView.editable = NO;
         placeHolderTextView.tag = 1000;
         placeHolderTextView.delegate = self;
-        placeHolderTextView.font = [UIFont systemFontOfSize:14];
+        placeHolderTextView.font = [UIFont systemFontOfSize:16];
         placeHolderTextView.backgroundColor = [UIColor clearColor];
-        placeHolderTextView.textColor = TITLE_COLOR;
+        placeHolderTextView.textColor = COMMENTCOLOR;
         [self.bgView addSubview:placeHolderTextView];
         
         self.titleLabel.text = @"设置班级介绍";
         infoTextView = [[UITextView alloc] initWithFrame:CGRectMake(15, UI_NAVIGATION_BAR_HEIGHT+15, SCREEN_WIDTH - 30, 200)];
-        infoTextView.textColor = TITLE_COLOR;
-        infoTextView.font = [UIFont systemFontOfSize:14];
+        infoTextView.textColor = COMMENTCOLOR;
+        infoTextView.font = [UIFont systemFontOfSize:16];
         infoTextView.text = infoStr;
         infoTextView.tag = 2000;
+        
         infoTextView.delegate = self;
         infoTextView.backgroundColor = [UIColor clearColor];
         [self.bgView addSubview:infoTextView];
@@ -98,7 +99,7 @@
         countLabel = [[UILabel alloc] initWithFrame:CGRectMake(infoTextView.frame.size.width+infoTextView.frame.origin.x-50, infoTextView.frame.size.height+infoTextView.frame.origin.y-50, 50, 20)];
         countLabel.backgroundColor = [UIColor clearColor];
         countLabel.font = [UIFont systemFontOfSize:12];
-        countLabel.textColor = TITLE_COLOR;
+        countLabel.textColor = TIMECOLOR;
         countLabel.text = [NSString stringWithFormat:@"%d/50",[infoStr length]];
         [self.bgView addSubview:countLabel];
     }
@@ -127,12 +128,12 @@
         {
             placeHolderTextView.text = @"填写班级介绍";
         }
-        if ([textView.text length] > 50)
+        if ([textView.text length] > 51)
         {
-            textView.text = [textView.text substringToIndex:50];
+            infoTextView.text = [infoTextView.text substringToIndex:50];
             [Tools showAlertView:@"请把班级介绍字数控制在50个字符内" delegateViewController:nil];
         }
-        countLabel.text = [NSString stringWithFormat:@"%d/50",[textView.text length]];
+        countLabel.text = [NSString stringWithFormat:@"%d/50",[infoTextView.text length]];
     }
 }
 
@@ -192,7 +193,7 @@
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         

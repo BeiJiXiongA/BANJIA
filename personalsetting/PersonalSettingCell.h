@@ -14,4 +14,6 @@
 @property (nonatomic, strong) UILabel *nameLabel;
 @property (nonatomic, strong) UILabel *objectsLabel;
 @property (nonatomic, strong) UIImageView *authenticationSign;
+@property (nonatomic, strong) UIImageView *arrowImageView;
+@property (nonatomic, strong) UIView *bgView;
 @end

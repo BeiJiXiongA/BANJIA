@@ -42,13 +42,16 @@
     
     sec = 60;
     
-    UIImage*inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 3, 20, 2.3)];
+    UIImage*inputImage = [Tools getImageFromImage:[UIImage imageNamed:@""] andInsets:UIEdgeInsetsMake(20, 3, 20, 2.3)];
     
-    phoneNumTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(29, UI_NAVIGATION_BAR_HEIGHT+100, SCREEN_WIDTH-58, 35)];
+    phoneNumTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(29, UI_NAVIGATION_BAR_HEIGHT+100, SCREEN_WIDTH-58, 42)];
     phoneNumTextfield.delegate = self;
     phoneNumTextfield.keyboardType = UIKeyboardTypeNumberPad;
     phoneNumTextfield.clearButtonMode = UITextFieldViewModeWhileEditing;
     phoneNumTextfield.tag = 3000;
+    phoneNumTextfield.layer.cornerRadius = 5;
+    phoneNumTextfield.clipsToBounds = YES;
+    phoneNumTextfield.backgroundColor = [UIColor whiteColor];
     phoneNumTextfield.placeholder = @"手机号码";
     phoneNumTextfield.background = inputImage;
     phoneNumTextfield.textColor = UIColorFromRGB(0x727171);
@@ -56,17 +59,20 @@
     phoneNumTextfield.numericFormatter = [AKNumericFormatter formatterWithMask:PHONE_FORMAT placeholderCharacter:'*'];
     [self.bgView addSubview:phoneNumTextfield];
     
-    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
+    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
     getCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    getCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, phoneNumTextfield.frame.origin.y+5, 58, 25);
+    getCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, phoneNumTextfield.frame.origin.y+6, 58, 30);
     [getCodeButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     [getCodeButton setTitle:@"短信验证" forState:UIControlStateNormal];
     getCodeButton.titleLabel.font = [UIFont boldSystemFontOfSize:13];
     [getCodeButton addTarget:self action:@selector(getVerifyCode) forControlEvents:UIControlEventTouchUpInside];
     [self.bgView addSubview:getCodeButton];
     
-    codeTextField = [[MyTextField alloc] initWithFrame:CGRectMake(29, phoneNumTextfield.frame.size.height+phoneNumTextfield.frame.origin.y+3, SCREEN_WIDTH-58, 35)];
+    codeTextField = [[MyTextField alloc] initWithFrame:CGRectMake(29, phoneNumTextfield.frame.size.height+phoneNumTextfield.frame.origin.y+5, SCREEN_WIDTH-58, 42)];
     codeTextField.delegate = self;
+    codeTextField.backgroundColor = [UIColor whiteColor];
+    codeTextField.layer.cornerRadius = 5;
+    codeTextField.clipsToBounds = YES;
     codeTextField.background = inputImage;
     codeTextField.keyboardType = UIKeyboardTypeNumberPad;
     codeTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
@@ -80,7 +86,6 @@
     changeButton.frame = CGRectMake(30, codeTextField.frame.origin.y+codeTextField.frame.size.height + 25, SCREEN_WIDTH-60, 40);
     [changeButton setTitle:@"提交手机号" forState:UIControlStateNormal];
     [changeButton addTarget:self action:@selector(verify) forControlEvents:UIControlEventTouchUpInside];
-    changeButton.enabled = NO;
     [self.bgView addSubview:changeButton];
 
 }
@@ -123,7 +128,7 @@
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
             
         }];
@@ -158,13 +163,12 @@
             {
 //                codeStr = [responseDict objectForKey:@"data"];
                 getCodeButton.hidden = YES;
-                changeButton.enabled = YES;
                 codeTextField.text = [responseDict objectForKey:@"data"];
                 
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
             
         }];
@@ -223,11 +227,17 @@
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 [Tools showTips:@"绑定成功" toView:self.bgView];
+                [[NSUserDefaults standardUserDefaults] setObject:phoneNumTextfield.text forKey:PHONENUM];
+                [[NSUserDefaults standardUserDefaults] synchronize];
+                if ([self.changePhoneDel respondsToSelector:@selector(changePhoneNum:)])
+                {
+                    [self.changePhoneDel changePhoneNum:YES];
+                }
                 [self.navigationController popViewControllerAnimated:YES];
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
             
         }];

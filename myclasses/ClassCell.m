@@ -10,7 +10,7 @@
 #import "Header.h"
 
 @implementation ClassCell
-@synthesize headerImageView,nameLabel,contentLable,timeLabel,unReadImageView,bgView;
+@synthesize headerImageView,nameLabel,contentLable,timeLabel,timeLabel2,unReadImageView,bgView,arrowImageView;
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
@@ -35,8 +35,14 @@
         contentLable.font = [UIFont systemFontOfSize:13];
         [bgView addSubview:contentLable];
         
-        timeLabel = [[UILabel alloc] init];
+        timeLabel = [[cnvUILabel alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
         [bgView addSubview:timeLabel];
+        
+        timeLabel2 = [[cnvUILabel alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
+        [bgView addSubview:timeLabel2];
+        
+        arrowImageView = [[UIImageView alloc] init];
+        [bgView addSubview:arrowImageView];
         
         self.contentView.backgroundColor = [UIColor clearColor];
     }

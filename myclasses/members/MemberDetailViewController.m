@@ -87,7 +87,7 @@ UIActionSheetDelegate>
     db = [[OperatDB alloc] init];
     
     UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    moreButton.frame = CGRectMake(SCREEN_WIDTH-60, 6, 50, 32);
+    moreButton.frame = CGRectMake(SCREEN_WIDTH-CORNERMORERIGHT, 6, 50, 32);
     [moreButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
     [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:moreButton];
@@ -142,7 +142,6 @@ UIActionSheetDelegate>
         }
     }
     
-    
     if([Tools NetworkReachable])
     {
         [self getUserInfo];
@@ -166,12 +165,11 @@ UIActionSheetDelegate>
 {
     if (objectUpdate)
     {
-        jobLabel.text = objectUpdate;
+        title = objectUpdate;
         if ([self.memDel respondsToSelector:@selector(updateListWith:)])
         {
             [self.memDel updateListWith:YES];
         }
-        [self.navigationController popViewControllerAnimated:YES];
     }
 }
 
@@ -190,7 +188,7 @@ UIActionSheetDelegate>
     }
     else if(section == 1)
     {
-        return 4;
+        return 3;
     }
     return 0;
 }
@@ -220,7 +218,7 @@ UIActionSheetDelegate>
     }
     else if (indexPath.section == 1)
     {
-        if (indexPath.row < 3)
+        if (indexPath.row < 2)
         {
             return 40;
         }
@@ -285,7 +283,7 @@ UIActionSheetDelegate>
     }
     else if (indexPath.section == 1)
     {
-        if (indexPath.row < 3)
+        if (indexPath.row < 2)
         {
             cell.nameLabel.frame = CGRectMake(15, 5, 100, 30);
             cell.nameLabel.textColor = TITLE_COLOR;
@@ -298,11 +296,6 @@ UIActionSheetDelegate>
                 cell.contentLabel.text = phoneNum;
             }
             else if(indexPath.row == 1)
-            {
-                cell.nameLabel.text = @"QQ";
-                cell.contentLabel.text = qqnum;
-            }
-            else if(indexPath.row == 2)
             {
                 cell.nameLabel.text = @"生日";
                 cell.contentLabel.text = birth;
@@ -380,8 +373,10 @@ UIActionSheetDelegate>
 
 -(void)moreClick
 {
+    NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
+    int userAdmin = [[dict objectForKey:@"admin"] integerValue];
     
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
+    if (userAdmin == 2)
     {
         UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"设置班级角色",@"任命为班主任",@"踢出班级",@"举报此人", nil];
         ac.tag = 3333;
@@ -400,7 +395,9 @@ UIActionSheetDelegate>
     
     if (actionSheet.tag == 3333)
     {
-        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
+        NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
+        int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+        if (userAdmin == 2)
         {
             if (buttonIndex == 0)
             {
@@ -409,7 +406,7 @@ UIActionSheetDelegate>
                 setobject.name = teacherName;
                 setobject.userid = teacherID;
                 setobject.classID = classID;
-                setobject.title = jobLabel.text;
+                setobject.title = title;
                 setobject.setobject= self;
                 [self.navigationController pushViewController:setobject animated:YES];
             }
@@ -421,6 +418,7 @@ UIActionSheetDelegate>
                 al.tag = TRANSADMINTAG;
                 [al show];
             }
+//            农业银行北京科技园区支行
             else if(buttonIndex == 2)
             {
                 //踢出班级
@@ -438,7 +436,7 @@ UIActionSheetDelegate>
                 [self.navigationController pushViewController:reportVC animated:YES];
             }
         }
-        else
+        else if(buttonIndex == 0)
         {
             ReportViewController *reportVC = [[ReportViewController alloc] init];
             reportVC.reportType = @"people";
@@ -466,15 +464,16 @@ UIActionSheetDelegate>
             DDLOG(@"kickuser responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                if ([self.memDel respondsToSelector:@selector(updateListWith:)])
+                if ([db deleteRecordWithDict:@{@"classid":classID,@"uid":teacherID} andTableName:CLASSMEMBERTABLE])
                 {
-                    [self.memDel updateListWith:YES];
+                    DDLOG(@"delete teacher success");
                 }
-                [self.navigationController popViewControllerAnimated:YES];
+                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
+                [self.navigationController popToRootViewControllerAnimated:YES];
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -507,11 +506,31 @@ UIActionSheetDelegate>
             DDLOG(@"transadmin responsedict %@",responseString);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                [self.navigationController popViewControllerAnimated:YES];
+                if ([db updeteKey:@"admin" toValue:@"2" withParaDict:@{@"classid":classID,@"uid":teacherID} andTableName:CLASSMEMBERTABLE])
+                {
+                    
+                    if ([db updeteKey:@"admin" toValue:@"1" withParaDict:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE])
+                    {
+                        DDLOG(@"update old admin to 1");
+                    }
+                    if ([db updeteKey:@"title" toValue:@"老师" withParaDict:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE])
+                    {
+                        DDLOG(@"update old admin to 老师");
+                    }
+                    if ([db updeteKey:@"title" toValue:@"班主任" withParaDict:@{@"classid":classID,@"uid":teacherID} andTableName:CLASSMEMBERTABLE])
+                    {
+                        DDLOG(@"update new admin title");
+                    }
+                    DDLOG(@"transmit admin success");
+                }
+                [[NSUserDefaults standardUserDefaults]  setObject:@"1" forKey:@"admin"];
+                [[NSUserDefaults standardUserDefaults] synchronize];
+                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
+                [self.navigationController popToRootViewControllerAnimated:YES];
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -523,7 +542,6 @@ UIActionSheetDelegate>
         [Tools showProgress:self.bgView];
         [request startAsynchronous];
     }
-
 }
 
 
@@ -601,7 +619,7 @@ UIActionSheetDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -664,7 +682,7 @@ UIActionSheetDelegate>
                     if (![[dict objectForKey:@"img_icon"] isEqual:[NSNull null]])
                     {
                         
-                        if ([[dict objectForKey:@"img_icon"] length] > 10)
+                        if ([[dict objectForKey:@"img_icon"] isKindOfClass:[NSString class]])
                         {
                             headerImageUrl = [dict objectForKey:@"img_icon"];
                         }
@@ -679,7 +697,7 @@ UIActionSheetDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         

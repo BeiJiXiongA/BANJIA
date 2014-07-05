@@ -16,6 +16,7 @@
 #import "EGORefreshTableHeaderView.h"
 #import "OperatDB.h"
 #import "InviteViewController.h"
+#import "InviteStuPareViewController.h"
 
 @class AppDelegate;
 
@@ -28,10 +29,6 @@ UITableViewDataSource,
 UITableViewDelegate,
 EGORefreshTableHeaderDelegate,
 UISearchBarDelegate,
-SubGroupDelegate,
-MemberDetailDelegate,
-PareberDetailDelegate,
-StuDetailDelegate,
 ChatDelegate,
 MsgDelegate>
 {
@@ -91,6 +88,8 @@ MsgDelegate>
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     updateGroup = @"";
     
+    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(manageClassMember) name:UPDATECLASSMEMBERLIST object:nil];
+    
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
     _db = [[OperatDB alloc] init];
@@ -109,15 +108,6 @@ MsgDelegate>
     adminIDDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     allMembersArray = [[NSMutableArray alloc] initWithCapacity:0];
     searchResultArray = [[NSMutableArray alloc] initWithCapacity:0];
-    
-    if (fromMsg)
-    {
-        [self.backButton addTarget:self action:@selector(mybackClick) forControlEvents:UIControlEventTouchUpInside];
-    }
-    else
-    {
-        [self.backButton addTarget:self action:@selector(backClick) forControlEvents:UIControlEventTouchUpInside];
-    }
     
     
     UIButton *inviteButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -246,6 +236,17 @@ MsgDelegate>
     // Dispose of any resources that can be recreated.
 }
 
+-(void)unShowSelfViewController
+{
+    [[XDTabViewController sharedTabViewController] dismissViewControllerAnimated:YES completion:nil];
+    [[NSUserDefaults standardUserDefaults] setObject:NOTFROMCLASS forKey:FROMWHERE];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+-(void)dealloc
+{
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
+}
+
 #pragma mark - chatDel
 -(void)dealNewChatMsg:(NSDictionary *)dict
 {
@@ -264,7 +265,7 @@ MsgDelegate>
 {
     if (update)
     {
-        [self getMembersByClass:@"all"];
+        [self manageClassMember];
     }
 }
 #pragma mark - memdel
@@ -406,7 +407,7 @@ MsgDelegate>
         }
         else
         {
-            [Tools dealRequestError:responseDict fromViewController:self];
+            [Tools dealRequestError:responseDict fromViewController:nil];
         }
     }
     else
@@ -444,7 +445,7 @@ MsgDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -575,9 +576,18 @@ MsgDelegate>
                     
                     if ([dict objectForKey:@"re_name"])
                     {
+                        NSString *checked;
+                        if ([[dict objectForKey:@"checked"] integerValue] == 0)
+                        {
+                            checked = @"0";
+                        }
+                        else
+                        {
+                            checked = @"1";
+                        }
                         if ([[_db findSetWithDictionary:@{@"classid":classID,@"role":@"students",@"name":[dict objectForKey:@"re_name"]} andTableName:CLASSMEMBERTABLE] count] == 0)
                         {
-                            NSDictionary *tmpDict = @{@"name":[dict objectForKey:@"re_name"],@"classid":classID,@"role":@"students",@"checked":@"1"};
+                            NSDictionary *tmpDict = @{@"name":[dict objectForKey:@"re_name"],@"classid":classID,@"role":@"students",@"checked":checked};
                             if ([_db insertRecord:tmpDict andTableName:CLASSMEMBERTABLE])
                             {
                                 DDLOG(@"insert stu of parent without stu success!");
@@ -610,7 +620,7 @@ MsgDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -642,12 +652,36 @@ MsgDelegate>
     [studentArray removeAllObjects];
     [withoutParentStuArray removeAllObjects];
     
+    int userAmin = [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue];
+    
+    if ([_db updeteKey:@"admin" toValue:[NSString stringWithFormat:@"%d",userAmin] withParaDict:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE])
+    {
+        DDLOG(@"update admin success");
+    }
+    
     [allMembersArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"checked":@"1"} andTableName:CLASSMEMBERTABLE]];
     //老师
     [teachersArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"role":@"teachers",@"checked":@"1"} andTableName:CLASSMEMBERTABLE]];
     
     //新申请
     [newAppleArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"checked":@"0"} andTableName:CLASSMEMBERTABLE]];
+    
+    
+    NSMutableArray *waitRemoveArray = [[NSMutableArray alloc] initWithCapacity:0];
+    
+    for (int i=0; i<[newAppleArray count]; i++)
+    {
+        NSDictionary *dict = [newAppleArray objectAtIndex:i];
+        if ([[dict objectForKey:@"uid"] isEqual:[NSNull null]])
+        {
+            [waitRemoveArray addObject:dict];
+        }
+    }
+    
+    for (int i=0; i<[waitRemoveArray count]; i++)
+    {
+        [newAppleArray removeObject:[waitRemoveArray objectAtIndex:i]];
+    }
     
     //管理员
     [adminArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"admin":@"1"} andTableName:CLASSMEMBERTABLE]];
@@ -843,6 +877,7 @@ MsgDelegate>
             cell.headerImageView.layer.cornerRadius = 3;
             cell.headerImageView.clipsToBounds = YES;
             cell.remarkLabel.hidden = NO;
+            cell.button2.hidden = YES;
             cell.memNameLabel.text = nil;
             cell.remarkLabel.text = nil;
             cell.memNameLabel.frame = CGRectMake(60, 15, 130, 30);
@@ -867,9 +902,10 @@ MsgDelegate>
                     cell.contentLabel.layer.borderColor = TIMECOLOR.CGColor;
                     cell.contentLabel.layer.borderWidth = 0.3;
                     
+                    cell.memNameLabel.hidden = NO;
+                    cell.memNameLabel.textColor = CONTENTCOLOR;
                     cell.memNameLabel.frame = CGRectMake(120, 16, 105, 30);
                     cell.memNameLabel.text = [NSString stringWithFormat:@"%d个新申请",[newAppleArray count]];
-                    cell.memNameLabel.textColor = CONTENTCOLOR;
                     
                     cell.markView.frame = CGRectMake(226, 25, 8, 12);
                     [cell.markView setImage:[UIImage imageNamed:@"discovery_arrow"]];
@@ -962,7 +998,6 @@ MsgDelegate>
             cell.memNameLabel.frame = CGRectMake(60, 15, 150, 30);
             cell.headerImageView.layer.cornerRadius = 3;
             cell.headerImageView.clipsToBounds = YES;
-            cell.button2.hidden = YES;
             cell.memNameLabel.text = [dict objectForKey:@"name"];
             cell.remarkLabel.hidden = NO;
             if (![[dict objectForKey:@"title"] isEqual:[NSNull null]])
@@ -970,7 +1005,21 @@ MsgDelegate>
                 cell.remarkLabel.text = [dict objectForKey:@"title"];
             }
             [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERBG];
+            
             cell.button2.hidden = YES;
+            if (![self haveParents:[dict objectForKey:@"name"]])
+            {
+                cell.button2.hidden = NO;
+                [cell.button2 setTitle:@"邀请家长" forState:UIControlStateNormal];
+                cell.button2.titleLabel.font = [UIFont systemFontOfSize:14];
+                cell.button2.frame = CGRectMake(SCREEN_WIDTH-90, 12.5, 70, 35);
+                [cell.button2 setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+                cell.button2.tag = (indexPath.section-2) * 3333 +indexPath.row;
+                [cell.button2 addTarget:self action:@selector(inviteButtonClick:) forControlEvents:UIControlEventTouchUpInside];
+                [cell.button2 setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+                cell.remarkLabel.frame = CGRectMake(SCREEN_WIDTH-100-cell.remarkLabel.frame.size.width, cell.remarkLabel.frame.origin.y, cell.remarkLabel.frame.size.width, cell.remarkLabel.frame.size.height);
+            }
+            
             cell.selectionStyle = UITableViewCellSelectionStyleGray;
             
             UIImageView *bgImageBG = [[UIImageView alloc] init];
@@ -998,6 +1047,35 @@ MsgDelegate>
     return nil;
 }
 
+-(void)inviteButtonClick:(UIButton *)button
+{
+    int section = button.tag/3333;
+    int row = button.tag % 3333;
+    NSDictionary *groupDict = [membersArray objectAtIndex:section];
+    NSDictionary *dict = [[groupDict objectForKey:@"array"] objectAtIndex:row];
+    
+    
+    InviteStuPareViewController *invite = [[InviteStuPareViewController alloc] init];
+    invite.classID = classID;
+    invite.name = [dict objectForKey:@"name"];
+    if (![[dict objectForKey:@"uid"] isEqual:[NSNull null]])
+    {
+        invite.userid = [dict objectForKey:@"uid"];
+    }
+    invite.className = className;
+    invite.schoolName = schoolName;
+    [self.navigationController pushViewController:invite animated:YES];
+}
+
+-(BOOL)haveParents:(NSString *)re_name
+{
+    if ([[_db findSetWithDictionary:@{@"re_name":re_name,@"classid":classID} andTableName:CLASSMEMBERTABLE] count] > 0)
+    {
+        return YES;
+    }
+    return NO;
+}
+
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     DDLOG(@"tableview tag= %d",tableView.tag);
@@ -1011,7 +1089,6 @@ MsgDelegate>
                 SubGroupViewController *subGroup = [[SubGroupViewController alloc] init];
                 subGroup.tmpArray = newAppleArray;
                 subGroup.classID = classID;
-                subGroup.subGroupDel = self;
                 subGroup.admin = NO;
                 subGroup.titleString = @"新申请";
                 [[XDTabViewController sharedTabViewController].navigationController pushViewController:subGroup animated:YES];
@@ -1022,7 +1099,6 @@ MsgDelegate>
                 subGroup.tmpArray = teachersArray;
                 subGroup.classID = classID;
                 subGroup.admin = NO;
-                subGroup.subGroupDel = self;
                 subGroup.titleString = @"老师";
                 [[XDTabViewController sharedTabViewController].navigationController pushViewController:subGroup animated:YES];
             }
@@ -1032,18 +1108,7 @@ MsgDelegate>
                 subGroup.tmpArray = adminArray;
                 subGroup.classID = classID;
                 subGroup.admin = YES;
-                subGroup.subGroupDel = self;
                 subGroup.titleString = @"管理员";
-                [[XDTabViewController sharedTabViewController].navigationController pushViewController:subGroup animated:YES];
-            }
-            else if(indexPath.row == 3)
-            {
-                SubGroupViewController *subGroup = [[SubGroupViewController alloc] init];
-                subGroup.tmpArray = withoutParentStuArray;
-                subGroup.classID = classID;
-                subGroup.admin = NO;
-                subGroup.subGroupDel = self;
-                subGroup.titleString = @"应添加家长学生";
                 [[XDTabViewController sharedTabViewController].navigationController pushViewController:subGroup animated:YES];
             }
         }
@@ -1052,7 +1117,6 @@ MsgDelegate>
             NSDictionary *dict = [classLeadersArray objectAtIndex:indexPath.row];
             StudentDetailViewController *studentDetail = [[StudentDetailViewController alloc] init];
             studentDetail.admin = NO;
-            studentDetail.memDel = self;
             studentDetail.studentID = [dict objectForKey:@"uid"];
             studentDetail.studentName = [dict objectForKey:@"name"];
             studentDetail.title = [dict objectForKey:@"title"];
@@ -1085,7 +1149,6 @@ MsgDelegate>
             {
                 studentDetail.headerImg = @"";
             }
-            studentDetail.memDel = self;
             studentDetail.role = [dict objectForKey:@"role"];
             [[XDTabViewController sharedTabViewController].navigationController pushViewController:studentDetail animated:YES];
         }
@@ -1111,30 +1174,9 @@ MsgDelegate>
             }
             
             studentDetail.headerImg = [dict objectForKey:@"img_icon"];
-            studentDetail.memDel = self;
             studentDetail.role = [dict objectForKey:@"role"];
             [[XDTabViewController sharedTabViewController].navigationController pushViewController:studentDetail animated:YES];
 
-        }
-        else if([[dict objectForKey:@"role"] isEqualToString:@"parents"])
-        {
-            ParentsDetailViewController *parentDetail = [[ParentsDetailViewController alloc] init];
-            parentDetail.parentID = [dict objectForKey:@"uid"];
-            parentDetail.parentName = [dict objectForKey:@"name"];
-            parentDetail.title = [dict objectForKey:@"title"];
-            parentDetail.headerImg = [dict objectForKey:@"img_icon"];
-            parentDetail.admin = NO;
-            parentDetail.memDel = self;
-            parentDetail.role = [dict objectForKey:@"role"];
-            [[XDTabViewController sharedTabViewController].navigationController pushViewController:parentDetail animated:YES];
-        }
-        else if([[dict objectForKey:@"role"] isEqualToString:@"teachers"])
-        {
-            MemberDetailViewController *memDetail = [[MemberDetailViewController alloc] init];
-            memDetail.teacherID = [dict objectForKey:@"uid"];
-            memDetail.teacherName = [dict objectForKey:@"name"];
-            memDetail.memDel = self;
-            [[XDTabViewController sharedTabViewController].navigationController pushViewController:memDetail animated:YES];
         }
         [self cancelSearch];
         [self searchBarCancelButtonClicked:mySearchBar];

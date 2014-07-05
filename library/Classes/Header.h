@@ -9,6 +9,7 @@
 
 #import <QuartzCore/QuartzCore.h>
 #import "Tools.h"
+#import "SetImageTools.h"
 #import "API.h"
 #import "XDContentViewController+JDSideMenu.h"
 #import "MyTextField.h"
@@ -17,6 +18,7 @@
 #import "NSString+AKNumericFormatter.h"
 #import "AKNumericFormatter.h"
 #import "UIButton+WebCache.h"
+#import "cnvUILabel.h"
 
 #define FaceViewHeight  220
 
@@ -137,6 +139,7 @@ return shared##className; \
 #define NAVBTNBG    @"navbtn"
 #define NAVCOLOR    TITLE_COLOR
 #define CornerMore   @"corner_more"
+#define CORNERMORERIGHT  50
 
 #define NAMEFONT   [UIFont boldSystemFontOfSize:16]
 #define NAMECOLOR  RGB(51, 51, 51, 1)
@@ -147,7 +150,7 @@ return shared##className; \
 #define PASSWORD  @"password"
 #define USERNAME  @"user_name"
 #define USERSEX   @"sex"
-
+#define BANJIANUM  @"banjianum"
 
 
 #define BGVIEWCOLOR   UIColorFromRGB(0xf1f0ec)
@@ -161,6 +164,11 @@ return shared##className; \
 #define DEVICE_IDENTIFER  @"d_imei"
 #define DEVICE_OS         @"c_os"
 #define CLIENT_TOKEN      @"c_token"
+
+#define ANONYMITY  @"anonymity"
+#define  SCHEMETYPE  @"schemetype"
+#define  SCHEMEDEBUG  @"debug"
+#define SCHEMERELEASE  @"release"
 
 #define PHONE_FORMAT   @"***********"
 
@@ -176,9 +184,13 @@ return shared##className; \
 #define NOTFROMCLASS  @"notfromclass"
 #define FROMWHERE   @"fromwhere"
 
+#define SEARCHSCHOOLTYPE  @"searchschooltype"
+#define BINDCLASSTOSCHOOL  @"bindclasstoschool"
+#define CREATENEWCLASS    @"createnewclass"
+
 #define LOCATIONLABELHEI   18
 
-#define CHATTO   @"    聊私信"
+#define CHATTO   @"    发私信"
 #define ADDFRIEND  @"    加好友"
 #define CHATW  15
 #define CHATH  15
@@ -188,3 +200,33 @@ return shared##className; \
 #define ATOP   13
 #define CLEFT  24
 #define ALEFT  33
+
+#define SCHOOLLEVELARRAY  @[@"小学",@"中学",@"夏令营",@"社团",@"职业学校",@"幼儿园",@"其他"]
+#define OBJECTARRAY   @[@"语文老师",@"数学老师",@"英语老师"]
+#define RELATEARRAY   @[@"爸爸",@"妈妈",@"爷爷",@"奶奶",@"其他"]
+
+
+#define ROLEPARENTS  @"parents"
+#define ROLETEACHER  @"teachers"
+#define ROLESTUDENTS  @"students"
+
+#define OurTeamID  @"YmFuamlh"
+#define OurTeamHeader  @"/teamlogo.png"
+
+#pragma mark - notification name
+#define UPDATECLASSMEMBERLIST   @"updateclassmemberlist"
+#define UPDATEFRIENDSLIST       @"updatefriendslist"
+#define LOGOUT                  @"logout"
+#define CHANGECLASSINFO         @"changeclassinfo"
+#define CHANGEHEADERICON    @"changeicon"
+#define RECEIVENEWMSG     @"receivenewmsg"
+#define RECEIVENEWMSGNOTATCHATVIEW   @"receivenewmsgnotatchatview"
+
+#pragma mark - aboutinvite
+#define InviteParentKey  @"item3"
+#define InviteClassMemberKey  @"item2"
+#define ShareContentKey    @"item1"
+
+#define ShareContent [[NSUserDefaults standardUserDefaults] objectForKey:ShareContentKey]
+#define InviteClassMember [[NSUserDefaults standardUserDefaults] objectForKey:InviteClassMemberKey]
+#define InviteParent [[NSUserDefaults standardUserDefaults] objectForKey:InviteParentKey]

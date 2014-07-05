@@ -64,10 +64,7 @@ AddObjectDel>
         [titleArray addObjectsFromArray:[title componentsSeparatedByString:@","]];
     }
     
-    alert = 1;
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
+    alert = 0;
     
     objectArray = [[NSMutableArray alloc] initWithArray:@[@"班长",@"生活委员",@"学习委员",@"文体委员",@"语文课代表"]];
     for (int i=0; i<[titleArray count]; i++)
@@ -106,27 +103,6 @@ AddObjectDel>
     addObjectTextField.delegate = self;
     addObjectTextField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
     addObjectTextField.placeholder = @"添加其他班级角色";
-//    [self.bgView addSubview:addObjectTextField];
-    
-    UILabel *tipLabel2 = [[UILabel alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT-70, SCREEN_WIDTH, 56)];
-    tipLabel2.text = @"      将任命通知班级成员";
-    tipLabel2.backgroundColor = [UIColor whiteColor];
-    tipLabel2.textColor = COMMENTCOLOR;
-    [self.bgView addSubview:tipLabel2];
-    
-//    noticeSwitch = [[KLSwitch alloc] init];
-//    noticeSwitch.frame = CGRectMake(SCREEN_WIDTH-100, SCREEN_HEIGHT-50, 80, 30);
-//    [noticeSwitch addTarget:self action:@selector(valueChange) forControlEvents:UIControlEventValueChanged];
-//    [noticeSwitch isOn:YES];
-//    noticeSwitch.backgroundColor = [UIColor whiteColor];
-//    [noticeSwitch setOnTintColor:LIGHT_BLUE_COLOR];
-//    [self.bgView addSubview:noticeSwitch];
-    
-    noticeSwitch = [[KLSwitch alloc] initWithFrame:CGRectMake(SCREEN_WIDTH-65, SCREEN_HEIGHT-57, 50, 30)];
-    [noticeSwitch addTarget:self action:@selector(valueChange) forControlEvents:UIControlEventValueChanged];
-    [noticeSwitch setOnTintColor:RGB(57, 188, 173, 1)];
-    [noticeSwitch isOn:YES];
-    [self.bgView addSubview:noticeSwitch];
     
     UIButton *submit = [UIButton buttonWithType:UIButtonTypeCustom];
     submit.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
@@ -134,12 +110,6 @@ AddObjectDel>
     [submit setTitle:@"提交" forState:UIControlStateNormal];
     [submit addTarget:self action:@selector(submit) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:submit];
-}
-
--(void)dealloc
-{
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification  object:nil];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillShowNotification object:nil];
 }
 
 - (void)didReceiveMemoryWarning
@@ -197,15 +167,12 @@ AddObjectDel>
                 {
                     DDLOG(@"title updata success!");
                 }
-                if ([self.setStudel respondsToSelector:@selector(setStuObj:)])
-                {
-                    [self.setStudel setStuObj:objectString];
-                }
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"updatememlist" object:nil];
                 [self.navigationController popViewControllerAnimated:YES];
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -456,5 +423,27 @@ AddObjectDel>
     [addObjectTextField resignFirstResponder];
 }
 
-
 @end
+
+//
+//    [self.bgView addSubview:addObjectTextField];
+//
+//    UILabel *tipLabel2 = [[UILabel alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT-70, SCREEN_WIDTH, 56)];
+//    tipLabel2.text = @"      将任命通知班级成员";
+//    tipLabel2.backgroundColor = [UIColor whiteColor];
+//    tipLabel2.textColor = COMMENTCOLOR;
+//    [self.bgView addSubview:tipLabel2];
+
+//    noticeSwitch = [[KLSwitch alloc] init];
+//    noticeSwitch.frame = CGRectMake(SCREEN_WIDTH-100, SCREEN_HEIGHT-50, 80, 30);
+//    [noticeSwitch addTarget:self action:@selector(valueChange) forControlEvents:UIControlEventValueChanged];
+//    [noticeSwitch isOn:YES];
+//    noticeSwitch.backgroundColor = [UIColor whiteColor];
+//    [noticeSwitch setOnTintColor:LIGHT_BLUE_COLOR];
+//    [self.bgView addSubview:noticeSwitch];
+
+//    noticeSwitch = [[KLSwitch alloc] initWithFrame:CGRectMake(SCREEN_WIDTH-65, SCREEN_HEIGHT-57, 50, 30)];
+//    [noticeSwitch addTarget:self action:@selector(valueChange) forControlEvents:UIControlEventValueChanged];
+//    [noticeSwitch setOnTintColor:RGB(57, 188, 173, 1)];
+//    [noticeSwitch isOn:YES];
+//    [self.bgView addSubview:noticeSwitch];

@@ -147,7 +147,7 @@
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -262,27 +262,6 @@
         NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
         [ud setObject:classid forKey:@"classid"];
         [ud setObject:className forKey:@"classname"];
-//        [ud setObject:[classDict objectForKey:@"s_id"] forKey:@"schoolid"];
-//        [ud setObject:[classDict objectForKey:@"s_name"] forKey:@"schoolname"];
-//        
-//        if (![[classDict objectForKey:@"img_kb"] isEqual:[NSNull null]] && [[classDict objectForKey:@"img_kb"] length] > 10)
-//        {
-//            [ud setObject:[classDict objectForKey:@"img_kb"] forKey:@"classkbimage"];
-//        }
-//        else
-//        {
-//            [ud setObject:@"" forKey:@"classkbimage"];
-//        }
-//        
-//        if (![[classDict objectForKey:@"img_icon"] isEqual:[NSNull null]] && [[classDict objectForKey:@"img_icon"] length] > 10)
-//        {
-//            [ud setObject:[classDict objectForKey:@"img_icon"] forKey:@"classiconimage"];
-//        }
-//        else
-//        {
-//            [ud setObject:@"" forKey:@"classiconimage"];
-//        }
-        
         [ud synchronize];
         classZoneViewController.fromClasses = YES;
         [self.navigationController pushViewController:classZoneViewController animated:YES];
@@ -292,17 +271,10 @@
 
 -(BOOL)isInThisClass:(NSString *)classId
 {
-    NSString *key = [TAGSARRAYKEY MD5Hash];
-    NSData *tagsData = [FTWCache objectForKey:key];
-    NSString *tagsString = [[NSString alloc] initWithData:tagsData encoding:NSUTF8StringEncoding];
-    
-    NSArray *tagsArray = [tagsString componentsSeparatedByString:@","];
-    for (int i=0; i<[tagsArray count]; ++i)
+    OperatDB *db = [[OperatDB alloc] init];
+    if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"classid":classId} andTableName:MYCLASSTABLE] count] > 0)
     {
-        if ([classId isEqualToString:[tagsArray objectAtIndex:i]])
-        {
-            return YES;
-        }
+        return YES;
     }
     return NO;
 }

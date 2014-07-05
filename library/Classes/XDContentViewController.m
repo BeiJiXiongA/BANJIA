@@ -10,6 +10,12 @@
 #import "AppDelegate.h"
 #import "MyColor.h"
 #import "Header.h"
+#import "KKNavigationController.h"
+#import "WelcomeViewController.h"
+
+//@class WelcomeViewController;
+//@class KKNavigationController;
+
 
 #define YSTART  (([[[UIDevice currentDevice] systemVersion] floatValue] < 7.0)?0.0f:20.0f)
 
@@ -130,11 +136,22 @@
     return self;
 }
 
+-(void)postlogOut
+{
+    
+    [Tools exit];
+    WelcomeViewController *login = [[WelcomeViewController alloc] init];
+    KKNavigationController *loginNav = [[KKNavigationController alloc] initWithRootViewController:login];
+    [self.navigationController presentViewController:loginNav animated:YES completion:nil];
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
     
 //    self.tableView.frame = CGRectMake(0, 0, 0, 0);
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(postlogOut) name:@"logout" object:nil];
     
     _bgView = [[UIView alloc] initWithFrame:CGRectMake(0, YSTART,
                                                        UI_SCREEN_WIDTH,
@@ -196,6 +213,12 @@
     if (SYSVERSION >= 7.0)
     {
         [self.view addSubview:_stateView];
+    }
+    
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:FROMWHERE] isEqualToString:FROMCLASS])
+    {
+        self.view.backgroundColor = [UIColor blackColor];
+        self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     }
 }
 

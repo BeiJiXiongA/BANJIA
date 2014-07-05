@@ -79,14 +79,14 @@ SelectClasses>
     objectString = [objectsArray firstObject];
     objectsValueString = @"all";
     
-    contentHolder = [[UITextView alloc] initWithFrame:CGRectMake(18, UI_NAVIGATION_BAR_HEIGHT+48, 200, 30)];
-    contentHolder.text = @"请填写通知内容";
+    contentHolder = [[UITextView alloc] initWithFrame:CGRectMake(18, UI_NAVIGATION_BAR_HEIGHT+20, 200, 30)];
+    contentHolder.text = @"填写通知内容";
     contentHolder.textColor = COMMENTCOLOR;
     contentHolder.font = [UIFont systemFontOfSize:18];
     contentHolder.textColor = [UIColor lightGrayColor];
     contentHolder.backgroundColor = [UIColor clearColor];
     
-    UIImageView *inputImageView = [[UIImageView alloc] initWithFrame:CGRectMake((SCREEN_WIDTH - 300)/2, UI_NAVIGATION_BAR_HEIGHT+38.5, 300, 95)];
+    UIImageView *inputImageView = [[UIImageView alloc] initWithFrame:CGRectMake((SCREEN_WIDTH - 300)/2, UI_NAVIGATION_BAR_HEIGHT+10.5, 300, 95)];
     inputImageView.layer.cornerRadius = 7;
     inputImageView.clipsToBounds = YES;
     inputImageView.layer.borderWidth = 0.3;
@@ -123,7 +123,7 @@ SelectClasses>
     replayLabel.backgroundColor = [UIColor clearColor];
     replayLabel.font = [UIFont systemFontOfSize:18];
     replayLabel.text = @"填写通知内容";
-    [self.bgView addSubview:replayLabel];
+//    [self.bgView addSubview:replayLabel];
     
     replaySwitch = [[MySwitchView alloc] initWithFrame:CGRectMake(replayLabel.frame.size.width+replaySwitch.frame.origin.x+20, replayLabel.frame.origin.y, 80, 30)];
 //    [self.bgView addSubview:replaySwitch];
@@ -310,10 +310,16 @@ SelectClasses>
                 {
                     [self.updel update:YES];
                 }
+                [Tools showAlertView:@"班级通知发布成功" delegateViewController:nil];
+                NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+                if ([[ud objectForKey:FROMWHERE] isEqualToString:FROMCLASS])
+                {
+                    [self.navigationController popViewControllerAnimated:YES];
+                }
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -348,7 +354,7 @@ SelectClasses>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         

@@ -24,6 +24,8 @@
 #import "InputTableBar.h"
 #import "MyButton.h"
 #import "DongTaiDetailViewController.h"
+#import "SearchClassViewController.h"
+#import "CreateClassViewController.h"
 
 #define ImageViewTag  9999
 #define HeaderImageTag  7777
@@ -45,7 +47,11 @@ UIActionSheetDelegate,
 ReturnFunctionDelegate,
 NameButtonDel,
 ClassZoneDelegate,
-NotificationDetailDelegate>
+NotificationDetailDelegate,
+NameButtonDel,
+ChatDelegate,
+MsgDelegate,
+DongTaiDetailAddCommentDelegate>
 {
     UIView *tipView;
     
@@ -84,6 +90,12 @@ NotificationDetailDelegate>
     InputTableBar *inputTabBar;
     
     UITapGestureRecognizer *backTgr;
+    
+    UIButton *addButton;
+    
+    UIButton *joinClassButton;
+    UIButton *createClassButton;
+    UILabel *tipLabel;
 }
 @end
 
@@ -100,11 +112,19 @@ NotificationDetailDelegate>
 
 -(void)joinClass
 {
-    
+
+    SearchClassViewController *searchclassVC = [[SearchClassViewController alloc] init];
+    [[NSUserDefaults standardUserDefaults] setObject:CREATENEWCLASS forKey:SEARCHSCHOOLTYPE];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    [self.navigationController pushViewController:searchclassVC animated:YES];
+
 }
 -(void)createClass
 {
-    
+    CreateClassViewController *createClassViewController = [[CreateClassViewController alloc] init];
+    [[NSUserDefaults standardUserDefaults] setObject:CREATENEWCLASS forKey:SEARCHSCHOOLTYPE];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    [self.navigationController pushViewController:createClassViewController animated:YES];
 }
 
 - (void)viewDidLoad
@@ -127,6 +147,9 @@ NotificationDetailDelegate>
     
     addOpen = NO;
     
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).ChatDelegate = self;
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = self;
+    
     backTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(backInput)];
     
     noticeArray = [[NSMutableArray alloc] initWithCapacity:0];
@@ -146,7 +169,7 @@ NotificationDetailDelegate>
     [moreButton addTarget:self action:@selector(moreOpen) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:moreButton];
     
-    UIButton *addButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    addButton = [UIButton buttonWithType:UIButtonTypeCustom];
     addButton.backgroundColor = [UIColor clearColor];
     [addButton setImage:[UIImage imageNamed:@"icon_add"] forState:UIControlStateNormal];
     addButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
@@ -176,6 +199,9 @@ NotificationDetailDelegate>
 //    addView.wid = 2;
     addView.backgroundColor = [UIColor clearColor];
     [self.bgView addSubview:addView];
+    
+    DDLOG(@"ShareContent  %@",[[NSUserDefaults standardUserDefaults] objectForKey:ShareContentKey]);
+    
     
     UIImageView *addBg = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, addView.frame.size.width, addView.frame.size.height)];
     [addBg setImage:[UIImage imageNamed:@"bor_bg"]];
@@ -226,11 +252,11 @@ NotificationDetailDelegate>
     inputSize = CGSizeMake(250, 30);
     
     
-    tipView = [[UIView alloc] initWithFrame:CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT+40, SCREEN_WIDTH-20, 300)];
+    tipView = [[UIView alloc] initWithFrame:CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT+90, SCREEN_WIDTH-20, 300)];
     tipView.backgroundColor = self.bgView.backgroundColor;
     [self.bgView addSubview:tipView];
     
-    UILabel *tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 0, SCREEN_WIDTH-40, 70)];
+    tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 0, SCREEN_WIDTH-40, 70)];
     tipLabel.backgroundColor = self.bgView.backgroundColor;
     tipLabel.lineBreakMode = NSLineBreakByWordWrapping;
     tipLabel.numberOfLines = 3;
@@ -239,14 +265,14 @@ NotificationDetailDelegate>
     tipLabel.text = @"您还没有加入任何一个班级，快来加入一个班级或创建一个自己的班级吧！";
     [tipView addSubview:tipLabel];
     
-    UIButton *joinClassButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    joinClassButton = [UIButton buttonWithType:UIButtonTypeCustom];
     joinClassButton.frame = CGRectMake(80, 80, 140, 40);
     [joinClassButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
     [joinClassButton addTarget:self action:@selector(joinClass) forControlEvents:UIControlEventTouchUpInside];
     [joinClassButton setTitle:@"加入班级" forState:UIControlStateNormal];
     [tipView addSubview:joinClassButton];
     
-    UIButton *createClassButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    createClassButton = [UIButton buttonWithType:UIButtonTypeCustom];
     createClassButton.frame = CGRectMake(80, 130, 140, 40);
     [createClassButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
     [createClassButton addTarget:self action:@selector(createClass) forControlEvents:UIControlEventTouchUpInside];
@@ -257,15 +283,46 @@ NotificationDetailDelegate>
 
 }
 
+-(void)dealloc
+{
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = nil;
+    inputTabBar.returnFunDel = nil;
+}
+
+-(void)dealNewChatMsg:(NSDictionary *)dict
+{
+    db = [[OperatDB alloc] init];
+    NSMutableArray *array = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"readed":@"0"} andTableName:CHATTABLE];
+    if ([array count] > 0 || [[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue]>0)
+    {
+        self.unReadLabel.hidden = NO;
+    }
+    else
+    {
+        self.unReadLabel.hidden = YES;
+    }
+    DDLOG(@"new chatmsg array=%d",[array count]);
+}
+
+-(void)dealNewMsg:(NSDictionary *)dict
+{
+    if([[dict objectForKey:@"type"]isEqualToString:@"f_apply"])
+    {
+        if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"checked":@"0"} andTableName:FRIENDSTABLE] count] > 0)
+        {
+            self.unReadLabel.hidden = NO;
+        }
+    }
+}
+
+
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
--(void)dealloc
-{
-    inputTabBar.returnFunDel = nil;
-}
+
 -(void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
@@ -275,6 +332,8 @@ NotificationDetailDelegate>
 {
     [super viewWillAppear:animated];
     [self backInput];
+    [self dealNewChatMsg:nil];
+    [self dealNewMsg:nil];
 }
 
 -(void)getHomeData
@@ -312,8 +371,21 @@ NotificationDetailDelegate>
                     [noticeArray removeAllObjects];
                     [diariesArray removeAllObjects];
                 }
+                addButton.hidden = NO;
                 [noticeArray addObjectsFromArray:[[responseDict objectForKey:@"data"] objectForKey:@"notices"]];
                 [diariesArray addObjectsFromArray:[[responseDict objectForKey:@"data"] objectForKey:@"diaries"]];
+                
+                if ([noticeArray count] == 0 && [diariesArray count] == 0)
+                {
+                    tipLabel.text = @"";
+                    [joinClassButton setTitle:@"发表空间" forState:UIControlStateNormal];
+                    [joinClassButton addTarget:self action:@selector(addDongtai) forControlEvents:UIControlEventTouchUpInside];
+                    
+                    [createClassButton setTitle:@"发布通知" forState:UIControlStateNormal];
+                    [createClassButton addTarget:self action:@selector(addNotice) forControlEvents:UIControlEventTouchUpInside];
+                    tipLabel.hidden = NO;
+                }
+                
                 [self groupByTime:diariesArray];
 //                [classTableView reloadData];
             }
@@ -322,9 +394,10 @@ NotificationDetailDelegate>
                 if ([[[[responseDict objectForKey:@"message"] allKeys] firstObject] isEqualToString:@"NO_CLASS"])
                 {
                     tipView.hidden = NO;
+                    addButton.hidden = YES;
                     return ;
                 }
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
             _reloading = NO;
             [egoheaderView egoRefreshScrollViewDataSourceDidFinishedLoading:classTableView];
@@ -386,7 +459,7 @@ NotificationDetailDelegate>
                 tipView.hidden = NO;
                 return ;
             }
-            [Tools dealRequestError:responseDict fromViewController:self];
+            [Tools dealRequestError:responseDict fromViewController:nil];
         }
 
     }
@@ -420,7 +493,7 @@ NotificationDetailDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -707,6 +780,7 @@ NotificationDetailDelegate>
         {
             cell = [[NotificationCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:notiCell];
         }
+        
         NSDictionary *noticeDict = [noticeArray objectAtIndex:indexPath.section];
         NSArray *tmpArray = [noticeDict objectForKey:@"news"];
         
@@ -755,21 +829,7 @@ NotificationDetailDelegate>
         cell.iconImageView.layer.borderColor = RGB(227, 63, 64, 1).CGColor;
         cell.iconImageView.layer.borderWidth = 1;
         
-        if ([[dict objectForKey:@"c_read"] integerValue] == 0)
-        {
-            cell.statusLabel.hidden = YES;
-        }
-        else
-        {
-            if ([[[dict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
-            {
-                cell.statusLabel.text =[NSString stringWithFormat:@"%d人已读 %d人未读",[[dict objectForKey:@"read_num"] integerValue],[[dict objectForKey:@"unread_num"] integerValue]];
-            }
-            else
-            {
-                cell.statusLabel.text =[NSString stringWithFormat:@"%d人已读 %d人未读",[[dict objectForKey:@"read_num"] integerValue],[[dict objectForKey:@"unread_num"] integerValue]];
-            }
-        }
+        cell.statusLabel.text =[NSString stringWithFormat:@"%d人已读 %d人未读",[[dict objectForKey:@"read_num"] integerValue],[[dict objectForKey:@"unread_num"] integerValue]];
         
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         cell.backgroundColor = [UIColor clearColor];
@@ -784,9 +844,9 @@ NotificationDetailDelegate>
             cell = [[TrendsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:topImageView];
         }
         
+        CGFloat left = 5;
         cell.showAllComments = NO;
         cell.nameButtonDel = self;
-        
         NSDictionary *groupDict = [groupDiaries objectAtIndex:indexPath.section-[noticeArray count]-1];
         NSArray *tmpArray = [groupDict objectForKey:@"diaries"];
         NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
@@ -817,6 +877,7 @@ NotificationDetailDelegate>
         cell.timeLabel.textAlignment = NSTextAlignmentRight;
         cell.timeLabel.numberOfLines = 2;
         cell.timeLabel.lineBreakMode = NSLineBreakByWordWrapping;
+        cell.timeLabel.textColor = COMMENTCOLOR;
         
         cell.headerImageView.backgroundColor = [UIColor clearColor];
         
@@ -946,7 +1007,7 @@ NotificationDetailDelegate>
         CGFloat iconH = 18;
         CGFloat iconTop = 9;
         
-        cell.transmitButton.frame = CGRectMake(0, cellHeight+13, (SCREEN_WIDTH-10)/3, buttonHeight);
+        cell.transmitButton.frame = CGRectMake(0, cellHeight+13, (SCREEN_WIDTH-left*2)/3, buttonHeight);
         [cell.transmitButton setTitle:@"   转发" forState:UIControlStateNormal];
         cell.transmitButton.iconImageView.image = [UIImage imageNamed:@"icon_forwarding"];
         cell.transmitButton.tag = (indexPath.section-cha)*SectionTag+indexPath.row;
@@ -976,7 +1037,7 @@ NotificationDetailDelegate>
         
         [cell.praiseButton addTarget:self action:@selector(praiseDiary:) forControlEvents:UIControlEventTouchUpInside];
         cell.praiseButton.tag = (indexPath.section-cha)*SectionTag+indexPath.row;
-        cell.praiseButton.frame = CGRectMake((SCREEN_WIDTH-10)/3, cellHeight+13, (SCREEN_WIDTH-10)/3, buttonHeight);
+        cell.praiseButton.frame = CGRectMake((SCREEN_WIDTH-left*2)/3, cellHeight+13, (SCREEN_WIDTH-left*2)/3, buttonHeight);
         cell.praiseButton.backgroundColor = UIColorFromRGB(0xfcfcfc);
         
         
@@ -990,7 +1051,7 @@ NotificationDetailDelegate>
             [cell.commentButton setTitle:@"  评论" forState:UIControlStateNormal];
             cell.commentButton.iconImageView.frame = CGRectMake(18, iconTop, iconH, iconH);
         }
-        cell.commentButton.frame = CGRectMake((SCREEN_WIDTH-10)/3*2, cellHeight+13, (SCREEN_WIDTH-10)/3, buttonHeight);
+        cell.commentButton.frame = CGRectMake((SCREEN_WIDTH-left*2)/3*2, cellHeight+13, (SCREEN_WIDTH-left*2)/3, buttonHeight);
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         cell.commentButton.backgroundColor = UIColorFromRGB(0xfcfcfc);
         cell.commentButton.tag = (indexPath.section-cha)*SectionTag+indexPath.row;
@@ -1026,7 +1087,7 @@ NotificationDetailDelegate>
             }
             [cell.commentsTableView reloadData];
             cell.commentsTableView.frame = CGRectMake(0, cell.praiseButton.frame.size.height+cell.praiseButton.frame.origin.y, SCREEN_WIDTH, cell.commentsTableView.contentSize.height);
-            cell.bgView.frame = CGRectMake(5, 0, SCREEN_WIDTH-10,
+            cell.bgView.frame = CGRectMake(left, 0, SCREEN_WIDTH-left*2,
                                            cell.commentsTableView.frame.size.height+
                                            cell.commentsTableView.frame.origin.y);
         }
@@ -1035,7 +1096,7 @@ NotificationDetailDelegate>
             cell.commentsArray = nil;
             cell.praiseArray = nil;
             [cell.commentsTableView reloadData];
-            cell.bgView.frame = CGRectMake(5, 0, SCREEN_WIDTH-10,
+            cell.bgView.frame = CGRectMake(left, 0, SCREEN_WIDTH-left*2,
                                            cell.praiseButton.frame.size.height+
                                            cell.praiseButton.frame.origin.y);
         }
@@ -1053,6 +1114,7 @@ NotificationDetailDelegate>
     for (int i = 0; i < [praiseArray count]; i++)
     {
         NSDictionary *dict = [praiseArray objectAtIndex:i];
+        DDLOG(@"praise dict %@",dict);
         if ([[[dict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
         {
             return YES;
@@ -1070,7 +1132,7 @@ NotificationDetailDelegate>
         NotificationDetailViewController *notificationDetailViewController = [[NotificationDetailViewController alloc] init];
         notificationDetailViewController.noticeID = [dict objectForKey:@"_id"];
         notificationDetailViewController.noticeContent = [dict objectForKey:@"content"];
-        notificationDetailViewController.c_read = [dict objectForKey:@"c_read"];
+        notificationDetailViewController.c_read = @"1";
         notificationDetailViewController.markString = [NSString stringWithFormat:@"%@发布于%@",[[dict objectForKey:@"by"] objectForKey:@"name"],[Tools showTime:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]]];
         notificationDetailViewController.readnotificationDetaildel = self;
         notificationDetailViewController.isnew = YES;
@@ -1086,6 +1148,7 @@ NotificationDetailDelegate>
         DongTaiDetailViewController *dongtaiDetailViewController = [[DongTaiDetailViewController alloc] init];
         dongtaiDetailViewController.dongtaiId = [dict objectForKey:@"_id"];
         dongtaiDetailViewController.fromclass = NO;
+        dongtaiDetailViewController.addComDel = self;
         
         [[NSUserDefaults standardUserDefaults] setObject:[dict objectForKey:@"c_id"] forKey:@"classid"];
         [[NSUserDefaults standardUserDefaults] synchronize];
@@ -1156,7 +1219,7 @@ NotificationDetailDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -1168,6 +1231,15 @@ NotificationDetailDelegate>
     }
     
 }
+
+-(void)addComment:(BOOL)add
+{
+    if (add)
+    {
+        [self getHomeData];
+    }
+}
+
 
 -(void)commentDiary:(UIButton *)button
 {
@@ -1374,18 +1446,35 @@ NotificationDetailDelegate>
     waitTransmitDict = [[array objectAtIndex:button.tag%SectionTag] objectForKey:@"detail"];
     [self shareAPP:nil];
 }
+//-(void)nameButtonClick:(NSDictionary *)dict
+//{
+//    DDLOG(@"person dict %@",dict);
+//    PersonDetailViewController *personDetailVC = [[PersonDetailViewController alloc] init];
+//    personDetailVC.personName = [[dict objectForKey:@"by"] objectForKey:@"name"];
+//    personDetailVC.personID = [[dict objectForKey:@"by"] objectForKey:@"_id"];
+//    [self.sideMenuController hideMenuAnimated:YES];
+//    [self.navigationController pushViewController:personDetailVC animated:YES];
+//}
 
 -(void)nameButtonClick:(NSDictionary *)dict
 {
+    
+    DDLOG(@"home %@",dict);
     DongTaiDetailViewController *dongtaiDetailViewController = [[DongTaiDetailViewController alloc] init];
     dongtaiDetailViewController.dongtaiId = [dict objectForKey:@"_id"];
     dongtaiDetailViewController.fromclass = NO;
-    
+    dongtaiDetailViewController.addComDel = self;
     [[NSUserDefaults standardUserDefaults] setObject:[dict objectForKey:@"c_id"] forKey:@"classid"];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
     //        dongtaiDetailViewController.addComDel = self;
     [self.navigationController pushViewController:dongtaiDetailViewController animated:YES];
+}
+
+-(void)cellCommentDiary:(NSDictionary *)dict
+{
+    waitCommentDict = dict;
+    [inputTabBar.inputTextView becomeFirstResponder];
 }
 
 #pragma mark - shareAPP
@@ -1430,6 +1519,7 @@ NotificationDetailDelegate>
  */
 - (void)shareToQQSpaceClickHandler:(UIButton *)sender
 {
+    [self backInput];
     NSString *content;
     if ([waitTransmitDict objectForKey:@"content"])
     {
@@ -1493,9 +1583,10 @@ NotificationDetailDelegate>
                                                        friendsViewDelegate:nil
                                                      picViewerViewDelegate:nil]
                              result:^(ShareType type, SSResponseState state, id<ISSPlatformShareInfo> statusInfo, id<ICMErrorInfo> error, BOOL end) {
-                                 
+                                 [self backInput];
                                  if (state == SSPublishContentStateSuccess)
                                  {
+                                     
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
                                  }
                                  else if (state == SSPublishContentStateFail)
@@ -1512,6 +1603,7 @@ NotificationDetailDelegate>
  */
 - (void)shareToSinaWeiboClickHandler:(UIButton *)sender
 {
+    [self backInput];
     NSString *content;
     if ([waitTransmitDict objectForKey:@"content"])
     {
@@ -1573,7 +1665,7 @@ NotificationDetailDelegate>
                                                          shareViewDelegate:nil                                                       friendsViewDelegate:nil
                                                      picViewerViewDelegate:nil]
                              result:^(ShareType type, SSResponseState state, id<ISSPlatformShareInfo> statusInfo, id<ICMErrorInfo> error, BOOL end) {
-                                 
+                                 [self backInput];
                                  if (state == SSPublishContentStateSuccess)
                                  {
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
@@ -1592,7 +1684,7 @@ NotificationDetailDelegate>
  */
 - (void)shareToTencentWeiboClickHandler:(UIButton *)sender
 {
-    
+    [self backInput];
     NSString *content;
     if ([waitTransmitDict objectForKey:@"content"])
     {
@@ -1654,7 +1746,7 @@ NotificationDetailDelegate>
                                                        friendsViewDelegate:nil
                                                      picViewerViewDelegate:nil]
                              result:^(ShareType type, SSResponseState state, id<ISSPlatformShareInfo> statusInfo, id<ICMErrorInfo> error, BOOL end) {
-                                 
+                                 [self backInput];
                                  if (state == SSPublishContentStateSuccess)
                                  {
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
@@ -1729,7 +1821,7 @@ NotificationDetailDelegate>
                                                        friendsViewDelegate:nil
                                                      picViewerViewDelegate:nil]
                              result:^(ShareType type, SSResponseState state, id<ISSPlatformShareInfo> statusInfo, id<ICMErrorInfo> error, BOOL end) {
-                                 
+                                 [self backInput];
                                  if (state == SSPublishContentStateSuccess)
                                  {
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
@@ -1748,6 +1840,7 @@ NotificationDetailDelegate>
  */
 - (void)shareToWeixinTimelineClickHandler:(UIButton *)sender
 {
+    [self backInput];
     NSString *content;
     if ([waitTransmitDict objectForKey:@"content"])
     {
@@ -1868,7 +1961,6 @@ NotificationDetailDelegate>
                                     [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
                                     SHARE_TYPE_NUMBER(ShareTypeTencentWeibo),
                                     nil]];
-    
     //显示分享菜单
     [ShareSDK showShareViewWithType:ShareTypeRenren
                           container:nil
@@ -1885,7 +1977,7 @@ NotificationDetailDelegate>
                                                        friendsViewDelegate:nil
                                                      picViewerViewDelegate:nil]
                              result:^(ShareType type, SSResponseState state, id<ISSPlatformShareInfo> statusInfo, id<ICMErrorInfo> error, BOOL end) {
-                                 
+                                 [self backInput];
                                  if (state == SSPublishContentStateSuccess)
                                  {
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));

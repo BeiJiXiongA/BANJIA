@@ -24,7 +24,7 @@
 UITableViewDelegate,
 UITextFieldDelegate,
 ReturnFunctionDelegate,
-UIActionSheetDelegate>
+UIActionSheetDelegate,NameButtonDel>
 {
     UITableView *diaryDetailTableView;
     NSDictionary *diaryDetailDict;
@@ -82,12 +82,11 @@ UIActionSheetDelegate>
 {
     [super viewWillAppear:animated];
     self.titleLabel.text = @"空间详情";
-    if (fromclass)
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:FROMWHERE] isEqualToString:FROMCLASS])
     {
         self.view.backgroundColor = [UIColor blackColor];
+        self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     }
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-    
     
     faceViewHeight = 0;
     
@@ -98,7 +97,7 @@ UIActionSheetDelegate>
     self.bgView.frame = CGRectMake(0, YSTART, SCREEN_WIDTH, SCREEN_HEIGHT+200);
     
     moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    moreButton.frame = CGRectMake(SCREEN_WIDTH-60, 6, 50, 32);
+    moreButton.frame = CGRectMake(SCREEN_WIDTH-CORNERMORERIGHT, 6, 50, 32);
     [moreButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
     [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:moreButton];
@@ -111,7 +110,7 @@ UIActionSheetDelegate>
     UIView *tableViewBg = [[UIView alloc] initWithFrame:self.bgView.frame];
     [tableViewBg setBackgroundColor:UIColorFromRGB(0xf1f0ec)];
     
-    diaryDetailTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT-40) style:UITableViewStylePlain];
+    diaryDetailTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT-45) style:UITableViewStylePlain];
     diaryDetailTableView.dataSource = self;
     diaryDetailTableView.delegate = self;
     diaryDetailTableView.tag = 10000;
@@ -154,7 +153,9 @@ UIActionSheetDelegate>
 {
     if (fromclass)
     {
-        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] ==2 || [[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
+        NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
+        int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+        if (userAdmin == 2 || [[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
         {
             UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"删除",@"举报", nil];
             ac.tag = 3333;
@@ -331,28 +332,24 @@ UIActionSheetDelegate>
                 NSString *content = [dict objectForKey:@"content"];
                 NSString *contentString = [NSString stringWithFormat:@"%@:%@",name,content];
                 CGSize s = [Tools getSizeWithString:contentString andWidth:200 andFont:[UIFont systemFontOfSize:14]];
-                tmpcommentHeight += (s.height > 25 ? (s.height+13):35);
+                
+                DDLOG(@"s.hei %.1f",s.height);
+                tmpcommentHeight += (s.height > 25 ? (s.height+15):35);
             }
             
         }
         if ([[diaryDetailDict objectForKey:@"likes_num"] integerValue] > 0)
         {
 //            int row = [[diaryDetailDict objectForKey:@"likes_num"] integerValue]%4 == 0 ? ([[diaryDetailDict objectForKey:@"likes_num"] integerValue]/4):([[diaryDetailDict objectForKey:@"likes_num"] integerValue]/4+1);
+            
             int likes_num = [[diaryDetailDict objectForKey:@"likes_num"] integerValue];
             
             int row = likes_num % ColumnPerRow == 0 ? (likes_num/ColumnPerRow):(likes_num/ColumnPerRow+1);
-            tmpcommentHeight+=(36+(PraiseW+5)*row);
+            tmpcommentHeight+=(37+(PraiseW+5)*row);
         }
 
         
-        return 60+imageViewHeight+contentHtight+75+he+tmpcommentHeight+5;
-    }
-    else if(indexPath.section == 1)
-    {
-        NSDictionary *dict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row-1];
-        NSString *contentStr = [dict objectForKey:@"content"];
-        CGSize size = [Tools getSizeWithString:contentStr andWidth:SCREEN_WIDTH-50 andFont:nil];
-        return size.height+68;
+        return 60+imageViewHeight+contentHtight+75+he+tmpcommentHeight+15;
     }
     return 0;
 }
@@ -384,6 +381,7 @@ UIActionSheetDelegate>
     }
     
     cell.showAllComments = YES;
+    cell.nameButtonDel = self;
     
     NSString *name = [[diaryDetailDict objectForKey:@"by"] objectForKey:@"name"];
     
@@ -630,6 +628,7 @@ UIActionSheetDelegate>
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    [self backInput];
     [inputTabBar backKeyBoard];
 }
 
@@ -658,6 +657,30 @@ UIActionSheetDelegate>
 -(void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
     [inputTabBar backKeyBoard];
+}
+
+-(void)showPersonDetail:(NSDictionary *)dict
+{
+    DDLOG(@"person dict %@",dict);
+    PersonDetailViewController *personDetailVC = [[PersonDetailViewController alloc] init];
+    personDetailVC.personName = [[dict objectForKey:@"by"] objectForKey:@"name"];
+    personDetailVC.personID = [[dict objectForKey:@"by"] objectForKey:@"_id"];
+    [self.sideMenuController hideMenuAnimated:YES];
+    [self.navigationController pushViewController:personDetailVC animated:YES];
+}
+
+-(void)nameButtonClick:(NSDictionary *)dict
+{
+//    DDLOG(@"person dict %@",dict);
+//    PersonDetailViewController *personDetailVC = [[PersonDetailViewController alloc] init];
+//    personDetailVC.personName = [[dict objectForKey:@"by"] objectForKey:@"name"];
+//    personDetailVC.personID = [[dict objectForKey:@"by"] objectForKey:@"_id"];
+//    [self.sideMenuController hideMenuAnimated:YES];
+//    [self.navigationController pushViewController:personDetailVC animated:YES];
+}
+-(void)cellCommentDiary:(NSDictionary *)dict
+{
+    [inputTabBar.inputTextView becomeFirstResponder];
 }
 
 #pragma mark - aboutComment
@@ -706,7 +729,7 @@ UIActionSheetDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -747,7 +770,7 @@ UIActionSheetDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -783,7 +806,7 @@ UIActionSheetDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -816,7 +839,9 @@ UIActionSheetDelegate>
                 
                 if (fromclass)
                 {
-                    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] ==2 || [[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
+                    NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
+                    int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+                    if (userAdmin == 2 || [[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
                     {
                         moreButton.hidden = NO;
                     }
@@ -837,7 +862,7 @@ UIActionSheetDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -896,7 +921,9 @@ UIActionSheetDelegate>
     }
     else if (actionSheet.tag == 3333)
     {
-        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] ==2 || [[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
+        NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
+        int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+        if (userAdmin == 2 || [[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
         {
             if (buttonIndex == 0)
             {
@@ -995,7 +1022,7 @@ UIActionSheetDelegate>
                                                        friendsViewDelegate:nil
                                                      picViewerViewDelegate:nil]
                              result:^(ShareType type, SSResponseState state, id<ISSPlatformShareInfo> statusInfo, id<ICMErrorInfo> error, BOOL end) {
-                                 
+                                 [self backInput];
                                  if (state == SSPublishContentStateSuccess)
                                  {
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
@@ -1075,7 +1102,7 @@ UIActionSheetDelegate>
                                                          shareViewDelegate:nil                                                       friendsViewDelegate:nil
                                                      picViewerViewDelegate:nil]
                              result:^(ShareType type, SSResponseState state, id<ISSPlatformShareInfo> statusInfo, id<ICMErrorInfo> error, BOOL end) {
-                                 
+                                 [self backInput];
                                  if (state == SSPublishContentStateSuccess)
                                  {
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
@@ -1156,7 +1183,7 @@ UIActionSheetDelegate>
                                                        friendsViewDelegate:nil
                                                      picViewerViewDelegate:nil]
                              result:^(ShareType type, SSResponseState state, id<ISSPlatformShareInfo> statusInfo, id<ICMErrorInfo> error, BOOL end) {
-                                 
+                                 [self backInput];
                                  if (state == SSPublishContentStateSuccess)
                                  {
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
@@ -1231,7 +1258,7 @@ UIActionSheetDelegate>
                                                        friendsViewDelegate:nil
                                                      picViewerViewDelegate:nil]
                              result:^(ShareType type, SSResponseState state, id<ISSPlatformShareInfo> statusInfo, id<ICMErrorInfo> error, BOOL end) {
-                                 
+                                 [self backInput];
                                  if (state == SSPublishContentStateSuccess)
                                  {
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
@@ -1307,7 +1334,7 @@ UIActionSheetDelegate>
                                                        friendsViewDelegate:nil
                                                      picViewerViewDelegate:nil]
                              result:^(ShareType type, SSResponseState state, id<ISSPlatformShareInfo> statusInfo, id<ICMErrorInfo> error, BOOL end) {
-                                 
+                                 [self backInput];
                                  if (state == SSPublishContentStateSuccess)
                                  {
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
@@ -1387,7 +1414,7 @@ UIActionSheetDelegate>
                                                        friendsViewDelegate:nil
                                                      picViewerViewDelegate:nil]
                              result:^(ShareType type, SSResponseState state, id<ISSPlatformShareInfo> statusInfo, id<ICMErrorInfo> error, BOOL end) {
-                                 
+                                 [self backInput];
                                  if (state == SSPublishContentStateSuccess)
                                  {
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));

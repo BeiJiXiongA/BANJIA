@@ -159,7 +159,7 @@
         return ;
     }
     
-    NSString *userStr = @"simu";
+    NSString *userStr = @"";
     if ([[APService registrionID] length] > 0)
     {
         userStr = [APService registrionID];
@@ -212,7 +212,7 @@
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         

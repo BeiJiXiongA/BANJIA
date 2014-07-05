@@ -20,7 +20,7 @@
         [self.contentView addSubview:headerImageView];
         
         nameLabel = [[UILabel alloc] init];
-        nameLabel.textColor = TITLE_COLOR;
+        nameLabel.textColor = COMMENTCOLOR;
         nameLabel.backgroundColor = [UIColor clearColor];
         [self.contentView addSubview:nameLabel];
         

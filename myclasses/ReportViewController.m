@@ -39,9 +39,11 @@
     
     selectIndex = 2;
     
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-    self.view.backgroundColor = [UIColor blackColor];
-    
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:FROMWHERE] isEqualToString:FROMCLASS])
+    {
+        self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+        self.view.backgroundColor = [UIColor blackColor];
+    }
     tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, UI_NAVIGATION_BAR_HEIGHT+20, 100, 30)];
     tipLabel.backgroundColor = self.bgView.backgroundColor;
     tipLabel.text = @"举报类型";
@@ -163,7 +165,7 @@
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
 
         }];

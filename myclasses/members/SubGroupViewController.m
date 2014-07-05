@@ -17,7 +17,6 @@
 
 @interface SubGroupViewController ()<UITableViewDataSource,
 UITableViewDelegate,
-ApplyInfoDelegate,
 StuDetailDelegate>
 {
     UITableView *tmpTableView;
@@ -184,7 +183,6 @@ StuDetailDelegate>
     if ([[dict objectForKey:@"checked"] intValue] == 0)
     {
         ApplyInfoViewController *applyInfoViewController = [[ApplyInfoViewController alloc] init];
-        applyInfoViewController.applyDel = self;
         applyInfoViewController.role = [dict objectForKey:@"role"];
         applyInfoViewController.j_id = [dict objectForKey:@"uid"];
         applyInfoViewController.title = [dict objectForKey:@"title"];
@@ -309,7 +307,6 @@ StuDetailDelegate>
 {
     NSDictionary *dict = [tmpArray objectAtIndex:button.tag - 3000];
     ApplyInfoViewController *applyInfoViewController = [[ApplyInfoViewController alloc] init];
-    applyInfoViewController.applyDel = self;
     applyInfoViewController.role = [dict objectForKey:@"role"];
     applyInfoViewController.j_id = [dict objectForKey:@"uid"];
     applyInfoViewController.title = [dict objectForKey:@"title"];
@@ -346,7 +343,7 @@ StuDetailDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -390,7 +387,7 @@ StuDetailDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         

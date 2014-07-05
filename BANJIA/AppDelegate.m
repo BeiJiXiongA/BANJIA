@@ -9,7 +9,8 @@
 #import "AppDelegate.h"
 #import "Header.h"
 #import "WelcomeViewController.h"
-#import "FillInfoViewController.h"
+//#import "FillInfoViewController.h"
+#import "FillInfo2ViewController.h"
 #import "SideMenuViewController.h"
 #import "MyClassesViewController.h"
 #import "HomeViewController.h"
@@ -26,6 +27,9 @@
 #import "WXApi.h"
 #import "ChineseToPinyin.h"
 #import "NSString+Emojize.h"
+
+#import "ApplyInfoViewController.h"
+
 //Õı»
 #define NewVersionTag  1000
 
@@ -42,12 +46,19 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for cupstomization after application launch.
     
-    [[NSUserDefaults standardUserDefaults] setObject:@"0016" forKey:@"currentVersion"];
+    [[NSUserDefaults standardUserDefaults] setObject:@"0002" forKey:@"currentVersion"];
+    [[NSUserDefaults standardUserDefaults] setObject:SCHEMERELEASE forKey:SCHEMETYPE];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
     [application setStatusBarHidden:NO withAnimation:UIStatusBarAnimationFade];
     
     _db = [[OperatDB alloc] init];
+    
+    [APService setAlias:[APService registrionID] callbackSelector:nil object:nil];
+    
+
+    [[NSUserDefaults standardUserDefaults] setObject:NOTFROMCLASS forKey:FROMWHERE];
+    [[NSUserDefaults standardUserDefaults] synchronize];
     
     NSArray *array = [_db findSetWithDictionary:@{} andTableName:CLASSMEMBERTABLE];
     NSDictionary *dict = [array firstObject];
@@ -78,7 +89,6 @@
                     DDLOG(@"insert city success!");
                 }
             }
-
         });
     }
     
@@ -101,9 +111,9 @@
     }
     else if ([[Tools user_id] length] > 0)
     {
-        if ([[Tools user_name] length] <= 0)
+        if ([[Tools user_name] length] <= 0 || [[Tools user_name] isEqualToString:ANONYMITY])
         {
-            FillInfoViewController *fillInfoVC = [[FillInfoViewController alloc] init];
+            FillInfo2ViewController *fillInfoVC = [[FillInfo2ViewController alloc] init];
             fillInfoVC.fromRoot = YES;
             KKNavigationController *fillNav = [[KKNavigationController alloc] initWithRootViewController:fillInfoVC];
             self.window.rootViewController = fillNav;
@@ -117,6 +127,7 @@
             KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:homeViewController];
             JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:homeNav menuController:sideMenuViewController];
             self.window.rootViewController = sideMenu;
+            
         }
     }
     else
@@ -125,10 +136,6 @@
         KKNavigationController *welNav = [[KKNavigationController alloc] initWithRootViewController:welcomeViewCOntroller];
         self.window.rootViewController = welNav;
     }
-
-    
-    self.window.backgroundColor = [UIColor whiteColor];
-    [self.window makeKeyAndVisible];
     
     [ShareSDK registerApp:@"182899e1ea92"];
     [self shareAppKeysForEvery];
@@ -138,7 +145,11 @@
      |UIRemoteNotificationTypeBadge
      |UIRemoteNotificationTypeSound];
     
+    
     [APService setupWithOption:launchOptions];
+    
+    self.window.backgroundColor = [UIColor whiteColor];
+    [self.window makeKeyAndVisible];
     return YES;
 }
 
@@ -172,31 +183,25 @@
                     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
                     NSDictionary *template = [[responseDict objectForKey:@"data"] objectForKey:@"template"];
                     NSString *item1 = [template objectForKey:@"tem1"];
-                    if ([ud objectForKey:@"item1"])
+                    
+                    if (![[ud objectForKey:InviteClassMemberKey] isEqualToString:item1])
                     {
-                        if (![[ud objectForKey:@"item1"] isEqualToString:item1])
-                        {
-                            [ud setObject:item1 forKey:@"item1"];
-                            [ud synchronize];
-                        }
+                        [ud setObject:item1 forKey:ShareContentKey];
+                        [ud synchronize];
                     }
+                    
                     NSString *item2 = [template objectForKey:@"tem2"];
-                    if ([ud objectForKey:@"item2"])
+                    if (![[ud objectForKey:InviteClassMemberKey] isEqualToString:item2])
                     {
-                        if (![[ud objectForKey:@"item2"] isEqualToString:item2])
-                        {
-                            [ud setObject:item2 forKey:@"item2"];
-                            [ud synchronize];
-                        }
+                        [ud setObject:item2 forKey:InviteClassMemberKey];
+                        [ud synchronize];
                     }
+                    
                     NSString *item3 = [template objectForKey:@"tem3"];
-                    if ([ud objectForKey:@"item3"])
+                    if (![[ud objectForKey:InviteParentKey] isEqualToString:item3])
                     {
-                        if (![[ud objectForKey:@"item3"] isEqualToString:item3])
-                        {
-                            [ud setObject:item3 forKey:@"item3"];
-                            [ud synchronize];
-                        }
+                        [ud setObject:item3 forKey:InviteParentKey];
+                        [ud synchronize];
                     }
                 }
             }
@@ -240,9 +245,9 @@
             DDLOG(@"newclass responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                if ([[responseDict objectForKey:@"data"] integerValue] > 0)
+                if ([[[responseDict objectForKey:@"data"] objectForKey:@"count"] integerValue] > 0)
                 {
-                    [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",[[responseDict objectForKey:@"data"] integerValue]] forKey:NewClassNum];
+                    [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"]objectForKey:@"count"] integerValue]] forKey:NewClassNum];
                     [[NSUserDefaults standardUserDefaults] synchronize];
                     
                     if ([self.msgDelegate respondsToSelector:@selector(dealNewMsg:)])
@@ -352,15 +357,30 @@
     [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
 //    [Tools showAlertView:[NSString stringWithFormat:@"%@",userInfo] delegateViewController:nil];
     DDLOG(@"push msg==%@",userInfo);
-    if ([[Tools user_id] length] > 0)
+    if ([Tools user_id])
     {
+        [self getNewChat];
+        [self getNewClass];
+        
         if ([[userInfo objectForKey:@"type"] isEqualToString:@"chat"])
         {
             NSMutableDictionary *chatDict = [[NSMutableDictionary alloc] initWithCapacity:0];
             NSString *alertContent = [[userInfo objectForKey:@"aps"] objectForKey:@"alert"];
-            NSString *chatContent = [alertContent substringFromIndex:[alertContent rangeOfString:@":"].location+1];
-            NSString *fname = [alertContent substringToIndex:[alertContent rangeOfString:@":"].location];
+            NSString *chatContent;
+            NSString *fname;
+            if ([alertContent rangeOfString:@":"].length > 0)
+            {
+                chatContent = [alertContent substringFromIndex:[alertContent rangeOfString:@":"].location+1];
+                fname = [alertContent substringToIndex:[alertContent rangeOfString:@":"].location];
+            }
+            else
+            {
+                chatContent = alertContent;
+                fname = @"";
+            }
+            
             [chatDict setObject:[userInfo objectForKey:@"m_id"] forKey:@"mid"];
+            
             [chatDict setObject:chatContent forKey:@"content"];
             [chatDict setObject:[userInfo  objectForKey:@"f_id"] forKey:@"fid"];
             [chatDict setObject:[userInfo objectForKey:@"time"] forKey:@"time"];
@@ -391,7 +411,8 @@
                 }
             }
             
-            if ([[_db findSetWithDictionary:@{@"userid":[Tools user_id],@"mid":[userInfo objectForKey:@"m_id"]} andTableName:@"chatMsg"] count]==0)
+            
+            if ([[chatDict objectForKey:@"mid"] integerValue] == 0)
             {
                 if ([_db insertRecord:chatDict andTableName:CHATTABLE])
                 {
@@ -401,10 +422,21 @@
                     }
                 }
             }
+            else if ([[_db findSetWithDictionary:@{@"userid":[Tools user_id],@"mid":[userInfo objectForKey:@"m_id"]} andTableName:CHATTABLE] count]==0)
+            {
+                if ([_db insertRecord:chatDict andTableName:CHATTABLE])
+                {
+                    
+                    if ([self.chatDelegate respondsToSelector:@selector(dealNewChatMsg:)])
+                    {
+                        [self.chatDelegate dealNewChatMsg:chatDict];
+                    }
+                    [[NSNotificationCenter defaultCenter] postNotificationName:@"receivenewmsg" object:nil];
+                }
+            }
         }
         else if ([[userInfo objectForKey:@"type"] isEqualToString:@"c_apply"])
         {
-            
             UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:[[userInfo objectForKey:@"aps"] objectForKey:@"alert"] delegate:self cancelButtonTitle:@"知道了" otherButtonTitles: nil];
             [al show];
             NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithCapacity:0];
@@ -427,7 +459,6 @@
                     [self.msgDelegate dealNewMsg:userInfo];
                 }
             }
-            
         }
         else if ([[userInfo objectForKey:@"type"] isEqualToString:@"notice"])
         {
@@ -446,9 +477,9 @@
                                                      , &soundID);
                     AudioServicesPlaySystemSound (soundID);
                 }
-
+                
             }
-//            [self getClassInfo:userInfo];
+            //            [self getClassInfo:userInfo];
         }
         else if([[userInfo objectForKey:@"type"] isEqualToString:@"f_apply"])
         {
@@ -457,7 +488,15 @@
             NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithCapacity:0];
             NSString *alertString = [[userInfo objectForKey:@"aps"] objectForKey:@"alert"];
             NSRange range = [alertString rangeOfString:@":"];
-            NSString *name = [alertString substringToIndex:range.location-1];
+            NSString *name;
+            if (range.length > 0)
+            {
+                name = [alertString substringToIndex:range.location-1];
+            }
+            else
+            {
+                name = @"";
+            }
             
             [dict setObject:[Tools user_id] forKey:@"uid"];
             [dict setObject:name forKey:@"fname"];
@@ -481,6 +520,12 @@
                 [self.msgDelegate dealNewMsg:userInfo];
             }
         }
+        else if([[userInfo objectForKey:@"type"] isEqualToString:@"logout"])
+        {
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"logout" object:userInfo];
+            
+            [Tools showAlertView:[[userInfo objectForKey:@"aps"] objectForKey:@"alert"] delegateViewController:nil];
+        }
     }
 }
 
@@ -503,8 +548,21 @@
                 {                    
                     NSString *alertString = [[classDict objectForKey:@"aps"] objectForKey:@"alert"];
                     NSRange range = [alertString rangeOfString:@":"];
-                    NSString *name = [alertString substringToIndex:range.location-1];
-                    NSString *content = [alertString substringFromIndex:range.location+1];
+                    
+                    NSString *name;
+                    NSString *content;
+                    
+                    if (range.length > 0)
+                    {
+                        name = [alertString substringToIndex:range.location-1];
+                        content = [alertString substringFromIndex:range.location+1];
+                    }
+                    else
+                    {
+                        name = @"";
+                        content = @"";
+                    }
+                    
                     
                     NSString *message = [NSString stringWithFormat:@"%@:%@",[[responseDict objectForKey:@"data"] objectForKey:@"name"],content];
                     UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"新公告" message:message delegate:self cancelButtonTitle:@"知道了" otherButtonTitles: nil];

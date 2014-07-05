@@ -192,7 +192,7 @@ SelectAreaDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
             
         }];
@@ -470,6 +470,7 @@ SelectAreaDelegate>
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 SchoolListViewController *schoolListViewController = [[SchoolListViewController alloc] init];
+                
                 if ([[responseDict objectForKey:@"data"] isKindOfClass:[NSDictionary class]])
                 {
                     schoolListViewController.schoolArray = [[responseDict objectForKey:@"data"] allValues];
@@ -484,7 +485,7 @@ SelectAreaDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
             
         }];
@@ -542,7 +543,7 @@ SelectAreaDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
             
         }];

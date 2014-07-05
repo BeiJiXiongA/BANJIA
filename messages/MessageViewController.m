@@ -134,9 +134,10 @@ ChatVCDelegate>
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).ChatDelegate = self;
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = self;
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dealNewChatMsg:) name:RECEIVENEWMSG object:nil];
+    
     
     [self dealNewChatMsg:nil];
     [self dealNewMsg:nil];
@@ -147,6 +148,7 @@ ChatVCDelegate>
 {
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).ChatDelegate = nil;
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = nil;
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:RECEIVENEWMSG object:nil];
 }
 
 -(void)dealNewMsg:(NSDictionary *)dict
@@ -214,7 +216,7 @@ ChatVCDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
             
         }];
@@ -377,9 +379,13 @@ ChatVCDelegate>
     
     if (![[dict objectForKey:@"ficon"] isEqual:[NSNull null]])
     {
-        if ([[dict objectForKey:@"ficon"] length] > 10)
+        if ([[dict objectForKey:@"fid"]isEqualToString:OurTeamID])
         {
-            [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"ficon"] andDefault:HEADERBG];
+            [Tools fillImageView:cell.headerImageView withImageFromURL:OurTeamHeader andDefault:HEADERICON];
+        }
+        else if ([[dict objectForKey:@"ficon"] length] > 10)
+        {
+            [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"ficon"] andDefault:HEADERICON];
         }
         else
         {
@@ -391,11 +397,11 @@ ChatVCDelegate>
                 {
                     if ([[memDict objectForKey:@"img_icon"] length] >10)
                     {
-                        [Tools fillImageView:cell.headerImageView withImageFromURL:[memDict objectForKey:@"img_icon"] andDefault:HEADERBG];
+                        [Tools fillImageView:cell.headerImageView withImageFromURL:[memDict objectForKey:@"img_icon"] andDefault:HEADERICON];
                     }
                     else
                     {
-                        [cell.headerImageView setImage:[UIImage imageNamed:HEADERBG]];
+                        [cell.headerImageView setImage:[UIImage imageNamed:HEADERICON]];
                     }
                 }
             }
@@ -415,6 +421,8 @@ ChatVCDelegate>
     {
         cell.unreadedMsgLabel.text = [NSString stringWithFormat:@"%d",[self newMsgCountOfUser:[dict objectForKey:@"fid"]]];
         cell.unreadedMsgLabel.hidden = NO;
+        cell.unreadedMsgLabel.backgroundColor = [UIColor redColor];
+        [cell.contentView bringSubviewToFront:cell.unreadedMsgLabel];
     }
     
     NSDictionary *lastMsgDict = [self findLastMsgWithUser:[dict objectForKey:@"fid"]];
@@ -452,7 +460,14 @@ ChatVCDelegate>
     ChatViewController *chat = [[ChatViewController alloc] init];
     chat.name = [self getNameFromString:[dict objectForKey:@"fname"]];
     chat.toID = [dict objectForKey:@"fid"];
-    chat.imageUrl = [dict objectForKey:@"ficon"];
+    if ([chat.toID isEqualToString:OurTeamID])
+    {
+        chat.imageUrl = OurTeamHeader;
+    }
+    else
+    {
+        chat.imageUrl = [dict objectForKey:@"ficon"];
+    }
     chat.chatVcDel = self;
     chat.fromClass = NO;
     [self.navigationController pushViewController:chat animated:YES];

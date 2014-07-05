@@ -269,35 +269,66 @@ UIScrollViewDelegate>
     }
 }
 
--(void)getCheckCode
+-(void)getVerifyCode
 {
-    if ([phoneNumTextfield.text length] == 0)
-    {
-        [Tools showAlertView:@"请输入手机号码！" delegateViewController:nil];
-        return ;
-    }
-    if (![Tools isPhoneNumber:[Tools getPhoneNumFromString:phoneNumTextfield.text]])
-    {
-        [Tools showAlertView:@"手机号格式不正确！" delegateViewController:nil];
-        return ;
-    }
-    
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],@"phone":phoneNumTextfield.text} API:CHECKPHONE];
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"phone":[Tools getPhoneNumFromString:phoneNumTextfield.text]} API:BINDPHONE];
         
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"check phone responsedict %@",responseString);
+            DDLOG(@"get code %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                [self getVerifyCode];
+                [self getcheckCode];
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+            
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools hideProgress:self.bgView];
+        }];
+        [Tools showProgress:self.bgView];
+        [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
+    
+}
+
+-(void)getcheckCode
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id]} API:MB_AUTHCODE];
+        
+        [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"== responsedict %@",responseString);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                //                codeStr = [responseDict objectForKey:@"data"];
+                getCodeButton.hidden = YES;
+                codeTextField.text = [responseDict objectForKey:@"data"];
+                
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
             
         }];
@@ -316,50 +347,7 @@ UIScrollViewDelegate>
     }
 }
 
--(void)getVerifyCode
-{
-    if ([Tools NetworkReachable])
-    {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"phone":phoneNumTextfield.text} API:MB_AUTHCODE];
-        
-        [request setCompletionBlock:^{
-            [Tools hideProgress:self.bgView];
-            NSString *responseString = [request responseString];
-            NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"checkphone responsedict %@",responseString);
-            if ([[responseDict objectForKey:@"code"] intValue]== 1)
-            {
-                if (![[responseDict objectForKey:@"data"] isEqual:[NSNull null]])
-                {
-                    checkCode = [responseDict objectForKey:@"data"];
-                    codeTextField.text = checkCode;
-                }
-                else
-                {
-                    [Tools showAlertView:@"获取验证码失败" delegateViewController:nil];
-                }
-            }
-            else
-            {
-                [Tools dealRequestError:responseDict fromViewController:self];
-            }
-            
-        }];
-        
-        [request setFailedBlock:^{
-            NSError *error = [request error];
-            DDLOG(@"error %@",error);
-            [Tools hideProgress:self.bgView];
-        }];
-        [Tools showProgress:self.bgView];
-        [request startAsynchronous];
-    }
-    else
-    {
-        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
-    }
-    
-}
+
 -(void)verify
 {
     if ([codeTextField.text length] == 0)
@@ -369,7 +357,11 @@ UIScrollViewDelegate>
     }
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"phone":[Tools getPhoneNumFromString:phoneNumTextfield.text],@"auth_code":codeTextField.text} API:MB_CHECKOUT];
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"phone":phoneNumTextfield.text,
+                                                                      @"auth_code":codeTextField.text}
+                                                                API:BINDPHONE];
         
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
@@ -378,13 +370,15 @@ UIScrollViewDelegate>
             DDLOG(@"verify responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                [Tools showAlertView:@"验证成功！" delegateViewController:nil];
+                [Tools showTips:@"绑定成功" toView:self.bgView];
                 studentButton.enabled = YES;
-                phoneNumTextfield.enabled = NO;
+                [[NSUserDefaults standardUserDefaults] setObject:phoneNumTextfield.text forKey:PHONENUM];
+                [[NSUserDefaults standardUserDefaults] synchronize];
+                [studentButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
             
         }];
@@ -547,7 +541,7 @@ UIScrollViewDelegate>
             }
             else if ([[responseDict objectForKey:@"code"] intValue]== 0)
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         

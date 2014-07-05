@@ -81,13 +81,15 @@ EGORefreshTableDelegate>
     [addButton setImage:[UIImage imageNamed:@"icon_add"] forState:UIControlStateNormal];
     
     
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] ==2)
+    NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
+    int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+    if (userAdmin == 2)
     {
         [self.navigationBarView addSubview:addButton];
     }
     else if([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:AdminSendNotice] integerValue] == 1)
     {
-        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] ==1)
+        if (userAdmin ==1)
         {
             [self.navigationBarView addSubview:addButton];
         }
@@ -235,9 +237,6 @@ EGORefreshTableDelegate>
     UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 35)];
     headerView.backgroundColor = UIColorFromRGB(0xf1f0ec);
     
-    UIView *dotView = [[UIView alloc] initWithFrame:CGRectMake(14, 11.5, 12, 12)];
-    dotView.backgroundColor = [UIColor redColor];
-    
     UILabel *headerLabel = [[UILabel alloc] init];
     headerLabel.backgroundColor = UIColorFromRGB(0xf1f0ec);
     headerLabel.font = [UIFont systemFontOfSize:18];
@@ -249,9 +248,6 @@ EGORefreshTableDelegate>
         {
             headerLabel.text = @"   未读通知";
             headerLabel.frame = CGRectMake(0, 2.5, headerView.frame.size.width, 30);
-//            dotView.layer.cornerRadius = 6;
-//            dotView.clipsToBounds = YES;
-//            [headerView addSubview:dotView];
             return headerView;
         }
     }
@@ -327,9 +323,12 @@ EGORefreshTableDelegate>
     cell.contentLabel.hidden = YES;
     cell.nameLabel.hidden = YES;
     cell.contentLabel.backgroundColor = [UIColor whiteColor];
+    
     if (indexPath.section == 0)
     {
-       
+        cell.timeLabel.hidden = YES;
+        cell.statusLabel.hidden = YES;
+        cell.bgImageView.hidden = YES;
         if (indexPath.row == 0)
         {
             NSString *schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
@@ -347,6 +346,12 @@ EGORefreshTableDelegate>
                 cell.contentLabel.text = @"您的班级未设置学校，设置班级后成员可以通过短信接收班级通知。";
                 cell.contentLabel.textColor = RGB(255, 102, 0, 1);
             }
+            else
+            {
+                cell.contentLabel.hidden = YES;
+                cell.nameLabel.hidden = YES;
+                
+            }
         }
         else if(indexPath.row == 1)
         {
@@ -361,6 +366,10 @@ EGORefreshTableDelegate>
                 NSString *classname = [NSString stringWithFormat:@"   %@",[[NSUserDefaults standardUserDefaults] objectForKey:@"classname"]];
                 cell.contentLabel.text = classname;
             }
+            else
+            
+                cell.contentLabel.hidden = YES;
+                cell.nameLabel.hidden = YES;
         }
         return cell;
     }
@@ -381,14 +390,13 @@ EGORefreshTableDelegate>
                 dict = [readedArray objectAtIndex:indexPath.row];
             }
         }
-        else
-        {
-            return nil;
-        }
-        
-        
+        cell.timeLabel.hidden = NO;
+        cell.statusLabel.hidden = NO;
+        cell.bgImageView.hidden = NO;
         cell.contentLabel.hidden = NO;
         cell.nameLabel.hidden = NO;
+        cell.contentLabel.backgroundColor = [UIColor whiteColor];
+        cell.nameLabel.backgroundColor = [UIColor whiteColor];
         
         NSString *byName = [[dict objectForKey:@"by"] objectForKey:@"name"];
         
@@ -409,11 +417,9 @@ EGORefreshTableDelegate>
         cell.bgImageView.frame = CGRectMake(8, 4, SCREEN_WIDTH-16, 80);
         
         cell.contentLabel.text = noticeContent;
-        cell.contentLabel.backgroundColor = [UIColor clearColor];
         cell.contentLabel.font = [UIFont systemFontOfSize:16];
         cell.contentLabel.textColor = CONTENTCOLOR;
         cell.contentLabel.contentMode = UIViewContentModeTop;
-        
         
         
         if (indexPath.section == 1)
@@ -446,38 +452,8 @@ EGORefreshTableDelegate>
         cell.timeLabel.text = [NSString stringWithFormat:@"%@发布于%@",byName,[Tools showTime:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]]];
         cell.timeLabel.textColor = TIMECOLOR;
         
-        //    if (![[[dict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
-        //    {
-        //        if ([[dict objectForKey:@"new"] integerValue] == 0)
-        //        {
-        //            [cell.iconImageView setImage:[UIImage imageNamed:@"icon_checked"]];
-        //        }
-        //        else if([[dict objectForKey:@"new"] integerValue] == 1)
-        //        {
-        //            [cell.iconImageView setImage:[UIImage imageNamed:@"unreadicon"]];;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        [cell.iconImageView setImage:[UIImage imageNamed:@"icon_checked"]];
-        //    }
         
-        if ([[dict objectForKey:@"c_read"] integerValue] == 0)
-        {
-            cell.statusLabel.hidden = YES;
-        }
-        else
-        {
-            if ([[[dict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
-            {
-                cell.statusLabel.text =[NSString stringWithFormat:@"%d人已读 %d人未读",[[dict objectForKey:@"read_num"] integerValue],[[dict objectForKey:@"unread_num"] integerValue]];
-            }
-            else
-            {
-                cell.statusLabel.text =[NSString stringWithFormat:@"%d人已读 %d人未读",[[dict objectForKey:@"read_num"] integerValue],[[dict objectForKey:@"unread_num"] integerValue]];
-            }
-        }
-        
+        cell.statusLabel.text =[NSString stringWithFormat:@"%d人已读 %d人未读",[[dict objectForKey:@"read_num"] integerValue],[[dict objectForKey:@"unread_num"] integerValue]];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         cell.backgroundColor = [UIColor clearColor];
         return cell;
@@ -508,7 +484,7 @@ EGORefreshTableDelegate>
     NotificationDetailViewController *notificationDetailViewController = [[NotificationDetailViewController alloc] init];
     notificationDetailViewController.noticeID = [dict objectForKey:@"_id"];
     notificationDetailViewController.noticeContent = [dict objectForKey:@"content"];
-    notificationDetailViewController.c_read = [dict objectForKey:@"c_read"];
+    notificationDetailViewController.c_read = @"1";
     notificationDetailViewController.readnotificationDetaildel = self;
     notificationDetailViewController.fromClass = YES;
     notificationDetailViewController.byID = [[dict objectForKey:@"by"] objectForKey:@"_id"];
@@ -639,7 +615,7 @@ EGORefreshTableDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         

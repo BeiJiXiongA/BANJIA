@@ -273,7 +273,7 @@ MFMailComposeViewControllerDelegate>
         }
         else
         {
-            if ([[NSUserDefaults standardUserDefaults] objectForKey:@"currentVersion"])
+            if ([[[NSUserDefaults standardUserDefaults] objectForKey:SCHEMETYPE] isEqualToString:SCHEMEDEBUG])
             {
                 cell.markLabel.text = [NSString stringWithFormat:@"当前版本%@",[[NSUserDefaults standardUserDefaults] objectForKey:@"currentVersion"]];
             }
@@ -297,7 +297,7 @@ MFMailComposeViewControllerDelegate>
         cell.mySwitch.hidden = YES;
         if (indexPath.row == [setArray3 count]-1)
         {
-            cell.accessoryType = UITableViewCellAccessoryNone;
+            
             UIButton *loginOutButton = [UIButton buttonWithType:UIButtonTypeCustom];
             loginOutButton.frame = CGRectMake(38.5, 16.5, SCREEN_WIDTH-77, 40);
             [loginOutButton setBackgroundImage:[UIImage imageNamed:@"logout"] forState:UIControlStateNormal];
@@ -310,8 +310,9 @@ MFMailComposeViewControllerDelegate>
         }
         else
         {
-            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"discovery_arrow"]];
-            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 12.5, 10, 15)];
+            cell.arrowImageView.frame = CGRectMake(SCREEN_WIDTH-25, 27.5, 10, 15);
+            [cell.arrowImageView setImage:[UIImage imageNamed:@"discovery_arrow"]];
+            cell.arrowImageView.backgroundColor = [UIColor whiteColor];
             UIImageView *bgImageBG = [[UIImageView alloc] init];
             bgImageBG.image = [UIImage imageNamed:@"line4"];
             bgImageBG.backgroundColor = [UIColor clearColor];
@@ -321,7 +322,7 @@ MFMailComposeViewControllerDelegate>
     }
     
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
-    
+    cell.contentView.backgroundColor = [UIColor whiteColor];
     return cell;
 }
 
@@ -631,7 +632,7 @@ MFMailComposeViewControllerDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
             
         }];
@@ -703,7 +704,7 @@ MFMailComposeViewControllerDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -738,7 +739,7 @@ MFMailComposeViewControllerDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         

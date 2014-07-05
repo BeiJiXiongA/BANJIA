@@ -95,16 +95,13 @@ UITableViewDelegate>
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     
     schoolLevelArray = [NSArray arrayWithObjects:@"小学",@"中学",@"夏令营",@"社团",@"职业学校",@"幼儿园",@"其他", nil];
-    
-    xiaoxue = @[@"一年级",@"二年级",@"三年级",@"四年级",@"五年级",@"六年级"];
-    chuzhong = @[@"初一",@"初二",@"初三",@"初四",@"高一",@"高二",@"高三",];
-    
+
     cellNameArray = @[@"学校类型",@"入学时间"];
     
     createTableView = [[UITableView alloc] initWithFrame:CGRectMake(20, UI_NAVIGATION_BAR_HEIGHT+40, SCREEN_WIDTH-40, 100) style:UITableViewStylePlain];
     createTableView.delegate = self;
     createTableView.dataSource = self;
-    createTableView.scrollEnabled = YES;
+    createTableView.scrollEnabled = NO;
     createTableView.tag = CreateClassTableViewTag;
     createTableView.backgroundColor = self.bgView.backgroundColor;
     createTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
@@ -118,8 +115,6 @@ UITableViewDelegate>
     tmpTableView.layer.cornerRadius = 8;
     tmpTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     
-    
-    
     UILabel *classLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, createTableView.frame.size.height+createTableView.frame.origin.y+10, SCREEN_WIDTH-40, 42.5)];
     classLabel.text = @"  班级名称";
     classLabel.backgroundColor = [UIColor whiteColor];
@@ -129,7 +124,7 @@ UITableViewDelegate>
     classLabel.textColor = CONTENTCOLOR;
     [self.bgView addSubview:classLabel];
     
-    classNameTextField = [[MyTextField alloc] initWithFrame:CGRectMake(100, classLabel.frame.origin.y+6.2, SCREEN_WIDTH-135, 30)];
+    classNameTextField = [[MyTextField alloc] initWithFrame:CGRectMake(103, classLabel.frame.origin.y+6.2, SCREEN_WIDTH-127, 30)];
     classNameTextField.text = @"";
     classNameTextField.returnKeyType = UIReturnKeyDone;
     classNameTextField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
@@ -141,13 +136,6 @@ UITableViewDelegate>
     classNameTextField.placeholder = @"班级名称";
     classNameTextField.font = [UIFont systemFontOfSize:18];
     [self.bgView addSubview:classNameTextField];
-    
-    UIButton *editButton1 = [UIButton buttonWithType:UIButtonTypeCustom];
-    editButton1.frame = CGRectMake(classNameTextField.frame.origin.x+classNameTextField.frame.size.width-25, classNameTextField.frame.origin.y, 30, 30);
-    [editButton1 setImage:[UIImage imageNamed:@"edit"] forState:UIControlStateNormal];
-    editButton1.backgroundColor = [UIColor clearColor];
-    [editButton1 addTarget:self action:@selector(editClassName) forControlEvents:UIControlEventTouchUpInside];
-    [self.bgView addSubview:editButton1];
     
     UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
     UIButton *createButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -261,12 +249,12 @@ UITableViewDelegate>
         }
         cell.nameLabel.frame = CGRectMake(10, 11, 100, 20);
         cell.nameLabel.text = [cellNameArray objectAtIndex:indexPath.row];
-        cell.contentLable.frame = CGRectMake(SCREEN_WIDTH-250, 11, 170, 20);
+        cell.contentLable.frame = CGRectMake(SCREEN_WIDTH-235, 11, 170, 20);
         cell.contentLable.font = cell.nameLabel.font;
         cell.contentLable.textAlignment = NSTextAlignmentRight;
         if (indexPath.row == 0)
         {
-            cell.contentLable.text = [schoolLevelArray objectAtIndex:[schoolType integerValue]];
+            cell.contentLable.text = [schoolLevelArray objectAtIndex:[schoolType integerValue]-1];
         }
         else if(indexPath.row == 1)
         {
@@ -365,47 +353,11 @@ UITableViewDelegate>
         if([selectType isEqualToString:SCHOOLTYPE])
         {
             schoolType = [NSString stringWithFormat:@"%d",indexPath.row+1];
-            if ([schoolType isEqualToString:@"1"])
-            {
-                nianji = [xiaoxue firstObject];
-            }
-            else if([schoolType isEqualToString:@"2"])
-            {
-                nianji = [chuzhong firstObject];;
-            }
-            else
-            {
-                nianji = @"";
-            }
         }
         else if([selectType isEqualToString:JOINYEAR])
         {
             joinYear = [yearArray objectAtIndex:indexPath.row];
         }
-        else if ([selectType isEqualToString:NIANJI])
-        {
-            if ([schoolType isEqualToString:@"1"])
-            {
-                nianji = [dataSourceArray objectAtIndex:indexPath.row];
-            }
-            else if([schoolType isEqualToString:@"2"])
-            {
-                nianji = [dataSourceArray objectAtIndex:indexPath.row];
-            }
-            else
-            {
-                nianji = @"";
-            }
-        }
-        if ([nianji length] == 0)
-        {
-            classNameTextField.text = [schoolLevelArray objectAtIndex:[schoolType integerValue]];
-        }
-        else
-        {
-            classNameTextField.text = nianji;
-        }
-        
         [createTableView reloadData];
         isSelect = NO;
         [UIView animateWithDuration:0.2 animations:^{
@@ -455,7 +407,7 @@ UITableViewDelegate>
     
     if([joinYear isEqualToString:@"请选择"])
     {
-        [Tools showAlertView:@"请选择入学年份" delegateViewController:nil];
+        [Tools showAlertView:@"请选择入学时间" delegateViewController:nil];
         return ;
     }
     
@@ -465,15 +417,19 @@ UITableViewDelegate>
         [Tools showAlertView:@"学校名称应该在4~20个字符之间" delegateViewController:nil];
         return ;
     }
+    if(!schoollID)
+    {
+        schoollID = @"";
+    }
+    NSDictionary *paraDict= @{@"u_id":[Tools user_id],
+                     @"token":[Tools client_token],
+                     @"s_level":schoolType,
+                     @"name":className,
+                     @"enter_t":[NSString stringWithFormat:@"%d",[joinYear integerValue]],
+                     @"s_id":schoollID};
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
-                                                                      @"token":[Tools client_token],
-                                                                      @"s_level":schoolType,
-                                                                      @"name":className,
-                                                                      @"enter_t":[NSString stringWithFormat:@"%d",[joinYear integerValue]],
-                                                                      @"grade":nianji
-                                                                      } API:NEWCEATECLASS];
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:paraDict API:NEWCEATECLASS];
         
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
@@ -496,7 +452,7 @@ UITableViewDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         

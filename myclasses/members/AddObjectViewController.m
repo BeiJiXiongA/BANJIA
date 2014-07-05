@@ -15,7 +15,7 @@
 @end
 
 @implementation AddObjectViewController
-
+@synthesize fromTeacher;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -36,10 +36,9 @@
         self.view.backgroundColor = [UIColor blackColor];
     }
     
-    self.titleLabel.text = @"任命班干部";
     
     UILabel *tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(18, UI_NAVIGATION_BAR_HEIGHT+20, 180, 20)];
-    tipLabel.text = [NSString stringWithFormat:@"请输入班干部职位名称"];
+    
     tipLabel.font = [UIFont systemFontOfSize:18];
     tipLabel.textColor = UIColorFromRGB(0x727171);
     tipLabel.backgroundColor = [UIColor clearColor];
@@ -51,8 +50,21 @@
     addObjectTextField.textColor = CONTENTCOLOR;
     addObjectTextField.backgroundColor = [UIColor whiteColor];
     addObjectTextField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
-    addObjectTextField.placeholder = @"添加其他班级角色";
     [self.bgView addSubview:addObjectTextField];
+    
+    
+    if (fromTeacher)
+    {
+        self.titleLabel.text = @"添加班级角色";
+        tipLabel.text = [NSString stringWithFormat:@"请输入班级角色名称"];
+        addObjectTextField.placeholder = @"添加其他班级角色";
+    }
+    else
+    {
+        self.titleLabel.text = @"任命班干部";
+        tipLabel.text = [NSString stringWithFormat:@"请输入班干部职位名称"];
+        addObjectTextField.placeholder = @"添加其他班干部名称";
+    }
     
     UIButton *doneButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [doneButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
@@ -77,7 +89,14 @@
 {
     if ([addObjectTextField.text length] == 0)
     {
-        [Tools showAlertView:@"请输入职位名称" delegateViewController:nil];
+        if (fromTeacher)
+        {
+            [Tools showAlertView:@"请输入角色名称" delegateViewController:nil];
+        }
+        else
+        {
+            [Tools showAlertView:@"请输入职位名称" delegateViewController:nil];
+        }
         return ;
     }
     if ([addObjectTextField.text lengthOfBytesUsingEncoding:NSUTF8StringEncoding] > 21)

@@ -10,16 +10,26 @@
 #import "Header.h"
 #import "OjectCell.h"
 #import "KLSwitch.h"
+#import "InfoCell.h"
+#import "AddObjectViewController.h"
 
-@interface SetObjectViewController ()<UITableViewDataSource,UITableViewDelegate,UITextFieldDelegate>
+@interface SetObjectViewController ()<UITableViewDataSource,UITableViewDelegate,UITextFieldDelegate,
+UITableViewDataSource,
+UITableViewDelegate,
+UITextFieldDelegate,
+AddObjectDel>
 {
     NSMutableDictionary *selectDict;
     UITableView *objectTabelView;
     KLSwitch *noticeSwitch;
     NSMutableArray *objectArray;
     
-    UITextField *addObjectTextField;
+    MyTextField *addObjectTextField;
     UIButton *addButton;
+    int alert;
+    
+    NSMutableArray *titleArray;
+    OperatDB *db;
 }
 @end
 
@@ -43,79 +53,62 @@
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     self.view.backgroundColor = [UIColor blackColor];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
+    db = [[OperatDB alloc] init];
     
-    objectArray = [[NSMutableArray alloc] initWithArray:@[@"数学老师",@"英语老师",@"语文老师",@"物理老师"]];
-    selectDict = [[NSMutableDictionary alloc] initWithCapacity:0];
-    
-    NSArray *titleArray = [title componentsSeparatedByString:@","];
-    for (int i=0; i<[objectArray count]; ++i)
+    //    [self.backButton setTitle:[NSString stringWithFormat:@"%@",name] forState:UIControlStateNormal];
+    //    self.backButton.frame = CGRectMake(self.backButton.frame.origin.x, self.backButton.frame.origin.y, [name length]*18, self.backButton.frame.size.height);
+    titleArray = [[NSMutableArray alloc] initWithCapacity:0];
+    if ([title length] > 0)
     {
-        for (int j=0; j<[titleArray count]; ++j)
+        [titleArray addObjectsFromArray:[title componentsSeparatedByString:@","]];
+    }
+    
+    alert = 0;
+    
+    objectArray = [[NSMutableArray alloc] initWithArray:OBJECTARRAY];
+    for (int i=0; i<[titleArray count]; i++)
+    {
+        if (![objectArray containsObject:[titleArray objectAtIndex:i]])
         {
-            if ([[titleArray objectAtIndex:j] isEqualToString:[objectArray objectAtIndex:i]])
-            {
-                [selectDict setObject:[objectArray objectAtIndex:i] forKey:[NSString stringWithFormat:@"%d",i]];
-            }
+            [objectArray addObject:[titleArray objectAtIndex:i]];
         }
     }
-    UILabel *tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(32, UI_NAVIGATION_BAR_HEIGHT+38, 150, 20)];
-    tipLabel.text = [NSString stringWithFormat:@"您想任命%@为",name];
-    tipLabel.font = [UIFont systemFontOfSize:15];
+    selectDict = [[NSMutableDictionary alloc] initWithCapacity:0];
+    
+    UILabel *tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT+20, 150, 20)];
+    tipLabel.text = [NSString stringWithFormat:@"您想更改%@为",name];
+    tipLabel.font = [UIFont systemFontOfSize:18];
     tipLabel.textColor = UIColorFromRGB(0x727171);
     tipLabel.backgroundColor = [UIColor clearColor];
     [self.bgView addSubview:tipLabel];
     
-    objectTabelView = [[UITableView alloc] initWithFrame:CGRectMake(31, tipLabel.frame.size.height+tipLabel.frame.origin.y+7, SCREEN_WIDTH-62, 34*4) style:UITableViewStylePlain];
+    objectTabelView = [[UITableView alloc] initWithFrame:CGRectMake( 0, UI_NAVIGATION_BAR_HEIGHT+ 50, SCREEN_WIDTH, 175.5) style:UITableViewStylePlain];
     objectTabelView.delegate = self;
     objectTabelView.dataSource =self;
-    objectTabelView.backgroundColor = [UIColor clearColor];
-    objectTabelView.scrollEnabled = NO;
+    objectTabelView.backgroundColor = self.bgView.backgroundColor;
+    objectTabelView.separatorStyle = UITableViewCellSeparatorStyleNone;
     [self.bgView addSubview:objectTabelView];
     
     addButton = [UIButton buttonWithType:UIButtonTypeCustom];
     addButton.frame = CGRectMake(31, objectTabelView.frame.size.height+objectTabelView.frame.origin.y, 40, 40);
     [addButton setImage:[UIImage imageNamed:@"set_add"] forState:UIControlStateNormal];
     [addButton addTarget:self action:@selector(addObjectToObjects) forControlEvents:UIControlEventTouchUpInside];
-    [self.bgView addSubview:addButton];
+    //    [self.bgView addSubview:addButton];
     
     UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
     
-    addObjectTextField = [[UITextField alloc] initWithFrame:CGRectMake(71, objectTabelView.frame.size.height+objectTabelView.frame.origin.y+5, SCREEN_WIDTH-62-40, 30)];
+    addObjectTextField = [[MyTextField alloc] initWithFrame:CGRectMake(71, objectTabelView.frame.size.height+objectTabelView.frame.origin.y+5, SCREEN_WIDTH-62-40, 30)];
     addObjectTextField.background = inputImage;
     addObjectTextField.delegate = self;
-    addObjectTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
     addObjectTextField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
-    addObjectTextField.placeholder = @"  添加其他班级角色";
-    [self.bgView addSubview:addObjectTextField];
-    
-    UIView *buttomView = [[UIView alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT-70, SCREEN_WIDTH, 50)];
-    buttomView.backgroundColor = [UIColor whiteColor];
-    [self.bgView addSubview:buttomView];
-    
-    UILabel *tipLabel2 = [[UILabel alloc] initWithFrame:CGRectMake(33, 10, 170, 30)];
-    tipLabel2.text = @"这位老师正在任职";
-    tipLabel2.backgroundColor = [UIColor clearColor];
-    tipLabel2.textColor = UIColorFromRGB(0x727171);
-    [buttomView addSubview:tipLabel2];
-    
-    noticeSwitch = [[KLSwitch  alloc] initWithFrame:CGRectMake(SCREEN_WIDTH-80, 10, 60, 30)];
-    noticeSwitch.onTintColor = LIGHT_BLUE_COLOR;
-    [buttomView addSubview:noticeSwitch];
+    addObjectTextField.placeholder = @"添加其他班级角色";
     
     UIButton *submit = [UIButton buttonWithType:UIButtonTypeCustom];
-    submit.frame = CGRectMake(SCREEN_WIDTH-65, 3, 55, 38);
-    [submit setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
+    submit.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
+    [submit setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [submit setTitle:@"提交" forState:UIControlStateNormal];
     [submit addTarget:self action:@selector(submit) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:submit];
-}
-
--(void)dealloc
-{
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification  object:nil];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillShowNotification object:nil];
 }
 
 - (void)didReceiveMemoryWarning
@@ -129,22 +122,173 @@
     [self.navigationController popViewControllerAnimated:YES];
 }
 
+-(void)valueChange
+{
+    if ([noticeSwitch isOn])
+    {
+        alert = 1;
+    }
+    else
+    {
+        alert = 0;
+    }
+}
+
+#pragma mark - tableview
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    CGFloat maxhei = SCREEN_HEIGHT-100-UI_NAVIGATION_BAR_HEIGHT;
+    int row = ([objectArray count]+1)%2 == 0 ? (([objectArray count]+1)/2):(([objectArray count]+1)/2+1);
+    CGFloat height = 58.5 * row > maxhei ? maxhei : (58.5*row);
+    objectTabelView.frame = CGRectMake(objectTabelView.frame.origin.x, objectTabelView.frame.origin.y, SCREEN_WIDTH, height);
+    if (([objectArray count]+1)%2 == 0)
+    {
+        return ([objectArray count]+1)/2;
+    }
+    else
+    {
+        return ([objectArray count]+1)/2+1;
+    }
+    return 0;
+}
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 58.5;
+}
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *objcetCell = @"objectcell";
+    InfoCell *cell = [tableView dequeueReusableCellWithIdentifier:objcetCell];
+    if (cell == nil)
+    {
+        cell = [[InfoCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:objcetCell
+                ];
+    }
+    
+    cell.button1.frame = CGRectMake(23.5, 6.5, 135, 52);
+    cell.button1.layer.cornerRadius = 5;
+    cell.button1.clipsToBounds = YES;
+    cell.button1.tag = indexPath.row*2;
+    [cell.button1 addTarget:self action:@selector(cellButtonClick:) forControlEvents:UIControlEventTouchUpInside];
+    DDLOG(@"setstu object row %d",indexPath.row);
+    
+    if (indexPath.row * 2 > [objectArray count]-1)
+    {
+        [cell.button1 setTitle:@"+添加" forState:UIControlStateNormal];
+        [cell.button1 setTitleColor:RGB(51, 204, 204, 1) forState:UIControlStateNormal];
+        cell.button1.backgroundColor = [UIColor whiteColor];
+    }
+    else
+    {
+        NSString *objectName1 = [objectArray objectAtIndex:indexPath.row*2];
+        if ([titleArray containsObject:objectName1])
+        {
+            [cell.button1 setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+            [cell.button1 setBackgroundImage:[UIImage imageNamed:@"selectobject"] forState:UIControlStateNormal];
+            cell.button1.backgroundColor = self.bgView.backgroundColor;
+        }
+        else
+        {
+            [cell.button1 setBackgroundImage:nil forState:UIControlStateNormal];
+            [cell.button1 setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+            cell.button1.backgroundColor = [UIColor whiteColor];
+        }
+        [cell.button1 setTitle:[objectArray objectAtIndex:indexPath.row*2] forState:UIControlStateNormal];
+    }
+    
+    cell.button2.hidden = YES;
+    cell.button2.frame = CGRectMake(165.5, 6.5, 135, 52);
+    [cell.button2 setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+    cell.button2.layer.cornerRadius = 5;
+    cell.button2.backgroundColor = [UIColor whiteColor];
+    cell.button2.clipsToBounds = YES;
+    cell.button2.tag = indexPath.row * 2 + 1;
+    
+    [cell.button2 addTarget:self action:@selector(cellButtonClick:) forControlEvents:UIControlEventTouchUpInside];
+    
+    if (indexPath.row*2+1 < ([objectArray count]+1))
+    {
+        cell.button2.hidden = NO;
+        if (indexPath.row * 2 + 1 == [objectArray count])
+        {
+            [cell.button2 setTitle:@"+添加" forState:UIControlStateNormal];
+            [cell.button2 setTitleColor:RGB(51, 204, 204, 1) forState:UIControlStateNormal];
+            cell.button2.backgroundColor = [UIColor whiteColor];
+        }
+        else
+        {
+            NSString *objectName2 = [objectArray objectAtIndex:indexPath.row*2+1];
+            if ([titleArray containsObject:objectName2])
+            {
+                [cell.button2 setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+                [cell.button2 setBackgroundImage:[UIImage imageNamed:@"selectobject"] forState:UIControlStateNormal];
+                cell.button2.backgroundColor = self.bgView.backgroundColor;
+            }
+            else
+            {
+                [cell.button2 setBackgroundImage:nil forState:UIControlStateNormal];
+                [cell.button2 setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+                cell.button2.backgroundColor = [UIColor whiteColor];
+            }
+            
+            
+            
+            [cell.button2 setTitle:[objectArray objectAtIndex:indexPath.row*2+1] forState:UIControlStateNormal];
+        }
+    }
+    
+    cell.backgroundColor = self.bgView.backgroundColor;
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    return cell;
+}
+
+-(void)cellButtonClick:(UIButton *)button
+{
+    if (button.tag == [objectArray count])
+    {
+        AddObjectViewController *addObject = [[AddObjectViewController alloc] init];
+        addObject.addobjectDel = self;
+        [self.navigationController pushViewController:addObject animated:YES];
+    }
+    else
+    {
+        NSString *objectname = [objectArray objectAtIndex:button.tag];
+        if ([titleArray containsObject:objectname])
+        {
+            [titleArray removeObject:objectname];
+        }
+        else
+        {
+            [titleArray addObject:objectname];
+        }
+        
+        [objectTabelView reloadData];
+    }
+}
+-(void)addObject:(NSString *)objectName
+{
+    [objectArray addObject:objectName];
+    [titleArray addObject:objectName];
+    [objectTabelView reloadData];
+}
+
 -(void)submit
 {
-    if ([selectDict count] == 0)
+    if ([titleArray count] == 0)
     {
         [Tools showAlertView:@"请选择班级角色" delegateViewController:nil];
         return ;
     }
     if ([Tools NetworkReachable])
     {
-        NSMutableString *jobTitle = [[NSMutableString alloc] initWithCapacity:0];
-        if ([selectDict count] >0)
+        NSString *objectString;
+        if ([titleArray count] > 0)
         {
-            for(NSString *key in selectDict)
-            {
-                [jobTitle insertString:[NSString stringWithFormat:@"%@,",[selectDict objectForKey:key]] atIndex:[jobTitle length]];
-            }
+            objectString = [titleArray componentsJoinedByString:@","];
+        }
+        else
+        {
+            objectString = @"";
         }
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
@@ -152,7 +296,7 @@
                                                                       @"c_id":classID,
                                                                       @"role":@"teachers",
                                                                       @"onduty":[noticeSwitch isOn]?@"1":@"0",
-                                                                      @"title":[jobTitle length]>0?[jobTitle substringToIndex:[jobTitle length]-1]:@""
+                                                                      @"title":objectString
                                                                       } API:CHANGE_MEM_TITLE];
         [request setCompletionBlock:^{
             NSString *responseString = [request responseString];
@@ -160,16 +304,16 @@
             DDLOG(@"commit diary responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                if ([self.setobject respondsToSelector:@selector(setobject:)])
+                if ([db updeteKey:@"title" toValue:objectString withParaDict:@{@"uid":userid,@"classid":classID} andTableName:CLASSMEMBERTABLE])
                 {
-                    [self.setobject setobject:[jobTitle length]>0?[jobTitle substringToIndex:[jobTitle length]-1]:@""];
+                    DDLOG(@"title updata success!");
                 }
-                
-                [self unShowSelfViewController];
+                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
+                [self.navigationController popToRootViewControllerAnimated:YES];
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -208,68 +352,6 @@
     }
 }
 
-#pragma mark - tableview
--(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
-{
-    return [objectArray count];
-}
--(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    return 34;
-}
--(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    static NSString *objcetCell = @"objectcell";
-    OjectCell *cell = [tableView dequeueReusableCellWithIdentifier:objcetCell];
-    if (cell == nil)
-    {
-        cell = [[OjectCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:objcetCell
-                ];
-    }
-    cell.nameLabel.frame = CGRectMake(18, 2.5, 180, 31.5);
-    cell.nameLabel.text = [objectArray objectAtIndex:indexPath.row];
-    cell.selectButton.tag = indexPath.row*1000;
-    [cell.selectButton addTarget:self action:@selector(operateObject:) forControlEvents:UIControlEventTouchUpInside];
-    cell.selectButton.backgroundColor = [UIColor clearColor];
-    if ([[selectDict objectForKey:[NSString stringWithFormat:@"%d",indexPath.row]] length] > 0)
-    {
-        cell.selectButton.layer.contentsGravity = kCAGravityResize;
-        cell.selectButton.layer.contents = (__bridge id)([UIImage imageNamed:@"icon_sel_sel"].CGImage);
-    }
-    else
-    {
-        cell.selectButton.layer.contentsGravity = kCAGravityResize;
-        cell.selectButton.layer.contents = (__bridge id)([UIImage imageNamed:@"icon_sel"].CGImage);
-    }
-    cell.selectionStyle = UITableViewCellSelectionStyleNone;
-    return cell;
-}
-
--(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    if ([[selectDict objectForKey:[NSString stringWithFormat:@"%d",indexPath.row]] length] > 0)
-    {
-        [selectDict removeObjectForKey:[NSString stringWithFormat:@"%d",indexPath.row]];
-    }
-    else
-    {
-        [selectDict setObject:[objectArray objectAtIndex:indexPath.row] forKey:[NSString stringWithFormat:@"%d",indexPath.row]];
-    }
-    [objectTabelView reloadData];
-}
-
--(void)operateObject:(UIButton *)button
-{
-    if ([[selectDict objectForKey:[NSString stringWithFormat:@"%d",button.tag/1000]] length] > 0)
-    {
-        [selectDict removeObjectForKey:[NSString stringWithFormat:@"%d",button.tag/1000]];
-    }
-    else
-    {
-        [selectDict setObject:[objectArray objectAtIndex:button.tag/1000] forKey:[NSString stringWithFormat:@"%d",button.tag/1000]];
-    }
-    [objectTabelView reloadData];
-}
 -(BOOL)textFieldShouldReturn:(UITextField *)textField
 {
     [addObjectTextField resignFirstResponder];
@@ -284,34 +366,6 @@
         return NO;
     }
     return YES;
-}
-
-- (void)keyboardWillShow:(NSNotification *)aNotification
-{
-    //获取键盘的高度
-    NSDictionary *userInfo = [aNotification userInfo];
-    NSValue *aValue = [userInfo objectForKey:UIKeyboardFrameEndUserInfoKey];
-    CGRect keyboardRect = [aValue CGRectValue];
-    int height = keyboardRect.size.height;
-    
-    [UIView animateWithDuration:0.25 animations:^{
-//        if (height > addObjectTextField.frame.origin.y+30)
-        if ([objectArray count]>4 || FOURS)
-        {
-            self.bgView.center = CGPointMake(UI_SCREEN_WIDTH/2, CENTER_POINT.y - height+(SCREEN_HEIGHT-addObjectTextField.frame.origin.y-50));
-        }
-    }completion:^(BOOL finished) {
-        
-    }];
-}
-
-- (void)keyBoardWillHide:(NSNotification *)aNotification
-{
-    [UIView animateWithDuration:0.25 animations:^{
-        self.bgView.center = CGPointMake(CENTER_POINT.x, CENTER_POINT.y);
-    }completion:^(BOOL finished) {
-        
-    }];
 }
 
 -(void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate

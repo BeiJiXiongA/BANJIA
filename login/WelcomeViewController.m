@@ -15,7 +15,7 @@
 #import "SideMenuViewController.h"
 #import "MyClassesViewController.h"
 #import "HomeViewController.h"
-#import "FillInfoViewController.h"
+#import "FillInfo2ViewController.h"
 #import "KKNavigationController.h"
 #import "SettingPasswordViewController.h"
 
@@ -121,9 +121,9 @@ UITextFieldDelegate>
     phoneNumTextfield.layer.cornerRadius = 3;
     phoneNumTextfield.textColor = TITLE_COLOR;
     phoneNumTextfield.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
-//    phoneNumTextfield.background = inputImage;
+    phoneNumTextfield.font = [UIFont systemFontOfSize:18];
     phoneNumTextfield.numericFormatter = [AKNumericFormatter formatterWithMask:PHONE_FORMAT placeholderCharacter:'*'];
-    phoneNumTextfield.placeholder = @"手机号码";
+    phoneNumTextfield.placeholder = @"班家账号手机号码/";
     [self.bgView addSubview:phoneNumTextfield];
     
     if ([[Tools last_phone_num] length] > 0)
@@ -143,12 +143,13 @@ UITextFieldDelegate>
 //    passwordTextfield.background = inputImage;
     passwordTextfield.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
     passwordTextfield.tag = 1001;
+    passwordTextfield.font = [UIFont systemFontOfSize:18];
     [self.bgView addSubview:passwordTextfield];
 
     
     UIButton *loginButton = [UIButton buttonWithType:UIButtonTypeCustom];
     loginButton.frame = CGRectMake(28, passwordTextfield.frame.size.height+passwordTextfield.frame.origin.y+space,SCREEN_WIDTH-56, 42);
-    [loginButton setTitle:@"手机号登录" forState:UIControlStateNormal];
+    [loginButton setTitle:@"登      录" forState:UIControlStateNormal];
     [loginButton addTarget:self action:@selector(login) forControlEvents:UIControlEventTouchUpInside];
     loginButton.titleLabel.textAlignment = NSTextAlignmentLeft;
     [loginButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
@@ -159,41 +160,31 @@ UITextFieldDelegate>
     UIButton *forgetPwdButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [forgetPwdButton setTitle:@"忘记密码?" forState:UIControlStateNormal];
     [forgetPwdButton setBackgroundColor:[UIColor clearColor]];
-    forgetPwdButton.frame = CGRectMake(loginButton.frame.size.width+loginButton.frame.origin.x-100, loginButton.frame.size.height+loginButton.frame.origin.y+5, 100, 20);
-    forgetPwdButton.titleLabel.font = [UIFont systemFontOfSize:12];
-    [forgetPwdButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+    forgetPwdButton.frame = CGRectMake(loginButton.frame.size.width+loginButton.frame.origin.x-100, loginButton.frame.size.height+loginButton.frame.origin.y+8, 100, 20);
+    forgetPwdButton.titleLabel.font = [UIFont systemFontOfSize:16];
+    [forgetPwdButton setTitleColor:UIColorFromRGB(0x999999) forState:UIControlStateNormal];
     [forgetPwdButton addTarget:self action:@selector(forgetPwd) forControlEvents:UIControlEventTouchUpInside];
     [self.bgView addSubview:forgetPwdButton];
     
     UIButton *otherButton = [UIButton buttonWithType:UIButtonTypeCustom];
     otherButton.frame = CGRectMake(0, SCREEN_HEIGHT-50, SCREEN_WIDTH/2+1, 50);
-    [otherButton setTitle:@"其它方式登录" forState:UIControlStateNormal];
-    [otherButton setTitleColor:RGB(153, 153, 153, 1) forState:UIControlStateNormal];
-    otherButton.titleLabel.font = [UIFont systemFontOfSize:16];
-    otherButton.layer.borderColor = RGB(216, 215, 213, 1).CGColor;
+    [otherButton setTitle:@"其他方式登录" forState:UIControlStateNormal];
+    [otherButton setTitleColor:UIColorFromRGB(0x999999) forState:UIControlStateNormal];
+    otherButton.titleLabel.font = [UIFont systemFontOfSize:18];
+    otherButton.layer.borderColor = UIColorFromRGB(0xcdcdcd).CGColor;
     otherButton.layer.borderWidth = 1;
     [otherButton addTarget:self action:@selector(otherlogin) forControlEvents:UIControlEventTouchUpInside];
     [self.bgView addSubview:otherButton];
     
-
-    UILabel *tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(26, loginButton.frame.origin.y+loginButton.frame.size.height+25+space, 100, 30)];
-    tipLabel.text = @"其他方式登录";
-    tipLabel.textColor = TITLE_COLOR;
-    tipLabel.font = [UIFont systemFontOfSize:13];
-    tipLabel.backgroundColor = [UIColor clearColor];
-//    [self.bgView addSubview:tipLabel];
-    
-    
     UIButton *registButton = [UIButton buttonWithType:UIButtonTypeCustom];
     registButton.frame = CGRectMake(SCREEN_WIDTH/2, SCREEN_HEIGHT-50, SCREEN_WIDTH/2, 50);
     [registButton setTitle:@"注册" forState:UIControlStateNormal];
-    [registButton setTitleColor:RGB(153, 153, 153, 1) forState:UIControlStateNormal];
-    registButton.titleLabel.font = [UIFont systemFontOfSize:16];
-    registButton.layer.borderColor = RGB(216, 215, 213, 1).CGColor;
+    [registButton setTitleColor:UIColorFromRGB(0x999999) forState:UIControlStateNormal];
+    registButton.titleLabel.font = [UIFont systemFontOfSize:18];
+    registButton.layer.borderColor = UIColorFromRGB(0xcdcdcd).CGColor;
     registButton.layer.borderWidth = 1;
     [registButton addTarget:self action:@selector(regist) forControlEvents:UIControlEventTouchUpInside];
     [self.bgView addSubview:registButton];
-
 }
 
 - (void)didReceiveMemoryWarning
@@ -259,7 +250,7 @@ UITextFieldDelegate>
     
     if ([Tools NetworkReachable])
     {
-        NSString *userStr = @"simu";
+        NSString *userStr = @"";
         if ([[APService registrionID] length] > 0)
         {
             userStr = [APService registrionID];
@@ -280,6 +271,7 @@ UITextFieldDelegate>
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:paraDict API:MB_LOGIN];
         
         [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
             NSString *responseString = [request responseString];
             
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
@@ -297,9 +289,9 @@ UITextFieldDelegate>
                 [ud setObject:[dict objectForKey:@"opt"] forKey:@"useropt"];
                 [ud synchronize];
                 NSString *name = [dict objectForKey:@"r_name"];
-                if ([name isEqualToString:@"anonymity"])
+                if ([name isEqualToString:ANONYMITY])
                 {
-                    FillInfoViewController *fillInfoVC = [[FillInfoViewController alloc] init];
+                    FillInfo2ViewController *fillInfoVC = [[FillInfo2ViewController alloc] init];
                     fillInfoVC.fromRoot = YES;
                     KKNavigationController *fillNav = [[KKNavigationController alloc] initWithRootViewController:fillInfoVC];
                     [self.navigationController presentViewController:fillNav animated:YES completion:nil];
@@ -333,10 +325,12 @@ UITextFieldDelegate>
         }];
         
         [request setFailedBlock:^{
+            [Tools hideProgress:self.bgView];
             NSError *error = [request error];
             DDLOG(@"error %@",error);
             [Tools showAlertView:@"连接错误" delegateViewController:nil];
         }];
+        [Tools showProgress:self.bgView];
         [request startAsynchronous];
     }
     else

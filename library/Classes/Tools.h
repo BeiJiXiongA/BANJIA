@@ -33,6 +33,7 @@
 +(NSString *)user_id;
 +(NSString *)user_name;
 +(NSString *)phone_num;
++(NSString *)banjia_num;
 +(NSString *)last_phone_num;
 +(NSString *)header_image;
 +(NSString *)top_image;

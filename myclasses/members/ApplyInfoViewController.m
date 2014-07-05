@@ -10,28 +10,32 @@
 #import "Header.h"
 #import "InfoCell.h"
 
+#define INFOLABELTAG  1000
+#define CALLBUTTONTAG  2000
+#define MSGBUTTONTAG  3000
+#define KICKALTAG    4000
+
+#define BGIMAGEHEIGHT  150
+
 @interface ApplyInfoViewController ()<UIAlertViewDelegate,UITableViewDataSource,UITableViewDelegate>
 {
-    UIImageView *headerImageView;
-    UILabel *nameLabel;
-    UIImageView *genderImageView;
-    UILabel *titleLabel;
-    NSMutableDictionary *dataDict;
-    UIImageView *bgImageView;
     
-    NSString *phoneNum;
-    
-    UILabel *infoLabel;
+    OperatDB *db;
     
     UITableView *infoView;
-    UIButton *phoneButton;
-    UILabel *phoneNumLabel;
     NSString *classID;
+    
+    NSDictionary *applyDict;
+    NSString *qqnum;
+    NSString *birth;
+    NSString *sexureimage;
+    NSString *phoneNum;
+    NSString *headerImg;
 }
 @end
 
 @implementation ApplyInfoViewController
-@synthesize role,j_id,applyName,title,applyDel,headerImg;
+@synthesize role,j_id,applyName,title;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -49,99 +53,31 @@
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     self.view.backgroundColor = [UIColor blackColor];
     
-    dataDict = [[NSMutableDictionary alloc] initWithCapacity:0];
-    
+    qqnum = @"未绑定";
+    birth = @"未设置";
+    sexureimage = @"";
+    headerImg = @"";
+
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
-    headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(33.5, UI_NAVIGATION_BAR_HEIGHT+11, 80, 80)];
-    headerImageView.backgroundColor = [UIColor clearColor];
-    headerImageView.layer.cornerRadius = headerImageView.frame.size.width/2;
-    headerImageView.clipsToBounds = YES;
-    if ([headerImg length]>0)
-    {
-        [Tools fillImageView:headerImageView withImageFromURL:headerImg andDefault:HEADERBG];
-    }
-    else
-    {
-        [headerImageView setImage:[UIImage imageNamed:HEADERBG]];
-    }
-    [self.bgView addSubview:headerImageView];
+    db = [[OperatDB alloc] init];
     
-    nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(headerImageView.frame.size.width+headerImageView.frame.origin.x+20, UI_NAVIGATION_BAR_HEIGHT+36, [applyName length]*18>100?100:([applyName length]*18), 20)];
-    nameLabel.text = applyName;
-    nameLabel.textColor = [UIColor blackColor];
-    nameLabel.backgroundColor = [UIColor clearColor];
-    nameLabel.font = [UIFont systemFontOfSize:18];
-    [self.bgView addSubview:nameLabel];
-    
-    genderImageView = [[UIImageView alloc] initWithFrame:CGRectMake(nameLabel.frame.size.width+nameLabel.frame.origin.x, headerImageView.frame.origin.y, 15, 15)];
-    genderImageView.backgroundColor = [UIColor clearColor];
-    [self.bgView addSubview:genderImageView];
-    
-    
-    CGSize titleSize = [Tools getSizeWithString:title andWidth:200 andFont:[UIFont systemFontOfSize:13]];
-    titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(nameLabel.frame.origin.x, nameLabel.frame.size.height+nameLabel.frame.origin.y, titleSize.width, titleSize.height>0?(titleSize.height+10):40)];
-    titleLabel.font = [UIFont systemFontOfSize:13];
-    titleLabel.textColor = [UIColor lightGrayColor];
-    titleLabel.numberOfLines = 2;
-    titleLabel.lineBreakMode = NSLineBreakByWordWrapping;
-    titleLabel.backgroundColor = [UIColor clearColor];
-    titleLabel.text = title;
-    [self.bgView addSubview:titleLabel];
-    
-    bgImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, headerImageView.frame.size.height+headerImageView.frame.origin.y+20, SCREEN_WIDTH, SCREEN_HEIGHT - headerImageView.frame.size.height-headerImageView.frame.origin.y)];
-    [bgImageView setImage:[UIImage imageNamed:@"bg.jpg"]];
-    [self.bgView addSubview:bgImageView];
-    
-    infoView  = [[UITableView alloc] initWithFrame:CGRectMake(10, bgImageView.frame.origin.y+50, SCREEN_WIDTH-15, 100) style:UITableViewStylePlain];
+    applyDict = [[db findSetWithDictionary:@{@"uid":j_id,@"classid":classID} andTableName:CLASSMEMBERTABLE] firstObject];
+//    headerImg = [applyDict objectForKey:@"img_icon"];
+//    if ([[applyDict objectForKey:@"birth"] isEqual:[NSNull null]])
+//    {
+//        birth = [applyDict objectForKey:@"birth"];
+//    };
+//    
+//    role = [applyDict objectForKey:@"role"];
+
+    infoView  = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
     infoView.delegate = self;
     infoView.dataSource = self;
-//    infoView.separatorStyle = UITableViewCellSeparatorStyleNone;
-    infoView.tag = 1000;
+    infoView.separatorStyle = UITableViewCellSeparatorStyleNone;
     infoView.backgroundColor = [UIColor clearColor];
     [self.bgView addSubview:infoView];
     
-    infoLabel = [[UILabel alloc] initWithFrame:CGRectMake(25, infoView.frame.size.height + infoView.frame.origin.y+10, SCREEN_WIDTH-50, 20)];
-    infoLabel.backgroundColor = [UIColor clearColor];
-    infoLabel.textAlignment = NSTextAlignmentCenter;
-    infoLabel.textColor = [UIColor whiteColor];
-    infoLabel.font = [UIFont systemFontOfSize:16];
-    if (![role isEqual:[NSNull null]])
-    {
-        if ([role isEqualToString:@"students"])
-        {
-            infoLabel.text = [NSString stringWithFormat:@"%@想申请成为本班的学生",applyName];
-        }
-        else if ([role isEqualToString:@"teachers"])
-        {
-            infoLabel.text = [NSString stringWithFormat:@"%@想申请成为本班的%@",applyName,title];
-        }
-        else if ([role isEqualToString:@"parents"])
-        {
-            infoLabel.text = [NSString stringWithFormat:@"%@想申请成为本班%@",applyName,title];
-        }
-    }
-    else
-    {
-        DDLOG(@"role is null");
-    }
-    [self.bgView addSubview:infoLabel];
-    
-    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
-    
-    UIButton *allowButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [allowButton setTitle:@"同意申请" forState:UIControlStateNormal];
-    [allowButton setBackgroundImage:btnImage forState:UIControlStateNormal];
-    [allowButton addTarget:self action:@selector(allowApplyByUID:classID:) forControlEvents:UIControlEventTouchUpInside];
-    allowButton.frame = CGRectMake(29,infoView.frame.size.height + infoView.frame.origin.y+40, SCREEN_WIDTH-58, 40);
-    [self.bgView addSubview:allowButton];
-    
-    UIButton *refuseButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [refuseButton setTitle:@"忽略申请" forState:UIControlStateNormal];
-    [refuseButton setBackgroundImage:btnImage forState:UIControlStateNormal];
-    [refuseButton addTarget:self action:@selector(refuseApplyByUID:classID:) forControlEvents:UIControlEventTouchUpInside];
-    refuseButton.frame = CGRectMake(29, allowButton.frame.origin.y+allowButton.frame.size.height+20, SCREEN_WIDTH-58, 40);
-    [self.bgView addSubview:refuseButton];
     
     [self getUserInfo];
 }
@@ -158,53 +94,214 @@
 }
 
 #pragma mark - tableview
+-(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 2;
+}
+
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
-     return 30;
+    if (section == 1)
+    {
+        return 35;
+    }
+    return 0;
 }
--(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
-{
-    UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 100, 30)];
-    headerLabel.backgroundColor = [UIColor clearColor];
-    headerLabel.text = @"     个人信息";
-    //    headerLabel.font = [UIFont systemFontOfSize:14];
-    headerLabel.textColor = [UIColor whiteColor];
-    return headerLabel;
-}
--(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    return 60;
-}
+
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return 1;
-
+    if (section == 0)
+    {
+        return 1;
+    }
+    else if(section == 1)
+    {
+        return 4;
+    }
+    return 0;
 }
+
+
+-(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+{
+    if (section == 1)
+    {
+        UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 100, 35)];
+        headerLabel.backgroundColor = [UIColor clearColor];
+        headerLabel.text = @"   个人信息";
+        headerLabel.textColor = TITLE_COLOR;
+        return headerLabel;
+    }
+    return nil;
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.section == 0)
+    {
+        return BGIMAGEHEIGHT;
+    }
+    else if (indexPath.section == 1)
+    {
+        if (indexPath.row < 3)
+        {
+            return 40;
+        }
+    }
+    return 60;
+}
+
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     
-    static NSString *infocell = @"infocell";
+    static NSString *infocell = @"onfocell";
     InfoCell *cell = [tableView dequeueReusableCellWithIdentifier:infocell];
     if (cell == nil)
     {
         cell = [[InfoCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:infocell];
     }
-    if (indexPath.row == 0)
+    cell.headerImageView.hidden = YES;
+    cell.bgImageView.hidden = YES;
+    cell.button1.hidden = YES;
+    cell.button2.hidden = YES;
+    cell.selectionStyle = UITableViewCellSelectionStyleGray;
+    if (indexPath.section == 0)
     {
-        cell.nameLabel.text = @"移动电话";
-        cell.contentLabel.text = [dataDict objectForKey:@"phone"];
-        //        [cell.button1 addTarget:self action:@selector(msgToUser) forControlEvents:UIControlEventTouchUpInside];
-        [cell.button2 addTarget:self action:@selector(callToUser) forControlEvents:UIControlEventTouchUpInside];
+        cell.headerImageView.hidden = NO;
+        cell.bgImageView.hidden = NO;
+        cell.sexureImageView.hidden = NO;
+        
+        cell.bgImageView.frame = CGRectMake(0, 0, SCREEN_WIDTH, BGIMAGEHEIGHT);
+        [cell.bgImageView setImage:[UIImage imageNamed:@"toppic"]];
+        
+        cell.headerImageView.frame = CGRectMake(15, BGIMAGEHEIGHT-DetailHeaderHeight-15, DetailHeaderHeight, DetailHeaderHeight);
+        if ([headerImg isEqualToString:HEADERICON])
+        {
+            [cell.headerImageView setImage:[UIImage imageNamed:HEADERICON]];
+        }
+        else
+        {
+            [Tools fillImageView:cell.headerImageView withImageFromURL:headerImg andDefault:HEADERICON];
+        }
+        
+        cell.headerImageView.layer.cornerRadius = 5;
+        cell.headerImageView.clipsToBounds = YES;
+        cell.headerImageView.layer.borderColor = [UIColor whiteColor].CGColor;
+        cell.headerImageView.layer.borderWidth = 2;
+        
+        cell.nameLabel.frame = CGRectMake(DetailHeaderHeight+30, cell.headerImageView.frame.origin.y+10, [applyName length]*18, 20);
+        cell.nameLabel.text = applyName;
+        cell.nameLabel.shadowColor = TITLE_COLOR;
+        cell.nameLabel.shadowOffset = CGSizeMake(0.5, 0.5);
+        cell.nameLabel.font = [UIFont boldSystemFontOfSize:18];
+        
+        cell.sexureImageView.frame = CGRectMake(cell.nameLabel.frame.origin.x+cell.nameLabel.frame.size.width+10, cell.nameLabel.frame.origin.y, 20, 20);
+        [cell.sexureImageView setImage:[UIImage imageNamed:sexureimage]];
+        
+        NSMutableString *titlestr = [[NSMutableString alloc] initWithString:title];
+        NSRange dotRange = [title rangeOfString:@"."];
+        if (dotRange.length > 0)
+        {
+             [titlestr replaceCharactersInRange:[title rangeOfString:@"."] withString:@"的"];
+        }
+        
+        cell.contentLabel.frame = CGRectMake(DetailHeaderHeight+30, cell.headerImageView.frame.origin.y+35, 100, 20);
+//        cell.contentLabel.text = titlestr;
+        cell.contentLabel.shadowOffset = CGSizeMake(0.5, 0.5);
+        cell.contentLabel.shadowColor = TITLE_COLOR;
+        cell.contentLabel.font = [UIFont boldSystemFontOfSize:14];
+        cell.backgroundColor = [UIColor whiteColor];
+    }
+    else if (indexPath.section == 1)
+    {
+        if (indexPath.row < 2)
+        {
+            cell.nameLabel.frame = CGRectMake(15, 5, 100, 30);
+            cell.nameLabel.textColor = TITLE_COLOR;
+            cell.contentLabel.frame = CGRectMake(SCREEN_WIDTH-150, 5, 140, 30);
+            cell.contentLabel.textColor = TITLE_COLOR;
+            cell.contentLabel.textAlignment = NSTextAlignmentRight;
+            if (indexPath.row == 0)
+            {
+                cell.nameLabel.text = @"手机号";
+                cell.contentLabel.text = phoneNum;
+            }
+            else if(indexPath.row == 1)
+            {
+                cell.nameLabel.text = @"生日";
+                cell.contentLabel.text = birth;
+            }
+            UIImageView *bgImageBG = [[UIImageView alloc] init];
+            bgImageBG.image = [UIImage imageNamed:@"line3"];
+            bgImageBG.backgroundColor = [UIColor clearColor];
+            cell.backgroundView = bgImageBG;
+            cell.backgroundColor = [UIColor whiteColor];
+        }
+        else if(indexPath.row == 2)
+        {
+            cell.nameLabel.frame = CGRectMake(15, 5, SCREEN_WIDTH-30, 30);
+            cell.nameLabel.backgroundColor = [UIColor whiteColor];
+            cell.nameLabel.textColor = TITLE_COLOR;
+            cell.contentView.backgroundColor = [UIColor whiteColor];
+            
+            
+            if (![role isEqual:[NSNull null]])
+            {
+                if ([role isEqualToString:@"students"])
+                {
+                    cell.nameLabel.text = [NSString stringWithFormat:@"%@想申请成为本班的学生数学老师",applyName];
+                }
+                else if ([role isEqualToString:@"teachers"])
+                {
+                    cell.nameLabel.text = [NSString stringWithFormat:@"%@想申请成为本班的%@",applyName,title];
+                }
+                else if ([role isEqualToString:@"parents"])
+                {
+                    cell.nameLabel.text = [NSString stringWithFormat:@"%@想申请成为本班%@",applyName,title];
+                }
+            }
+        }
+        else
+        {
+            
+            cell.button1.frame = CGRectMake(10, 10, 145, 43.5);
+            [cell.button1 setTitle:ADDFRIEND forState:UIControlStateNormal];
+            [cell.button1 setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+            
+            [cell.button1 setTitle:@"同意申请" forState:UIControlStateNormal];
+            
+            [cell.button1 addTarget:self action:@selector(allowApply) forControlEvents:UIControlEventTouchUpInside];
+            
+            cell.button2.frame = CGRectMake(165, 10, 145, 43.5);
+            [cell.button2 setTitle:CHATTO forState:UIControlStateNormal];
+            [cell.button2 setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+            [cell.button2 setTitle:@"忽略申请" forState:UIControlStateNormal];
+            
+            cell.button1.hidden = NO;
+            cell.button2.hidden = NO;
+            
+            
+            
+            cell.button1.iconImageView.frame = CGRectMake(ALEFT, ATOP, CHATW, CHATH);
+//            [cell.button1.iconImageView setImage:[UIImage imageNamed:@"add_friend"]];
+            
+            cell.button2.iconImageView.frame = CGRectMake(CLEFT, CTOP, ADDFRIW, ADDFRIH);
+//            [cell.button2.iconImageView setImage:[UIImage imageNamed:@"chatto"]];
+            
+            [cell.button2 addTarget:self action:@selector(refuseApply) forControlEvents:UIControlEventTouchUpInside];
+            cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        }
+        
     }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
+
 }
 #define CALLBUTTONTAG  2000
 -(void)callToUser
 {
     UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"您确定要拨打这个电话吗？" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"拨打", nil];
     al.tag = CALLBUTTONTAG;
-    phoneNum = [dataDict objectForKey:@"phone"];
     [al show];
 }
 
@@ -242,26 +339,26 @@
             {
                 if (![[responseDict objectForKey:@"data" ] isEqual:[NSNull null]])
                 {
-                    nameLabel.text = [[responseDict objectForKey:@"data"] objectForKey:@"r_name"];
-                    phoneNumLabel.text = [dataDict objectForKey:@"phone"];
-                    [dataDict setDictionary:[responseDict objectForKey:@"data"]];
-                    [Tools fillImageView:headerImageView withImageFromURL:[[responseDict objectForKey:@"data"] objectForKey:@"img_icon"] andDefault:@"0.jpg"];
-                    if ([[dataDict objectForKey:@"sex"] intValue] == 1)
+                    
+                    phoneNum = [[responseDict objectForKey:@"data"] objectForKey:@"phone"];
+                    headerImg = [[responseDict objectForKey:@"data"] objectForKey:@"img_icon"];
+                    
+                    if ([[[responseDict objectForKey:@"data"] objectForKey:@"sex"] intValue] == 1)
                     {
                         //男
-                        [genderImageView setImage:[UIImage imageNamed:@"male"]];
+                        sexureimage = @"male";
                     }
-                    else if ([[dataDict objectForKey:@"sex"] intValue] == 0)
+                    else if ([[[responseDict objectForKey:@"data"] objectForKey:@"sex"] intValue] == 0)
                     {
                         //
-                        [genderImageView setImage:[UIImage imageNamed:@"female"]];
+                        sexureimage = @"famale";
                     }
                 }
                 [infoView reloadData];
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -275,7 +372,7 @@
     }
 }
 
--(void)allowApplyByUID:(NSString *)u_id classID:(NSString *)c_id
+-(void)allowApply
 {
     if ([Tools NetworkReachable])
     {
@@ -292,22 +389,35 @@
             DDLOG(@"memberByClass responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                if ([self.applyDel respondsToSelector:@selector(updateList:)])
+                if ([db updeteKey:@"checked" toValue:@"1" withParaDict:@{@"uid":j_id,@"classid":classID,@"checked":@"0"} andTableName:CLASSMEMBERTABLE])
                 {
-                    OperatDB *db = [[OperatDB alloc] init];
-                    if ([db updeteKey:@"checked" toValue:@"1" withParaDict:@{@"uid":j_id,@"classid":classID,@"checked":@"0"} andTableName:CLASSMEMBERTABLE])
+                    DDLOG(@"c_apply %@ delete success!",[Tools user_id]);
+                    if ([[applyDict objectForKey:@"role"] isEqualToString:@"parents"])
                     {
-                        DDLOG(@"c_apply %@ delete success!",[Tools user_id]);
+                         NSDictionary *studentDict = [[db findSetWithDictionary:@{@"classid":classID,@"name":[applyDict objectForKey:@"re_name"]} andTableName:CLASSMEMBERTABLE] firstObject];
+                        if ([[studentDict objectForKey:@"checked"] integerValue] == 0)
+                        {
+                            if ([db updeteKey:@"checked" toValue:@"1" withParaDict:@{@"classid":classID,@"name":[applyDict objectForKey:@"re_name"]} andTableName:CLASSMEMBERTABLE])
+                            {
+                                DDLOG(@"allow parent update student checked success!");
+                            };
+                        }
                     }
-                    
-                    [self.applyDel updateList:YES];
+                    else if([[applyDict objectForKey:@"rele"] isEqualToString:@"teachers"])
+                    {
+                        if ([db updeteKey:@"admin" toValue:@"1" withParaDict:@{@"uid":j_id,@"classid":classID} andTableName:CLASSMEMBERTABLE])
+                        {
+                            DDLOG(@"update teacher admin");
+                        }
+                    }
                 }
                 [Tools showTips:[NSString stringWithFormat:@"您已经同意%@的申请",applyName] toView:self.bgView];
-                [self.navigationController popViewControllerAnimated:YES];
+                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
+                [self.navigationController popToRootViewControllerAnimated:YES];
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         
@@ -321,7 +431,7 @@
     }
 }
 
--(void)refuseApplyByUID:(NSString *)u_id classID:(NSString *)c_id
+-(void)refuseApply
 {
     if ([Tools NetworkReachable])
     {
@@ -338,24 +448,20 @@
             DDLOG(@"memberByClass responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                NSString *messageStr = [NSString stringWithFormat:@"您已经忽略%@的申请",nameLabel.text];
+                NSString *messageStr = [NSString stringWithFormat:@"您已经忽略%@的申请",applyName];
                 [Tools showTips:messageStr toView:self.bgView];
                 
-                OperatDB *db = [[OperatDB alloc] init];
                 if ([db deleteRecordWithDict:@{@"uid":j_id,@"classid":classID,@"checked":@"0"} andTableName:CLASSMEMBERTABLE])
                 {
                     DDLOG(@"c_apply %@ delete success!",[Tools user_id]);
                 }
                 
-                if ([self.applyDel respondsToSelector:@selector(updateList:)])
-                {
-                    [self.applyDel updateList:YES];
-                }
-                [self.navigationController popViewControllerAnimated:YES];
+                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
+                [self.navigationController popToRootViewControllerAnimated:YES];
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         

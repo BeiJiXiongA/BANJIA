@@ -12,6 +12,8 @@
 
 @interface AddObjectViewController : XDContentViewController
 @property (nonatomic, assign) id<AddObjectDel> addobjectDel;
+@property (nonatomic, assign) BOOL fromTeacher;
+
 @end
 
 @protocol AddObjectDel <NSObject>

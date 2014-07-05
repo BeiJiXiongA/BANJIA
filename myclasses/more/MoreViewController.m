@@ -72,16 +72,24 @@ UIActionSheetDelegate>
     DDLOG(@"button index %d",buttonIndex);
     if (actionSheet.tag == ParentSendDiaryTag)
     {
-        if (buttonIndex == 0 || buttonIndex == 1 || buttonIndex == 2)
+        if (buttonIndex == 0)
         {
-            [self settingValue:[NSString stringWithFormat:@"%d",buttonIndex] forKay:ParentSendDiary];
+            [self settingValue:@"1" forKay:ParentSendDiary];
+        }
+        else if(buttonIndex == 1)
+        {
+            [self settingValue:@"0" forKay:ParentSendDiary];
         }
     }
     else if(actionSheet.tag == StudentSendDiaryTag)
     {
-        if (buttonIndex == 0 || buttonIndex == 1 || buttonIndex == 2)
+        if (buttonIndex == 0)
         {
-            [self settingValue:[NSString stringWithFormat:@"%d",buttonIndex] forKay:StudentSendDiary];
+            [self settingValue:@"1" forKay:StudentSendDiary];
+        }
+        else if(buttonIndex == 1)
+        {
+            [self settingValue:@"0" forKay:StudentSendDiary];
         }
     }
     else if (actionSheet.tag == StudentAccessTimeTag)
@@ -114,12 +122,9 @@ UIActionSheetDelegate>
     
     UIButton *inviteButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [inviteButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
-    inviteButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
+    inviteButton.frame = CGRectMake(SCREEN_WIDTH - CORNERMORERIGHT, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
     [inviteButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] < 2)
-    {
-//        [self.navigationBarView addSubview:inviteButton];
-    }
+    
 
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     self.view.backgroundColor = [UIColor blackColor];
@@ -504,15 +509,11 @@ UIActionSheetDelegate>
             {
                 cell.contentLabel.hidden = NO;
                 cell.nameLabel.hidden = NO;
-                if ([[settingDict objectForKey:ParentSendDiary] intValue] == 0)
-                {
-                    parentsPublish = @"需要审核";
-                }
-                else if([[settingDict objectForKey:ParentSendDiary] intValue] == 1)
+                if([[settingDict objectForKey:ParentSendDiary] intValue] == 1)
                 {
                     parentsPublish = @"直接发布";
                 }
-                else if([[settingDict objectForKey:ParentSendDiary] intValue] == 2)
+                else if([[settingDict objectForKey:ParentSendDiary] intValue] == 0)
                 {
                     parentsPublish = @"不可发布";
                 }
@@ -522,15 +523,11 @@ UIActionSheetDelegate>
             {
                 cell.contentLabel.hidden = NO;
                 cell.nameLabel.hidden = NO;
-                if ([[settingDict objectForKey:StudentSendDiary] intValue] == 0)
-                {
-                    studentsPublish = @"需要审核";
-                }
-                else if([[settingDict objectForKey:StudentSendDiary] intValue] == 1)
+                if([[settingDict objectForKey:StudentSendDiary] intValue] == 1)
                 {
                     studentsPublish = @"直接发布";
                 }
-                else if([[settingDict objectForKey:StudentSendDiary] intValue] == 2)
+                else if([[settingDict objectForKey:StudentSendDiary] intValue] == 0)
                 {
                     studentsPublish = @"不可发布";
                 }
@@ -607,7 +604,7 @@ UIActionSheetDelegate>
     {
         if (indexPath.row == 2)
         {
-            UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"家长发布空间" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"需要审核",@"直接发布",@"不可发布", nil];
+            UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"家长发布空间" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"直接发布",@"不可发布", nil];
             ac.tag = ParentSendDiaryTag;
             [ac showInView:classSettingTableView];
         }
@@ -616,7 +613,7 @@ UIActionSheetDelegate>
     {
         if (indexPath.row == 1)
         {
-            UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"学生发布空间" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"需要审核",@"直接发布",@"不可发布", nil];
+            UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"学生发布空间" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"直接发布",@"不可发布", nil];
             ac.tag = StudentSendDiaryTag;
             [ac showInView:classSettingTableView];
         }
@@ -667,7 +664,7 @@ UIActionSheetDelegate>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         

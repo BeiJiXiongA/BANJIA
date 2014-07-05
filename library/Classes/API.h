@@ -15,6 +15,10 @@
 //#define HOST_URL       @"http://api.banjiaedu.com"
 //#define IMAGEURL       @"http://img.banjiaedu.com"
 
+//头像地址 人(host)\ur\(uid)\(img_icon||img_bk).(你想要啥格式就写啥)
+
+//班级地址 人(host)\cl\(cid)\(img_icon||img_bk).(你想要啥格式就写啥)
+
 #define HOST_URL      @"http://mytest.banjiaedu.com"
 #define IMAGEURL       @"http://imgtest.banjiaedu.com"
 
@@ -28,6 +32,7 @@
 #define BINDPHONE      @"/users/mbBindPhone"
 #define HOMEDATA       @"/users/mbindex"
 
+#define NEWREGIST      @"/users/mbRegist"
 #define MB_CHECKOUT    @"/users/mbCheckCode"
 #define MB_SUBPWD         @"/users/mbSubPwd"
 #define MB_RESETPWD      @"/users/mbUpdatePwd"
@@ -85,10 +90,14 @@
 #define SETCLASSINFO     @"/classes/mbSetClassInfo"
 #define NEWCEATECLASS      @"/v11/classes/mbaddclass"
 #define SEARCHCLASS     @"/classes/mbSearchClass"
+#define BINDSCHOOL     @"/classes/mbBindSchool"
 
 #pragma mark - diaries
 #define ADDDIARY        @"/Diaries/mbAddDiaries"
-#define GETDIARIESLIST  @"/Diaries/mbGetDiariesList"
+
+#define GETDIARIESLIST @"/v11/Diaries/mbGetDiariesList"
+
+#define OLDGETDIARIESLIST  @"/Diaries/mbGetDiariesList"
 #define COMMENT_DIARY   @"/Diaries/mbDiariesComment"
 #define GET_COMMENTS    @"/Diaries/mbCommentList"
 #define LIKE_DIARY      @"/Diaries/mbDiariesLike"
@@ -172,8 +181,6 @@
 
 #define UCFRIENDSUM   @"ucfriendsnum"
 
-
-#define ShareContent  @"班家是一个为方便老师，家长，学生之间有效沟通的平台，在这里你可以找到或创建属于你们的班级大家庭，快来一起加入吧！http://mytest.banjiaedu.com"
 
 #define IMAGE_NAME @"icon120"
 #define IMAGE_EXT @"png"

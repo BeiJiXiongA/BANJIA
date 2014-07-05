@@ -18,6 +18,7 @@
 #import "UINavigationController+JDSideMenu.h"
 
 #import "SubGroupViewController.h"
+#import "PersonDetailViewController.h"
 
 @interface FriendsViewController ()<UITableViewDataSource,
 UITableViewDelegate,
@@ -61,6 +62,8 @@ OperateFriends>
     [[self.bgView layer] setShadowOpacity:1.0f];
     [[self.bgView layer] setShadowRadius:3.0f];
     self.returnImageView.hidden = YES;
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getFriendList) name:UPDATEFRIENDSLIST object:nil];
     
     db = [[OperatDB alloc] init];
     
@@ -132,8 +135,8 @@ OperateFriends>
 }
 -(void)dealloc
 {
-    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = self;
-    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = self;
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = nil;
 }
 -(BOOL)haveNewMsg
 {
@@ -388,13 +391,21 @@ OperateFriends>
         NSArray *array = [groupDict objectForKey:@"array"];
         NSDictionary *dict = [array objectAtIndex:indexPath.row];
         
-        ChatViewController *chatViewController = [[ChatViewController alloc] init];
-        chatViewController.name = [dict objectForKey:@"fname"];
-        chatViewController.toID = [dict objectForKey:@"fid"];
-        chatViewController.imageUrl = [dict objectForKey:@"ficon"];
-        chatViewController.friendVcDel = self;
+        PersonDetailViewController *personDetailVC = [[PersonDetailViewController alloc] init];
+        personDetailVC.personName = [dict objectForKey:@"fname"];
+        personDetailVC.personID = [dict objectForKey:@"fid"];
         [self.sideMenuController hideMenuAnimated:YES];
-        [self.navigationController pushViewController:chatViewController animated:YES];
+        [self.navigationController pushViewController:personDetailVC animated:YES];
+        
+        
+        
+//        ChatViewController *chatViewController = [[ChatViewController alloc] init];
+//        chatViewController.name = [dict objectForKey:@"fname"];
+//        chatViewController.toID = [dict objectForKey:@"fid"];
+//        chatViewController.imageUrl = [dict objectForKey:@"ficon"];
+//        chatViewController.friendVcDel = self;
+//        [self.sideMenuController hideMenuAnimated:YES];
+//        [self.navigationController pushViewController:chatViewController animated:YES];
 
     }
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
@@ -443,7 +454,7 @@ OperateFriends>
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:self];
+                [Tools dealRequestError:responseDict fromViewController:nil];
             }
         }];
         [request setFailedBlock:^{
@@ -494,7 +505,11 @@ OperateFriends>
                 [tmpDict setObject:[Tools user_id] forKey:@"uid"];
                 [tmpDict setObject:[dict objectForKey:@"_id"] forKey:@"fid"];
                 [tmpDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"checked"] intValue]] forKey:@"checked"];
-                [tmpDict setObject:[dict objectForKey:@"img_icon"] forKey:@"ficon"];
+                if ([dict objectForKey:@"img_icon"])
+                {
+                    [tmpDict setObject:[dict objectForKey:@"img_icon"] forKey:@"ficon"];
+                }
+                
                 [tmpDict setObject:[dict objectForKey:@"name"] forKey:@"fname"];
                 [tmpDict setObject:@"" forKey:@"phone"];
                 [db insertRecord:tmpDict andTableName:FRIENDSTABLE];

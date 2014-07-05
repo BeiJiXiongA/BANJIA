@@ -219,7 +219,7 @@
         }
         else
         {
-            userStr = @"simu";
+            userStr = @"";
         }
         NSDictionary *paraDict;
         if ([accountID length] > 0)

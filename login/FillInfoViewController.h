@@ -15,5 +15,6 @@
 @property (nonatomic, strong) NSString *accountID;
 @property (nonatomic, strong) NSString *accountType;
 @property (nonatomic, strong) NSString *userid;
+@property (nonatomic, strong) NSString *token;
 @property (nonatomic, assign) BOOL fromRoot;
 @end
