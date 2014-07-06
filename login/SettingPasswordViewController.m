@@ -60,36 +60,39 @@
     UILabel *label = [[UILabel alloc] init];
     label.frame = CGRectMake(SCREEN_WIDTH/2-130, UI_NAVIGATION_BAR_HEIGHT+50, 200, 20);
     label.backgroundColor = [UIColor clearColor];
-    label.font = [UIFont systemFontOfSize:14];
-    label.textColor = TITLE_COLOR;
+    label.font = [UIFont systemFontOfSize:18];
+    label.textColor = COMMENTCOLOR;
     label.text = @"您的登录账号:";
     [self.bgView addSubview:label];
     
-    UIImage*inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 3, 20, 2.3)];
     
-    phoneNumTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(29, label.frame.size.height+label.frame.origin.y+20, SCREEN_WIDTH-58, 35)];
+    phoneNumTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(29, label.frame.size.height+label.frame.origin.y+20, SCREEN_WIDTH-58, 42)];
     phoneNumTextfield.delegate = self;
+    phoneNumTextfield.backgroundColor = [UIColor whiteColor];
     phoneNumTextfield.keyboardType = UIKeyboardTypeNumberPad;
     phoneNumTextfield.clearButtonMode = UITextFieldViewModeWhileEditing;
     phoneNumTextfield.tag = 1000;
-    phoneNumTextfield.background = inputImage;
+    phoneNumTextfield.layer.cornerRadius = 5;
+    phoneNumTextfield.background = nil;
     phoneNumTextfield.textColor = UIColorFromRGB(0x727171);
     phoneNumTextfield.text = phoneNum;
     phoneNumTextfield.enabled = NO;
     [self.bgView addSubview:phoneNumTextfield];
     
-    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
+    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
     getCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    getCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, phoneNumTextfield.frame.origin.y+5, 58, 25);
+    getCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, phoneNumTextfield.frame.origin.y+5, 58, 32);
     [getCodeButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     [getCodeButton setTitle:@"短信验证" forState:UIControlStateNormal];
     getCodeButton.titleLabel.font = [UIFont boldSystemFontOfSize:13];
     [getCodeButton addTarget:self action:@selector(getCheckCode) forControlEvents:UIControlEventTouchUpInside];
     [self.bgView addSubview:getCodeButton];
     
-    codeTextField = [[MyTextField alloc] initWithFrame:CGRectMake(29, phoneNumTextfield.frame.size.height+phoneNumTextfield.frame.origin.y+4, SCREEN_WIDTH-58, 35)];
+    codeTextField = [[MyTextField alloc] initWithFrame:CGRectMake(29, phoneNumTextfield.frame.size.height+phoneNumTextfield.frame.origin.y+4, SCREEN_WIDTH-58, 42)];
     codeTextField.delegate = self;
-    codeTextField.background = inputImage;
+    codeTextField.backgroundColor = [UIColor whiteColor];
+    codeTextField.background = nil;
+    codeTextField.layer.cornerRadius = 5;
     codeTextField.keyboardType = UIKeyboardTypeNumberPad;
     codeTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
     codeTextField.tag = 1000;
@@ -98,28 +101,32 @@
     [self.bgView addSubview:codeTextField];
     
     UIButton *checkCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    checkCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, codeTextField.frame.origin.y+5, 58, 25);
+    checkCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, codeTextField.frame.origin.y+5, 58, 32);
     [checkCodeButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     [checkCodeButton setTitle:@"验证" forState:UIControlStateNormal];
     checkCodeButton.titleLabel.font = [UIFont boldSystemFontOfSize:13];
     [checkCodeButton addTarget:self action:@selector(verify) forControlEvents:UIControlEventTouchUpInside];
     [self.bgView addSubview:checkCodeButton];
     
-    passwordTextField = [[MyTextField alloc] initWithFrame:CGRectMake(29, codeTextField.frame.origin.y+codeTextField.frame.size.height+4, SCREEN_WIDTH-58, 35)];
+    passwordTextField = [[MyTextField alloc] initWithFrame:CGRectMake(29, codeTextField.frame.origin.y+codeTextField.frame.size.height+4, SCREEN_WIDTH-58, 42)];
     passwordTextField.delegate = self;
+    passwordTextField.backgroundColor = [UIColor whiteColor];
     passwordTextField.secureTextEntry = YES;
     passwordTextField.placeholder = @"密码";
     passwordTextField.tag = 1000;
-    passwordTextField.background = inputImage;
+    passwordTextField.layer.cornerRadius = 5;
+    passwordTextField.background = nil;
     passwordTextField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
     passwordTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
     [self.bgView addSubview:passwordTextField];
     
-    verifyTextField = [[MyTextField alloc] initWithFrame:CGRectMake(29, passwordTextField.frame.origin.y+passwordTextField.frame.size.height+4, SCREEN_WIDTH-58, 35)];
+    verifyTextField = [[MyTextField alloc] initWithFrame:CGRectMake(29, passwordTextField.frame.origin.y+passwordTextField.frame.size.height+4, SCREEN_WIDTH-58, 42)];
     verifyTextField.delegate = self;
     verifyTextField.secureTextEntry = YES;
     verifyTextField.tag = 1001;
-    verifyTextField.background = inputImage;
+    verifyTextField.backgroundColor = [UIColor whiteColor];
+    verifyTextField.layer.cornerRadius = 5;
+    verifyTextField.background = nil;
     verifyTextField.placeholder = @"再次输入密码";
     verifyTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
     [self.bgView addSubview:verifyTextField];

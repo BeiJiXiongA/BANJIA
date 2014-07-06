@@ -123,7 +123,7 @@ UITextFieldDelegate>
     phoneNumTextfield.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
     phoneNumTextfield.font = [UIFont systemFontOfSize:18];
     phoneNumTextfield.numericFormatter = [AKNumericFormatter formatterWithMask:PHONE_FORMAT placeholderCharacter:'*'];
-    phoneNumTextfield.placeholder = @"班家账号手机号码/";
+    phoneNumTextfield.placeholder = @"班家账号/手机号码";
     [self.bgView addSubview:phoneNumTextfield];
     
     if ([[Tools last_phone_num] length] > 0)

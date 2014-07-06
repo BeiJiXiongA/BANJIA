@@ -34,7 +34,7 @@
 #define SectionTag  999999
 #define RowTag     100
 
-#define ImageHeight  67.5f
+#define ImageHeight  65.5f
 
 #define ImageCountPerRow  4
 
@@ -649,6 +649,10 @@ DongTaiDetailAddCommentDelegate>
     }
     else if (section == [noticeArray count])
     {
+        UIView *verticalLineView = [[UIView alloc] initWithFrame:CGRectMake(34.75, 10, 1.5, 30)];
+        verticalLineView.backgroundColor = UIColorFromRGB(0xe2e3e4);
+        [headerView addSubview:verticalLineView];
+        
         headerLabel.backgroundColor = RGB(64, 196, 110, 1);
         headerLabel.text = @"    班级空间";
         headerLabel.font = [UIFont boldSystemFontOfSize:15];
@@ -657,6 +661,11 @@ DongTaiDetailAddCommentDelegate>
     }
     else
     {
+        
+        UIView *verticalLineView = [[UIView alloc] initWithFrame:CGRectMake(34.75, 0, 1.5, 40)];
+        verticalLineView.backgroundColor = UIColorFromRGB(0xe2e3e4);
+        [headerView addSubview:verticalLineView];
+        
         UIView *dotView = [[UIView alloc] initWithFrame:CGRectMake(28, 12.5, 15, 15)];
         dotView.layer.cornerRadius = 7.5;
         dotView.clipsToBounds = YES;
@@ -671,6 +680,7 @@ DongTaiDetailAddCommentDelegate>
 //        headerLabel.font = [UIFont boldSystemFontOfSize:15];
 //        headerLabel.textColor = [UIColor whiteColor];
         headerLabel.frame = CGRectMake(50, 5, SCREEN_WIDTH, 30);
+        
     }
     [headerView addSubview:headerLabel];
     return headerView;
@@ -844,7 +854,7 @@ DongTaiDetailAddCommentDelegate>
             cell = [[TrendsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:topImageView];
         }
         
-        CGFloat left = 5;
+        CGFloat left = 9.5;
         cell.showAllComments = NO;
         cell.nameButtonDel = self;
         NSDictionary *groupDict = [groupDiaries objectAtIndex:indexPath.section-[noticeArray count]-1];
@@ -873,7 +883,7 @@ DongTaiDetailAddCommentDelegate>
         NSString *timeStr = [Tools showTimeOfToday:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]];
         NSString *c_name = [dict objectForKey:@"c_name"];
         cell.timeLabel.text = c_name;
-        cell.timeLabel.frame = CGRectMake(SCREEN_WIDTH-[c_name length]*18-20, 2, [c_name length]*18, 35);
+        cell.timeLabel.frame = CGRectMake(SCREEN_WIDTH-[c_name length]*18-30, 2, [c_name length]*18, 35);
         cell.timeLabel.textAlignment = NSTextAlignmentRight;
         cell.timeLabel.numberOfLines = 2;
         cell.timeLabel.lineBreakMode = NSLineBreakByWordWrapping;
@@ -882,7 +892,7 @@ DongTaiDetailAddCommentDelegate>
         cell.headerImageView.backgroundColor = [UIColor clearColor];
         
         [Tools fillImageView:cell.headerImageView withImageFromURL:[[dict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERBG];
-        cell.locationLabel.frame = CGRectMake(60, cell.headerImageView.frame.origin.y+cell.headerImageView.frame.size.height-LOCATIONLABELHEI, SCREEN_WIDTH-80, LOCATIONLABELHEI);
+        cell.locationLabel.frame = CGRectMake(60, cell.headerImageView.frame.origin.y+cell.headerImageView.frame.size.height-LOCATIONLABELHEI, SCREEN_WIDTH-90, LOCATIONLABELHEI);
         cell.locationLabel.text = [NSString stringWithFormat:@"于%@在%@",timeStr,[[dict objectForKey:@"detail"] objectForKey:@"add"]];
         cell.locationLabel.numberOfLines = 1;
         cell.locationLabel.lineBreakMode = NSLineBreakByWordWrapping | NSLineBreakByTruncatingTail;
@@ -1103,6 +1113,12 @@ DongTaiDetailAddCommentDelegate>
         cell.bgView.layer.cornerRadius = 5;
         cell.bgView.clipsToBounds = YES;
         cell.bgView.backgroundColor = [UIColor whiteColor];
+        
+        UIView *verticalLineView = [[UIView alloc] init];
+        verticalLineView.backgroundColor = UIColorFromRGB(0xe2e3e4);
+        verticalLineView.frame = CGRectMake(34.75, 0, 1.5, cell.bgView.frame.size.height+10);
+        [cell.contentView insertSubview:verticalLineView belowSubview:cell.bgView];
+        
         return cell;
     }
     return nil;

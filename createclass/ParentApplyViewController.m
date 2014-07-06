@@ -51,6 +51,9 @@ UIScrollViewDelegate>
     NSString *schoolName;
     NSString *className;
     NSString *classID;
+    
+    NSTimer *timer;
+    int sec;
 }
 @end
 
@@ -79,6 +82,7 @@ UIScrollViewDelegate>
     checkCode = @"";
     re_id = @"";
     showRelate = YES;
+    sec = 0;
     
     mainScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT)];
     mainScrollView.delegate = self;
@@ -175,32 +179,36 @@ UIScrollViewDelegate>
     }
     else
     {
-        UIImage*inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 3, 20, 2.3)];
-        
-        phoneNumTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(29, relatetextField.frame.size.height+relatetextField.frame.origin.y+20, SCREEN_WIDTH-58, 35)];
+        phoneNumTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(29, relatetextField.frame.size.height+relatetextField.frame.origin.y+20, SCREEN_WIDTH-58, 42)];
         phoneNumTextfield.delegate = self;
         phoneNumTextfield.keyboardType = UIKeyboardTypeNumberPad;
         phoneNumTextfield.clearButtonMode = UITextFieldViewModeWhileEditing;
         phoneNumTextfield.tag = 3000;
+        phoneNumTextfield.layer.cornerRadius = 5;
+        phoneNumTextfield.clipsToBounds = YES;
+        phoneNumTextfield.backgroundColor = [UIColor whiteColor];
         phoneNumTextfield.placeholder = @"手机号码";
-        phoneNumTextfield.background = inputImage;
-        phoneNumTextfield.textColor = UIColorFromRGB(0x727171);
+        phoneNumTextfield.background = nil;
+        phoneNumTextfield.textColor = COMMENTCOLOR;
         phoneNumTextfield.enabled = YES;
         phoneNumTextfield.numericFormatter = [AKNumericFormatter formatterWithMask:PHONE_FORMAT placeholderCharacter:'*'];
         [mainScrollView addSubview:phoneNumTextfield];
         
-        UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
+        UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
         getCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        getCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, phoneNumTextfield.frame.origin.y+5, 58, 25);
+        getCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, phoneNumTextfield.frame.origin.y+5, 58, 32);
         [getCodeButton setBackgroundImage:btnImage forState:UIControlStateNormal];
         [getCodeButton setTitle:@"短信验证" forState:UIControlStateNormal];
         getCodeButton.titleLabel.font = [UIFont boldSystemFontOfSize:13];
         [getCodeButton addTarget:self action:@selector(getVerifyCode) forControlEvents:UIControlEventTouchUpInside];
         [mainScrollView addSubview:getCodeButton];
         
-        codeTextField = [[MyTextField alloc] initWithFrame:CGRectMake(29, phoneNumTextfield.frame.size.height+phoneNumTextfield.frame.origin.y+3, SCREEN_WIDTH-58, 35)];
+        codeTextField = [[MyTextField alloc] initWithFrame:CGRectMake(29, phoneNumTextfield.frame.size.height+phoneNumTextfield.frame.origin.y+3, SCREEN_WIDTH-58, 42)];
         codeTextField.delegate = self;
-        codeTextField.background = inputImage;
+        codeTextField.layer.cornerRadius = 5;
+        codeTextField.clipsToBounds = YES;
+        codeTextField.backgroundColor = [UIColor whiteColor];
+        codeTextField.background = nil;
         codeTextField.keyboardType = UIKeyboardTypeNumberPad;
         codeTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
         codeTextField.tag = 4000;
@@ -209,7 +217,7 @@ UIScrollViewDelegate>
         [mainScrollView addSubview:codeTextField];
         
         UIButton *checkCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        checkCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, codeTextField.frame.origin.y+5, 58, 25);
+        checkCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, codeTextField.frame.origin.y+5, 58, 32);
         [checkCodeButton setBackgroundImage:btnImage forState:UIControlStateNormal];
         [checkCodeButton setTitle:@"验证" forState:UIControlStateNormal];
         checkCodeButton.titleLabel.font = [UIFont boldSystemFontOfSize:13];
@@ -220,7 +228,7 @@ UIScrollViewDelegate>
     UIImage *btnImage  =[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
     studentButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [studentButton setTitle:@"提交" forState:UIControlStateNormal];
-    studentButton.enabled = NO;
+//    studentButton.enabled = NO;
     if ([[Tools phone_num] length] > 0)
     {
         studentButton.enabled = YES;
@@ -241,6 +249,10 @@ UIScrollViewDelegate>
     mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, studentButton.frame.size.height+studentButton.frame.origin.y+30);
     
     [mainScrollView addSubview:relateTableView];
+    
+    UITapGestureRecognizer *tapTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapEvent)];
+    mainScrollView.userInteractionEnabled = YES;
+    [mainScrollView addGestureRecognizer:tapTgr];
 }
 -(void)viewWillAppear:(BOOL)animated
 {
@@ -253,8 +265,29 @@ UIScrollViewDelegate>
     [MobClick endLogPageView:@"PageOne"];
 }
 
+-(void)tapEvent
+{
+    for(UIView *v in mainScrollView.subviews)
+    {
+        if ([v isKindOfClass:[UITextField class]] || [v isKindOfClass:[UITextView class]])
+        {
+            if (![v isExclusiveTouch])
+            {
+                [v resignFirstResponder];
+                [UIView animateWithDuration:0.25 animations:^{
+                    self.bgView.center = CENTER_POINT;
+                }completion:^(BOOL finished) {
+                    
+                }];
+            }
+        }
+    }
+}
+
+
 -(void)unShowSelfViewController
 {
+    [timer invalidate];
     [self.navigationController popViewControllerAnimated:YES];
 }
 
@@ -284,6 +317,8 @@ UIScrollViewDelegate>
             DDLOG(@"get code %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
+                timer = [NSTimer timerWithTimeInterval:1.0 target:self selector:@selector(timeRefresh)userInfo:nil repeats:YES];
+                [[NSRunLoop  currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
                 [self getcheckCode];
             }
             else
@@ -308,6 +343,23 @@ UIScrollViewDelegate>
     
 }
 
+-(void)timeRefresh
+{
+    if (sec > 0)
+    {
+        sec--;
+        [getCodeButton setTitle:[NSString stringWithFormat:@"等待%d",sec] forState:UIControlStateNormal];
+    }
+    else
+    {
+        [getCodeButton setTitle:@"重新获取" forState:UIControlStateNormal];
+        getCodeButton.enabled = YES;
+        [timer invalidate];
+        sec = 60;
+    }
+}
+
+
 -(void)getcheckCode
 {
     if ([Tools NetworkReachable])
@@ -322,7 +374,6 @@ UIScrollViewDelegate>
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 //                codeStr = [responseDict objectForKey:@"data"];
-                getCodeButton.hidden = YES;
                 codeTextField.text = [responseDict objectForKey:@"data"];
                 
             }

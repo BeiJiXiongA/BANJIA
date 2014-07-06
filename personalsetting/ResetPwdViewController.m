@@ -41,7 +41,7 @@
     UIButton *sendButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [sendButton setTitle:@"保存" forState:UIControlStateNormal];
     sendButton.backgroundColor = [UIColor clearColor];
-    [sendButton setBackgroundImage:[UIImage imageNamed:@"navbtn"] forState:UIControlStateNormal];
+    [sendButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     sendButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
     [sendButton addTarget:self action:@selector(submitPwdChange) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:sendButton];
@@ -50,12 +50,22 @@
     oldPwdTextField = [[MyTextField alloc] initWithFrame:CGRectMake(30, UI_NAVIGATION_BAR_HEIGHT+30, SCREEN_WIDTH-60, 40)];
     oldPwdTextField.placeholder = @"原密码";
     oldPwdTextField.secureTextEntry = YES;
+    oldPwdTextField.layer.cornerRadius = 5;
+    oldPwdTextField.clipsToBounds = YES;
+    oldPwdTextField.background = nil;
+    oldPwdTextField.textColor = COMMENTCOLOR;
+    oldPwdTextField.backgroundColor = [UIColor whiteColor];
     oldPwdTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
     [self.bgView addSubview:oldPwdTextField];
     
     newPwdTextField = [[MyTextField alloc] initWithFrame:CGRectMake(30, UI_NAVIGATION_BAR_HEIGHT+90, SCREEN_WIDTH-60, 40)];
     newPwdTextField.placeholder = @"新密码";
     newPwdTextField.secureTextEntry = YES;
+    newPwdTextField.layer.cornerRadius = 5;
+    newPwdTextField.clipsToBounds = YES;
+    newPwdTextField.background = nil;
+    newPwdTextField.textColor = COMMENTCOLOR;
+    newPwdTextField.backgroundColor = [UIColor whiteColor];
     newPwdTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
     [self.bgView addSubview:newPwdTextField];
     

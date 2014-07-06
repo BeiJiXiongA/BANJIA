@@ -34,7 +34,7 @@
 #define SectionTag  10000
 #define RowTag     100
 
-#define ImageHeight  67.5f
+#define ImageHeight  65.5f
 
 #define ImageCountPerRow  4
 
@@ -570,24 +570,11 @@ NameButtonDel>
         dotView.layer.borderWidth = 1.5;
         dotView.backgroundColor = RGB(64, 196, 110, 1);
         [headerView addSubview:dotView];
-        //        int cha = [noticeArray count]>0?([noticeArray count]+1):0;
         NSDictionary *groupDict = [tmpArray objectAtIndex:section-1];
-        //        headerLabel.backgroundColor = RGB(64, 196, 110, 1);
         headerLabel.text = [groupDict objectForKey:@"date"];
-        //        headerLabel.font = [UIFont boldSystemFontOfSize:15];
-        //        headerLabel.textColor = [UIColor whiteColor];
         headerLabel.frame = CGRectMake(50, 5, SCREEN_WIDTH, 30);
         [headerView addSubview:headerLabel];
         return headerView;
-        
-        
-//        NSDictionary *dict = [tmpArray objectAtIndex:section-1];
-//        UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(5, 0, SCREEN_WIDTH-10, 45)];
-//        headerLabel.text = [NSString stringWithFormat:@"  %@",[dict objectForKey:@"date"]];
-//        headerLabel.textColor = TITLE_COLOR;
-//        headerLabel.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.8];
-//        headerLabel.font = [UIFont systemFontOfSize:20];
-//        return headerLabel;
     }
     return nil;
 }

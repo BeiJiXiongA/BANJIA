@@ -53,7 +53,14 @@
     limitTableView = [[UITableView alloc] initWithFrame:CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT+20, SCREEN_WIDTH-20, 150) style:UITableViewStylePlain];
     limitTableView.delegate = self;
     limitTableView.dataSource = self;
+    limitTableView.layer.cornerRadius = 5;
+    limitTableView.clipsToBounds = YES;
     [self.bgView addSubview:limitTableView];
+    
+    if ([limitTableView respondsToSelector:@selector(setSeparatorInset:)])
+    {
+        [limitTableView setSeparatorInset:UIEdgeInsetsZero];
+    }
     
     [self getUserInfo];
 }

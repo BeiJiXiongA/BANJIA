@@ -104,9 +104,18 @@
     cell.nameLabel.font = [UIFont systemFontOfSize:15];
     cell.objectsLabel.font = [UIFont systemFontOfSize:15];
     cell.nameLabel.textAlignment = NSTextAlignmentLeft;
-    cell.nameLabel.frame = CGRectMake(10, 10, 80, 20);
+    
+    cell.nameLabel.frame = CGRectMake(10, 0, SCREEN_WIDTH-40, 40);
+    cell.nameLabel.backgroundColor = [UIColor whiteColor];
+    cell.nameLabel.layer.cornerRadius = 5;
+    cell.nameLabel.clipsToBounds = YES;
+    cell.nameLabel.textColor = COMMENTCOLOR;
+    
+    cell.objectsLabel.textColor = COMMENTCOLOR;
     cell.objectsLabel.frame = CGRectMake(100, 10, SCREEN_WIDTH-150, 20);
-    cell.nameLabel.text = [array objectAtIndex:indexPath.section *2+indexPath.row];
+    cell.objectsLabel.backgroundColor = [UIColor whiteColor];
+    cell.objectsLabel.textAlignment = NSTextAlignmentRight;
+    cell.nameLabel.text = [NSString stringWithFormat:@"    %@",[array objectAtIndex:indexPath.section *2+indexPath.row]];
     cell.accessoryView = nil;
     if (indexPath.section == 0)
     {
@@ -132,8 +141,8 @@
         }
         cell.selectionStyle = UITableViewCellSelectionStyleGray;
     }
-    cell.backgroundColor = [UIColor whiteColor];
-    cell.contentView.backgroundColor = [UIColor whiteColor];
+    cell.backgroundColor = self.bgView.backgroundColor;
+    cell.contentView.backgroundColor = self.bgView.backgroundColor;
     return cell;
 }
 
@@ -146,6 +155,7 @@
         if (indexPath.row == 0)
         {
             ResetPwdViewController *resetPwdViewController = [[ResetPwdViewController alloc] init];
+            
             [self.navigationController pushViewController:resetPwdViewController animated:YES];
         }
     }

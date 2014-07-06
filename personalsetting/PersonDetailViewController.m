@@ -352,7 +352,6 @@ UIActionSheetDelegate,UIAlertViewDelegate>
             [cell.button2 addTarget:self action:@selector(toChat) forControlEvents:UIControlEventTouchUpInside];
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
         }
-        
     }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;

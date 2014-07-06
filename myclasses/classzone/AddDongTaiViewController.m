@@ -293,7 +293,7 @@ int count = 0;
     placeHolderLabel.font = [UIFont systemFontOfSize:16];
     [mainScrollView addSubview:placeHolderLabel];
     
-    contentTextView = [[UITextView alloc] initWithFrame:CGRectMake(13, 12, SCREEN_WIDTH -26, 45)];
+    contentTextView = [[UITextView alloc] initWithFrame:CGRectMake(13, 12, SCREEN_WIDTH -26, 47)];
     contentTextView.delegate = self;
     contentTextView.tag = ContentTextViewTag;
     contentTextView.backgroundColor = [UIColor clearColor];
@@ -466,6 +466,30 @@ int count = 0;
 #pragma mark - dealImage
 -(UIImage *)getNormalImageFromImage:(UIImage *)originalImage
 {
+    CGFloat imageHeight = 0.0f;
+    CGFloat imageWidth = 0.0f;
+    if (originalImage.size.width > originalImage.size.height)
+    {
+        if (originalImage.size.height > SCREEN_WIDTH * NormalImageScale)
+        {
+            imageHeight = SCREEN_WIDTH * NormalImageScale;
+            imageWidth = originalImage.size.width*imageHeight/originalImage.size.height;
+        }
+        else
+        {
+            imageHeight = originalImage.size.height;
+            imageWidth = originalImage.size.width;
+        }
+    }
+    else
+    {
+        if (originalImage.size.width > SCREEN_WIDTH * NormalImageScale)
+        {
+            imageWidth = SCREEN_WIDTH * NormalImageScale;
+            imageHeight = originalImage.
+        }
+    }
+    
     if (originalImage.size.width>SCREEN_WIDTH*NormalImageScale || originalImage.size.height>SCREEN_HEIGHT*NormalImageScale)
     {
         CGFloat imageHeight = 0.0f;

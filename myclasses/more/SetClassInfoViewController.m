@@ -130,13 +130,30 @@
         }
         if ([textView.text length] > 51)
         {
-            infoTextView.text = [infoTextView.text substringToIndex:50];
-            [Tools showAlertView:@"请把班级介绍字数控制在50个字符内" delegateViewController:nil];
+            
         }
         countLabel.text = [NSString stringWithFormat:@"%d/50",[infoTextView.text length]];
     }
 }
 
+-(BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
+{
+    if ([textView.text length] > 51)
+    {
+        infoTextView.text = [infoTextView.text substringToIndex:50];
+        return NO;
+    }
+    return YES;
+}
+
+-(void)textViewDidEndEditing:(UITextView *)textView
+{
+    if ([textView.text length] > 50)
+    {
+        infoTextView.text = [infoTextView.text substringToIndex:50];
+        [Tools showAlertView:@"请把班级介绍字数控制在50个字符内" delegateViewController:nil];
+    }
+}
 
 -(void)setClassInfo
 {

@@ -50,6 +50,9 @@ UIScrollViewDelegate>
     NSString *classID;
     
     UIButton *getCodeButton;
+    
+    NSTimer *timer;
+    int sec;
 }
 @end
 
@@ -176,16 +179,18 @@ UIScrollViewDelegate>
     }
     else
     {
-        UIImage*inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 3, 20, 2.3)];
         
         phoneNumTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(29, objectTextField.frame.size.height+objectTextField.frame.origin.y+20, SCREEN_WIDTH-58, 35)];
         phoneNumTextfield.delegate = self;
         phoneNumTextfield.keyboardType = UIKeyboardTypeNumberPad;
         phoneNumTextfield.clearButtonMode = UITextFieldViewModeWhileEditing;
         phoneNumTextfield.tag = 3000;
+        phoneNumTextfield.layer.cornerRadius = 5;
+        phoneNumTextfield.clipsToBounds = YES;
+        phoneNumTextfield.backgroundColor = [UIColor whiteColor];
         phoneNumTextfield.placeholder = @"手机号码";
-        phoneNumTextfield.background = inputImage;
-        phoneNumTextfield.textColor = UIColorFromRGB(0x727171);
+        phoneNumTextfield.background = nil;
+        phoneNumTextfield.textColor = COMMENTCOLOR;
         phoneNumTextfield.enabled = YES;
         phoneNumTextfield.numericFormatter = [AKNumericFormatter formatterWithMask:PHONE_FORMAT placeholderCharacter:'*'];
         [mainScrollView addSubview:phoneNumTextfield];
@@ -201,11 +206,14 @@ UIScrollViewDelegate>
         
         codeTextField = [[MyTextField alloc] initWithFrame:CGRectMake(29, phoneNumTextfield.frame.size.height+phoneNumTextfield.frame.origin.y+3, SCREEN_WIDTH-58, 35)];
         codeTextField.delegate = self;
-        codeTextField.background = inputImage;
+        codeTextField.background = nil;
         codeTextField.keyboardType = UIKeyboardTypeNumberPad;
         codeTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
         codeTextField.tag = 4000;
-        codeTextField.textColor = UIColorFromRGB(0x727171);
+        codeTextField.layer.cornerRadius = 5;
+        codeTextField.clipsToBounds = YES;
+        codeTextField.backgroundColor = [UIColor whiteColor];
+        codeTextField.textColor = COMMENTCOLOR;
         codeTextField.placeholder = @"验证码";
         [mainScrollView addSubview:codeTextField];
         
@@ -259,6 +267,7 @@ UIScrollViewDelegate>
 
 -(void)unShowSelfViewController
 {
+    [timer invalidate];
     [self.navigationController popViewControllerAnimated:YES];
 }
 
@@ -306,6 +315,8 @@ UIScrollViewDelegate>
             DDLOG(@"get code %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
+                timer = [NSTimer timerWithTimeInterval:1.0 target:self selector:@selector(timeRefresh)userInfo:nil repeats:YES];
+                [[NSRunLoop  currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
                 [self getcheckCode];
             }
             else
@@ -328,6 +339,22 @@ UIScrollViewDelegate>
         [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
     }
     
+}
+
+-(void)timeRefresh
+{
+    if (sec > 0)
+    {
+        sec--;
+        [getCodeButton setTitle:[NSString stringWithFormat:@"等待%d",sec] forState:UIControlStateNormal];
+    }
+    else
+    {
+        [getCodeButton setTitle:@"重新获取" forState:UIControlStateNormal];
+        getCodeButton.enabled = YES;
+        [timer invalidate];
+        sec = 60;
+    }
 }
 
 -(void)getcheckCode

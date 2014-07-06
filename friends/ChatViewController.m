@@ -90,7 +90,7 @@ FriendListDelegate>
     if ([[[NSUserDefaults standardUserDefaults] objectForKey:FROMWHERE]isEqualToString:FROMCLASS])
     {
         self.view.backgroundColor = [UIColor blackColor];
-        self.stateView.frame = CGRectMake(0, 0, YSTART, 0);
+        self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     }
     
         
