@@ -466,29 +466,30 @@ int count = 0;
 #pragma mark - dealImage
 -(UIImage *)getNormalImageFromImage:(UIImage *)originalImage
 {
-    CGFloat imageHeight = 0.0f;
-    CGFloat imageWidth = 0.0f;
-    if (originalImage.size.width > originalImage.size.height)
-    {
-        if (originalImage.size.height > SCREEN_WIDTH * NormalImageScale)
-        {
-            imageHeight = SCREEN_WIDTH * NormalImageScale;
-            imageWidth = originalImage.size.width*imageHeight/originalImage.size.height;
-        }
-        else
-        {
-            imageHeight = originalImage.size.height;
-            imageWidth = originalImage.size.width;
-        }
-    }
-    else
-    {
-        if (originalImage.size.width > SCREEN_WIDTH * NormalImageScale)
-        {
-            imageWidth = SCREEN_WIDTH * NormalImageScale;
-            imageHeight = originalImage.
-        }
-    }
+//    a307741613dbc06cd926be027a15298364712d59
+//    CGFloat imageHeight = 0.0f;
+//    CGFloat imageWidth = 0.0f;
+//    if (originalImage.size.width > originalImage.size.height)
+//    {
+//        if (originalImage.size.height > SCREEN_WIDTH * NormalImageScale)
+//        {
+//            imageHeight = SCREEN_WIDTH * NormalImageScale;
+//            imageWidth = originalImage.size.width*imageHeight/originalImage.size.height;
+//        }
+//        else
+//        {
+//            imageHeight = originalImage.size.height;
+//            imageWidth = originalImage.size.width;
+//        }
+//    }
+//    else
+//    {
+//        if (originalImage.size.width > SCREEN_WIDTH * NormalImageScale)
+//        {
+//            imageWidth = SCREEN_WIDTH * NormalImageScale;
+//            imageHeight = originalImage.
+//        }
+//    }
     
     if (originalImage.size.width>SCREEN_WIDTH*NormalImageScale || originalImage.size.height>SCREEN_HEIGHT*NormalImageScale)
     {
