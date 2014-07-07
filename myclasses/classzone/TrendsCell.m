@@ -16,7 +16,7 @@
 
 
 @implementation TrendsCell
-@synthesize headerImageView,nameLabel,timeLabel,locationLabel,contentLabel,imagesScrollView,imagesView,transmitButton,praiseButton,commentButton,bgView,nameTextField,commentsTableView,commentsArray,praiseArray,showAllComments,nameButtonDel,diaryDetailDict,geduan1,geduan2,openPraise,topImageView;
+@synthesize headerImageView,nameLabel,timeLabel,locationLabel,contentLabel,imagesScrollView,imagesView,transmitButton,praiseButton,commentButton,bgView,nameTextField,commentsTableView,commentsArray,praiseArray,showAllComments,nameButtonDel,diaryDetailDict,geduan1,geduan2,openPraise,topImageView,verticalLineView;
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
@@ -144,6 +144,10 @@
             [commentsTableView setSeparatorInset:UIEdgeInsetsZero];
         }
         [self.bgView addSubview:commentsTableView];
+        
+        verticalLineView = [[UIView alloc] init];
+        verticalLineView.backgroundColor = UIColorFromRGB(0xe2e3e4);
+        [self.contentView insertSubview:verticalLineView belowSubview:self.bgView];
     }
     return self;
 }

@@ -1114,10 +1114,7 @@ DongTaiDetailAddCommentDelegate>
         cell.bgView.clipsToBounds = YES;
         cell.bgView.backgroundColor = [UIColor whiteColor];
         
-        UIView *verticalLineView = [[UIView alloc] init];
-        verticalLineView.backgroundColor = UIColorFromRGB(0xe2e3e4);
-        verticalLineView.frame = CGRectMake(34.75, 0, 1.5, cell.bgView.frame.size.height+10);
-        [cell.contentView insertSubview:verticalLineView belowSubview:cell.bgView];
+        cell.verticalLineView.frame = CGRectMake(34.75, 0, 1.5, cell.bgView.frame.size.height+10);
         
         return cell;
     }

@@ -100,7 +100,7 @@
         countLabel.backgroundColor = [UIColor clearColor];
         countLabel.font = [UIFont systemFontOfSize:12];
         countLabel.textColor = TIMECOLOR;
-        countLabel.text = [NSString stringWithFormat:@"%d/50",[infoStr length]];
+//        countLabel.text = [NSString stringWithFormat:@"%d/50",[infoStr length]];
         [self.bgView addSubview:countLabel];
     }
 }
@@ -128,17 +128,13 @@
         {
             placeHolderTextView.text = @"填写班级介绍";
         }
-        if ([textView.text length] > 51)
-        {
-            
-        }
-        countLabel.text = [NSString stringWithFormat:@"%d/50",[infoTextView.text length]];
+//        countLabel.text = [NSString stringWithFormat:@"%d/50",[infoTextView.text length]];
     }
 }
 
 -(BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
 {
-    if ([textView.text length] > 51)
+    if ([textView.text length] > 50)
     {
         infoTextView.text = [infoTextView.text substringToIndex:50];
         return NO;
@@ -150,7 +146,6 @@
 {
     if ([textView.text length] > 50)
     {
-        infoTextView.text = [infoTextView.text substringToIndex:50];
         [Tools showAlertView:@"请把班级介绍字数控制在50个字符内" delegateViewController:nil];
     }
 }

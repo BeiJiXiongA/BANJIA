@@ -77,6 +77,8 @@ UIScrollViewDelegate>
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     className = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
     
+    sec = 60;
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     
     mainScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT)];
@@ -180,7 +182,7 @@ UIScrollViewDelegate>
     else
     {
         
-        phoneNumTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(29, objectTextField.frame.size.height+objectTextField.frame.origin.y+20, SCREEN_WIDTH-58, 35)];
+        phoneNumTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(29, objectTextField.frame.size.height+objectTextField.frame.origin.y+20, SCREEN_WIDTH-58, 42)];
         phoneNumTextfield.delegate = self;
         phoneNumTextfield.keyboardType = UIKeyboardTypeNumberPad;
         phoneNumTextfield.clearButtonMode = UITextFieldViewModeWhileEditing;
@@ -195,16 +197,16 @@ UIScrollViewDelegate>
         phoneNumTextfield.numericFormatter = [AKNumericFormatter formatterWithMask:PHONE_FORMAT placeholderCharacter:'*'];
         [mainScrollView addSubview:phoneNumTextfield];
         
-        UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
+        UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
         getCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        getCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, phoneNumTextfield.frame.origin.y+5, 58, 25);
+        getCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, phoneNumTextfield.frame.origin.y+5, 58, 32);
         [getCodeButton setBackgroundImage:btnImage forState:UIControlStateNormal];
         [getCodeButton setTitle:@"短信验证" forState:UIControlStateNormal];
         getCodeButton.titleLabel.font = [UIFont boldSystemFontOfSize:13];
         [getCodeButton addTarget:self action:@selector(getVerifyCode) forControlEvents:UIControlEventTouchUpInside];
         [mainScrollView addSubview:getCodeButton];
         
-        codeTextField = [[MyTextField alloc] initWithFrame:CGRectMake(29, phoneNumTextfield.frame.size.height+phoneNumTextfield.frame.origin.y+3, SCREEN_WIDTH-58, 35)];
+        codeTextField = [[MyTextField alloc] initWithFrame:CGRectMake(29, phoneNumTextfield.frame.size.height+phoneNumTextfield.frame.origin.y+3, SCREEN_WIDTH-58, 42)];
         codeTextField.delegate = self;
         codeTextField.background = nil;
         codeTextField.keyboardType = UIKeyboardTypeNumberPad;
@@ -218,7 +220,7 @@ UIScrollViewDelegate>
         [mainScrollView addSubview:codeTextField];
         
         UIButton *checkCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        checkCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, codeTextField.frame.origin.y+5, 58, 25);
+        checkCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, codeTextField.frame.origin.y+5, 58, 32);
         [checkCodeButton setBackgroundImage:btnImage forState:UIControlStateNormal];
         [checkCodeButton setTitle:@"验证" forState:UIControlStateNormal];
         checkCodeButton.titleLabel.font = [UIFont boldSystemFontOfSize:13];
@@ -228,7 +230,7 @@ UIScrollViewDelegate>
 
     
     
-    UIImage *btnImage  =[Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
+    UIImage *btnImage  =[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
     studentButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [studentButton setTitle:@"提交" forState:UIControlStateNormal];
     studentButton.enabled = NO;
@@ -253,6 +255,10 @@ UIScrollViewDelegate>
     mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, studentButton.frame.size.height+studentButton.frame.origin.y+30);
     
     [mainScrollView addSubview:objectsTableView];
+    
+    UITapGestureRecognizer *tapTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapEvent)];
+    mainScrollView.userInteractionEnabled = YES;
+    [mainScrollView addGestureRecognizer:tapTgr];
 }
 -(void)viewWillAppear:(BOOL)animated
 {
@@ -271,13 +277,21 @@ UIScrollViewDelegate>
     [self.navigationController popViewControllerAnimated:YES];
 }
 
--(void)returnKeyBoard
+-(void)tapEvent
 {
     for(UIView *v in mainScrollView.subviews)
     {
-        if ([v isKindOfClass:[UITextField class]])
+        if ([v isKindOfClass:[UITextField class]] || [v isKindOfClass:[UITextView class]])
         {
-            [v resignFirstResponder];
+            if (![v isExclusiveTouch])
+            {
+                [v resignFirstResponder];
+                [UIView animateWithDuration:0.25 animations:^{
+                    self.bgView.center = CENTER_POINT;
+                }completion:^(BOOL finished) {
+                    
+                }];
+            }
         }
     }
 }
@@ -371,7 +385,6 @@ UIScrollViewDelegate>
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 //                codeStr = [responseDict objectForKey:@"data"];
-                getCodeButton.hidden = YES;
                 codeTextField.text = [responseDict objectForKey:@"data"];
                 
             }

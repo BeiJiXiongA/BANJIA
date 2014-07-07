@@ -380,12 +380,17 @@ SelectClasses>
     }
     if ([textView.text length] > 200)
     {
-        textView.text = [textView.text substringToIndex:201];
+        
         [Tools showAlertView:@"公告内容不能超多200字" delegateViewController:nil];
     }
 }
 -(BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
 {
+    if ([textView.text length] > 200)
+    {
+        textView.text = [textView.text substringToIndex:200];
+        return NO;
+    }
     return YES;
 }
 @end

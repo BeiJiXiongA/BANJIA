@@ -37,6 +37,7 @@
 @property (nonatomic, assign) id<NameButtonDel> nameButtonDel;
 @property (nonatomic, strong) NSDictionary *diaryDetailDict;
 @property (nonatomic, strong) UIImageView *topImageView;
+@property (nonatomic, strong) UIView *verticalLineView;
 
 @property (nonatomic, strong) UIView *geduan1;
 @property (nonatomic, strong) UIView *geduan2;

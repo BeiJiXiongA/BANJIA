@@ -25,6 +25,9 @@
 #define NormalImageScale  2
 #define BigImageScale    2
 
+#define MAXHEIGHT     640
+#define MAXWIDTH      640
+
 #define ContentTextViewTag  1000
 #define LocationTextViewTag  2000
 
@@ -467,67 +470,49 @@ int count = 0;
 -(UIImage *)getNormalImageFromImage:(UIImage *)originalImage
 {
 //    a307741613dbc06cd926be027a15298364712d59
-//    CGFloat imageHeight = 0.0f;
-//    CGFloat imageWidth = 0.0f;
-//    if (originalImage.size.width > originalImage.size.height)
-//    {
-//        if (originalImage.size.height > SCREEN_WIDTH * NormalImageScale)
-//        {
-//            imageHeight = SCREEN_WIDTH * NormalImageScale;
-//            imageWidth = originalImage.size.width*imageHeight/originalImage.size.height;
-//        }
-//        else
-//        {
-//            imageHeight = originalImage.size.height;
-//            imageWidth = originalImage.size.width;
-//        }
-//    }
-//    else
-//    {
-//        if (originalImage.size.width > SCREEN_WIDTH * NormalImageScale)
-//        {
-//            imageWidth = SCREEN_WIDTH * NormalImageScale;
-//            imageHeight = originalImage.
-//        }
-//    }
-    
-    if (originalImage.size.width>SCREEN_WIDTH*NormalImageScale || originalImage.size.height>SCREEN_HEIGHT*NormalImageScale)
+    CGFloat imageHeight = 0.0f;
+    CGFloat imageWidth = 0.0f;
+    if (originalImage.size.width > originalImage.size.height)
     {
-        CGFloat imageHeight = 0.0f;
-        CGFloat imageWidth = 0.0f;
-        if (originalImage.size.width > SCREEN_WIDTH*NormalImageScale)
+        if (originalImage.size.height > MAXHEIGHT)
         {
-            imageWidth = SCREEN_WIDTH*NormalImageScale;
-            imageHeight = imageWidth *originalImage.size.height/originalImage.size.width;
+            imageHeight = MAXHEIGHT;
+            imageWidth = originalImage.size.width*imageHeight/originalImage.size.height;
         }
         else
         {
             imageHeight = originalImage.size.height;
             imageWidth = originalImage.size.width;
         }
-        originalImage = [Tools thumbnailWithImageWithoutScale:originalImage size:CGSizeMake(imageWidth, imageHeight)];
     }
-    return originalImage;
-}
-
--(UIImage *)getBigImageFromImage:(UIImage *)originalImage
-{
-    if (originalImage.size.width>SCREEN_WIDTH*BigImageScale || originalImage.size.height>SCREEN_HEIGHT*BigImageScale)
+    else if(originalImage.size.width < originalImage.size.height)
     {
-        CGFloat imageHeight = 0.0f;
-        CGFloat imageWidth = 0.0f;
-        if (originalImage.size.width>SCREEN_WIDTH*BigImageScale)
+        if (originalImage.size.width > MAXWIDTH)
         {
-            imageWidth = SCREEN_WIDTH*BigImageScale;
-            imageHeight = imageWidth*originalImage.size.height/originalImage.size.width;
+            imageWidth = MAXWIDTH;
+            imageHeight = originalImage.size.height*imageWidth/originalImage.size.width;
         }
         else
         {
-            imageHeight = SCREEN_HEIGHT*BigImageScale;
-            imageWidth = imageHeight*originalImage.size.width/originalImage.size.height;
+            imageHeight = originalImage.size.height;
+            imageWidth = originalImage.size.width;
         }
-        originalImage = [Tools thumbnailWithImageWithoutScale:originalImage size:CGSizeMake(imageWidth, imageHeight)];
     }
+    else
+    {
+        if (originalImage.size.width > MAXWIDTH)
+        {
+            imageWidth = MAXWIDTH;
+            imageHeight = MAXWIDTH;
+        }
+        else
+        {
+            imageHeight = originalImage.size.height;
+            imageWidth = originalImage.size.width;
+        }
+    }
+    DDLOG(@"image direction %d",originalImage.imageOrientation);
+    originalImage = [Tools thumbnailWithImageWithoutScale:originalImage size:CGSizeMake(imageWidth, imageHeight)];
     return originalImage;
 }
 
@@ -615,15 +600,6 @@ int count = 0;
                 UIImage *image=[UIImage imageWithCGImage:asset.thumbnail];
                 [latelyThumImageArray addObject:image];
                 
-                UIImage *fullScreenImage = [self getImageFromALAssesst:asset];
-                
-                [originalLatelyImageArray addObject:fullScreenImage];
-                
-                fullScreenImage = [self getNormalImageFromImage:fullScreenImage];
-                
-                [latelyFullImageArray addObject:fullScreenImage];
-                
-                
                 UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(10+(67.5+5)*i, 37, 67.5, 67.5)];
                 imageView.layer.cornerRadius = 5;
                 imageView.clipsToBounds = YES;
@@ -633,6 +609,24 @@ int count = 0;
                 UITapGestureRecognizer *addLatelyImageTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(addLatelyImage:)];
                 imageView.userInteractionEnabled = YES;
                 [imageView addGestureRecognizer:addLatelyImageTgr];
+                
+                UIImage *fullScreenImage = [self getImageFromALAssesst:asset];
+                fullScreenImage = [self getNormalImageFromImage:fullScreenImage];
+                [originalLatelyImageArray addObject:fullScreenImage];
+                [latelyFullImageArray addObject:fullScreenImage];
+                
+                
+//                __block UIImage *fullScreenImage;
+//                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+//                    fullScreenImage = [self getImageFromALAssesst:asset];
+//                    dispatch_async(dispatch_get_main_queue(), ^{
+//                        fullScreenImage = [self getImageFromALAssesst:asset];
+//                        fullScreenImage = [self getNormalImageFromImage:fullScreenImage];
+//                        [originalLatelyImageArray addObject:fullScreenImage];
+//                        [latelyFullImageArray addObject:fullScreenImage];
+//                    });
+//                });
+                
             }failureBlock:^(NSError *error) {
                 NSLog(@"error=%@",error);
             }
@@ -728,6 +722,9 @@ int count = 0;
         [deleteButton setImage:[UIImage imageNamed:@"icon_del"] forState:UIControlStateNormal];
         [deleteButton addTarget:self action:@selector(deleteImage:) forControlEvents:UIControlEventTouchUpInside];
         [imageScrollView addSubview:deleteButton];
+        
+        
+        DDLOG(@"reload images orientation %d ==size %@",[[normalPhotosArray objectAtIndex:i] imageOrientation],NSStringFromCGSize(((UIImage *)[normalPhotosArray objectAtIndex:i]).size));
     }
     
     
@@ -943,6 +940,12 @@ int count = 0;
     {
         [locationTextView resignFirstResponder];
         [contentTextView resignFirstResponder];
+        
+        if ([textView.text length] > 200)
+        {
+            textView.text = [textView.text substringToIndex:200];
+            return NO;
+        }
         return NO;
     }
     return YES;
@@ -960,14 +963,8 @@ int count = 0;
         {
             placeHolderLabel.text = @"说点什么吧...";
         }
-        if([textView.text length] > 200)
-        {
-            textView.text = [textView.text substringToIndex:201];
-            [Tools showAlertView:@"字数不能超过200个字" delegateViewController:nil];
-        }
     }
 }
-
 
 -(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
@@ -1026,15 +1023,26 @@ int count = 0;
 {
     ALAssetRepresentation *assetPresentation = [asset defaultRepresentation];
     
+    DDLOG(@"%d",assetPresentation.orientation);
+    
     CGImageRef imageRef = [assetPresentation fullResolutionImage];
     UIImage *image = [UIImage imageWithCGImage:imageRef];
     
     NSData *data = UIImageJPEGRepresentation(image, 1.0f);
+    UIImage *thumImage = [UIImage imageWithData:data];
     
-    NSString *tmpDir = NSTemporaryDirectory();
-    NSString *filePath = [NSString stringWithFormat:@"%@/%@",tmpDir,assetPresentation.filename];
-    [data writeToFile:filePath atomically:YES];
-    return image;
+
+    return thumImage;
+}
+
+CGImageRef flip(CGImageRef im)
+{
+    CGSize sz = CGSizeMake(CGImageGetWidth(im), CGImageGetHeight(im));
+    UIGraphicsBeginImageContext(sz);
+    CGContextDrawImage(UIGraphicsGetCurrentContext(), CGRectMake(0, 0, sz.width, sz.height), im);
+    CGImageRef result = [UIGraphicsGetImageFromCurrentImageContext() CGImage];
+    UIGraphicsEndImageContext();
+    return result;
 }
 
 

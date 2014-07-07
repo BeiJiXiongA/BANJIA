@@ -81,20 +81,25 @@
 {
     if(textView.tag == 2000)
     {
-        if ([textView.text length] > 0 && [textView.text length] < 300)
+        if ([textView.text length] > 0)
         {
             holderTextView.text = nil;
-        }
-        else if([textView.text length] > 300)
-        {
-            textView.text = [textView.text substringToIndex:301];
-            [Tools showAlertView:@"字数控制在300字以内" delegateViewController:nil];
         }
         else
         {
             holderTextView.text = @"请输入您的宝贵意见";
         }
     }
+}
+
+-(BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
+{
+    if ([textView.text length] > 300)
+    {
+        textView.text = [textView.text substringToIndex:300];
+        return NO;
+    }
+    return YES;
 }
 
 -(void)sendAdvise

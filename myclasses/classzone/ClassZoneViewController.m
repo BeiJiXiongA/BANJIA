@@ -840,7 +840,7 @@ NameButtonDel>
             
             UIView *verticalLineView = [[UIView alloc] init];
             verticalLineView.backgroundColor = UIColorFromRGB(0xe2e3e4);
-            verticalLineView.frame = CGRectMake(34.75, cell.headerImageView.frame.size.height+cell.headerImageView.frame.origin.y, 1.5, 40);
+            verticalLineView.frame = CGRectMake(34.75, cell.headerImageView.frame.size.height+cell.headerImageView.frame.origin.y, 1.5, 12.5);
             [cell.bgView addSubview:verticalLineView];
             
             
@@ -1184,10 +1184,7 @@ NameButtonDel>
         cell.bgView.backgroundColor = [UIColor whiteColor];
         
         
-        UIView *verticalLineView = [[UIView alloc] init];
-        verticalLineView.backgroundColor = UIColorFromRGB(0xe2e3e4);
-        verticalLineView.frame = CGRectMake(34.75, 0, 1.5, cell.bgView.frame.size.height+10);
-        [cell.contentView insertSubview:verticalLineView belowSubview:cell.bgView];
+        cell.verticalLineView.frame = CGRectMake(34.75, 0, 1.5, cell.bgView.frame.size.height+10);
         
         return cell;
     }
@@ -1232,6 +1229,12 @@ NameButtonDel>
 
 -(void)transmitDiary:(UIButton *)button
 {
+    if (fromClasses)
+    {
+        [Tools showTips:@"游客不能赞班级日志,赶快加入吧!" toView:self.bgView];
+        return ;
+    }
+    
     NSDictionary *groupDict = [tmpArray objectAtIndex:button.tag/SectionTag-1];
     NSArray *array = [groupDict objectForKey:@"diaries"];
     waitTransmitDict = [array objectAtIndex:button.tag%SectionTag];
@@ -1807,6 +1810,12 @@ NameButtonDel>
 
 -(void)commentDiary:(UIButton *)button
 {
+    if (fromClasses)
+    {
+        [Tools showTips:@"游客不能赞班级日志,赶快加入吧!" toView:self.bgView];
+        return ;
+    }
+    
     NSDictionary *groupDict = [tmpArray objectAtIndex:button.tag/SectionTag-1];
     NSArray *array = [groupDict objectForKey:@"diaries"];
     NSDictionary *dict = [array objectAtIndex:button.tag%SectionTag];

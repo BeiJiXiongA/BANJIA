@@ -20,6 +20,7 @@
     
     NSInteger sec;
     NSTimer *timer;
+    NSString *codeStr;
 }
 @end
 
@@ -148,6 +149,22 @@
     
 }
 
+-(void)timeRefresh
+{
+    if (sec > 0)
+    {
+        sec--;
+        [getCodeButton setTitle:[NSString stringWithFormat:@"等待%d",sec] forState:UIControlStateNormal];
+    }
+    else
+    {
+        [getCodeButton setTitle:@"重新获取" forState:UIControlStateNormal];
+        getCodeButton.enabled = YES;
+        [timer invalidate];
+        sec = 60;
+    }
+}
+
 -(void)getcheckCode
 {
     if ([Tools NetworkReachable])
@@ -161,8 +178,7 @@
             DDLOG(@"== responsedict %@",responseString);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-//                codeStr = [responseDict objectForKey:@"data"];
-                getCodeButton.hidden = YES;
+                codeStr = [responseDict objectForKey:@"data"];
                 codeTextField.text = [responseDict objectForKey:@"data"];
                 
             }
@@ -184,23 +200,6 @@
     else
     {
         [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
-    }
-}
-
-
--(void)timeRefresh
-{
-    if (sec > 0)
-    {
-        sec--;
-        [getCodeButton setTitle:[NSString stringWithFormat:@"等待%d",sec] forState:UIControlStateNormal];
-    }
-    else
-    {
-        [getCodeButton setTitle:@"重新获取" forState:UIControlStateNormal];
-        getCodeButton.enabled = YES;
-        [timer invalidate];
-        sec = 60;
     }
 }
 

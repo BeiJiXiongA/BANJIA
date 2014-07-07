@@ -82,7 +82,7 @@ UIScrollViewDelegate>
     checkCode = @"";
     re_id = @"";
     showRelate = YES;
-    sec = 0;
+    sec = 60;
     
     mainScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT)];
     mainScrollView.delegate = self;
@@ -228,7 +228,7 @@ UIScrollViewDelegate>
     UIImage *btnImage  =[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
     studentButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [studentButton setTitle:@"提交" forState:UIControlStateNormal];
-//    studentButton.enabled = NO;
+    studentButton.enabled = NO;
     if ([[Tools phone_num] length] > 0)
     {
         studentButton.enabled = YES;

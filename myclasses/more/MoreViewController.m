@@ -78,7 +78,7 @@ UIActionSheetDelegate>
         }
         else if(buttonIndex == 1)
         {
-            [self settingValue:@"0" forKay:ParentSendDiary];
+            [self settingValue:@"2" forKay:ParentSendDiary];
         }
     }
     else if(actionSheet.tag == StudentSendDiaryTag)
@@ -89,7 +89,7 @@ UIActionSheetDelegate>
         }
         else if(buttonIndex == 1)
         {
-            [self settingValue:@"0" forKay:StudentSendDiary];
+            [self settingValue:@"2" forKay:StudentSendDiary];
         }
     }
     else if (actionSheet.tag == StudentAccessTimeTag)
@@ -509,7 +509,7 @@ UIActionSheetDelegate>
             {
                 cell.contentLabel.hidden = NO;
                 cell.nameLabel.hidden = NO;
-                if([[settingDict objectForKey:ParentSendDiary] intValue] == 1)
+                if([[settingDict objectForKey:ParentSendDiary] intValue] == 2)
                 {
                     parentsPublish = @"直接发布";
                 }
@@ -523,7 +523,7 @@ UIActionSheetDelegate>
             {
                 cell.contentLabel.hidden = NO;
                 cell.nameLabel.hidden = NO;
-                if([[settingDict objectForKey:StudentSendDiary] intValue] == 1)
+                if([[settingDict objectForKey:StudentSendDiary] intValue] == 2)
                 {
                     studentsPublish = @"直接发布";
                 }

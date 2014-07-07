@@ -394,13 +394,13 @@
                     DDLOG(@"c_apply %@ delete success!",[Tools user_id]);
                     if ([[applyDict objectForKey:@"role"] isEqualToString:@"parents"])
                     {
-                         NSDictionary *studentDict = [[db findSetWithDictionary:@{@"classid":classID,@"name":[applyDict objectForKey:@"re_name"]} andTableName:CLASSMEMBERTABLE] firstObject];
+                         NSDictionary *studentDict = [[db findSetWithDictionary:@{@"classid":classID,@"name":[applyDict objectForKey:@"re_name"],@"role":@"students"} andTableName:CLASSMEMBERTABLE] firstObject];
                         if ([[studentDict objectForKey:@"checked"] integerValue] == 0)
                         {
-                            if ([db updeteKey:@"checked" toValue:@"1" withParaDict:@{@"classid":classID,@"name":[applyDict objectForKey:@"re_name"]} andTableName:CLASSMEMBERTABLE])
+                            if ([db updeteKey:@"checked" toValue:@"1" withParaDict:@{@"classid":classID,@"name":[applyDict objectForKey:@"re_name"],@"role":@"students"} andTableName:CLASSMEMBERTABLE])
                             {
                                 DDLOG(@"allow parent update student checked success!");
-                            };
+                            }
                         }
                     }
                     else if([[applyDict objectForKey:@"rele"] isEqualToString:@"teachers"])

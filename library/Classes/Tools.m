@@ -519,37 +519,32 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 //    
 //}
 
+
+
+//    }
+
 + (UIImage *)thumbnailWithImageWithoutScale:(UIImage *)image size:(CGSize)asize
 {
-    UIImage *newimage;
-    if (nil == image) {
-        newimage = nil;
-    }
-    else{
-        CGSize oldsize = image.size;
-        CGRect rect;
-        if (asize.width/asize.height > oldsize.width/oldsize.height) {
-            rect.size.width = asize.height*oldsize.width/oldsize.height;
-            rect.size.height = asize.height;
-            rect.origin.x = (asize.width - rect.size.width)/3;
-            rect.origin.y = 0;
-        }
-        else{
-            rect.size.width = asize.width;
-            rect.size.height = asize.width*oldsize.height/oldsize.width;
-            rect.origin.x = 0;
-            rect.origin.y = (asize.height - rect.size.height)/3;
-        }
-        UIGraphicsBeginImageContext(asize);
-        CGContextRef context = UIGraphicsGetCurrentContext();
-        CGContextSetFillColorWithColor(context, [[UIColor clearColor] CGColor]);
-        UIRectFill(CGRectMake(0, 0, asize.width, asize.height));//clear background
-        [image drawInRect:rect];
-        newimage = UIGraphicsGetImageFromCurrentImageContext();
-        UIGraphicsEndImageContext();
-    }
-    return newimage;
+    UIGraphicsBeginImageContext(asize);
+    
+    // Tell the old image to draw in this new context, with the desired
+    // new size
+    [image drawInRect:CGRectMake(0, 0, asize.width, asize.height)];
+    
+    // Get the new image from the context
+    UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+    
+    // End the context
+    UIGraphicsEndImageContext();
+    
+    // Return the new image.
+    NSData *imageData = UIImageJPEGRepresentation(newImage, 0.8);
+    
+    newImage = [UIImage imageWithData:imageData];
+    return newImage;
 }
+
+
 #pragma mark - setting
 +(BOOL)soundOpen
 {

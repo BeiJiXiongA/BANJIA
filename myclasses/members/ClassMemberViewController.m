@@ -595,22 +595,34 @@ MsgDelegate>
                         }
                         [memDict setObject:[dict objectForKey:@"re_name"] forKey:@"re_name"];
                     }
-                    if ([[_db findSetWithDictionary:@{@"classid":classID,@"name":[memDict objectForKey:@"name"],@"role":@"students"} andTableName:CLASSMEMBERTABLE] count] > 0)
+                    if ([[memDict objectForKey:@"role"] isEqualToString:@"students"])
                     {
-                        if ([[memDict objectForKey:@"uid"] length] > 0)
+                        if ([[_db findSetWithDictionary:@{@"name":[memDict objectForKey:@"name"],@"classid":classID,@"role":@"students"} andTableName:CLASSMEMBERTABLE] count] == 0)
                         {
-                            [_db deleteRecordWithDict:@{@"classid":classID,@"name":[memDict objectForKey:@"name"],@"role":@"students"} andTableName:CLASSMEMBERTABLE];
                             if ([_db insertRecord:memDict andTableName:CLASSMEMBERTABLE])
                             {
                                 DDLOG(@"insert mem success!");
                             }
+                        }
+                        else
+                        {
+//                            if ([_db deleteRecordWithDict:@{@"name":[memDict objectForKey:@"name"],@"classid":classID,@"role":@"students"} andTableName:CLASSMEMBERTABLE])
+//                            {
+                            if ([[memDict objectForKey:@"checked"] integerValue] == 0)
+                            {
+                                if ([_db insertRecord:memDict andTableName:CLASSMEMBERTABLE])
+                                {
+                                    DDLOG(@"insert mem success!");
+                                }
+                            }
+//                            }
                         }
                     }
                     else
                     {
                         if ([_db insertRecord:memDict andTableName:CLASSMEMBERTABLE])
                         {
-                            DDLOG(@"insert mem success!");
+                            ;
                         }
                     }
                 }
@@ -659,7 +671,7 @@ MsgDelegate>
         DDLOG(@"update admin success");
     }
     
-    [allMembersArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"checked":@"1"} andTableName:CLASSMEMBERTABLE]];
+    [allMembersArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID} andTableName:CLASSMEMBERTABLE]];
     //老师
     [teachersArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"role":@"teachers",@"checked":@"1"} andTableName:CLASSMEMBERTABLE]];
     
@@ -688,18 +700,13 @@ MsgDelegate>
     [adminArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"admin":@"2"} andTableName:CLASSMEMBERTABLE]];
     
     
-    [parentsArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"role":@"parents"} andTableName:CLASSMEMBERTABLE]];
+    [parentsArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"role":@"parents",@"checked":@"1"} andTableName:CLASSMEMBERTABLE]];
     studentArray = [_db findSetWithDictionary:@{@"classid":classID,@"role":@"students",@"checked":@"1"} andTableName:CLASSMEMBERTABLE];
     
     for (int i=0; i<[studentArray count]; ++i)
     {
         NSDictionary *stuDict = [studentArray objectAtIndex:i];
         DDLOG(@"sudict=%@",stuDict);
-        NSArray *parentarray = [_db findSetWithDictionary:@{@"classid":classID,@"role":@"parents",@"re_name":[stuDict objectForKey:@"name"]} andTableName:CLASSMEMBERTABLE];
-        if([parentarray count] == 0)
-        {
-//            [withoutParentStuArray addObject:[studentArray objectAtIndex:i]];
-        }
         if (![[stuDict objectForKey:@"title"] isEqual:[NSNull null]])
         {
             if ([[stuDict objectForKey:@"title"] length] > 0)
@@ -709,14 +716,6 @@ MsgDelegate>
         }
     }
     
-    for (int i=0; i<[newAppleArray count]; ++i)
-    {
-        if ([studentArray containsObject:[newAppleArray objectAtIndex:i]])
-        {
-            [studentArray removeObject:[newAppleArray objectAtIndex:i]];
-        }
-    }
-
     self.titleLabel.text = [NSString stringWithFormat:@"班级成员(%d)",[teachersArray count]+[studentArray count]];
     
     [membersArray addObjectsFromArray:[Tools getSpellSortArrayFromChineseArray:studentArray andKey:@"name"]];
@@ -1069,7 +1068,7 @@ MsgDelegate>
 
 -(BOOL)haveParents:(NSString *)re_name
 {
-    if ([[_db findSetWithDictionary:@{@"re_name":re_name,@"classid":classID} andTableName:CLASSMEMBERTABLE] count] > 0)
+    if ([[_db findSetWithDictionary:@{@"re_name":re_name,@"classid":classID,@"checked":@"1"} andTableName:CLASSMEMBERTABLE] count] > 0)
     {
         return YES;
     }

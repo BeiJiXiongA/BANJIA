@@ -179,7 +179,7 @@ UIActionSheetDelegate>
 -(void)getParentsWithStudentName
 {
     [pArray removeAllObjects];
-    NSArray *tmpParentsArray = [db findSetWithDictionary:@{@"classid":classID,@"role":@"parents",@"re_name":studentName} andTableName:CLASSMEMBERTABLE];
+    NSArray *tmpParentsArray = [db findSetWithDictionary:@{@"classid":classID,@"role":@"parents",@"re_name":studentName,@"checked":@"1"} andTableName:CLASSMEMBERTABLE];
     if ([tmpParentsArray count] > 0)
     {
         [pArray addObjectsFromArray:tmpParentsArray];
