@@ -60,7 +60,7 @@ UIActionSheetDelegate,UIAlertViewDelegate>
 @end
 
 @implementation PersonDetailViewController
-
+@synthesize fromChat;
 @synthesize personID,personName,c_id,headerImg;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -480,6 +480,11 @@ UIActionSheetDelegate,UIAlertViewDelegate>
 
 -(void)toChat
 {
+    if (fromChat)
+    {
+        [self.navigationController popViewControllerAnimated:YES];
+        return ;
+    }
     ChatViewController *chatViewController = [[ChatViewController alloc] init];
     chatViewController.toID = personID;
     chatViewController.name = personName;

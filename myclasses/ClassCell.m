@@ -10,7 +10,14 @@
 #import "Header.h"
 
 @implementation ClassCell
-@synthesize headerImageView,nameLabel,contentLable,timeLabel,timeLabel2,unReadImageView,bgView,arrowImageView;
+@synthesize headerImageView,
+nameLabel,
+contentLable,
+timeLabel,
+timeLabel2,
+unReadImageView,
+bgView,
+arrowImageView;
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];

@@ -249,7 +249,7 @@
             {
                 if ([role isEqualToString:@"students"])
                 {
-                    cell.nameLabel.text = [NSString stringWithFormat:@"%@想申请成为本班的学生数学老师",applyName];
+                    cell.nameLabel.text = [NSString stringWithFormat:@"%@想申请成为本班的学生",applyName];
                 }
                 else if ([role isEqualToString:@"teachers"])
                 {
@@ -403,12 +403,39 @@
                             }
                         }
                     }
-                    else if([[applyDict objectForKey:@"rele"] isEqualToString:@"teachers"])
+                    else if([[applyDict objectForKey:@"role"] isEqualToString:@"teachers"])
                     {
                         if ([db updeteKey:@"admin" toValue:@"1" withParaDict:@{@"uid":j_id,@"classid":classID} andTableName:CLASSMEMBERTABLE])
                         {
                             DDLOG(@"update teacher admin");
                         }
+                    }
+                    else if([[applyDict objectForKey:@"role"] isEqualToString:@"students"])
+                    {
+                        if ([db deleteRecordWithDict:@{@"classid":classID,@"name":applyName} andTableName:CLASSMEMBERTABLE])
+                        {
+                            NSDictionary *dict = @{@"classid":classID,
+                                                   @"name":applyName,
+                                                   @"uid":j_id,
+                                                   @"img_icon":headerImg,
+                                                   @"re_name":@"",
+                                                   @"re_id":@"",
+                                                   @"title":@"",
+                                                   @"phone":phoneNum,
+                                                   @"checked":@"1",
+                                                   @"role":@"students",
+                                                   @"re_type":@"",
+                                                   @"birth":birth,
+                                                   @"admin":@"0"};
+                            if ([db insertRecord:dict andTableName:CLASSMEMBERTABLE])
+                            {
+                                DDLOG(@"update students success");
+                            }
+                        }
+//                        if ([db updeteKey:@"admin" toValue:@"1" withParaDict:@{@"uid":j_id,@"classid":classID} andTableName:CLASSMEMBERTABLE])
+//                        {
+//                            DDLOG(@"update students admin");
+//                        }
                     }
                 }
                 [Tools showTips:[NSString stringWithFormat:@"您已经同意%@的申请",applyName] toView:self.bgView];

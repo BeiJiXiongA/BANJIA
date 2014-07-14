@@ -796,6 +796,11 @@ int count = 0;
 -(void)emitClick
 {
     [contentTextView resignFirstResponder];
+    if ([contentTextView.text length] <= 0 && [normalPhotosArray count] <= 0)
+    {
+        [Tools showAlertView:@"说点什么或添加几张图片吧！" delegateViewController:nil];
+        return ;
+    }
     if (!fromCLass)
     {
         ClassesListViewController *classelistVC = [[ClassesListViewController alloc] init];
@@ -814,11 +819,6 @@ int count = 0;
 
 -(void)submitDongTai:(NSString *)classid
 {
-    if ([contentTextView.text length] <= 0 && [normalPhotosArray count] <= 0)
-    {
-        [Tools showAlertView:@"说出您的话或添加几张图片吧！" delegateViewController:nil];
-        return ;
-    }
     if ([Tools NetworkReachable])
     {
         NSString *url = [NSString stringWithFormat:@"%@/Diaries/mbAddDiaries",HOST_URL];
@@ -1023,28 +1023,14 @@ int count = 0;
 {
     ALAssetRepresentation *assetPresentation = [asset defaultRepresentation];
     
-    DDLOG(@"%d",assetPresentation.orientation);
-    
     CGImageRef imageRef = [assetPresentation fullResolutionImage];
-    UIImage *image = [UIImage imageWithCGImage:imageRef];
     
-    NSData *data = UIImageJPEGRepresentation(image, 1.0f);
+    UIImage *image = [UIImage imageWithCGImage:imageRef scale:1 orientation:(int)assetPresentation.orientation];
+    NSData *data = UIImageJPEGRepresentation(image, 0.5f);
     UIImage *thumImage = [UIImage imageWithData:data];
-    
 
     return thumImage;
 }
-
-CGImageRef flip(CGImageRef im)
-{
-    CGSize sz = CGSizeMake(CGImageGetWidth(im), CGImageGetHeight(im));
-    UIGraphicsBeginImageContext(sz);
-    CGContextDrawImage(UIGraphicsGetCurrentContext(), CGRectMake(0, 0, sz.width, sz.height), im);
-    CGImageRef result = [UIGraphicsGetImageFromCurrentImageContext() CGImage];
-    UIGraphicsEndImageContext();
-    return result;
-}
-
 
 - (void)openAction:(id)sender
 {

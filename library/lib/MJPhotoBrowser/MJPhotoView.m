@@ -186,6 +186,7 @@
 
 #pragma mark - UIScrollViewDelegate
 - (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView {
+//    _imageView.center = CENTER_POINT;
 	return _imageView;
 }
 

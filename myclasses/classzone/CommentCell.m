@@ -22,7 +22,7 @@
         [nameButton setTitleColor:RGB(64, 196, 110, 1) forState:UIControlStateNormal];
         [self.contentView addSubview:nameButton];
         
-        commentContentLabel = [[UILabel alloc] init];
+        commentContentLabel = [[cnvUILabel alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
 //        commentContentLabel.backgroundColor = RGB(252, 252, 252, 1);
         commentContentLabel.backgroundColor = [UIColor clearColor];
         commentContentLabel.font = [UIFont systemFontOfSize:14];

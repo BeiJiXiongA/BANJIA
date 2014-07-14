@@ -254,6 +254,12 @@ SelectClasses>
 
 -(void)sendnotice
 {
+    if ([contentTextView.text length] <= 0)
+    {
+        [Tools showAlertView:@"请输入公告内容" delegateViewController:nil];
+        return ;
+    }
+
     if (!fromClass)
     {
         ClassesListViewController *classelistVC = [[ClassesListViewController alloc] init];

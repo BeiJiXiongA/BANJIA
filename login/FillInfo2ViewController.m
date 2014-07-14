@@ -253,12 +253,6 @@
         return;
     }
     
-    if([pwdTextField.text length] == 0)
-    {
-        [Tools showAlertView:@"请输入您的密码！" delegateViewController:nil];
-        return;
-    }
-    
     NSString *userStr;
     if ([[APService registrionID] length] > 0)
     {
@@ -275,6 +269,11 @@
     NSString *url;
     if ([token length] > 0)
     {
+        if([pwdTextField.text length] == 0)
+        {
+            [Tools showAlertView:@"请输入您的密码！" delegateViewController:nil];
+            return;
+        }
         paraDict = @{@"u_id":userid,
                      @"token":token,
                      @"pwd":pwdTextField.text,

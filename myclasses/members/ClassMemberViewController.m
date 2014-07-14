@@ -585,7 +585,7 @@ MsgDelegate>
                         {
                             checked = @"1";
                         }
-                        if ([[_db findSetWithDictionary:@{@"classid":classID,@"role":@"students",@"name":[dict objectForKey:@"re_name"]} andTableName:CLASSMEMBERTABLE] count] == 0)
+                        if ([[_db findSetWithDictionary:@{@"classid":classID,@"role":@"students",@"name":[dict objectForKey:@"re_name"],@"checked":checked} andTableName:CLASSMEMBERTABLE] count] == 0)
                         {
                             NSDictionary *tmpDict = @{@"name":[dict objectForKey:@"re_name"],@"classid":classID,@"role":@"students",@"checked":checked};
                             if ([_db insertRecord:tmpDict andTableName:CLASSMEMBERTABLE])
@@ -606,8 +606,6 @@ MsgDelegate>
                         }
                         else
                         {
-//                            if ([_db deleteRecordWithDict:@{@"name":[memDict objectForKey:@"name"],@"classid":classID,@"role":@"students"} andTableName:CLASSMEMBERTABLE])
-//                            {
                             if ([[memDict objectForKey:@"checked"] integerValue] == 0)
                             {
                                 if ([_db insertRecord:memDict andTableName:CLASSMEMBERTABLE])
@@ -615,7 +613,16 @@ MsgDelegate>
                                     DDLOG(@"insert mem success!");
                                 }
                             }
-//                            }
+                            else if([[memDict objectForKey:@"checked"] integerValue] == 1)
+                            {
+                                if ([_db deleteRecordWithDict:@{@"name":[memDict objectForKey:@"name"],@"classid":classID,@"role":@"students"} andTableName:CLASSMEMBERTABLE])
+                                {
+                                    if ([_db insertRecord:memDict andTableName:CLASSMEMBERTABLE])
+                                    {
+                                        DDLOG(@"insert student success!");
+                                    }
+                                }
+                            }
                         }
                     }
                     else
@@ -1063,7 +1070,7 @@ MsgDelegate>
     }
     invite.className = className;
     invite.schoolName = schoolName;
-    [self.navigationController pushViewController:invite animated:YES];
+    [[XDTabViewController sharedTabViewController].navigationController pushViewController:invite animated:YES];
 }
 
 -(BOOL)haveParents:(NSString *)re_name

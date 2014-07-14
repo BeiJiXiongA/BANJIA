@@ -110,6 +110,7 @@
     relateButton.layer.cornerRadius = 5;
     [relateButton setContentHorizontalAlignment:UIControlContentHorizontalAlignmentLeft];
     relateButton.clipsToBounds = YES;
+    [relateButton setTitle:[title substringFromIndex:[title rangeOfString:@"."].location+1] forState:UIControlStateNormal];
     relateButton.frame = CGRectMake(studentButton.frame.origin.x, tipLabel2.frame.origin.y+tipLabel2.frame.size.height, 134, studentButton.frame.size.height);
     [relateButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [relateButton addTarget:self action:@selector(selectRelate) forControlEvents:UIControlEventTouchUpInside];

@@ -15,6 +15,7 @@
 #import "ClassZoneViewController.h"
 #import "UIImageView+MJWebCache.h"
 #import "ReportViewController.h"
+#import "PersonDetailViewController.h"
 
 
 #define DIRECT  @"direct"
@@ -33,8 +34,7 @@ UITextFieldDelegate,
 UIActionSheetDelegate,
 UIAlertViewDelegate,
 ChatDelegate,
-ReturnFunctionDelegate,
-FriendListDelegate>
+ReturnFunctionDelegate>
 {
     NSMutableArray *messageArray;
     UITableView *messageTableView;
@@ -62,6 +62,8 @@ FriendListDelegate>
     BOOL iseditting;
     
     NSString *fromImageStr;
+    
+    UITapGestureRecognizer *headerTapTgr;
 }
 @end
 
@@ -153,7 +155,7 @@ FriendListDelegate>
     messageTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT-40) style:UITableViewStylePlain];
     messageTableView.delegate = self;
     messageTableView.dataSource = self;
-    messageTableView.backgroundColor = [UIColor clearColor];
+    messageTableView.backgroundColor = self.bgView.backgroundColor;
     messageTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     [self.bgView addSubview:messageTableView];
     
@@ -691,26 +693,22 @@ FriendListDelegate>
 {
     CGFloat rowHeight = 0;
     NSDictionary *dict = [messageArray objectAtIndex:indexPath.row];
-    CGSize size = [self sizeWithText:[[messageArray objectAtIndex:indexPath.row] objectForKey:@"content"]];
-    rowHeight = size.height+50;
+    CGSize size = [self sizeWithText:[[[messageArray objectAtIndex:indexPath.row] objectForKey:@"content"] emojizedString]];
+    rowHeight = size.height+20;
     if ([[dict objectForKey:@"content"] rangeOfString:@"$!#"].length >0)
     {
         NSString *msgContent = [dict objectForKey:@"content"];
         NSRange range = [msgContent rangeOfString:@"$!#"];
         msgContent = [msgContent substringFromIndex:range.location+range.length];
-        size = [self sizeWithText:msgContent];
-        rowHeight = size.height+70;
+        size = [self sizeWithText:[msgContent emojizedString]];
+        rowHeight = size.height+20;
     }
-    if (ABS([[dict objectForKey:@"time"] integerValue] - currentSec) < 60*3)
-    {
-        DDLOG(@"++++++%d",ABS([[dict objectForKey:@"time"] integerValue] - currentSec));
-        DDLOG(@"content=%@",[dict objectForKey:@"content"]);
-    }
-    else
-    {
-        currentSec = [[dict objectForKey:@"time"] integerValue];
-    }
-    return rowHeight+20;
+//    if (ABS([[dict objectForKey:@"time"] integerValue] - currentSec) > 60*3  || indexPath.row == 0)
+//    {
+//        currentSec = [[dict objectForKey:@"time"] integerValue];
+//        rowHeight+=20;
+//    }
+    return rowHeight+20+20;
 }
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -727,6 +725,11 @@ FriendListDelegate>
     CGFloat messageBgY = 30;
     CGFloat messageTfY = 5;
     CGSize size = [self  sizeWithText:[[dict objectForKey:@"content"] emojizedString]];
+    
+    headerTapTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(headerImageViewTap:)];
+    [cell.headerImageView addGestureRecognizer:headerTapTgr];
+    cell.headerImageView.userInteractionEnabled = YES;
+    cell.headerImageView.tag = indexPath.row+3333;
     cell.chatBg.hidden = NO;
     
     cell.button.hidden = YES;
@@ -761,7 +764,9 @@ FriendListDelegate>
                 he = 3;
             }
             
-            cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x + 10,cell.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+10+he);
+            cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x + 10,cell.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+20+he);
+            cell.messageTf.backgroundColor = [[UIColor grayColor] colorWithAlphaComponent:0];
+            DDLOG(@"from content %@",[dict objectForKey:@"content"]);
 //            cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x + 10,cell.chatBg.frame.origin.y + messageTfY,size.width+12, 0);
             cell.messageTf.text = [[dict objectForKey:@"content"] emojizedString];
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
@@ -808,15 +813,18 @@ FriendListDelegate>
             }
             
             cell.headerImageView.frame = CGRectMake(5, messageBgY, 40, 40);
-            if (ABS([[dict objectForKey:@"time"] integerValue] - currentSec) > 60*3)
-            {
-                cell.timeLabel.hidden = NO;
-                currentSec = [[dict objectForKey:@"time"] integerValue];
-            }
-            else
-            {
-                cell.timeLabel.hidden = YES;
-            }
+//            if (ABS([[dict objectForKey:@"time"] integerValue] - currentSec) > 60*3  || indexPath.row == 0)
+//            {
+//                cell.timeLabel.hidden = NO;
+//                currentSec = [[dict objectForKey:@"time"] integerValue];
+//            }
+//            else
+//            {
+//                cell.headerImageView.frame = CGRectMake(5, messageBgY-23, 40, 40);
+//                cell.chatBg.frame = CGRectMake(55, messageBgY-25, size.width+20, size.height+20);
+//                cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x + 10,cell.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+20+he);
+//                cell.timeLabel.hidden = YES;
+//            }
             
             [Tools fillImageView:cell.headerImageView withImageFromURL:[NSURL URLWithString:fromImageStr] andDefault:HEADERBG];
         }
@@ -839,6 +847,7 @@ FriendListDelegate>
             [cell.chatBg setImage:toImage];
             
             cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x+ 5-x,cell.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+20);
+            cell.messageTf.backgroundColor = [[UIColor grayColor] colorWithAlphaComponent:0];
 //            cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x+ 5-x,cell.chatBg.frame.origin.y + messageTfY, size.width+12, 0);
             cell.messageTf.text = [[dict objectForKey:@"content"] emojizedString];
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
@@ -854,15 +863,21 @@ FriendListDelegate>
                 cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x+ 10-x,cell.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+30);
             }
             cell.headerImageView.frame = CGRectMake(SCREEN_WIDTH - 60, messageBgY, 40, 40);
-            if (ABS([[dict objectForKey:@"time"] integerValue] - currentSec) > 60*3)
+            
+            if (ABS([[dict objectForKey:@"time"] integerValue] - currentSec) > 60*3 || indexPath.row == 0)
             {
                 cell.timeLabel.hidden = NO;
                 currentSec = [[dict objectForKey:@"time"] integerValue];
             }
-            else
-            {
-                cell.timeLabel.hidden = YES;
-            }
+//            else
+//            {
+//                cell.headerImageView.frame = CGRectMake(SCREEN_WIDTH - 60, messageBgY-23, 40, 40);
+//                cell.chatBg.frame = CGRectMake(self.view.frame.size.width - 10-size.width-30-45, messageBgY-25, size.width+20, size.height+20);
+//                [cell.chatBg setImage:toImage];
+//                
+//                cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x+ 5-x,cell.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+20);
+//                cell.timeLabel.hidden = YES;
+//            }
             [Tools fillImageView:cell.headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERBG];
         }
     }
@@ -875,7 +890,7 @@ FriendListDelegate>
     {
         cell.timeLabel.hidden = NO;
     }
-    cell.backgroundColor = [UIColor clearColor];
+    cell.backgroundColor = self.bgView.backgroundColor;
     
     return cell;
 }
@@ -887,6 +902,18 @@ FriendListDelegate>
         [inputTabBar backKeyBoard];
         [self backInput];
     }
+}
+
+-(void)headerImageViewTap:(UITapGestureRecognizer *)tap
+{
+    NSDictionary *dict = [messageArray objectAtIndex:tap.view.tag-3333];
+    DDLOG(@"message dict %@",dict);
+    PersonDetailViewController *personDetailVC = [[PersonDetailViewController alloc] init];
+    personDetailVC.personName = [dict objectForKey:@"fname"];
+    personDetailVC.personID = [dict objectForKey:@"fid"];
+    personDetailVC.fromChat = YES;
+    [self.navigationController pushViewController:personDetailVC animated:YES];
+    
 }
 
 -(BOOL)isInThisClass:(NSString *)classId

@@ -48,6 +48,9 @@ UIAlertViewDelegate>
     NSMutableArray *contactInviteArray;
     NSMutableArray *groupContactArray;
     
+    NSMutableArray *alreadyPhoneNameArray;
+    NSMutableArray *allContacts;
+    
     
     UIView *phoneBgView;
     NSString *_userName;
@@ -114,6 +117,8 @@ UIAlertViewDelegate>
     contactInviteArray  = [[NSMutableArray alloc] initWithCapacity:0];
     alreadyUsers = [[NSMutableArray alloc] initWithCapacity:0];
     groupContactArray = [[NSMutableArray alloc] initWithCapacity:0];
+    alreadyPhoneNameArray = [[NSMutableArray alloc] initWithCapacity:0];
+    allContacts = [[NSMutableArray alloc] initWithCapacity:0];
     
     
     inviteButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -382,7 +387,16 @@ UIAlertViewDelegate>
             cell.headerImageView.clipsToBounds = YES;
             [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERICON];
             
-            cell.nameLabel.text = [dict objectForKey:@"r_name"];
+            
+            NSString *name = [self nameInContacts:[dict objectForKey:@"phone"]];
+            if ([name length] > 0)
+            {
+                cell.nameLabel.text = [NSString stringWithFormat:@"%@(%@)",[dict objectForKey:@"r_name"],name];
+            }
+            else
+            {
+                cell.nameLabel.text = [dict objectForKey:@"r_name"];
+            }
             cell.inviteButton.hidden = NO;
             cell.inviteButton.frame = CGRectMake(SCREEN_WIDTH-50, 12.5, 25, 25);
             [cell.inviteButton setImage:[UIImage imageNamed:@"roundadd"] forState:UIControlStateNormal];
@@ -481,6 +495,18 @@ UIAlertViewDelegate>
             [contactTableView reloadData];
         }
     }
+}
+
+-(NSString *)nameInContacts:(NSString *)phoneNum
+{
+    for(NSDictionary *dict in allContacts)
+    {
+        if ([[Tools getPhoneNumFromString:[dict objectForKey:@"home_phone"]] rangeOfString:phoneNum].length > 0)
+        {
+            return [dict objectForKey:@"name"];
+        }
+    }
+    return @"";
 }
 
 -(void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
@@ -715,7 +741,7 @@ UIAlertViewDelegate>
 
 -(void)checkContacts:(NSArray *)array
 {
-    
+    [allContacts addObjectsFromArray:array];
     if ([array count] == 0)
     {
         [Tools showTips:@"没有任何联系人信息" toView:contactTableView];
@@ -771,7 +797,6 @@ UIAlertViewDelegate>
             {
                 [groupContactArray removeAllObjects];
                 [alreadyUsers addObjectsFromArray:[[responseDict objectForKey:@"data"] allObjects]];
-            
                 
                 for (int i = 0; i < [alreadyUsers count]; ++i)
                 {
@@ -844,6 +869,7 @@ UIAlertViewDelegate>
         }];
         
         [request setFailedBlock:^{
+            [Tools hideProgress:contactTableView];
             NSError *error = [request error];
             DDLOG(@"error %@",error);
             [Tools hideProgress:self.bgView];
@@ -958,7 +984,7 @@ UIAlertViewDelegate>
     if (fromClass)
     {
         inviteBody = [[NSMutableString alloc] initWithString:InviteClassMember];
-        
+        [inviteBody replaceOccurrencesOfString:@"班" withString:@"" options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
         [inviteBody replaceOccurrencesOfString:@"#school" withString:schoolName options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
         [inviteBody replaceOccurrencesOfString:@"#class" withString:className options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
         

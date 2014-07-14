@@ -12,6 +12,7 @@
 #import "MoreViewController.h"
 #import "SetClassInfoViewController.h"
 #import "SearchSchoolViewController.h"
+#import "ClassQRViewController.h"
 
 
 #define MOREACTIONSHEETTAG    1000
@@ -245,6 +246,7 @@ SetClassInfoDel>
         cell = [[PersonalSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:classInfoCell];
     }
     cell.headerImageView.hidden = YES;
+    cell.authenticationSign.hidden = YES;
     cell.nameLabel.textColor = CONTENTCOLOR;
     cell.nameLabel.font = [UIFont systemFontOfSize:15];
     cell.objectsLabel.font = [UIFont systemFontOfSize:15];
@@ -291,8 +293,13 @@ SetClassInfoDel>
             cell.nameLabel.text = @"班      号";
             cell.nameLabel.frame = CGRectMake(10, 10, 80, 27);
             
-            cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-left, 10, 180, 27);
+            cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-left-40, 10, 180, 27);
+            
             cell.objectsLabel.text = classNumber;
+            
+            cell.authenticationSign.hidden = NO;
+            cell.authenticationSign.frame = CGRectMake(SCREEN_WIDTH-60, 8.5, 30, 30);
+            [cell.authenticationSign setImage:[UIImage imageNamed:@"icon_qr"]];
         }
         else if(indexPath.row == 3)
         {
@@ -373,6 +380,12 @@ SetClassInfoDel>
             setClassInfoViewController.setClassInfoDel = self;
             [[XDTabViewController sharedTabViewController] .navigationController pushViewController:setClassInfoViewController animated:YES];
         }
+    }
+    else if(indexPath.row == 2)
+    {
+        ClassQRViewController *classQRVC = [[ClassQRViewController alloc] init];
+        classQRVC.classNumber = classNumber;
+        [[XDTabViewController sharedTabViewController].navigationController pushViewController:classQRVC animated:YES];
     }
     else if(indexPath.row == 6)
     {

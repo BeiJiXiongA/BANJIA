@@ -53,7 +53,7 @@
         nameTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
         nameTextField.textColor = TITLE_COLOR;
         nameTextField.background = nil;
-        
+        nameTextField.layer.cornerRadius = 5;
         nameTextField.backgroundColor = [UIColor whiteColor];
         nameTextField.font = [UIFont systemFontOfSize:16];
         nameTextField.text = infoStr;
@@ -64,7 +64,9 @@
         
         UIImageView *inputBg = [[UIImageView alloc] init];
         inputBg.frame = CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT+10, SCREEN_WIDTH - 20, 210);
-        [inputBg setImage:[Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)]];
+        [inputBg setImage:[Tools getImageFromImage:[UIImage imageNamed:@""] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)]];
+        inputBg.backgroundColor = [UIColor whiteColor];
+        inputBg.layer.cornerRadius = 5;
         [self.bgView addSubview:inputBg];
         
         placeHolderTextView = [[UITextView alloc] init];
@@ -146,6 +148,7 @@
 {
     if ([textView.text length] > 50)
     {
+        infoTextView.text = [infoTextView.text substringToIndex:50];
         [Tools showAlertView:@"请把班级介绍字数控制在50个字符内" delegateViewController:nil];
     }
 }
@@ -171,6 +174,12 @@
         }
         else if ([infoKey isEqualToString:@"info"])
         {
+            if ([infoTextView.text length] > 50)
+            {
+                [Tools showAlertView:@"请把班级介绍字数控制在50个字符内" delegateViewController:nil];
+                return ;
+            }
+            
             if ([infoTextView.text isEqualToString:infoStr])
             {
                 [Tools showAlertView:@"班级介绍没做任何更改哦" delegateViewController:nil];

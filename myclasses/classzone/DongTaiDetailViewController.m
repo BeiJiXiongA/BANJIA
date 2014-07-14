@@ -17,8 +17,10 @@
 #import "NSString+Emojize.h"
 #import "InputTableBar.h"
 #import "ReportViewController.h"
+#import "DiaryTools.h"
 
 #define additonalH  90
+#define PraiseW   31
 
 @interface DongTaiDetailViewController ()<UITableViewDataSource,
 UITableViewDelegate,
@@ -291,65 +293,7 @@ UIActionSheetDelegate,NameButtonDel>
 {
     if (indexPath.section == 0)
     {
-        CGFloat imageViewHeight = 0;
-        NSString *content = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"];
-        NSArray *imgsArray = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"img"];
-        NSInteger imageCount = [imgsArray count];
-        NSInteger row = 0;
-        if (imageCount % ImageCountPerRow > 0)
-        {
-            row = (imageCount/ImageCountPerRow+1) > 3 ? 3:(imageCount / ImageCountPerRow + 1);
-        }
-        else
-        {
-            row = (imageCount/ImageCountPerRow) > 3 ? 3:(imageCount / ImageCountPerRow);
-        }
-        
-        imageViewHeight = row * (60+5);
-        CGFloat he= 0;
-        if (SYSVERSION>=7)
-        {
-            he = 10;
-        }
-        CGFloat contentHtight;
-        if ([content length]>0)
-        {
-            contentHtight = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-50 andFont:nil].height;
-        }
-        else
-        {
-            contentHtight = -15;
-        }
-        
-        CGFloat tmpcommentHeight = 0;
-        if ([[diaryDetailDict objectForKey:@"comments_num"] integerValue] > 0)
-        {
-            NSArray *array = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"comments"];
-            for (int i=0; i<[array count]; ++i)
-            {
-                NSDictionary *dict = [array objectAtIndex:i];
-                NSString *name = [[dict objectForKey:@"by"] objectForKey:@"name"];
-                NSString *content = [dict objectForKey:@"content"];
-                NSString *contentString = [NSString stringWithFormat:@"%@:%@",name,content];
-                CGSize s = [Tools getSizeWithString:contentString andWidth:200 andFont:[UIFont systemFontOfSize:14]];
-                
-                DDLOG(@"s.hei %.1f",s.height);
-                tmpcommentHeight += (s.height > 25 ? (s.height+15):35);
-            }
-            
-        }
-        if ([[diaryDetailDict objectForKey:@"likes_num"] integerValue] > 0)
-        {
-//            int row = [[diaryDetailDict objectForKey:@"likes_num"] integerValue]%4 == 0 ? ([[diaryDetailDict objectForKey:@"likes_num"] integerValue]/4):([[diaryDetailDict objectForKey:@"likes_num"] integerValue]/4+1);
-            
-            int likes_num = [[diaryDetailDict objectForKey:@"likes_num"] integerValue];
-            
-            int row = likes_num % ColumnPerRow == 0 ? (likes_num/ColumnPerRow):(likes_num/ColumnPerRow+1);
-            tmpcommentHeight+=(37+(PraiseW+5)*row);
-        }
-
-        
-        return 60+imageViewHeight+contentHtight+75+he+tmpcommentHeight+15;
+        return [DiaryTools heightWithDiaryDict:diaryDetailDict andShowAll:YES];
     }
     return 0;
 }
@@ -760,7 +704,6 @@ UIActionSheetDelegate,NameButtonDel>
             DDLOG(@"commit diary responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                [Tools showTips:@"赞成功" toView:diaryDetailTableView];
                 [self getDiaryDetail];
                 
                 if ([self.addComDel respondsToSelector:@selector(addComment:)])
@@ -829,6 +772,7 @@ UIActionSheetDelegate,NameButtonDel>
                                                                       @"p_id":dongtaiId
                                                                       } API:GETDIARY_DETAIL];
         [request setCompletionBlock:^{
+            [Tools hideProgress:diaryDetailTableView];
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
             DDLOG(@"diary detail responsedict %@",responseDict);
@@ -869,9 +813,11 @@ UIActionSheetDelegate,NameButtonDel>
         [request setFailedBlock:^{
             NSError *error = [request error];
             DDLOG(@"error %@",error);
+            [Tools hideProgress:diaryDetailTableView];
             [Tools showAlertView:@"连接错误" delegateViewController:nil];
             diaryDetailTableView.hidden = YES;
         }];
+        [Tools showProgress:diaryDetailTableView];
         [request startAsynchronous];
     }
     else

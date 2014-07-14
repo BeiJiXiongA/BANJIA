@@ -182,6 +182,20 @@ ChatVCDelegate>
                         if ([dict objectForKey:@"img_icon"])
                         {
                             [tmpDict setObject:[dict objectForKey:@"img_icon"] forKey:@"ficon"];
+                            if ([[db findSetWithDictionary:@{@"uid":[tmpDict objectForKey:@"fid"]} andTableName:USERICONTABLE] count] > 0)
+                            {
+                                if ([db updeteKey:@"uicon" toValue:[dict objectForKey:@"img_icon"] withParaDict:@{@"fid":[tmpDict objectForKey:@"fid"]} andTableName:USERICONTABLE])
+                                {
+                                    
+                                }
+                            }
+                            else
+                            {
+                                if ([db insertRecord:@{@"uid":[tmpDict objectForKey:@"fid"],@"uicon":[dict objectForKey:@"img_icon"]} andTableName:USERICONTABLE])
+                                {
+                                    
+                                }
+                            }
                         }
                         if ([dict objectForKey:@"r_name"])
                         {
@@ -385,7 +399,16 @@ ChatVCDelegate>
         }
         else if ([[dict objectForKey:@"ficon"] length] > 10)
         {
-            [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"ficon"] andDefault:HEADERICON];
+            NSDictionary *icondict;
+            if ([[db findSetWithDictionary:@{@"uid":[dict objectForKey:@"fid"]} andTableName:USERICONTABLE] count] > 0)
+            {
+                icondict = [[db findSetWithDictionary:@{@"uid":[dict objectForKey:@"fid"]} andTableName:USERICONTABLE] firstObject];
+                [Tools fillImageView:cell.headerImageView withImageFromURL:[icondict objectForKey:@"uicon"] andDefault:HEADERICON];
+            }
+            else
+            {
+                [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"ficon"] andDefault:HEADERICON];
+            }
         }
         else
         {

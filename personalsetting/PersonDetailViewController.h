@@ -9,7 +9,7 @@
 #import "XDContentViewController.h"
 
 @interface PersonDetailViewController : XDContentViewController
-
+@property (nonatomic, assign) BOOL fromChat;
 @property (nonatomic, strong) NSString *personName;
 @property (nonatomic, strong) NSString *personID;
 @property (nonatomic, strong) NSString *headerImg;

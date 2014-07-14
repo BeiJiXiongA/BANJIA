@@ -63,6 +63,11 @@
     // Dispose of any resources that can be recreated.
 }
 
+-(void)unShowSelfViewController
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
 /*
 #pragma mark - Navigation
 

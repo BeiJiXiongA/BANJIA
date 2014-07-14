@@ -30,7 +30,7 @@
         inputTextViewSize = CGSizeMake(250, 30);
         
         inputBgView = [[UIView alloc] initWithFrame:CGRectMake(0, 20, SCREEN_WIDTH, 40)];
-        inputBgView.backgroundColor = RGB(91, 91, 91, 1);
+        inputBgView.backgroundColor = RGB(214, 214, 214, 1);
         inputBgView.layer.anchorPoint = CGPointMake(0.5, 1);
         [self addSubview:inputBgView];
         

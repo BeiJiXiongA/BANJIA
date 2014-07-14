@@ -15,6 +15,7 @@
 #import "SendAdviseViewController.h"
 #import "KKNavigationController.h"
 #import "UserProtocolViewController.h"
+#import "SDImageCache.h"
 
 #define SWITCHTAG   1000
 #define CLEARCACHE   2000
@@ -269,7 +270,13 @@ MFMailComposeViewControllerDelegate>
         if (indexPath.row == 1)
         {
             cell.accessoryType = UITableViewCellAccessoryNone;
-            cell.markLabel.text = [NSString stringWithFormat:@"%.2fM",[self folderSizeAtPath:[FTWCache pathString]]];
+            CGFloat cachesize = (((float)[[SDImageCache sharedImageCache] getSize])/1024/1024);
+            if (cachesize == 0)
+            {
+                cachesize = 0;
+            }
+            
+            cell.markLabel.text = [NSString stringWithFormat:@"%.2fM",cachesize];
         }
         else
         {
@@ -597,7 +604,7 @@ MFMailComposeViewControllerDelegate>
         if (buttonIndex == 1)
         {
             //清楚缓存
-            [FTWCache resetCache];
+            [[SDImageCache sharedImageCache] clearDisk];
             [settingTableView reloadData];
         }
     }

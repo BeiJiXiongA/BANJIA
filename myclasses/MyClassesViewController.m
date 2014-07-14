@@ -525,6 +525,7 @@ UIActionSheetDelegate>
         [dict setObject:@"" forKey:@"s_id"];
         [dict setObject:@"" forKey:@"s_level"];
         [dict setObject:@"" forKey:@"s_name"];
+        [dict setObject:[Tools user_id] forKey:@"uid"];
         if ([db insertRecord:dict andTableName:MYCLASSTABLE])
         {
             DDLOG(@"insert class success");

@@ -26,6 +26,7 @@
 #import "DongTaiDetailViewController.h"
 #import "SearchClassViewController.h"
 #import "CreateClassViewController.h"
+#import "DiaryTools.h"
 
 #define ImageViewTag  9999
 #define HeaderImageTag  7777
@@ -718,13 +719,6 @@ DongTaiDetailAddCommentDelegate>
     }
     else if(indexPath.section > [noticeArray count])
     {
-        CGFloat he=0;
-        if (SYSVERSION>=7)
-        {
-            he = 5;
-        }
-            //                CGFloat imageWidth = 60;
-        CGFloat imageViewHeight = ImageHeight;
         int cha = [noticeArray count]>0?([noticeArray count]+1):0;
         NSDictionary *groupDict;
         if ([noticeArray count] > 0)
@@ -738,48 +732,11 @@ DongTaiDetailAddCommentDelegate>
         
         NSArray *tmpArray = [groupDict objectForKey:@"diaries"];
         NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
-        NSString *content = [[dict objectForKey:@"detail"] objectForKey:@"content"];
-        NSArray *imgsArray = [[[dict objectForKey:@"detail"] objectForKey:@"img"] count]>0?[[dict objectForKey:@"detail"] objectForKey:@"img"]:nil;
-        NSInteger imageCount = [imgsArray count];
-        NSInteger row = 0;
-        if (imageCount % ImageCountPerRow > 0)
-        {
-            row = (imageCount/ImageCountPerRow+1) > 3 ? 3:(imageCount / ImageCountPerRow + 1);
-        }
-        else
-        {
-            row = (imageCount/ImageCountPerRow) > 3 ? 3:(imageCount / ImageCountPerRow);
-        }
-        
-        CGFloat imgsHeight = row * (imageViewHeight+5);
-        CGFloat contentHtight = [content length]>0?(45+he):5;
-        CGFloat tmpcommentHeight = 0;
-        if ([[dict objectForKey:@"comments_num"] integerValue] > 0)
-        {
-            NSArray *array = [[dict objectForKey:@"detail"] objectForKey:@"comments"];
-            for (int i=0; i<([array count]>6?6:[array count]); ++i)
-            {
-                NSDictionary *dict = [array objectAtIndex:i];
-                NSString *name = [[dict objectForKey:@"by"] objectForKey:@"name"];
-                NSString *content = [dict objectForKey:@"content"];
-                NSString *contentString = [NSString stringWithFormat:@"%@:%@",name,content];
-                CGSize s = [Tools getSizeWithString:contentString andWidth:200 andFont:[UIFont systemFontOfSize:14]];
-                tmpcommentHeight += (s.height > 25 ? (s.height+13):35);
-            }
-            if ([array count] >6)
-            {
-                tmpcommentHeight += 35;
-            }
-        }
-        if ([[dict objectForKey:@"likes_num"] integerValue] > 0)
-        {
-//            int row = [[dict objectForKey:@"likes_num"] integerValue]%4 == 0 ? ([[dict objectForKey:@"likes_num"] integerValue]/4):([[dict objectForKey:@"likes_num"] integerValue]/4+1);
-            tmpcommentHeight += 36;
-        }
-        return 60+imgsHeight+contentHtight+50 + tmpcommentHeight+6;
+        return [DiaryTools heightWithDiaryDict:dict andShowAll:NO];
     }
     return 0;
 }
+
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (indexPath.section < [noticeArray count])

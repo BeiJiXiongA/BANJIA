@@ -201,6 +201,9 @@ return shared##className; \
 #define CLEFT  24
 #define ALEFT  33
 
+#define MinCommentHeight  35
+#define MaxCommentWidth   (SCREEN_WIDTH-40)
+
 #define SCHOOLLEVELARRAY  @[@"小学",@"中学",@"夏令营",@"社团",@"职业学校",@"幼儿园",@"其他"]
 #define OBJECTARRAY   @[@"语文老师",@"数学老师",@"英语老师"]
 #define RELATEARRAY   @[@"爸爸",@"妈妈",@"爷爷",@"奶奶",@"其他"]

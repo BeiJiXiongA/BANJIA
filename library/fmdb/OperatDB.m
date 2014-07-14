@@ -361,11 +361,6 @@
     }
 }
 
--(void)insertRecords:(NSArray *)records andTableName:(NSString *)tableName
-{
-    
-}
-
 -(NSMutableArray *)findSetWithKey:(NSString *)key
                          andValue:(NSString *)value
                      andTableName:(NSString *)tableName
@@ -493,12 +488,13 @@
 
 -(BOOL)deleteRecordWithDict:(NSDictionary *)dict andTableName:(NSString *)tableName
 {
-    NSMutableString *query = [NSMutableString stringWithFormat:@"DELETE FROM %@ WHERE",tableName];
+    NSMutableString *query = [[NSMutableString alloc] initWithString:[NSString stringWithFormat:@"DELETE FROM %@ WHERE",tableName]];
     for (NSString *key in dict)
     {
-        [query appendString:[NSString stringWithFormat:@" %@='%@' and",key,[dict objectForKey:key]]];
+        [query insertString:[NSString stringWithFormat:@" %@='%@' and",key,[dict objectForKey:key]] atIndex:[query length]];
     }
     NSString *queryStr = [query substringToIndex:[query length]-3];
+    DDLOG(@"queryStr %@",queryStr);
     BOOL success = [_db executeUpdate:queryStr];
     if (success)
     {

@@ -7,7 +7,7 @@
 //
 
 #import "ClassesListViewController.h"
-#import "RelatedCell.h"
+#import "ClassCell.h"
 
 @interface ClassesListViewController ()<
 UITableViewDataSource,
@@ -49,12 +49,9 @@ UITableViewDelegate>
     classesTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
     classesTableView.delegate = self;
     classesTableView.dataSource = self;
+    classesTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    classesTableView.backgroundColor = self.bgView.backgroundColor;
     [self.bgView addSubview:classesTableView];
-    
-    if ([classesTableView respondsToSelector:@selector(setSeparatorInset:)])
-    {
-        [classesTableView setSeparatorInset:UIEdgeInsetsZero];
-    }
     
     [self getClassesByUser];
 }
@@ -90,49 +87,128 @@ UITableViewDelegate>
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return 50;
+    return 83;
 }
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    static NSString *cellid = @"waittingselectclasscell";
-    //mlgb i'm so cold in the aircondition room
-    RelatedCell *cell = [tableView dequeueReusableCellWithIdentifier:cellid];
+    static NSString *classname = @"homeselectclasscell";
+    ClassCell *cell = [tableView dequeueReusableCellWithIdentifier:classname];
     if (cell == nil)
     {
-        cell = [[RelatedCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellid];
+        cell = [[ClassCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:classname];
     }
-    
-    NSDictionary *dict = [classArray objectAtIndex:indexPath.row];
-    
-    cell.contentLabel.frame = CGRectMake(10, 10, 250, 30);
-    cell.contentLabel.text = [dict objectForKey:@"name"];
-    cell.nametf.hidden = YES;
-    [cell.relateButton setTitle:@"" forState:UIControlStateNormal];
-    cell.relateButton.frame = CGRectMake(SCREEN_WIDTH-60, 10, 30, 30);
-    cell.relateButton.backgroundColor = [UIColor whiteColor];
-    if ([selectedClassids containsObject:[dict objectForKey:@"_id"]])
+    NSDictionary *classDict = [classArray objectAtIndex:indexPath.row];
+    cell.headerImageView.frame = CGRectMake(10, 10, 50, 50);
+    cell.headerImageView.layer.cornerRadius = 3;
+    cell.headerImageView.clipsToBounds =YES;
+    if (![[classDict objectForKey:@"img_icon"] isEqual:[NSNull null]] && [[classDict objectForKey:@"img_icon"] length] > 10)
     {
-        [cell.relateButton setImage:[UIImage imageNamed:@"selectBtn"] forState:UIControlStateNormal];
+        [Tools fillImageView:cell.headerImageView withImageFromURL:[classDict objectForKey:@"img_icon"] andDefault:@"3100"];
     }
     else
     {
-        [cell.relateButton setImage:[UIImage imageNamed:@"unselectBtn"] forState:UIControlStateNormal];
+        [cell.headerImageView setImage:[UIImage imageNamed:@"headpic.jpg"]];
     }
+    cell.nameLabel.frame = CGRectMake(70, 12.5, SCREEN_WIDTH-95, 25);
+    cell.nameLabel.text = [classDict objectForKey:@"name"];
+    cell.nameLabel.backgroundColor = [UIColor clearColor];
+    int num = 0;
+    
+    if ([[classDict objectForKey:@"notice"] integerValue] > 0)
+    {
+        num+=[[classDict objectForKey:@"notice"] integerValue];
+    }
+    
+    cell.contentLable.backgroundColor = [UIColor redColor];
+    cell.contentLable.textColor = [UIColor whiteColor];
+    cell.contentLable.textAlignment = NSTextAlignmentCenter;
+    cell.contentLable.font = [UIFont systemFontOfSize:10];
+    if (num >0)
+    {
+        cell.contentLable.frame = CGRectMake(SCREEN_WIDTH-70 , 25, 20, 20);
+        cell.contentLable.layer.cornerRadius = 10;
+        cell.contentLable.clipsToBounds = YES;
+        cell.contentLable.hidden = NO;
+        cell.contentLable.text = [NSString stringWithFormat:@"%d",num];
+    }
+    else if(([classDict objectForKey:UCDIARY] && [[classDict objectForKey:UCDIARY] integerValue] > 0)
+            || ([classDict objectForKey:DIARY] && [[classDict objectForKey:DIARY] integerValue] > 0))
+    {
+        cell.contentLable.frame = CGRectMake(SCREEN_WIDTH-60, 30, 10, 10);
+        cell.contentLable.layer.cornerRadius = 5;
+        cell.contentLable.clipsToBounds = YES;
+        cell.contentLable.hidden = NO;
+    }
+    else
+    {
+        cell.contentLable.hidden = YES;
+    }
+    
+    
+    int studentNum = 0;
+    if(![[classDict objectForKey:@"students_num"] isEqual:[NSNull null]])
+    {
+        studentNum = [[classDict objectForKey:@"students_num"] integerValue];
+    }
+    int parentNum = 0;
+    if(![[classDict objectForKey:@"parents_num"] isEqual:[NSNull null]])
+    {
+        parentNum = [[classDict objectForKey:@"parents_num"] integerValue];
+    }
+    
+    [cell.timeLabel cnv_setUILabelText:[NSString stringWithFormat:@"%d名学生",studentNum]
+                            andKeyWord:[NSString stringWithFormat:@"%d",studentNum]];
+    cell.timeLabel.frame = CGRectMake(cell.nameLabel.frame.origin.x, cell.nameLabel.frame.origin.y+cell.nameLabel.frame.size.height+3, [cell.timeLabel.text lengthOfBytesUsingEncoding:NSUTF8StringEncoding]*6.5, 20);
+    cell.timeLabel.font = [UIFont systemFontOfSize:16];
+    [cell.timeLabel cnv_setUIlabelTextColor:TIMECOLOR andKeyWordColor:RGB(51, 204, 102, 0.8)];
+    
+    cell.timeLabel2.frame = CGRectMake(cell.timeLabel.frame.origin.x+cell.timeLabel.frame.size.width, cell.nameLabel.frame.origin.y+cell.nameLabel.frame.size.height+3, 110, 20);
+    [cell.timeLabel2 cnv_setUILabelText:[NSString stringWithFormat:@"%d名家长已加入",parentNum]
+                             andKeyWord:[NSString stringWithFormat:@"%d",parentNum]];
+    cell.timeLabel2.font = [UIFont systemFontOfSize:16];
+    [cell.timeLabel2 cnv_setUIlabelTextColor:TIMECOLOR andKeyWordColor:RGB(51, 204, 102, 0.8)];
+    
+    cell.bgView.frame = CGRectMake(10, 6.5, SCREEN_WIDTH-20, 70);
+    
+    NSString *classid = [classDict objectForKey:@"_id"];
+    if ([selectedClassids containsObject:classid])
+    {
+        [cell.arrowImageView setImage:[UIImage imageNamed:@"selectBtn"]];
+    }
+    else
+    {
+        [cell.arrowImageView setImage:[UIImage imageNamed:@"unselectBtn"]];
+    }
+    cell.arrowImageView.tag = indexPath.row;
+    UITapGestureRecognizer *selectTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapclass:)];
+    cell.arrowImageView.userInteractionEnabled = YES;
+    [cell.arrowImageView addGestureRecognizer:selectTap];
+    
+    cell.arrowImageView.frame = CGRectMake(cell.bgView.frame.size.width-35, 22.5, 25, 25);
+    cell.arrowImageView.backgroundColor = [UIColor whiteColor];
+    
+    cell.bgView.backgroundColor = [UIColor whiteColor];
+    cell.bgView.layer.cornerRadius = 5;
+    cell.bgView.clipsToBounds = YES;
+    cell.selectionStyle = UITableViewCellSelectionStyleGray;
+    cell.backgroundColor = self.bgView.backgroundColor;
     return cell;
+
+}
+
+-(void)tapclass:(UITapGestureRecognizer *)tap
+{
+    int selectViewTag = tap.view.tag;
+    NSDictionary *dict = [classArray objectAtIndex:selectViewTag];
+    [selectedClassids removeAllObjects];
+    [selectedClassids addObject:[dict objectForKey:@"_id"]];
+    [classesTableView reloadData];
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     NSDictionary *dict = [classArray objectAtIndex:indexPath.row];
-//    if ([selectedClassids containsObject:[dict objectForKey:@"_id"]])
-//    {
-//        [selectedClassids removeObject:[dict objectForKey:@"_id"]];
-//    }
-//    else
-//    {
-//        [selectedClassids addObject:[dict objectForKey:@"_id"]];
-//    }
     [selectedClassids removeAllObjects];
     [selectedClassids addObject:[dict objectForKey:@"_id"]];
     [classesTableView reloadData];
@@ -154,9 +230,6 @@ UITableViewDelegate>
             {
                 [classArray addObjectsFromArray:[[responseDict objectForKey:@"data"] objectForKey:@"classes"]];
                 [classesTableView reloadData];
-                
-                CGFloat height = [classArray count]*50>(SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT)?(SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT):([classArray count] *50);
-                classesTableView.frame = CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, height);
             }
             else
             {

@@ -168,7 +168,7 @@
     //保存现在得上下文图形状态。不管后续对context上绘制什么都不会影响真正得屏幕。
 	CGContextSaveGState(context);
     //x，y轴方向移动
-	CGContextTranslateCTM(context, 0.0, 0.0);/*self.bounds.size.height*/
+	CGContextTranslateCTM(context, 0.0, self.bounds.size.height);/*self.bounds.size.height*/
     
     //缩放x，y轴方向缩放，－1.0为反向1.0倍,坐标系转换,沿x轴翻转180度
 	CGContextScaleCTM(context, 1, -1);	
@@ -178,17 +178,42 @@
 	if ([fontArray count]) {
 		fontName = [fontArray objectAtIndex:0];
 	}
-    //创建一个文本行对象，此对象包含一个字符
-	CTLineRef line = CTLineCreateWithAttributedString((CFAttributedStringRef) 
-                                                      [self illuminatedString:self.text font:self.font]);	//[UIFont fontWithName:fontName size:60]
+//    //创建一个文本行对象，此对象包含一个字符
+//	CTLineRef line = CTLineCreateWithAttributedString((CFAttributedStringRef) 
+//                                                      [self illuminatedString:self.text font:self.font]);	//[UIFont fontWithName:fontName size:60]
+//    //设置文字绘画的起点坐标。由于前面沿x轴翻转了（上面那条边）所以要移动到与此位置相同，也可以只改变CGContextSetTextPosition函数y的坐标，效果是一样的只是意义不一样
+//          CGContextTranslateCTM(context, 0.0, - ceill(self.bounds.size.height) + 8);//加8是稍微调整一下位置，让字体完全现实，有时候y，j下面一点点会被遮盖
+//	CGContextSetTextPosition(context, 0.0, 0.0); /*ceill(self.bounds.size.height) + 8*/
+//    //在离屏上绘制line
+//	CTLineDraw(line, context);
+    
+    
+    CTFramesetterRef fs = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)
+                                                                  [self illuminatedString:self.text font:self.font]);
+    
     //设置文字绘画的起点坐标。由于前面沿x轴翻转了（上面那条边）所以要移动到与此位置相同，也可以只改变CGContextSetTextPosition函数y的坐标，效果是一样的只是意义不一样
-          CGContextTranslateCTM(context, 0.0, - ceill(self.bounds.size.height) + 8);//加8是稍微调整一下位置，让字体完全现实，有时候y，j下面一点点会被遮盖
-	CGContextSetTextPosition(context, 0.0, 0.0); /*ceill(self.bounds.size.height) + 8*/
+//    CGContextTranslateCTM(context, 0.0, - ceill(self.bounds.size.height) + 8);//加8是稍微调整一下位置，让字体完全现实，有时候y，j下面一点点会被遮盖
+//	CGContextSetTextPosition(context, 0.0, 0.0); /*ceill(self.bounds.size.height) + 8*/
     //在离屏上绘制line
-	CTLineDraw(line, context);
+    
+    CGMutablePathRef path = CGPathCreateMutable();
+    
+    CGPathAddRect(path, NULL, rect);
+    
+    CTFrameRef f = CTFramesetterCreateFrame(fs, CFRangeMake(0, 0), path, NULL);
+    
+    CTFrameDraw(f, context);
+    
+    CGPathRelease(path);
+    
+    CFRelease(f);
+    
+    CFRelease(fs);
+
+    
     //将离屏上得内容覆盖到屏幕。此处得做法很像windows绘制中的双缓冲。
 	CGContextRestoreGState(context);	
-	CFRelease(line);
+//	CFRelease(line);
 	//CGContextRef	myContext = UIGraphicsGetCurrentContext();
 	//CGContextSaveGState(myContext);
 	//[self MyColoredPatternPainting:myContext rect:self.bounds];

@@ -353,7 +353,7 @@
         [inviteBody replaceOccurrencesOfString:@"#school" withString:schoolName options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
         [inviteBody replaceOccurrencesOfString:@"#class" withString:className options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
         [inviteBody replaceOccurrencesOfString:@"#name" withString:[Tools user_name] options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
-        
+        [inviteBody insertString:HOST_URL atIndex:[inviteBody length]];
         msgBody = inviteBody;
 
         controller.body = msgBody;

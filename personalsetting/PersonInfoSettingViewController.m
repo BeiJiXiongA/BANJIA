@@ -49,6 +49,9 @@ EditNameDone>
     NSString *uidNum;
     
     NSMutableDictionary *userInfoDict;
+    
+    UIButton *dateDoneButton;
+    UIButton *dateCancelButton;
 }
 @end
 
@@ -117,12 +120,33 @@ EditNameDone>
     dateView = [[UIView alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT, SCREEN_WIDTH, 0)];
     dateView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
     
-    datePicker = [[UIDatePicker alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT-210, SCREEN_WIDTH-100, 60)];
+    datePicker = [[UIDatePicker alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT-210, SCREEN_WIDTH-100, 150)];
     datePicker.datePickerMode = UIDatePickerModeDate;
     datePicker.backgroundColor = [UIColor whiteColor];
     [dateView addSubview:datePicker];
     
-    UITapGestureRecognizer *dateTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dateDone)];
+    UIToolbar *toolBar = [[UIToolbar alloc] init];
+    toolBar.frame = CGRectMake(0, SCREEN_HEIGHT-290, SCREEN_WIDTH, 45);
+    [dateView addSubview:toolBar];
+    
+    UIImage *btnBgImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
+    dateCancelButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [dateCancelButton setTitle:@"取消" forState:UIControlStateNormal];
+    [dateCancelButton setBackgroundImage:btnBgImage forState:UIControlStateNormal];
+    [dateCancelButton addTarget:self action:@selector(dateCancel) forControlEvents:UIControlEventTouchUpInside];
+    dateCancelButton.frame = CGRectMake(10, 5, 60, 35);
+    
+    [toolBar addSubview:dateCancelButton];
+    
+    dateDoneButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [dateDoneButton setTitle:@"完成" forState:UIControlStateNormal];
+    [dateDoneButton setBackgroundImage:btnBgImage forState:UIControlStateNormal];
+    [dateDoneButton addTarget:self action:@selector(dateDone) forControlEvents:UIControlEventTouchUpInside];
+    dateDoneButton.frame = CGRectMake(SCREEN_WIDTH-70, 5, 60, 35);
+    [toolBar addSubview:dateDoneButton];
+    
+    
+    UITapGestureRecognizer *dateTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dateCancel)];
     dateView.userInteractionEnabled = YES;
     [dateView addGestureRecognizer:dateTgr];
     
@@ -155,7 +179,7 @@ EditNameDone>
 //        [self dateDone];
 //    }
     
-    
+    [self dateDone];
     if (!bgImage && !iconImage && [((UITextField *)[personInfoTableView viewWithTag:4]).text isEqualToString:[Tools user_birth]])
     {
         [Tools showAlertView:@"没做任何更改哦！" delegateViewController:nil];
@@ -180,7 +204,7 @@ EditNameDone>
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
-                                                                      @"birth":[[NSString stringWithFormat:@"%@",datePicker.date] substringToIndex:10],
+                                                                      @"birth":birth,
                                                                       @"sex":sex,
                                                                       @"r_name":userName}
                                                                 API:MB_SETUSERINFO];
@@ -197,7 +221,6 @@ EditNameDone>
                 [[NSUserDefaults standardUserDefaults] setObject:userName forKey:USERNAME];
                 [[NSUserDefaults standardUserDefaults] synchronize];
                 [[NSNotificationCenter defaultCenter] postNotificationName:CHANGEHEADERICON object:nil];
-                [Tools showTips:@"修改成功" toView:self.bgView];
             }
             else
             {
@@ -279,6 +302,9 @@ EditNameDone>
 //            [SetImageTools fillHeaderImage:cell.iconImageView withUserid:[Tools user_id] imageType:@"img_icon" defultImage:HEADERICON];
             [Tools fillImageView:cell.iconImageView withImageFromURL:[Tools header_image] andDefault:HEADERICON];
         }
+        UITapGestureRecognizer *iconTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(selectoo)];
+        cell.iconImageView.userInteractionEnabled = YES;
+        [cell.iconImageView addGestureRecognizer:iconTap];
     }
     else if(indexPath.row == 1)
     {
@@ -346,7 +372,6 @@ EditNameDone>
     if (indexPath.row == 0)
     {
         //头像
-        imageUsed = @"img_icon";
         [self selectoo];
     }
     else if (indexPath.row == 1)
@@ -447,7 +472,14 @@ EditNameDone>
     DDLOG(@"%@",[[NSString stringWithFormat:@"%@",datePicker.date] substringToIndex:10]);
     [UIView animateWithDuration:0.2 animations:^{
         dateView.frame = CGRectMake(0, SCREEN_HEIGHT, SCREEN_WIDTH, 0);
-        ((UITextField *)[personInfoTableView viewWithTag:5]).text = [[NSString stringWithFormat:@"%@",datePicker.date] substringToIndex:10];
+        birth = [[NSString stringWithFormat:@"%@",datePicker.date] substringToIndex:10];
+        [personInfoTableView reloadData];
+    }];
+}
+-(void)dateCancel
+{
+    [UIView animateWithDuration:0.2 animations:^{
+        dateView.frame = CGRectMake(0, SCREEN_HEIGHT, SCREEN_WIDTH, 0);
     }];
 }
 
@@ -550,6 +582,7 @@ EditNameDone>
 
 -(void)selectoo
 {
+    imageUsed = @"img_icon";
     UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"从相册选取",@"拍照", nil];
     [ac showInView:self.bgView];
 }

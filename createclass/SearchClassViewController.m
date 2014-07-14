@@ -10,13 +10,16 @@
 #import "RelatedCell.h"
 #import "SearchSchoolViewController.h"
 #import "ClassZoneViewController.h"
+#import "ZBarSDK.h"
 
 @interface SearchClassViewController ()<
 UITableViewDataSource,
 UITableViewDelegate,
-UITextFieldDelegate>
+UITextFieldDelegate,
+ZBarReaderDelegate>
 {
     UITableView *searchClassTableView;
+    UIView* line;
 }
 @end
 
@@ -38,7 +41,7 @@ UITextFieldDelegate>
     
     self.titleLabel.text = @"查找班级";
     
-    searchClassTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, 158) style:UITableViewStylePlain];
+    searchClassTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, 237) style:UITableViewStylePlain];
     searchClassTableView.delegate = self;
     searchClassTableView.dataSource  = self;
     searchClassTableView.scrollEnabled = NO;
@@ -68,7 +71,7 @@ UITextFieldDelegate>
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return 4;
+    return 6;
 }
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -127,6 +130,7 @@ UITextFieldDelegate>
         }
         else if (indexPath.row == 5)
         {
+            [cell.iconImageView setImage:[UIImage imageNamed:@"icon_qr"]];
             cell.contentLabel.text = @"扫一扫";
         }
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
@@ -150,6 +154,189 @@ UITextFieldDelegate>
         [[NSUserDefaults standardUserDefaults] synchronize];
         [self.navigationController pushViewController:searchSchoolVC animated:YES];
     }
+    else if(indexPath.row == 5)
+    {
+        //扫一扫
+        ZBarReaderViewController *reader = [ZBarReaderViewController new];
+        reader.readerDelegate = self;
+        reader.supportedOrientationsMask = ZBarOrientationMaskAll;
+        reader.showsZBarControls = NO;
+        reader.readerView.torchMode = 0;
+        [self setOverlayPickerView:reader];
+        
+        ZBarImageScanner *scanner = reader.scanner;
+        
+        [scanner setSymbology: ZBAR_I25
+                       config: ZBAR_CFG_ENABLE
+                           to: 0];
+        
+        [self.navigationController presentViewController:reader animated:YES completion:nil];
+    }
+}
+
+
+- (void)setOverlayPickerView:(ZBarReaderViewController *)reader
+
+{
+    
+    //清除原有控件
+    
+    for (UIView *temp in [reader.view subviews])
+    {
+        for (UIButton *button in [temp subviews])
+        {
+            if ([button isKindOfClass:[UIButton class]])
+            {
+                [button removeFromSuperview];
+            }
+        }
+        
+        for (UIToolbar *toolbar in [temp subviews])
+        {
+            if ([toolbar isKindOfClass:[UIToolbar class]])
+            {
+                [toolbar setHidden:YES];
+                
+                [toolbar removeFromSuperview];
+            }
+        }
+    }
+    
+//    CGFloat width = 280.0f;
+    
+    //画中间的基准线
+    
+    line = [[UIView alloc] init];
+    line.frame = CGRectMake(40, (SCREEN_HEIGHT+20)/2, 240, 1);
+    line.backgroundColor = [UIColor greenColor];
+//    [reader.view addSubview:line];
+    
+    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
+    animation.fromValue = [NSValue valueWithCGPoint:CGPointMake(20, 80)];
+    animation.toValue = [NSValue valueWithCGPoint:CGPointMake(20, 220)];
+    animation.duration = 0.5;
+    animation.autoreverses = YES;
+    animation.repeatCount = INFINITY;
+    [line.layer addAnimation:animation forKey:@"123"];
+    
+    //最上部view
+    
+    UIView* upView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, (SCREEN_HEIGHT-240)/2)];
+    
+    upView.alpha = 0.3;
+    
+    upView.backgroundColor = [UIColor blackColor];
+    
+    [reader.view addSubview:upView];
+    
+    //用于说明的label
+    
+    UILabel * labIntroudction= [[UILabel alloc] init];
+    
+    labIntroudction.backgroundColor = [UIColor clearColor];
+    
+    labIntroudction.frame=CGRectMake(15, 20, 290, 50);
+    
+    labIntroudction.numberOfLines=2;
+    
+    labIntroudction.textColor=[UIColor whiteColor];
+    
+    labIntroudction.text=@"";
+    
+    [upView addSubview:labIntroudction];
+    
+    
+    //左侧的view
+    
+    UIView *leftView = [[UIView alloc] initWithFrame:CGRectMake(0, (SCREEN_HEIGHT-240)/2, 20, 280)];
+    
+    leftView.alpha = 0.3;
+    
+    leftView.backgroundColor = [UIColor blackColor];
+    
+    [reader.view addSubview:leftView];
+    
+    
+    //右侧的view
+    
+    UIView *rightView = [[UIView alloc] initWithFrame:CGRectMake(300, (SCREEN_HEIGHT-240)/2, 20, 280)];
+    
+    rightView.alpha = 0.3;
+    
+    rightView.backgroundColor = [UIColor blackColor];
+    
+    [reader.view addSubview:rightView];
+    
+    
+    //底部view
+    
+    UIView * downView = [[UIView alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT-(SCREEN_HEIGHT-240)/2+40, 320, (SCREEN_HEIGHT-240)/2+20)];
+    
+    downView.alpha = 0.3;
+    
+    downView.backgroundColor = [UIColor blackColor];
+    
+    [reader.view addSubview:downView];
+    
+    UIImageView *upLeftCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_1"]];
+    upLeftCorner.frame = CGRectMake(20, (SCREEN_HEIGHT-240)/2, 30, 30);
+    [reader.view addSubview:upLeftCorner];
+    
+    UIImageView *upRightCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_2"]];
+    upRightCorner.frame = CGRectMake(20+280-30, (SCREEN_HEIGHT-240)/2, 30, 30);
+    [reader.view addSubview:upRightCorner];
+    
+    UIImageView *downLeftCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_4"]];
+    downLeftCorner.frame = CGRectMake(20, (SCREEN_HEIGHT+YSTART-240)/2+240, 30, 30);
+    [reader.view addSubview:downLeftCorner];
+    
+    UIImageView *downRightCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_3"]];
+    downRightCorner.frame = CGRectMake(300-30, (SCREEN_HEIGHT+YSTART-240)/2+240, 30, 30);
+    [reader.view addSubview:downRightCorner];
+    
+    
+    //用于取消操作的button
+    
+    UIButton *cancelButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    
+    cancelButton.alpha = 0.4;
+    
+    [cancelButton setFrame:CGRectMake(20, SCREEN_HEIGHT-40, 40, 40)];
+    
+    [cancelButton setTitle:@"取消" forState:UIControlStateNormal];
+    
+//    [cancelButton setImage:[UIImage imageNamed:@"outer_nav_backbtn_s"] forState:UIControlStateNormal];
+    
+    [cancelButton.titleLabel setFont:[UIFont boldSystemFontOfSize:20]];
+    
+    [cancelButton addTarget:self action:@selector(dismissOverlayView:)forControlEvents:UIControlEventTouchUpInside];
+    
+    [reader.view addSubview:cancelButton];  
+    
+}  
+
+//取消button方法  
+
+- (void)dismissOverlayView:(id)sender{   
+    
+    [self dismissViewControllerAnimated:YES completion:nil];
+    
+}
+
+- (void) imagePickerController: (UIImagePickerController*) picker
+ didFinishPickingMediaWithInfo: (NSDictionary*) info
+{
+    id<NSFastEnumeration> results =
+    [info objectForKey: ZBarReaderControllerResults];
+    ZBarSymbol *symbol = nil;
+    for(symbol in results)
+        break;
+    [picker dismissViewControllerAnimated:YES completion:^{
+        DDLOG(@"%@",symbol.data);
+        NSString *classNum = [symbol.data substringFromIndex:[symbol.data rangeOfString:@";"].location+1];
+        [self searchClass:classNum];
+    }];
+    
 }
 
 -(void)unShowSelfViewController
@@ -201,7 +388,7 @@ UITextFieldDelegate>
                         NSString *className = [[responseDict objectForKey:@"data"] objectForKey:@"name"];
                         
                         OperatDB *db = [[OperatDB alloc] init];
-                        if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"classid":classID} andTableName:CLASSMEMBERTABLE] count]> 0)
+                        if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"classid":classID} andTableName:MYCLASSTABLE] count]> 0)
                         {
                             [Tools showAlertView:@"您已经是这个班的一员了" delegateViewController:nil];
                             return ;
