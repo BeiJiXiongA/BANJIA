@@ -838,7 +838,7 @@ static int loginID;
         
         [request setFailedBlock:^{
             NSError *error = [request error];
-            DDLOG(@"error %@",error);
+            DDLOG(@"error %@",error.description);
         }];
         [request startAsynchronous];
     }
