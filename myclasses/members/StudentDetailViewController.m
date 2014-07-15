@@ -694,7 +694,7 @@ UIActionSheetDelegate>
 {
     NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
     int userAdmin = [[dict objectForKey:@"admin"] integerValue];
-    if (userAdmin == 2)
+    if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
     {
         if ([otherUserAdmin integerValue] == 0)
         {
@@ -724,7 +724,7 @@ UIActionSheetDelegate>
     {
         NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
         int userAdmin = [[dict objectForKey:@"admin"] integerValue];
-        if (userAdmin == 2)
+        if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
         {
             if (buttonIndex == 0)
             {

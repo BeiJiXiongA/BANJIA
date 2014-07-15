@@ -186,14 +186,14 @@ ChatVCDelegate>
                             {
                                 if ([db updeteKey:@"uicon" toValue:[dict objectForKey:@"img_icon"] withParaDict:@{@"fid":[tmpDict objectForKey:@"fid"]} andTableName:USERICONTABLE])
                                 {
-                                    
+                                    DDLOG(@"usericon update success");
                                 }
                             }
                             else
                             {
                                 if ([db insertRecord:@{@"uid":[tmpDict objectForKey:@"fid"],@"uicon":[dict objectForKey:@"img_icon"]} andTableName:USERICONTABLE])
                                 {
-                                    
+                                    DDLOG(@"insert update success");
                                 }
                             }
                         }
@@ -403,11 +403,25 @@ ChatVCDelegate>
             if ([[db findSetWithDictionary:@{@"uid":[dict objectForKey:@"fid"]} andTableName:USERICONTABLE] count] > 0)
             {
                 icondict = [[db findSetWithDictionary:@{@"uid":[dict objectForKey:@"fid"]} andTableName:USERICONTABLE] firstObject];
-                [Tools fillImageView:cell.headerImageView withImageFromURL:[icondict objectForKey:@"uicon"] andDefault:HEADERICON];
+                if ([[icondict objectForKey:@"uicon"] length] > 0)
+                {
+                    [Tools fillImageView:cell.headerImageView withImageFromURL:[icondict objectForKey:@"uicon"] andDefault:HEADERICON];
+                }
+                else
+                {
+                    [cell.headerImageView setImage:[UIImage imageNamed:HEADERICON]];
+                }
             }
             else
             {
-                [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"ficon"] andDefault:HEADERICON];
+                if ([[dict objectForKey:@"uicon"] length] > 0)
+                {
+                    [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"uicon"] andDefault:HEADERICON];
+                }
+                else
+                {
+                    [cell.headerImageView setImage:[UIImage imageNamed:HEADERICON]];
+                }
             }
         }
         else

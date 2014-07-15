@@ -32,8 +32,12 @@
 @property (nonatomic, strong) UITextView *inputTextView;
 @property (nonatomic, strong) UIView *inputBgView;
 @property (nonatomic, assign) BOOL face;
+@property (nonatomic, assign) BOOL onlyFace;
+@property (nonatomic, strong) UIButton *soundButton;
+@property (nonatomic, strong) UIButton *moreButton;
 @property (nonatomic, assign) id<ReturnFunctionDelegate> returnFunDel;
 @property (nonatomic, strong) NSMutableString *sendString;
+
 -(NSMutableString *)analyString:(NSString *)inputString;
 
 -(void)backKeyBoard;

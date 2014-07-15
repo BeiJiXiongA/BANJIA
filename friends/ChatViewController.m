@@ -701,13 +701,13 @@ ReturnFunctionDelegate>
         NSRange range = [msgContent rangeOfString:@"$!#"];
         msgContent = [msgContent substringFromIndex:range.location+range.length];
         size = [self sizeWithText:[msgContent emojizedString]];
-        rowHeight = size.height+20;
+        rowHeight = size.height+40;
     }
-//    if (ABS([[dict objectForKey:@"time"] integerValue] - currentSec) > 60*3  || indexPath.row == 0)
-//    {
+    if (([[dict objectForKey:@"time"] integerValue] - currentSec) > 60*3  || indexPath.row == 0)
+    {
 //        currentSec = [[dict objectForKey:@"time"] integerValue];
 //        rowHeight+=20;
-//    }
+    }
     return rowHeight+20+20;
 }
 
@@ -777,6 +777,11 @@ ReturnFunctionDelegate>
                 NSString *msgContent = [dict objectForKey:@"content"];
                 NSRange range = [msgContent rangeOfString:@"$!#"];
                 
+                if ([msgContent rangeOfString:@""].length > 0)
+                {
+                    
+                }
+                
                 cell.messageTf.text = [msgContent substringFromIndex:range.location+range.length];
                 
                 size = [self sizeWithText:[[msgContent substringFromIndex:range.location+range.length] emojizedString]];
@@ -801,7 +806,7 @@ ReturnFunctionDelegate>
                 cell.joinlable.backgroundColor = [UIColor clearColor];
                 cell.joinlable.hidden = NO;
                 
-                cell.chatBg.frame = CGRectMake(55, messageBgY-10, size.width+20, size.height+20+30);
+                cell.chatBg.frame = CGRectMake(55, messageBgY-0, size.width+20, size.height+20+30);
                 
                 cell.joinlable.userInteractionEnabled = YES;
                 cell.joinlable.tag = 5555+indexPath.row;
@@ -813,18 +818,18 @@ ReturnFunctionDelegate>
             }
             
             cell.headerImageView.frame = CGRectMake(5, messageBgY, 40, 40);
-//            if (ABS([[dict objectForKey:@"time"] integerValue] - currentSec) > 60*3  || indexPath.row == 0)
-//            {
-//                cell.timeLabel.hidden = NO;
-//                currentSec = [[dict objectForKey:@"time"] integerValue];
-//            }
-//            else
-//            {
+            if (([[dict objectForKey:@"time"] integerValue] - currentSec) > 60*3  || indexPath.row == 0)
+            {
+                cell.timeLabel.hidden = NO;
+                currentSec = [[dict objectForKey:@"time"] integerValue];
+            }
+            else
+            {
 //                cell.headerImageView.frame = CGRectMake(5, messageBgY-23, 40, 40);
 //                cell.chatBg.frame = CGRectMake(55, messageBgY-25, size.width+20, size.height+20);
 //                cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x + 10,cell.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+20+he);
-//                cell.timeLabel.hidden = YES;
-//            }
+                cell.timeLabel.hidden = YES;
+            }
             
             [Tools fillImageView:cell.headerImageView withImageFromURL:[NSURL URLWithString:fromImageStr] andDefault:HEADERBG];
         }
@@ -864,20 +869,20 @@ ReturnFunctionDelegate>
             }
             cell.headerImageView.frame = CGRectMake(SCREEN_WIDTH - 60, messageBgY, 40, 40);
             
-            if (ABS([[dict objectForKey:@"time"] integerValue] - currentSec) > 60*3 || indexPath.row == 0)
+            if (([[dict objectForKey:@"time"] integerValue] - currentSec) > 60*3 || indexPath.row == 0)
             {
                 cell.timeLabel.hidden = NO;
                 currentSec = [[dict objectForKey:@"time"] integerValue];
             }
-//            else
-//            {
+            else
+            {
 //                cell.headerImageView.frame = CGRectMake(SCREEN_WIDTH - 60, messageBgY-23, 40, 40);
 //                cell.chatBg.frame = CGRectMake(self.view.frame.size.width - 10-size.width-30-45, messageBgY-25, size.width+20, size.height+20);
 //                [cell.chatBg setImage:toImage];
 //                
 //                cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x+ 5-x,cell.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+20);
-//                cell.timeLabel.hidden = YES;
-//            }
+                cell.timeLabel.hidden = YES;
+            }
             [Tools fillImageView:cell.headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERBG];
         }
     }

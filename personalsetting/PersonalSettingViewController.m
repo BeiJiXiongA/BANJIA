@@ -358,9 +358,12 @@ UIActionSheetDelegate>
                 cell = [[RelatedCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:relateCell];
             }
             cell.relateButton.tag = indexPath.row+1000;
-            cell.relateButton.frame = CGRectMake(SCREEN_WIDTH-100, 17, 80, 26);
+            cell.relateButton.frame = CGRectMake(SCREEN_WIDTH-150, 17, 120, 26);
             cell.nametf.frame = CGRectMake(60, 15, 170, 30);
-            
+            cell.relateButton.titleLabel.font = [UIFont systemFontOfSize:16];
+            [cell.relateButton setTitle:@"" forState:UIControlStateNormal];
+            [cell.relateButton setTitleColor:COMMENTCOLOR forState:UIControlStateNormal];
+            cell.nametf.frame = CGRectMake(SCREEN_WIDTH-150, 17, 120, 26);
             if (indexPath.row == 1)
             {
                 cell.contentLabel.text = [NSString stringWithFormat:@"QQ账号"];
@@ -368,14 +371,13 @@ UIActionSheetDelegate>
                 {
                     cell.nametf.frame = CGRectMake(SCREEN_WIDTH-150, 17, 120, 26);
                     cell.nametf.text = [[NSUserDefaults standardUserDefaults] objectForKey:QQNICKNAME];
-                    [cell.relateButton setTitle:@"" forState:UIControlStateNormal];
+                    
                 }
                 else
                 {
                     [cell.relateButton removeTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
                     [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-                    cell.nametf.text = @"";
-                    [cell.relateButton setTitle:@"未关联" forState:UIControlStateNormal];
+                    cell.nametf.text = @"未关联";
                 }
                 [cell.iconImageView setImage:[UIImage imageNamed:@"QQicon"]];
             }
@@ -392,8 +394,7 @@ UIActionSheetDelegate>
                 {
                     [cell.relateButton removeTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
                     [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-                    cell.nametf.text = @"";
-                    [cell.relateButton setTitle:@"未关联" forState:UIControlStateNormal];
+                    cell.nametf.text = @"未关联";
                 }
                 [cell.iconImageView setImage:[UIImage imageNamed:@"sinaicon"]];
             }
@@ -410,8 +411,7 @@ UIActionSheetDelegate>
                 {
                     [cell.relateButton removeTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
                     [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-                    cell.nametf.text = @"";
-                    [cell.relateButton setTitle:@"未关联" forState:UIControlStateNormal];
+                    cell.nametf.text = @"未关联";
                 }
                 [cell.iconImageView setImage:[UIImage imageNamed:@"icon_rr"]];
             }

@@ -321,7 +321,7 @@
                 
                 cell.commentContentLabel.frame = CGRectMake(35, cell.nameButton.frame.origin.y, SCREEN_WIDTH-50, 30);
                 [cell.commentContentLabel cnv_setUILabelText:[NSString stringWithFormat:@"%d人觉得很赞",[praiseArray count]] andKeyWord:@""];
-                [cell.commentContentLabel cnv_setUIlabelTextColor:COMMENTCOLOR andKeyWordColor:RGB(51, 204, 102, 0.8)];
+                [cell.commentContentLabel cnv_setUIlabelTextColor:COMMENTCOLOR andKeyWordColor:nil];
                 cell.selectionStyle = UITableViewCellSelectionStyleNone;
                 
                 cell.openPraiseButton.frame = CGRectMake(SCREEN_WIDTH-70, 3, 130, 130);
@@ -339,7 +339,14 @@
                     NSDictionary *praiseDict = [praiseArray objectAtIndex:i];
                     UIButton *headerButton = [UIButton buttonWithType:UIButtonTypeCustom];
                     headerButton.frame = CGRectMake((PraiseW+5)*(i%ColumnPerRow), (PraiseH+5)*(i/ColumnPerRow), PraiseW, PraiseH);
-                    [Tools fillButtonView:headerButton withImageFromURL:[[praiseDict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERICON];
+                    if ([[[praiseDict objectForKey:@"by"] objectForKey:@"img_icon"] length] > 0)
+                    {
+                        [Tools fillButtonView:headerButton withImageFromURL:[[praiseDict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERICON];
+                    }
+                    else
+                    {
+                        [headerButton setImage:[UIImage imageNamed:HEADERICON] forState:UIControlStateNormal];
+                    }
                     headerButton.layer.cornerRadius = 2;
                     headerButton.tag = 3333+i;
                     headerButton.clipsToBounds = YES;
@@ -400,7 +407,7 @@
             
             cell.commentContentLabel.frame = CGRectMake(35, cell.nameButton.frame.origin.y, SCREEN_WIDTH-50, 30);
             [cell.commentContentLabel cnv_setUILabelText:[NSString stringWithFormat:@"%d人觉得很赞",[praiseArray count]] andKeyWord:@""];
-            [cell.commentContentLabel cnv_setUIlabelTextColor:COMMENTCOLOR andKeyWordColor:COMMENTCOLOR];
+            [cell.commentContentLabel cnv_setUIlabelTextColor:COMMENTCOLOR andKeyWordColor:nil];
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
             
             cell.openPraiseButton.frame = CGRectMake(SCREEN_WIDTH-70, 3, 30, 30);
@@ -420,7 +427,14 @@
                 {
                     UIButton *headerButton = [UIButton buttonWithType:UIButtonTypeCustom];
                     headerButton.frame = CGRectMake((PraiseW+5)*(i%ColumnPerRow), (PraiseH+5)*(i/ColumnPerRow), PraiseW, PraiseH);
-                    [Tools fillButtonView:headerButton withImageFromURL:[[praiseDict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERICON];
+                    if ([[[praiseDict objectForKey:@"by"] objectForKey:@"img_icon"] length] > 0)
+                    {
+                        [Tools fillButtonView:headerButton withImageFromURL:[[praiseDict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERICON];
+                    }
+                    else
+                    {
+                        [headerButton setImage:[UIImage imageNamed:HEADERICON] forState:UIControlStateNormal];
+                    }
                     headerButton.layer.cornerRadius = 2;
                     headerButton.tag = 3333+i;
                     headerButton.clipsToBounds = YES;
@@ -452,7 +466,7 @@
                 
                 cell.commentContentLabel.frame = CGRectMake(35, cell.nameButton.frame.origin.y, SCREEN_WIDTH-50, 30);
                 [cell.commentContentLabel cnv_setUILabelText:[NSString stringWithFormat:@"%d人觉得很赞",[praiseArray count]] andKeyWord:@""];
-                [cell.commentContentLabel cnv_setUIlabelTextColor:COMMENTCOLOR andKeyWordColor:COMMENTCOLOR];
+                [cell.commentContentLabel cnv_setUIlabelTextColor:COMMENTCOLOR andKeyWordColor:nil];
                 cell.selectionStyle = UITableViewCellSelectionStyleNone;
                 return cell;
             }
@@ -521,7 +535,7 @@
             
             cell.commentContentLabel.frame = CGRectMake(35, cell.nameButton.frame.origin.y, SCREEN_WIDTH-50, 30);
             [cell.commentContentLabel cnv_setUILabelText:[NSString stringWithFormat:@"%d人觉得很赞",[praiseArray count]] andKeyWord:@""];
-            [cell.commentContentLabel cnv_setUIlabelTextColor:COMMENTCOLOR andKeyWordColor:COMMENTCOLOR];
+            [cell.commentContentLabel cnv_setUIlabelTextColor:COMMENTCOLOR andKeyWordColor:nil];
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
             return cell;
         }

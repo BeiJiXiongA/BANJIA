@@ -157,7 +157,7 @@ UIActionSheetDelegate,NameButtonDel>
     {
         NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
         int userAdmin = [[dict objectForKey:@"admin"] integerValue];
-        if (userAdmin == 2 || [[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
+        if (userAdmin == 2 || [[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]] || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
         {
             UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"删除",@"举报", nil];
             ac.tag = 3333;
@@ -663,7 +663,6 @@ UIActionSheetDelegate,NameButtonDel>
             DDLOG(@"commit diary responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                [Tools showTips:@"评论成功" toView:diaryDetailTableView];
                 [self getDiaryDetail];
                 
                 if ([self.addComDel respondsToSelector:@selector(addComment:)])
@@ -785,7 +784,7 @@ UIActionSheetDelegate,NameButtonDel>
                 {
                     NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
                     int userAdmin = [[dict objectForKey:@"admin"] integerValue];
-                    if (userAdmin == 2 || [[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
+                    if (userAdmin == 2 || [[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]] || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
                     {
                         moreButton.hidden = NO;
                     }
@@ -869,7 +868,7 @@ UIActionSheetDelegate,NameButtonDel>
     {
         NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
         int userAdmin = [[dict objectForKey:@"admin"] integerValue];
-        if (userAdmin == 2 || [[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
+        if (userAdmin == 2 || [[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]] || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
         {
             if (buttonIndex == 0)
             {

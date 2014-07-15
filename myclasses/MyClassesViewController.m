@@ -29,7 +29,7 @@
 
 #import "XDTabViewController.h"
 
-#define DEFAULTSCHOOLNAME  @"未指定学校的班级"
+#define DEFAULTSCHOOLNAME  @"未设置学校的班级"
 #define DEFAULTSCHOOLID    @"123"
 #define DEFAULTSCHOOLLEVEL  @"1"
 
@@ -48,8 +48,6 @@ UIActionSheetDelegate>
     UITableView *classTableView;
     NSMutableArray *tmpArray;
     
-    UILabel *haveNoClassLabel;
-    
     EGORefreshTableHeaderView *pullRefreshView;
     BOOL _reloading;
     
@@ -58,6 +56,11 @@ UIActionSheetDelegate>
     NSArray *schoolLevelArray;
     
     BOOL inThisPage;
+    
+    UIView *tipView;
+    UIButton *joinClassButton;
+    UIButton *createClassButton;
+    UILabel *tipLabel;
     
 //    UIView *headerView;
 //    UILabel *headerLabel;
@@ -95,6 +98,8 @@ UIActionSheetDelegate>
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getClassesByUser) name:UPDATECLASSMEMBERLIST object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getClassesByUser) name:CHANGECLASSINFO object:nil];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getClassesByUser) name:RECEIVENEWNOTICE object:nil];
+    
     [[self.bgView layer] setShadowOffset:CGSizeMake(-5.0f, 5.0f)];
     [[self.bgView layer] setShadowColor:[UIColor darkGrayColor].CGColor];
     [[self.bgView layer] setShadowOpacity:1.0f];
@@ -119,16 +124,32 @@ UIActionSheetDelegate>
     [addButton addTarget:self action:@selector(addButtonClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:addButton];
     
-    haveNoClassLabel = [[UILabel alloc] initWithFrame:CGRectMake(30, UI_NAVIGATION_BAR_HEIGHT+101, SCREEN_WIDTH-60, 60)];
-    haveNoClassLabel.font = [UIFont systemFontOfSize:17];
-    haveNoClassLabel.backgroundColor = [UIColor clearColor];
-    haveNoClassLabel.numberOfLines = 3;
-    haveNoClassLabel.textAlignment = NSTextAlignmentCenter;
-    haveNoClassLabel.lineBreakMode = NSLineBreakByWordWrapping;
-    haveNoClassLabel.textColor = UIColorFromRGB(0x727171);
-    haveNoClassLabel.text = @"您还没有加入任何班级，快去加入或创建一个您的班级吧!";
-    haveNoClassLabel.hidden = YES;
-    [self.bgView addSubview:haveNoClassLabel];
+    tipView = [[UIView alloc] initWithFrame:CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT+90, SCREEN_WIDTH-20, 300)];
+    tipView.backgroundColor = self.bgView.backgroundColor;
+    [self.bgView addSubview:tipView];
+    
+    tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 0, SCREEN_WIDTH-40, 70)];
+    tipLabel.backgroundColor = self.bgView.backgroundColor;
+    tipLabel.lineBreakMode = NSLineBreakByWordWrapping;
+    tipLabel.numberOfLines = 3;
+    tipLabel.textColor = CONTENTCOLOR;
+    tipLabel.textAlignment = NSTextAlignmentCenter;
+    tipLabel.text = @"您还没有加入任何一个班级，快来加入一个班级或创建一个自己的班级吧！";
+    [tipView addSubview:tipLabel];
+    
+    joinClassButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    joinClassButton.frame = CGRectMake(80, 80, 140, 40);
+    [joinClassButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+    [joinClassButton addTarget:self action:@selector(joinClass) forControlEvents:UIControlEventTouchUpInside];
+    [joinClassButton setTitle:@"加入班级" forState:UIControlStateNormal];
+    [tipView addSubview:joinClassButton];
+    
+    createClassButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    createClassButton.frame = CGRectMake(80, 130, 140, 40);
+    [createClassButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+    [createClassButton addTarget:self action:@selector(createClass) forControlEvents:UIControlEventTouchUpInside];
+    [createClassButton setTitle:@"创建班级" forState:UIControlStateNormal];
+    [tipView addSubview:createClassButton];
     
     classTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT - UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
     classTableView.delegate = self;
@@ -176,6 +197,8 @@ UIActionSheetDelegate>
 {
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = nil;
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:RECEIVENEWNOTICE object:nil];
 }
 
 #pragma mark - chatdelegate
@@ -244,7 +267,6 @@ UIActionSheetDelegate>
             NSDictionary *dict1 = [responseDict objectForKey:@"data"];
             if (![dict1 isEqual:[NSNull null]])
             {
-                haveNoClassLabel.hidden = YES;
                 classTableView.hidden = NO;
                 NSArray *array = [dict1 objectForKey:@"classes"];
                 for (int i=0; i<[array count]; ++i)
@@ -307,13 +329,11 @@ UIActionSheetDelegate>
                 }
                 if ([tmpArray count] <= 0)
                 {
-                    haveNoClassLabel.hidden = NO;
                     classTableView.hidden = YES;
                     [self getClassesByUser];
                 }
                 else
                 {
-                    haveNoClassLabel.hidden = YES;
                     classTableView.hidden = NO;
                     [classTableView reloadData];
                 }
@@ -392,7 +412,6 @@ UIActionSheetDelegate>
                 NSDictionary *dict1 = [responseDict objectForKey:@"data"];
                 if (![dict1 isEqual:[NSNull null]])
                 {
-                    haveNoClassLabel.hidden = YES;
                     classTableView.hidden = NO;
                     NSArray *array = [dict1 objectForKey:@"classes"];
                     [self updateDataBase:array];
@@ -463,12 +482,10 @@ UIActionSheetDelegate>
                     [FTWCache setObject:[responseString dataUsingEncoding:NSUTF8StringEncoding] forKey:key];
                     if ([tmpArray count] <= 0)
                     {
-                        haveNoClassLabel.hidden = NO;
                         classTableView.hidden = YES;
                     }
                     else
                     {
-                        haveNoClassLabel.hidden = YES;
                         classTableView.hidden = NO;
                     }
                     [classTableView reloadData];
@@ -478,7 +495,6 @@ UIActionSheetDelegate>
                 else
                 {
                     classTableView.hidden = YES;
-                    haveNoClassLabel.hidden = NO;
                 }
             }
             else
@@ -564,6 +580,14 @@ UIActionSheetDelegate>
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
+    if ([tmpArray count] == 0)
+    {
+        tipView.hidden = NO;
+    }
+    else if([tmpArray count] > 0)
+    {
+        tipView.hidden = YES;
+    }
     return [tmpArray count];
 }
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -775,20 +799,20 @@ UIActionSheetDelegate>
     NSString *s_id = [classDict objectForKey:@"s_id"];
     if ([s_id isEqual:[NSNull null]])
     {
-        s_id = @"未设置学校";
+        s_id = @"未指定学校";
     }
     [ud setObject:s_id forKey:@"schoolid"];
     NSString *s_name = [classDict objectForKey:@"s_name"];
     if ([s_name isEqual:[NSNull null]])
     {
-        s_name = @"未设置学校";
+        s_name = @"未指定学校";
     }
     [ud setObject:s_name forKey:@"schoolname"];
     
     NSString *s_level = [classDict objectForKey:@"s_level"];
     if ([s_level isEqual:[NSNull null]])
     {
-        s_level = @"未设置学校";
+        s_level = @"未指定学校";
     }
     [ud setObject:s_level forKey:@"schoollevel"];
     
@@ -878,16 +902,24 @@ UIActionSheetDelegate>
     {
         if (buttonIndex == 0)
         {
-            CreateClassViewController *createClass = [[CreateClassViewController alloc] init];
-            [self.navigationController pushViewController:createClass animated:YES];
+            [self createClass];
         }
         else if(buttonIndex == 1)
         {
-            SearchClassViewController *searchclassVC = [[SearchClassViewController alloc] init];
-            
-            [self.navigationController pushViewController:searchclassVC animated:YES];
+            [self joinClass];
         }
     }
+}
+
+-(void)joinClass
+{
+    SearchClassViewController *searchclassVC = [[SearchClassViewController alloc] init];
+    [self.navigationController pushViewController:searchclassVC animated:YES];
+}
+-(void)createClass
+{
+    CreateClassViewController *createClass = [[CreateClassViewController alloc] init];
+    [self.navigationController pushViewController:createClass animated:YES];
 }
 
 -(void)getcities
@@ -911,7 +943,6 @@ UIActionSheetDelegate>
             {
                 [Tools dealRequestError:responseDict fromViewController:nil];
             }
-            
         }];
         
         [request setFailedBlock:^{
@@ -926,7 +957,6 @@ UIActionSheetDelegate>
     {
         [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
     }
-
 }
 
 @end

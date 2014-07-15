@@ -86,7 +86,7 @@ UIActionSheetDelegate>
         logoY = 200;
     }
     
-    UIImage *logoImage = [UIImage imageNamed:@"logo"];
+    UIImage *logoImage = [UIImage imageNamed:@""];
     CGFloat imageH = logoImage.size.height-5;
     CGFloat imageW = logoImage.size.width-5;
     UIImageView *logoImageView = [[UIImageView alloc] init];

@@ -199,7 +199,7 @@ UIActionSheetDelegate>
         OperatDB *db = [[OperatDB alloc] init];
         NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
         int userAdmin = [[dict objectForKey:@"admin"] integerValue];
-        if (userAdmin == 2 && [byID isEqualToString:[Tools user_id]])
+        if ((userAdmin == 2 && [byID isEqualToString:[Tools user_id]]) || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
         {
             UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"删除", nil];
             ac.tag = 3333;
@@ -244,14 +244,14 @@ UIActionSheetDelegate>
             OperatDB *db = [[OperatDB alloc] init];
             NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
             int userAdmin = [[dict objectForKey:@"admin"] integerValue];
-            if (userAdmin == 2 && [byID isEqualToString:[Tools user_id]])
+            if ((userAdmin == 2 && [byID isEqualToString:[Tools user_id]]) || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
             {
                 if (buttonIndex == 0)
                 {
                     [self deleteNotice];
                 }
             }
-            else if (userAdmin == 2 && ![byID isEqualToString:[Tools user_id]])
+            else if ((userAdmin == 2 && ![byID isEqualToString:[Tools user_id]]) || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
             {
                 if (buttonIndex == 0)
                 {

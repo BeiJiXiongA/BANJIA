@@ -286,7 +286,22 @@ UITextFieldDelegate>
                 [ud setObject:[dict objectForKey:@"token"] forKey:CLIENT_TOKEN];
                 [ud setObject:[dict objectForKey:@"img_icon"] forKey:HEADERIMAGE];
                 [ud setObject:[dict objectForKey:@"r_name"] forKey:USERNAME];
-                [ud setObject:[dict objectForKey:@"opt"] forKey:@"useropt"];
+                
+                if ([[dict objectForKey:@"opt"] isKindOfClass:[NSDictionary class]])
+                {
+                    [ud setObject:[[dict objectForKey:@"opt"] objectForKey:NewNoticeAlert] forKey:NewNoticeAlert];
+                    [ud setObject:[[dict objectForKey:@"opt"] objectForKey:NewNoticeMotion] forKey:NewNoticeMotion];
+                    [ud setObject:[[dict objectForKey:@"opt"] objectForKey:NewDiaryAlert] forKey:NewDiaryAlert];
+                    [ud setObject:[[dict objectForKey:@"opt"] objectForKey:NewChatAlert] forKey:NewChatAlert];
+                }
+                else
+                {
+                    [ud setObject:@"1" forKey:NewNoticeAlert];
+                    [ud setObject:@"1" forKey:NewNoticeMotion];
+                    [ud setObject:@"1" forKey:NewDiaryAlert];
+                    [ud setObject:@"1" forKey:NewChatAlert];
+                }
+            
                 [ud synchronize];
                 NSString *name = [dict objectForKey:@"r_name"];
                 if ([name isEqualToString:ANONYMITY])

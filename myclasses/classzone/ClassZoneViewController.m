@@ -55,7 +55,7 @@ NameButtonDel>
     NSMutableArray *DongTaiArray;
     NSMutableArray *tmpArray;
     NSMutableDictionary *tmpDict;
-    int page;
+    NSString *page;
     NSString *monthStr;
     CGFloat bgImageViewHeight;
     
@@ -127,7 +127,7 @@ NameButtonDel>
     db = [[OperatDB alloc] init];
     
     self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-    page = 0;
+    page = @"";
     haveNew = NO;
     _reloading = NO;
     
@@ -175,10 +175,6 @@ NameButtonDel>
     noneDongTaiLabel.textAlignment = NSTextAlignmentCenter;
     noneDongTaiLabel.backgroundColor = [UIColor clearColor];
     
-    UITapGestureRecognizer *tapFresh = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(getDongTaiList)];
-    noneDongTaiLabel.userInteractionEnabled = YES;
-    [noneDongTaiLabel addGestureRecognizer:tapFresh];
-    
     classZoneTableView = [[UITableView alloc] init];
     if (fromClasses)
     {
@@ -193,10 +189,9 @@ NameButtonDel>
     classZoneTableView.dataSource = self;
     classZoneTableView.tag = 10000;
     classZoneTableView.backgroundColor = self.bgView.backgroundColor;
-//    classZoneTableView.backgroundColor = RGB(205, 205, 205, 1);;
+//    classZoneTableView.backgroundColor = RGB(205, 205, 205, 1);
     classZoneTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     classZoneTableView.showsVerticalScrollIndicator = NO;
-    
     [self.bgView addSubview:classZoneTableView];
     
     [classZoneTableView addSubview:noneDongTaiLabel];
@@ -270,15 +265,9 @@ NameButtonDel>
             DDLOG(@"commit diary responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                [Tools showTips:@"评论成功" toView:classZoneTableView];
-                page = 0;
+                page = @"";
                 monthStr = @"";
                 [self getDongTaiList];
-                
-//                if ([self.addComDel respondsToSelector:@selector(addComment:)])
-//                {
-//                    [self.addComDel addComment:YES];
-//                }
             }
             else
             {
@@ -362,7 +351,7 @@ NameButtonDel>
         [Tools showAlertView:@"您还没有进入这个班级，快去申请加入吧！" delegateViewController:self];
         return ;
     }
-    page =0;
+    page = @"";
     monthStr = @"";
     [self getCLassSettings];
 }
@@ -415,7 +404,7 @@ NameButtonDel>
     if (add)
     {
         haveNew = YES;
-        page = 0;
+        page = @"";
         monthStr = @"";
         [self getDongTaiList];
     }
@@ -457,10 +446,7 @@ NameButtonDel>
                 NSString *requestUrlStr = [NSString stringWithFormat:@"%@=%@=%@",GETSETTING,[Tools user_id],classID];
                 NSString *key = [requestUrlStr MD5Hash];
                 [FTWCache setObject:[responseString dataUsingEncoding:NSUTF8StringEncoding] forKey:key];
-                if (![responseString isEqualToString:settingCacheString])
-                {
-                    [self dealClassSetting:responseDict];
-                }
+                [self dealClassSetting:responseDict];
             }
             else
             {
@@ -1702,7 +1688,7 @@ NameButtonDel>
                 if ([[responseDict objectForKey:@"code"] intValue]== 1)
                 {
                     //                [Tools showTips:@"赞成功" toView:classTableView];
-                    page = 0;
+                    page = @"";
                     monthStr = @"";
                     [self getDongTaiList];
                     
@@ -1821,7 +1807,7 @@ NameButtonDel>
 {
     if (add)
     {
-        page = 0;
+        page = @"";
         monthStr = @"";
         [self getDongTaiList];
     }
@@ -1829,7 +1815,8 @@ NameButtonDel>
 
 -(void)getMoreDongTai
 {
-    page++;
+    int tmppage = [page intValue];
+    page = [NSString stringWithFormat:@"%d",++tmppage];
     [self getDongTaiList];
 }
 
@@ -1838,12 +1825,22 @@ NameButtonDel>
 {
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
-                                                                      @"token":[Tools client_token],
-                                                                      @"c_id":classID,
-                                                                      @"page":[NSNumber numberWithInt:page],
-                                                                      @"month":[monthStr length]>0?monthStr:@""
-                                                                      } API:GETDIARIESLIST];
+        NSDictionary *paraDict;
+        if ([page length] == 0)
+        {
+            paraDict = @{@"u_id":[Tools user_id],
+                         @"token":[Tools client_token],
+                         @"c_id":classID};
+        }
+        else
+        {
+            paraDict = @{@"u_id":[Tools user_id],
+                         @"token":[Tools client_token],
+                         @"c_id":classID,
+                         @"page":page,
+                         @"month":monthStr};
+        }
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:paraDict API:GETDIARIESLIST];
         [request setCompletionBlock:^{
             [Tools hideProgress:classZoneTableView];
             NSString *responseString = [request responseString];
@@ -1851,8 +1848,9 @@ NameButtonDel>
             DDLOG(@"diaries list responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                if (page == 0)
+                if ([page length]== 0)
                 {
+                    [tmpArray removeAllObjects];
                     [DongTaiArray removeAllObjects];
                     NSString *requestUrlStr = [NSString stringWithFormat:@"%@=%@=%@",GETDIARIESLIST,[Tools user_id],classID];
                     NSString *key = [requestUrlStr MD5Hash];
@@ -1871,14 +1869,14 @@ NameButtonDel>
                         classZoneTableView.hidden = NO;
                         [DongTaiArray addObjectsFromArray:array];
                     }
-                    page = [[[responseDict objectForKey:@"data"] objectForKey:@"page"] intValue];
+                    page = [NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"] objectForKey:@"page"] intValue]];
                     monthStr = [NSString stringWithFormat:@"%@",[[responseDict objectForKey:@"data"] objectForKey:@"month"]];
                 }
-                else if (page==0 && [monthStr length]==0 )
+                else if ([page length] == 0 && [monthStr length]==0 )
                 {
                     noneDongTaiLabel.hidden = NO;
                 }
-                else if([monthStr length]>0 && page>0)
+                else if([monthStr length] > 0 && [page integerValue]>0)
                 {
                     [Tools showAlertView:@"没有更多动态了" delegateViewController:nil];
                 }
@@ -2109,6 +2107,7 @@ NameButtonDel>
         {
             if ([[[responseDict objectForKey:@"data"] objectForKey:@"posts"] count] > 0)
             {
+                [tmpArray removeAllObjects];
                 classZoneTableView.hidden = NO;
                 NSArray *array = [[responseDict objectForKey:@"data"] objectForKey:@"posts"];
                 [self groupByTime:array];
@@ -2118,10 +2117,6 @@ NameButtonDel>
                 noneDongTaiLabel.hidden = NO;
             }
         }
-    }
-    else
-    {
-        [self getDongTaiList];
     }
 }
 @end

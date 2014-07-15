@@ -77,24 +77,28 @@
     }
     
     //将所有的字符位置存在list中
-    int nLen = [keyWord length];
-    for (int i = 0  ; i < nLen; i++) 
+//    int nLen = [keyWord length];
+//    for (int i = 0  ; i < nLen; i++) 
+//    {
+//        //按照所给的位置，长度，从keyword中截取子串
+//        NSString *strTemp = [keyWord substringWithRange:NSMakeRange(i, 1)];
+//        //获取单个关键字符在text中的位置
+//        NSString *strText = self.text;
+//        NSRange range = [strText rangeOfString:strTemp];
+//        //由于结构体不能直接存到NSArray中，所以要转换一下。
+//        NSValue *value = [NSValue valueWithRange:range];
+//        
+//        if (range.length > 0) 
+//        {
+//             [list addObject:value];
+//        }
+//       
+//    }
+    NSRange range = [self.text rangeOfString:keyWord];
+    if (range.length > 0)
     {
-        //按照所给的位置，长度，从keyword中截取子串
-        NSString *strTemp = [keyWord substringWithRange:NSMakeRange(i, 1)];
-        //获取单个关键字符在text中的位置
-        NSString *strText = self.text;
-        NSRange range = [strText rangeOfString:strTemp];
-        //由于结构体不能直接存到NSArray中，所以要转换一下。
-        NSValue *value = [NSValue valueWithRange:range];
-        
-        if (range.length > 0) 
-        {
-             [list addObject:value];
-        }
-       
+        [list addObject:[NSValue valueWithRange:range]];
     }
-    
 }
 
 

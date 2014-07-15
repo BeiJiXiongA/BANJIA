@@ -75,20 +75,23 @@ EditNameDone>
     
     imageUsed = @"";
     sex = [Tools user_sex];
-    birth = [Tools user_birth];
-    userName = [Tools user_name];
-    
-    if ([[Tools header_image] isKindOfClass:[NSString class]])
+    if ([Tools user_birth])
     {
-        headerImage = [UIImage imageNamed:[Tools header_image]];
+        birth = [Tools user_birth];
     }
+    else
+    {
+        birth = @"请设置生日";
+    }
+    
+    userName = [Tools user_name];
     
     cellNameArray = @[@"我的头像",@"姓名",@"生日",@"性别",@"手机号"];
     
     userInfoDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     
     bgImage = nil;
-    iconImage = nil;
+    headerImage = nil;
     
     db = [[OperatDB alloc] init];
     
@@ -169,7 +172,40 @@ EditNameDone>
 
 -(void)unShowSelfViewController
 {
+    if (bgImage || headerImage || ![userName isEqualToString:[Tools user_name]] || (![birth isEqualToString:[Tools user_birth]] && ![birth isEqualToString:@"请设置生日"]) || ![sex isEqualToString:[Tools user_sex]])
+    {
+        UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"" message:@"你要放弃以上更改么？" delegate:self cancelButtonTitle:@"放弃" otherButtonTitles:@"保存", nil];
+        al.tag = 1234;
+        [al show];
+        return;
+    }
     [self.navigationController popViewControllerAnimated:YES];
+}
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (alertView.tag == 1234)
+    {
+        if (buttonIndex == 0)
+        {
+            [self.navigationController popViewControllerAnimated:YES];
+        }
+        else if(buttonIndex == 1)
+        {
+            [self submitChange];
+        }
+    }
+    else if (alertView.tag == SEXTAG)
+    {
+        if (buttonIndex ==1)
+        {
+            sex = @"1";
+        }
+        else if(buttonIndex == 2)
+        {
+            sex = @"0";
+        }
+        [personInfoTableView reloadData];
+    }
 }
 
 -(void)submitChange
@@ -179,8 +215,7 @@ EditNameDone>
 //        [self dateDone];
 //    }
     
-    [self dateDone];
-    if (!bgImage && !iconImage && [((UITextField *)[personInfoTableView viewWithTag:4]).text isEqualToString:[Tools user_birth]])
+    if (!bgImage && !headerImage && [((UITextField *)[personInfoTableView viewWithTag:4]).text isEqualToString:[Tools user_birth]] && [userName isEqualToString:[Tools user_name]])
     {
         [Tools showAlertView:@"没做任何更改哦！" delegateViewController:nil];
         return;
@@ -323,15 +358,7 @@ EditNameDone>
     else if(indexPath.row == 2)
     {
         cell.nametf.hidden = NO;
-        if (birth)
-        {
-            cell.nametf.text = birth;
-        }
-        else
-        {
-            cell.nametf.text = @"请设置生日";
-        }
-        
+        cell.nametf.text = birth;
     }
     else if (indexPath.row == 3)
     {
@@ -409,23 +436,6 @@ EditNameDone>
     userName = name;
     [personInfoTableView reloadData];
 }
-
--(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-    if (alertView.tag == SEXTAG)
-    {
-        if (buttonIndex ==1)
-        {
-            sex = @"1";
-        }
-        else if(buttonIndex == 2)
-        {
-            sex = @"0";
-        }
-        [personInfoTableView reloadData];
-    }
-}
-
 
 -(void)editInfo:(UITapGestureRecognizer *)tap
 {
@@ -684,6 +694,7 @@ EditNameDone>
                     NSString *img_icon = [[responseDict objectForKey:@"data"] objectForKey:@"files"];
                     [[NSUserDefaults standardUserDefaults] setObject:img_icon forKey:TOPIMAGE];
                     [[NSUserDefaults standardUserDefaults] synchronize];
+                    bgImage = nil;
                 }
                 else if ([imageKey isEqualToString:@"img_icon"])
                 {
@@ -692,6 +703,7 @@ EditNameDone>
                     
                     [[NSUserDefaults standardUserDefaults] synchronize];
                     
+                    headerImage = nil;
                     [[NSNotificationCenter defaultCenter] postNotificationName:CHANGEHEADERICON object:nil];
                 }
             }

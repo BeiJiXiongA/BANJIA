@@ -180,7 +180,7 @@ StuDetailDelegate>
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
-    if ([[dict objectForKey:@"checked"] intValue] == 0)
+    if ([[dict objectForKey:@"checked"] intValue] == 0 || [titleString isEqualToString:@"新申请"])
     {
         ApplyInfoViewController *applyInfoViewController = [[ApplyInfoViewController alloc] init];
         applyInfoViewController.role = [dict objectForKey:@"role"];

@@ -9,9 +9,17 @@
 #import "InputTableBar.h"
 #import "Header.h"
 #define FaceViewTag  1000
+#define INPUTBUTTONH 35
+#define INPUTBUTTONT 2.5
 
 @implementation InputTableBar
-@synthesize inputTextView,inputBgView,face,returnFunDel,sendString;
+@synthesize inputTextView,
+inputBgView,
+face,
+returnFunDel,
+sendString,
+soundButton,
+moreButton;
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
@@ -34,6 +42,13 @@
         inputBgView.layer.anchorPoint = CGPointMake(0.5, 1);
         [self addSubview:inputBgView];
         
+//        soundButton = [UIButton buttonWithType:UIButtonTypeCustom];
+//        soundButton.frame = CGRectMake(10, 5, 40, 30);
+//    
+//        soundButton.backgroundColor = [UIColor greenColor];
+//        [inputBgView addSubview:soundButton];
+        
+        
         inputTextView = [[UITextView alloc] initWithFrame:CGRectMake(10, 5, 250, 30)];
         inputTextView .backgroundColor = [UIColor whiteColor];
         inputTextView.returnKeyType = UIReturnKeySend;
@@ -48,7 +63,7 @@
         [inputBgView addSubview:inputTextView];
         
         inputButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        inputButton.frame = CGRectMake(SCREEN_WIDTH-50, 5, 40, 30);
+        inputButton.frame = CGRectMake(SCREEN_WIDTH-50, INPUTBUTTONT, INPUTBUTTONH, INPUTBUTTONH);
         inputButton.backgroundColor = [UIColor clearColor];
         [inputButton setImage:[UIImage imageNamed:@"face"] forState:UIControlStateNormal];
         [inputButton addTarget:self action:@selector(changeInputType) forControlEvents:UIControlEventTouchUpInside];
@@ -382,7 +397,7 @@
 -(void)inputChange
 {
     [UIView animateWithDuration:0.2 animations:^{
-        inputButton.frame = CGRectMake(SCREEN_WIDTH-50, 5+inputTextViewSize.height-30, 40, 30);
+        inputButton.frame = CGRectMake(SCREEN_WIDTH-50, inputTextViewSize.height-30+INPUTBUTTONT, INPUTBUTTONH, INPUTBUTTONH);
         inputBgView.frame = CGRectMake(0, 0, SCREEN_WIDTH, inputTextViewSize.height+10);
         inputTextView.frame = CGRectMake(10, 5, 250 , inputTextViewSize.height);
     }];

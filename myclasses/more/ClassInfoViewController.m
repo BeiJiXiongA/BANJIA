@@ -307,7 +307,8 @@ SetClassInfoDel>
             cell.nameLabel.frame = CGRectMake(10, 10, 80, 27);
             
             cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-left, 10, 180, 27);
-            cell.objectsLabel.text = [NSString stringWithFormat:@"%@",[schoolLevelArray objectAtIndex:[[[NSUserDefaults standardUserDefaults] objectForKey:@"schoollevel"] integerValue]]];
+            NSString *schoollevel = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoollevel"];
+            cell.objectsLabel.text = [NSString stringWithFormat:@"%@",[schoolLevelArray objectAtIndex:[schoollevel integerValue]]];
         }
         
         else if(indexPath.row == 4)
@@ -354,7 +355,7 @@ SetClassInfoDel>
         OperatDB *db = [[OperatDB alloc] init];
         NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
         int userAdmin = [[dict objectForKey:@"admin"] integerValue];
-        if (userAdmin == 2)
+        if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] intValue] == 2)
         {
             cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         }
@@ -371,7 +372,7 @@ SetClassInfoDel>
         OperatDB *db = [[OperatDB alloc] init];
         NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
         int userAdmin = [[dict objectForKey:@"admin"] integerValue];
-        if (userAdmin == 2)
+        if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
         {
             SetClassInfoViewController *setClassInfoViewController = [[SetClassInfoViewController alloc] init];
             setClassInfoViewController.infoKey = @"name";
@@ -392,7 +393,7 @@ SetClassInfoDel>
         OperatDB *db = [[OperatDB alloc] init];
         NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
         int userAdmin = [[dict objectForKey:@"admin"] integerValue];
-        if (userAdmin == 2)
+        if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
         {
             SetClassInfoViewController *setClassInfoViewController = [[SetClassInfoViewController alloc] init];
             setClassInfoViewController.infoKey = @"info";
@@ -406,7 +407,7 @@ SetClassInfoDel>
         OperatDB *db = [[OperatDB alloc] init];
         NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
         int userAdmin = [[dict objectForKey:@"admin"] integerValue];
-        if (userAdmin == 2)
+        if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
         {
             SearchSchoolViewController  *searchSchoolInfoViewController = [[SearchSchoolViewController alloc] init];
             
@@ -423,7 +424,7 @@ SetClassInfoDel>
     OperatDB *db = [[OperatDB alloc] init];
     NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
     int userAdmin = [[dict objectForKey:@"admin"] integerValue];
-    if (userAdmin == 2)
+    if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
     {
         UIActionSheet *moreAction = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"班级设置", nil];
         moreAction.tag = MOREACTIONSHEETTAG;
@@ -510,7 +511,7 @@ SetClassInfoDel>
         OperatDB *db = [[OperatDB alloc] init];
         NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
         int userAdmin = [[dict objectForKey:@"admin"] integerValue];
-        if (userAdmin == 2)
+        if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
         {
             if (buttonIndex == 0)
             {
@@ -557,7 +558,7 @@ SetClassInfoDel>
     OperatDB *db = [[OperatDB alloc] init];
     NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
     int userAdmin = [[dict objectForKey:@"admin"] integerValue];
-    if (userAdmin == 2)
+    if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
     {
         UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"从相册选取",@"拍照", nil];
         ac.tag = TAKEPICTURETAG;

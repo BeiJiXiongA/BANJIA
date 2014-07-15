@@ -46,7 +46,7 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for cupstomization after application launch.
     
-    [[NSUserDefaults standardUserDefaults] setObject:@"0017" forKey:@"currentVersion"];
+    [[NSUserDefaults standardUserDefaults] setObject:@"0003" forKey:@"currentVersion"];
     [[NSUserDefaults standardUserDefaults] setObject:SCHEMERELEASE forKey:SCHEMETYPE];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
@@ -212,8 +212,6 @@
         }];
         
         [request setFailedBlock:^{
-            NSError *error = [request error];
-            DDLOG(@"error %@",error);
         }];
         [request startAsynchronous];
     }
@@ -263,8 +261,6 @@
         }];
         
         [request setFailedBlock:^{
-            NSError *error = [request error];
-            DDLOG(@"error %@",error);
         }];
         [request startAsynchronous];
     }
@@ -298,8 +294,6 @@
             }];
             
             [request setFailedBlock:^{
-                NSError *error = [request error];
-                DDLOG(@"error %@",error);
             }];
             [request startAsynchronous];
     }
@@ -355,7 +349,6 @@
     [APService handleRemoteNotification:userInfo];
     [[UIApplication sharedApplication] cancelAllLocalNotifications];
     [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
-//    [Tools showAlertView:[NSString stringWithFormat:@"%@",userInfo] delegateViewController:nil];
     DDLOG(@"push msg==%@",userInfo);
     if ([Tools user_id])
     {
@@ -394,9 +387,9 @@
             [chatDict setObject:fname forKey:@"fname"];
             [chatDict setObject:[Tools user_id] forKey:@"userid"];
             
-            if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"useropt"] isKindOfClass:[NSDictionary class]])
+            if ([[NSUserDefaults standardUserDefaults] objectForKey:NewChatAlert])
             {
-                if ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"useropt"] objectForKey:NewChatAlert] integerValue] == 1)
+                if ([[[NSUserDefaults standardUserDefaults] objectForKey:NewChatAlert] integerValue] == 1)
                 {
                     NSString *path = [[NSBundle mainBundle] pathForResource:@"msg"
                                                                      ofType:@"wav"];
@@ -462,13 +455,16 @@
         }
         else if ([[userInfo objectForKey:@"type"] isEqualToString:@"notice"])
         {
-            if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"useropt"] isKindOfClass:[NSDictionary class]])
+            if ([[NSUserDefaults standardUserDefaults] objectForKey:NewNoticeMotion])
             {
-                if ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"useropt"] objectForKey:NewNoticeMotion] integerValue] == 1)
+                if ([[[NSUserDefaults standardUserDefaults]objectForKey:NewNoticeMotion] integerValue] == 1)
                 {
                     AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
                 }
-                if ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"useropt"] objectForKey:NewNoticeAlert] integerValue] == 1)
+            }
+            if([[NSUserDefaults standardUserDefaults] objectForKey:NewNoticeAlert])
+            {
+                if ([[[NSUserDefaults standardUserDefaults] objectForKey:NewNoticeAlert] integerValue] == 1)
                 {
                     NSString *path = [[NSBundle mainBundle] pathForResource:@"msg"
                                                                      ofType:@"wav"];
@@ -477,8 +473,8 @@
                                                      , &soundID);
                     AudioServicesPlaySystemSound (soundID);
                 }
-                
             }
+            [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVENEWNOTICE object:nil];
             //            [self getClassInfo:userInfo];
         }
         else if([[userInfo objectForKey:@"type"] isEqualToString:@"f_apply"])

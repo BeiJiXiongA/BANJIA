@@ -58,7 +58,6 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    [[UIApplication sharedApplication] cancelAllLocalNotifications];
     [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
     self.backButton.hidden = YES;
     self.navigationBarView.hidden = YES;

@@ -54,8 +54,6 @@ ChatDelegate,
 MsgDelegate,
 DongTaiDetailAddCommentDelegate>
 {
-    UIView *tipView;
-    
     NSString *page;
     
     CGFloat commentHeight;
@@ -94,6 +92,7 @@ DongTaiDetailAddCommentDelegate>
     
     UIButton *addButton;
     
+    UIView *tipView;
     UIButton *joinClassButton;
     UIButton *createClassButton;
     UILabel *tipLabel;
@@ -147,6 +146,8 @@ DongTaiDetailAddCommentDelegate>
     self.titleLabel.hidden = YES;
     
     addOpen = NO;
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getHomeData) name:RECEIVENEWNOTICE object:nil];
     
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).ChatDelegate = self;
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = self;
@@ -288,6 +289,7 @@ DongTaiDetailAddCommentDelegate>
 {
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = nil;
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:RECEIVENEWNOTICE object:nil];
     inputTabBar.returnFunDel = nil;
 }
 
@@ -489,7 +491,6 @@ DongTaiDetailAddCommentDelegate>
             DDLOG(@"commit diary responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-//                [Tools showTips:@"评论成功" toView:classTableView];
                 [self getHomeData];
             }
             else

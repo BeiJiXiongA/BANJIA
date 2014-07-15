@@ -98,11 +98,12 @@
         infoTextView.backgroundColor = [UIColor clearColor];
         [self.bgView addSubview:infoTextView];
         
-        countLabel = [[UILabel alloc] initWithFrame:CGRectMake(infoTextView.frame.size.width+infoTextView.frame.origin.x-50, infoTextView.frame.size.height+infoTextView.frame.origin.y-50, 50, 20)];
+        countLabel = [[UILabel alloc] initWithFrame:CGRectMake(infoTextView.frame.size.width+infoTextView.frame.origin.x-50, infoTextView.frame.size.height+infoTextView.frame.origin.y-15, 50, 20)];
         countLabel.backgroundColor = [UIColor clearColor];
-        countLabel.font = [UIFont systemFontOfSize:12];
-        countLabel.textColor = TIMECOLOR;
-//        countLabel.text = [NSString stringWithFormat:@"%d/50",[infoStr length]];
+//        countLabel.font = [UIFont systemFontOfSize:12];
+        countLabel.font = [UIFont fontWithName:@"Futura" size:14];
+        countLabel.textColor = COMMENTCOLOR;
+        countLabel.text = [NSString stringWithFormat:@"%d/50",[infoStr length]];
         [self.bgView addSubview:countLabel];
     }
 }
@@ -130,26 +131,15 @@
         {
             placeHolderTextView.text = @"填写班级介绍";
         }
-//        countLabel.text = [NSString stringWithFormat:@"%d/50",[infoTextView.text length]];
-    }
-}
-
--(BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
-{
-    if ([textView.text length] > 50)
-    {
-        infoTextView.text = [infoTextView.text substringToIndex:50];
-        return NO;
-    }
-    return YES;
-}
-
--(void)textViewDidEndEditing:(UITextView *)textView
-{
-    if ([textView.text length] > 50)
-    {
-        infoTextView.text = [infoTextView.text substringToIndex:50];
-        [Tools showAlertView:@"请把班级介绍字数控制在50个字符内" delegateViewController:nil];
+        countLabel.text = [NSString stringWithFormat:@"%d/50",[infoTextView.text length]];
+        if ([textView.text length] > 50)
+        {
+            countLabel.textColor = [UIColor redColor];
+        }
+        else
+        {
+            countLabel.textColor = COMMENTCOLOR;
+        }
     }
 }
 

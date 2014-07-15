@@ -106,7 +106,7 @@
     [checkCodeButton setTitle:@"验证" forState:UIControlStateNormal];
     checkCodeButton.titleLabel.font = [UIFont boldSystemFontOfSize:13];
     [checkCodeButton addTarget:self action:@selector(verify) forControlEvents:UIControlEventTouchUpInside];
-    [self.bgView addSubview:checkCodeButton];
+//    [self.bgView addSubview:checkCodeButton];
     
     passwordTextField = [[MyTextField alloc] initWithFrame:CGRectMake(29, codeTextField.frame.origin.y+codeTextField.frame.size.height+4, SCREEN_WIDTH-58, 42)];
     passwordTextField.delegate = self;
@@ -132,11 +132,10 @@
     [self.bgView addSubview:verifyTextField];
     
     startButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    startButton.frame = CGRectMake(SCREEN_WIDTH/2-60, verifyTextField.frame.origin.y+verifyTextField.frame.size.height+20, 120, 30);
+    startButton.frame = CGRectMake(40, verifyTextField.frame.origin.y+verifyTextField.frame.size.height+20, SCREEN_WIDTH-80, 42);
     [startButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     [startButton setTitle:@"提交" forState:UIControlStateNormal];
-    [startButton addTarget:self action:@selector(start) forControlEvents:UIControlEventTouchUpInside];
-    startButton.enabled = NO;
+    [startButton addTarget:self action:@selector(verify) forControlEvents:UIControlEventTouchUpInside];
     [self.bgView addSubview:startButton];
     
 }
@@ -380,9 +379,9 @@
             {
                 user_id = [[responseDict objectForKey:@"data"] objectForKey:@"u_id"];
                 startButton.enabled = YES;
-                [Tools showAlertView:@"验证成功！" delegateViewController:nil];
                 getCodeButton.hidden = YES;
                 codeTextField.enabled = NO;
+                [self start];
             }
             else
             {

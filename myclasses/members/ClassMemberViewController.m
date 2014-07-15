@@ -1184,6 +1184,29 @@ MsgDelegate>
             [[XDTabViewController sharedTabViewController].navigationController pushViewController:studentDetail animated:YES];
 
         }
+        else if ([[dict objectForKey:@"role"] isEqualToString:@"teachers"])
+        {
+            MemberDetailViewController *memDetail = [[MemberDetailViewController alloc] init];
+            memDetail.teacherID = [dict objectForKey:@"uid"];
+            memDetail.teacherName = [dict objectForKey:@"name"];
+            memDetail.admin = YES;
+            if (![[dict objectForKey:@"title"] isEqual:[NSNull null]])
+            {
+                memDetail.title = [dict objectForKey:@"title"];
+            }
+            [[XDTabViewController sharedTabViewController].navigationController pushViewController:memDetail animated:YES];
+        }
+        else if ([[dict objectForKey:@"role"] isEqualToString:@"parents"])
+        {
+            ParentsDetailViewController *parentDetail = [[ParentsDetailViewController alloc] init];
+            parentDetail.parentID = [dict objectForKey:@"uid"];
+            parentDetail.parentName = [dict objectForKey:@"name"];
+            parentDetail.title = [dict objectForKey:@"title"];
+            parentDetail.headerImg = [dict objectForKey:@"img_icon"];
+            parentDetail.admin = NO;
+            parentDetail.role = [dict objectForKey:@"role"];
+            [[XDTabViewController sharedTabViewController].navigationController pushViewController:parentDetail animated:YES];
+        }
         [self cancelSearch];
         [self searchBarCancelButtonClicked:mySearchBar];
     }

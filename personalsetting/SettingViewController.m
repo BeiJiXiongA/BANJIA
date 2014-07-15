@@ -169,6 +169,7 @@ MFMailComposeViewControllerDelegate>
     
     cell.mySwitch.hidden = YES;
     cell.mySwitch.frame = CGRectMake( SCREEN_WIDTH-65, 7, 50, 30);
+    cell.mySwitch.tag = indexPath.row + 3333;
     cell.accessoryType = UITableViewCellAccessoryNone;
     cell.accessoryView = nil;
     
@@ -180,11 +181,12 @@ MFMailComposeViewControllerDelegate>
     {
         cell.contentLabel.text = [setArray1 objectAtIndex:indexPath.row];
         cell.mySwitch.hidden = NO;
+        NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
         if (indexPath.row == 0)
         {
-            if ([settingDict objectForKey:NewNoticeAlert])
+            if ([ud objectForKey:NewNoticeAlert])
             {
-                if ([[settingDict objectForKey:NewNoticeAlert] integerValue] == 0)
+                if ([[ud objectForKey:NewNoticeAlert] integerValue] == 0)
                 {
                     [cell.mySwitch isOn:NO];
                 }
@@ -200,9 +202,9 @@ MFMailComposeViewControllerDelegate>
         }
         else if(indexPath.row == 1)
         {
-            if ([settingDict objectForKey:NewNoticeMotion])
+            if ([ud objectForKey:NewNoticeMotion])
             {
-                if ([[settingDict objectForKey:NewNoticeMotion] integerValue] == 0)
+                if ([[ud objectForKey:NewNoticeMotion] integerValue] == 0)
                 {
                     [cell.mySwitch isOn:NO];
                 }
@@ -218,9 +220,9 @@ MFMailComposeViewControllerDelegate>
         }
         else if(indexPath.row == 2)
         {
-            if ([settingDict objectForKey:NewDiaryAlert])
+            if ([ud objectForKey:NewDiaryAlert])
             {
-                if ([[settingDict objectForKey:NewDiaryAlert] integerValue] == 0)
+                if ([[ud objectForKey:NewDiaryAlert] integerValue] == 0)
                 {
                     [cell.mySwitch isOn:NO];
                 }
@@ -237,9 +239,9 @@ MFMailComposeViewControllerDelegate>
         }
         else if (indexPath.row == 3)
         {
-            if ([settingDict objectForKey:NewChatAlert])
+            if ([ud objectForKey:NewChatAlert])
             {
-                if ([[settingDict objectForKey:NewChatAlert] integerValue] == 0)
+                if ([[ud objectForKey:NewChatAlert] integerValue] == 0)
                 {
                     [cell.mySwitch isOn:NO];
                 }
@@ -660,32 +662,52 @@ MFMailComposeViewControllerDelegate>
 }
 
 
--(void)switchchange:(UISwitch *)sw
+-(void)switchchange:(KLSwitch *)sw
 {
-    NSString *value = @"";
-    if ([sw isOn])
-    {
-        value = @"0";
-    }
-    else
-    {
-        value = @"1";
-    }
     if (sw.tag/1000 == 0)
     {
-        [self settingValue:value forKay:NewNoticeAlert];
+        if ([[[NSUserDefaults standardUserDefaults] objectForKey:NewNoticeAlert] intValue] == 0)
+        {
+            [self settingValue:@"1" forKay:NewNoticeAlert];
+        }
+        else
+        {
+            [self settingValue:@"0" forKay:NewNoticeAlert];
+        }
+        
     }
     else if(sw.tag/1000 == 1)
     {
-        [self settingValue:value forKay:NewNoticeMotion];
+        if ([[[NSUserDefaults standardUserDefaults] objectForKey:NewNoticeMotion] intValue] == 0)
+        {
+            [self settingValue:@"1" forKay:NewNoticeMotion];
+        }
+        else
+        {
+            [self settingValue:@"0" forKay:NewNoticeMotion];
+        }
     }
     else if(sw.tag/1000 == 2)
     {
-        [self settingValue:value forKay:NewDiaryAlert];
+        if ([[[NSUserDefaults standardUserDefaults] objectForKey:NewDiaryAlert] intValue] == 0)
+        {
+            [self settingValue:@"1" forKay:NewDiaryAlert];
+        }
+        else
+        {
+            [self settingValue:@"0" forKay:NewDiaryAlert];
+        }
     }
     else if(sw.tag/1000 == 3)
     {
-        [self settingValue:value forKay:NewChatAlert];
+        if ([[[NSUserDefaults standardUserDefaults] objectForKey:NewChatAlert] intValue] == 0)
+        {
+            [self settingValue:@"1" forKay:NewChatAlert];
+        }
+        else
+        {
+            [self settingValue:@"0" forKay:NewChatAlert];
+        }
     }
 }
 
@@ -704,10 +726,12 @@ MFMailComposeViewControllerDelegate>
             DDLOG(@"memberByClass responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                [settingDict setObject:value forKey:key];
-                [settingTableView reloadData];
+                [[NSUserDefaults standardUserDefaults] setObject:value forKey:key];
+                [[NSUserDefaults standardUserDefaults]synchronize];
+                
                 [Tools showTips:@"设置成功" toView:self.bgView];
-                DDLOG(@"setting opt==%@",settingDict);
+                
+                [settingTableView reloadData];
             }
             else
             {

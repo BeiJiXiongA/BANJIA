@@ -478,7 +478,7 @@ UIActionSheetDelegate>
 {
     NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
     int userAdmin = [[dict objectForKey:@"admin"] integerValue];
-    if (userAdmin == 2)
+    if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
     {
         UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"设置家长学生关系",@"设置发言权限",@"踢出班级",@"举报此人", nil];
         ac.tag = 3333;
@@ -498,7 +498,7 @@ UIActionSheetDelegate>
     {
         NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
         int userAdmin = [[dict objectForKey:@"admin"] integerValue];
-        if (userAdmin == 2)
+        if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
         {
             if (buttonIndex == 0)
             {

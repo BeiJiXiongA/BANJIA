@@ -61,7 +61,9 @@ EGORefreshTableDelegate>
     page = 0;
     month = @"";
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
-        
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getNotifications) name:RECEIVENEWNOTICE object:nil];
+    
     db = [[OperatDB alloc] init];
     
     if (fromMsg)
@@ -83,7 +85,7 @@ EGORefreshTableDelegate>
     
     NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
     int userAdmin = [[dict objectForKey:@"admin"] integerValue];
-    if (userAdmin == 2)
+    if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
     {
         [self.navigationBarView addSubview:addButton];
     }
@@ -143,6 +145,11 @@ EGORefreshTableDelegate>
         month = @"";
         [self getNotifications];
     }
+}
+
+-(void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:RECEIVENEWNOTICE object:nil];
 }
 
 #pragma mark - egodelegate

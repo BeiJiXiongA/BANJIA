@@ -106,7 +106,7 @@
         oriY = 20;
     }
     
-    UIImage *logoImage = [UIImage imageNamed:@"logo"];
+    UIImage *logoImage = [UIImage imageNamed:@""];
     CGFloat imageH = logoImage.size.height-5;
     CGFloat imageW = logoImage.size.width-5;
     

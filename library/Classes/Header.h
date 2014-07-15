@@ -224,6 +224,7 @@ return shared##className; \
 #define CHANGEHEADERICON    @"changeicon"
 #define RECEIVENEWMSG     @"receivenewmsg"
 #define RECEIVENEWMSGNOTATCHATVIEW   @"receivenewmsgnotatchatview"
+#define RECEIVENEWNOTICE   @"receivenewnotice"
 
 #pragma mark - aboutinvite
 #define InviteParentKey  @"item3"
