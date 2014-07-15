@@ -23,16 +23,22 @@
     UIPageControl *pageControl;
     NSDictionary *faceDict;
     
+    UIView *moreView;
+    
     CGFloat keyBoardHeight;
     
     CGSize inputTextViewSize;
     
     NSArray *faceArray;
+    
+    CGFloat inputWidth;
 }
 @property (nonatomic, strong) UITextView *inputTextView;
 @property (nonatomic, strong) UIView *inputBgView;
 @property (nonatomic, assign) BOOL face;
-@property (nonatomic, assign) BOOL onlyFace;
+@property (nonatomic, assign) BOOL more;
+@property (nonatomic, assign) BOOL sound;
+@property (nonatomic, assign) BOOL notOnlyFace;
 @property (nonatomic, strong) UIButton *soundButton;
 @property (nonatomic, strong) UIButton *moreButton;
 @property (nonatomic, assign) id<ReturnFunctionDelegate> returnFunDel;
@@ -41,6 +47,8 @@
 -(NSMutableString *)analyString:(NSString *)inputString;
 
 -(void)backKeyBoard;
+
+-(void)setLayout;
 //-(void)layOutWithKeyBoardHeight:(CGFloat)keyBoardHeight;
 @end
 
@@ -51,5 +59,7 @@
 -(void)changeInputType:(NSString *)changeType;
 
 -(void)changeInputViewSize:(CGSize)size;
+
+-(void)selectPic;
 
 @end

@@ -46,7 +46,7 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for cupstomization after application launch.
     
-    [[NSUserDefaults standardUserDefaults] setObject:@"0003" forKey:@"currentVersion"];
+    [[NSUserDefaults standardUserDefaults] setObject:@"0019" forKey:@"currentVersion"];
     [[NSUserDefaults standardUserDefaults] setObject:SCHEMERELEASE forKey:SCHEMETYPE];
     [[NSUserDefaults standardUserDefaults] synchronize];
     

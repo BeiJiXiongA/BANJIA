@@ -26,6 +26,7 @@
 #define Image_H 180
 #define additonalH  90
 #define MoreACTag   1000
+#define SelectPicTag 2000
 
 
 @interface ChatViewController ()<UITableViewDataSource,
@@ -168,6 +169,16 @@ ReturnFunctionDelegate>
         [self dealNewChatMsg:nil];
     }
     [self dealNewChatMsg:nil];
+    
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = self;
+    
+    inputTabBar = [[InputTableBar alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT-20, SCREEN_WIDTH, 40)];
+    inputTabBar.backgroundColor = [UIColor whiteColor];
+    inputTabBar.returnFunDel = self;
+    inputTabBar.notOnlyFace = YES;
+    inputTabBar.layer.anchorPoint = CGPointMake(0.5, 1);
+    [self.bgView addSubview:inputTabBar];
+    [inputTabBar setLayout];
 }
 
 -(void)moreClick
@@ -193,13 +204,6 @@ ReturnFunctionDelegate>
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = self;
-    
-    inputTabBar = [[InputTableBar alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT-20, SCREEN_WIDTH, 40)];
-    inputTabBar.backgroundColor = [UIColor whiteColor];
-    inputTabBar.returnFunDel = self;
-    inputTabBar.layer.anchorPoint = CGPointMake(0.5, 1);
-    [self.bgView addSubview:inputTabBar];
     
     [MobClick beginLogPageView:@"PageOne"];
     [self uploadLastViewTime];
@@ -208,16 +212,14 @@ ReturnFunctionDelegate>
 {
     [super viewWillDisappear:animated];
     [MobClick endLogPageView:@"PageOne"];
-    
-    inputTabBar.returnFunDel = nil;
-    [[NSNotificationCenter defaultCenter] removeObserver:inputTabBar];
-        
     [self uploadLastViewTime];
 }
 
 -(void)dealloc
 {
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
+    inputTabBar.returnFunDel = nil;
+    [[NSNotificationCenter defaultCenter] removeObserver:inputTabBar];
 }
 
 -(void)unShowSelfViewController
@@ -338,6 +340,18 @@ ReturnFunctionDelegate>
 }
 
 #pragma mark - returnfunctionDelegate
+-(void)selectPic
+{
+    [inputTabBar backKeyBoard];
+    if (iseditting)
+    {
+        [self backInput];
+    }
+    UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"从相册选取",@"拍照", nil];
+    ac.tag = SelectPicTag;
+    [ac showInView:self.bgView];
+}
+
 -(void)myReturnFunction
 {
     if (inputTabBar.inputTextView.text.length == 0)
@@ -457,12 +471,6 @@ ReturnFunctionDelegate>
 
 #pragma mark - takepicture
 
--(void)takePicture:(id)sender
-{
-    UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"拍照",@"从相册获取", nil];
-    [actionSheet showInView:self.bgView];
-}
-
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
     if (actionSheet.tag == MoreACTag)
@@ -490,9 +498,9 @@ ReturnFunctionDelegate>
             [self.navigationController pushViewController:reportVC animated:YES];
         }
     }
-    else
+    else if(actionSheet.tag == SelectPicTag)
     {
-        if (buttonIndex == 0)
+        if (buttonIndex == 1)
         {
             if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
             {
@@ -507,7 +515,7 @@ ReturnFunctionDelegate>
                 
             }];
         }
-        else if(buttonIndex == 1)
+        else if(buttonIndex == 0)
         {
             imagePickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
             [self presentViewController:imagePickerController animated:YES completion:nil];

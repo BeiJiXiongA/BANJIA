@@ -250,8 +250,10 @@ DongTaiDetailAddCommentDelegate>
     inputTabBar = [[InputTableBar alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT, SCREEN_WIDTH, 40)];
     inputTabBar.backgroundColor = [UIColor grayColor];
     inputTabBar.returnFunDel = self;
+    inputTabBar.notOnlyFace = NO;
     [self.bgView addSubview:inputTabBar];
     inputSize = CGSizeMake(250, 30);
+    [inputTabBar setLayout];
     
     
     tipView = [[UIView alloc] initWithFrame:CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT+90, SCREEN_WIDTH-20, 300)];

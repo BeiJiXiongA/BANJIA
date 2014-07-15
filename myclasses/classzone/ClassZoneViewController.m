@@ -228,8 +228,10 @@ NameButtonDel>
     inputTabBar = [[InputTableBar alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT, SCREEN_WIDTH, 40)];
     inputTabBar.backgroundColor = [UIColor grayColor];
     inputTabBar.returnFunDel = self;
+    inputTabBar.notOnlyFace = NO;
     [self.bgView addSubview:inputTabBar];
     inputSize = CGSizeMake(250, 30);
+    [inputTabBar setLayout];
     
     backTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(backInput)];
 }

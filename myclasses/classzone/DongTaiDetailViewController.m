@@ -124,7 +124,9 @@ UIActionSheetDelegate,NameButtonDel>
     inputTabBar = [[InputTableBar alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT-40, SCREEN_WIDTH, 40)];
     inputTabBar.backgroundColor = [UIColor grayColor];
     inputTabBar.returnFunDel = self;
+    inputTabBar.notOnlyFace = NO;
     [self.bgView addSubview:inputTabBar];
+    [inputTabBar setLayout];
     
     diaryDetailTableView.hidden = YES;
     
