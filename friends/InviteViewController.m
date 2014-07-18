@@ -93,13 +93,7 @@ UIAlertViewDelegate>
 	// Do any additional setup after loading the view.
     
     self.titleLabel.text = @"邀请";
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:FROMWHERE] isEqualToString:FROMCLASS])
-    {
-        self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-        self.view.backgroundColor = [UIColor blackColor];
-    }
-    
-    
+        
     schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
     className = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];

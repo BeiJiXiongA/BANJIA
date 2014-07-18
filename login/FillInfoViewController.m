@@ -72,9 +72,6 @@ UIActionSheetDelegate>
         self.titleLabel.text = @"注册成功";
     }
     
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-    self.view.backgroundColor = [UIColor blackColor];
-    
     mainScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT)];
     mainScrollView.backgroundColor = [UIColor clearColor];
     mainScrollView.showsVerticalScrollIndicator = NO;

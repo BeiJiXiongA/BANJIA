@@ -50,8 +50,6 @@ AddObjectDel>
 	// Do any additional setup after loading the view.
     
     self.titleLabel.text = @"设置班级角色";
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-    self.view.backgroundColor = [UIColor blackColor];
     
     db = [[OperatDB alloc] init];
     

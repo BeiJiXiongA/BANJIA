@@ -59,12 +59,6 @@ UITableViewDelegate>
     cityArray = [[NSMutableArray alloc] initWithCapacity:0];
     searchArray = [[NSMutableArray alloc] initWithCapacity:0];
     hotCityArray = [[NSMutableArray alloc] initWithCapacity:0];
-    
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:FROMWHERE] isEqualToString:FROMCLASS])
-    {
-        self.view.backgroundColor = [UIColor blackColor];
-        self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-    }
 
     
     NSArray *array = @[@"北京",@"天津",@"上海",@"广州",@"海南"];

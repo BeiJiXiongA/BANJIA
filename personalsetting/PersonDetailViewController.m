@@ -79,12 +79,6 @@ UIActionSheetDelegate,UIAlertViewDelegate>
     
 //    classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:FROMWHERE] isEqualToString:FROMCLASS])
-    {
-        self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-        self.view.backgroundColor = [UIColor blackColor];
-    }
-    
     qqnum = @"未绑定";
     birth = @"未设置";
     

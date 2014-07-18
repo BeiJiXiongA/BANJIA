@@ -90,13 +90,6 @@ ReturnFunctionDelegate>
         self.edgesForExtendedLayout =UIRectEdgeTop;
     }
     
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:FROMWHERE]isEqualToString:FROMCLASS])
-    {
-        self.view.backgroundColor = [UIColor blackColor];
-        self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-    }
-    
-        
     db = [[OperatDB alloc] init];
     
     currentSec = 0;
@@ -114,12 +107,6 @@ ReturnFunctionDelegate>
     }
     
     inputSize = CGSizeMake(250, 30);
-    
-    if (fromClass)
-    {
-        self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 20);
-        self.view.backgroundColor = [UIColor blackColor];
-    }
     
     fromImage = [Tools getImageFromImage:[UIImage imageNamed:@"f"] andInsets:UIEdgeInsetsMake(40, 40, 17, 40)];
     toImage = [Tools getImageFromImage:[UIImage imageNamed:@"t2"] andInsets:UIEdgeInsetsMake(35, 40, 17, 40)];

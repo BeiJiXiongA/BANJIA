@@ -65,9 +65,7 @@
     open = YES;
     
     relateString = @"";
-    
-    self.stateView.frame = CGRectMake(0, YSTART, 0, 0);
-    self.view.backgroundColor = [UIColor blackColor];
+
     
     className = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
     schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];

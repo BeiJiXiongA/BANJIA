@@ -30,12 +30,6 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:FROMWHERE] isEqualToString:FROMCLASS])
-    {
-        self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-        self.view.backgroundColor = [UIColor blackColor];
-    }
-    
     
     UILabel *tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(18, UI_NAVIGATION_BAR_HEIGHT+20, 180, 20)];
     

@@ -37,8 +37,6 @@
     // Do any additional setup after loading the view.
     
     self.titleLabel.text = @"其他方式登录";
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-    self.view.backgroundColor = [UIColor blackColor];
     
     reg = 0;
     UIButton *sinaLoginButton = [UIButton buttonWithType:UIButtonTypeCustom];

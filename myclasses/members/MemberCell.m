@@ -44,6 +44,7 @@
         
         headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 10, 40, 40)];
         headerImageView.backgroundColor = [UIColor whiteColor];
+        headerImageView.layer.contentsGravity = kCAGravityResizeAspectFill;
         [self.contentView addSubview:headerImageView];
         
         markView = [[UIImageView alloc] init];

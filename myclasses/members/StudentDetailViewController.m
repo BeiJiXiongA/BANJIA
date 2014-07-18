@@ -86,8 +86,6 @@ UIActionSheetDelegate>
     birth = @"未设置";
     
     self.titleLabel.text = @"个人信息";
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-    self.view.backgroundColor = [UIColor blackColor];
     
     pArray = [[NSMutableArray alloc] initWithCapacity:0];
     

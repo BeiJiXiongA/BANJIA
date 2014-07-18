@@ -74,22 +74,22 @@ UIActionSheetDelegate>
     {
         if (buttonIndex == 0)
         {
-            [self settingValue:@"1" forKay:ParentSendDiary];
+            [self settingValue:@"2" forKay:ParentSendDiary];
         }
         else if(buttonIndex == 1)
         {
-            [self settingValue:@"2" forKay:ParentSendDiary];
+            [self settingValue:@"1" forKay:ParentSendDiary];
         }
     }
     else if(actionSheet.tag == StudentSendDiaryTag)
     {
         if (buttonIndex == 0)
         {
-            [self settingValue:@"1" forKay:StudentSendDiary];
+            [self settingValue:@"2" forKay:StudentSendDiary];
         }
         else if(buttonIndex == 1)
         {
-            [self settingValue:@"2" forKay:StudentSendDiary];
+            [self settingValue:@"1" forKay:StudentSendDiary];
         }
     }
     else if (actionSheet.tag == StudentAccessTimeTag)
@@ -133,7 +133,7 @@ UIActionSheetDelegate>
     
     sectionArray = @[@{@"count":@"4",@"name":@"家长权限"},
                     @{@"count":@"4",@"name":@"学生权限"},
-                     @{@"count":@"4",@"name":@"管理员权限"},
+                     @{@"count":@"3",@"name":@"管理员权限"},
                      @{@"count": @"1",@"name":@"访客权限"}];
     
     rowsArray = @[@"允许家长评论",
@@ -146,11 +146,12 @@ UIActionSheetDelegate>
                   @"学生访问时间",
                   @"邀请其他成员",
                   @"审核成员申请",
-                  @"审核班级空间",
                   @"发布公告",
                   @"查看班级空间"];
     
-    settingKeysArray = [NSArray arrayWithObjects:@"p_com",@"p_t_f",@"p_s_d",@"p_i_m",@"s_t_f",@"s_s_d",@"s_i_m",@"s_v_t",@"a_i_m",@"a_c_a",@"a_c_d",@"a_s_n",@"o_v_d", nil];
+    settingKeysArray = [NSArray arrayWithObjects:@"p_com",@"p_t_f",@"p_s_d",@"p_i_m",@"s_t_f",@"s_s_d",@"s_i_m",@"s_v_t",@"a_i_m",@"a_c_a",@"a_s_n",@"o_v_d", nil];
+    
+//    settingKeysArray = [NSArray arrayWithObjects:ParentComment,ParentTeacherFriend,ParentSendDiary,ParentInviteMem,StudentTeacherFriend,StudentSendDiary,StudentInviteMem,StudentAccessTimeTag,AdminInviteMem,AdminCheckApply,AdminSendNotice,VisitorAccess, nil];
     
     timeArray = [[NSMutableArray alloc] initWithCapacity:0];
     for (int i=0; i<24; i++)
@@ -474,19 +475,6 @@ UIActionSheetDelegate>
         }
         else if (indexPath.row+row == 10)
         {
-            if ([[settingDict objectForKey:AdminCheckDiary] intValue] == 0)
-            {
-                cell.contentLabel.text = @"关";
-                [cell.switchView isOn:NO];
-            }
-            else if([[settingDict objectForKey:AdminCheckDiary] intValue] == 1)
-            {
-                cell.contentLabel.text = @"开";
-                [cell.switchView isOn:YES];
-            }
-        }
-        else if (indexPath.row+row == 11)
-        {
             if ([[settingDict objectForKey:AdminSendNotice] intValue] == 0)
             {
                 cell.contentLabel.text = @"关";
@@ -513,7 +501,7 @@ UIActionSheetDelegate>
                 {
                     parentsPublish = @"直接发布";
                 }
-                else if([[settingDict objectForKey:ParentSendDiary] intValue] == 0)
+                else if([[settingDict objectForKey:ParentSendDiary] intValue] == 1)
                 {
                     parentsPublish = @"不可发布";
                 }
@@ -527,7 +515,7 @@ UIActionSheetDelegate>
                 {
                     studentsPublish = @"直接发布";
                 }
-                else if([[settingDict objectForKey:StudentSendDiary] intValue] == 0)
+                else if([[settingDict objectForKey:StudentSendDiary] intValue] == 1)
                 {
                     studentsPublish = @"不可发布";
                 }
@@ -551,7 +539,7 @@ UIActionSheetDelegate>
                 }
                 cell.contentLabel.text = accessTime;
             }
-            else if(indexPath.row + row == 12)
+            else if(indexPath.row + row == 11)
             {
                 cell.contentLabel.hidden = NO;
                 cell.nameLabel.hidden = NO;
@@ -565,7 +553,7 @@ UIActionSheetDelegate>
                 }
                 cell.contentLabel.text = accessClassZone;
             }
-            else if(indexPath.row + row == 13)
+            else if(indexPath.row + row == 12)
             {
                 cell.button.hidden = NO;
                 cell.contentLabel.hidden = YES;
@@ -660,6 +648,10 @@ UIActionSheetDelegate>
             {
                 [settingDict setObject:value forKey:key];
                 [classSettingTableView reloadData];
+                
+                [[NSUserDefaults standardUserDefaults] setObject:settingDict forKey:@"set"];
+                [[NSUserDefaults standardUserDefaults] synchronize];
+                
                 [Tools showTips:@"设置成功" toView:self.bgView];
             }
             else

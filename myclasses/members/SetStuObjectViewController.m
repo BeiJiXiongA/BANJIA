@@ -51,8 +51,6 @@ AddObjectDel>
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"任命班干部";
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-    self.view.backgroundColor = [UIColor blackColor];
     
     db = [[OperatDB alloc] init];
     

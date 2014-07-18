@@ -242,15 +242,6 @@ int count = 0;
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"发布日记";
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-    if (fromCLass)
-    {
-        self.view.backgroundColor = [UIColor blackColor];
-    }
-    else
-    {
-        self.view.backgroundColor = [UIColor whiteColor];
-    }
     
     keyBoardHeight = 0.0f;
     imageW = 67.5;

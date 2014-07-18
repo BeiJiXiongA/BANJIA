@@ -45,8 +45,8 @@
     
     UIButton *setButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [setButton setTitle:@"提交" forState:UIControlStateNormal];
-    [setButton setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
     setButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
+    [setButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [setButton addTarget:self action:@selector(submit) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:setButton];
     if ([img_tcard length] > 10 || [img_id length] > 10)

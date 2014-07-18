@@ -42,11 +42,6 @@ StuDetailDelegate>
 	// Do any additional setup after loading the view.
     
     db = [[OperatDB alloc] init];
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:FROMWHERE] isEqualToString:FROMCLASS])
-    {
-        self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-        self.view.backgroundColor = [UIColor blackColor];
-    }
     
     self.titleLabel.text = titleString;
     

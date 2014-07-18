@@ -36,8 +36,6 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"设置发言权限";
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-    self.view.backgroundColor = [UIColor blackColor];
     
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     

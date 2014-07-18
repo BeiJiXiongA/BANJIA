@@ -67,6 +67,14 @@
         [_db alterTableAdd:@"admin" charLength:8 defaultValue:@"0" andTableName:CLASSMEMBERTABLE];
     }
     
+    NSArray *array2 = [_db findSetWithDictionary:@{} andTableName:CLASSMEMBERTABLE];
+    NSDictionary *dict2 = [array2 firstObject];
+    if (![[dict2 allKeys] containsObject:@"jianpin"])
+    {
+        [_db alterTableAdd:@"jianpin" charLength:8 defaultValue:@"" andTableName:CLASSMEMBERTABLE];
+        [_db alterTableAdd:@"quanpin" charLength:8 defaultValue:@"" andTableName:CLASSMEMBERTABLE];
+    }
+    
     if ([[_db findSetWithDictionary:@{} andTableName:CITYTABLE] count] <= 0)
     {
         NSString *filePath = [[NSBundle mainBundle] pathForResource:@"citys" ofType:@"plist"];
@@ -99,7 +107,7 @@
         DDLOG(@"manager start failed!");
     }
     
-    [MobClick startWithAppkey:@"533f919556240b5a200b0339" reportPolicy:SEND_INTERVAL channelId:nil];
+    [MobClick startWithAppkey:@"53c5f0ec56240be9ed07306e" reportPolicy:SEND_INTERVAL channelId:@"123"];
     NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
     [MobClick setAppVersion:version];
     
@@ -144,7 +152,6 @@
      UIRemoteNotificationTypeAlert
      |UIRemoteNotificationTypeBadge
      |UIRemoteNotificationTypeSound];
-    
     
     [APService setupWithOption:launchOptions];
     
@@ -333,7 +340,18 @@
 
 -(void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
 {
+//    [[NSUserDefaults standardUserDefaults] setObject:@"accept" forKey:@"receive"];
+//    [[NSUserDefaults standardUserDefaults] synchronize];
     [APService registerDeviceToken:deviceToken];
+}
+- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
+{
+//    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"receive"];
+//    [[NSUserDefaults standardUserDefaults] synchronize];
+//    if (![[NSUserDefaults standardUserDefaults] objectForKey:@"receive"])
+//    {
+        [Tools showAlertView:@"你还不能收到推送的消息，不能及时收到班级通知，也不能正常聊天，您可以到系统设置里打开限制！" delegateViewController:nil];
+//    }
 }
 
 - (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url

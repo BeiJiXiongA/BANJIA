@@ -36,9 +36,6 @@
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"任命班干部";
     
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-    self.view.backgroundColor = [UIColor blackColor];
-    
     DDLOG(@"name name %@",otherUserName);
     
     UILabel *label1 = [[UILabel alloc] initWithFrame:CGRectMake(20, UI_NAVIGATION_BAR_HEIGHT+20, SCREEN_WIDTH-40, 30)];

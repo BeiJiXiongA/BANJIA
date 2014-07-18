@@ -84,11 +84,6 @@ UIActionSheetDelegate,NameButtonDel>
 {
     [super viewWillAppear:animated];
     self.titleLabel.text = @"空间详情";
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:FROMWHERE] isEqualToString:FROMCLASS])
-    {
-        self.view.backgroundColor = [UIColor blackColor];
-        self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-    }
     
     faceViewHeight = 0;
     

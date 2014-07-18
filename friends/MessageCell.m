@@ -18,6 +18,7 @@
         // Initialization code
         
         headerImageView = [[UIImageView alloc] init];
+        headerImageView.layer.contentsGravity = kCAGravityResizeAspectFill;
         [self.contentView addSubview:headerImageView];
         
         chatBg = [[UIImageView alloc] init];

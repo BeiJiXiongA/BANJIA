@@ -60,8 +60,12 @@
 //    [self.navigationBar setBarTintColor:[UIColor whiteColor]];
     
     self.bgView = [[UIView alloc] init];
-    self.bgView.frame = CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    self.bgView.frame = CGRectMake(0, YSTART, SCREEN_WIDTH, SCREEN_HEIGHT);
 
+//    self.navigationBar.barStyle = UIBarStyleBlackTranslucent;
+//    UIImage *navImage = [UIImage imageNamed:@"navi_bg.png"];
+//    [self.navigationBar setBackgroundImage:navImage forBarMetrics:UIBarMetricsDefault];
+//    
     self.navigationBar.barStyle = UIBarStyleBlackTranslucent;
     self.navigationBar.backgroundColor = [UIColor redColor];
     self.navigationBar.hidden = YES;

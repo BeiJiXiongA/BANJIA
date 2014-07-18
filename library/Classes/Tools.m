@@ -219,7 +219,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 {
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     NSString *user_sex = [ud objectForKey:USERSEX];
-    return user_sex;
+    return [NSString stringWithFormat:@"%d",[user_sex integerValue]];
 }
 
 +(NSString *)device_os

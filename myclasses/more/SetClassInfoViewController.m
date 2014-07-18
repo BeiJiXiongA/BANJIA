@@ -34,8 +34,6 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-    self.view.backgroundColor = [UIColor blackColor];
     
     UIButton *inviteButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [inviteButton setTitle:@"保存" forState:UIControlStateNormal];

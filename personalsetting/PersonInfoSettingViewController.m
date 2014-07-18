@@ -172,7 +172,7 @@ EditNameDone>
 
 -(void)unShowSelfViewController
 {
-    if (bgImage || headerImage || ![userName isEqualToString:[Tools user_name]] || (![birth isEqualToString:[Tools user_birth]] && ![birth isEqualToString:@"请设置生日"]) || ![sex isEqualToString:[Tools user_sex]])
+    if ( bgImage || headerImage || ![userName isEqualToString:[Tools user_name]] || (![birth isEqualToString:[Tools user_birth]] && ![birth isEqualToString:@"请设置生日"]) || ![sex isEqualToString:[Tools user_sex]])
     {
         UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"" message:@"你要放弃以上更改么？" delegate:self cancelButtonTitle:@"放弃" otherButtonTitles:@"保存", nil];
         al.tag = 1234;
@@ -256,6 +256,11 @@ EditNameDone>
                 [[NSUserDefaults standardUserDefaults] setObject:userName forKey:USERNAME];
                 [[NSUserDefaults standardUserDefaults] synchronize];
                 [[NSNotificationCenter defaultCenter] postNotificationName:CHANGEHEADERICON object:nil];
+                
+                if (!headerImage)
+                {
+                    [self.navigationController popViewControllerAnimated:YES];
+                }
             }
             else
             {
@@ -312,6 +317,7 @@ EditNameDone>
     UITapGestureRecognizer *iconTag = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(editInfo:)];
     cell.iconImageView.userInteractionEnabled = YES;
     [cell.iconImageView addGestureRecognizer:iconTag];
+    
     cell.iconImageView.hidden = YES;
     cell.nametf.hidden = YES;
     
@@ -327,7 +333,8 @@ EditNameDone>
     {
         cell.iconImageView.hidden = NO;
         cell.iconImageView.frame = CGRectMake(SCREEN_WIDTH-80, 7, 40, 40);
-        cell.iconImageView.backgroundColor = [UIColor yellowColor];
+//        cell.iconImageView.backgroundColor = [UIColor yellowColor];
+//        cell.iconImageView.layer.contentsGravity = kCAGravityResizeAspectFill;
         if (headerImage)
         {
             [cell.iconImageView setImage:headerImage];
@@ -337,6 +344,7 @@ EditNameDone>
 //            [SetImageTools fillHeaderImage:cell.iconImageView withUserid:[Tools user_id] imageType:@"img_icon" defultImage:HEADERICON];
             [Tools fillImageView:cell.iconImageView withImageFromURL:[Tools header_image] andDefault:HEADERICON];
         }
+
         UITapGestureRecognizer *iconTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(selectoo)];
         cell.iconImageView.userInteractionEnabled = YES;
         [cell.iconImageView addGestureRecognizer:iconTap];
@@ -703,8 +711,13 @@ EditNameDone>
                     
                     [[NSUserDefaults standardUserDefaults] synchronize];
                     
-                    headerImage = nil;
+                    
                     [[NSNotificationCenter defaultCenter] postNotificationName:CHANGEHEADERICON object:nil];
+                }
+                if (headerImage)
+                {
+                    headerImage = nil;
+                    [self.navigationController popViewControllerAnimated:YES];
                 }
             }
             else

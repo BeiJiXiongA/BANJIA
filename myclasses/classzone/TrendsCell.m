@@ -43,6 +43,7 @@
         headerImageView = [[UIImageView alloc] init];
         headerImageView.frame = CGRectMake(12, 12, 43, 43);
         headerImageView.hidden = YES;
+        headerImageView.layer.contentsGravity = kCAGravityResizeAspectFill;
         [bgView addSubview:headerImageView];
         
         nameLabel = [[UILabel alloc] init];

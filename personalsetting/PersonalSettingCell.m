@@ -28,6 +28,7 @@
         headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 15, 50, 50)];
         headerImageView.backgroundColor = [UIColor clearColor];
         [headerImageView setImage:[UIImage imageNamed:HEADERBG]];
+        headerImageView.layer.contentsGravity = kCAGravityResizeAspectFill;
         [self.contentView addSubview:headerImageView];
         
         nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(70, 10, 60, 30)];

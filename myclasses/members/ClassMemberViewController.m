@@ -17,6 +17,7 @@
 #import "OperatDB.h"
 #import "InviteViewController.h"
 #import "InviteStuPareViewController.h"
+#import "ChineseToPinyin.h"
 
 @class AppDelegate;
 
@@ -332,15 +333,16 @@ MsgDelegate>
 -(void)searchWithText:(NSString *)searchContent
 {
     [searchResultArray removeAllObjects];
-    NSArray *classMemberArray = [_db findSetWithDictionary:@{@"classid":classID} andTableName:CLASSMEMBERTABLE];
+    
+    NSArray *classMemberArray = [_db fuzzyfindSetWithDictionary:@{@"classid":classID}
+                                                  andTableName:CLASSMEMBERTABLE
+                                            andFuzzyDictionary:@{@"name":mySearchBar.text,
+                                                                 @"jianpin":mySearchBar.text,
+                                                                 @"quanpin":mySearchBar.text}];
     for (int i=0; i<[classMemberArray count]; ++i)
     {
         NSDictionary *dict = [classMemberArray objectAtIndex:i];
-        NSString *name = [dict objectForKey:@"name"];
-        if ([name rangeOfString:searchContent].length > 0)
-        {
-            [searchResultArray addObject:dict];
-        }
+        [searchResultArray addObject:dict];
     }
     [searchTableView reloadData];
 }
@@ -509,7 +511,11 @@ MsgDelegate>
                     NSMutableDictionary *memDict = [[NSMutableDictionary alloc] initWithCapacity:0];
                     NSDictionary *dict = [allMembersArray objectAtIndex:i];
                     [memDict setObject:[dict objectForKey:@"_id"] forKey:@"uid"];
-                    [memDict setObject:[dict objectForKey:@"name"] forKey:@"name"];
+                    NSString *name = [dict objectForKey:@"name"];
+                    [memDict setObject:name forKey:@"name"];
+                    [memDict setObject:[ChineseToPinyin jianPinFromChiniseString:name] forKey:@"jianpin"];
+                    [memDict setObject:[ChineseToPinyin pinyinFromChiniseString:name] forKey:@"quanpin"];
+                    
                     [memDict setObject:classID forKey:@"classid"];
                     [memDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"checked"] integerValue]] forKey:@"checked"];
                     

@@ -69,11 +69,17 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:a]
 
 #define SCREEN_WIDTH   ([[UIScreen mainScreen] bounds].size.width)
 
+
 #ifdef YSTART
+
 #define SCREEN_HEIGHT  (([[UIScreen mainScreen] bounds].size.height)-20)
+
 #else
+
 #define SCREEN_HEIGHT  ([[UIScreen mainScreen] bounds].size.height)
+
 #endif
+
 
 #define Y_STARTPOINT (([[[UIDevice currentDevice] systemVersion] floatValue] < 7.0) ? 0.0f:64.0f)
 

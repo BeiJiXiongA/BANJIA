@@ -54,8 +54,6 @@
     
     sec = 60;
     
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-    self.view.backgroundColor = [UIColor blackColor];
     
     UILabel *label = [[UILabel alloc] init];
     label.frame = CGRectMake(SCREEN_WIDTH/2-130, UI_NAVIGATION_BAR_HEIGHT+50, 200, 20);

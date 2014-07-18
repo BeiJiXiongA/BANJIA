@@ -56,16 +56,7 @@ SelectClasses>
     
     self.titleLabel.text = @"发布通知";
     replay = 1;
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-    if (fromClass)
-    {
-        self.view.backgroundColor = [UIColor blackColor];
-    }
-    else
-    {
-         self.view.backgroundColor = [UIColor whiteColor];
-    }
-    
+        
     [self.backButton addTarget:self action:@selector(myBack) forControlEvents:UIControlEventTouchUpInside];
     
     objectsArray = [[NSArray alloc] initWithObjects:@"全体师生和家长",@"全体家长",@"全体老师",@"全体学生", nil];
