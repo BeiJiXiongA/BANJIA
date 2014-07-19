@@ -20,6 +20,9 @@
     UIImage *idImage;
     UIImage *componentImage;
     
+    int idDone;
+    int comDone;
+    
     NSMutableArray *imageArray;
 }
 @end
@@ -43,9 +46,12 @@
     self.titleLabel.text = @"教师认证";
     imageUsed = @"";
     
+    idDone = 0;
+    comDone = 0;
+    
     UIButton *setButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [setButton setTitle:@"提交" forState:UIControlStateNormal];
-    setButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
+    setButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [setButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [setButton addTarget:self action:@selector(submit) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:setButton];
@@ -56,22 +62,22 @@
     
     imageArray = [[NSMutableArray alloc] initWithCapacity:0];
     
-    UILabel *nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, UI_NAVIGATION_BAR_HEIGHT+20, 60, 30)];
+    UILabel *nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, UI_NAVIGATION_BAR_HEIGHT+20, 200, 30)];
     nameLabel.backgroundColor = [UIColor clearColor];
     nameLabel.font = [UIFont systemFontOfSize:16];
-    nameLabel.text = @"姓名：";
+    nameLabel.text = [NSString stringWithFormat:@"姓名：%@",[Tools user_name]];
     nameLabel.textColor = TITLE_COLOR;
     [self.bgView addSubview:nameLabel];
     
     nameTextField = [[MyTextField alloc] initWithFrame:CGRectMake(nameLabel.frame.origin.x+nameLabel.frame.size.width, nameLabel.frame.origin.y, 200, 35)];
     nameTextField.backgroundColor = [UIColor clearColor];
     nameTextField.delegate = self;
+    nameTextField.background = nil;
     nameTextField.enabled = NO;
     nameTextField.text = [Tools user_name];
-    nameTextField.background = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
     nameTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
     nameTextField.font = [UIFont systemFontOfSize:16];
-    [self.bgView addSubview:nameTextField];
+//    [self.bgView addSubview:nameTextField];
     
     UILabel *idCardLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, nameLabel.frame.size.height+nameLabel.frame.origin.y+20, 100, 30)];
     idCardLabel.backgroundColor = [UIColor clearColor];
@@ -293,12 +299,18 @@
                 if ([imgUsed isEqualToString:@"img_tcard"])
                 {
                     [competenceImageView setImage:image];
+                    comDone = 1;
                     [Tools showTips:@"教师资格证上传成功" toView:self.bgView];
                 }
                 else if ([imgUsed isEqualToString:@"img_id"])
                 {
                     [idCardImageView setImage:image];
+                    idDone = 1;
                     [Tools showTips:@"身份证上传成功" toView:self.bgView];
+                }
+                if (idDone == 1 && comDone == 1)
+                {
+                    [self.navigationController popViewControllerAnimated:YES];
                 }
             }
             else

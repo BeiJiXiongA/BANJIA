@@ -166,7 +166,7 @@ DongTaiDetailAddCommentDelegate>
     [self.navigationBarView addSubview:navButton];
     
     UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    moreButton.frame = CGRectMake(5, 4, 42, 34);
+    moreButton.frame = CGRectMake(5, self.backButton.frame.origin.y, 42, NAV_RIGHT_BUTTON_HEIGHT);
     [moreButton setImage:[UIImage imageNamed:@"icon_list"] forState:UIControlStateNormal];
     [moreButton addTarget:self action:@selector(moreOpen) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:moreButton];
@@ -174,7 +174,7 @@ DongTaiDetailAddCommentDelegate>
     addButton = [UIButton buttonWithType:UIButtonTypeCustom];
     addButton.backgroundColor = [UIColor clearColor];
     [addButton setImage:[UIImage imageNamed:@"icon_add"] forState:UIControlStateNormal];
-    addButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
+    addButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [addButton addTarget:self action:@selector(addButtonClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:addButton];
     
@@ -1187,7 +1187,9 @@ DongTaiDetailAddCommentDelegate>
             DDLOG(@"commit diary responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-//                [Tools showTips:@"赞成功" toView:classTableView];
+//                NSMutableDictionary *newDict = [[NSMutableDictionary alloc] initWithDictionary:dict];
+//                DDLOG(@"newdict %@",newDict);
+                [Tools showTips:@"赞成功" toView:classTableView];
                 [self getHomeData];
             }
             else

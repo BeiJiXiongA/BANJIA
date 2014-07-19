@@ -75,7 +75,6 @@ static XDTabViewController *_tabViewController = nil;
     self.tabBar.backgroundColor = [UIColor whiteColor];
     [self.bgView addSubview:_tabBar];
     
-    self.stateView.hidden = YES;
 
     label0 = [[UILabel alloc] initWithFrame:CGRectMake(50, SCREEN_HEIGHT-50, 20, 20)];
     label0.layer.cornerRadius = 10;
@@ -205,8 +204,8 @@ static XDTabViewController *_tabViewController = nil;
     
     self.preItemIndex = itemIndex;
     XDContentViewController* viewController = [_tabBarContents objectAtIndex:itemIndex];
-    viewController.view.frame = CGRectMake(0, -YSTART, SCREEN_WIDTH, SCREEN_HEIGHT - UI_TAB_BAR_HEIGHT+YSTART);
-    viewController.bgView.frame = CGRectMake(0, 0,SCREEN_WIDTH,SCREEN_HEIGHT - UI_TAB_BAR_HEIGHT);
+    viewController.view.frame = CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - UI_TAB_BAR_HEIGHT);
+    viewController.bgView.frame = CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - UI_TAB_BAR_HEIGHT);
     viewController.view.backgroundColor = [UIColor blackColor];
     viewController.bgView.backgroundColor = [UIColor whiteColor];
     viewController.view.tag = SELECTED_VIEW_CONTROLLER_TAG;

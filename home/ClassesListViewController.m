@@ -39,7 +39,7 @@ UITableViewDelegate>
     selectedClassids = [[NSMutableArray alloc] initWithCapacity:0];
     
     UIButton *doneButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    doneButton.frame = CGRectMake(SCREEN_WIDTH - 60, 4, 50, 36);
+    doneButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     doneButton.backgroundColor = [UIColor clearColor];
     [doneButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [doneButton addTarget:self action:@selector(doneClick) forControlEvents:UIControlEventTouchUpInside];

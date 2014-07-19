@@ -137,7 +137,7 @@
     
     UIButton *submitButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [submitButton setTitle:@"提交" forState:UIControlStateNormal];
-    submitButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
+    submitButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [submitButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [submitButton addTarget:self action:@selector(submitChange) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:submitButton];

@@ -36,7 +36,6 @@
     
     self.navigationBarView.hidden = YES;
     
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     self.view.backgroundColor = [UIColor blackColor];
     self.bgView.frame = CGRectMake(0, 0, SCREEN_WIDTH, self.view.frame.size.height);
     

@@ -89,7 +89,7 @@ UIActionSheetDelegate,UIAlertViewDelegate>
     db = [[OperatDB alloc] init];
     
     UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    moreButton.frame = CGRectMake(SCREEN_WIDTH-CORNERMORERIGHT, 6, 50, 32);
+    moreButton.frame = CGRectMake(SCREEN_WIDTH-CORNERMORERIGHT, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [moreButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
     [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:moreButton];

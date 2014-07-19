@@ -90,11 +90,9 @@ UIActionSheetDelegate,NameButtonDel>
     db = [[OperatDB alloc] init];
     
     inputSize = CGSizeMake(250, 30);
-    
-    self.bgView.frame = CGRectMake(0, YSTART, SCREEN_WIDTH, SCREEN_HEIGHT+200);
-    
+        
     moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    moreButton.frame = CGRectMake(SCREEN_WIDTH-CORNERMORERIGHT, 6, 50, 32);
+    moreButton.frame = CGRectMake(SCREEN_WIDTH-CORNERMORERIGHT, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [moreButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
     [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:moreButton];

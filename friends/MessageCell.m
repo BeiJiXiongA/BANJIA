@@ -9,7 +9,7 @@
 #import "MessageCell.h"
 
 @implementation MessageCell
-@synthesize messageTf,chatBg,button,timeLabel,headerImageView,joinlable;
+@synthesize messageTf,chatBg,button,timeLabel,headerImageView,joinlable,msgImageView,msgDict;
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
@@ -49,8 +49,21 @@
         timeLabel.font = [UIFont systemFontOfSize:12];
         timeLabel.textAlignment = NSTextAlignmentCenter;
         [self.contentView addSubview:timeLabel];
+        
+        msgImageView = [[UIImageView alloc] init];
+        [self.contentView addSubview:msgImageView];
     }
     return self;
+}
+
+-(void)setCell
+{
+    
+}
+
+-(void)cellHeight
+{
+    
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated

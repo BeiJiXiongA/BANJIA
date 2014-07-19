@@ -84,9 +84,7 @@ MsgDelegate>
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"班级成员";
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     updateGroup = @"";
     
     [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(manageClassMember) name:UPDATECLASSMEMBERLIST object:nil];
@@ -115,7 +113,7 @@ MsgDelegate>
     [inviteButton setTitle:@"邀请" forState:UIControlStateNormal];
     [inviteButton setBackgroundColor:[UIColor clearColor]];
     [inviteButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
-    inviteButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
+    inviteButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [inviteButton addTarget:self action:@selector(inviteClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:inviteButton];
     

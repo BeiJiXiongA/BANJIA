@@ -126,7 +126,6 @@ NameButtonDel>
     
     db = [[OperatDB alloc] init];
     
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     page = @"";
     haveNew = NO;
     _reloading = NO;
@@ -134,13 +133,12 @@ NameButtonDel>
     bgImageViewHeight = 150.0f;
     uncheckedCount = 0;
     
-    self.stateView.hidden = YES;
     
     tmpArray = [[NSMutableArray alloc] initWithCapacity:0];
     DongTaiArray = [[NSMutableArray alloc] initWithCapacity:0];
     
     addButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    addButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
+    addButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     addButton.hidden = YES;
     [addButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [addButton setTitle:@"发布" forState:UIControlStateNormal];

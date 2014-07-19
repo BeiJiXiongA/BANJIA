@@ -148,7 +148,7 @@ UITableViewDelegate>
     
     
     UIButton *addButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    addButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
+    addButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [addButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [addButton setTitle:@"创建" forState:UIControlStateNormal];
     [addButton addTarget:self action:@selector(createClass) forControlEvents:UIControlEventTouchUpInside];

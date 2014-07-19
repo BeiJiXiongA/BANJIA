@@ -57,7 +57,6 @@ EGORefreshTableDelegate>
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"班级通知";
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     page = 0;
     month = @"";
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
@@ -78,7 +77,7 @@ EGORefreshTableDelegate>
     unreadedArray = [[NSMutableArray alloc] initWithCapacity:0];
     
     UIButton *addButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    addButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
+    addButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [addButton addTarget:self action:@selector(addClick) forControlEvents:UIControlEventTouchUpInside];
     [addButton setImage:[UIImage imageNamed:@"icon_add"] forState:UIControlStateNormal];
     

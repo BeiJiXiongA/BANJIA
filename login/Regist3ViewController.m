@@ -38,7 +38,6 @@
 	// Do any additional setup after loading the view.
     
     self.titleLabel.text = @"填写密码";
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];

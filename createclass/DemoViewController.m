@@ -69,7 +69,7 @@
     [sendButton setTitle:@"完成" forState:UIControlStateNormal];
     sendButton.backgroundColor = [UIColor clearColor];
     [sendButton setBackgroundImage:[UIImage imageNamed:@"navbtn"] forState:UIControlStateNormal];
-    sendButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
+    sendButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [sendButton addTarget:self action:@selector(selectAreaDone) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:sendButton];
     

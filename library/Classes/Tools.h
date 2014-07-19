@@ -59,6 +59,7 @@
 + (ASIFormDataRequest *)postRequestWithDict:(NSDictionary *)parameterDict API:(NSString *)subUrl;
 + (ASIFormDataRequest *)getRequestWithDict:(NSDictionary *)parameterDict andHostUrl:(NSString *)hostUrl;
 + (ASIFormDataRequest *)upLoadImages:(NSArray *)imageArray withSubURL:(NSString *)subUrl andParaDict:(NSDictionary *)pareDict;
++ (ASIFormDataRequest *)upLoadImageFiles:(NSArray *)filesArray withSubURL:(NSString *)subUrl andParaDict:(NSDictionary *)pareDict;
 
 +(NSString *)getURLWithDict:(NSDictionary *)dict andUrl:(NSString *)url;
 +(void)showAlterView:(NSString *)alterContent;

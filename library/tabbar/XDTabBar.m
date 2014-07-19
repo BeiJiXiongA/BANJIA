@@ -83,7 +83,7 @@
             
             CGFloat padding = (itemSize.width - button.frame.size.width) / 2;
             button.frame = CGRectMake(horizontalOffset + padding,
-                                      UI_MAINSCREEN_HEIGHT - UI_TAB_BAR_HEIGHT,
+                                      SCREEN_HEIGHT - UI_TAB_BAR_HEIGHT,
                                       button.frame.size.width,
                                       UI_TAB_BAR_HEIGHT);
             

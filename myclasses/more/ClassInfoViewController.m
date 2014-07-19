@@ -72,7 +72,6 @@ SetClassInfoDel>
     // Do any additional setup after loading the view.
     
     self.titleLabel.text = @"班级信息";
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     classInfo = @"";
     regionStr = @"";
     
@@ -89,7 +88,7 @@ SetClassInfoDel>
     
     UIButton *inviteButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [inviteButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
-    inviteButton.frame = CGRectMake(SCREEN_WIDTH - CORNERMORERIGHT, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
+    inviteButton.frame = CGRectMake(SCREEN_WIDTH - CORNERMORERIGHT, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [inviteButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:inviteButton];
     

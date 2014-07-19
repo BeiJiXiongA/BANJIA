@@ -72,7 +72,7 @@ UISearchBarDelegate>
     
     UIButton *navCreateSchoolButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [navCreateSchoolButton setTitle:@"创建" forState:UIControlStateNormal];
-    navCreateSchoolButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
+    navCreateSchoolButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [navCreateSchoolButton addTarget:self action:@selector(createSchoolClick) forControlEvents:UIControlEventTouchUpInside];
     [navCreateSchoolButton setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
     [self.navigationBarView addSubview:navCreateSchoolButton];

@@ -32,12 +32,15 @@
     NSArray *faceArray;
     
     CGFloat inputWidth;
+    
+    
 }
 @property (nonatomic, strong) UITextView *inputTextView;
 @property (nonatomic, strong) UIView *inputBgView;
 @property (nonatomic, assign) BOOL face;
 @property (nonatomic, assign) BOOL more;
 @property (nonatomic, assign) BOOL sound;
+@property (nonatomic, assign) BOOL recording;
 @property (nonatomic, assign) BOOL notOnlyFace;
 @property (nonatomic, strong) UIButton *soundButton;
 @property (nonatomic, strong) UIButton *moreButton;
@@ -60,6 +63,6 @@
 
 -(void)changeInputViewSize:(CGSize)size;
 
--(void)selectPic;
+-(void)selectPic:(int)selectPicTag;
 
 @end

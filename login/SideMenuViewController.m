@@ -61,7 +61,6 @@
     [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
     self.backButton.hidden = YES;
     self.navigationBarView.hidden = YES;
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     self.view.backgroundColor = [UIColor whiteColor];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeIcon) name:@"changeicon" object:nil];
@@ -72,7 +71,7 @@
     
     self.bgView.backgroundColor = RGB(49, 54, 58, 1);
     
-    self.imageView = [[UIImageView alloc] initWithFrame:CGRectMake(150/2-43, 30, 86, 86)];
+    self.imageView = [[UIImageView alloc] initWithFrame:CGRectMake(150/2-43, YSTART+30, 86, 86)];
     self.imageView.backgroundColor = [UIColor whiteColor];
     self.imageView.layer.borderColor = [UIColor whiteColor].CGColor;
     self.imageView.layer.borderWidth = 2;
@@ -97,7 +96,7 @@
     menuNamesArray = [NSArray arrayWithObjects:@"   首页",@"   我的班级",@"   我的好友",@"   聊天记录",@"   个人信息", nil];
     menuIconArray = [NSArray arrayWithObjects:@"icon_home",@"icon_class",@"icon_friends",@"icon_chat",@"icon_setup", nil];
     
-    buttonTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 166, 180, [menuNamesArray count] * 40) style:UITableViewStylePlain];
+    buttonTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 166+YSTART, 180, [menuNamesArray count] * 40) style:UITableViewStylePlain];
     buttonTableView.delegate = self;
     buttonTableView.dataSource = self;
     buttonTableView.scrollEnabled = NO;

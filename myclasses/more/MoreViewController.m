@@ -125,10 +125,6 @@ UIActionSheetDelegate>
     inviteButton.frame = CGRectMake(SCREEN_WIDTH - CORNERMORERIGHT, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
     [inviteButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
     
-
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-    self.view.backgroundColor = [UIColor blackColor];
-    
     [self.backButton addTarget:self action:@selector(backClick) forControlEvents:UIControlEventTouchUpInside];
     
     sectionArray = @[@{@"count":@"4",@"name":@"家长权限"},

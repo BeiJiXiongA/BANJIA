@@ -11,16 +11,9 @@
 
 
 @interface XDContentViewController : UIViewController
-{
-    UIPanGestureRecognizer *panGestureRecognier;
-    
-}
 
 @property (nonatomic, strong) UILabel *titleLabel;
-@property (nonatomic, strong) UIView *shadowView;
-@property (nonatomic, weak)  id<XDViewControllerDelegate> lenghtDelegate;
 @property (nonatomic, strong) UIView *bgView;
-@property (nonatomic, strong) UIView *stateView;
 @property (nonatomic, strong) UIButton *backButton;
 @property (nonatomic, strong) UIImageView *navigationBarBg;
 @property (nonatomic, strong) UIView *navigationBarView;
@@ -29,7 +22,6 @@
 @property (nonatomic, strong) UILabel *unReadLabel;
 @property (nonatomic, strong) UIImageView *returnImageView;
 
-- (void) setRecognierEnable:(BOOL) isEnable;
 -(void)showSelfViewController: (UIViewController*) parentViewCon;
 - (void)unShowSelfViewController;
 

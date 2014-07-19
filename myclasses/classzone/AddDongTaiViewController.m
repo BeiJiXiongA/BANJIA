@@ -25,9 +25,6 @@
 #define NormalImageScale  2
 #define BigImageScale    2
 
-#define MAXHEIGHT     640
-#define MAXWIDTH      640
-
 #define ContentTextViewTag  1000
 #define LocationTextViewTag  2000
 
@@ -370,7 +367,7 @@ int count = 0;
     
     //提交
     emitButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    emitButton.frame = CGRectMake(SCREEN_WIDTH - 60, 4, 50, 36);
+    emitButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     emitButton.backgroundColor = [UIColor clearColor];
     [emitButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [emitButton addTarget:self action:@selector(emitClick) forControlEvents:UIControlEventTouchUpInside];

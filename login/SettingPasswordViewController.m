@@ -70,11 +70,11 @@
     phoneNumTextfield.keyboardType = UIKeyboardTypeNumberPad;
     phoneNumTextfield.clearButtonMode = UITextFieldViewModeWhileEditing;
     phoneNumTextfield.tag = 1000;
+    phoneNumTextfield.placeholder = @"手机号码";
     phoneNumTextfield.layer.cornerRadius = 5;
     phoneNumTextfield.background = nil;
     phoneNumTextfield.textColor = UIColorFromRGB(0x727171);
-    phoneNumTextfield.text = phoneNum;
-    phoneNumTextfield.enabled = NO;
+//    phoneNumTextfield.text = phoneNum;
     [self.bgView addSubview:phoneNumTextfield];
     
     UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
@@ -130,7 +130,7 @@
     [self.bgView addSubview:verifyTextField];
     
     startButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    startButton.frame = CGRectMake(40, verifyTextField.frame.origin.y+verifyTextField.frame.size.height+20, SCREEN_WIDTH-80, 42);
+    startButton.frame = CGRectMake(40, verifyTextField.frame.origin.y + verifyTextField.frame.size.height+20, SCREEN_WIDTH-80, 42);
     [startButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     [startButton setTitle:@"提交" forState:UIControlStateNormal];
     [startButton addTarget:self action:@selector(verify) forControlEvents:UIControlEventTouchUpInside];
@@ -155,6 +155,17 @@
 }
 -(void)start
 {
+    if ([phoneNumTextfield.text  length] == 0)
+    {
+        [Tools showAlertView:@"请输入手机号" delegateViewController:nil];
+        return ;
+    }
+    if (![Tools isPhoneNumber:phoneNumTextfield.text])
+    {
+        [Tools showAlertView:@"手机号格式不正确" delegateViewController:nil];
+        return ;
+    }
+    
     if ([codeTextField.text length] == 0)
     {
         [Tools showAlertView:@"请您填写验证码" delegateViewController:nil];

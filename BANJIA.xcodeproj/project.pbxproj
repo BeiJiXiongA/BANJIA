@@ -125,6 +125,7 @@
 		38800DF81959B3A50077E30B /* home_more@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38800DF71959B3A50077E30B /* home_more@2x.png */; };
 		3881A630195145C000DBA619 /* 640X960.png in Resources */ = {isa = PBXBuildFile; fileRef = 3881A62F195145C000DBA619 /* 640X960.png */; };
 		3881A632195145C900DBA619 /* 320X480.png in Resources */ = {isa = PBXBuildFile; fileRef = 3881A631195145C900DBA619 /* 320X480.png */; };
+		388207AA1978FF780033AAC0 /* RecordTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 388207A91978FF780033AAC0 /* RecordTools.m */; };
 		38938FC618EEF0260014F169 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38938FC518EEF0260014F169 /* Foundation.framework */; };
 		38938FC818EEF0260014F169 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38938FC718EEF0260014F169 /* CoreGraphics.framework */; };
 		38938FCA18EEF0260014F169 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38938FC918EEF0260014F169 /* UIKit.framework */; };
@@ -693,6 +694,8 @@
 		38800DF71959B3A50077E30B /* home_more@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "home_more@2x.png"; sourceTree = "<group>"; };
 		3881A62F195145C000DBA619 /* 640X960.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 640X960.png; sourceTree = "<group>"; };
 		3881A631195145C900DBA619 /* 320X480.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 320X480.png; sourceTree = "<group>"; };
+		388207A81978FF780033AAC0 /* RecordTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RecordTools.h; sourceTree = "<group>"; };
+		388207A91978FF780033AAC0 /* RecordTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RecordTools.m; sourceTree = "<group>"; };
 		38938FC218EEF0260014F169 /* BANJIA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BANJIA.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		38938FC518EEF0260014F169 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		38938FC718EEF0260014F169 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -1891,6 +1894,8 @@
 			children = (
 				3893915E18EEF1A30014F169 /* InputTableBar.h */,
 				3893915F18EEF1A30014F169 /* InputTableBar.m */,
+				388207A81978FF780033AAC0 /* RecordTools.h */,
+				388207A91978FF780033AAC0 /* RecordTools.m */,
 			);
 			path = emoji;
 			sourceTree = "<group>";
@@ -3254,6 +3259,7 @@
 				3899BC25196CF1760037C586 /* qrencode.c in Sources */,
 				3893924918EEF1A30014F169 /* ASIDataCompressor.m in Sources */,
 				387AABD91936FFF700657087 /* UIImage+GIF.m in Sources */,
+				388207AA1978FF780033AAC0 /* RecordTools.m in Sources */,
 				3893924218EEF1A30014F169 /* ALAsset+AGIPC.m in Sources */,
 				3893925A18EEF1A30014F169 /* ChineseToPinyin.m in Sources */,
 				38938FD818EEF0260014F169 /* AppDelegate.m in Sources */,

@@ -42,7 +42,7 @@
     [sendButton setTitle:@"保存" forState:UIControlStateNormal];
     sendButton.backgroundColor = [UIColor clearColor];
     [sendButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
-    sendButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
+    sendButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [sendButton addTarget:self action:@selector(submitPwdChange) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:sendButton];
 

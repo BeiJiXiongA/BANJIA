@@ -103,7 +103,7 @@ AddObjectDel>
     addObjectTextField.placeholder = @"添加其他班级角色";
     
     UIButton *submit = [UIButton buttonWithType:UIButtonTypeCustom];
-    submit.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
+    submit.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [submit setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [submit setTitle:@"提交" forState:UIControlStateNormal];
     [submit addTarget:self action:@selector(submit) forControlEvents:UIControlEventTouchUpInside];

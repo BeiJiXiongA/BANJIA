@@ -85,14 +85,14 @@ UIActionSheetDelegate>
     UIButton *setButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [setButton setTitle:@"设置" forState:UIControlStateNormal];
     [setButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
-    setButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
+    setButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [setButton addTarget:self action:@selector(settingClick) forControlEvents:UIControlEventTouchUpInside];
 //    [self.navigationBarView addSubview:setButton];
     
     [self.backButton setHidden:YES];
     
     UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    moreButton.frame = CGRectMake(5, 4, 42, 34);
+    moreButton.frame = CGRectMake(5, self.backButton.frame.origin.y, 42, 34);
     [moreButton setImage:[UIImage imageNamed:@"icon_list"] forState:UIControlStateNormal];
     [moreButton addTarget:self action:@selector(moreOpen) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:moreButton];
@@ -114,7 +114,7 @@ UIActionSheetDelegate>
     [self getAccount];
     
     UIButton *shareButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    shareButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
+    shareButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [shareButton setTitle:@"分享" forState:UIControlStateNormal];
     [shareButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [shareButton addTarget:self action:@selector(shareAPP:) forControlEvents:UIControlEventTouchUpInside];
@@ -358,7 +358,8 @@ UIActionSheetDelegate>
                 cell = [[RelatedCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:relateCell];
             }
             cell.relateButton.tag = indexPath.row+1000;
-            cell.relateButton.frame = CGRectMake(SCREEN_WIDTH-150, 17, 120, 26);
+            cell.relateButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentRight;
+            cell.relateButton.frame = CGRectMake(SCREEN_WIDTH-80, 17, 60, 26);
             cell.nametf.frame = CGRectMake(60, 15, 170, 30);
             cell.relateButton.titleLabel.font = [UIFont systemFontOfSize:16];
             [cell.relateButton setTitle:@"" forState:UIControlStateNormal];
@@ -366,60 +367,73 @@ UIActionSheetDelegate>
             cell.nametf.frame = CGRectMake(SCREEN_WIDTH-150, 17, 120, 26);
             if (indexPath.row == 1)
             {
-                cell.contentLabel.text = [NSString stringWithFormat:@"QQ账号"];
                 if ([[[NSUserDefaults standardUserDefaults] objectForKey:QQNICKNAME] length] >0)
                 {
-                    cell.nametf.frame = CGRectMake(SCREEN_WIDTH-150, 17, 120, 26);
-                    cell.nametf.text = [[NSUserDefaults standardUserDefaults] objectForKey:QQNICKNAME];
-                    
+                    cell.contentLabel.text = [NSString stringWithFormat:@"QQ账号(%@)",[[NSUserDefaults standardUserDefaults] objectForKey:QQNICKNAME]];
+                    cell.nametf.frame = CGRectMake(SCREEN_WIDTH - 150, 17, 120, 26);
+                    cell.nametf.text = @"";
+                    [cell.relateButton removeTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
+                    [cell.relateButton setTitle:@"解绑" forState:UIControlStateNormal];
+                    [cell.relateButton addTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
                 }
                 else
                 {
+                    cell.contentLabel.text = [NSString stringWithFormat:@"QQ账号"];
                     [cell.relateButton removeTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
                     [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-                    cell.nametf.text = @"未关联";
+                    [cell.relateButton setTitle:@"未关联" forState:UIControlStateNormal];
                 }
                 [cell.iconImageView setImage:[UIImage imageNamed:@"QQicon"]];
             }
             else if(indexPath.row == 2)
             {
-                cell.contentLabel.text = [NSString stringWithFormat:@"新浪账号"];
-                if ([[[NSUserDefaults standardUserDefaults] objectForKey:SINANICKNAME] length] > 0)
+                
+                if ([[[NSUserDefaults standardUserDefaults] objectForKey:SINANICKNAME] length] >0)
                 {
-                    cell.nametf.text = [[NSUserDefaults standardUserDefaults] objectForKey:SINANICKNAME];
-                    cell.nametf.frame = CGRectMake(SCREEN_WIDTH-150, 17, 120, 26);
-                    [cell.relateButton setTitle:@"" forState:UIControlStateNormal];
+                    cell.contentLabel.text = [NSString stringWithFormat:@"新浪账号(%@)",[[NSUserDefaults standardUserDefaults] objectForKey:SINANICKNAME]];
+                    cell.nametf.frame = CGRectMake(SCREEN_WIDTH - 150, 17, 120, 26);
+                    cell.nametf.text = @"";
+                    [cell.relateButton removeTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
+                    [cell.relateButton setTitle:@"解绑" forState:UIControlStateNormal];
+                    [cell.relateButton addTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
                 }
                 else
                 {
+                    cell.contentLabel.text = [NSString stringWithFormat:@"新浪账号"];
                     [cell.relateButton removeTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
                     [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-                    cell.nametf.text = @"未关联";
+                    [cell.relateButton setTitle:@"未关联" forState:UIControlStateNormal];
                 }
+                
                 [cell.iconImageView setImage:[UIImage imageNamed:@"sinaicon"]];
             }
             else if(indexPath.row == 3)
             {
-                cell.contentLabel.text = [NSString stringWithFormat:@"人人账号"];
-                if ([[[NSUserDefaults standardUserDefaults] objectForKey:RRNICKNAME] length] > 0)
+                
+                if ([[[NSUserDefaults standardUserDefaults] objectForKey:RRNICKNAME] length] >0)
                 {
-                    cell.nametf.text = [[NSUserDefaults standardUserDefaults] objectForKey:RRNICKNAME];
-                    [cell.relateButton setTitle:@"" forState:UIControlStateNormal];
-                    cell.nametf.frame = CGRectMake(SCREEN_WIDTH-150, 17, 120, 26);
+                    cell.contentLabel.text = [NSString stringWithFormat:@"人人账号(%@)",[[NSUserDefaults standardUserDefaults] objectForKey:RRNICKNAME]];
+                    cell.nametf.frame = CGRectMake(SCREEN_WIDTH - 150, 17, 120, 26);
+                    cell.nametf.text = @"";
+                    [cell.relateButton removeTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
+                    [cell.relateButton setTitle:@"解绑" forState:UIControlStateNormal];
+                    [cell.relateButton addTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
                 }
                 else
                 {
+                    cell.contentLabel.text = [NSString stringWithFormat:@"人人账号"];
                     [cell.relateButton removeTarget:self action:@selector(cancelAccount:) forControlEvents:UIControlEventTouchUpInside];
                     [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-                    cell.nametf.text = @"未关联";
+                    [cell.relateButton setTitle:@"未关联" forState:UIControlStateNormal];
                 }
+                
                 [cell.iconImageView setImage:[UIImage imageNamed:@"icon_rr"]];
             }
             cell.nametf.tag = indexPath.row+333;
             cell.nametf.font = [UIFont systemFontOfSize:16];
             cell.nametf.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
             cell.nametf.enabled = NO;
-            cell.contentLabel.frame = CGRectMake(cell.iconImageView.frame.size.width+cell.iconImageView.frame.origin.x+10, cell.iconImageView.frame.origin.y+4, 80, 30);
+            cell.contentLabel.frame = CGRectMake(cell.iconImageView.frame.size.width+cell.iconImageView.frame.origin.x+10, cell.iconImageView.frame.origin.y+4, 150, 30);
             cell.contentLabel.font = [UIFont systemFontOfSize:18];
             cell.nametf.returnKeyType = UIReturnKeyDone;
             cell.selectionStyle = UITableViewCellSelectionStyleGray;
@@ -663,34 +677,74 @@ static int loginID;
 
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
+    NSString *acctype = @"";
     if (buttonIndex == 1)
     {
         switch (alertView.tag-1000)
         {
-            case 0:
-            {
-                loginID = ShareTypeQQSpace;
-                [[NSUserDefaults standardUserDefaults] removeObjectForKey:QQNICKNAME];
-                break;
-            }
             case 1:
             {
-                loginID = ShareTypeSinaWeibo;
-                [[NSUserDefaults standardUserDefaults] removeObjectForKey:SINANICKNAME];
+                loginID = ShareTypeQQSpace;
+                acctype = @"qq";
+                [[NSUserDefaults standardUserDefaults] removeObjectForKey:QQNICKNAME];
                 break;
             }
             case 2:
             {
+                loginID = ShareTypeSinaWeibo;
+                acctype = @"sw";
+                [[NSUserDefaults standardUserDefaults] removeObjectForKey:SINANICKNAME];
+                break;
+            }
+            case 3:
+            {
                 loginID = ShareTypeRenren;
+                acctype = @"rr";
                 [[NSUserDefaults standardUserDefaults] removeObjectForKey:RRNICKNAME];
                 break;
             }
             default:
                 break;
         }
+        [[NSUserDefaults standardUserDefaults] synchronize];
         [ShareSDK cancelAuthWithType:loginID];
-        [personalSettiongTableView reloadData];
+        [self unBindAccount:acctype];
     }
+}
+
+-(void)unBindAccount:(NSString *)accountType
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"a_type":accountType,
+                                                                      } API:UNBINDACCOUNT];
+        [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"bind responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                [Tools showTips:@"成功解绑" toView:self.bgView];
+                [personalSettiongTableView reloadData];
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools hideProgress:self.bgView];
+        }];
+        [Tools showProgress:self.bgView];
+        [request startAsynchronous];
+    }
+
 }
 
 -(void)relateAccount:(NSString *)account accountType:(NSString *)accountType andName:(NSString *)name
@@ -713,22 +767,18 @@ static int loginID;
                 [Tools showTips:@"成功绑定" toView:self.bgView];
                 if ([accountType isEqualToString:@"sw"])
                 {
-                    ((UITextField *)[personalSettiongTableView viewWithTag:334]).text = sinaNickName;
                     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
                     [ud setObject:sinaNickName forKey:SINANICKNAME];
                     [ud synchronize];
                 }
                 else if([accountType isEqualToString:@"qq"])
                 {
-                    ((UITextField *)[personalSettiongTableView viewWithTag:333]).text = qqNickName;
                     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
-                    DDLOG(@"udnickname==%@",qqNickName);
                     [ud setObject:qqNickName forKey:QQNICKNAME];
                     [ud synchronize];
                 }
                 else if([accountType isEqualToString:@"rr"])
                 {
-                    ((UITextField *)[personalSettiongTableView viewWithTag:335]).text = rrNickName;
                     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
                     [ud setObject:rrNickName forKey:RRNICKNAME];
                     [ud synchronize];

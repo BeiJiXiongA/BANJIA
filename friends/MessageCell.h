@@ -15,5 +15,9 @@
 @property (nonatomic, strong) UIButton *button;
 @property (nonatomic, strong) UILabel *timeLabel;
 
+@property (nonatomic, strong) UIImageView *msgImageView;
+
 @property (nonatomic, strong) UILabel *joinlable;
+
+@property (nonatomic, strong) NSDictionary *msgDict;
 @end

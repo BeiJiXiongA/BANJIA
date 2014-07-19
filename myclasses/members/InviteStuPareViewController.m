@@ -72,7 +72,6 @@
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
     self.titleLabel.text = @"邀请学生家长";
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     
     NSString *tipStr = [NSString stringWithFormat:@"您邀请%@的",name];
     tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(27, UI_NAVIGATION_BAR_HEIGHT+20, 140, 30)];

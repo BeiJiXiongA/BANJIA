@@ -87,19 +87,22 @@ notOnlyFace;
         soundButton = [UIButton buttonWithType:UIButtonTypeCustom];
         soundButton.frame = CGRectMake(5, INPUTBUTTONT, INPUTBUTTONH, INPUTBUTTONH);
         soundButton.backgroundColor = [UIColor greenColor];
-//        [inputBgView addSubview:soundButton];
         
-        inputWidth = SCREEN_WIDTH-90;
+        [inputBgView addSubview:soundButton];
+        
+        
+        
+        inputWidth = SCREEN_WIDTH-130;
         
         inputTextView.frame = CGRectMake(45, INPUTBUTTONT, inputWidth, DEFAULTTEXTHEIGHT);
         
         moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        moreButton.frame = CGRectMake( 5, INPUTBUTTONT, INPUTBUTTONH, INPUTBUTTONH);
+        moreButton.frame = CGRectMake( SCREEN_WIDTH - 40, INPUTBUTTONT, INPUTBUTTONH, INPUTBUTTONH);
         [moreButton setImage:[UIImage imageNamed:@"moreinchat"] forState:UIControlStateNormal];
         [moreButton addTarget:self action:@selector(moreButtonClick) forControlEvents:UIControlEventTouchUpInside];
         [inputBgView addSubview:moreButton];
         
-        inputButton.frame = CGRectMake(SCREEN_WIDTH-40, INPUTBUTTONT, INPUTBUTTONH, INPUTBUTTONH);
+        inputButton.frame = CGRectMake(SCREEN_WIDTH-80, INPUTBUTTONT, INPUTBUTTONH, INPUTBUTTONH);
     }
     
     faceView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, FaceViewHeight+40, SCREEN_WIDTH, 0)];
@@ -114,11 +117,19 @@ notOnlyFace;
     moreView.backgroundColor = [UIColor whiteColor];
     [self addSubview:moreView];
     
-    UIButton *picButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    picButton.backgroundColor = [UIColor blackColor];
-    picButton.frame = CGRectMake(10, 10, 60, 60);
-    [picButton addTarget:self action:@selector(selectImage) forControlEvents:UIControlEventTouchUpInside];
-    [moreView addSubview:picButton];
+    UIButton *albumButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    albumButton.backgroundColor = [UIColor blackColor];
+    albumButton.frame = CGRectMake(10, 10, 60, 60);
+    albumButton.tag = AlbumTag;
+    [albumButton addTarget:self action:@selector(selectImage:) forControlEvents:UIControlEventTouchUpInside];
+    [moreView addSubview:albumButton];
+    
+    UIButton *photoButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    photoButton.backgroundColor = [UIColor yellowColor];
+    photoButton.frame = CGRectMake(80, 10, 60, 60);
+    photoButton.tag = TakePhotoTag;
+    [photoButton addTarget:self action:@selector(selectImage:) forControlEvents:UIControlEventTouchUpInside];
+    [moreView addSubview:photoButton];
     
     
     faceDict = [NSString emojiAliases];
@@ -407,11 +418,11 @@ notOnlyFace;
     }
 }
 
--(void)selectImage
+-(void)selectImage:(UIButton *)button
 {
-    if ([self.returnFunDel respondsToSelector:@selector(selectPic)])
+    if ([self.returnFunDel respondsToSelector:@selector(selectPic:)])
     {
-        [self.returnFunDel selectPic];
+        [self.returnFunDel selectPic:button.tag];
     }
 }
 

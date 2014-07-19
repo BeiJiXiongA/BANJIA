@@ -144,7 +144,7 @@ SelectClasses>
     
     sendButton = [UIButton buttonWithType:UIButtonTypeCustom];
     sendButton.backgroundColor = [UIColor clearColor];
-    sendButton.frame = CGRectMake(SCREEN_WIDTH-60, 6, 50, 35);
+    sendButton.frame = CGRectMake(SCREEN_WIDTH-60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [sendButton setTitle:@"发布" forState:UIControlStateNormal];
     [sendButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [sendButton addTarget:self action:@selector(sendnotice) forControlEvents:UIControlEventTouchUpInside];
@@ -301,8 +301,6 @@ SelectClasses>
             DDLOG(@"addNoti===%@",responseString);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                [self readNotice:[responseDict objectForKey:@"data"]  andClassid:classid];
-                
                 if ([self.updel respondsToSelector:@selector(update:)])
                 {
                     [self.updel update:YES];

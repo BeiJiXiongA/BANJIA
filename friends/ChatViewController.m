@@ -98,7 +98,7 @@ ReturnFunctionDelegate>
     faceViewHeight = 0;
     
     UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    moreButton.frame = CGRectMake(SCREEN_WIDTH-CORNERMORERIGHT, 6, 50, 32);
+    moreButton.frame = CGRectMake(SCREEN_WIDTH-CORNERMORERIGHT, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [moreButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
     [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
     if (![toID isEqualToString:OurTeamID])
@@ -128,7 +128,7 @@ ReturnFunctionDelegate>
    
     edittingTableView = NO;
     editButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    editButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, UI_NAVIGATION_BAR_HEIGHT - 10);
+    editButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [editButton setTitle:@"编辑" forState:UIControlStateNormal];
     editButton.backgroundColor = [UIColor clearColor];
     [editButton setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
@@ -327,16 +327,33 @@ ReturnFunctionDelegate>
 }
 
 #pragma mark - returnfunctionDelegate
--(void)selectPic
+-(void)selectPic:(int)selectPicTag
 {
     [inputTabBar backKeyBoard];
     if (iseditting)
     {
         [self backInput];
     }
-    UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"从相册选取",@"拍照", nil];
-    ac.tag = SelectPicTag;
-    [ac showInView:self.bgView];
+    if (selectPicTag == TakePhotoTag)
+    {
+        if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
+        {
+            imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
+        }
+        else
+        {
+            UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"" message:@"相机不可用！" delegate:self cancelButtonTitle:@"确定" otherButtonTitles: nil];
+            [al show];
+        }
+        [self presentViewController:imagePickerController animated:YES completion:^{
+            
+        }];
+    }
+    else if(selectPicTag == AlbumTag)
+    {
+        imagePickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+        [self presentViewController:imagePickerController animated:YES completion:nil];
+    }
 }
 
 -(void)myReturnFunction
@@ -487,26 +504,6 @@ ReturnFunctionDelegate>
     }
     else if(actionSheet.tag == SelectPicTag)
     {
-        if (buttonIndex == 1)
-        {
-            if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
-            {
-                imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
-            }
-            else
-            {
-                UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"" message:@"相机不可用！" delegate:self cancelButtonTitle:@"确定" otherButtonTitles: nil];
-                [al show];
-            }
-            [self presentViewController:imagePickerController animated:YES completion:^{
-                
-            }];
-        }
-        else if(buttonIndex == 0)
-        {
-            imagePickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-            [self presentViewController:imagePickerController animated:YES completion:nil];
-        }
     }
 }
 
@@ -599,16 +596,100 @@ ReturnFunctionDelegate>
 -(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
     [imagePickerController dismissViewControllerAnimated:YES completion:^{
-//        UIImage *originaImage = [info objectForKey:UIImagePickerControllerOriginalImage];
-//        CGSize size = [self sizeWithImage:originaImage];
-//        UIImage *image = [Tools thumbnailWithImageWithoutScale:originaImage size:CGSizeMake(size.width*3, size.height*3)];
-//        NSData *imageData = UIImagePNGRepresentation(image);
-        
-//        NSString *imageStr = [NSString stringWithFormat:@"imag%@",[Base64 stringByEncodingData:imageData]];
-        
+        UIImage *originaImage = [info objectForKey:UIImagePickerControllerOriginalImage];
+        originaImage = [self getNormalImageFromImage:originaImage];
+        [self sendImage:originaImage];
     }];
     
 }
+
+-(void)sendImage:(UIImage *)image
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools upLoadImageFiles:[NSArray arrayWithObject:image]
+                                                 withSubURL:UPLOADCHATFILE
+                                                andParaDict:@{@"u_id":[Tools user_id],                                                                                                                                    @"token":[Tools client_token]}];
+        [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"upload image responsedict %@",responseDict);
+            
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                [self sendMsgWithString:[[responseDict objectForKey:@"data"] objectForKey:@"files"]];
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools hideProgress:self.bgView];
+            
+        }];
+        [Tools showProgress:self.bgView];
+        [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
+}
+
+-(UIImage *)getNormalImageFromImage:(UIImage *)originalImage
+{
+    //    a307741613dbc06cd926be027a15298364712d59
+    CGFloat imageHeight = 0.0f;
+    CGFloat imageWidth = 0.0f;
+    if (originalImage.size.width > originalImage.size.height)
+    {
+        if (originalImage.size.height > MAXHEIGHT)
+        {
+            imageHeight = MAXHEIGHT;
+            imageWidth = originalImage.size.width*imageHeight/originalImage.size.height;
+        }
+        else
+        {
+            imageHeight = originalImage.size.height;
+            imageWidth = originalImage.size.width;
+        }
+    }
+    else if(originalImage.size.width < originalImage.size.height)
+    {
+        if (originalImage.size.width > MAXWIDTH)
+        {
+            imageWidth = MAXWIDTH;
+            imageHeight = originalImage.size.height*imageWidth/originalImage.size.width;
+        }
+        else
+        {
+            imageHeight = originalImage.size.height;
+            imageWidth = originalImage.size.width;
+        }
+    }
+    else
+    {
+        if (originalImage.size.width > MAXWIDTH)
+        {
+            imageWidth = MAXWIDTH;
+            imageHeight = MAXWIDTH;
+        }
+        else
+        {
+            imageHeight = originalImage.size.height;
+            imageWidth = originalImage.size.width;
+        }
+    }
+    DDLOG(@"image direction %d",originalImage.imageOrientation);
+    originalImage = [Tools thumbnailWithImageWithoutScale:originalImage size:CGSizeMake(imageWidth, imageHeight)];
+    return originalImage;
+}
+
 
 #pragma mark - sizeabout
 -(CGSize)sizeWithImage:(UIImage *)image
@@ -680,6 +761,55 @@ ReturnFunctionDelegate>
     edittingTableView = !edittingTableView;
 }
 
+-(CGSize)getSizeFromImage:(UIImage *)image
+{
+    CGFloat maxH = 60;
+    CGFloat maxW = 80;
+    CGFloat imageWidth = 0;
+    CGFloat imageHeight = 0;
+    if (image.size.width > image.size.height)
+    {
+        if (image.size.height > maxH)
+        {
+            imageHeight = maxH;
+            imageWidth = image.size.width*imageHeight/image.size.height;
+        }
+        else
+        {
+            imageHeight = image.size.height;
+            imageWidth = image.size.width;
+        }
+    }
+    else if(image.size.width < image.size.height)
+    {
+        if (image.size.width > maxW)
+        {
+            imageWidth = maxW;
+            imageHeight = image.size.height*imageWidth/image.size.width;
+        }
+        else
+        {
+            imageHeight = image.size.height;
+            imageWidth = image.size.width;
+        }
+    }
+    else
+    {
+        if (image.size.width > maxW)
+        {
+            imageWidth = maxW;
+            imageHeight = maxW;
+        }
+        else
+        {
+            imageHeight = image.size.height;
+            imageWidth = image.size.width;
+        }
+    }
+    CGSize size = CGSizeMake(imageWidth, imageHeight);
+    return size;
+}
+
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     return [messageArray count];
@@ -688,7 +818,8 @@ ReturnFunctionDelegate>
 {
     CGFloat rowHeight = 0;
     NSDictionary *dict = [messageArray objectAtIndex:indexPath.row];
-    CGSize size = [self sizeWithText:[[[messageArray objectAtIndex:indexPath.row] objectForKey:@"content"] emojizedString]];
+    NSString *msgContent = [[messageArray objectAtIndex:indexPath.row] objectForKey:@"content"];
+    CGSize size = [self sizeWithText:[msgContent emojizedString]];
     rowHeight = size.height+20;
     if ([[dict objectForKey:@"content"] rangeOfString:@"$!#"].length >0)
     {
@@ -697,6 +828,12 @@ ReturnFunctionDelegate>
         msgContent = [msgContent substringFromIndex:range.location+range.length];
         size = [self sizeWithText:[msgContent emojizedString]];
         rowHeight = size.height+40;
+    }
+    if ([[msgContent pathExtension] isEqualToString:@"png"] || [[msgContent pathExtension] isEqualToString:@"jpg"])
+    {
+        NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/%@",IMAGEURL,msgContent]]];
+        UIImage *msgImage = [UIImage imageWithData:imageData];
+        rowHeight = [self getSizeFromImage:msgImage].height;
     }
     if (([[dict objectForKey:@"time"] integerValue] - currentSec) > 60*3  || indexPath.row == 0)
     {
@@ -719,7 +856,8 @@ ReturnFunctionDelegate>
     NSDictionary *dict = [messageArray objectAtIndex:indexPath.row];
     CGFloat messageBgY = 30;
     CGFloat messageTfY = 5;
-    CGSize size = [self  sizeWithText:[[dict objectForKey:@"content"] emojizedString]];
+    NSString *msgContent = [dict objectForKey:@"content"];
+    CGSize size = [self  sizeWithText:[msgContent emojizedString]];
     
     headerTapTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(headerImageViewTap:)];
     [cell.headerImageView addGestureRecognizer:headerTapTgr];
@@ -744,8 +882,28 @@ ReturnFunctionDelegate>
     
     if ([[dict objectForKey:DIRECT] isEqualToString:@"f"])
     {
-        if ([[dict objectForKey:TYPE] isEqualToString:TEXTMEG])
+        if ([[msgContent pathExtension] isEqualToString:@"png"] || [[msgContent pathExtension] isEqualToString:@"jpg"])
         {
+            cell.msgImageView.hidden = NO;
+            cell.timeLabel.frame = CGRectMake(SCREEN_WIDTH/2-50, 5, 100, 20);
+            NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
+            cell.timeLabel.text = timeStr;
+            
+            
+            
+            NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/%@",IMAGEURL,msgContent]]];
+            UIImage *msgImage = [UIImage imageWithData:imageData];
+            CGSize imageSize = [self getSizeFromImage:msgImage];
+            cell.chatBg.frame = CGRectMake(self.view.frame.size.width - 10- imageSize.width- 30-45, messageBgY, imageSize.width+20, imageSize.height+20);
+            [cell.chatBg setImage:fromImage];
+            
+            cell.msgImageView.frame = CGRectMake(cell.chatBg.frame.origin.x+10, cell.chatBg.frame.origin.y+10, imageSize.width, imageSize.height);
+            cell.headerImageView.frame = CGRectMake(5, messageBgY, 40, 40);
+            [Tools fillImageView:cell.msgImageView withImageFromURL:msgContent andDefault:@"3100"];
+        }
+        else
+        {
+            cell.msgImageView.hidden = YES;
             cell.timeLabel.frame = CGRectMake(SCREEN_WIDTH/2-50, 5, 100, 20);
             NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
             cell.timeLabel.text = timeStr;
@@ -761,7 +919,6 @@ ReturnFunctionDelegate>
             
             cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x + 10,cell.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+20+he);
             cell.messageTf.backgroundColor = [[UIColor grayColor] colorWithAlphaComponent:0];
-            DDLOG(@"from content %@",[dict objectForKey:@"content"]);
 //            cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x + 10,cell.chatBg.frame.origin.y + messageTfY,size.width+12, 0);
             cell.messageTf.text = [[dict objectForKey:@"content"] emojizedString];
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
@@ -771,11 +928,6 @@ ReturnFunctionDelegate>
                 
                 NSString *msgContent = [dict objectForKey:@"content"];
                 NSRange range = [msgContent rangeOfString:@"$!#"];
-                
-                if ([msgContent rangeOfString:@""].length > 0)
-                {
-                    
-                }
                 
                 cell.messageTf.text = [msgContent substringFromIndex:range.location+range.length];
                 
@@ -831,8 +983,35 @@ ReturnFunctionDelegate>
     }
     else if([[dict objectForKey:DIRECT] isEqualToString:@"t"])
     {
-        if ([[dict objectForKey:TYPE] isEqualToString:TEXTMEG])
+        if ([[msgContent pathExtension] isEqualToString:@"png"] || [[msgContent pathExtension] isEqualToString:@"jpg"])
         {
+            cell.msgImageView.hidden = NO;
+            cell.timeLabel.frame = CGRectMake(SCREEN_WIDTH/2-50, 5, 100, 20);
+            NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
+            cell.timeLabel.text = timeStr;
+            
+            CGFloat x=7;
+            if([[Tools device_version] integerValue] >= 7.0)
+            {
+                x=0;
+            }
+            
+            NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/%@",IMAGEURL,msgContent]]];
+            UIImage *msgImage = [UIImage imageWithData:imageData];
+            
+            CGSize imageSize = [self getSizeFromImage:msgImage];
+            
+            cell.chatBg.frame = CGRectMake(self.view.frame.size.width - 10- imageSize.width- 30-45, messageBgY, imageSize.width+20, imageSize.height+20);
+            [cell.chatBg setImage:toImage];
+            
+            cell.msgImageView.frame = CGRectMake(cell.chatBg.frame.origin.x+10, cell.chatBg.frame.origin.y+10, imageSize.width, imageSize.height);
+            cell.headerImageView.frame = CGRectMake(SCREEN_WIDTH - 60, messageBgY, 40, 40);
+            [Tools fillImageView:cell.headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERBG];
+            [Tools fillImageView:cell.msgImageView withImageFromURL:msgContent andDefault:@"3100"];
+        }
+        else
+        {
+            cell.msgImageView.hidden = YES;
             cell.timeLabel.frame = CGRectMake(SCREEN_WIDTH/2-50, 5, 100, 20);
             NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
             cell.timeLabel.text = timeStr;
@@ -871,11 +1050,6 @@ ReturnFunctionDelegate>
             }
             else
             {
-//                cell.headerImageView.frame = CGRectMake(SCREEN_WIDTH - 60, messageBgY-23, 40, 40);
-//                cell.chatBg.frame = CGRectMake(self.view.frame.size.width - 10-size.width-30-45, messageBgY-25, size.width+20, size.height+20);
-//                [cell.chatBg setImage:toImage];
-//                
-//                cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x+ 5-x,cell.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+20);
                 cell.timeLabel.hidden = YES;
             }
             [Tools fillImageView:cell.headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERBG];

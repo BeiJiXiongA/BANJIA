@@ -121,6 +121,7 @@
 #define GETCHATLOG       @"/chats/mbGetChatLog"
 #define GETCHATLIST     @"/chats/mbNewChatList"
 #define LASTVIEWTIME    @"/chats/mbLastViewTime"
+#define UPLOADCHATFILE     @"/chats/mbUploadChatFile"
 
 #define MSGLIST    @"/messages/mbmsglist"
 
@@ -136,6 +137,7 @@
 #define BINDACCOUNT    @"/users/mbBindAccount"  //u_id,a_id,a_type
 #define GETACCOUNTLIST   @"/users/mbGetAccountList"  //u_id
 #define LOGINBYAUTHOR    @"/users/mbLoginByAnother"   //a_id','a_type','d_name', 'd_imei', 'd_type', 'c_ver', 'c_os', 'p_cid', 'p_uid'
+#define UNBINDACCOUNT   @"/users/mbUnbindAccount"
 
 #define QQNICKNAME  [NSString stringWithFormat:@"%@-qqNickName",[Tools user_id]]
 #define SINANICKNAME  [NSString stringWithFormat:@"%@-sinaNickName",[Tools user_id]]

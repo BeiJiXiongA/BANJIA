@@ -105,10 +105,11 @@
 
     self.headerImageView.layer.cornerRadius = 5;
     self.headerImageView.clipsToBounds = YES;
+    self.headerLabel.frame = CGRectMake(self.headerLabel.frame.origin.y, self.headerImageView.frame.size.height+self.headerImageView.frame.origin.y+10, 80, 30);
     self.headerLabel.textColor = COMMENTCOLOR;
     self.nameLabel.textColor = COMMENTCOLOR;
     
-    nameTextField = [[MyTextField alloc] initWithFrame:CGRectMake(102, 166, 200, 42)];
+    nameTextField = [[MyTextField alloc] initWithFrame:CGRectMake(102, self.nameLabel.frame.origin.y-10.5, 200, 42)];
     nameTextField.background = nil;
     nameTextField.layer.cornerRadius = 5;
     nameTextField.clipsToBounds = YES;

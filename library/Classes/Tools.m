@@ -457,6 +457,52 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     return request;
 }
 
++ (ASIFormDataRequest *)upLoadImageFiles:(NSArray *)filesArray withSubURL:(NSString *)subUrl andParaDict:(NSDictionary *)pareDict
+{
+    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:
+                                                                      [NSString stringWithFormat:@"%@%@",HOST_URL,subUrl]]];
+    [request setRequestMethod:@"POST"];
+    [request setTimeOutSeconds:12];
+    DDLOG(@"url=%@",request.url);
+    for (NSString *key in pareDict.allKeys)
+    {
+        [request setPostValue:[pareDict objectForKey:key] forKey:key];
+        DDLOG(@"post date &%@=%@",key,[pareDict objectForKey:key]);
+    }
+    
+    for (int i=0; i<[filesArray count]; ++i)
+    {
+        UIImage *image = [filesArray objectAtIndex:i];
+        NSData *imageData = UIImagePNGRepresentation(image);
+        DDLOG(@"%@",NSStringFromCGSize(image.size));
+        [request addData:imageData withFileName:[NSString stringWithFormat:@"%d@%.0fX%.0f.png",i+1,image.size.width,image.size.height] andContentType:@"file" forKey:[NSString stringWithFormat:@"file%@",i==0?@"":[NSString stringWithFormat:@"%d",i+1]]];
+    }
+    return request;
+}
+
++ (ASIFormDataRequest *)upLoadSoundFiles:(NSArray *)filesArray withSubURL:(NSString *)subUrl andParaDict:(NSDictionary *)pareDict
+{
+    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:
+                                                                      [NSString stringWithFormat:@"%@%@",HOST_URL,subUrl]]];
+    [request setRequestMethod:@"POST"];
+    [request setTimeOutSeconds:12];
+    DDLOG(@"url=%@",request.url);
+    for (NSString *key in pareDict.allKeys)
+    {
+        [request setPostValue:[pareDict objectForKey:key] forKey:key];
+        DDLOG(@"post date &%@=%@",key,[pareDict objectForKey:key]);
+    }
+    
+    for (int i=0; i<[filesArray count]; ++i)
+    {
+        UIImage *image = [filesArray objectAtIndex:i];
+        NSData *imageData = UIImagePNGRepresentation(image);
+        DDLOG(@"%@",NSStringFromCGSize(image.size));
+        [request addData:imageData withFileName:[NSString stringWithFormat:@"%d@%.0fX%.0f.png",i+1,image.size.width,image.size.height] andContentType:@"file" forKey:[NSString stringWithFormat:@"file%@",i==0?@"":[NSString stringWithFormat:@"%d",i+1]]];
+    }
+    return request;
+}
+
 +(NSString *)getURLWithDict:(NSDictionary *)dict andUrl:(NSString *)url
 {
     NSMutableString *postDataStr = [[NSMutableString alloc] initWithCapacity:0];

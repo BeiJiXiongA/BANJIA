@@ -27,92 +27,6 @@
 
 @synthesize topbarImage,unReadLabel,returnImageView;
 
-- (void)HandlePan:(UIPanGestureRecognizer *)recognizer{
-    
-    
-    
-    CGPoint delta = [recognizer translationInView : self.parentViewController.view];
-    float proportion = [[UIScreen mainScreen] bounds].size.width - recognizer.view.frame.origin.x;
-    float ratio = proportion / ([[UIScreen mainScreen] bounds].size.width);  //变化的比率
-    float alpha = XD_SHADOWVIEW_MAX_ALPHA * ratio;                //self移动后阴影层的透明度
-    XDContentViewController * xdParentContent = (XDContentViewController*)self.parentViewController;
-
-    if (recognizer.state == UIGestureRecognizerStateBegan )
-    {
-        _shadowView.backgroundColor = [UIColor blackColor];
-        _shadowView.alpha =  XD_SHADOWVIEW_MAX_ALPHA;
-        [self.parentViewController.view addSubview:_shadowView];
-        [self.parentViewController.view bringSubviewToFront:self.view];
-//        [self.view bringSubviewToFront:_shadowView];
-        UIView *view = self.parentViewController.view ;
-        NSLog(@"%f %f  %f %f", view.frame.origin.x, view.frame.origin.y
-              ,view.frame.size.width, view.frame.size.height);
-
-    }
-    else if(recognizer.state == UIGestureRecognizerStateChanged )
-    {
- 
-        CGRect parentRect = CGRectMake(XD_SHADOWVIEW_ORGION_MAX_X * ratio,
-                                       XD_SHADOWVIEW_ORGION_MAX_Y * ratio,
-                                       UI_SCREEN_WIDTH - XD_SHADOWVIEW_ORGION_MAX_X * ratio * 1.5,
-                                       UI_MAINSCREEN_HEIGHT - XD_SHADOWVIEW_ORGION_MAX_Y * ratio * 1.5);
-        
-        CGPoint c = self.view.frame.origin;
-        c.x += delta.x;
-        if (c.x > 0) {
-            [UIView animateWithDuration:0.01 animations:^{
-                self.view.frame = CGRectMake(c.x, 0, UI_SCREEN_WIDTH, UI_SCREEN_HEIGHT);
-                xdParentContent.bgView.frame = parentRect;
-                _shadowView.alpha = alpha;
-            }];
-        }
-    }
-    else if (recognizer.state == UIGestureRecognizerStateEnded ||
-             recognizer.state == UIGestureRecognizerStateFailed)
-    {
- 
-        if (recognizer.view.frame.origin.x > XD_SHADOWVIEW_DECIDE_DIRECTIONPOINT ) {
-            
-            [self unShowSelfViewController];
-        }
-        else
-        {
-            [UIView animateWithDuration:0.3 animations:^{
-                self.view.frame = CGRectMake(0, 0, UI_SCREEN_WIDTH,
-                                             UI_MAINSCREEN_HEIGHT);
-                
-                CGRect rcView = CGRectMake(XD_SHADOWVIEW_ORGION_MAX_X,
-                                           XD_SHADOWVIEW_ORGION_MAX_Y,
-                                           UI_SCREEN_WIDTH - XD_SHADOWVIEW_ORGION_MAX_X * 2 ,
-                                           UI_MAINSCREEN_HEIGHT - XD_SHADOWVIEW_ORGION_MAX_Y * 2);
-
-                
-                [xdParentContent.bgView setFrame:rcView];
-                _shadowView.alpha = XD_SHADOWVIEW_MAX_ALPHA;
-            }completion:^(BOOL finished) {
-                _shadowView.alpha = 0;
-                [_shadowView removeFromSuperview];
-                
-            }];
-        }
-    }
-    [recognizer setTranslation:CGPointZero inView:self.parentViewController.view];
-}
-
-- (void)setRecognierEnable:(BOOL)isEnable
-{
-    if (isEnable) {
-        panGestureRecognier = [[UIPanGestureRecognizer alloc]
-                               initWithTarget:self
-                               action:@selector(HandlePan:)];
-        
-        [self.view addGestureRecognizer:panGestureRecognier];
-
-    }else{
-        [self.view removeGestureRecognizer:panGestureRecognier];
-    }
-}
-
 - (void)unShowSelfViewController
 {
 
@@ -149,11 +63,12 @@
 {
     [super viewDidLoad];
     
-//    self.tableView.frame = CGRectMake(0, 0, 0, 0);
+    
+    [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleBlackTranslucent;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(postlogOut) name:@"logout" object:nil];
     
-    _bgView = [[UIView alloc] initWithFrame:CGRectMake(0, YSTART,
+    _bgView = [[UIView alloc] initWithFrame:CGRectMake(0, 0,
                                                        UI_SCREEN_WIDTH,
                                                        UI_SCREEN_HEIGHT)];
     
@@ -175,7 +90,7 @@
     _navigationBarBg.image = [UIImage imageNamed:@"nav_bar_bg"];
     [_navigationBarView addSubview:_navigationBarBg];
     
-    _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(self.view.frame.size.width/2-90, 6, 180, 36)];
+    _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(self.view.frame.size.width/2-90, YSTART + 6, 180, 36)];
     _titleLabel.font = [UIFont fontWithName:@"Courier" size:19];
     _titleLabel.backgroundColor = [UIColor clearColor];
     _titleLabel.textColor = UIColorFromRGB(0x666464);
@@ -183,11 +98,11 @@
     [_navigationBarView addSubview:_titleLabel];
     
     
-    returnImageView = [[UIImageView alloc] initWithFrame:CGRectMake(11, 13, 11, 18)];
+    returnImageView = [[UIImageView alloc] initWithFrame:CGRectMake(11, YSTART +13, 11, 18)];
     [returnImageView setImage:[UIImage imageNamed:@"icon_return"]];
     [self.navigationBarView addSubview:returnImageView];
     
-    _backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 5, 58 , UI_NAVIGATION_BAR_HEIGHT-10)];
+    _backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, YSTART +2, 58 , NAV_RIGHT_BUTTON_HEIGHT)];
     [_backButton setTitle:@"返回" forState:UIControlStateNormal];
     [_backButton setBackgroundColor:[UIColor clearColor]];
     [_backButton setTitleColor:UIColorFromRGB(0x727171) forState:UIControlStateNormal];
@@ -195,7 +110,7 @@
     _backButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentRight;
     _backButton.titleLabel.font = [UIFont systemFontOfSize:16.5];
     
-    unReadLabel = [[UILabel alloc] initWithFrame:CGRectMake(35, 13, 15, 15)];
+    unReadLabel = [[UILabel alloc] initWithFrame:CGRectMake(35, YSTART +13, 15, 15)];
     unReadLabel.backgroundColor = [UIColor redColor];
     unReadLabel.layer.cornerRadius = 7.5;
     unReadLabel.layer.borderColor = [UIColor whiteColor].CGColor;
@@ -208,18 +123,18 @@
     _bgView.backgroundColor = UIColorFromRGB(0xf1f0ec);
     [self.view addSubview:_bgView];
     
-    _stateView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 20)];
-    _stateView.backgroundColor = [UIColor whiteColor];
-    if (SYSVERSION >= 7.0)
-    {
-        [self.view addSubview:_stateView];
-    }
+//    _stateView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 20)];
+//    _stateView.backgroundColor = [UIColor whiteColor];
+//    if (SYSVERSION >= 7.0)
+//    {
+//        [self.view addSubview:_stateView];
+//    }
     
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:FROMWHERE] isEqualToString:FROMCLASS])
-    {
-        self.view.backgroundColor = [UIColor blackColor];
-        self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-    }
+//    if ([[[NSUserDefaults standardUserDefaults] objectForKey:FROMWHERE] isEqualToString:FROMCLASS])
+//    {
+//        self.view.backgroundColor = [UIColor blackColor];
+//        self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+//    }
 }
 
 -(void)viewWillAppear:(BOOL)animated

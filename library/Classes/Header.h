@@ -69,10 +69,12 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:a]
 
 #define SCREEN_WIDTH   ([[UIScreen mainScreen] bounds].size.width)
 
+#define NAV_RIGHT_BUTTON_HEIGHT   40
+
 
 #ifdef YSTART
 
-#define SCREEN_HEIGHT  (([[UIScreen mainScreen] bounds].size.height)-20)
+#define SCREEN_HEIGHT  (([[UIScreen mainScreen] bounds].size.height))
 
 #else
 
@@ -80,18 +82,9 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:a]
 
 #endif
 
-
 #define Y_STARTPOINT (([[[UIDevice currentDevice] systemVersion] floatValue] < 7.0) ? 0.0f:64.0f)
 
-#define XD_TOPNAVBACKGROUD_HEIGHT        36
-#define XD_VIEW_ORGION_Y                 44            //由于导航栏用imageview代替，
-#define XD_SHADOWVIEW_ORGION_MAX_X       1             //抽屉视图放缩时原点的x的最大值（视图缩小时原点的x会不断增加）
-#define XD_SHADOWVIEW_ORGION_MAX_Y       0             //抽屉视图放缩时原点的y的最大值（视图缩小时原点的y会不断增加）
-#define XD_SHADOWVIEW_MAX_ALPHA         0.8               //抽屉视图的阴影层的透明度的最大值
-#define XD_SHADOWVIEW_ISMAINVIEW_MAX_ORGION_x   220    //抽屉视图是主视图时侧滑后的原点的位置
-#define XD_SHADOWVIEW_DECIDE_DIRECTIONPOINT     120     //与原点的x作比较，决定手势结束后视图应该回到初始位置还是自动右移
-
-#define UI_NAVIGATION_BAR_HEIGHT        44
+#define UI_NAVIGATION_BAR_HEIGHT        ((SYSVERSION >= 7.0)?64:44)
 #define UI_TOOL_BAR_HEIGHT              44
 #define UI_TAB_BAR_HEIGHT               49
 #define UI_STATUS_BAR_HEIGHT            20
@@ -104,7 +97,7 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:a]
 #define UI_MAIN_VIEW_FRAME              CGRectMake(0, UI_STATUS_BAR_HEIGHT, UI_SCREEN_WIDTH, UI_MAINSCREEN_HEIGHT)
 #define UI_MAIN_VIEW_FRAME_ROTATE       CGRectMake(0, UI_STATUS_BAR_HEIGHT, UI_SCREEN_HEIGHT, UI_MAINSCREEN_HEIGHT_ROTATE)
 
-#define CENTER_POINT    CGPointMake(UI_SCREEN_WIDTH/2, UI_SCREEN_HEIGHT/2+YSTART)
+#define CENTER_POINT    CGPointMake(UI_SCREEN_WIDTH/2, UI_SCREEN_HEIGHT/2)
 
 #define HEADER_NEWS_COUNT   3
 
@@ -240,3 +233,10 @@ return shared##className; \
 #define ShareContent [[NSUserDefaults standardUserDefaults] objectForKey:ShareContentKey]
 #define InviteClassMember [[NSUserDefaults standardUserDefaults] objectForKey:InviteClassMemberKey]
 #define InviteParent [[NSUserDefaults standardUserDefaults] objectForKey:InviteParentKey]
+
+
+#pragma mark - aboutimagesize
+#define MAXHEIGHT     640
+#define MAXWIDTH      640
+#define TakePhotoTag   7777
+#define AlbumTag      9999

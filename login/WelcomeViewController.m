@@ -68,23 +68,37 @@ UITextFieldDelegate>
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
     self.view.backgroundColor = [UIColor blackColor];
     self.backButton.hidden = YES;
-    self.stateView.hidden = YES;
     self.navigationBarView.hidden = YES;
     
     
     CGFloat logoImageHeight = 0;
     if (FOURS)
     {
-        logoImageHeight = 200;
-        space = 5;
+        if (SYSVERSION >= 7.0)
+        {
+            logoImageHeight = 220;
+            space = 5;
+        }
+        else
+        {
+            logoImageHeight = 200;
+            space = 5;
+        }
     }
     else
     {
-        logoImageHeight = 247;
-        space = 15;
+        if (SYSVERSION >= 7.0)
+        {
+            logoImageHeight = 267;
+            space = 15;
+        }
+        else
+        {
+            logoImageHeight = 247;
+            space = 15;
+        }
     }
     UIView *headerView = [[UIView alloc] init];\
     headerView.frame = CGRectMake(0,0, SCREEN_WIDTH, logoImageHeight);
@@ -207,16 +221,6 @@ UITextFieldDelegate>
 
 -(void)forgetPwd
 {
-    if ([phoneNumTextfield.text length] <= 0)
-    {
-        [Tools showAlertView:@"请填写手机号码" delegateViewController:nil];
-        return ;
-    }
-    if (![Tools isPhoneNumber:[Tools getPhoneNumFromString:phoneNumTextfield.text]])
-    {
-        [Tools showAlertView:@"手机号格式不正确" delegateViewController:nil];
-        return ;
-    }
     SettingPasswordViewController *setpwd = [[SettingPasswordViewController alloc] init];
     setpwd.phoneNum = [Tools getPhoneNumFromString:phoneNumTextfield.text];
     setpwd.forgetPwd = YES;
