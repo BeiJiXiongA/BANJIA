@@ -8,7 +8,14 @@
 
 #import <UIKit/UIKit.h>
 
+@protocol MessageDelegate;
+
 @interface MessageCell : UITableViewCell
+{
+    UITapGestureRecognizer *headerTapTgr;
+    UIImage *fromImage;
+    UIImage *toImage;
+}
 @property (nonatomic, strong) UIImageView *headerImageView;
 @property (nonatomic, strong) UITextView *messageTf;
 @property (nonatomic, strong) UIImageView *chatBg;
@@ -20,4 +27,14 @@
 @property (nonatomic, strong) UILabel *joinlable;
 
 @property (nonatomic, strong) NSDictionary *msgDict;
+
+@property (nonatomic, assign) id<MessageDelegate> msgDelegate;
+
+-(void)setCellWithDict:(NSDictionary *)dict;
+@end
+
+@protocol MessageDelegate <NSObject>
+
+-(void)toPersonDetail:(NSDictionary *)personDict;
+
 @end

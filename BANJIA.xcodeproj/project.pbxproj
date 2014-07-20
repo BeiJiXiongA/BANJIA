@@ -373,6 +373,8 @@
 		389C32EE18EF8AF000DA05E8 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 389C32ED18EF8AF000DA05E8 /* MessageUI.framework */; };
 		389E02C8190E2ACC00474FCC /* edit.png in Resources */ = {isa = PBXBuildFile; fileRef = 389E02C6190E2ACB00474FCC /* edit.png */; };
 		389E02C9190E2ACC00474FCC /* edit@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 389E02C7190E2ACC00474FCC /* edit@2x.png */; };
+		38A24C07197B3C8700C718BA /* SizeTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 38A24C06197B3C8700C718BA /* SizeTools.m */; };
+		38A24C0A197B44BE00C718BA /* ImageTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 38A24C09197B44BE00C718BA /* ImageTools.m */; };
 		38A2E40F192E483B00CA9EBD /* citys.plist in Resources */ = {isa = PBXBuildFile; fileRef = 38A2E40E192E483B00CA9EBD /* citys.plist */; };
 		38A715F41914971B000798D0 /* KKNavigationController+JDSideMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 38A715F31914971B000798D0 /* KKNavigationController+JDSideMenu.m */; };
 		38A715F71914C771000798D0 /* SendAdviseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 38A715F61914C771000798D0 /* SendAdviseViewController.m */; };
@@ -1121,6 +1123,10 @@
 		389C32ED18EF8AF000DA05E8 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
 		389E02C6190E2ACB00474FCC /* edit.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = edit.png; sourceTree = "<group>"; };
 		389E02C7190E2ACC00474FCC /* edit@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "edit@2x.png"; sourceTree = "<group>"; };
+		38A24C05197B3C8700C718BA /* SizeTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SizeTools.h; sourceTree = "<group>"; };
+		38A24C06197B3C8700C718BA /* SizeTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SizeTools.m; sourceTree = "<group>"; };
+		38A24C08197B44BE00C718BA /* ImageTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageTools.h; sourceTree = "<group>"; };
+		38A24C09197B44BE00C718BA /* ImageTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageTools.m; sourceTree = "<group>"; };
 		38A2E40E192E483B00CA9EBD /* citys.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = citys.plist; sourceTree = "<group>"; };
 		38A715F21914971B000798D0 /* KKNavigationController+JDSideMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "KKNavigationController+JDSideMenu.h"; sourceTree = "<group>"; };
 		38A715F31914971B000798D0 /* KKNavigationController+JDSideMenu.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "KKNavigationController+JDSideMenu.m"; sourceTree = "<group>"; };
@@ -2123,6 +2129,10 @@
 				3893934618EEF5440014F169 /* InviteViewController.m */,
 				3893934718EEF5440014F169 /* MessageCell.h */,
 				3893934818EEF5440014F169 /* MessageCell.m */,
+				38A24C05197B3C8700C718BA /* SizeTools.h */,
+				38A24C06197B3C8700C718BA /* SizeTools.m */,
+				38A24C08197B44BE00C718BA /* ImageTools.h */,
+				38A24C09197B44BE00C718BA /* ImageTools.m */,
 			);
 			path = friends;
 			sourceTree = "<group>";
@@ -3247,6 +3257,7 @@
 				38D57CD319260E570096B895 /* MMRadialProgressView.m in Sources */,
 				3893929C18EEF1A40014F169 /* HanyuPinyinOutputFormat.m in Sources */,
 				3893934A18EEF5440014F169 /* FriendsCell.m in Sources */,
+				38A24C07197B3C8700C718BA /* SizeTools.m in Sources */,
 				3893933718EEF53D0014F169 /* ChooseClassInfoViewController.m in Sources */,
 				3893925F18EEF1A30014F169 /* FTWCache.m in Sources */,
 				38A715F71914C771000798D0 /* SendAdviseViewController.m in Sources */,
@@ -3317,6 +3328,7 @@
 				3899BC26196CF1760037C586 /* qrinput.c in Sources */,
 				387AABD21936FFF700657087 /* SDWebImageDecoder.m in Sources */,
 				389392E118EEF1A40014F169 /* JDSideMenu.m in Sources */,
+				38A24C0A197B44BE00C718BA /* ImageTools.m in Sources */,
 				38E8CAEE195004090075BDEC /* CommentCell.m in Sources */,
 				3893934B18EEF5440014F169 /* FriendsViewController.m in Sources */,
 				387AABCE1936FFF700657087 /* MKAnnotationView+WebCache.m in Sources */,

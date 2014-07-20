@@ -35,7 +35,8 @@ UITextFieldDelegate,
 UIActionSheetDelegate,
 UIAlertViewDelegate,
 ChatDelegate,
-ReturnFunctionDelegate>
+ReturnFunctionDelegate,
+MessageDelegate>
 {
     NSMutableArray *messageArray;
     UITableView *messageTableView;
@@ -107,9 +108,6 @@ ReturnFunctionDelegate>
     }
     
     inputSize = CGSizeMake(250, 30);
-    
-    fromImage = [Tools getImageFromImage:[UIImage imageNamed:@"f"] andInsets:UIEdgeInsetsMake(40, 40, 17, 40)];
-    toImage = [Tools getImageFromImage:[UIImage imageNamed:@"t2"] andInsets:UIEdgeInsetsMake(35, 40, 17, 40)];
     
     if (imageUrl && [imageUrl length]>10)
     {
@@ -597,7 +595,7 @@ ReturnFunctionDelegate>
 {
     [imagePickerController dismissViewControllerAnimated:YES completion:^{
         UIImage *originaImage = [info objectForKey:UIImagePickerControllerOriginalImage];
-        originaImage = [self getNormalImageFromImage:originaImage];
+        originaImage = [ImageTools getNormalImageFromImage:originaImage];
         [self sendImage:originaImage];
     }];
     
@@ -641,108 +639,6 @@ ReturnFunctionDelegate>
     }
 }
 
--(UIImage *)getNormalImageFromImage:(UIImage *)originalImage
-{
-    //    a307741613dbc06cd926be027a15298364712d59
-    CGFloat imageHeight = 0.0f;
-    CGFloat imageWidth = 0.0f;
-    if (originalImage.size.width > originalImage.size.height)
-    {
-        if (originalImage.size.height > MAXHEIGHT)
-        {
-            imageHeight = MAXHEIGHT;
-            imageWidth = originalImage.size.width*imageHeight/originalImage.size.height;
-        }
-        else
-        {
-            imageHeight = originalImage.size.height;
-            imageWidth = originalImage.size.width;
-        }
-    }
-    else if(originalImage.size.width < originalImage.size.height)
-    {
-        if (originalImage.size.width > MAXWIDTH)
-        {
-            imageWidth = MAXWIDTH;
-            imageHeight = originalImage.size.height*imageWidth/originalImage.size.width;
-        }
-        else
-        {
-            imageHeight = originalImage.size.height;
-            imageWidth = originalImage.size.width;
-        }
-    }
-    else
-    {
-        if (originalImage.size.width > MAXWIDTH)
-        {
-            imageWidth = MAXWIDTH;
-            imageHeight = MAXWIDTH;
-        }
-        else
-        {
-            imageHeight = originalImage.size.height;
-            imageWidth = originalImage.size.width;
-        }
-    }
-    DDLOG(@"image direction %d",originalImage.imageOrientation);
-    originalImage = [Tools thumbnailWithImageWithoutScale:originalImage size:CGSizeMake(imageWidth, imageHeight)];
-    return originalImage;
-}
-
-
-#pragma mark - sizeabout
--(CGSize)sizeWithImage:(UIImage *)image
-{
-    CGFloat width = 0;
-    CGFloat height = 0;
-    CGFloat imageWidth = image.size.width;
-    CGFloat imageHeight = image.size.height;
-    
-    //    DDLOG(@" imageWidth %.0f imageHeight %.0f",imageWidth,imageHeight);
-    
-    if (imageWidth >= SCREEN_WIDTH && imageHeight >=Image_H)
-    {
-        if (imageHeight >= imageWidth)
-        {
-            height = Image_H;
-            width = height*imageWidth/imageHeight;
-        }
-        else if(imageWidth >= imageHeight)
-        {
-            width = SCREEN_WIDTH-80;
-            height = imageHeight*width/imageWidth;
-        }
-    }
-    else if(imageHeight >= Image_H)
-    {
-        height = Image_H;
-        width = height*imageWidth/imageHeight;
-    }
-    else if(imageWidth >= SCREEN_WIDTH)
-    {
-        width = SCREEN_WIDTH-80;
-        height = imageHeight*width/imageWidth;
-    }
-    else
-    {
-        width = imageWidth;
-        height = imageHeight;
-    }
-    CGSize size = CGSizeMake(width, height);
-    return size;
-}
--(CGSize)sizeWithText:(NSString *)string
-{
-    if ([string length]>=11)
-    {
-        CGSize labsize = [string sizeWithFont:[UIFont systemFontOfSize:17] constrainedToSize:CGSizeMake(self.view.frame.size.width-130, 9999) lineBreakMode:NSLineBreakByWordWrapping];
-        return labsize;
-    }
-    else
-        return CGSizeMake([string length]*18, 20);
-}
-
 
 #pragma mark - tableview
 
@@ -761,54 +657,6 @@ ReturnFunctionDelegate>
     edittingTableView = !edittingTableView;
 }
 
--(CGSize)getSizeFromImage:(UIImage *)image
-{
-    CGFloat maxH = 60;
-    CGFloat maxW = 80;
-    CGFloat imageWidth = 0;
-    CGFloat imageHeight = 0;
-    if (image.size.width > image.size.height)
-    {
-        if (image.size.height > maxH)
-        {
-            imageHeight = maxH;
-            imageWidth = image.size.width*imageHeight/image.size.height;
-        }
-        else
-        {
-            imageHeight = image.size.height;
-            imageWidth = image.size.width;
-        }
-    }
-    else if(image.size.width < image.size.height)
-    {
-        if (image.size.width > maxW)
-        {
-            imageWidth = maxW;
-            imageHeight = image.size.height*imageWidth/image.size.width;
-        }
-        else
-        {
-            imageHeight = image.size.height;
-            imageWidth = image.size.width;
-        }
-    }
-    else
-    {
-        if (image.size.width > maxW)
-        {
-            imageWidth = maxW;
-            imageHeight = maxW;
-        }
-        else
-        {
-            imageHeight = image.size.height;
-            imageWidth = image.size.width;
-        }
-    }
-    CGSize size = CGSizeMake(imageWidth, imageHeight);
-    return size;
-}
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
@@ -819,21 +667,21 @@ ReturnFunctionDelegate>
     CGFloat rowHeight = 0;
     NSDictionary *dict = [messageArray objectAtIndex:indexPath.row];
     NSString *msgContent = [[messageArray objectAtIndex:indexPath.row] objectForKey:@"content"];
-    CGSize size = [self sizeWithText:[msgContent emojizedString]];
+    CGSize size = [SizeTools getSizeWithString:[msgContent emojizedString] andWidth:SCREEN_WIDTH/2+20 andFont:[UIFont systemFontOfSize:14]];
     rowHeight = size.height+20;
     if ([[dict objectForKey:@"content"] rangeOfString:@"$!#"].length >0)
     {
         NSString *msgContent = [dict objectForKey:@"content"];
         NSRange range = [msgContent rangeOfString:@"$!#"];
         msgContent = [msgContent substringFromIndex:range.location+range.length];
-        size = [self sizeWithText:[msgContent emojizedString]];
+        size = [SizeTools getSizeWithString:[msgContent emojizedString] andWidth:SCREEN_WIDTH/2+20 andFont:[UIFont systemFontOfSize:14]];
         rowHeight = size.height+40;
     }
     if ([[msgContent pathExtension] isEqualToString:@"png"] || [[msgContent pathExtension] isEqualToString:@"jpg"])
     {
         NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/%@",IMAGEURL,msgContent]]];
         UIImage *msgImage = [UIImage imageWithData:imageData];
-        rowHeight = [self getSizeFromImage:msgImage].height;
+        rowHeight = [ImageTools getSizeFromImage:msgImage].height;
     }
     if (([[dict objectForKey:@"time"] integerValue] - currentSec) > 60*3  || indexPath.row == 0)
     {
@@ -851,221 +699,9 @@ ReturnFunctionDelegate>
     {
         cell = [[MessageCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:messageCell];
     }
-    
-    cell.timeLabel.backgroundColor = RGB(203, 203, 203, 1);
-    NSDictionary *dict = [messageArray objectAtIndex:indexPath.row];
-    CGFloat messageBgY = 30;
-    CGFloat messageTfY = 5;
-    NSString *msgContent = [dict objectForKey:@"content"];
-    CGSize size = [self  sizeWithText:[msgContent emojizedString]];
-    
-    headerTapTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(headerImageViewTap:)];
-    [cell.headerImageView addGestureRecognizer:headerTapTgr];
-    cell.headerImageView.userInteractionEnabled = YES;
-    cell.headerImageView.tag = indexPath.row+3333;
-    cell.chatBg.hidden = NO;
-    
-    cell.button.hidden = YES;
-    cell.joinlable.hidden = YES;
-    cell.timeLabel.hidden = NO;
-    cell.messageTf.editable = NO;
-    cell.messageTf.hidden = NO;
-    cell.messageTf.backgroundColor = [UIColor clearColor];
-    if (SYSVERSION >= 7.0)
-    {
-        cell.messageTf.font = [UIFont systemFontOfSize:16];
-    }
-    else
-    {
-        cell.messageTf.font = [UIFont systemFontOfSize:14];
-    }
-    
-    if ([[dict objectForKey:DIRECT] isEqualToString:@"f"])
-    {
-        if ([[msgContent pathExtension] isEqualToString:@"png"] || [[msgContent pathExtension] isEqualToString:@"jpg"])
-        {
-            cell.msgImageView.hidden = NO;
-            cell.timeLabel.frame = CGRectMake(SCREEN_WIDTH/2-50, 5, 100, 20);
-            NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
-            cell.timeLabel.text = timeStr;
-            
-            
-            
-            NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/%@",IMAGEURL,msgContent]]];
-            UIImage *msgImage = [UIImage imageWithData:imageData];
-            CGSize imageSize = [self getSizeFromImage:msgImage];
-            cell.chatBg.frame = CGRectMake(self.view.frame.size.width - 10- imageSize.width- 30-45, messageBgY, imageSize.width+20, imageSize.height+20);
-            [cell.chatBg setImage:fromImage];
-            
-            cell.msgImageView.frame = CGRectMake(cell.chatBg.frame.origin.x+10, cell.chatBg.frame.origin.y+10, imageSize.width, imageSize.height);
-            cell.headerImageView.frame = CGRectMake(5, messageBgY, 40, 40);
-            [Tools fillImageView:cell.msgImageView withImageFromURL:msgContent andDefault:@"3100"];
-        }
-        else
-        {
-            cell.msgImageView.hidden = YES;
-            cell.timeLabel.frame = CGRectMake(SCREEN_WIDTH/2-50, 5, 100, 20);
-            NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
-            cell.timeLabel.text = timeStr;
-            
-            cell.chatBg.frame = CGRectMake(55, messageBgY, size.width+20, size.height+20);
-            [cell.chatBg setImage:fromImage];
-            
-            CGFloat he = 0;
-            if (SYSVERSION >= 7)
-            {
-                he = 3;
-            }
-            
-            cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x + 10,cell.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+20+he);
-            cell.messageTf.backgroundColor = [[UIColor grayColor] colorWithAlphaComponent:0];
-//            cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x + 10,cell.chatBg.frame.origin.y + messageTfY,size.width+12, 0);
-            cell.messageTf.text = [[dict objectForKey:@"content"] emojizedString];
-            cell.selectionStyle = UITableViewCellSelectionStyleNone;
-            
-            if ([[dict objectForKey:@"content"] rangeOfString:@"$!#"].length >0)
-            {
-                
-                NSString *msgContent = [dict objectForKey:@"content"];
-                NSRange range = [msgContent rangeOfString:@"$!#"];
-                
-                cell.messageTf.text = [msgContent substringFromIndex:range.location+range.length];
-                
-                size = [self sizeWithText:[[msgContent substringFromIndex:range.location+range.length] emojizedString]];
-               
-                cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x + 10,cell.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+10+he);
-                cell.messageTf.editable = NO;
-                
-                UITapGestureRecognizer *msgTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(joinClass:)];
-                
-                cell.chatBg.tag = 5555+indexPath.row;
-                cell.chatBg.userInteractionEnabled = YES;
-                [cell.chatBg addGestureRecognizer:msgTap];
-                cell.chatBg.backgroundColor = [UIColor clearColor];
-                
-                cell.messageTf.backgroundColor = [UIColor clearColor];
-                cell.messageTf.tag = 5555+indexPath.row;
-                cell.messageTf.userInteractionEnabled = YES;
-                [cell.messageTf addGestureRecognizer:msgTap];
-
-                cell.joinlable.frame = CGRectMake(15, size.height+15, size.width, 30);
-                cell.joinlable.text = @"点击申请加入";
-                cell.joinlable.backgroundColor = [UIColor clearColor];
-                cell.joinlable.hidden = NO;
-                
-                cell.chatBg.frame = CGRectMake(55, messageBgY-0, size.width+20, size.height+20+30);
-                
-                cell.joinlable.userInteractionEnabled = YES;
-                cell.joinlable.tag = 5555+indexPath.row;
-                [cell.joinlable addGestureRecognizer:msgTap];
-            }
-            else
-            {
-                cell.button.hidden = YES;
-            }
-            
-            cell.headerImageView.frame = CGRectMake(5, messageBgY, 40, 40);
-            if (([[dict objectForKey:@"time"] integerValue] - currentSec) > 60*3  || indexPath.row == 0)
-            {
-                cell.timeLabel.hidden = NO;
-                currentSec = [[dict objectForKey:@"time"] integerValue];
-            }
-            else
-            {
-//                cell.headerImageView.frame = CGRectMake(5, messageBgY-23, 40, 40);
-//                cell.chatBg.frame = CGRectMake(55, messageBgY-25, size.width+20, size.height+20);
-//                cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x + 10,cell.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+20+he);
-                cell.timeLabel.hidden = YES;
-            }
-            
-            [Tools fillImageView:cell.headerImageView withImageFromURL:[NSURL URLWithString:fromImageStr] andDefault:HEADERBG];
-        }
-    }
-    else if([[dict objectForKey:DIRECT] isEqualToString:@"t"])
-    {
-        if ([[msgContent pathExtension] isEqualToString:@"png"] || [[msgContent pathExtension] isEqualToString:@"jpg"])
-        {
-            cell.msgImageView.hidden = NO;
-            cell.timeLabel.frame = CGRectMake(SCREEN_WIDTH/2-50, 5, 100, 20);
-            NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
-            cell.timeLabel.text = timeStr;
-            
-            CGFloat x=7;
-            if([[Tools device_version] integerValue] >= 7.0)
-            {
-                x=0;
-            }
-            
-            NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/%@",IMAGEURL,msgContent]]];
-            UIImage *msgImage = [UIImage imageWithData:imageData];
-            
-            CGSize imageSize = [self getSizeFromImage:msgImage];
-            
-            cell.chatBg.frame = CGRectMake(self.view.frame.size.width - 10- imageSize.width- 30-45, messageBgY, imageSize.width+20, imageSize.height+20);
-            [cell.chatBg setImage:toImage];
-            
-            cell.msgImageView.frame = CGRectMake(cell.chatBg.frame.origin.x+10, cell.chatBg.frame.origin.y+10, imageSize.width, imageSize.height);
-            cell.headerImageView.frame = CGRectMake(SCREEN_WIDTH - 60, messageBgY, 40, 40);
-            [Tools fillImageView:cell.headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERBG];
-            [Tools fillImageView:cell.msgImageView withImageFromURL:msgContent andDefault:@"3100"];
-        }
-        else
-        {
-            cell.msgImageView.hidden = YES;
-            cell.timeLabel.frame = CGRectMake(SCREEN_WIDTH/2-50, 5, 100, 20);
-            NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
-            cell.timeLabel.text = timeStr;
-            
-            CGFloat x=7;
-            if([[Tools device_version] integerValue] >= 7.0)
-            {
-                x=0;
-            }
-            
-            cell.chatBg.frame = CGRectMake(self.view.frame.size.width - 10-size.width-30-45, messageBgY, size.width+20, size.height+20);
-            [cell.chatBg setImage:toImage];
-            
-            cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x+ 5-x,cell.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+20);
-            cell.messageTf.backgroundColor = [[UIColor grayColor] colorWithAlphaComponent:0];
-//            cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x+ 5-x,cell.chatBg.frame.origin.y + messageTfY, size.width+12, 0);
-            cell.messageTf.text = [[dict objectForKey:@"content"] emojizedString];
-            cell.selectionStyle = UITableViewCellSelectionStyleNone;
-            cell.button.hidden = YES;
-            
-            if ([[dict objectForKey:@"content"] rangeOfString:@"$!#"].length >0)
-            {
-                NSString *msgContent = [dict objectForKey:@"content"];
-                NSRange range = [msgContent rangeOfString:@"$!#"];
-                cell.messageTf.text = [msgContent substringFromIndex:range.location+range.length];
-                size = [self sizeWithText:[[msgContent substringFromIndex:range.location+range.length] emojizedString]];
-                cell.chatBg.frame = CGRectMake(self.view.frame.size.width - 10-size.width-30-45, messageBgY, size.width+20, size.height+20);
-                cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x+ 10-x,cell.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+30);
-            }
-            cell.headerImageView.frame = CGRectMake(SCREEN_WIDTH - 60, messageBgY, 40, 40);
-            
-            if (([[dict objectForKey:@"time"] integerValue] - currentSec) > 60*3 || indexPath.row == 0)
-            {
-                cell.timeLabel.hidden = NO;
-                currentSec = [[dict objectForKey:@"time"] integerValue];
-            }
-            else
-            {
-                cell.timeLabel.hidden = YES;
-            }
-            [Tools fillImageView:cell.headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERBG];
-        }
-    }
-    cell.timeLabel.layer.cornerRadius = cell.timeLabel.frame.size.height/2;
-    cell.timeLabel.clipsToBounds = YES;
-    cell.timeLabel.textColor = [UIColor whiteColor];
-    cell.headerImageView.layer.cornerRadius = 5;
-    cell.headerImageView.clipsToBounds = YES;
-    if (indexPath.row == 0)
-    {
-        cell.timeLabel.hidden = NO;
-    }
+    [cell setCellWithDict:[messageArray objectAtIndex:indexPath.row]];
+    cell.msgDelegate = self;
     cell.backgroundColor = self.bgView.backgroundColor;
-    
     return cell;
 }
 
@@ -1078,13 +714,11 @@ ReturnFunctionDelegate>
     }
 }
 
--(void)headerImageViewTap:(UITapGestureRecognizer *)tap
+-(void)toPersonDetail:(NSDictionary *)personDict
 {
-    NSDictionary *dict = [messageArray objectAtIndex:tap.view.tag-3333];
-    DDLOG(@"message dict %@",dict);
     PersonDetailViewController *personDetailVC = [[PersonDetailViewController alloc] init];
-    personDetailVC.personName = [dict objectForKey:@"fname"];
-    personDetailVC.personID = [dict objectForKey:@"fid"];
+    personDetailVC.personName = [personDict objectForKey:@"fname"];
+    personDetailVC.personID = [personDict objectForKey:@"fid"];
     personDetailVC.fromChat = YES;
     [self.navigationController pushViewController:personDetailVC animated:YES];
     

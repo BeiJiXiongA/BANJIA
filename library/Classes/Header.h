@@ -19,6 +19,8 @@
 #import "AKNumericFormatter.h"
 #import "UIButton+WebCache.h"
 #import "cnvUILabel.h"
+#import "SizeTools.h"
+#import "ImageTools.h"
 
 #define FaceViewHeight  220
 
