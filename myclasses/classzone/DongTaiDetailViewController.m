@@ -11,9 +11,7 @@
 #import "TrendsCell.h"
 #import "CommentCell.h"
 
-#import "UIImageView+MJWebCache.h"
-#import "MJPhotoBrowser.h"
-#import "MJPhoto.h"
+#import "UIImageView+WebCache.h"
 #import "NSString+Emojize.h"
 #import "InputTableBar.h"
 #import "ReportViewController.h"
@@ -573,24 +571,7 @@ UIActionSheetDelegate,NameButtonDel>
 
 - (void)tapImage:(UITapGestureRecognizer *)tap
 {
-    NSArray *imgs = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"img"];
-    int count = [imgs count];
     
-    // 1.封装图片数据
-    NSMutableArray *photos = [NSMutableArray arrayWithCapacity:count];
-    for (int i = 0; i<count; i++) {
-        // 替换为中等尺寸图片
-        NSString *url = [[NSString stringWithFormat:@"%@%@",IMAGEURL,imgs[i]] stringByReplacingOccurrencesOfString:@"thumbnail" withString:@"bmiddle"];
-        MJPhoto *photo = [[MJPhoto alloc] init];
-        photo.url = [NSURL URLWithString:url];
-        [photos addObject:photo];
-    }
-    
-    // 2.显示相册
-    MJPhotoBrowser *browser = [[MJPhotoBrowser alloc] init];
-    browser.currentPhotoIndex = tap.view.tag%1000; // 弹出相册时显示的第一张图片是？
-    browser.photos = photos; // 设置所有的图片
-    [browser show];
 }
 
 -(void)scrollViewDidScroll:(UIScrollView *)scrollView

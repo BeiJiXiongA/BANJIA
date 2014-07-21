@@ -8,8 +8,8 @@
 
 #import "RecordTools.h"
 
-
 @implementation RecordTools
+@synthesize recorder;
 
 static RecordTools *sharedRecordTools;
 + (RecordTools *)defaultRecordTools
@@ -26,6 +26,8 @@ static RecordTools *sharedRecordTools;
 
 -(void)record
 {
+    [recorder stop];
+    
     secs = 0;
     audioSession = [AVAudioSession sharedInstance];
     [audioSession setCategory:AVAudioSessionCategoryRecord error:nil];
@@ -54,7 +56,11 @@ static RecordTools *sharedRecordTools;
         if ([self.recordDel respondsToSelector:@selector(recordFinished:andSecs:)])
         {
             [self.recordDel recordFinished:tmpFile andSecs:secs];
+            
+            
         }
+        
+        [[PlayerTools defaultPlayerTools] palySound:tmpFile];
         secs = 0;
     }
 }

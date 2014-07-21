@@ -7,8 +7,7 @@
 //
 
 #import "HomeViewController.h"
-#import "MMProgressHUD.h"
-#import "MMProgressHUDOverlayView.h"
+//#import "MBProgressHUD.h"
 #import "KKNavigationController.h"
 #import "KKNavigationController+JDSideMenu.h"
 #import "UINavigationController+JDSideMenu.h"
@@ -19,8 +18,6 @@
 #import "AddNotificationViewController.h"
 #import "NotificationDetailViewController.h"
 #import "TrendsCell.h"
-#import "MJPhotoBrowser.h"
-#import "MJPhoto.h"
 #import "InputTableBar.h"
 #import "MyButton.h"
 #import "DongTaiDetailViewController.h"
@@ -1138,33 +1135,7 @@ DongTaiDetailAddCommentDelegate>
 
 - (void)tapImage:(UITapGestureRecognizer *)tap
 {
-    if ([inputTabBar.inputTextView isFirstResponder])
-    {
-        [self backInput];
-        [inputTabBar backKeyBoard];
-    }
-    
-    NSDictionary *groupDict = [groupDiaries objectAtIndex:(tap.view.tag-333)/SectionTag];
-    NSArray *array = [groupDict objectForKey:@"diaries"];
-    NSDictionary *dict = [array objectAtIndex:(tap.view.tag-333)%SectionTag/RowTag];
-    NSArray *imgs = [[dict objectForKey:@"detail"] objectForKey:@"img"];
-    int count = [imgs count];
-    // 1.封装图片数据
-    NSMutableArray *photos = [NSMutableArray arrayWithCapacity:count];
-    for (int i = 0; i<count; i++) {
-        // 替换为中等尺寸图片
-        NSString *url = [NSString stringWithFormat:@"%@%@",IMAGEURL,imgs[i]];
-        MJPhoto *photo = [[MJPhoto alloc] init];
-        photo.url = [NSURL URLWithString:url];
-        photo.srcImageView = (UIImageView *)[self.bgView viewWithTag:tap.view.tag]; // 来源于哪个UIImageView
-        [photos addObject:photo];
-    }
-    
-    // 2.显示相册
-    MJPhotoBrowser *browser = [[MJPhotoBrowser alloc] init];
-    browser.currentPhotoIndex = ((tap.view.tag-333)%SectionTag)%RowTag; // 弹出相册时显示的第一张图片是？
-    browser.photos = photos; // 设置所有的图片
-    [browser show];
+    DDLOG(@"tap view tag %d",tap.view.tag);
 }
 
 

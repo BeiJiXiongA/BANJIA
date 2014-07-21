@@ -13,7 +13,7 @@
 #import "OperatDB.h"
 #import "InputTableBar.h"
 #import "ClassZoneViewController.h"
-#import "UIImageView+MJWebCache.h"
+#import "UIImageView+WebCache.h"
 #import "ReportViewController.h"
 #import "PersonDetailViewController.h"
 
@@ -664,7 +664,7 @@ MessageDelegate>
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    CGFloat rowHeight = 0;
+    __block CGFloat rowHeight = 0;
     NSDictionary *dict = [messageArray objectAtIndex:indexPath.row];
     NSString *msgContent = [[messageArray objectAtIndex:indexPath.row] objectForKey:@"content"];
     CGSize size = [SizeTools getSizeWithString:[msgContent emojizedString] andWidth:SCREEN_WIDTH/2+20 andFont:[UIFont systemFontOfSize:14]];
@@ -679,9 +679,14 @@ MessageDelegate>
     }
     if ([[msgContent pathExtension] isEqualToString:@"png"] || [[msgContent pathExtension] isEqualToString:@"jpg"])
     {
-        NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/%@",IMAGEURL,msgContent]]];
-        UIImage *msgImage = [UIImage imageWithData:imageData];
-        rowHeight = [ImageTools getSizeFromImage:msgImage].height;
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/%@",IMAGEURL,msgContent]]];
+            UIImage *msgImage = [UIImage imageWithData:imageData];
+            CGSize imageSize = [ImageTools getSizeFromImage:msgImage];
+            dispatch_sync(dispatch_get_main_queue(), ^{
+                rowHeight = imageSize.height;
+            });
+        });
     }
     if (([[dict objectForKey:@"time"] integerValue] - currentSec) > 60*3  || indexPath.row == 0)
     {
@@ -699,8 +704,23 @@ MessageDelegate>
     {
         cell = [[MessageCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:messageCell];
     }
-    [cell setCellWithDict:[messageArray objectAtIndex:indexPath.row]];
+    NSDictionary *dict = [messageArray objectAtIndex:indexPath.row];
+    [cell setCellWithDict:dict];
     cell.msgDelegate = self;
+    
+    if (([[dict objectForKey:@"time"] integerValue] - currentSec) > 60*3  || indexPath.row == 0)
+    {
+        cell.timeLabel.hidden = NO;
+        currentSec = [[dict objectForKey:@"time"] integerValue];
+    }
+    else
+    {
+        //                cell.headerImageView.frame = CGRectMake(5, messageBgY-23, 40, 40);
+        //                cell.chatBg.frame = CGRectMake(55, messageBgY-25, size.width+20, size.height+20);
+        //                cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x + 10,cell.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+20+he);
+        cell.timeLabel.hidden = YES;
+    }
+
     cell.backgroundColor = self.bgView.backgroundColor;
     return cell;
 }

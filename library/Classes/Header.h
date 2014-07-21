@@ -21,6 +21,8 @@
 #import "cnvUILabel.h"
 #import "SizeTools.h"
 #import "ImageTools.h"
+#import "RecordTools.h"
+#import "PlayerTools.h"
 
 #define FaceViewHeight  220
 
@@ -242,3 +244,5 @@ return shared##className; \
 #define MAXWIDTH      640
 #define TakePhotoTag   7777
 #define AlbumTag      9999
+
+#define PhotoSpace  7

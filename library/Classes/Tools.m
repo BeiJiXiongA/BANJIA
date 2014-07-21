@@ -11,7 +11,7 @@
 #import "ChineseToPinyin.h"
 #import <AVFoundation/AVFoundation.h>
 #import "KKNavigationController.h"
-#import "UIImageView+MJWebCache.h"
+#import "UIImageView+WebCache.h"
 
 extern NSString *CTSettingCopyMyPhoneNumber();
 
@@ -47,9 +47,8 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 
 + (void) fillImageView:(UIImageView *)imageView withImageFromURL:(NSString*)URL imageWidth:(CGFloat)imageWidth andDefault:(NSString *)defaultName
 {
-    NSString *urlStr = [NSString stringWithFormat:@"%@%@@%.0fw%@",IMAGEURL,[URL substringToIndex:[URL length]-4],imageWidth,[URL substringFromIndex:[URL rangeOfString:@"."].location]];
+    NSString *urlStr = [NSString stringWithFormat:@"%@%@@%.0fw",IMAGEURL,URL,imageWidth];
     NSURL *imageURL = [NSURL URLWithString:urlStr];
-    DDLOG(@"image url %@",imageURL.absoluteString);
     [imageView setImageWithURL:imageURL placeholderImage:[UIImage imageNamed:defaultName]];
 }
 +(BOOL)isPhoneNumber:(NSString *)numStr
@@ -337,22 +336,22 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 #pragma mark - 等待
 + (void)showProgress:(UIView *) view
 {
-    [MBProgressHUD showHUDAddedTo:view animated:YES];
+//    [MBProgressHUD showHUDAddedTo:view animated:YES];
 }
 
 + (void)hideProgress:(UIView *)view
 {
-    [MBProgressHUD hideAllHUDsForView:view animated:YES];
+//    [MBProgressHUD hideAllHUDsForView:view animated:YES];
 }
 + (void) showTips:(NSString *)text toView:(UIView *)view
 {
-    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:view animated:YES];
+//    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:view animated:YES];
 	// Configure for text only and offset down
-	hud.mode = MBProgressHUDModeText;
-	hud.labelText = text;
+//	hud.mode = MBProgressHUDModeText;
+//	hud.labelText = text;
     
-	[hud show:YES];
-	[hud hide:YES afterDelay:0.5];
+//	[hud show:YES];
+//	[hud hide:YES afterDelay:0.5];
 }
 
 + (ASIHTTPRequest *)joinUrlWithDic:(NSDictionary *)parameterDict  andHostUrl:(NSString *)hostUrl

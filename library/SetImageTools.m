@@ -7,7 +7,7 @@
 //
 
 #import "SetImageTools.h"
-#import "UIImageView+MJWebCache.h"
+#import "UIImageView+WebCache.h"
 
 @implementation SetImageTools
 + (void) fillImageView:(UIImageView *)imageView withImageFromURL:(NSString*)URL imageWidth:(CGFloat)imageWidth andDefault:(NSString *)defaultName

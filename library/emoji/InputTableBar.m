@@ -23,7 +23,8 @@ returnFunDel,
 sendString,
 soundButton,
 moreButton,
-notOnlyFace;
+notOnlyFace,
+recordButton;
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
@@ -43,7 +44,7 @@ notOnlyFace;
     
     face = YES;
     more = YES;
-    sound =YES;
+    sound = NO;
     
     
     fileNameArray = [[NSMutableArray alloc] initWithCapacity:0];
@@ -86,8 +87,9 @@ notOnlyFace;
     {
         soundButton = [UIButton buttonWithType:UIButtonTypeCustom];
         soundButton.frame = CGRectMake(5, INPUTBUTTONT, INPUTBUTTONH, INPUTBUTTONH);
-        soundButton.backgroundColor = [UIColor greenColor];
-        
+        soundButton.backgroundColor = [UIColor clearColor];
+        [soundButton setImage:[UIImage imageNamed:@"icon_sound"] forState:UIControlStateNormal];
+        [soundButton addTarget:self action:@selector(soundButtonClick) forControlEvents:UIControlEventTouchUpInside];
         [inputBgView addSubview:soundButton];
         
         
@@ -95,6 +97,20 @@ notOnlyFace;
         inputWidth = SCREEN_WIDTH-130;
         
         inputTextView.frame = CGRectMake(45, INPUTBUTTONT, inputWidth, DEFAULTTEXTHEIGHT);
+        
+        recordButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        recordButton.frame = CGRectMake(45, INPUTBUTTONT, inputWidth, DEFAULTTEXTHEIGHT);
+        [recordButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+        [recordButton setTitleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
+        [recordButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateHighlighted];
+        [recordButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:@"btnbg"] andInsets:UIEdgeInsetsMake(15, 15, 15, 15)] forState:UIControlStateNormal];
+        [recordButton setTitle:@"按下录音" forState:UIControlStateNormal];
+        [recordButton setTitle:@"松开播放" forState:UIControlStateHighlighted];
+        recordButton.hidden = YES;
+        [recordButton addTarget:self action:@selector(recordButtonDown) forControlEvents:UIControlEventTouchDown];
+//        [recordButton addTarget:self action:@selector(playRecord) forControlEvents:UIControlEventTouchUpOutside];
+        [inputBgView addSubview:recordButton];
+
         
         moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
         moreButton.frame = CGRectMake( SCREEN_WIDTH - 40, INPUTBUTTONT, INPUTBUTTONH, INPUTBUTTONH);
@@ -118,16 +134,18 @@ notOnlyFace;
     [self addSubview:moreView];
     
     UIButton *albumButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    albumButton.backgroundColor = [UIColor blackColor];
+    albumButton.backgroundColor = [UIColor whiteColor];
     albumButton.frame = CGRectMake(10, 10, 60, 60);
     albumButton.tag = AlbumTag;
+    [albumButton setImage:[UIImage imageNamed:@"icon_album"] forState:UIControlStateNormal];
     [albumButton addTarget:self action:@selector(selectImage:) forControlEvents:UIControlEventTouchUpInside];
     [moreView addSubview:albumButton];
     
     UIButton *photoButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    photoButton.backgroundColor = [UIColor yellowColor];
+    photoButton.backgroundColor = [UIColor whiteColor];
     photoButton.frame = CGRectMake(80, 10, 60, 60);
     photoButton.tag = TakePhotoTag;
+    [photoButton setImage:[UIImage imageNamed:@"icon_take_pic"] forState:UIControlStateNormal];
     [photoButton addTarget:self action:@selector(selectImage:) forControlEvents:UIControlEventTouchUpInside];
     [moreView addSubview:photoButton];
     
@@ -416,6 +434,30 @@ notOnlyFace;
         text2 = [text stringByAppendingString:[NSString emojizedStringWithString:[NSString stringWithFormat:@":%@:",imageFileName]]];
         inputTextView.text = text2;
     }
+}
+
+-(void)soundButtonClick
+{
+    if (sound)
+    {
+        [soundButton setImage:[UIImage imageNamed:@"icon_sound"] forState:UIControlStateNormal];
+        recordButton.hidden = YES;
+        inputTextView.hidden = NO;
+    }
+    else
+    {
+        //显示录音键
+        [soundButton setImage:[UIImage imageNamed:@"keyboard"] forState:UIControlStateNormal];
+        recordButton.hidden = NO;
+        inputTextView.hidden = YES;
+    }
+    sound = !sound;
+}
+
+-(void)recordButtonDown
+{
+    [[RecordTools defaultRecordTools].recorder stop];
+    [[RecordTools defaultRecordTools] record];
 }
 
 -(void)selectImage:(UIButton *)button

@@ -15,6 +15,8 @@
     UITapGestureRecognizer *headerTapTgr;
     UIImage *fromImage;
     UIImage *toImage;
+    
+    UITapGestureRecognizer *chatImageTap;
 }
 @property (nonatomic, strong) UIImageView *headerImageView;
 @property (nonatomic, strong) UITextView *messageTf;

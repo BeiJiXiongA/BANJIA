@@ -11,9 +11,7 @@
 #import "Header.h"
 
 
-#import "UIImageView+MJWebCache.h"
-#import "MJPhotoBrowser.h"
-#import "MJPhoto.h"
+#import "UIImageView+WebCache.h"
 
 #define GIARYTAG  100000
 
@@ -258,7 +256,8 @@
             imageView.userInteractionEnabled = YES;
             [imageView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapImage:)]];
             
-            [imageView setImageURLStr:[NSString stringWithFormat:@"%@%@",IMAGEURL,[imgsArray objectAtIndex:i]] placeholder:placeholder];
+            
+            [imageView setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",IMAGEURL,[imgsArray objectAtIndex:i]]] placeholderImage:placeholder];
             
             // 内容模式
             imageView.clipsToBounds = YES;
@@ -289,29 +288,6 @@
 }
 - (void)tapImage:(UITapGestureRecognizer *)tap
 {
-    NSDictionary *dict = [tmpArray objectAtIndex:(tap.view.tag-1000)/1000];
-    NSArray *imgs = [dict objectForKey:@"img"];
-    int count = [imgs count];
-    DDLOG(@"tapviewtag=%d dict= %@",tap.view.tag,dict);
-    // 1.封装图片数据
-    NSMutableArray *photos = [NSMutableArray arrayWithCapacity:count];
-    for (int i = 0; i<count; i++) {
-        // 替换为中等尺寸图片
-        NSString *url = [NSString stringWithFormat:@"%@%@",IMAGEURL,imgs[i]];
-        NSData *imgData = [FTWCache objectForKey:[url MD5Hash]];
-        UIImage *img = [UIImage imageWithData:imgData];
-        MJPhoto *photo = [[MJPhoto alloc] init];
-        //        DDLOG(@"url =%@",url);
-//        photo.url = [NSURL URLWithString:url]; // 图片路径
-        photo.image = img;
-        photo.srcImageView = (UIImageView *)[self.bgView viewWithTag:tap.view.tag]; // 来源于哪个UIImageView
-        [photos addObject:photo];
-    }
     
-    // 2.显示相册
-    MJPhotoBrowser *browser = [[MJPhotoBrowser alloc] init];
-    browser.currentPhotoIndex = tap.view.tag%1000; // 弹出相册时显示的第一张图片是？
-    browser.photos = photos; // 设置所有的图片
-    [browser show];
 }
 @end

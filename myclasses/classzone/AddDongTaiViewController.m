@@ -16,10 +16,7 @@
 #import <CoreLocation/CoreLocation.h>
 #import "ImageCell.h"
 
-#import "UIImageView+MJWebCache.h"
-#import "MJPhotoBrowser.h"
-#import "MJPhoto.h"
-
+#import "UIImageView+WebCache.h"
 #import "ClassesListViewController.h"
 
 #define NormalImageScale  2
@@ -762,23 +759,7 @@ int count = 0;
 
 - (void)tapImage:(UITapGestureRecognizer *)tap
 {
-    int count = [selectPhotosArray count];
-    DDLOG(@"select count==%d",tap.view.tag);
-    // 1.封装图片数据
-    NSMutableArray *photos = [NSMutableArray arrayWithCapacity:count];
-    for (int i = 0; i<count; i++) {
-        // 替换为中等尺寸图片
-        MJPhoto *photo = [[MJPhoto alloc] init];
-        //        DDLOG(@"url =%@",url);
-        photo.image = [selectPhotosArray objectAtIndex:i]; // 图片路径
-        [photos addObject:photo];
-    }
     
-    // 2.显示相册
-    MJPhotoBrowser *browser = [[MJPhotoBrowser alloc] init];
-    browser.currentPhotoIndex = tap.view.tag-1001; // 弹出相册时显示的第一张图片是？
-    browser.photos = photos; // 设置所有的图片
-    [browser show];
 }
 
 -(void)emitClick

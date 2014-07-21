@@ -13,9 +13,13 @@
 +(CGSize)getSizeWithString:(NSString *)content andWidth:(CGFloat)width andFont:(UIFont *)font
 {
     
-    CGSize maxSize=CGSizeMake(width, 99999);
-    CGSize  strSize=[content sizeWithFont:font constrainedToSize:maxSize lineBreakMode:NSLineBreakByWordWrapping];
-    return strSize;
+    if ([content length]>=11)
+    {
+        CGSize labsize = [content sizeWithFont:[UIFont systemFontOfSize:17] constrainedToSize:CGSizeMake(SCREEN_WIDTH-130, 9999) lineBreakMode:NSLineBreakByWordWrapping];
+        return labsize;
+    }
+    else
+        return CGSizeMake([content length]*18, 20);
 }
 
 @end

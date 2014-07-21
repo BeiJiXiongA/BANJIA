@@ -32,8 +32,6 @@
     NSArray *faceArray;
     
     CGFloat inputWidth;
-    
-    
 }
 @property (nonatomic, strong) UITextView *inputTextView;
 @property (nonatomic, strong) UIView *inputBgView;
@@ -44,6 +42,7 @@
 @property (nonatomic, assign) BOOL notOnlyFace;
 @property (nonatomic, strong) UIButton *soundButton;
 @property (nonatomic, strong) UIButton *moreButton;
+@property (nonatomic, strong) UIButton *recordButton;
 @property (nonatomic, assign) id<ReturnFunctionDelegate> returnFunDel;
 @property (nonatomic, strong) NSMutableString *sendString;
 

@@ -66,6 +66,7 @@
         [self.contentView addSubview:timeLabel];
         
         msgImageView = [[UIImageView alloc] init];
+//        msgImageView.layer.contentsGravity = kCAGravityResizeAspectFill;
         [self.contentView addSubview:msgImageView];
     }
     return self;
@@ -91,6 +92,12 @@
     self.messageTf.editable = NO;
     self.messageTf.hidden = NO;
     self.messageTf.backgroundColor = [UIColor clearColor];
+    
+//    chatImageTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(chatimagetap:)];
+//    self.msgImageView.userInteractionEnabled = YES;
+//    [self.msgImageView addGestureRecognizer:chatImageTap];
+    
+    
     if (SYSVERSION >= 7.0)
     {
         self.messageTf.font = [UIFont systemFontOfSize:16];
@@ -110,17 +117,27 @@
             NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
             self.timeLabel.text = timeStr;
             
-            
-            
-            NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/%@",IMAGEURL,msgContent]]];
-            UIImage *msgImage = [UIImage imageWithData:imageData];
-            CGSize imageSize = [ImageTools getSizeFromImage:msgImage];
-            self.chatBg.frame = CGRectMake(SCREEN_WIDTH - 10- imageSize.width- 30-45, messageBgY, imageSize.width+20, imageSize.height+20);
+            self.chatBg.frame = CGRectMake(SCREEN_WIDTH - 10- 100- 30-45, messageBgY, 100+PhotoSpace*2+5, 100+PhotoSpace*2);
             [self.chatBg setImage:fromImage];
             
-            self.msgImageView.frame = CGRectMake(self.chatBg.frame.origin.x+10, self.chatBg.frame.origin.y+10, imageSize.width, imageSize.height);
+            self.msgImageView.frame = CGRectMake(self.chatBg.frame.origin.x+PhotoSpace+5, self.chatBg.frame.origin.y+PhotoSpace, 100, 100);
+            
+//            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+//                NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/%@",IMAGEURL,msgContent]]];
+//                UIImage *msgImage = [UIImage imageWithData:imageData];
+//                CGSize imageSize = [ImageTools getSizeFromImage:msgImage];
+//                dispatch_sync(dispatch_get_main_queue(), ^{
+//                    self.chatBg.frame = CGRectMake(SCREEN_WIDTH - 10- imageSize.width- 30-45, messageBgY, imageSize.width+PhotoSpace*2+5, imageSize.height+PhotoSpace*2);
+//                    [self.chatBg setImage:fromImage];
+//                    
+//                    self.msgImageView.frame = CGRectMake(self.chatBg.frame.origin.x+PhotoSpace+5, self.chatBg.frame.origin.y+PhotoSpace, imageSize.width, imageSize.height);
+//                });
+//            });
+            [Tools fillImageView:self.msgImageView withImageFromURL:msgContent imageWidth:100 andDefault:@"3100"];
+//            [Tools fillImageView:self.msgImageView withImageFromURL:msgContent andDefault:@"3100"];
+            
             self.headerImageView.frame = CGRectMake(5, messageBgY, 40, 40);
-            [Tools fillImageView:self.msgImageView withImageFromURL:msgContent andDefault:@"3100"];
+            
         }
         else
         {
@@ -184,18 +201,6 @@
             }
             
             self.headerImageView.frame = CGRectMake(5, messageBgY, 40, 40);
-//            if (([[dict objectForKey:@"time"] integerValue] - currentSec) > 60*3  || indexPath.row == 0)
-//            {
-//                self.timeLabel.hidden = NO;
-//                currentSec = [[dict objectForKey:@"time"] integerValue];
-//            }
-//            else
-//            {
-//                //                cell.headerImageView.frame = CGRectMake(5, messageBgY-23, 40, 40);
-//                //                cell.chatBg.frame = CGRectMake(55, messageBgY-25, size.width+20, size.height+20);
-//                //                cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x + 10,cell.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+20+he);
-//                self.timeLabel.hidden = YES;
-//            }
             
             [Tools fillImageView:self.headerImageView withImageFromURL:[dict objectForKey:@"ficon"] andDefault:HEADERBG];
         }
@@ -216,18 +221,26 @@
                 x=0;
             }
             
-            NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/%@",IMAGEURL,msgContent]]];
-            UIImage *msgImage = [UIImage imageWithData:imageData];
-            
-            CGSize imageSize = [ImageTools getSizeFromImage:msgImage];
-            
-            self.chatBg.frame = CGRectMake(SCREEN_WIDTH - 10- imageSize.width- 30-45, messageBgY, imageSize.width+20, imageSize.height+20);
+            self.chatBg.frame = CGRectMake(SCREEN_WIDTH - 10- 100- 30-45, messageBgY, 100+PhotoSpace*2+5, 100+PhotoSpace*2);
             [self.chatBg setImage:toImage];
+            self.msgImageView.frame = CGRectMake(self.chatBg.frame.origin.x+PhotoSpace, self.chatBg.frame.origin.y+PhotoSpace, 102, 100);
             
-            self.msgImageView.frame = CGRectMake(self.chatBg.frame.origin.x+10, self.chatBg.frame.origin.y+10, imageSize.width, imageSize.height);
+//            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+//                NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/%@",IMAGEURL,msgContent]]];
+//                UIImage *msgImage = [UIImage imageWithData:imageData];
+//                
+//                CGSize imageSize = [ImageTools getSizeFromImage:msgImage];
+//                dispatch_sync(dispatch_get_main_queue(), ^{
+//                    self.chatBg.frame = CGRectMake(SCREEN_WIDTH - 10- imageSize.width- 30-45, messageBgY, imageSize.width+PhotoSpace*2+5, imageSize.height+PhotoSpace*2);
+//                    [self.chatBg setImage:toImage];
+//                    self.msgImageView.frame = CGRectMake(self.chatBg.frame.origin.x+PhotoSpace, self.chatBg.frame.origin.y+PhotoSpace, imageSize.width, imageSize.height);
+//                });
+//            });
+            [Tools fillImageView:self.msgImageView withImageFromURL:msgContent imageWidth:100 andDefault:@"3100"];
+//            [Tools fillImageView:self.msgImageView withImageFromURL:msgContent andDefault:@"3100"];
             self.headerImageView.frame = CGRectMake(SCREEN_WIDTH - 60, messageBgY, 40, 40);
             [Tools fillImageView:self.headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERBG];
-            [Tools fillImageView:self.msgImageView withImageFromURL:msgContent andDefault:@"3100"];
+            
         }
         else
         {
@@ -264,15 +277,6 @@
             }
             self.headerImageView.frame = CGRectMake(SCREEN_WIDTH - 60, messageBgY, 40, 40);
             
-//            if (([[dict objectForKey:@"time"] integerValue] - currentSec) > 60*3 || indexPath.row == 0)
-//            {
-//                self.timeLabel.hidden = NO;
-//                currentSec = [[dict objectForKey:@"time"] integerValue];
-//            }
-//            else
-//            {
-//                self.timeLabel.hidden = YES;
-//            }
             [Tools fillImageView:self.headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERBG];
         }
     }

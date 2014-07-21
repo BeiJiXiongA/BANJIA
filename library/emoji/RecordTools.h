@@ -16,17 +16,18 @@
 @interface RecordTools : NSObject<AVAudioRecorderDelegate>
 {
     NSURL *tmpFile;
-    AVAudioRecorder *recorder;
     BOOL recording;
     AVAudioPlayer *audioPlayer;
     AVAudioSession *audioSession;
-    
     NSTimer *timer;
     
     NSTimeInterval secs;
 }
-@property (nonatomic, assign) id<RecordDelegate> recordDel;
 
++ (RecordTools *)defaultRecordTools;
+
+@property (nonatomic, assign) id<RecordDelegate> recordDel;
+@property (nonatomic, strong) AVAudioRecorder *recorder;
 
 -(void)record;
 @end
