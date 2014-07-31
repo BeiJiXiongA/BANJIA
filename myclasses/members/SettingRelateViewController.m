@@ -31,6 +31,9 @@
     NSString *studentID;
     
     UIButton *studentButton;
+    
+    UIImageView *arrowImageView;
+    UIImageView *arrowImageView2;
 }
 @end
 
@@ -81,6 +84,11 @@
     [studentButton setTitle:[NSString stringWithFormat:@"   %@",studentName] forState:UIControlStateNormal];
     [self.bgView addSubview:studentButton];
     
+    arrowImageView = [[UIImageView alloc] init];
+    arrowImageView.frame = CGRectMake(studentButton.frame.size.width+studentButton.frame.origin.x-30, studentButton.frame.origin.y+studentButton.frame.size.height/2-5, 15, 10);
+    [arrowImageView setImage:[UIImage imageNamed:@"arrow_down"]];
+    [self.bgView addSubview:arrowImageView];
+    
     studentsTableView = [[UITableView alloc] initWithFrame:CGRectMake(studentButton.frame.origin.x, studentButton.frame.size.height+studentButton.frame.origin.y, studentButton.frame.size.width, 0) style:UITableViewStylePlain];
     studentsTableView.delegate = self;
     studentsTableView.dataSource = self;
@@ -105,11 +113,16 @@
     relateButton.layer.cornerRadius = 5;
     [relateButton setContentHorizontalAlignment:UIControlContentHorizontalAlignmentLeft];
     relateButton.clipsToBounds = YES;
-    [relateButton setTitle:[title substringFromIndex:[title rangeOfString:@"."].location+1] forState:UIControlStateNormal];
+    [relateButton setTitle:[NSString stringWithFormat:@"   %@",[title substringFromIndex:[title rangeOfString:@"."].location+1]] forState:UIControlStateNormal];
     relateButton.frame = CGRectMake(studentButton.frame.origin.x, tipLabel2.frame.origin.y+tipLabel2.frame.size.height, 134, studentButton.frame.size.height);
     [relateButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [relateButton addTarget:self action:@selector(selectRelate) forControlEvents:UIControlEventTouchUpInside];
     [self.bgView addSubview:relateButton];
+    
+    arrowImageView2 = [[UIImageView alloc] init];
+    arrowImageView2.frame = CGRectMake(relateButton.frame.size.width+relateButton.frame.origin.x-30, relateButton.frame.origin.y+relateButton.frame.size.height/2-5, 15, 10);
+    [arrowImageView2 setImage:[UIImage imageNamed:@"arrow_down"]];
+    [self.bgView addSubview:arrowImageView2];
     
     relateTableView = [[UITableView alloc] initWithFrame:CGRectMake(relateButton.frame.origin.x, relateButton.frame.size.height+relateButton.frame.origin.y, relateButton.frame.size.width, 0) style:UITableViewStylePlain];
     relateTableView.delegate = self;
@@ -117,6 +130,7 @@
     relateTableView.tag = 2000;
     relateTableView.layer.cornerRadius = 5;
     relateTableView.clipsToBounds = YES;
+    relateTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     relateTableView.backgroundColor = [UIColor whiteColor];
     [self.bgView addSubview:relateTableView];
     
@@ -162,12 +176,14 @@
     {
         [UIView animateWithDuration:0.2 animations:^{
             relateTableView.frame = CGRectMake(relateButton.frame.origin.x, relateButton.frame.size.height+relateButton.frame.origin.y, relateButton.frame.size.width, [relateArray count]*40);
+            [arrowImageView2 setImage:[UIImage imageNamed:@"arrow_up"]];
         }];
     }
     else
     {
         [UIView animateWithDuration:0.2 animations:^{
             relateTableView.frame = CGRectMake(relateButton.frame.origin.x, relateButton.frame.size.height+relateButton.frame.origin.y, relateButton.frame.size.width, 0);
+            [arrowImageView2 setImage:[UIImage imageNamed:@"arrow_down"]];
         }];
     }
     showRelate = !showRelate;
@@ -179,13 +195,16 @@
     {
         
         [UIView animateWithDuration:0.2 animations:^{
-            studentsTableView.frame = CGRectMake(studentButton.frame.origin.x, studentButton.frame.size.height+studentButton.frame.origin.y, studentButton.frame.size.width, [studentsArray count]*40);
+            CGFloat maxH = [studentsArray count]*40>(SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT-150)?(SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT-150):([studentsArray count] * 40);
+            studentsTableView.frame = CGRectMake(studentButton.frame.origin.x, studentButton.frame.size.height+studentButton.frame.origin.y, studentButton.frame.size.width, maxH);
+            [arrowImageView setImage:[UIImage imageNamed:@"arrow_up"]];
         }];
     }
     else
     {
         [UIView animateWithDuration:0.2 animations:^{
             studentsTableView.frame = CGRectMake(studentButton.frame.origin.x, studentButton.frame.size.height+studentButton.frame.origin.y, studentButton.frame.size.width, 0);
+            [arrowImageView setImage:[UIImage imageNamed:@"arrow_down"]];
         }];
     }
     showStudents = !showStudents;
@@ -218,6 +237,15 @@
         cell.contentView.backgroundColor = [UIColor clearColor];
         cell.textLabel.textColor = [UIColor grayColor];
         cell.textLabel.font = [UIFont systemFontOfSize:16];
+        if (indexPath.row < [studentsArray count]-1)
+        {
+            CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+            UIImageView *lineImageView = [[UIImageView alloc] init];
+            lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            [cell.contentView addSubview:lineImageView];
+            cell.contentView.backgroundColor = [UIColor whiteColor];
+        }
         return cell;
     }
     else if(tableView.tag == 2000)
@@ -232,6 +260,16 @@
         cell.contentView.backgroundColor = [UIColor clearColor];
         cell.textLabel.font = [UIFont systemFontOfSize:16];
         cell.textLabel.textColor = [UIColor grayColor];
+        if (indexPath.row < [relateArray count]-1)
+        {
+            CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+            UIImageView *lineImageView = [[UIImageView alloc] init];
+            lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            [cell.contentView addSubview:lineImageView];
+            cell.contentView.backgroundColor = [UIColor whiteColor];
+        }
+
         return cell;
 
     }

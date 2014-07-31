@@ -33,7 +33,7 @@
     
 //    UIImage *image = [QRCodeGenerator qrImageForString:classNumber imageSize:240];
     
-    UIImage *image = [self getImage];
+    UIImage *image = [self getQrImageWithString:[NSString stringWithFormat:@"%@;%@",@"http://www.banjiaedu.com/welcome/mobile",classNumber] width:480];
     UIImageView *imageView = [[UIImageView alloc] init];
     imageView.frame = CGRectMake(40, UI_NAVIGATION_BAR_HEIGHT+50, 240, 240);
     [imageView setImage:image];
@@ -46,11 +46,11 @@
     // Dispose of any resources that can be recreated.
 }
 
--(UIImage *)getImage
+-(UIImage *)getQrImageWithString:(NSString *)qrString width:(CGFloat)width
 {
-    UIImage *image = [QRCodeGenerator qrImageForString:[NSString stringWithFormat:@"%@;%@",@"http://www.banjiaedu.com/welcome/mobile",classNumber] imageSize:480];
+    UIImage *image = [QRCodeGenerator qrImageForString:qrString imageSize:width];
     UIImage *banjiaIcon = [UIImage imageNamed:@"logo58"];
-    UIGraphicsBeginImageContext(CGSizeMake(480, 480));
+    UIGraphicsBeginImageContext(CGSizeMake(width, width));
     [image drawAtPoint:CGPointMake(0, 0)];
     [banjiaIcon drawAtPoint:CGPointMake(211, 211)];
     UIImage *qrimage = UIGraphicsGetImageFromCurrentImageContext();

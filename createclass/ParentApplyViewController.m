@@ -54,6 +54,8 @@ UIScrollViewDelegate>
     
     NSTimer *timer;
     int sec;
+    
+    UITapGestureRecognizer *tapTgr;
 }
 @end
 
@@ -81,7 +83,7 @@ UIScrollViewDelegate>
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     checkCode = @"";
     re_id = @"";
-    showRelate = YES;
+    showRelate = NO;
     sec = 60;
     
     mainScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT)];
@@ -250,7 +252,7 @@ UIScrollViewDelegate>
     
     [mainScrollView addSubview:relateTableView];
     
-    UITapGestureRecognizer *tapTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapEvent)];
+    tapTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapEvent)];
     mainScrollView.userInteractionEnabled = YES;
     [mainScrollView addGestureRecognizer:tapTgr];
 }
@@ -454,16 +456,19 @@ UIScrollViewDelegate>
     {
         [UIView animateWithDuration:0.2 animations:^{
             
-            relateTableView.frame = CGRectMake(relateButton.frame.origin.x, relateButton.frame.size.height+relateButton.frame.origin.y, relateButton.frame.size.width, [relateArray count]*40);
+            relateTableView.frame = CGRectMake(relateButton.frame.origin.x, relateButton.frame.size.height+relateButton.frame.origin.y, relateButton.frame.size.width, 0);
         }];
+        [mainScrollView addGestureRecognizer:tapTgr];
     }
     else
     {
         [UIView animateWithDuration:0.2 animations:^{
-            relateTableView.frame = CGRectMake(relateButton.frame.origin.x, relateButton.frame.size.height+relateButton.frame.origin.y, relateButton.frame.size.width, 0);
+            relateTableView.frame = CGRectMake(relateButton.frame.origin.x, relateButton.frame.size.height+relateButton.frame.origin.y, relateButton.frame.size.width, [relateArray count]*40);
         }];
+        [mainScrollView removeGestureRecognizer:tapTgr];
     }
     showRelate = !showRelate;
+    [relateTableView reloadData];
 }
 
 
@@ -523,6 +528,7 @@ UIScrollViewDelegate>
     cell.textLabel.textAlignment = NSTextAlignmentCenter;
     cell.textLabel.text = [relateArray objectAtIndex:indexPath.row];
     cell.textLabel.backgroundColor = [UIColor clearColor];
+    
     UIImageView *bgImageBG = [[UIImageView alloc] init];
     bgImageBG.image = [UIImage imageNamed:@"line3"];
     bgImageBG.backgroundColor = [UIColor clearColor];
@@ -531,6 +537,7 @@ UIScrollViewDelegate>
 }
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    DDLOG(@"didselect row");
     if (indexPath.row == [relateArray count]-1)
     {
         relatetextField.hidden = NO;

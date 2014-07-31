@@ -29,6 +29,7 @@ arrowImageView;
         
         headerImageView = [[UIImageView alloc] init];
         headerImageView.layer.contentsGravity = kCAGravityResizeAspectFill;
+        headerImageView.clipsToBounds = YES;
         [bgView addSubview:headerImageView];
         
         nameLabel = [[UILabel alloc] init];

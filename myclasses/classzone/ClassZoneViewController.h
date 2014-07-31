@@ -15,7 +15,7 @@
 @end
 
 @interface ClassZoneViewController : XDContentViewController
-@property (nonatomic) BOOL fromClasses;
+@property (nonatomic) BOOL isApply;
 @property (nonatomic) BOOL fromMsg;
 @property (nonatomic, assign) id<FreshClassZone> refreshDel;
 @end

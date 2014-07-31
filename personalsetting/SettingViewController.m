@@ -74,7 +74,7 @@ MFMailComposeViewControllerDelegate>
     settingTableView.delegate = self;
     settingTableView.backgroundView = tableViewBg;
     settingTableView.dataSource = self;
-    settingTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    settingTableView.backgroundColor = self.bgView.backgroundColor;
     [self.bgView addSubview:settingTableView];
     
 //    [self getUserSet];
@@ -120,8 +120,9 @@ MFMailComposeViewControllerDelegate>
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
     UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 8.5, SCREEN_WIDTH, 20)];
-    headerLabel.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.8];
+    headerLabel.backgroundColor = self.bgView.backgroundColor;
     headerLabel.font = [UIFont systemFontOfSize:16];
+    
     if (section == 0)
     {
         headerLabel.text = @"   消息设置";
@@ -157,6 +158,11 @@ MFMailComposeViewControllerDelegate>
     if (cell == nil)
     {
         cell = [[LimitCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:settingcell];
+    }
+    
+    if ([cell respondsToSelector:@selector(setSeparatorInset:)])
+    {
+        [cell setSeparatorInset:UIEdgeInsetsZero];
     }
     
     for(UIView *v in cell.contentView.subviews)
@@ -258,10 +264,6 @@ MFMailComposeViewControllerDelegate>
         cell.mySwitch.tag = indexPath.row*SWITCHTAG;
         [cell.mySwitch addTarget:self action:@selector(switchchange:) forControlEvents:UIControlEventValueChanged];
        
-        UIImageView *bgImageBG = [[UIImageView alloc] init];
-        bgImageBG.image = [UIImage imageNamed:@"line4"];
-        bgImageBG.backgroundColor = [UIColor clearColor];
-        cell.backgroundView = bgImageBG;
         cell.backgroundColor = [UIColor whiteColor];
         
     }
@@ -288,17 +290,13 @@ MFMailComposeViewControllerDelegate>
             }
             else
             {
-                cell.markLabel.text = [NSString stringWithFormat:@"当前版本%.1f",[[Tools client_ver] floatValue]];
+                cell.markLabel.text = [NSString stringWithFormat:@"当前版本%@",[Tools client_ver]];
             }
             
 //            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"discovery_arrow"]];
 //            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 12.5, 10, 15)];
         }
-        UIImageView *bgImageBG = [[UIImageView alloc] init];
-        bgImageBG.image = [UIImage imageNamed:@"line4"];
-        bgImageBG.backgroundColor = [UIColor clearColor];
-        cell.backgroundView = bgImageBG;
-//        cell.backgroundColor = [UIColor whiteColor];
+        
     }
     else if(indexPath.section == 2)
     {
@@ -313,19 +311,19 @@ MFMailComposeViewControllerDelegate>
             [loginOutButton setTitle:@"注销" forState:UIControlStateNormal];
             [loginOutButton addTarget:self action:@selector(askloginOut) forControlEvents:UIControlEventTouchUpInside];
             [cell.contentView addSubview:loginOutButton];
-            cell.backgroundColor = [UIColor clearColor];
+            cell.backgroundColor = self.bgView.backgroundColor;
             cell.contentView.backgroundColor = [UIColor clearColor];
             cell.backgroundView = nil;
+//            if ([cell respondsToSelector:@selector(setSeparatorInset:)])
+//            {
+//                [cell setSeparatorInset:UIEdgeInsetsMake(1000, 1001, 10011, 0)];
+//            }
         }
         else
         {
-            cell.arrowImageView.frame = CGRectMake(SCREEN_WIDTH-25, 27.5, 10, 15);
+            cell.arrowImageView.frame = CGRectMake(SCREEN_WIDTH-25, 14, 10, 15);
             [cell.arrowImageView setImage:[UIImage imageNamed:@"discovery_arrow"]];
             cell.arrowImageView.backgroundColor = [UIColor whiteColor];
-            UIImageView *bgImageBG = [[UIImageView alloc] init];
-            bgImageBG.image = [UIImage imageNamed:@"line4"];
-            bgImageBG.backgroundColor = [UIColor clearColor];
-            cell.backgroundView = bgImageBG;
 //            cell.backgroundColor = [UIColor whiteColor];
         }
     }
@@ -401,16 +399,15 @@ MFMailComposeViewControllerDelegate>
                 NSDictionary *releaseInfo = [results objectAtIndex:0];
                 
                 NSString *latestVersion = [releaseInfo objectForKey:@"version"];
-                double doubleUpdateVersion = [latestVersion doubleValue];
+//                double doubleUpdateVersion = [latestVersion doubleValue];
                 _trackViewUrl = [releaseInfo objectForKey:@"trackViewUrl"];
                 NSString *trackName = [releaseInfo objectForKey:@"trackName"];
                 
                 
                 NSDictionary *infoDict = [[NSBundle mainBundle] infoDictionary];
                 NSString *currentVersion = [infoDict objectForKey:@"CFBundleShortVersionString"];
-                double doubleCurrentVersion = [currentVersion doubleValue];
                 
-                if (doubleCurrentVersion < doubleUpdateVersion) {
+                if (currentVersion < latestVersion) {
                     
                     UIAlertView *alert;
                     alert = [[UIAlertView alloc] initWithTitle:trackName

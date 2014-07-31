@@ -9,7 +9,7 @@
 #import "ClassInfoViewController.h"
 #import "XDTabViewController.h"
 #import "PersonalSettingCell.h"
-#import "MoreViewController.h"
+
 #import "SetClassInfoViewController.h"
 #import "SearchSchoolViewController.h"
 #import "ClassQRViewController.h"
@@ -56,7 +56,7 @@ SetClassInfoDel>
 @end
 
 @implementation ClassInfoViewController
-@synthesize signOutDel;
+@synthesize signOutDel,classinfoDict;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -85,12 +85,6 @@ SetClassInfoDel>
     className = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
     schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
     schoolID = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolid"];
-    
-    UIButton *inviteButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [inviteButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
-    inviteButton.frame = CGRectMake(SCREEN_WIDTH - CORNERMORERIGHT, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
-    [inviteButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
-    [self.navigationBarView addSubview:inviteButton];
     
     topicImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 150)];
     topicImageView.backgroundColor = [UIColor whiteColor];
@@ -136,7 +130,7 @@ SetClassInfoDel>
     imagePickerController = [[UIImagePickerController alloc] init];
     imagePickerController.delegate = self;
     
-    classInfoTableView = [[UITableView alloc] initWithFrame:CGRectMake(0,UI_NAVIGATION_BAR_HEIGHT , SCREEN_WIDTH, SCREEN_HEIGHT-UI_TAB_BAR_HEIGHT-UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
+    classInfoTableView = [[UITableView alloc] initWithFrame:CGRectMake(0,UI_NAVIGATION_BAR_HEIGHT , SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
     classInfoTableView.delegate = self;
     classInfoTableView.dataSource = self;
     classInfoTableView.backgroundColor = [UIColor clearColor];
@@ -185,9 +179,7 @@ SetClassInfoDel>
 
 -(void)unShowSelfViewController
 {
-    [[XDTabViewController sharedTabViewController] dismissViewControllerAnimated:YES completion:nil];
-    [[NSUserDefaults standardUserDefaults] setObject:NOTFROMCLASS forKey:FROMWHERE];
-    [[NSUserDefaults standardUserDefaults] synchronize];
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 #pragma mark - aboutNotification
@@ -202,7 +194,7 @@ SetClassInfoDel>
     {
         classInfo = infoValue;
     }
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"changeClassInfo" object:nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:CHANGECLASSINFO object:nil];
     [classInfoTableView reloadData];
 }
 
@@ -378,14 +370,14 @@ SetClassInfoDel>
             setClassInfoViewController.infoStr = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
             setClassInfoViewController.classID = classID;
             setClassInfoViewController.setClassInfoDel = self;
-            [[XDTabViewController sharedTabViewController] .navigationController pushViewController:setClassInfoViewController animated:YES];
+            [self.navigationController pushViewController:setClassInfoViewController animated:YES];
         }
     }
     else if(indexPath.row == 2)
     {
         ClassQRViewController *classQRVC = [[ClassQRViewController alloc] init];
         classQRVC.classNumber = classNumber;
-        [[XDTabViewController sharedTabViewController].navigationController pushViewController:classQRVC animated:YES];
+        [self.navigationController pushViewController:classQRVC animated:YES];
     }
     else if(indexPath.row == 6)
     {
@@ -398,7 +390,7 @@ SetClassInfoDel>
             setClassInfoViewController.infoKey = @"info";
             setClassInfoViewController.infoStr = classInfo;
             setClassInfoViewController.setClassInfoDel = self;
-            [[XDTabViewController sharedTabViewController] .navigationController pushViewController:setClassInfoViewController animated:YES];
+            [self.navigationController pushViewController:setClassInfoViewController animated:YES];
         }
     }
     else if (indexPath.row == 4)
@@ -413,46 +405,14 @@ SetClassInfoDel>
             [[NSUserDefaults standardUserDefaults] setObject:BINDCLASSTOSCHOOL forKey:SEARCHSCHOOLTYPE];
             [[NSUserDefaults standardUserDefaults] synchronize];
             
-            [[XDTabViewController sharedTabViewController] .navigationController pushViewController:searchSchoolInfoViewController animated:YES];
+            [self.navigationController pushViewController:searchSchoolInfoViewController animated:YES];
         }
     }
 }
 
--(void)moreClick
-{
-    OperatDB *db = [[OperatDB alloc] init];
-    NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
-    int userAdmin = [[dict objectForKey:@"admin"] integerValue];
-    if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
-    {
-        UIActionSheet *moreAction = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"班级设置", nil];
-        moreAction.tag = MOREACTIONSHEETTAG;
-        [moreAction showInView:self.bgView];
-    }
-    else
-    {
-        UIActionSheet *moreAction = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"退出班级", nil];
-        moreAction.tag = MOREACTIONSHEETTAG;
-        [moreAction showInView:self.bgView];
-    }
-}
-
--(void)signOut
-{
-    UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"确定要退出这个班级吗？" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
-    al.tag = 2222;
-    [al show];
-}
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    if (alertView.tag == 2222)
-    {
-        if (buttonIndex == 1)
-        {
-            [self signoutclass];
-        }
-    }
-    else if (alertView.tag == HEADERIMAGETAG)
+    if (alertView.tag == HEADERIMAGETAG)
     {
         if (buttonIndex == 1)
         {
@@ -468,67 +428,9 @@ SetClassInfoDel>
     }
 }
 
--(void)signoutclass
-{
-    if ([Tools NetworkReachable])
-    {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
-                                                                      @"token":[Tools client_token],
-                                                                      @"role":[[NSUserDefaults standardUserDefaults] objectForKey:@"role"],
-                                                                      @"c_id":classID
-                                                                      } API:SIGNOUTCLASS];
-        [request setCompletionBlock:^{
-            [Tools hideProgress:self.bgView];
-            NSString *responseString = [request responseString];
-            NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"signout responsedict %@",responseString);
-            if ([[responseDict objectForKey:@"code"] intValue]== 1)
-            {
-                [[NSNotificationCenter defaultCenter] postNotificationName:CHANGECLASSINFO object:nil];
-                [self unShowSelfViewController];
-            }
-            else
-            {
-                [Tools dealRequestError:responseDict fromViewController:nil];
-            }
-        }];
-        
-        [request setFailedBlock:^{
-            NSError *error = [request error];
-            DDLOG(@"error %@",error);
-            [Tools hideProgress:self.bgView];
-        }];
-        [Tools showProgress:self.bgView];
-        [request startAsynchronous];
-    }
-}
-
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    if (actionSheet.tag == MOREACTIONSHEETTAG)
-    {
-        OperatDB *db = [[OperatDB alloc] init];
-        NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
-        int userAdmin = [[dict objectForKey:@"admin"] integerValue];
-        if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
-        {
-            if (buttonIndex == 0)
-            {
-                //班级设置
-                MoreViewController *more = [[MoreViewController alloc] init];
-                [[XDTabViewController sharedTabViewController].navigationController pushViewController:more animated:YES];
-            }
-        }
-        else
-        {
-            if (buttonIndex == 0)
-            {
-                //退出班级
-                [self signOut];
-            }
-        }
-    }
-    else if(actionSheet.tag == TAKEPICTURETAG)
+    if(actionSheet.tag == TAKEPICTURETAG)
     {
         if (buttonIndex == 0)
         {
@@ -559,7 +461,17 @@ SetClassInfoDel>
     int userAdmin = [[dict objectForKey:@"admin"] integerValue];
     if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
     {
-        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"从相册选取",@"拍照", nil];
+        NSString *title;
+        if ([imageUsed isEqualToString:@"img_icon"])
+        {
+            title = @"更换班级头像";
+        }
+        else
+        {
+            title = @"更换班级背景";
+        }
+        
+        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:title delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"从相册选取",@"拍照", nil];
         ac.tag = TAKEPICTURETAG;
         [ac showInView:self.bgView];
     }
@@ -654,20 +566,19 @@ SetClassInfoDel>
             {
                 if ([imageKey isEqualToString:@"img_kb"])
                 {
-                    [[NSNotificationCenter defaultCenter] postNotificationName:@"changeClassInfo" object:nil];
-                    
                     [[NSUserDefaults standardUserDefaults]  setObject:[[responseDict objectForKey:@"data"] objectForKey:@"files"] forKey:@"classkbimage"];
                     [[NSUserDefaults standardUserDefaults] synchronize];
                     
+                    [[NSNotificationCenter defaultCenter] postNotificationName:CHANGECLASSINFO object:nil];
                     [topicImageView setImage:image];
                     
                 }
                 else if ([imageKey isEqualToString:@"img_icon"])
                 {
-                    [[NSNotificationCenter defaultCenter] postNotificationName:@"changeClassInfo" object:nil];
-                    
                     [[NSUserDefaults standardUserDefaults] setObject:[[responseDict objectForKey:@"data"] objectForKey:@"files"] forKey:@"classiconimage"];
                     [[NSUserDefaults standardUserDefaults] synchronize];
+                    
+                    [[NSNotificationCenter defaultCenter] postNotificationName:CHANGECLASSINFO object:nil];
                     [headerImageView setImage:image];
                 }
                 [classInfoTableView reloadData];

@@ -12,4 +12,11 @@
 + (UIImage *)getNormalImageFromImage:(UIImage *)originalImage;
 
 + (CGSize)getSizeFromImage:(UIImage *)image;
+
++ (UIImage *)imageWithUrl:(NSString *)imageUrl;
+
++ (NSDictionary *)iconDictWithUserID:(NSString *)userid;
+
++ (UIImage *)getQrImageWithString:(NSString *)qrString width:(CGFloat)width;
+
 @end

@@ -22,6 +22,8 @@
 #define TRANSADMINTAG  4000
 #define KICKALTAG    5000
 
+#define ContaceACTag  6000
+
 #define BGIMAGEHEIGHT   150
 
 @interface MemberDetailViewController ()<
@@ -353,7 +355,9 @@ UIActionSheetDelegate>
         {
             if (![teacherID isEqualToString:[Tools user_id]])
             {
-                [self callToUser];
+                UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"打电话",@"发短信", nil];
+                ac.tag = ContaceACTag;
+                [ac showInView:self.bgView];
             }
         }
     }
@@ -441,6 +445,17 @@ UIActionSheetDelegate>
             reportVC.reportUserid = teacherID;
             reportVC.reportContentID = @"";
             [self.navigationController pushViewController:reportVC animated:YES];
+        }
+    }
+    else if(actionSheet.tag == ContaceACTag)
+    {
+        if (buttonIndex == 0)
+        {
+            [self callToUser];
+        }
+        else if(buttonIndex == 1)
+        {
+            [self showMessageView];
         }
     }
 }
@@ -716,7 +731,7 @@ UIActionSheetDelegate>
         
         MFMessageComposeViewController * controller = [[MFMessageComposeViewController alloc]init]; //autorelease];
         
-        controller.recipients = [NSArray arrayWithObject:userPhone];
+        controller.recipients = [NSArray arrayWithObject:phoneNum];
         
         NSString *msgBody;
         

@@ -8,7 +8,6 @@
 
 #import "WelcomeViewController.h"
 #import "Header.h"
-#import "LoginViewController.h"
 #import "RegistViewController.h"
 #import "CustomSwitch.h"
 #import "UIImageView+WebCache.h"

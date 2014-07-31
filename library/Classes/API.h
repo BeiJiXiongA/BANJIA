@@ -122,6 +122,14 @@
 #define GETCHATLIST     @"/chats/mbNewChatList"
 #define LASTVIEWTIME    @"/chats/mbLastViewTime"
 #define UPLOADCHATFILE     @"/chats/mbUploadChatFile"
+#define CREATEGROUPCHAT   @"/chats/mbcreateGroupChat"
+#define GROUPCHATLIST     @"/chats/mbGetGroupChatList"   //u_id','~c_id'
+#define GROUPCHAT       @"/chats/mbGroupChat"   //'u_id', 'g_id', 'content'
+#define GETGROUPINFO    @"/chats/mbGetGroupInfo"
+#define EXITGROUPCHAT    @"/chats/mbOffGroupChat"
+#define SETGROUPCHAT   @"/chats/mbSetGroupChat"
+#define JOINGROUPCHAR  @"/chats/mbJoinCgroup"
+
 
 #define MSGLIST    @"/messages/mbmsglist"
 

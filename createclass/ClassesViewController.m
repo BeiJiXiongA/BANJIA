@@ -263,7 +263,7 @@
         [ud setObject:classid forKey:@"classid"];
         [ud setObject:className forKey:@"classname"];
         [ud synchronize];
-        classZoneViewController.fromClasses = YES;
+        classZoneViewController.isApply = YES;
         [self.navigationController pushViewController:classZoneViewController animated:YES];
     }
     [tableView deselectRowAtIndexPath:indexPath animated:NO];

@@ -16,4 +16,5 @@
 
 @interface ClassInfoViewController : XDContentViewController<UIImagePickerControllerDelegate,UINavigationControllerDelegate>
 @property (nonatomic, strong) id<moreDelegate> signOutDel;
+@property (nonatomic, strong) NSDictionary *classinfoDict;
 @end

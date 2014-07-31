@@ -39,11 +39,12 @@
         memNameLabel = [[UILabel alloc] initWithFrame:CGRectMake(60, 10, 150, 30)];
         memNameLabel.backgroundColor = [UIColor clearColor];
         memNameLabel.font = [UIFont systemFontOfSize:17];
-        memNameLabel.textColor = CONTENTCOLOR;
+        memNameLabel.textColor = TITLE_COLOR;
         [self.contentView addSubview:memNameLabel];
         
         headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 10, 40, 40)];
         headerImageView.backgroundColor = [UIColor whiteColor];
+        headerImageView.clipsToBounds = YES;
         headerImageView.layer.contentsGravity = kCAGravityResizeAspectFill;
         [self.contentView addSubview:headerImageView];
         

@@ -58,9 +58,12 @@
     
     self.bgView = [[UIView alloc] init];
     self.bgView.frame = CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    if(SYSVERSION >= 7.0)
+    {
+        [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
+    }
     
-    [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
-
+        
     self.navigationBar.hidden = YES;
     
     UIImageView *shadowImageView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"leftside_shadow_bg"]];

@@ -7,7 +7,6 @@
 //
 
 #import "HomeViewController.h"
-//#import "MBProgressHUD.h"
 #import "KKNavigationController.h"
 #import "KKNavigationController+JDSideMenu.h"
 #import "UINavigationController+JDSideMenu.h"
@@ -24,13 +23,21 @@
 #import "SearchClassViewController.h"
 #import "CreateClassViewController.h"
 #import "DiaryTools.h"
+#import "CheckQRCodeViewController.h"
+
+#import "ZBarReaderViewController.h"
+#import "ZBarSDK.h"
+
+#import "ClassZoneViewController.h"
+
+#import "ChatViewController.h"
 
 #define ImageViewTag  9999
 #define HeaderImageTag  7777
 #define CellButtonTag   33333
 
 #define SectionTag  999999
-#define RowTag     100
+#define RowTag     3333
 
 #define ImageHeight  65.5f
 
@@ -49,7 +56,8 @@ NotificationDetailDelegate,
 NameButtonDel,
 ChatDelegate,
 MsgDelegate,
-DongTaiDetailAddCommentDelegate>
+DongTaiDetailAddCommentDelegate,
+ZBarReaderViewDelegate>
 {
     NSString *page;
     
@@ -59,6 +67,7 @@ DongTaiDetailAddCommentDelegate>
     UIView *addView;
     MyButton *addNoticeButton;
     MyButton *addDiaryButton;
+    MyButton *qrCodeButton;
     NSDictionary *waitTransmitDict;
     NSDictionary *waitCommentDict;
     DemoVIew *demoView;
@@ -93,6 +102,8 @@ DongTaiDetailAddCommentDelegate>
     UIButton *joinClassButton;
     UIButton *createClassButton;
     UILabel *tipLabel;
+    
+    UIView *line;
 }
 @end
 
@@ -193,7 +204,7 @@ DongTaiDetailAddCommentDelegate>
     footerView = [[FooterView alloc] initWithScrollView:classTableView];
     footerView.delegate = self;
     
-    addView = [[UIView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH-147, UI_NAVIGATION_BAR_HEIGHT-10, 129, 95)];
+    addView = [[UIView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH-147, UI_NAVIGATION_BAR_HEIGHT-10, 129, 135)];
 //    addView.point = CGPointMake(90, 0);
 //    addView.wid = 2;
     addView.backgroundColor = [UIColor clearColor];
@@ -228,6 +239,15 @@ DongTaiDetailAddCommentDelegate>
     [addDiaryButton setBackgroundImage:[UIImage imageNamed:@"publish"] forState:UIControlStateNormal];
     [addDiaryButton setBackgroundImage:[UIImage imageNamed:@"publish_on"] forState:UIControlStateHighlighted];
     [addDiaryButton addTarget:self action:@selector(addDongtai) forControlEvents:UIControlEventTouchUpInside];
+    
+    qrCodeButton = [MyButton buttonWithType:UIButtonTypeCustom];
+    qrCodeButton.frame = CGRectMake(4, 93, 120, 38);
+    qrCodeButton.alpha = 0;
+    [qrCodeButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+    qrCodeButton.backgroundColor = [UIColor greenColor];
+    [qrCodeButton setTitle:@"扫一扫" forState:UIControlStateNormal];
+    [addView addSubview:qrCodeButton];
+    [qrCodeButton addTarget:self action:@selector(toqrview) forControlEvents:UIControlEventTouchUpInside];
     
     
     addView.alpha = 0;
@@ -284,6 +304,348 @@ DongTaiDetailAddCommentDelegate>
 
 }
 
+#pragma mark - 扫一扫
+
+-(void)toqrview
+{
+    //扫一扫
+    ZBarReaderViewController *reader = [ZBarReaderViewController new];
+    reader.readerDelegate = self;
+    reader.supportedOrientationsMask = ZBarOrientationMaskAll;
+    reader.showsZBarControls = NO;
+    reader.readerView.torchMode = 0;
+    [self setOverlayPickerView:reader];
+    
+    ZBarImageScanner *scanner = reader.scanner;
+    [scanner setSymbology: ZBAR_I25
+                   config: ZBAR_CFG_ENABLE
+                       to: 0];
+    [self.navigationController presentViewController:reader animated:YES completion:nil];
+    if (addOpen)
+    {
+        addOpen = NO;
+        [self closeAdd];
+    }
+}
+
+- (void)setOverlayPickerView:(ZBarReaderViewController *)reader
+
+{
+    
+    //清除原有控件
+    
+    for (UIView *temp in [reader.view subviews])
+    {
+        for (UIButton *button in [temp subviews])
+        {
+            if ([button isKindOfClass:[UIButton class]])
+            {
+                [button removeFromSuperview];
+            }
+        }
+        
+        for (UIToolbar *toolbar in [temp subviews])
+        {
+            if ([toolbar isKindOfClass:[UIToolbar class]])
+            {
+                [toolbar setHidden:YES];
+                
+                [toolbar removeFromSuperview];
+            }
+        }
+    }
+    
+    //    CGFloat width = 280.0f;
+    
+    //画中间的基准线
+    
+    line = [[UIView alloc] init];
+    line.frame = CGRectMake(40, (SCREEN_HEIGHT+20)/2, 240, 1);
+    line.backgroundColor = [UIColor greenColor];
+    //    [reader.view addSubview:line];
+    
+    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
+    animation.fromValue = [NSValue valueWithCGPoint:CGPointMake(20, 80)];
+    animation.toValue = [NSValue valueWithCGPoint:CGPointMake(20, 220)];
+    animation.duration = 0.5;
+    animation.autoreverses = YES;
+    animation.repeatCount = INFINITY;
+    [line.layer addAnimation:animation forKey:@"123"];
+    
+    //最上部view
+    
+    UIView* upView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, (SCREEN_HEIGHT-240)/2)];
+    
+    upView.alpha = 0.3;
+    
+    upView.backgroundColor = [UIColor blackColor];
+    
+    [reader.view addSubview:upView];
+    
+    //用于说明的label
+    
+    UILabel * labIntroudction= [[UILabel alloc] init];
+    
+    labIntroudction.backgroundColor = [UIColor clearColor];
+    
+    labIntroudction.frame=CGRectMake(15, 20, 290, 50);
+    
+    labIntroudction.numberOfLines=2;
+    
+    labIntroudction.textColor=[UIColor whiteColor];
+    
+    labIntroudction.text=@"";
+    
+    [upView addSubview:labIntroudction];
+    
+    
+    //左侧的view
+    
+    UIView *leftView = [[UIView alloc] initWithFrame:CGRectMake(0, (SCREEN_HEIGHT-240)/2, 20, 280)];
+    
+    leftView.alpha = 0.3;
+    
+    leftView.backgroundColor = [UIColor blackColor];
+    
+    [reader.view addSubview:leftView];
+    
+    
+    //右侧的view
+    
+    UIView *rightView = [[UIView alloc] initWithFrame:CGRectMake(300, (SCREEN_HEIGHT-240)/2, 20, 280)];
+    
+    rightView.alpha = 0.3;
+    
+    rightView.backgroundColor = [UIColor blackColor];
+    
+    [reader.view addSubview:rightView];
+    
+    
+    //底部view
+    
+    UIView * downView = [[UIView alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT-(SCREEN_HEIGHT-240)/2+40, 320, (SCREEN_HEIGHT-240)/2+20)];
+    
+    downView.alpha = 0.3;
+    
+    downView.backgroundColor = [UIColor blackColor];
+    
+    [reader.view addSubview:downView];
+    
+    UIImageView *upLeftCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_1"]];
+    upLeftCorner.frame = CGRectMake(20, (SCREEN_HEIGHT-240)/2, 30, 30);
+    [reader.view addSubview:upLeftCorner];
+    
+    UIImageView *upRightCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_2"]];
+    upRightCorner.frame = CGRectMake(20+280-30, (SCREEN_HEIGHT-240)/2, 30, 30);
+    [reader.view addSubview:upRightCorner];
+    
+    UIImageView *downLeftCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_4"]];
+    downLeftCorner.frame = CGRectMake(20, (SCREEN_HEIGHT+YSTART-240)/2+240, 30, 30);
+    [reader.view addSubview:downLeftCorner];
+    
+    UIImageView *downRightCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_3"]];
+    downRightCorner.frame = CGRectMake(300-30, (SCREEN_HEIGHT+YSTART-240)/2+240, 30, 30);
+    [reader.view addSubview:downRightCorner];
+    
+    
+    //用于取消操作的button
+    
+    UIButton *cancelButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    
+    cancelButton.alpha = 0.4;
+    
+    [cancelButton setFrame:CGRectMake(20, SCREEN_HEIGHT-40, 40, 40)];
+    
+    [cancelButton setTitle:@"取消" forState:UIControlStateNormal];
+    
+    //    [cancelButton setImage:[UIImage imageNamed:@"outer_nav_backbtn_s"] forState:UIControlStateNormal];
+    
+    [cancelButton.titleLabel setFont:[UIFont boldSystemFontOfSize:20]];
+    
+    [cancelButton addTarget:self action:@selector(dismissOverlayView:)forControlEvents:UIControlEventTouchUpInside];
+    
+    [reader.view addSubview:cancelButton];
+    
+}
+
+//取消button方法
+
+- (void)dismissOverlayView:(id)sender
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+- (void) imagePickerController: (UIImagePickerController*) picker
+ didFinishPickingMediaWithInfo: (NSDictionary*) info
+{
+    id<NSFastEnumeration> results =
+    [info objectForKey: ZBarReaderControllerResults];
+    ZBarSymbol *symbol = nil;
+    for(symbol in results)
+        break;
+    [picker dismissViewControllerAnimated:YES completion:^{
+        //        [self.navigationController popViewControllerAnimated:YES];
+        DDLOG(@"%@",symbol.data);
+        NSString *resultStr = symbol.data;
+        if ([resultStr rangeOfString:@";"].length > 0)
+        {
+            [self searchClass:[resultStr substringFromIndex:[resultStr rangeOfString:@";"].location+1]];
+        }
+        else
+        {
+            NSRange range1 = [resultStr rangeOfString:@"?"];
+            NSRange range2 = [resultStr rangeOfString:@"="];
+            if (range1.length > 0 && range2.length > 0)
+            {
+                NSString *key = [resultStr substringWithRange:NSMakeRange(range1.location+1, range2.location-range1.location-1)];
+                NSString *value = [resultStr substringWithRange:NSMakeRange(range2.location+1, [resultStr length]-range2.location-1)];
+                DDLOG(@"key = %@  value = %@",key,value);
+                if([key isEqualToString:@"groupid"])
+                {
+                    [self joinGroupChat:value];
+                }
+                else if([key isEqualToString:@"classid"])
+                {
+                    [self searchClass:value];
+                }
+            }
+        }
+    }];
+    
+}
+
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+-(void)joinGroupChat:(NSString *)groupID
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"g_id":groupID,
+                                                                      } API:JOINGROUPCHAR];
+        [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"searchclass responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                ChatViewController *chatVC = [[ChatViewController alloc] init];
+                chatVC.toID = groupID;
+                chatVC.isGroup = YES;
+                [self.navigationController pushViewController:chatVC animated:YES];
+            }
+            else
+            {
+                [self.navigationController popViewControllerAnimated:YES];
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+            
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools hideProgress:self.bgView];
+        }];
+        [Tools showProgress:self.bgView];
+        [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
+}
+
+-(void)searchClass:(NSString *)searchContent
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"c_id":@"",
+                                                                      @"number":[NSString stringWithFormat:@"%d",[searchContent integerValue]]
+                                                                      } API:SEARCHCLASS];
+        [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"searchclass responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                if (![[responseDict objectForKey:@"data"] isEqual:[NSNull null]])
+                {
+                    if ([[responseDict objectForKey:@"data"] isKindOfClass:[NSDictionary class]])
+                    {
+                        NSString *classID = [[responseDict objectForKey:@"data"] objectForKey:@"_id"];
+                        NSString *className = [[responseDict objectForKey:@"data"] objectForKey:@"name"];
+                        
+                        if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"classid":classID} andTableName:MYCLASSTABLE] count]> 0)
+                        {
+                            [Tools showAlertView:@"您已经是这个班的一员了" delegateViewController:nil];
+                            return ;
+                        }
+                        
+                        NSString *schoolName;
+                        if (![[[responseDict objectForKey:@"data"] objectForKey:@"school"] isEqual:[NSNull null]])
+                        {
+                            schoolName = [[[responseDict objectForKey:@"data"] objectForKey:@"school"] objectForKey:@"name"];
+                        }
+                        else
+                        {
+                            schoolName = @"未指定学校";
+                        }
+                        
+                        ClassZoneViewController *classZone = [[ClassZoneViewController alloc] init];
+                        classZone.isApply = YES;
+                        [[NSUserDefaults standardUserDefaults] setObject:classID forKey:@"classid"];
+                        [[NSUserDefaults standardUserDefaults] setObject:className forKey:@"classname"];
+                        [[NSUserDefaults standardUserDefaults] setObject:schoolName forKey:@"schoolname"];
+                        [[NSUserDefaults standardUserDefaults] synchronize];
+                        [self.navigationController pushViewController:classZone animated:YES];
+                    }
+                    
+                    else
+                    {
+                        [Tools showTips:@"未找到任何班级" toView:self.bgView];
+                    }
+                }
+                else
+                {
+                    [Tools showTips:@"未找到任何班级" toView:self.bgView];
+                }
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+            
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools hideProgress:self.bgView];
+        }];
+        [Tools showProgress:self.bgView];
+        [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
+}
+
+
+
+
 -(void)dealloc
 {
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
@@ -316,13 +678,6 @@ DongTaiDetailAddCommentDelegate>
             self.unReadLabel.hidden = NO;
         }
     }
-}
-
-
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
 -(void)viewWillDisappear:(BOOL)animated
@@ -830,6 +1185,12 @@ DongTaiDetailAddCommentDelegate>
         cell.commentButton.hidden = NO;
         cell.transmitButton.hidden = NO;
         
+        cell.headerImageView.tag = SectionTag * indexPath.section + indexPath.row;
+        
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(headerImageViewClicked:)];
+        cell.headerImageView.userInteractionEnabled = YES;
+        [cell.headerImageView addGestureRecognizer:tap];
+        
         cell.commentsTableView.frame = CGRectMake(0, 0, 0, 0);
         
         cell.nameLabel.frame = CGRectMake(60, 5, [nameStr length]*18>170?170:([nameStr length]*18), 25);
@@ -918,8 +1279,8 @@ DongTaiDetailAddCommentDelegate>
                 // 内容模式
                 imageView.clipsToBounds = YES;
                 imageView.contentMode = UIViewContentModeScaleAspectFill;
-                [Tools fillImageView:imageView withImageFromURL:[imgsArray firstObject] imageWidth:100.0f andDefault:@"3100"];
-                //                    [Tools fillImageView:imageView withImageFromURL:[imgsArray firstObject] ];
+//                [Tools fillImageView:imageView withImageFromURL:[imgsArray firstObject] imageWidth:100.0f andDefault:@"3100"];
+                [Tools fillImageView:imageView withImageFromURL:[imgsArray firstObject] andDefault:@"3100"];
                 [cell.imagesView addSubview:imageView];
             }
             else
@@ -951,7 +1312,8 @@ DongTaiDetailAddCommentDelegate>
                     // 内容模式
                     imageView.clipsToBounds = YES;
                     imageView.contentMode = UIViewContentModeScaleAspectFill;
-                    [Tools fillImageView:imageView withImageFromURL:[imgsArray objectAtIndex:i] andDefault:@"3100"];
+                    [Tools fillImageView:imageView withImageFromURL:[imgsArray objectAtIndex:i] imageWidth:100.0f andDefault:@"3100"];
+//                    [Tools fillImageView:imageView withImageFromURL:[imgsArray objectAtIndex:i] andDefault:@"3100"];
                     [cell.imagesView addSubview:imageView];
                 }
                 
@@ -1078,6 +1440,21 @@ DongTaiDetailAddCommentDelegate>
     return nil;
 }
 
+-(void)headerImageViewClicked:(UITapGestureRecognizer *)tap
+{
+    int section = ((tap.view.tag)/SectionTag-1)-[noticeArray count];
+    int row = (tap.view.tag)%SectionTag;
+    NSDictionary *groupDict = [groupDiaries objectAtIndex:section];
+    NSArray *tmpArray = [groupDict objectForKey:@"diaries"];
+    NSDictionary *dict = [tmpArray objectAtIndex:row];
+    DDLOG(@"diary dict %@",dict);
+    PersonDetailViewController *personDetail = [[PersonDetailViewController alloc] init];
+    personDetail.personID = [[dict objectForKey:@"by"] objectForKey:@"_id"];
+    personDetail.personName = [[dict objectForKey:@"by"] objectForKey:@"name"];
+    personDetail.headerImg = [[dict objectForKey:@"by"] objectForKey:@"img_icon"];
+    [self.navigationController pushViewController:personDetail animated:YES];
+}
+
 -(BOOL)havePraisedThisDiary:(NSDictionary *)diaryDict
 {
     NSArray *praiseArray = [[diaryDict objectForKey:@"detail"] objectForKey:@"likes"];
@@ -1135,7 +1512,38 @@ DongTaiDetailAddCommentDelegate>
 
 - (void)tapImage:(UITapGestureRecognizer *)tap
 {
-    DDLOG(@"tap view tag %d",tap.view.tag);
+    if ([inputTabBar.inputTextView isFirstResponder])
+    {
+        [self backInput];
+        [inputTabBar backKeyBoard];
+    }
+    
+    DDLOG(@"tap imageview frame %@",NSStringFromCGRect(tap.view.frame));
+    NSDictionary *groupDict = [groupDiaries objectAtIndex:(tap.view.tag-333)/SectionTag];
+    NSArray *array = [groupDict objectForKey:@"diaries"];
+    NSDictionary *dict = [array objectAtIndex:(tap.view.tag-333)%SectionTag/RowTag];
+    NSArray *imgs = [[dict objectForKey:@"detail"] objectForKey:@"img"];
+    NSMutableArray *smallImageArray = [[NSMutableArray alloc] initWithCapacity:0];
+    
+    for (NSString *imageUrl in imgs)
+    {
+        NSString *smallUrlStr = [NSString stringWithFormat:@"%@100w",imageUrl];
+        [smallImageArray addObject:smallUrlStr];
+    }
+    NSMutableArray *photos = [[NSMutableArray alloc] initWithCapacity:0];
+    for (int i=0; i<[imgs count]; i++)
+    {
+//        NSString *url = [imgs[i] stringByReplacingOccurrencesOfString:@"thumbnail" withString:@"bmiddle"];
+        NSString *url = [NSString stringWithFormat:@"%@%@",IMAGEURL,imgs[i]];
+        MJPhoto *photo = [[MJPhoto alloc] init];
+        photo.url = [NSURL URLWithString:url];
+        photo.srcImageView = (UIImageView *)tap.view;
+        [photos addObject:photo];
+    }
+    MJPhotoBrowser *photoBroser = [[MJPhotoBrowser alloc] init];
+    photoBroser.photos = photos;
+    photoBroser.currentPhotoIndex = (tap.view.tag-333)%SectionTag%RowTag;
+    [photoBroser show];
 }
 
 
@@ -1340,6 +1748,7 @@ DongTaiDetailAddCommentDelegate>
         addView.alpha = 1;
         addNoticeButton.alpha = 1;
         addDiaryButton.alpha = 1;
+        qrCodeButton.alpha = 1;
         classTableView.userInteractionEnabled = NO;
     }];
     
@@ -1351,6 +1760,7 @@ DongTaiDetailAddCommentDelegate>
         addNoticeButton.alpha = 0;
         addDiaryButton.alpha = 0;
         addView.alpha = 0;
+        qrCodeButton.alpha = 0;
         self.navigationController.sideMenuController.panGestureEnabled = YES;
         self.navigationController.sideMenuController.tapGestureEnabled = YES;
         classTableView.userInteractionEnabled = YES;

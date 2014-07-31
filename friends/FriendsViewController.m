@@ -38,6 +38,9 @@ OperateFriends>
     
     OperatDB *db;
     UILabel *tipLabel;
+    
+    NSMutableArray *groupChatArray;
+    NSMutableArray *tmpListArray;
 }
 @end
 
@@ -64,10 +67,13 @@ OperateFriends>
     self.returnImageView.hidden = YES;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getFriendList) name:UPDATEFRIENDSLIST object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getFriendList) name:UPDATEGROUPCHATLIST object:nil];
     
     db = [[OperatDB alloc] init];
     
     newMessageArray = [[NSMutableArray alloc] initWithCapacity:0];
+    groupChatArray = [[NSMutableArray alloc] initWithCapacity:0];
+    tmpListArray = [[NSMutableArray alloc] initWithCapacity:0];
     
     tmpArray = [[NSMutableArray alloc] initWithCapacity:0];
     newFriendsApply = [[NSMutableArray alloc] initWithCapacity:0];
@@ -137,6 +143,8 @@ OperateFriends>
 {
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = nil;
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UPDATEGROUPCHATLIST object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UPDATEFRIENDSLIST object:nil];
 }
 -(BOOL)haveNewMsg
 {
@@ -245,11 +253,19 @@ OperateFriends>
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
+    if ([tmpListArray count] >0 && [tmpListArray count] < 20)
+    {
+        return 2;
+    }
     return [tmpArray count]+1;
 }
 
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
+    if ([tmpListArray count] > 0 && [tmpListArray count] < 20)
+    {
+        return 0;
+    }
     if (section == 0)
     {
         return 0;
@@ -259,6 +275,10 @@ OperateFriends>
 
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
+    if ([tmpListArray count] > 0 && [tmpListArray count] < 20)
+    {
+        return nil;
+    }
     if (section > 0)
     {
         NSDictionary *groupDict = [tmpArray objectAtIndex:section-1];
@@ -274,9 +294,17 @@ OperateFriends>
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
+    if ([tmpListArray count] > 0 && [tmpListArray count] < 20)
+    {
+        if (section == 0)
+        {
+            return 2;
+        }
+        return [tmpArray count];
+    }
     if(section == 0)
     {
-        return 1;
+        return 2;
     }
     else
     {
@@ -291,7 +319,11 @@ OperateFriends>
 {
     if (indexPath.section == 0)
     {
-        if ([newFriendsApply count] > 0)
+        if (indexPath.row == 0 && [newFriendsApply count] > 0)
+        {
+            return 62;
+        }
+        else if (indexPath.row == 1 && [groupChatArray count] > 0)
         {
             return 62;
         }
@@ -309,24 +341,20 @@ OperateFriends>
         {
             cell = [[MemberCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:friendsCell];
         }
-        if ([newFriendsApply count] > 0)
+        if (indexPath.row == 0 && [newFriendsApply count] > 0)
         {
             cell.headerImageView.hidden = NO;
-            cell.headerImageView.frame = CGRectMake(87, 21, 22, 20);
-            [cell.headerImageView setImage:[UIImage imageNamed:@"newapplyheader"]];
+            cell.headerImageView.frame = CGRectMake(10, 8, 46, 46);
+            [cell.headerImageView setImage:[UIImage imageNamed:@"newfriendheader"]];
             
             cell.contentLabel.frame = CGRectMake(75, 7.5, 178, 47);
-            cell.contentLabel.layer.cornerRadius = 8;
-            cell.contentLabel.clipsToBounds = YES;
             cell.contentLabel.hidden = NO;
             cell.contentLabel.backgroundColor = [UIColor whiteColor];
-            cell.contentLabel.layer.borderColor = TIMECOLOR.CGColor;
-            cell.contentLabel.layer.borderWidth = 0.3;
             
-            cell.memNameLabel.frame = CGRectMake(115, 16, 115, 30);
+            cell.memNameLabel.frame = CGRectMake(70, 16, 115, 30);
             cell.memNameLabel.hidden = NO;
             cell.memNameLabel.text = [NSString stringWithFormat:@"您有%d个新好友",[newFriendsApply count]];
-            cell.memNameLabel.font = [UIFont systemFontOfSize:16];
+            cell.memNameLabel.font = [UIFont systemFontOfSize:17];
             
             cell.markView.frame = CGRectMake(236, 25, 8, 12);
             [cell.markView setImage:[UIImage imageNamed:@"discovery_arrow"]];
@@ -336,6 +364,25 @@ OperateFriends>
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
         }
         
+        else  if(indexPath.row == 1 && [groupChatArray count] > 0)
+        {
+            cell.headerImageView.hidden = NO;
+            cell.headerImageView.frame = CGRectMake(10, 8, 46, 46);
+            [cell.headerImageView setImage:[UIImage imageNamed:@"groupchatheader"]];
+            
+            cell.contentLabel.frame = CGRectMake(75, 7.5, 178, 47);
+            cell.contentLabel.hidden = NO;
+            cell.contentLabel.backgroundColor = [UIColor whiteColor];
+            
+            cell.memNameLabel.frame = CGRectMake(70, 16, 115, 30);
+            cell.memNameLabel.hidden = NO;
+            cell.memNameLabel.text = [NSString stringWithFormat:@"群聊(%d)",[groupChatArray count]];
+            cell.memNameLabel.font = [UIFont systemFontOfSize:17];
+            
+            cell.markView.frame = CGRectMake(SCREEN_WIDTH-20, 25, 8, 12);
+            [cell.markView setImage:[UIImage imageNamed:@"discovery_arrow"]];
+            cell.markView.hidden = NO;
+        }
         else
         {
             cell.headerImageView.hidden = YES;
@@ -343,6 +390,12 @@ OperateFriends>
             cell.memNameLabel.hidden = YES;
             cell.markView.hidden = YES;
         }
+        CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+        UIImageView *lineImageView = [[UIImageView alloc] init];
+        lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+        [cell.contentView addSubview:lineImageView];
+        cell.contentView.backgroundColor = [UIColor whiteColor];
         return cell;
     }
     else
@@ -353,24 +406,43 @@ OperateFriends>
         {
             cell = [[MemberCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:friendsCell];
         }
-        NSDictionary *groupDict = [tmpArray objectAtIndex:indexPath.section-1];
-        NSArray *array = [groupDict objectForKey:@"array"];
-        NSDictionary *friendDict = [array objectAtIndex:indexPath.row];
+        if ([tmpListArray count] > 0 && [tmpListArray count] < 20)
+        {
+            NSDictionary *friendDict = [tmpArray objectAtIndex:indexPath.row];
+            
+            cell.headerImageView.frame = CGRectMake(10, 7, 46, 46);
+            cell.headerImageView.layer.cornerRadius = 5;
+            cell.headerImageView.clipsToBounds = YES;
+            
+            cell.unreadedMsgLabel.hidden = YES;
+            [Tools fillImageView:cell.headerImageView withImageFromURL:[friendDict objectForKey:@"ficon"] andDefault:HEADERICON];
+            
+            cell.memNameLabel.frame = CGRectMake(70, 15, 150, 30);
+            cell.memNameLabel.text = [friendDict objectForKey:@"fname"];
+        }
+        else
+        {
+            NSDictionary *groupDict = [tmpArray objectAtIndex:indexPath.section-1];
+            NSArray *array = [groupDict objectForKey:@"array"];
+            NSDictionary *friendDict = [array objectAtIndex:indexPath.row];
+            
+            cell.headerImageView.frame = CGRectMake(10, 7, 46, 46);
+            cell.headerImageView.layer.cornerRadius = 5;
+            cell.headerImageView.clipsToBounds = YES;
+            
+            cell.unreadedMsgLabel.hidden = YES;
+            [Tools fillImageView:cell.headerImageView withImageFromURL:[friendDict objectForKey:@"ficon"] andDefault:HEADERICON];
+            
+            cell.memNameLabel.frame = CGRectMake(70, 15, 150, 30);
+            cell.memNameLabel.text = [friendDict objectForKey:@"fname"];
+        }
         
-        cell.headerImageView.frame = CGRectMake(10, 7, 46, 46);
-        cell.headerImageView.layer.cornerRadius = 5;
-        cell.headerImageView.clipsToBounds = YES;
-        
-        cell.unreadedMsgLabel.hidden = YES;
-        [Tools fillImageView:cell.headerImageView withImageFromURL:[friendDict objectForKey:@"ficon"] andDefault:HEADERICON];
-        
-        cell.memNameLabel.frame = CGRectMake(70, 15, 150, 30);
-        cell.memNameLabel.text = [friendDict objectForKey:@"fname"];
-        
-        UIImageView *bgImageBG = [[UIImageView alloc] init];
-        bgImageBG.image = [UIImage imageNamed:@"cell_bg"];
-        cell.backgroundView = bgImageBG;
-        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+        UIImageView *lineImageView = [[UIImageView alloc] init];
+        lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+        [cell.contentView addSubview:lineImageView];
+        cell.contentView.backgroundColor = [UIColor whiteColor];
         return cell;
     }
     return nil;
@@ -379,34 +451,48 @@ OperateFriends>
 {
     if (indexPath.section == 0)
     {
-        SubGroupViewController *newApplyVC = [[SubGroupViewController alloc] init];
-        newApplyVC.titleString = @"好友申请";
-        newApplyVC.tmpArray = newFriendsApply;
-        newApplyVC.operateFriDel = self;
-        [self.navigationController pushViewController:newApplyVC animated:YES];
+        if (indexPath.row == 0)
+        {
+            SubGroupViewController *newApplyVC = [[SubGroupViewController alloc] init];
+            newApplyVC.titleString = @"好友申请";
+            newApplyVC.tmpArray = newFriendsApply;
+            newApplyVC.operateFriDel = self;
+            [self.navigationController pushViewController:newApplyVC animated:YES];
+        }
+        else if(indexPath.row == 1)
+        {
+            SubGroupViewController *newApplyVC = [[SubGroupViewController alloc] init];
+            newApplyVC.titleString = @"群聊";
+            newApplyVC.tmpArray = groupChatArray;
+            newApplyVC.operateFriDel = self;
+            [self.navigationController pushViewController:newApplyVC animated:YES];
+        }
     }
     else
     {
-        NSDictionary *groupDict = [tmpArray objectAtIndex:indexPath.section-1];
-        NSArray *array = [groupDict objectForKey:@"array"];
-        NSDictionary *dict = [array objectAtIndex:indexPath.row];
-        
-        PersonDetailViewController *personDetailVC = [[PersonDetailViewController alloc] init];
-        personDetailVC.personName = [dict objectForKey:@"fname"];
-        personDetailVC.personID = [dict objectForKey:@"fid"];
-        [self.sideMenuController hideMenuAnimated:YES];
-        [self.navigationController pushViewController:personDetailVC animated:YES];
-        
-        
-        
-//        ChatViewController *chatViewController = [[ChatViewController alloc] init];
-//        chatViewController.name = [dict objectForKey:@"fname"];
-//        chatViewController.toID = [dict objectForKey:@"fid"];
-//        chatViewController.imageUrl = [dict objectForKey:@"ficon"];
-//        chatViewController.friendVcDel = self;
-//        [self.sideMenuController hideMenuAnimated:YES];
-//        [self.navigationController pushViewController:chatViewController animated:YES];
+        if ([tmpListArray count] > 0 && [tmpListArray count] <20)
+        {
+            NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
+            
+            PersonDetailViewController *personDetailVC = [[PersonDetailViewController alloc] init];
+            personDetailVC.personName = [dict objectForKey:@"fname"];
+            personDetailVC.personID = [dict objectForKey:@"fid"];
+            [self.sideMenuController hideMenuAnimated:YES];
+            [self.navigationController pushViewController:personDetailVC animated:YES];
 
+        }
+        else
+        {
+            NSDictionary *groupDict = [tmpArray objectAtIndex:indexPath.section-1];
+            NSArray *array = [groupDict objectForKey:@"array"];
+            NSDictionary *dict = [array objectAtIndex:indexPath.row];
+            
+            PersonDetailViewController *personDetailVC = [[PersonDetailViewController alloc] init];
+            personDetailVC.personName = [dict objectForKey:@"fname"];
+            personDetailVC.personID = [dict objectForKey:@"fid"];
+            [self.sideMenuController hideMenuAnimated:YES];
+            [self.navigationController pushViewController:personDetailVC animated:YES];
+        }
     }
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
 }
@@ -475,6 +561,8 @@ OperateFriends>
 {
     [newFriendsApply removeAllObjects];
     [tmpArray removeAllObjects];
+    [groupChatArray removeAllObjects];
+    [tmpListArray removeAllObjects];
     if ([tmpFriendsList count] > 0)
     {
         if ([db deleteRecordWithDict:@{@"uid":[Tools user_id]} andTableName:FRIENDSTABLE])
@@ -488,6 +576,7 @@ OperateFriends>
                 NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithCapacity:0];
                 NSDictionary *dict = [tmpFriendsList objectAtIndex:i];
                 [tmpDict setObject:[Tools user_id] forKey:@"uid"];
+                [tmpDict setObject:[dict objectForKey:@"cgroup"] forKey:@"cgroup"];
                 [tmpDict setObject:[dict objectForKey:@"fid"] forKey:@"fid"];
                 [tmpDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"checked"] intValue]] forKey:@"checked"];
                 [tmpDict setObject:[dict objectForKey:@"ficon"] forKey:@"ficon"];
@@ -503,6 +592,7 @@ OperateFriends>
                 NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithCapacity:0];
                 NSDictionary *dict = [tmpFriendsList objectAtIndex:i];
                 [tmpDict setObject:[Tools user_id] forKey:@"uid"];
+                [tmpDict setObject:[dict objectForKey:@"cgroup"] forKey:@"cgroup"];
                 [tmpDict setObject:[dict objectForKey:@"_id"] forKey:@"fid"];
                 [tmpDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"checked"] intValue]] forKey:@"checked"];
                 if ([dict objectForKey:@"img_icon"])
@@ -525,16 +615,22 @@ OperateFriends>
     }
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:UCFRIENDSUM];
     [[NSUserDefaults standardUserDefaults] synchronize];
-    [newFriendsApply addObjectsFromArray:[db findSetWithDictionary:@{@"uid":[Tools user_id],@"checked":@"0"} andTableName:FRIENDSTABLE]];
-    NSArray *tmpListArray = [db findSetWithDictionary:@{@"uid":[Tools user_id],@"checked":@"1"} andTableName:FRIENDSTABLE];
-    if ([tmpListArray count] > 0)
+    [newFriendsApply addObjectsFromArray:[db findSetWithDictionary:@{@"uid":[Tools user_id],@"checked":@"0",@"cgroup":@"0"} andTableName:FRIENDSTABLE]];
+    [groupChatArray addObjectsFromArray:[db findSetWithDictionary:@{@"uid":[Tools user_id],@"cgroup":@"1"} andTableName:FRIENDSTABLE]];
+    tmpListArray = [db findSetWithDictionary:@{@"uid":[Tools user_id],@"checked":@"1",@"cgroup":@"0"} andTableName:FRIENDSTABLE];
+    
+    if ([tmpListArray count] >0 && [tmpListArray count] <20)
+    {
+        [tmpArray addObjectsFromArray:tmpListArray];
+    }
+    else if ([tmpListArray count] >= 20)
     {
         [tmpArray addObjectsFromArray:[Tools getSpellSortArrayFromChineseArray:tmpListArray andKey:@"fname"]];
     }
     
     [friendsListTableView reloadData];
     
-    if ([newFriendsApply count] > 0 || [tmpArray count] > 0)
+    if ([newFriendsApply count] > 0 || [tmpArray count] > 0 || [groupChatArray count] > 0)
     {
         tipLabel.hidden = YES;
     }

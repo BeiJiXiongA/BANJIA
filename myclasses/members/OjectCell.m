@@ -18,6 +18,7 @@
         
         UIImageView *bgImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 1, SCREEN_WIDTH-62, 38)];
         bgImageView.backgroundColor = RGB(74, 187, 192, 1);
+        bgImageView.hidden = YES;
         [self.contentView addSubview:bgImageView];
         
         nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(18, 6, 180, 28)];

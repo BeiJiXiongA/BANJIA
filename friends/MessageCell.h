@@ -24,11 +24,17 @@
 @property (nonatomic, strong) UIButton *button;
 @property (nonatomic, strong) UILabel *timeLabel;
 
+@property (nonatomic, strong) NSString *fromImgIcon;
+
+@property (nonatomic, strong) UILabel *nameLabel;
+
 @property (nonatomic, strong) UIImageView *msgImageView;
 
 @property (nonatomic, strong) UILabel *joinlable;
 
 @property (nonatomic, strong) NSDictionary *msgDict;
+
+@property (nonatomic, assign) BOOL isGroup;
 
 @property (nonatomic, assign) id<MessageDelegate> msgDelegate;
 
@@ -38,5 +44,5 @@
 @protocol MessageDelegate <NSObject>
 
 -(void)toPersonDetail:(NSDictionary *)personDict;
-
+-(void)joinClassWithMsgContent:(NSString *)msgContent;
 @end

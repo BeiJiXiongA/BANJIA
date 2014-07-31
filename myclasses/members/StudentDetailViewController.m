@@ -23,6 +23,9 @@
 #define MSGBUTTONTAG  3000
 #define KICKALTAG    4000
 #define SETADMINTAG  5000
+
+#define ContaceACTag  6000
+
 #define INFOTABLEVIEWTAG  3333
 #define PARENTTABLEVIEWTAG  4444
 
@@ -372,7 +375,7 @@ UIActionSheetDelegate>
         cell.nameLabel.text = studentName;
         cell.nameLabel.shadowColor = TITLE_COLOR;
         cell.nameLabel.shadowOffset = CGSizeMake(0.5, 0.5);
-        cell.nameLabel.font = [UIFont boldSystemFontOfSize:18];
+        cell.nameLabel.font = [UIFont systemFontOfSize:18];
         
         cell.sexureImageView.frame = CGRectMake(cell.nameLabel.frame.origin.x+cell.nameLabel.frame.size.width+10, cell.nameLabel.frame.origin.y, 20, 20);
         [cell.sexureImageView setImage:[UIImage imageNamed:sexureimage]];
@@ -396,19 +399,20 @@ UIActionSheetDelegate>
             [Tools fillImageView:cell.headerImageView withImageFromURL:[parentDict objectForKey:@"img_icon"] andDefault:HEADERICON];
             cell.nameLabel.frame = CGRectMake(70, 15, 100, 30);
             cell.nameLabel.text = [parentDict objectForKey:@"name"];
-            cell.nameLabel.font = NAMEFONT;
-            cell.nameLabel.textColor = NAMECOLOR;
+            cell.nameLabel.font = [UIFont systemFontOfSize:17];
+            cell.nameLabel.textColor = TITLE_COLOR;
             
             cell.contentLabel.frame = CGRectMake(SCREEN_WIDTH-100, 15, 80, 30);
             cell.contentLabel.textAlignment = NSTextAlignmentRight;
             cell.contentLabel.textColor = TITLE_COLOR;
             cell.contentLabel.text = [[parentDict objectForKey:@"title"] substringFromIndex:[[parentDict objectForKey:@"title"] rangeOfString:@"."].location+1];
         }
-        UIImageView *bgImageBG = [[UIImageView alloc] init];
-        bgImageBG.image = [UIImage imageNamed:@"line4"];
-        bgImageBG.backgroundColor = [UIColor clearColor];
-        cell.backgroundView = bgImageBG;
-        cell.backgroundColor = [UIColor whiteColor];
+        CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+        UIImageView *lineImageView = [[UIImageView alloc] init];
+        lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+        [cell.contentView addSubview:lineImageView];
+        cell.contentView.backgroundColor = [UIColor whiteColor];
     }
     
     else if(indexPath.section == 2)
@@ -514,7 +518,9 @@ UIActionSheetDelegate>
         {
             if (![studentID isEqualToString:[Tools user_id]])
             {
-                [self callToUser];
+                UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"打电话",@"发短信", nil];
+                ac.tag = ContaceACTag;
+                [ac showInView:self.bgView];
             }
         }
     }
@@ -801,6 +807,17 @@ UIActionSheetDelegate>
             }
         }
     }
+    else if(actionSheet.tag == ContaceACTag)
+    {
+        if (buttonIndex == 0)
+        {
+            [self callToUser];
+        }
+        else if(buttonIndex == 1)
+        {
+            [self showMessageView:phoneNum];
+        }
+    }
 }
 
 -(void)appointToAdmin
@@ -1056,6 +1073,7 @@ UIActionSheetDelegate>
             break;
     }
 }
+
 
 - (void) alertWithTitle:(NSString *)titles msg:(NSString *)msg {
     

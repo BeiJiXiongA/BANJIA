@@ -90,13 +90,13 @@ recordButton;
         soundButton.backgroundColor = [UIColor clearColor];
         [soundButton setImage:[UIImage imageNamed:@"icon_sound"] forState:UIControlStateNormal];
         [soundButton addTarget:self action:@selector(soundButtonClick) forControlEvents:UIControlEventTouchUpInside];
-        [inputBgView addSubview:soundButton];
+//        [inputBgView addSubview:soundButton];
         
         
         
-        inputWidth = SCREEN_WIDTH-130;
+        inputWidth = SCREEN_WIDTH-90;
         
-        inputTextView.frame = CGRectMake(45, INPUTBUTTONT, inputWidth, DEFAULTTEXTHEIGHT);
+        inputTextView.frame = CGRectMake(5, INPUTBUTTONT, inputWidth, DEFAULTTEXTHEIGHT);
         
         recordButton = [UIButton buttonWithType:UIButtonTypeCustom];
         recordButton.frame = CGRectMake(45, INPUTBUTTONT, inputWidth, DEFAULTTEXTHEIGHT);
@@ -557,7 +557,7 @@ recordButton;
             moreButton.frame = CGRectMake( SCREEN_WIDTH-40, inputTextViewSize.height-DEFAULTTEXTHEIGHT+INPUTBUTTONT, INPUTBUTTONH, INPUTBUTTONH);
             soundButton.frame = CGRectMake( 5, inputTextViewSize.height-DEFAULTTEXTHEIGHT+INPUTBUTTONT, INPUTBUTTONH, INPUTBUTTONH);
             inputBgView.frame = CGRectMake(0, 0, SCREEN_WIDTH, inputTextViewSize.height+10);
-            inputTextView.frame = CGRectMake( 45, INPUTBUTTONT, inputWidth , inputTextViewSize.height+2.5);
+            inputTextView.frame = CGRectMake( 5, INPUTBUTTONT, inputWidth , inputTextViewSize.height+2.5);
         }
         else
         {

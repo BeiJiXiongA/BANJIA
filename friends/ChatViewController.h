@@ -25,6 +25,7 @@
 @property (nonatomic, strong) NSString *toID;
 @property (nonatomic, strong) NSString *imageUrl;
 @property (nonatomic, assign) BOOL fromClass;
+@property (nonatomic, assign) BOOL isGroup;
 @property (nonatomic, strong) id<ChatVCDelegate> chatVcDel;
 @property (nonatomic, strong) id<FriendListDelegate> friendVcDel;
 @end

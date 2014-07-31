@@ -289,7 +289,7 @@ UIActionSheetDelegate>
             
             
             
-            [Tools fillImageView:cell.headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERBG];
+            [Tools fillImageView:cell.headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERICON];
             
             cell.authenticationSign.frame = CGRectMake(cell.nameLabel.frame.origin.x+cell.nameLabel.frame.size.width+5, cell.nameLabel.frame.origin.y-10, 20, 20);
             
@@ -304,6 +304,7 @@ UIActionSheetDelegate>
             cell.selectionStyle = UITableViewCellSelectionStyleGray;
             cell.backgroundColor = [UIColor whiteColor];
             cell.contentView.backgroundColor = [UIColor whiteColor];
+            
             return cell;
         }
     }

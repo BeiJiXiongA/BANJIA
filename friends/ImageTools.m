@@ -7,6 +7,7 @@
 //
 
 #import "ImageTools.h"
+#import "QRCodeGenerator.h"
 
 @implementation ImageTools
 + (UIImage *)getNormalImageFromImage:(UIImage *)originalImage
@@ -107,5 +108,34 @@
     return size;
 }
 
+//+ (UIImage *)imageWithUrl:(NSString *)imageUrl
+//{
+//    UIImage *image = [[SDWebImageManager sharedManager] imageWithUrl:[NSURL URLWithString:imageUrl]];
+//    return image;
+//}
+
++(NSDictionary *)iconDictWithUserID:(NSString *)userid
+{
+    OperatDB *db = [[OperatDB alloc] init];
+    NSDictionary *userDict = [[db findSetWithDictionary:@{@"uid":userid} andTableName:USERICONTABLE] firstObject];
+    return userDict;
+}
+
++ (UIImage *)imageWithUrl:(NSString *)imageUrl
+{
+//    UIImage *image = [[SDWebImageManager sharedManager]  ]
+    return nil;
+}
+
++ (UIImage *)getQrImageWithString:(NSString *)qrString width:(CGFloat)width
+{
+    UIImage *image = [QRCodeGenerator qrImageForString:qrString imageSize:width];
+    UIImage *banjiaIcon = [UIImage imageNamed:@"logo58"];
+    UIGraphicsBeginImageContext(CGSizeMake(width, width));
+    [image drawAtPoint:CGPointMake(0, 0)];
+    [banjiaIcon drawAtPoint:CGPointMake(211, 211)];
+    UIImage *qrimage = UIGraphicsGetImageFromCurrentImageContext();
+    return qrimage;
+}
 
 @end

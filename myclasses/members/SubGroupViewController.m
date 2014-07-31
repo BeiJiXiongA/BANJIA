@@ -14,10 +14,13 @@
 #import "MemberDetailViewController.h"
 #import "ParentsDetailViewController.h"
 #import "OperatDB.h"
+#import "GroupInfoViewController.h"
+#import "ChatViewController.h"
 
 @interface SubGroupViewController ()<UITableViewDataSource,
 UITableViewDelegate,
-StuDetailDelegate>
+StuDetailDelegate,
+updateGroupInfoDelegate>
 {
     UITableView *tmpTableView;
     OperatDB *db;
@@ -44,6 +47,8 @@ StuDetailDelegate>
     db = [[OperatDB alloc] init];
     
     self.titleLabel.text = titleString;
+    
+    DDLOG(@"tmp array %@",tmpArray);
     
     tmpTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
     tmpTableView.delegate = self;
@@ -120,6 +125,20 @@ StuDetailDelegate>
 
         return cell;
     }
+    else if([titleString isEqualToString:@"群聊"])
+    {
+        static NSString *groupChat = @"groupchat";
+        MemberCell *cell = [tableView dequeueReusableCellWithIdentifier:groupChat];
+        if (cell == nil)
+        {
+            cell = [[MemberCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:groupChat];
+        }
+        NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
+        cell.memNameLabel.text = [dict objectForKey:@"fname"];
+        cell.memNameLabel.frame = CGRectMake(70, 15, 220, 30);
+        [cell.headerImageView setImage:[UIImage imageNamed:@"newapplyheader"]];
+        return cell;
+    }
     else
     {
         static NSString *memCell = @"subgroup";
@@ -159,7 +178,7 @@ StuDetailDelegate>
         }
         cell.headerImageView.layer.cornerRadius = cell.headerImageView.frame.size.width/2;
         cell.headerImageView.clipsToBounds = YES;
-        [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERBG];
+        [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERICON];
         cell.selectionStyle = UITableViewCellSelectionStyleGray;
         cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_angle"]];
         [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 20, 10, 16)];
@@ -240,6 +259,15 @@ StuDetailDelegate>
             studentDetail.admin = NO;
         }
         [self.navigationController pushViewController:studentDetail animated:YES];
+    }
+    else if([titleString isEqualToString:@"群聊"])
+    {
+        ChatViewController  *chat = [[ChatViewController alloc] init];
+        chat.isGroup = YES;
+        chat.name = [dict objectForKey:@"fname"];
+        chat.toID = [dict objectForKey:@"fid"];
+        chat.imageUrl = @"";
+        [self.navigationController pushViewController:chat animated:YES];
     }
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }

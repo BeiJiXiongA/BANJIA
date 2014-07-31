@@ -76,7 +76,7 @@
     self.imageView.layer.borderColor = [UIColor whiteColor].CGColor;
     self.imageView.layer.borderWidth = 2;
     self.imageView.layer.contentsGravity = kCAGravityResizeAspectFill;
-    [Tools fillImageView:self.imageView withImageFromURL:[Tools header_image] andDefault:HEADERBG];
+    [Tools fillImageView:self.imageView withImageFromURL:[Tools header_image] andDefault:HEADERICON];
     self.imageView.layer.cornerRadius = imageView.frame.size.width/2;
     self.imageView.clipsToBounds = YES;
     [self.bgView addSubview:self.imageView];
@@ -222,7 +222,7 @@
 
 -(void)changeIcon
 {
-    [Tools fillImageView:self.imageView withImageFromURL:[Tools header_image] andDefault:HEADERBG];
+    [Tools fillImageView:self.imageView withImageFromURL:[Tools header_image] andDefault:HEADERICON];
 }
 
 -(void)viewWillAppear:(BOOL)animated

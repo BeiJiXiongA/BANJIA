@@ -95,7 +95,7 @@ NameButtonDel>
 @end
 
 @implementation ClassZoneViewController
-@synthesize fromClasses,fromMsg,refreshDel;
+@synthesize isApply,fromMsg,refreshDel;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -103,6 +103,16 @@ NameButtonDel>
         // Custom initialization
     }
     return self;
+}
+
+-(void)selectPic:(int)selectPicTag
+{
+    
+}
+
+-(void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:CHANGECLASSINFO object:nil];
 }
 
 - (void)viewDidLoad
@@ -117,7 +127,7 @@ NameButtonDel>
     schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
     classTopImage = [[NSUserDefaults standardUserDefaults] objectForKey:@"classtopimage"];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeClassInfo) name:@"changeClassInfo" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeClassInfo) name:CHANGECLASSINFO object:nil];
     
     self.titleLabel.text = @"班级空间";
     monthStr = @"";
@@ -172,7 +182,7 @@ NameButtonDel>
     noneDongTaiLabel.backgroundColor = [UIColor clearColor];
     
     classZoneTableView = [[UITableView alloc] init];
-    if (fromClasses)
+    if (isApply)
     {
         classZoneTableView.frame = CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT - UI_NAVIGATION_BAR_HEIGHT);
     }
@@ -192,7 +202,7 @@ NameButtonDel>
     
     [classZoneTableView addSubview:noneDongTaiLabel];
     
-    if (!fromClasses)
+    if (!isApply)
     {
         addButton.hidden = NO;
     }
@@ -323,7 +333,7 @@ NameButtonDel>
 
 -(void)unShowSelfViewController
 {
-    if (fromClasses)
+    if (isApply)
     {
         [self.navigationController popViewControllerAnimated:YES];
     }
@@ -344,7 +354,7 @@ NameButtonDel>
 #pragma mark - egodelegate
 -(void)egoRefreshTableHeaderDidTriggerRefresh:(EGORefreshTableHeaderView *)view
 {
-    if (fromClasses)
+    if (isApply)
     {
         [Tools showAlertView:@"您还没有进入这个班级，快去申请加入吧！" delegateViewController:self];
         return ;
@@ -356,7 +366,7 @@ NameButtonDel>
 
 -(void)egoRefreshTableDidTriggerRefresh:(EGORefreshPos)aRefreshPos
 {
-    if (fromClasses)
+    if (isApply)
     {
         [Tools showAlertView:@"您还没有进入这个班级，快去申请加入吧！" delegateViewController:self];
         return ;
@@ -512,7 +522,7 @@ NameButtonDel>
         addButton.hidden = YES;
     }
     
-    if (fromClasses)
+    if (isApply)
     {
         addButton.hidden = YES;
     }
@@ -521,7 +531,7 @@ NameButtonDel>
 #pragma mark - tableview
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    if (fromClasses)
+    if (isApply)
     {
         return [tmpArray count]>0?2:1;
     }
@@ -575,7 +585,7 @@ NameButtonDel>
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    if (fromClasses)
+    if (isApply)
     {
         if(section == 0)
         {
@@ -658,7 +668,7 @@ NameButtonDel>
     {
         if (indexPath.row == 0)
         {
-            if (fromClasses)
+            if (isApply)
             {
                 return bgImageViewHeight+72.5;
             }
@@ -695,6 +705,11 @@ NameButtonDel>
 
 -(void)cellCommentDiary:(NSDictionary *)dict
 {
+    if (isApply)
+    {
+        [Tools showAlertView:@"游客不能评论班级日志,赶快加入吧!" delegateViewController:nil];
+        return ;
+    }
     waitCommentDict = dict;
     [inputTabBar.inputTextView becomeFirstResponder];
 }
@@ -737,6 +752,12 @@ NameButtonDel>
             cell.headerImageView.layer.borderColor = [UIColor whiteColor].CGColor;
             cell.headerImageView.layer.borderWidth = 2;
             
+            
+            cell.headerImageView.tag = SectionTag * indexPath.section + indexPath.row;
+            
+            UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(headerImageViewClicked:)];
+            cell.headerImageView.userInteractionEnabled = YES;
+            [cell.headerImageView addGestureRecognizer:tap];
             
             UIView *verticalLineView = [[UIView alloc] init];
             verticalLineView.backgroundColor = UIColorFromRGB(0xe2e3e4);
@@ -782,7 +803,7 @@ NameButtonDel>
             }
             cell.locationLabel.text = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
             cell.backgroundColor = [UIColor clearColor];
-            if (fromClasses)
+            if (isApply)
             {
                 cell.praiseButton.hidden = NO;
                 cell.praiseButton.frame = CGRectMake(35, bgImageViewHeight+18, SCREEN_WIDTH-70, 42);
@@ -862,6 +883,12 @@ NameButtonDel>
         cell.timeLabel.lineBreakMode = NSLineBreakByWordWrapping;
         
         cell.headerImageView.backgroundColor = [UIColor clearColor];
+        
+        cell.headerImageView.tag = SectionTag * indexPath.section + indexPath.row;
+        
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(headerImageViewClicked:)];
+        cell.headerImageView.userInteractionEnabled = YES;
+        [cell.headerImageView addGestureRecognizer:tap];
         
         [Tools fillImageView:cell.headerImageView withImageFromURL:[[dict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERBG];
         cell.locationLabel.frame = CGRectMake(60, cell.headerImageView.frame.origin.y+cell.headerImageView.frame.size.height-LOCATIONLABELHEI, SCREEN_WIDTH-80, LOCATIONLABELHEI);
@@ -1091,17 +1118,70 @@ NameButtonDel>
     return nil;
 }
 
+-(void)headerImageViewClicked:(UITapGestureRecognizer *)tap
+{
+    if (isApply)
+    {
+        [Tools showAlertView:@"游客不能查看班级成员信息,赶快加入吧!" delegateViewController:nil];
+        return ;
+    }
+    int section = ((tap.view.tag)/SectionTag-1);
+    int row = (tap.view.tag)%SectionTag;
+    NSDictionary *groupDict = [tmpArray objectAtIndex:section];
+    NSArray *tmpArray1 = [groupDict objectForKey:@"diaries"];
+    NSDictionary *dict = [tmpArray1 objectAtIndex:row];
+    DDLOG(@"diary dict %@",dict);
+    PersonDetailViewController *personDetail = [[PersonDetailViewController alloc] init];
+    personDetail.personID = [[dict objectForKey:@"by"] objectForKey:@"_id"];
+    personDetail.personName = [[dict objectForKey:@"by"] objectForKey:@"name"];
+    personDetail.headerImg = [[dict objectForKey:@"by"] objectForKey:@"img_icon"];
+    [[XDTabViewController sharedTabViewController].navigationController pushViewController:personDetail animated:YES];
+}
+
+
 - (void)tapImage:(UITapGestureRecognizer *)tap
 {
+    if ([inputTabBar.inputTextView isFirstResponder])
+    {
+        [self backInput];
+        [inputTabBar backKeyBoard];
+    }
     
+    NSDictionary *groupDict = [tmpArray objectAtIndex:(tap.view.tag-333)/SectionTag];
+    NSArray *array = [groupDict objectForKey:@"diaries"];
+    NSDictionary *dict = [array objectAtIndex:(tap.view.tag-333)%SectionTag/RowTag];
+    NSArray *imgs = [[dict objectForKey:@"detail"] objectForKey:@"img"];
+    
+    
+    NSMutableArray *smallImageArray = [[NSMutableArray alloc] initWithCapacity:0];
+    
+    for (NSString *imageUrl in imgs)
+    {
+        NSString *smallUrlStr = [NSString stringWithFormat:@"%@100w",imageUrl];
+        [smallImageArray addObject:smallUrlStr];
+    }
+    NSMutableArray *photos = [[NSMutableArray alloc] initWithCapacity:0];
+    for (int i=0; i<[imgs count]; i++)
+    {
+        //        NSString *url = [imgs[i] stringByReplacingOccurrencesOfString:@"thumbnail" withString:@"bmiddle"];
+        NSString *url = [NSString stringWithFormat:@"%@%@",IMAGEURL,imgs[i]];
+        MJPhoto *photo = [[MJPhoto alloc] init];
+        photo.url = [NSURL URLWithString:url];
+        photo.srcImageView = (UIImageView *)tap.view;
+        [photos addObject:photo];
+    }
+    MJPhotoBrowser *photoBroser = [[MJPhotoBrowser alloc] init];
+    photoBroser.photos = photos;
+    photoBroser.currentPhotoIndex = (tap.view.tag-333)%SectionTag%RowTag;
+    [photoBroser show];
 }
 
 
 -(void)transmitDiary:(UIButton *)button
 {
-    if (fromClasses)
+    if (isApply)
     {
-        [Tools showTips:@"游客不能赞班级日志,赶快加入吧!" toView:self.bgView];
+        [Tools showAlertView:@"游客不能转发班级日志,赶快加入吧!" delegateViewController:nil];
         return ;
     }
     
@@ -1630,9 +1710,9 @@ NameButtonDel>
 
 -(void)praiseDiary:(UIButton *)button
 {
-    if (fromClasses)
+    if (isApply)
     {
-        [Tools showTips:@"游客不能赞班级日志,赶快加入吧!" toView:self.bgView];
+        [Tools showAlertView:@"游客不能赞班级日志,赶快加入吧!" delegateViewController:nil];
         return ;
     }
     
@@ -1673,23 +1753,22 @@ NameButtonDel>
             }];
             [request startAsynchronous];
         }
-
     }
-    
 }
 
 -(void)commentDiary:(UIButton *)button
 {
-    if (fromClasses)
+ 
+    
+    if (isApply)
     {
-        [Tools showTips:@"游客不能赞班级日志,赶快加入吧!" toView:self.bgView];
+        [Tools showAlertView:@"游客不能评论班级日志,赶快加入吧!" delegateViewController:nil];
         return ;
     }
     
     NSDictionary *groupDict = [tmpArray objectAtIndex:button.tag/SectionTag-1];
     NSArray *array = [groupDict objectForKey:@"diaries"];
     NSDictionary *dict = [array objectAtIndex:button.tag%SectionTag];
-    DDLOG(@"comment diary dict %@",dict);
     waitCommentDict = dict;
     [inputTabBar.inputTextView becomeFirstResponder];
     

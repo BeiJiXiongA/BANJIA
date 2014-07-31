@@ -64,9 +64,11 @@
     [super viewDidLoad];
     
     
-    [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleBlackTranslucent;
+//    [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleBlackTranslucent;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(postlogOut) name:@"logout" object:nil];
+    
+    DDLOG(@"UI_SCREEN_HEIGHT %f",UI_SCREEN_HEIGHT);
     
     _bgView = [[UIView alloc] initWithFrame:CGRectMake(0, 0,
                                                        UI_SCREEN_WIDTH,

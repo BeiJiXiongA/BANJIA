@@ -173,58 +173,48 @@ ChatVCDelegate>
             {
                 if ([[responseDict objectForKey:@"data"] isKindOfClass:[NSDictionary class]])
                 {
-                    NSArray *array = [[responseDict objectForKey:@"data"] allValues];
-                    for (int i=0; i<[array count]; ++i)
+                    [newMessageArray removeAllObjects];
+                    
+                    NSArray *tmpArray = [[responseDict objectForKey:@"data"] allValues];
+                    NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithCapacity:0];
+                    for (NSDictionary *dict in tmpArray)
                     {
-                        NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithCapacity:0];
-                        NSDictionary *dict = [array objectAtIndex:i];
                         [tmpDict setObject:[dict objectForKey:@"tid"] forKey:@"fid"];
-                        if ([dict objectForKey:@"img_icon"])
-                        {
-                            [tmpDict setObject:[dict objectForKey:@"img_icon"] forKey:@"ficon"];
-                            if ([[db findSetWithDictionary:@{@"uid":[tmpDict objectForKey:@"fid"]} andTableName:USERICONTABLE] count] > 0)
-                            {
-                                if ([db updeteKey:@"uicon" toValue:[dict objectForKey:@"img_icon"] withParaDict:@{@"fid":[tmpDict objectForKey:@"fid"]} andTableName:USERICONTABLE])
-                                {
-                                    DDLOG(@"usericon update success");
-                                }
-                            }
-                            else
-                            {
-                                if ([db insertRecord:@{@"uid":[tmpDict objectForKey:@"fid"],@"uicon":[dict objectForKey:@"img_icon"]} andTableName:USERICONTABLE])
-                                {
-                                    DDLOG(@"insert update success");
-                                }
-                            }
-                        }
-                        if ([dict objectForKey:@"r_name"])
-                        {
-                            [tmpDict setObject:[dict objectForKey:@"r_name"] forKey:@"fname"];
-                        }
-                        NSString *mid = [[dict objectForKey:@"l_n"] objectForKey:@"_id"];
-                        [tmpDict setObject:mid forKey:@"mid"];
-                        [tmpDict setObject:[[dict objectForKey:@"l_n"] objectForKey:@"msg"] forKey:@"content"];
-                        [tmpDict setObject:[[dict objectForKey:@"l_n"] objectForKey:@"t"] forKey:@"time"];
-                        [tmpDict setObject:@"0" forKey:@"readed"];
-                        [tmpDict setObject:@"f" forKey:@"direct"];
-                        [tmpDict setObject:[Tools user_id] forKey:@"userid"];
-                        [tmpDict setObject:@"text" forKey:@"msgType"];
-                        [tmpDict setObject:[Tools user_id] forKey:@"tid"];
+                        [tmpDict setObject:[dict objectForKey:@"r_name"] forKey:@"fname"];
                         
-                        if ([[db findSetWithDictionary:@{@"mid":mid,@"userid":[Tools user_id]} andTableName:CHATTABLE] count] <= 0)
+                        NSDictionary *msgDict = [dict objectForKey:@"l_n"];
+                        [tmpDict setObject:[msgDict objectForKey:@"msg"] forKey:@"content"];
+                        [tmpDict setObject:[msgDict objectForKey:@"t"] forKey:@"time"];
+                        [tmpDict setObject:[msgDict objectForKey:@"_id"] forKey:@"mid"];
+                        if([[dict objectForKey:@"cgroup"] integerValue] == 1)
                         {
-                            if ([db insertRecord:tmpDict andTableName:@"chatMsg"])
+                            
+                            [tmpDict setObject:[msgDict objectForKey:@"by"] forKey:@"by"];
+                        }
+                        
+                        NSDictionary *userIconDict = @{@"uid":[dict objectForKey:@"tid"],
+                                                       @"uicon":[dict objectForKey:@"img_icon"],
+                                                       @"username":[dict objectForKey:@"r_name"]};
+                        if ([[db findSetWithDictionary:@{@"uid":[dict objectForKey:@"tid"]} andTableName:USERICONTABLE] count] > 0)
+                        {
+                            [db deleteRecordWithDict:@{@"uid":[dict objectForKey:@"tid"]} andTableName:USERICONTABLE];
+                            [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                        }
+                        else
+                        {
+                            [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                        }
+                        
+                        if ([[db findSetWithDictionary:@{@"mid":[msgDict objectForKey:@"_id"],@"userid":[Tools user_id]} andTableName:CHATTABLE] count] == 0)
+                        {
+                            if ([db insertRecord:tmpDict  andTableName:CHATTABLE])
                             {
-                                DDLOG(@"new msg insert success!");
-                            }
-                            else
-                            {
-                                DDLOG(@"new msg insert failed!");
+                                DDLOG(@"insert chat success in msg log");
                             }
                         }
                     }
+                    [self dealNewChatMsg:nil];
                 }
-                [self manageChatList];
                 _reloading = NO;
                 [pullRefreshView egoRefreshScrollViewDataSourceDidFinishedLoading:friendsListTableView];
             }
@@ -253,9 +243,16 @@ ChatVCDelegate>
 #pragma mark -chatDelegate
 -(void)dealNewChatMsg:(NSDictionary *)dict
 {
-    if ([Tools NetworkReachable])
+    if(dict)
     {
-        [self getChatList];
+        if ([Tools NetworkReachable])
+        {
+            [self getChatList];
+        }
+        else
+        {
+            [self manageChatList];
+        }
     }
     else
     {
@@ -266,10 +263,10 @@ ChatVCDelegate>
 -(void)manageChatList
 {
     
-    [chatFriendArray removeAllObjects];
-    [chatFriendArray addObjectsFromArray:[db findChatUseridWithTableName:CHATTABLE]];
+    [newMessageArray removeAllObjects];
+    [newMessageArray addObjectsFromArray:[db findChatUseridWithTableName:CHATTABLE]];
     [friendsListTableView reloadData];
-    if ([chatFriendArray count] > 0)
+    if ([newMessageArray count] > 0)
     {
         editButton.hidden = NO;
         tipLabel.hidden = YES;
@@ -286,16 +283,16 @@ ChatVCDelegate>
     }
 }
 
--(NSInteger)newMsgCountOfUser:(NSString *)fid
-{
-    NSArray *newMsgs = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"fid":fid,@"readed":@"0"} andTableName:CHATTABLE];
-    return [newMsgs count];
-}
-
 -(NSDictionary *)findLastMsgWithUser:(NSString *)fid
 {
-    NSMutableArray *array = [db findChatLogWithUid:[Tools user_id] andOtherId:fid andTableName:@"chatMsg"];
+    NSMutableArray *array = [db findChatLogWithUid:[Tools user_id] andOtherId:fid andTableName:CHATTABLE];
     return [array lastObject];
+}
+
+-(int)findCountOfUserId:(NSString *)fid
+{
+    NSMutableArray *array = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"fid":fid,@"readed":@"0"} andTableName:CHATTABLE];
+    return [array count];
 }
 
 #pragma mark - egodelegate
@@ -372,7 +369,7 @@ ChatVCDelegate>
 }
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return [chatFriendArray count];
+    return [newMessageArray count];
 }
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -388,114 +385,103 @@ ChatVCDelegate>
     {
         cell = [[MemberCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:chatCell];
     }
-    NSDictionary *dict = [chatFriendArray objectAtIndex:indexPath.row];
+    NSDictionary *dict = [newMessageArray objectAtIndex:indexPath.row];
     cell.headerImageView.frame = CGRectMake(10, 7, 46, 46);
-    
-    if (![[dict objectForKey:@"ficon"] isEqual:[NSNull null]])
-    {
-        if ([[dict objectForKey:@"fid"]isEqualToString:OurTeamID])
-        {
-            [Tools fillImageView:cell.headerImageView withImageFromURL:OurTeamHeader andDefault:HEADERICON];
-        }
-        else if ([[dict objectForKey:@"ficon"] length] > 10)
-        {
-            NSDictionary *icondict;
-            if ([[db findSetWithDictionary:@{@"uid":[dict objectForKey:@"fid"]} andTableName:USERICONTABLE] count] > 0)
-            {
-                icondict = [[db findSetWithDictionary:@{@"uid":[dict objectForKey:@"fid"]} andTableName:USERICONTABLE] firstObject];
-                if ([[icondict objectForKey:@"uicon"] length] > 0)
-                {
-                    [Tools fillImageView:cell.headerImageView withImageFromURL:[icondict objectForKey:@"uicon"] andDefault:HEADERICON];
-                }
-                else
-                {
-                    [cell.headerImageView setImage:[UIImage imageNamed:HEADERICON]];
-                }
-            }
-            else
-            {
-                if ([[dict objectForKey:@"uicon"] length] > 0)
-                {
-                    [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"uicon"] andDefault:HEADERICON];
-                }
-                else
-                {
-                    [cell.headerImageView setImage:[UIImage imageNamed:HEADERICON]];
-                }
-            }
-        }
-        else
-        {
-            NSArray *array = [db findSetWithDictionary:@{@"uid":[dict objectForKey:@"fid"]} andTableName:CLASSMEMBERTABLE];
-            if ([array count] > 0)
-            {
-                NSDictionary *memDict = [array firstObject];
-                if (![[memDict objectForKey:@"img_icon"] isEqual:[NSNull null]])
-                {
-                    if ([[memDict objectForKey:@"img_icon"] length] >10)
-                    {
-                        [Tools fillImageView:cell.headerImageView withImageFromURL:[memDict objectForKey:@"img_icon"] andDefault:HEADERICON];
-                    }
-                    else
-                    {
-                        [cell.headerImageView setImage:[UIImage imageNamed:HEADERICON]];
-                    }
-                }
-            }
-        }
-    }
-    
     cell.headerImageView.layer.cornerRadius = 5;
     cell.headerImageView.clipsToBounds = YES;
     
-    cell.memNameLabel.frame = CGRectMake(70, 7, 150, 20);
-    cell.memNameLabel.text = [self getNameFromString:[dict objectForKey:@"fname"]];
+    cell.memNameLabel.frame = CGRectMake(70, 7, 190, 20);
     cell.memNameLabel.textColor = [UIColor blackColor];
     cell.memNameLabel.font = [UIFont boldSystemFontOfSize:16];
     cell.unreadedMsgLabel.hidden = YES;
     
-    if ([self newMsgCountOfUser:[dict objectForKey:@"fid"]] > 0)
+   
+    
+    int unreadMsgCount = [self findCountOfUserId:[dict objectForKey:@"fid"]];
+    if (unreadMsgCount > 0)
     {
-        cell.unreadedMsgLabel.text = [NSString stringWithFormat:@"%d",[self newMsgCountOfUser:[dict objectForKey:@"fid"]]];
+        cell.unreadedMsgLabel.text = [NSString stringWithFormat:@"%d",unreadMsgCount];
         cell.unreadedMsgLabel.hidden = NO;
         cell.unreadedMsgLabel.backgroundColor = [UIColor redColor];
         [cell.contentView bringSubviewToFront:cell.unreadedMsgLabel];
     }
+    else
+    {
+        cell.unreadedMsgLabel.hidden = YES;
+    }
     
     NSDictionary *lastMsgDict = [self findLastMsgWithUser:[dict objectForKey:@"fid"]];
-    cell.contentLabel.hidden = NO;
-    cell.contentLabel.font = [UIFont systemFontOfSize:14];
-    cell.contentLabel.text = [[lastMsgDict  objectForKey:@"content"]emojizedString];
+    
+    if ([[dict objectForKey:@"fid"] isEqualToString:OurTeamID])
+    {
+        [Tools fillImageView:cell.headerImageView withImageFromURL:OurTeamHeader andDefault:HEADERICON];
+    }
+    else
+    {
+        NSDictionary *userIconDIct = [ImageTools iconDictWithUserID:[dict objectForKey:@"fid"]];
+        if(userIconDIct)
+        {
+            [Tools fillImageView:cell.headerImageView withImageFromURL:[userIconDIct objectForKey:@"uicon"] andDefault:HEADERICON];
+            cell.memNameLabel.text = [userIconDIct objectForKey:@"username"];
+            
+            
+            if (lastMsgDict)
+            {
+                cell.contentLabel.hidden = NO;
+                cell.contentLabel.font = [UIFont systemFontOfSize:14];
+                if (![[userIconDIct objectForKey:@"username"] isEqual:[NSNull null]] && [[userIconDIct objectForKey:@"username"] length] > 0  && [[userIconDIct objectForKey:@"username"] rangeOfString:@"人)"].length > 0)
+                {
+                    NSDictionary *userIconDict = [ImageTools iconDictWithUserID:[lastMsgDict objectForKey:@"by"]];
+                    NSString *byName;
+                    if (userIconDict)
+                    {
+                        byName = [userIconDict objectForKey:@"username"];
+                    }
+                    NSString *msgContent = [[lastMsgDict objectForKey:@"content"] emojizedString];
+                    if ([[msgContent pathExtension] isEqualToString:@"png"] || [[msgContent pathExtension] isEqualToString:@"jpg"])
+                    {
+                        cell.contentLabel.text = [NSString stringWithFormat:@"%@:%@",byName,@"图片"];
+                    }
+                    else
+                    {
+                        cell.contentLabel.text = [[NSString stringWithFormat:@"%@:%@",byName,[lastMsgDict objectForKey:@"content"]] emojizedString];
+                    }
+                }
+                else
+                {
+                    cell.contentLabel.text = [[lastMsgDict objectForKey:@"content"] emojizedString];
+                }
+            }
+        }
+    }
+
     if ([[lastMsgDict objectForKey:@"content"] rangeOfString:@"$!#"].length >0)
     {
-        
         NSString *msgContent = [lastMsgDict objectForKey:@"content"];
         NSRange range = [msgContent rangeOfString:@"$!#"];
         cell.contentLabel.text = [msgContent substringFromIndex:range.location+range.length];
     }
    
-    cell.remarkLabel.frame = CGRectMake(SCREEN_WIDTH-120, 7, 100, 15);
+    cell.remarkLabel.frame = CGRectMake(SCREEN_WIDTH-60, 7, 40, 15);
     cell.remarkLabel.font = [UIFont systemFontOfSize:10];
     cell.remarkLabel.hidden = NO;
-    cell.remarkLabel.text = [Tools showTime:[dict objectForKey:@"time"]];
-
-    UIImageView *bgImageBG = [[UIImageView alloc] init];
-    bgImageBG.image = [UIImage imageNamed:@"cell_bg"];
-    cell.backgroundView = bgImageBG;
-    cell.selectionStyle = UITableViewCellSelectionStyleGray;
+    cell.remarkLabel.text = [Tools showTime:[lastMsgDict objectForKey:@"time"]];
+    
+    CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+    UIImageView *lineImageView = [[UIImageView alloc] init];
+    lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+    lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+    [cell.contentView addSubview:lineImageView];
+    cell.contentView.backgroundColor = [UIColor whiteColor];
     return cell;
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    NSDictionary *dict = [chatFriendArray objectAtIndex:indexPath.row];
-    
-    [db updeteKey:@"readed" toValue:@"1" withParaDict:@{@"fid":[dict objectForKey:@"fid"],@"userid":[Tools user_id]} andTableName:@"chatMsg"];
-    [self dealNewChatMsg:nil];
-    
+    NSDictionary *dict = [newMessageArray objectAtIndex:indexPath.row];
+   
     ChatViewController *chat = [[ChatViewController alloc] init];
-    chat.name = [self getNameFromString:[dict objectForKey:@"fname"]];
     chat.toID = [dict objectForKey:@"fid"];
     if ([chat.toID isEqualToString:OurTeamID])
     {
@@ -507,6 +493,21 @@ ChatVCDelegate>
     }
     chat.chatVcDel = self;
     chat.fromClass = NO;
+    
+    NSDictionary *userIconDIct = [ImageTools iconDictWithUserID:[dict objectForKey:@"fid"]];
+    if(userIconDIct)
+    {
+        if ([[userIconDIct objectForKey:@"username"] rangeOfString:@"人)"].length == 0)
+        {
+            chat.isGroup = NO;
+        }
+        else if([[userIconDIct objectForKey:@"username"] rangeOfString:@"人)"].length > 0)
+        {
+            chat.isGroup = YES;
+        }
+        chat.name = [userIconDIct objectForKey:@"username"];
+    }
+    
     [self.navigationController pushViewController:chat animated:YES];
 }
 
@@ -534,14 +535,14 @@ ChatVCDelegate>
 
 -(void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSDictionary *dict = [chatFriendArray objectAtIndex:indexPath.row];
+    NSDictionary *dict = [newMessageArray objectAtIndex:indexPath.row];
 //    DDLOG(@"dict == %@",dict);
     
     if ([db deleteRecordWithDict:@{@"userid":[Tools user_id],@"fid":[dict objectForKey:@"fid"]} andTableName:CHATTABLE])
     {
         DDLOG(@"delete chat log of %@ success",[dict objectForKey:@"fname"]);
     }
-    [chatFriendArray removeObjectAtIndex:indexPath.row];
+    [newMessageArray removeObjectAtIndex:indexPath.row];
     [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForItem:indexPath.row inSection:indexPath.section]] withRowAnimation:UITableViewRowAnimationFade];
     [tableView reloadData];
 }

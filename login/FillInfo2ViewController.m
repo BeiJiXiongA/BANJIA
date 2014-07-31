@@ -113,6 +113,7 @@
     nameTextField.background = nil;
     nameTextField.layer.cornerRadius = 5;
     nameTextField.clipsToBounds = YES;
+    nameTextField.placeholder = @"15个汉字以内";
     nameTextField.backgroundColor = [UIColor whiteColor];
     nameTextField.textColor = COMMENTCOLOR;
     nameTextField.font = [UIFont systemFontOfSize:16];
@@ -125,11 +126,12 @@
     self.sexLabel.textColor = COMMENTCOLOR;
     
     self.pwdLabel.textColor = COMMENTCOLOR;
-    pwdTextField = [[MyTextField alloc] initWithFrame:CGRectMake(102, 270, 200, 42)];
+    pwdTextField = [[MyTextField alloc] initWithFrame:CGRectMake(102, self.pwdLabel.frame.origin.y-10.5, 200, 42)];
     pwdTextField.background = nil;
     pwdTextField.layer.cornerRadius = 5;
     pwdTextField.clipsToBounds = YES;
     pwdTextField.textColor = COMMENTCOLOR;
+    pwdTextField.placeholder = @"密码长度不能少于6位";
     pwdTextField.backgroundColor = [UIColor whiteColor];
     pwdTextField.font = [UIFont systemFontOfSize:16];
     
@@ -251,6 +253,11 @@
         [Tools showAlertView:@"请输入您的姓名！" delegateViewController:nil];
         return;
     }
+    if ([nameTextField.text lengthOfBytesUsingEncoding:NSUTF8StringEncoding] > 45)
+    {
+        [Tools showAlertView:@"名字最多有15个汉字组成！" delegateViewController:nil];
+        return;
+    }
     
     NSString *userStr;
     if ([[APService registrionID] length] > 0)
@@ -272,6 +279,11 @@
         {
             [Tools showAlertView:@"请输入您的密码！" delegateViewController:nil];
             return;
+        }
+        if ([Tools isPassWord:pwdTextField.text])
+        {
+            [Tools showAlertView:@"密码由6-20位字母或数字组成" delegateViewController:nil];
+            return ;
         }
         paraDict = @{@"u_id":userid,
                      @"token":token,

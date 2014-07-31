@@ -56,10 +56,6 @@
     
     [APService setAlias:[APService registrionID] callbackSelector:nil object:nil];
     
-
-    [[NSUserDefaults standardUserDefaults] setObject:NOTFROMCLASS forKey:FROMWHERE];
-    [[NSUserDefaults standardUserDefaults] synchronize];
-    
     NSArray *array = [_db findSetWithDictionary:@{} andTableName:CLASSMEMBERTABLE];
     NSDictionary *dict = [array firstObject];
     if (![[dict allKeys] containsObject:@"admin"])
@@ -73,6 +69,27 @@
     {
         [_db alterTableAdd:@"jianpin" charLength:8 defaultValue:@"" andTableName:CLASSMEMBERTABLE];
         [_db alterTableAdd:@"quanpin" charLength:8 defaultValue:@"" andTableName:CLASSMEMBERTABLE];
+    }
+    
+    NSArray *array3 = [_db findSetWithDictionary:@{} andTableName:CHATTABLE];
+    NSDictionary *dict3 = [array3 firstObject];
+    if (![[dict3 allKeys] containsObject:@"by"])
+    {
+        [_db alterTableAdd:@"by" charLength:8 defaultValue:@"" andTableName:CHATTABLE];
+    }
+    
+    NSArray *array4 = [_db findSetWithDictionary:@{} andTableName:USERICONTABLE];
+    NSDictionary *dict4 = [array4 firstObject];
+    if (![[dict4 allKeys] containsObject:@"by"])
+    {
+        [_db alterTableAdd:@"username" charLength:8 defaultValue:@"" andTableName:USERICONTABLE];
+    }
+    
+    NSArray *array5 = [_db findSetWithDictionary:@{} andTableName:FRIENDSTABLE];
+    NSDictionary *dict5 = [array5 firstObject];
+    if (![[dict5 allKeys] containsObject:@"cgroup"])
+    {
+        [_db alterTableAdd:@"cgroup" charLength:8 defaultValue:@"" andTableName:USERICONTABLE];
     }
     
     if ([[_db findSetWithDictionary:@{} andTableName:CITYTABLE] count] <= 0)
@@ -144,6 +161,8 @@
         KKNavigationController *welNav = [[KKNavigationController alloc] initWithRootViewController:welcomeViewCOntroller];
         self.window.rootViewController = welNav;
     }
+    
+    DDLOG(@"uinavigation bar height %d",UI_NAVIGATION_BAR_HEIGHT);
     
     [ShareSDK registerApp:@"182899e1ea92"];
     [self shareAppKeysForEvery];
@@ -402,23 +421,23 @@
             
             NSString *ficon = @"";
             [chatDict setObject:ficon forKey:@"ficon"];
-            [chatDict setObject:fname forKey:@"fname"];
+//            [chatDict setObject:fname forKey:@"fname"];
             [chatDict setObject:[Tools user_id] forKey:@"userid"];
             
             if ([[NSUserDefaults standardUserDefaults] objectForKey:NewChatAlert])
             {
                 if ([[[NSUserDefaults standardUserDefaults] objectForKey:NewChatAlert] integerValue] == 1)
                 {
-                    NSString *path = [[NSBundle mainBundle] pathForResource:@"msg"
-                                                                     ofType:@"wav"];
-                    SystemSoundID soundID;
-                    AudioServicesCreateSystemSoundID((__bridge CFURLRef)[NSURL fileURLWithPath:path]
-                                                     , &soundID);
+//                    NSString *path = [[NSBundle mainBundle] pathForResource:@"msg"
+//                                                                     ofType:@"wav"];
+//                    SystemSoundID soundID;
+//                    AudioServicesCreateSystemSoundID((__bridge CFURLRef)[NSURL fileURLWithPath:path]
+//                                                     , &soundID);
                     
                     AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
                     
                     
-                    AudioServicesPlaySystemSound (soundID);
+//                    AudioServicesPlaySystemSound (soundID);
                 }
             }
             

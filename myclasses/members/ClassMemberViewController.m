@@ -299,10 +299,10 @@ MsgDelegate>
 {
     [UIView animateWithDuration:0.2 animations:^{
         [searchView addGestureRecognizer:tapTgr];
-        mySearchBar.frame = CGRectMake(0, 0, SCREEN_WIDTH, 40);
+        mySearchBar.frame = CGRectMake(0, YSTART, SCREEN_WIDTH, 40);
         [self.bgView bringSubviewToFront:searchView];
         searchTableView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-        searchView.frame = CGRectMake(0, 40, SCREEN_WIDTH, SCREEN_HEIGHT);
+        searchView.frame = CGRectMake(0, 40+YSTART, SCREEN_WIDTH, SCREEN_HEIGHT);
         memberTableView.hidden = YES;
         searchView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.4];
         searchBar.showsCancelButton = YES;
@@ -312,7 +312,10 @@ MsgDelegate>
 
 -(void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText
 {
-    [self searchWithText:searchText];
+    if ([searchBar.text length] > 0)
+    {
+        [self searchWithText:searchText];
+    }
 }
 -(void)searchBarCancelButtonClicked:(UISearchBar *)searchBar
 {
@@ -508,11 +511,32 @@ MsgDelegate>
                     //classid VARCHAR(30),name VARCHAR(20),uid VARCHAR(30),img_icon VARCHAR(30),re_id VARCHAR(30),re_name VARCHAR(30),checked VARCHAR(5),phone VARCHAR(15)
                     NSMutableDictionary *memDict = [[NSMutableDictionary alloc] initWithCapacity:0];
                     NSDictionary *dict = [allMembersArray objectAtIndex:i];
+                    
+                    if ([dict objectForKey:@"role"])
+                    {
+                        [memDict setObject:[dict objectForKey:@"role"] forKey:@"role"];
+                    }
+                    else
+                    {
+                        [memDict setObject:@"" forKey:@"role"];
+                    }
+                    if ([[dict objectForKey:@"role"] isEqualToString:@"unin_students"])
+                    {
+                        continue ;
+                    }
                     [memDict setObject:[dict objectForKey:@"_id"] forKey:@"uid"];
                     NSString *name = [dict objectForKey:@"name"];
                     [memDict setObject:name forKey:@"name"];
                     [memDict setObject:[ChineseToPinyin jianPinFromChiniseString:name] forKey:@"jianpin"];
                     [memDict setObject:[ChineseToPinyin pinyinFromChiniseString:name] forKey:@"quanpin"];
+                    
+                    if ([[_db findSetWithDictionary:@{@"uid":[dict objectForKey:@"_id"],@"uicon":[dict objectForKey:@"img_icon"],@"username":[dict objectForKey:@"name"]} andTableName:USERICONTABLE] count] == 0)
+                    {
+                        [_db insertRecord:@{@"uid":[dict objectForKey:@"_id"],
+                                                    @"uicon":[dict objectForKey:@"img_icon"],
+                                                    @"username":[dict objectForKey:@"name"]}
+                                     andTableName:USERICONTABLE];
+                    }
                     
                     [memDict setObject:classID forKey:@"classid"];
                     [memDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"checked"] integerValue]] forKey:@"checked"];
@@ -560,7 +584,7 @@ MsgDelegate>
                         {
                             [memDict setObject:@"班主任" forKey:@"title"];
                         }
-                        else if([[dict objectForKey:@"title"] isEqualToString:@"班主任"])
+                        else if([[dict objectForKey:@"title"] isEqual:[NSNull null]] || [[dict objectForKey:@"title"] isEqualToString:@"班主任"])
                         {
                             [memDict setObject:@"" forKey:@"title"];
                         }
@@ -568,14 +592,6 @@ MsgDelegate>
                         {
                             [memDict setObject:[dict objectForKey:@"title"] forKey:@"title"];
                         }
-                    }
-                    if ([dict objectForKey:@"role"])
-                    {
-                        [memDict setObject:[dict objectForKey:@"role"] forKey:@"role"];
-                    }
-                    else
-                    {
-                        [memDict setObject:@"" forKey:@"role"];
                     }
                     
                     if ([dict objectForKey:@"re_name"])
@@ -979,7 +995,7 @@ MsgDelegate>
             NSDictionary *dict = [classLeadersArray objectAtIndex:indexPath.row];
             cell.memNameLabel.frame = CGRectMake(60, 15, 150, 30);
             cell.memNameLabel.text = [dict objectForKey:@"name"];
-            [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERBG];
+            [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERICON];
             cell.headerImageView.layer.cornerRadius = 3;
             cell.headerImageView.clipsToBounds = YES;
             cell.remarkLabel.hidden = NO;
@@ -994,7 +1010,6 @@ MsgDelegate>
             bgImageBG.backgroundColor = [UIColor clearColor];
             cell.backgroundView = bgImageBG;
             return cell;
-            
         }
         else
         {
@@ -1014,7 +1029,7 @@ MsgDelegate>
             {
                 cell.remarkLabel.text = [dict objectForKey:@"title"];
             }
-            [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERBG];
+            [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERICON];
             
             cell.button2.hidden = YES;
             if (![self haveParents:[dict objectForKey:@"name"]])
@@ -1043,14 +1058,20 @@ MsgDelegate>
     else if(tableView.tag == SearchTableViewTag)
     {
         static NSString *searchCell = @"searchmemCell";
-        UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:searchCell];
+        MemberCell *cell = [tableView dequeueReusableCellWithIdentifier:searchCell];
         if (cell == nil)
         {
-            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:searchCell];
+            cell = [[MemberCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:searchCell];
         }
         NSDictionary *dict = [searchResultArray objectAtIndex:indexPath.row];
-        cell.textLabel.font = [UIFont systemFontOfSize:14];
-        cell.textLabel.text = [dict objectForKey:@"name"];
+        
+        [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERICON];
+        cell.headerImageView.frame = CGRectMake(5, 4, 35, 35);
+        cell.headerImageView.layer.cornerRadius = 5;
+        cell.headerImageView.clipsToBounds = YES;
+        
+        cell.memNameLabel.frame = CGRectMake(cell.headerImageView.frame.size.width+cell.headerImageView.frame.origin.x+5, 12, 100, 20);
+        cell.memNameLabel.text = [dict objectForKey:@"name"];
         cell.selectionStyle = UITableViewCellSelectionStyleGray;
         return cell;
     }
@@ -1187,6 +1208,23 @@ MsgDelegate>
             studentDetail.role = [dict objectForKey:@"role"];
             [[XDTabViewController sharedTabViewController].navigationController pushViewController:studentDetail animated:YES];
 
+        }
+        else if([[dict objectForKey:@"role"] isEqualToString:@"unin_students"])
+        {
+            StudentDetailViewController *studentDetail = [[StudentDetailViewController alloc] init];
+            if (![[dict objectForKey:@"title"] isEqual:[NSNull null]])
+            {
+                studentDetail.title = [dict objectForKey:@"title"];
+            }
+            studentDetail.studentName = [dict objectForKey:@"name"];
+            if (![[dict objectForKey:@"title"] isEqual:[NSNull null]])
+            {
+                studentDetail.title = [dict objectForKey:@"title"];
+            }
+            
+            studentDetail.headerImg = [dict objectForKey:@"img_icon"];
+            studentDetail.role = [dict objectForKey:@"role"];
+            [[XDTabViewController sharedTabViewController].navigationController pushViewController:studentDetail animated:YES];
         }
         else if ([[dict objectForKey:@"role"] isEqualToString:@"teachers"])
         {

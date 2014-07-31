@@ -53,6 +53,8 @@ UIScrollViewDelegate>
     
     NSTimer *timer;
     int sec;
+    
+    UITapGestureRecognizer *tapTgr;
 }
 @end
 
@@ -128,6 +130,8 @@ UIScrollViewDelegate>
     
     objectArray = @[@"语文老师",@"数学老师",@"英语老师",@"历史老师",@"其他"];
     objectStr = [objectArray firstObject];
+    
+    
     
     showObjectButton = [UIButton buttonWithType:UIButtonTypeCustom];
     showObjectButton.backgroundColor = [UIColor whiteColor];
@@ -256,7 +260,7 @@ UIScrollViewDelegate>
     
     [mainScrollView addSubview:objectsTableView];
     
-    UITapGestureRecognizer *tapTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapEvent)];
+    tapTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapEvent)];
     mainScrollView.userInteractionEnabled = YES;
     [mainScrollView addGestureRecognizer:tapTgr];
 }
@@ -557,12 +561,14 @@ UIScrollViewDelegate>
             
             objectsTableView.frame = CGRectMake(showObjectButton.frame.origin.x, showObjectButton.frame.size.height+showObjectButton.frame.origin.y, showObjectButton.frame.size.width, [objectArray count]*40);
         }];
+        [mainScrollView removeGestureRecognizer:tapTgr];
     }
     else
     {
         [UIView animateWithDuration:0.2 animations:^{
             objectsTableView.frame = CGRectMake(showObjectButton.frame.origin.x, showObjectButton.frame.size.height+showObjectButton.frame.origin.y, showObjectButton.frame.size.width, 0);
         }];
+        [mainScrollView addGestureRecognizer:tapTgr];
     }
     showObjects = !showObjects;
 }

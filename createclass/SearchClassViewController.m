@@ -169,7 +169,6 @@ ZBarReaderDelegate>
         [scanner setSymbology: ZBAR_I25
                        config: ZBAR_CFG_ENABLE
                            to: 0];
-        
         [self.navigationController presentViewController:reader animated:YES completion:nil];
     }
 }
@@ -405,7 +404,7 @@ ZBarReaderDelegate>
                         }
                         
                         ClassZoneViewController *classZone = [[ClassZoneViewController alloc] init];
-                        classZone.fromClasses = YES;
+                        classZone.isApply = YES;
                         [[NSUserDefaults standardUserDefaults] setObject:classID forKey:@"classid"];
                         [[NSUserDefaults standardUserDefaults] setObject:className forKey:@"classname"];
                         [[NSUserDefaults standardUserDefaults] setObject:schoolName forKey:@"schoolname"];

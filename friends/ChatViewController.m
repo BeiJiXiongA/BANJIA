@@ -16,6 +16,7 @@
 #import "UIImageView+WebCache.h"
 #import "ReportViewController.h"
 #import "PersonDetailViewController.h"
+#import "GroupInfoViewController.h"
 
 
 #define DIRECT  @"direct"
@@ -36,7 +37,8 @@ UIActionSheetDelegate,
 UIAlertViewDelegate,
 ChatDelegate,
 ReturnFunctionDelegate,
-MessageDelegate>
+MessageDelegate,
+updateGroupInfoDelegate>
 {
     NSMutableArray *messageArray;
     UITableView *messageTableView;
@@ -66,11 +68,17 @@ MessageDelegate>
     NSString *fromImageStr;
     
     UITapGestureRecognizer *headerTapTgr;
+    
+    NSArray *users;
+    NSString *builder;
+    
+    NSString *g_a_f;
+    NSString *g_r_a;
 }
 @end
 
 @implementation ChatViewController
-@synthesize name,toID,imageUrl,chatVcDel,fromClass;
+@synthesize name,toID,imageUrl,chatVcDel,fromClass,isGroup;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -78,6 +86,26 @@ MessageDelegate>
         // Custom initialization
     }
     return self;
+}
+
+-(void)groupInfo
+{
+    GroupInfoViewController *groupInfoVC = [[GroupInfoViewController alloc] init];
+    groupInfoVC.groupID = toID;
+    [groupInfoVC.groupUsers addObjectsFromArray:users];
+    groupInfoVC.builderID = builder;
+    groupInfoVC.updateGroupInfoDel = self;
+    groupInfoVC.g_a_f = g_a_f;
+    groupInfoVC.g_r_a = g_r_a;
+    [self.navigationController pushViewController:groupInfoVC animated:YES];
+}
+
+-(void)updateGroupInfo:(BOOL)update
+{
+    if (update)
+    {
+        [self getGroupInfo];
+    }
 }
 
 - (void)viewDidLoad
@@ -98,10 +126,34 @@ MessageDelegate>
     
     faceViewHeight = 0;
     
+    
+    if (toID && name)
+    {
+        NSDictionary *userDict = [[NSDictionary alloc] initWithObjectsAndKeys:toID,@"uid",name,@"username",imageUrl,@"uicon", nil];
+        if ([[db findSetWithDictionary:@{toID:@"uid"} andTableName:USERICONTABLE] count] == 0)
+        {
+            [db insertRecord:userDict andTableName:USERICONTABLE];
+        }
+        else
+        {
+            [db deleteRecordWithDict:@{toID:@"uid"} andTableName:USERICONTABLE];
+            [db insertRecord:userDict andTableName:USERICONTABLE];
+        }
+    }
+    
+    
     UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
     moreButton.frame = CGRectMake(SCREEN_WIDTH-CORNERMORERIGHT, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
-    [moreButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
-    [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
+    if (isGroup)
+    {
+        [moreButton setImage:[UIImage imageNamed:@"newapplyheader"] forState:UIControlStateNormal];
+        [moreButton addTarget:self action:@selector(groupInfo) forControlEvents:UIControlEventTouchUpInside];
+    }
+    else
+    {
+        [moreButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
+        [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
+    }
     if (![toID isEqualToString:OurTeamID])
     {
         [self.navigationBarView addSubview:moreButton];
@@ -147,7 +199,14 @@ MessageDelegate>
     
     if ([Tools NetworkReachable])
     {
-        [self getChatLog];
+        if(isGroup)
+        {
+            [self getGroupInfo];
+        }
+        else
+        {
+            [self getChatLog];
+        }
     }
     else
     {
@@ -223,10 +282,23 @@ MessageDelegate>
 {
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
-                                                                      @"token":[Tools client_token],
-                                                                      @"t_id":toID,
-                                                                      } API:GETCHATLOG];
+        NSDictionary *paraDict;
+        if(isGroup)
+        {
+            paraDict = @{@"u_id":[Tools user_id],
+                         @"token":[Tools client_token],
+                         @"g_id":toID,
+                         };
+        }
+        else
+        {
+            paraDict = @{@"u_id":[Tools user_id],
+                         @"token":[Tools client_token],
+                         @"t_id":toID,
+                         };
+        }
+        
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:paraDict API:GETCHATLOG];
         [request setCompletionBlock:^{
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
@@ -234,45 +306,47 @@ MessageDelegate>
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 
-                    NSArray *array = [[NSArray alloc] initWithArray:[responseDict objectForKey:@"data"]];
-                    for (int i=0; i<[array count]; ++i)
+                NSArray *array = [[NSArray alloc] initWithArray:[responseDict objectForKey:@"data"]];
+                for (int i=0; i<[array count]; ++i)
+                {
+                    NSMutableDictionary *chatDict = [[NSMutableDictionary alloc] initWithCapacity:0];
+                    NSDictionary *dict = [array objectAtIndex:i];
+                    
+                    [chatDict setObject:[dict objectForKey:@"_id"] forKey:@"mid"];
+                    [chatDict setObject:[Tools user_id] forKey:@"userid"];
+                    [chatDict setObject:[dict objectForKey:@"msg"] forKey:@"content"];
+                    [chatDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"t"] integerValue]] forKey:@"time"];
+                    [chatDict setObject:imageUrl?imageUrl:@"" forKey:@"ficon"];
+                    [chatDict setObject:@"1" forKey:@"readed"];
+                    [chatDict setObject:TEXTMEG forKey:@"msgType"];
+                    if ([[dict objectForKey:@"by"] isEqualToString:[Tools user_id]])
                     {
-                        NSMutableDictionary *chatDict = [[NSMutableDictionary alloc] initWithCapacity:0];
-                        NSDictionary *dict = [array objectAtIndex:i];
-                        [chatDict setObject:[dict objectForKey:@"_id"] forKey:@"mid"];
-                        [chatDict setObject:[Tools user_id] forKey:@"userid"];
-                        [chatDict setObject:[dict objectForKey:@"by"] forKey:@"fid"];
-                        [chatDict setObject:[dict objectForKey:@"msg"] forKey:@"content"];
-                        [chatDict setObject:[NSString stringWithFormat:@"%f",[[dict objectForKey:@"t"] floatValue]] forKey:@"time"];
-                        [chatDict setObject:imageUrl?imageUrl:@"" forKey:@"ficon"];
-                        [chatDict setObject:@"1" forKey:@"readed"];
-                        [chatDict setObject:TEXTMEG forKey:@"msgType"];
-                        if ([[dict objectForKey:@"by"] isEqualToString:[Tools user_id]])
-                        {
-                            [chatDict setObject:toID forKey:@"tid"];
-                            [chatDict setObject:[Tools user_name] forKey:@"fname"];
-                            [chatDict setObject:@"t" forKey:@"direct"];
-                        }
-                        else if([[dict objectForKey:@"by"] isEqualToString:toID])
-                        {
-                            [chatDict setObject:[Tools user_id] forKey:@"tid"];
-                            [chatDict setObject:name forKey:@"fname"];
-                            [chatDict setObject:@"f" forKey:@"direct"];
-                        }
-                
-                        NSArray *dataMsgArray = [db findSetWithDictionary:@{@"mid":[dict objectForKey:@"_id"],@"userid":[Tools user_id]} andTableName:CHATTABLE];
-                        if ([dataMsgArray count] == 0)
-                        {
-                            [db insertRecord:chatDict andTableName:CHATTABLE];
-                        }
-                        else if ([[[dataMsgArray firstObject] objectForKey:@"content"] isEqualToString:@"给您发来一条新消息"]||
-                                 [[[dataMsgArray firstObject] objectForKey:@"content"] isEqualToString:@"给您发来一条新邀请"])
-                        {
-                            [db deleteRecordWithDict:@{@"mid":[dict objectForKey:@"_id"]} andTableName:CHATTABLE];
-                            [db insertRecord:chatDict andTableName:CHATTABLE];
-                        }
+                        [chatDict setObject:toID forKey:@"tid"];
+                        [chatDict setObject:@"t" forKey:DIRECT];
+                        [chatDict setObject:[Tools user_id] forKey:@"fid"];
                     }
-                    [self dealNewChatMsg:nil];
+                    else
+                    {
+                        [chatDict setObject:[Tools user_id] forKey:@"tid"];
+                        [chatDict setObject:toID forKey:@"fid"];
+                        [chatDict setObject:@"f" forKey:DIRECT];
+                    }
+                    if (isGroup)
+                    {
+                        [chatDict setObject:[dict objectForKey:@"by"] forKey:@"by"];
+                    }
+                    
+                    if ([db findSetWithDictionary:@{@"userid":[Tools user_id],@"mid":[dict objectForKey:@"_id"]} andTableName:CHATTABLE] == 0)
+                    {
+                        [db insertRecord:chatDict andTableName:CHATTABLE];
+                    }
+                    else
+                    {
+                        [db deleteRecordWithDict:@{@"userid":[Tools user_id],@"mid":[dict objectForKey:@"_id"]} andTableName:CHATTABLE];
+                        [db insertRecord:chatDict andTableName:CHATTABLE];
+                    }
+                }
+                [self dealNewChatMsg:nil];
             }
             else
             {
@@ -289,15 +363,100 @@ MessageDelegate>
 
 }
 
-#pragma mark - lastViewTime
--(void)uploadLastViewTime
+-(void)getGroupInfo
 {
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
-                                                                      @"t_id":toID
-                                                                      } API:LASTVIEWTIME];
+                                                                      @"g_id":toID
+                                                                      } API:GETGROUPINFO];
+        [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"get froup info responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                users = [[responseDict objectForKey:@"data"] objectForKey:@"users"];
+                self.titleLabel.text = [[responseDict objectForKey:@"data"] objectForKey:@"name"];
+                for(NSDictionary *dict in users)
+                {
+                    NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithCapacity:0];
+                    [tmpDict setObject:[dict objectForKey:@"_id"]forKey:@"uid"];
+                    if ([dict objectForKey:@"img_icon"])
+                    {
+                        [tmpDict setObject:[dict objectForKey:@"img_icon"] forKey:@"uicon"];
+                    }
+                    else
+                    {
+                        [tmpDict setObject:@"" forKey:@"uicon"];
+                    }
+                    [tmpDict setObject:[dict objectForKey:@"r_name"] forKey:@"username"];
+                    if ([[db findSetWithDictionary:@{@"uid":[dict objectForKey:@"_id"]} andTableName:USERICONTABLE] count]>0)
+                    {
+                        [db deleteRecordWithDict:@{@"uid":[dict objectForKey:@"_id"]} andTableName:USERICONTABLE];
+                        [db insertRecord:tmpDict andTableName:USERICONTABLE];
+                    }
+                    else
+                    {
+                        [db insertRecord:tmpDict andTableName:USERICONTABLE];
+                    }
+                }
+                builder = [[responseDict objectForKey:@"data"] objectForKey:@"builder"];
+                
+                name = [[responseDict objectForKey:@"data"] objectForKey:@"name"];
+                NSDictionary *userIconDict = @{@"uid":toID,@"username":name,@"uicon":@""};
+                if ([[db findSetWithDictionary:@{@"uid":toID} andTableName:USERICONTABLE] count] > 0)
+                {
+                    [db deleteRecordWithDict:@{@"uid":toID} andTableName:USERICONTABLE];
+                    [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                }
+                else
+                {
+                    [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                }
+                g_a_f = [[[responseDict objectForKey:@"data"] objectForKey:@"opt"] objectForKey:@"g_a_f"];
+                g_r_a = [[[responseDict objectForKey:@"data"] objectForKey:@"opt"] objectForKey:@"g_r_a"];
+                [self getChatLog];
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        }];
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools hideProgress:self.bgView];
+        }];
+        [Tools showProgress:self.bgView];
+        [request startAsynchronous];
+    }
+}
+
+#pragma mark - lastViewTime
+-(void)uploadLastViewTime
+{
+    if ([Tools NetworkReachable])
+    {
+        
+        NSDictionary *paraDict;
+        if(isGroup)
+        {
+            paraDict = @{@"u_id":[Tools user_id],
+                         @"token":[Tools client_token],
+                         @"g_id":toID,
+                         };
+        }
+        else
+        {
+            paraDict = @{@"u_id":[Tools user_id],
+                         @"token":[Tools client_token],
+                         @"t_id":toID,
+                         };
+        }
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:paraDict API:LASTVIEWTIME];
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
             NSString *responseString = [request responseString];
@@ -444,11 +603,17 @@ MessageDelegate>
 {
     [messageArray removeAllObjects];
     [messageArray addObjectsFromArray:[db findChatLogWithUid:[Tools user_id] andOtherId:toID andTableName:CHATTABLE]];
-    
-    if ([[dict objectForKey:@"content"] isEqualToString:@"给您发来一条新消息"]||
-        [[dict objectForKey:@"content"] isEqualToString:@"给您发来一条新邀请"])
+    if(dict)
     {
-        [self getChatLog];
+        if ([[dict objectForKey:@"content"] isEqualToString:@"给您发来一条新消息"]||
+            [[dict objectForKey:@"content"] isEqualToString:@"给您发来一条新邀请"])
+        {
+            [self getChatLog];
+        }
+        else if(isGroup)
+        {
+            [self getChatLog];
+        }
     }
     else
     {
@@ -457,7 +622,6 @@ MessageDelegate>
             NSDictionary *tmpDict = [messageArray objectAtIndex:i];
             [db updeteKey:@"readed" toValue:@"1" withParaDict:@{@"fid":[tmpDict objectForKey:@"fid"],@"userid":[Tools user_id]} andTableName:CHATTABLE];
         }
-        
         [messageTableView reloadData];
     }
     
@@ -680,18 +844,23 @@ MessageDelegate>
     if ([[msgContent pathExtension] isEqualToString:@"png"] || [[msgContent pathExtension] isEqualToString:@"jpg"])
     {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/%@",IMAGEURL,msgContent]]];
-            UIImage *msgImage = [UIImage imageWithData:imageData];
+            
+            NSString *imageUrlStr = [NSString stringWithFormat:@"%@/%@",IMAGEURL,msgContent];
+            UIImage *msgImage = [ImageTools imageWithUrl:imageUrlStr];
             CGSize imageSize = [ImageTools getSizeFromImage:msgImage];
-            dispatch_sync(dispatch_get_main_queue(), ^{
-                rowHeight = imageSize.height;
-            });
+            rowHeight = imageSize.height;
         });
+        
+        
     }
     if (([[dict objectForKey:@"time"] integerValue] - currentSec) > 60*3  || indexPath.row == 0)
     {
 //        currentSec = [[dict objectForKey:@"time"] integerValue];
 //        rowHeight+=20;
+    }
+    if ([[dict objectForKey:DIRECT] isEqualToString:@"f"] && isGroup)
+    {
+        rowHeight += 20;
     }
     return rowHeight+20+20;
 }
@@ -705,7 +874,16 @@ MessageDelegate>
         cell = [[MessageCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:messageCell];
     }
     NSDictionary *dict = [messageArray objectAtIndex:indexPath.row];
+    cell.isGroup = isGroup;
     [cell setCellWithDict:dict];
+    cell.msgImageView.tag = indexPath.row;
+    [cell.msgImageView addGestureRecognizer:[[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(tapImage:)]];
+    cell.msgImageView.userInteractionEnabled = YES;
+    
+    if (!isGroup)
+    {
+        cell.fromImgIcon = imageUrl;
+    }
     cell.msgDelegate = self;
     
     if (([[dict objectForKey:@"time"] integerValue] - currentSec) > 60*3  || indexPath.row == 0)
@@ -715,14 +893,26 @@ MessageDelegate>
     }
     else
     {
-        //                cell.headerImageView.frame = CGRectMake(5, messageBgY-23, 40, 40);
-        //                cell.chatBg.frame = CGRectMake(55, messageBgY-25, size.width+20, size.height+20);
-        //                cell.messageTf.frame = CGRectMake(cell.chatBg.frame.origin.x + 10,cell.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+20+he);
         cell.timeLabel.hidden = YES;
     }
-
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
     cell.backgroundColor = self.bgView.backgroundColor;
     return cell;
+}
+
+-(void)tapImage:(UITapGestureRecognizer *)tap
+{
+    NSDictionary *dict = [messageArray objectAtIndex:tap.view.tag];
+    NSString *msgContent = [dict objectForKey:@"content"];
+    if ([[msgContent pathExtension] isEqualToString:@"png"] || [[msgContent pathExtension] isEqualToString:@"jpg"])
+    {
+        MJPhoto *photo = [[MJPhoto alloc] init];
+        photo.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",IMAGEURL,msgContent]];
+        photo.srcImageView = (UIImageView *)tap.view;
+        MJPhotoBrowser *photoBroser = [[MJPhotoBrowser alloc] init];
+        photoBroser.photos = [NSArray arrayWithObject:photo];
+        [photoBroser show];
+    }
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
@@ -737,9 +927,29 @@ MessageDelegate>
 -(void)toPersonDetail:(NSDictionary *)personDict
 {
     PersonDetailViewController *personDetailVC = [[PersonDetailViewController alloc] init];
-    personDetailVC.personName = [personDict objectForKey:@"fname"];
-    personDetailVC.personID = [personDict objectForKey:@"fid"];
-    personDetailVC.fromChat = YES;
+    if (isGroup)
+    {
+        NSDictionary *usericondict = [ImageTools iconDictWithUserID:[personDict objectForKey:@"by"]];
+        if (usericondict)
+        {
+            personDetailVC.personName = [usericondict objectForKey:@"username"];
+        }
+        personDetailVC.personID = [personDict objectForKey:@"by"];
+    }
+    else
+    {
+        NSDictionary *usericondict = [ImageTools iconDictWithUserID:[personDict objectForKey:@"fid"]];
+        if (usericondict)
+        {
+            personDetailVC.personName = [usericondict objectForKey:@"username"];
+        }
+
+        personDetailVC.personID = [personDict objectForKey:@"fid"];
+    }
+    if (!isGroup)
+    {
+        personDetailVC.fromChat = YES;
+    }
     [self.navigationController pushViewController:personDetailVC animated:YES];
     
 }
@@ -753,9 +963,8 @@ MessageDelegate>
     return NO;
 }
 
--(void)joinClass:(UITapGestureRecognizer *)button
+-(void)joinClassWithMsgContent:(NSString *)msgContent
 {
-    NSString *msgContent = [[messageArray objectAtIndex:button.view.tag-5555] objectForKey:@"content"];
     NSRange range1 = [msgContent rangeOfString:@"$!#"];
     NSRange range2 = [msgContent rangeOfString:@"["];
     NSRange range3 = [msgContent rangeOfString:@"—"];
@@ -782,7 +991,7 @@ MessageDelegate>
     }
     
     ClassZoneViewController *classZone = [[ClassZoneViewController alloc] init];
-    classZone.fromClasses = YES;
+    classZone.isApply = YES;
     [[NSUserDefaults standardUserDefaults] setObject:classID forKey:@"classid"];
     [[NSUserDefaults standardUserDefaults] setObject:className forKey:@"classname"];
     [[NSUserDefaults standardUserDefaults] setObject:schoolName forKey:@"schoolname"];
@@ -816,11 +1025,28 @@ MessageDelegate>
 {
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
-                                                                      @"token":[Tools client_token],
-                                                                      @"t_id":toID,
-                                                                      @"content":msgContent
-                                                                      } API:CREATE_CHAT_MSG];
+        NSDictionary *paraDict;
+        NSString *subUrl;
+        if (isGroup)
+        {
+            paraDict = @{@"u_id":[Tools user_id],
+                         @"token":[Tools client_token],
+                         @"g_id":toID,
+                         @"content":msgContent
+                         };
+            subUrl = GROUPCHAT;
+        }
+        else
+        {
+            paraDict = @{@"u_id":[Tools user_id],
+              @"token":[Tools client_token],
+              @"t_id":toID,
+              @"content":msgContent
+                         };
+            subUrl = CREATE_CHAT_MSG;
+        }
+        
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:paraDict API:subUrl];
         [request setCompletionBlock:^{
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
@@ -841,6 +1067,10 @@ MessageDelegate>
                 [chatDict setObject:@"text" forKey:@"msgType"];
                 [chatDict setObject:toID forKey:@"tid"];
                 [chatDict setObject:@"1" forKey:@"readed"];
+                if (isGroup)
+                {
+                    [chatDict setObject:[Tools user_id] forKey:@"by"];
+                }
                 
                 if ([[db findSetWithDictionary:@{@"mid":messageID,@"userid":[Tools user_id]} andTableName:CHATTABLE] count] == 0)
                 {

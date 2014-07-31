@@ -25,6 +25,7 @@
         
         headerImageView = [[UIImageView alloc] init];
         headerImageView.backgroundColor = [UIColor clearColor];
+        headerImageView.clipsToBounds = YES;
         headerImageView.layer.contentsGravity = kCAGravityResizeAspectFill;
         [self.contentView addSubview:headerImageView];
                 

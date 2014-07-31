@@ -25,6 +25,8 @@
 #import "MoreViewController.h"
 #import "CreateClassViewController.h"
 
+#import "NewMoreViewController.h"
+
 #import "SearchClassViewController.h"
 
 #import "XDTabViewController.h"
@@ -777,7 +779,7 @@ UIActionSheetDelegate>
     XDTabViewController *tabViewController = [XDTabViewController sharedTabViewController];
     
     ClassZoneViewController *classZone = [[ClassZoneViewController alloc] init];
-    classZone.fromClasses = NO;
+    classZone.isApply = NO;
     classZone.fromMsg = NO;
     classZone.refreshDel = self;
     
@@ -787,8 +789,9 @@ UIActionSheetDelegate>
     ClassMemberViewController *classMember = [[ClassMemberViewController alloc] init];
     classMember.fromMsg = NO;
     
-    ClassInfoViewController *classInfoViewController = [[ClassInfoViewController alloc] init];
+//    ClassInfoViewController *classInfoViewController = [[ClassInfoViewController alloc] init];
 //    MoreViewController *moreVC = [[MoreViewController alloc] init];
+    NewMoreViewController *newMoreViewController = [[NewMoreViewController alloc] init];
     
     
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
@@ -839,7 +842,7 @@ UIActionSheetDelegate>
     KKNavigationController *nav1 = [[KKNavigationController alloc] initWithRootViewController:classZone];
     KKNavigationController *nav2 = [[KKNavigationController alloc] initWithRootViewController:notification];
     KKNavigationController *nav3 = [[KKNavigationController alloc] initWithRootViewController:classMember];
-    KKNavigationController *nav4 = [[KKNavigationController alloc] initWithRootViewController:classInfoViewController];
+    KKNavigationController *nav4 = [[KKNavigationController alloc] initWithRootViewController:newMoreViewController];
     
     NSArray *viewControllerArray = @[nav1,nav2,nav3,nav4];
     [tabViewController setTabBarContents:viewControllerArray];

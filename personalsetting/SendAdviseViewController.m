@@ -36,9 +36,9 @@
     UIButton *sendButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [sendButton setTitle:@"提交" forState:UIControlStateNormal];
     sendButton.backgroundColor = [UIColor clearColor];
-    [sendButton setBackgroundImage:[UIImage imageNamed:@"navbtn"] forState:UIControlStateNormal];
     sendButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [sendButton addTarget:self action:@selector(sendAdvise) forControlEvents:UIControlEventTouchUpInside];
+    [sendButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [self.navigationBarView addSubview:sendButton];
     
     UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
@@ -63,7 +63,6 @@
     adviseTextView.font = [UIFont systemFontOfSize:18];
     adviseTextView.backgroundColor = [UIColor clearColor];
     [self.bgView addSubview:adviseTextView];
-    
     
 }
 

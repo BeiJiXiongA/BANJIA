@@ -18,6 +18,7 @@
 @property (retain,nonatomic)  UIColor *stringColor;//CGColorRef
 @property (retain,nonatomic)  UIColor *keywordColor;
 @property (retain, nonatomic) NSMutableArray *list;
+@property (nonatomic, assign) float topSpace;
 
 //-(id) initWithStringColor:(UIColor *)strColor keyColor:(UIColor *)keyColor;
 

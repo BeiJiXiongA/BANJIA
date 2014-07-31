@@ -33,7 +33,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     NSString *urlStr = [NSString stringWithFormat:@"%@%@",IMAGEURL,URL];
     NSURL *imageURL = [NSURL URLWithString:urlStr];
     [button setImage:[UIImage imageNamed:defaultName] forState:UIControlStateNormal];
-    [button setImageWithURL:imageURL forState:UIControlStateNormal];
+    [button setImageWithURL:imageURL forState:UIControlStateNormal placeholderImage:[UIImage imageNamed:defaultName]];
 }
 
 + (void) fillImageView:(UIImageView *)imageView withImageFromURL:(NSString*)URL andDefault:(NSString *)defaultName
@@ -618,16 +618,24 @@ extern NSString *CTSettingCopyMyPhoneNumber();
         {
             long sec = (long)[time longLongValue];
             NSDateFormatter *dateFormatter = [[NSDateFormatter alloc]init];
-            [dateFormatter setDateFormat:@"YYYY年MM月dd日 hh:mm"];
+            [dateFormatter setDateFormat:@"YYYY年MM月dd日hh:mm"];
             NSDate *datetimeDate = [NSDate dateWithTimeIntervalSince1970:sec];
             resultStr = [dateFormatter stringFromDate:datetimeDate];
         }
     }
-    else if (resultTime > MINUTE*10)
+    else if (resultTime > SECPERDAY)
     {
         long sec = (long)[time longLongValue];
         NSDateFormatter *dateFormatter = [[NSDateFormatter alloc]init];
-        [dateFormatter setDateFormat:@"MM月dd日 hh:mm"];
+        [dateFormatter setDateFormat:@"MM月dd日hh:mm"];
+        NSDate *datetimeDate = [NSDate dateWithTimeIntervalSince1970:sec];
+        resultStr = [dateFormatter stringFromDate:datetimeDate];
+    }
+    else if(resultTime > 10*MINUTE)
+    {
+        long sec = (long)[time longLongValue];
+        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc]init];
+        [dateFormatter setDateFormat:@"hh:mm"];
         NSDate *datetimeDate = [NSDate dateWithTimeIntervalSince1970:sec];
         resultStr = [dateFormatter stringFromDate:datetimeDate];
     }
@@ -635,6 +643,17 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     {
         resultStr = [NSString stringWithFormat:@"%d分钟前",resultTime/MINUTE];
     }
+    return resultStr;
+}
+
++(NSString *)showTime:(NSString *)time andFromat:(NSString *)timeFormat
+{
+    NSString *resultStr;
+    long sec = (long)[time longLongValue];
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc]init];
+    [dateFormatter setDateFormat:timeFormat];
+    NSDate *datetimeDate = [NSDate dateWithTimeIntervalSince1970:sec];
+    resultStr = [dateFormatter stringFromDate:datetimeDate];
     return resultStr;
 }
 

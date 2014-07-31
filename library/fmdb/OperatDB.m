@@ -159,7 +159,7 @@
         //chatMsg
         NSString *sql = [NSString stringWithFormat:@"CREATE TABLE %@ (userindex INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\
                          mid VARCHAR(30) NOT NULL,\
-                         userid VARCHAR(30),fid VARCHAR(30),fname VARCHAR(30),ficon VARCHAR(50),tid VARCHAR(30),direct VARCHAR(2),readed VARCHAR(2), content VARCHAR(20),msgType VARCHAR(8),time VARCHAR(15))",TableName];
+                         userid VARCHAR(30),fid VARCHAR(30),fname VARCHAR(30),ficon VARCHAR(50),tid VARCHAR(30),direct VARCHAR(2),readed VARCHAR(2), content VARCHAR(20),msgType VARCHAR(8),time VARCHAR(15),by VARCHAR(10))",TableName];
         BOOL res = [_db executeUpdate:sql];
         if (!res)
         {
@@ -215,7 +215,7 @@
     }
     else
     {
-        NSString *sql = [NSString stringWithFormat:@"CREATE TABLE %@ (iid INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,uid VARCHAR(30),uicon VARCHAR(30))",USERICONTABLE];
+        NSString *sql = [NSString stringWithFormat:@"CREATE TABLE %@ (iid INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,uid VARCHAR(30),uicon VARCHAR(30),username VARCHAR(20))",USERICONTABLE];
         BOOL res = [_db executeUpdate:sql];
         if (!res)
         {
@@ -245,7 +245,7 @@
     else
     {
         NSString *sql = [NSString stringWithFormat:@"CREATE TABLE %@ (userindex INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\
-                         uid VARCHAR(30),fname VARCHAR(20),ficon VARCHAR(30),fid VARCHAR(30),phone VARCHAR(15),checked VARCHAR(10))",FRIENDSTABLE];
+                         uid VARCHAR(30),fname VARCHAR(20),ficon VARCHAR(30),fid VARCHAR(30),phone VARCHAR(15),checked VARCHAR(10),cgroup VARCHAR(10))",FRIENDSTABLE];
         BOOL res = [_db executeUpdate:sql];
         if (!res)
         {

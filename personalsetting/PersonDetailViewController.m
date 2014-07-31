@@ -17,6 +17,8 @@
 #import <MessageUI/MessageUI.h>
 #import "ReportViewController.h"
 
+#import <MessageUI/MessageUI.h>
+
 #define INFOLABELTAG  1000
 #define CALLBUTTONTAG  2000
 #define MSGBUTTONTAG  3000
@@ -24,6 +26,7 @@
 #define KICKALTAG    5000
 
 #define MoreACTag   6000
+#define ContaceACTag  7000
 
 #define BGIMAGEHEIGHT   120
 
@@ -31,7 +34,8 @@
 UITableViewDelegate,
 UITableViewDataSource,
 MFMessageComposeViewControllerDelegate,
-UIActionSheetDelegate,UIAlertViewDelegate>
+UIActionSheetDelegate,UIAlertViewDelegate,
+MFMailComposeViewControllerDelegate>
 {
     UIView *tmpBgView;
     UIImageView *genderImageView;
@@ -138,6 +142,7 @@ UIActionSheetDelegate,UIAlertViewDelegate>
         {
             phoneNum = [dict objectForKey:@"phone"];
         }
+        
         if (![[dict objectForKey:@"img_icon"] isEqual:[NSNull null]])
         {
             headerImageUrl = [dict objectForKey:@"img_icon"];
@@ -147,6 +152,8 @@ UIActionSheetDelegate,UIAlertViewDelegate>
             birth = [dict objectForKey:@"birth"];
         }
     }
+    
+    [infoView reloadData];
     
     
     if([Tools NetworkReachable])
@@ -247,7 +254,7 @@ UIActionSheetDelegate,UIAlertViewDelegate>
         }
         else
         {
-            [Tools fillImageView:cell.headerImageView withImageFromURL:headerImageUrl andDefault:HEADERICON];
+            [Tools fillImageView:cell.headerImageView withImageFromURL:headerImg andDefault:HEADERICON];
         }
         
         cell.headerImageView.layer.cornerRadius = 5;
@@ -281,15 +288,15 @@ UIActionSheetDelegate,UIAlertViewDelegate>
             cell.contentLabel.textAlignment = NSTextAlignmentRight;
             if (indexPath.row == 0)
             {
-                if ([phoneNum length] > 0)
+                if (![personID isEqualToString:OurTeamID])
                 {
                     cell.nameLabel.text = @"手机号";
                     cell.contentLabel.text = phoneNum;
                 }
-                else if([email length] > 0)
+                else
                 {
                     cell.nameLabel.text = @"邮箱";
-                    cell.contentLabel.text = email;
+                    cell.contentLabel.text = phoneNum;
                 }
             }
             else if(indexPath.row == 1)
@@ -319,6 +326,11 @@ UIActionSheetDelegate,UIAlertViewDelegate>
             {
                 cell.button1.hidden = NO;
                 cell.button2.hidden = NO;
+            }
+            else
+            {
+                cell.button1.hidden = YES;
+                cell.button2.hidden = YES;
             }
             
             cell.button1.frame = CGRectMake(10, 10, 145, 43.5);
@@ -357,9 +369,17 @@ UIActionSheetDelegate,UIAlertViewDelegate>
     {
         if (indexPath.row == 0)
         {
-            if (![personID isEqualToString:[Tools user_id]])
+            if ([personID isEqualToString:OurTeamID])
             {
-                [self callToUser];
+                UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"发送邮件", nil];
+                ac.tag = ContaceACTag;
+                [ac showInView:self.bgView];
+            }
+            else if (![personID isEqualToString:[Tools user_id]])
+            {
+                UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"打电话",@"发短信", nil];
+                ac.tag = ContaceACTag;
+                [ac showInView:self.bgView];
             }
         }
     }
@@ -419,7 +439,87 @@ UIActionSheetDelegate,UIAlertViewDelegate>
             [self.navigationController pushViewController:reportVC animated:YES];
         }
     }
+    else if(actionSheet.tag == ContaceACTag)
+    {
+        if([personID isEqualToString:OurTeamID])
+        {
+            [self displayMailPicker];
+        }
+        else
+        {
+            if (buttonIndex == 0)
+            {
+                [self callToUser];
+            }
+            else if(buttonIndex == 1)
+            {
+                [self showMessageView];
+            }
+        }
+    }
 }
+
+#pragma mark - 意见反馈
+//调出邮件发送窗口
+- (void)displayMailPicker
+{
+    MFMailComposeViewController *mailPicker = [[MFMailComposeViewController alloc] init];
+    mailPicker.mailComposeDelegate = self;
+    
+    //设置主题
+    [mailPicker setSubject: @"班家意见反馈"];
+    //添加收件人
+    NSArray *toRecipients = [NSArray arrayWithObject: phoneNum];
+    [mailPicker setToRecipients: toRecipients];
+    //添加抄送
+    //    NSArray *ccRecipients = [NSArray arrayWithObjects:@"second@example.com", @"third@example.com", nil];
+    //    [mailPicker setCcRecipients:ccRecipients];
+    //添加密送
+    //    NSArray *bccRecipients = [NSArray arrayWithObjects:@"fourth@example.com", nil];
+    //    [mailPicker setBccRecipients:bccRecipients];
+    
+    //    // 添加一张图片
+    //    UIImage *addPic = [UIImage imageNamed: @"icon@2x.png"];
+    //    NSData *imageData = UIImagePNGRepresentation(addPic);            // png
+    //    //关于mimeType：http://www.iana.org/assignments/media-types/index.html
+    //    [mailPicker addAttachmentData: imageData mimeType: @"" fileName: @"icon.png"];
+    
+    //添加一个pdf附件
+    //    NSString *file = [self fullBundlePathFromRelativePath:@"高质量C++编程指南.pdf"];
+    //    NSData *pdf = [NSData dataWithContentsOfFile:file];
+    //    [mailPicker addAttachmentData: pdf mimeType: @"" fileName: @"高质量C++编程指南.pdf"];
+    
+    //    NSString *emailBody = @"<font color='black'>请输入您要反馈的内容：</font> ";
+    //    [mailPicker setMessageBody:emailBody isHTML:YES];
+    [self presentViewController:mailPicker animated:YES completion:nil];
+}
+
+#pragma mark - 实现 MFMailComposeViewControllerDelegate
+- (void)mailComposeController:(MFMailComposeViewController *)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError *)error
+{
+    //关闭邮件发送窗口
+    [self dismissViewControllerAnimated:YES completion:nil];
+    NSString *msg;
+    switch (result) {
+        case MFMailComposeResultCancelled:
+            msg = @"用户取消编辑邮件";
+            break;
+        case MFMailComposeResultSaved:
+            msg = @"用户成功保存邮件";
+            break;
+        case MFMailComposeResultSent:
+            msg = @"用户点击发送，将邮件放到队列中，还没发送";
+            break;
+        case MFMailComposeResultFailed:
+            msg = @"用户试图保存或者发送邮件失败";
+            break;
+        default:
+            msg = @"";
+            break;
+    }
+    [Tools showAlertView:msg delegateViewController:nil];
+}
+
 
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
@@ -579,11 +679,37 @@ UIActionSheetDelegate,UIAlertViewDelegate>
                         
                         if ([[dict objectForKey:@"img_icon"] length] > 10)
                         {
-                            headerImageUrl = [dict objectForKey:@"img_icon"];
+                            headerImg = [dict objectForKey:@"img_icon"];
                         }
                         else
                         {
-                            headerImageUrl = HEADERICON;
+                            headerImg = HEADERICON;
+                        }
+                    }
+                    
+                    if ([[db findSetWithDictionary:@{@"uid":personID} andTableName:CLASSMEMBERTABLE] count] > 0)
+                    {
+                        [db updeteKey:@"phone" toValue:phoneNum withParaDict:@{@"uid":personID} andTableName:CLASSMEMBERTABLE];
+                    }
+                    else
+                    {
+                        if (phoneNum)
+                        {
+                            [db insertRecord:@{@"uid":personID,
+                                               @"name":personName,
+                                               @"phone":phoneNum,
+                                               @"birth":birth,
+                                               @"img_icon":headerImg}
+                                andTableName:CLASSMEMBERTABLE];
+                        }
+                        else if(email)
+                        {
+                            [db insertRecord:@{@"uid":personID,
+                                               @"name":personName,
+                                               @"phone":email,
+                                               @"birth":birth,
+                                               @"img_icon":headerImg}
+                                andTableName:CLASSMEMBERTABLE];
                         }
                     }
                     
@@ -613,7 +739,7 @@ UIActionSheetDelegate,UIAlertViewDelegate>
         
         MFMessageComposeViewController * controller = [[MFMessageComposeViewController alloc]init]; //autorelease];
         
-        controller.recipients = [NSArray arrayWithObject:userPhone];
+        controller.recipients = [NSArray arrayWithObject:phoneNum];
         
         NSString *msgBody;
         

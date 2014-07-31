@@ -141,7 +141,7 @@
     waynames = [[NSArray alloc] initWithObjects:@"微信",@"QQ好友",@"手机短信",@"邀请好友", nil];
     iconsArray = @[@"weichat",@"QQicon",@"mesginviteicon",@"invitefriendicon"];
     
-    inviteWayTableview = [[UITableView alloc] initWithFrame:CGRectMake(0, 159, SCREEN_WIDTH, 200) style:UITableViewStylePlain];
+    inviteWayTableview = [[UITableView alloc] initWithFrame:CGRectMake(0, parentTextField.frame.size.height+parentTextField.frame.origin.y, SCREEN_WIDTH, 200) style:UITableViewStylePlain];
     inviteWayTableview.tag = InviteWayTag;
     inviteWayTableview.delegate = self;
     inviteWayTableview.dataSource = self;

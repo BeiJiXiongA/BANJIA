@@ -429,7 +429,7 @@ UIActionSheetDelegate>
         }
        
         NSDictionary *dict = [readArray objectAtIndex:indexPath.row];
-        [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERBG];
+        [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERICON];
         cell.headerImageView.frame = CGRectMake(14, 3.75, 40, 40);
         cell.nameLabel.frame = CGRectMake(60, 8.75, 200, 30);
         
@@ -473,7 +473,7 @@ UIActionSheetDelegate>
         }
         NSDictionary *dict = [unreaderArray objectAtIndex:indexPath.row];
         cell.headerImageView.frame = CGRectMake(14, 3.75, 40, 40);
-        [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERBG];
+        [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERICON];
         
         if ([[dict objectForKey:@"role"] isEqualToString:@"parents"])
         {

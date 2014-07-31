@@ -61,7 +61,7 @@
     label.font = [UIFont systemFontOfSize:18];
     label.textColor = COMMENTCOLOR;
     label.text = @"您的登录账号:";
-    [self.bgView addSubview:label];
+//    [self.bgView addSubview:label];
     
     
     phoneNumTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(29, label.frame.size.height+label.frame.origin.y+20, SCREEN_WIDTH-58, 42)];
@@ -74,7 +74,7 @@
     phoneNumTextfield.layer.cornerRadius = 5;
     phoneNumTextfield.background = nil;
     phoneNumTextfield.textColor = UIColorFromRGB(0x727171);
-//    phoneNumTextfield.text = phoneNum;
+    phoneNumTextfield.text = phoneNum;
     [self.bgView addSubview:phoneNumTextfield];
     
     UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];

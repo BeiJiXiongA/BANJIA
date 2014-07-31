@@ -17,11 +17,12 @@
         // Initialization code
         headerImageView = [[UIImageView alloc] init];
         headerImageView.backgroundColor = [UIColor clearColor];
+        headerImageView.clipsToBounds = YES;
         headerImageView.layer.contentsGravity = kCAGravityResizeAspectFill;
         [self.contentView addSubview:headerImageView];
         
         nameLabel = [[UILabel alloc] init];
-        nameLabel.textColor = COMMENTCOLOR;
+        nameLabel.textColor = TITLE_COLOR;
         nameLabel.backgroundColor = [UIColor clearColor];
         [self.contentView addSubview:nameLabel];
         

@@ -168,7 +168,7 @@ UIAlertViewDelegate>
     {
         contactTableView.sectionIndexBackgroundColor = [UIColor clearColor];
     }
-    contactTableView.backgroundColor = [UIColor clearColor];
+    contactTableView.backgroundColor = self.bgView.backgroundColor;
     contactTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     [bgScrollView addSubview:contactTableView];
     

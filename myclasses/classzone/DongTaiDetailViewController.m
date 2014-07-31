@@ -20,6 +20,8 @@
 #define additonalH  90
 #define PraiseW   31
 
+#define SectionTag  999999
+
 @interface DongTaiDetailViewController ()<UITableViewDataSource,
 UITableViewDelegate,
 UITextFieldDelegate,
@@ -366,6 +368,10 @@ UIActionSheetDelegate,NameButtonDel>
     cell.headerImageView.layer.cornerRadius = 0;
     cell.headerImageView.clipsToBounds = YES;
     
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(headerImageViewClicked:)];
+    cell.headerImageView.userInteractionEnabled = YES;
+    [cell.headerImageView addGestureRecognizer:tap];
+    
     [Tools fillImageView:cell.headerImageView withImageFromURL:[[diaryDetailDict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERICON];
     cell.locationLabel.numberOfLines = 1;
     cell.locationLabel.lineBreakMode = NSLineBreakByWordWrapping | NSLineBreakByTruncatingTail;
@@ -548,6 +554,15 @@ UIActionSheetDelegate,NameButtonDel>
    
 }
 
+-(void)headerImageViewClicked:(UITapGestureRecognizer *)tap
+{
+    PersonDetailViewController *personDetail = [[PersonDetailViewController alloc] init];
+    personDetail.personID = [[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"];
+    personDetail.personName = [[diaryDetailDict objectForKey:@"by"] objectForKey:@"name"];
+    personDetail.headerImg = [[diaryDetailDict objectForKey:@"by"] objectForKey:@"img_icon"];
+    [self.navigationController pushViewController:personDetail animated:YES];
+}
+
 -(BOOL)havePraisedThisDiary:(NSDictionary *)diaryDict
 {
     NSArray *praiseArray = [[diaryDict objectForKey:@"detail"] objectForKey:@"likes"];
@@ -571,6 +586,31 @@ UIActionSheetDelegate,NameButtonDel>
 
 - (void)tapImage:(UITapGestureRecognizer *)tap
 {
+
+    NSArray *imgs = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"img"];
+    
+    
+    NSMutableArray *smallImageArray = [[NSMutableArray alloc] initWithCapacity:0];
+    
+    for (NSString *imageUrl in imgs)
+    {
+        NSString *smallUrlStr = [NSString stringWithFormat:@"%@100w",imageUrl];
+        [smallImageArray addObject:smallUrlStr];
+    }
+    
+    NSMutableArray *photos = [[NSMutableArray alloc] initWithCapacity:0];
+    for (int i=0; i<[imgs count]; i++)
+    {
+        NSString *url = [NSString stringWithFormat:@"%@%@",IMAGEURL,imgs[i]];
+        MJPhoto *photo = [[MJPhoto alloc] init];
+        photo.url = [NSURL URLWithString:url];
+        photo.srcImageView = (UIImageView *)tap.view;
+        [photos addObject:photo];
+    }
+    MJPhotoBrowser *photoBroser = [[MJPhotoBrowser alloc] init];
+    photoBroser.photos = photos;
+    photoBroser.currentPhotoIndex = (tap.view.tag-1000)%100;
+    [photoBroser show];
     
 }
 

@@ -23,6 +23,8 @@
 #import "ImageTools.h"
 #import "RecordTools.h"
 #import "PlayerTools.h"
+#import "MJPhoto.h"
+#import "MJPhotoBrowser.h"
 
 #define FaceViewHeight  220
 
@@ -138,7 +140,7 @@ return shared##className; \
 #pragma mark - 用户信息
 #define HEADERDEFAULT  @"header_pic.jpg"
 #define HEADERBG     @"headerbg"
-#define HEADERICON   @"headericon"
+#define HEADERICON   @"defaultheader"
 #define NAVBTNBG    @"navbtn"
 #define NAVCOLOR    TITLE_COLOR
 #define CornerMore   @"corner_more"
@@ -219,6 +221,8 @@ return shared##className; \
 #define OurTeamID  @"YmFuamlh"
 #define OurTeamHeader  @"/teamlogo.png"
 
+#define ClassAssistantHeader   @"/assistant.png"
+
 #pragma mark - notification name
 #define UPDATECLASSMEMBERLIST   @"updateclassmemberlist"
 #define UPDATEFRIENDSLIST       @"updatefriendslist"
@@ -228,6 +232,8 @@ return shared##className; \
 #define RECEIVENEWMSG     @"receivenewmsg"
 #define RECEIVENEWMSGNOTATCHATVIEW   @"receivenewmsgnotatchatview"
 #define RECEIVENEWNOTICE   @"receivenewnotice"
+
+#define UPDATEGROUPCHATLIST   @"updategroupchatlist"
 
 #pragma mark - aboutinvite
 #define InviteParentKey  @"item3"
