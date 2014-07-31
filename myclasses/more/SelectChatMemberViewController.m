@@ -189,6 +189,7 @@ UISearchBarDelegate>
     memberTableView.delegate = self;
     memberTableView.dataSource = self;
     memberTableView.tag = MemTableViewTag;
+    memberTableView.backgroundColor = self.bgView.backgroundColor;
     memberTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     [self.bgView addSubview:memberTableView];
     
@@ -646,27 +647,27 @@ UISearchBarDelegate>
                                                                                 @"quanpin":mySearchBar.text}]];
     }
     
-    NSMutableArray *waitingRemoveArray = [[NSMutableArray alloc] initWithCapacity:0];
-    for (int i=0; i<[searchResultArray count]; ++i)
-    {
-        NSDictionary *dict = [searchResultArray objectAtIndex:i];
-        if (!([dict objectForKey:@"uid"] && [[dict objectForKey:@"uid"] isKindOfClass:[NSString class]] && [[dict objectForKey:@"uid"] length] > 10))
-        {
-            [waitingRemoveArray addObject:dict];
-        }
-        else if([[dict objectForKey:@"uid"] isEqualToString:[Tools user_id]])
-        {
-            [waitingRemoveArray addObject:dict];
-        }
-        if([selectedArray containsObject:dict])
-        {
-            [waitingRemoveArray addObject:dict];
-        }
-    }
-    for(NSDictionary *dict in waitingRemoveArray)
-    {
-        [searchResultArray removeObject:dict];
-    }
+//    NSMutableArray *waitingRemoveArray = [[NSMutableArray alloc] initWithCapacity:0];
+//    for (int i=0; i<[searchResultArray count]; ++i)
+//    {
+//        NSDictionary *dict = [searchResultArray objectAtIndex:i];
+//        if (!([dict objectForKey:@"uid"] && [[dict objectForKey:@"uid"] isKindOfClass:[NSString class]] && [[dict objectForKey:@"uid"] length] > 10))
+//        {
+//            [waitingRemoveArray addObject:dict];
+//        }
+//        else if([[dict objectForKey:@"uid"] isEqualToString:[Tools user_id]])
+//        {
+//            [waitingRemoveArray addObject:dict];
+//        }
+//        if([selectedArray containsObject:dict])
+//        {
+//            [waitingRemoveArray addObject:dict];
+//        }
+//    }
+//    for(NSDictionary *dict in waitingRemoveArray)
+//    {
+//        [searchResultArray removeObject:dict];
+//    }
     DDLOG(@"search result count %d",[searchResultArray count]);
     [self updateSelect:nil];
     [searchTableView reloadData];
@@ -920,25 +921,25 @@ UISearchBarDelegate>
             button.layer.cornerRadius = 5;
             button.clipsToBounds = YES;
             button.tag = i;
-            button.frame = CGRectMake(5+40*i, 0, 30, 30);
+            button.frame = CGRectMake(5+50*i, 0, 40, 40);
             [chatMemberScrollView addSubview:button];
             
-            UILabel *nameLabel = [[UILabel alloc] init];
-            nameLabel.frame = CGRectMake(button.frame.origin.x-3, button.frame.size.height+button.frame.origin.y, button.frame.size.width+6, 10);
-            nameLabel.textAlignment = NSTextAlignmentCenter;
-            nameLabel.font = [UIFont systemFontOfSize:10];
-            nameLabel.textColor = COMMENTCOLOR;
-//            NSDictionary *userDict = []
-            
-            nameLabel.text = [dict objectForKey:@"name"];
-            [chatMemberScrollView addSubview:nameLabel];
+//            UILabel *nameLabel = [[UILabel alloc] init];
+//            nameLabel.frame = CGRectMake(button.frame.origin.x-3, button.frame.size.height+button.frame.origin.y, button.frame.size.width+6, 10);
+//            nameLabel.textAlignment = NSTextAlignmentCenter;
+//            nameLabel.font = [UIFont systemFontOfSize:10];
+//            nameLabel.textColor = COMMENTCOLOR;
+////            NSDictionary *userDict = []
+//            
+//            nameLabel.text = [dict objectForKey:@"name"];
+//            [chatMemberScrollView addSubview:nameLabel];
         }
         
         [UIView animateWithDuration:0.2 animations:^{
             buttomView.frame = CGRectMake(0, SCREEN_HEIGHT-buttomH-keyBoardHeight, SCREEN_WIDTH, buttomH);
             [submitButton setTitle:[NSString stringWithFormat:@"提交(%d)",[selectedArray count]] forState:UIControlStateNormal];
             memberTableView.frame = CGRectMake(0, mySearchBar.frame.size.height+mySearchBar.frame.origin.y, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT-buttomH-chedkViewH-mySearchBar.frame.size.height);
-            chatMemberScrollView.contentSize = CGSizeMake([selectedArray count] * 40+5, 50);
+            chatMemberScrollView.contentSize = CGSizeMake([selectedArray count] * 50, 50);
             if (chatMemberScrollView.contentSize.width > chatMemberScrollView.frame.size.width)
             {
                 chatMemberScrollView.contentOffset = CGPointMake(chatMemberScrollView.contentSize.width-chatMemberScrollView.frame.size.width, 0);

@@ -8,7 +8,7 @@
 
 #import "SubmitGroupChatViewController.h"
 
-@interface SubmitGroupChatViewController ()
+@interface SubmitGroupChatViewController ()<UITextFieldDelegate>
 {
     MyTextField *nameTextField;
     NSMutableString *nameStr;
@@ -65,7 +65,9 @@
     nameTextField.layer.cornerRadius = 5;
     nameTextField.clipsToBounds = YES;
     nameTextField.background = nil;
-    nameTextField.placeholder = @"私聊名字";
+    nameTextField.delegate = self;
+    nameTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
+    nameTextField.placeholder = @"群聊名称";
     if ([selectArray count] > 3)
     {
         nameTextField.text = [NSString stringWithFormat:@"%@等(%d人)",[nameStr substringToIndex:[nameStr length]-1],[selectArray count]+1];
@@ -100,6 +102,11 @@
 -(void)unShowSelfViewController
 {
     [self.navigationController popViewControllerAnimated:YES];
+}
+
+-(BOOL)textFieldShouldClear:(UITextField *)textField
+{
+    return YES;
 }
 
 -(void)createClick

@@ -324,8 +324,9 @@ verticalLineView;
 //    cell.nameButton.hidden = YES;
 //    CGFloat c_width = 15;
     CGFloat minCellHei = 35;
-    CGFloat hei = 0;
+    CGFloat hei = 8;
     CGFloat originalY = 5;
+    CGFloat topSpace = 8;
     cell.openPraiseButton.hidden = YES;
     [cell.nameButton setTitle:@"" forState:UIControlStateNormal];
     [cell.nameButton setImage:nil forState:UIControlStateNormal];
@@ -395,10 +396,10 @@ verticalLineView;
                 NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row];
                 NSString *name = [NSString stringWithFormat:@"%@:",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
                 NSString *content = [[commitDict objectForKey:@"content"] emojizedString];
-                CGSize s = [Tools getSizeWithString:[content emojizedString] andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
+                CGSize s = [Tools getSizeWithString:content andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
                 if (s.height > minCellHei)
                 {
-                    cell.commentContentLabel.topSpace = 8;
+                    cell.commentContentLabel.topSpace = topSpace;
                 }
                 else
                 {
@@ -422,10 +423,10 @@ verticalLineView;
             NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row-1];
             NSString *name = [NSString stringWithFormat:@"%@:",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
             NSString *content = [[commitDict objectForKey:@"content"] emojizedString];
-            CGSize s = [Tools getSizeWithString:[content emojizedString] andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
+            CGSize s = [Tools getSizeWithString:content andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
             if (s.height > minCellHei)
             {
-                cell.commentContentLabel.topSpace = 8;
+                cell.commentContentLabel.topSpace = topSpace;
             }
             else
             {
@@ -525,11 +526,11 @@ verticalLineView;
                 NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row];
                 NSString *name = [NSString stringWithFormat:@"%@:",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
                 NSString *content = [[commitDict objectForKey:@"content"] emojizedString];
-                CGSize s = [Tools getSizeWithString:[content emojizedString] andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
+                CGSize s = [Tools getSizeWithString:content andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
                 
                 if (s.height > minCellHei)
                 {
-                    cell.commentContentLabel.topSpace = 8;
+                    cell.commentContentLabel.topSpace = topSpace;
                 }
                 else
                 {
@@ -561,10 +562,10 @@ verticalLineView;
                 NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row-1];
                 NSString *name = [NSString stringWithFormat:@"%@:",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
                 NSString *content = [[commitDict objectForKey:@"content"] emojizedString];
-                CGSize s = [Tools getSizeWithString:[content emojizedString] andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
+                CGSize s = [Tools getSizeWithString:content andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
                 if (s.height > minCellHei)
                 {
-                    cell.commentContentLabel.topSpace = 8;
+                    cell.commentContentLabel.topSpace = topSpace;
                 }
                 else
                 {
