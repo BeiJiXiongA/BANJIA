@@ -9,6 +9,7 @@
 #import "ApplyInfoViewController.h"
 #import "Header.h"
 #import "InfoCell.h"
+#import "AlreadyInStudentsListViewController.h"
 
 #define INFOLABELTAG  1000
 #define CALLBUTTONTAG  2000
@@ -17,7 +18,9 @@
 
 #define BGIMAGEHEIGHT  150
 
-@interface ApplyInfoViewController ()<UIAlertViewDelegate,UITableViewDataSource,UITableViewDelegate>
+#define RepeatStuTag   5000
+
+@interface ApplyInfoViewController ()<UIAlertViewDelegate,UITableViewDataSource,UITableViewDelegate,StuListDelegate>
 {
     
     OperatDB *db;
@@ -31,6 +34,17 @@
     NSString *sexureimage;
     NSString *phoneNum;
     NSString *headerImg;
+    
+    NSString *studentNum;
+    NSString *re_id;
+    NSString *re_sn;
+    NSString *userid;
+    
+    NSMutableArray *studentsArray;
+    
+    NSString *otherId;
+    
+    NSString *newsn;
 }
 @end
 
@@ -51,30 +65,96 @@
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"个人信息";
     qqnum = @"未绑定";
-    birth = @"未设置";
+    birth = @"";
     sexureimage = @"";
     headerImg = @"";
+    
+    otherId = @"";
+    newsn = @"";
+    userid = @"";
+    re_id = @"";
 
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
     db = [[OperatDB alloc] init];
     
-    applyDict = [[db findSetWithDictionary:@{@"uid":j_id,@"classid":classID} andTableName:CLASSMEMBERTABLE] firstObject];
-//    headerImg = [applyDict objectForKey:@"img_icon"];
-//    if ([[applyDict objectForKey:@"birth"] isEqual:[NSNull null]])
-//    {
-//        birth = [applyDict objectForKey:@"birth"];
-//    };
-//    
-//    role = [applyDict objectForKey:@"role"];
-
+    studentsArray = [[NSMutableArray alloc] initWithCapacity:0];
+    
+    NSArray *apply = [db findSetWithDictionary:@{@"uid":j_id,@"classid":classID} andTableName:CLASSMEMBERTABLE];
+    applyDict = [apply firstObject];
+    
+    if ([applyDict objectForKey:@"cb_id"] &&
+        ![[applyDict objectForKey:@"cb_id"] isEqual:[NSNull null]] &&
+        [[applyDict objectForKey:@"cb_id"] length] > 0)
+    {
+        userid = [applyDict objectForKey:@"cb_id"];
+    }
+    else if([applyDict objectForKey:@"re_id"] &&
+            ![[applyDict objectForKey:@"re_id"] isEqual:[NSNull null]] &&
+            [[applyDict objectForKey:@"re_id"] length] > 0)
+    {
+        re_id = [applyDict objectForKey:@"re_id"];
+    }
+    else
+    {
+        userid = j_id;
+    }
+    if (![j_id isEqual:[NSNull null]])
+    {
+        if ([j_id length] > 10)
+        {
+            DDLOG(@"database dict %@",applyDict);
+            if (![[applyDict objectForKey:@"phone"] isEqual:[NSNull null]])
+            {
+                phoneNum = [applyDict objectForKey:@"phone"];
+            }
+            if (![[applyDict objectForKey:@"img_icon"] isEqual:[NSNull null]])
+            {
+                headerImg = [applyDict objectForKey:@"img_icon"];
+            }
+            if (![[applyDict objectForKey:@"birth"] isEqual:[NSNull null]])
+            {
+                birth = [applyDict objectForKey:@"birth"];
+            }
+            if ([applyDict objectForKey:@"sn"] && ![[applyDict objectForKey:@"sn"] isEqual:[NSNull null]])
+            {
+                studentNum = [applyDict objectForKey:@"sn"];
+            }
+            if ([applyDict objectForKey:@"re_sn"] && ![[applyDict objectForKey:@"re_sn"] isEqual:[NSNull null]])
+            {
+                re_sn = [applyDict objectForKey:@"re_sn"];
+            }
+            else
+            {
+                re_sn = @"";
+            }
+            if (![[applyDict objectForKey:@"sex"] isEqual:[NSNull null]] && [[applyDict objectForKey:@"sex"] length] > 0)
+            {
+                if ([[applyDict objectForKey:@"sex"] intValue] == 1)
+                {
+                    //男
+                    sexureimage = @"male";
+                }
+                else
+                {
+                    //
+                    sexureimage = @"female";
+                }
+            }
+            
+            if ([applyDict objectForKey:@"cb_id"] && ![[applyDict objectForKey:@"cb_id"] isEqual:[NSNull null]])
+            {
+                otherId = [applyDict objectForKey:@"cb_id"];
+            }
+        }
+    }
+    
     infoView  = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
     infoView.delegate = self;
     infoView.dataSource = self;
     infoView.separatorStyle = UITableViewCellSeparatorStyleNone;
     infoView.backgroundColor = [UIColor clearColor];
     [self.bgView addSubview:infoView];
-    
     
     [self getUserInfo];
 }
@@ -113,7 +193,7 @@
     }
     else if(section == 1)
     {
-        return 4;
+        return 5;
     }
     return 0;
 }
@@ -140,18 +220,41 @@
     }
     else if (indexPath.section == 1)
     {
-        if (indexPath.row < 3)
+        if (indexPath.row < 4)
         {
-            return 40;
+            if (indexPath.row == 0 && [phoneNum length] > 0)
+            {
+                return 40;
+            }
+            else if(indexPath.row == 1 && [birth length] > 0)
+            {
+                return 40;
+            }
+            else if(indexPath.row == 2 && [studentNum length] > 0)
+            {
+                return 40;
+            }
+            else if (indexPath.row == 2 &&[re_sn length] > 0)
+            {
+                return 40;
+            }
+            else if(indexPath.row == 3)
+            {
+                return 60;
+            }
+        }
+        else
+        {
+            return 60;
         }
     }
-    return 60;
+    return 0;
 }
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     
-    static NSString *infocell = @"onfocell";
+    static NSString *infocell = @"applyinfocell";
     InfoCell *cell = [tableView dequeueReusableCellWithIdentifier:infocell];
     if (cell == nil)
     {
@@ -211,7 +314,7 @@
     }
     else if (indexPath.section == 1)
     {
-        if (indexPath.row < 2)
+        if (indexPath.row < 3)
         {
             cell.nameLabel.frame = CGRectMake(15, 5, 100, 30);
             cell.nameLabel.textColor = TITLE_COLOR;
@@ -220,31 +323,72 @@
             cell.contentLabel.textAlignment = NSTextAlignmentRight;
             if (indexPath.row == 0)
             {
-                cell.nameLabel.text = @"手机号";
-                cell.contentLabel.text = phoneNum;
+                if ([phoneNum length] > 0)
+                {
+                    cell.nameLabel.text = @"手机号";
+                    cell.contentLabel.text = phoneNum;
+                }
+                else
+                {
+                    cell.nameLabel.text = @"";
+                    cell.contentLabel.text = phoneNum;
+                }
             }
             else if(indexPath.row == 1)
             {
-                cell.nameLabel.text = @"生日";
-                cell.contentLabel.text = birth;
+                if ([birth length] > 0)
+                {
+                    cell.nameLabel.text = @"生日";
+                    cell.contentLabel.text = birth;
+
+                }
+                else
+                {
+                    cell.nameLabel.text = @"";
+                    cell.contentLabel.text = birth;
+                }
             }
-            UIImageView *bgImageBG = [[UIImageView alloc] init];
-            bgImageBG.image = [UIImage imageNamed:@"line3"];
-            bgImageBG.backgroundColor = [UIColor clearColor];
-            cell.backgroundView = bgImageBG;
-            cell.backgroundColor = [UIColor whiteColor];
-        }
-        else if(indexPath.row == 2)
-        {
-            cell.nameLabel.frame = CGRectMake(15, 5, SCREEN_WIDTH-30, 30);
-            cell.nameLabel.backgroundColor = [UIColor whiteColor];
-            cell.nameLabel.textColor = TITLE_COLOR;
+            else if (indexPath.row == 2)
+            {
+                if ([studentNum length] > 0)
+                {
+                    cell.nameLabel.text = @"学号";
+                    cell.contentLabel.text = studentNum;
+                }
+                else if ([re_sn length] > 0)
+                {
+                    cell.nameLabel.text = @"学生学号";
+                    cell.contentLabel.text = re_sn;
+                }
+                else
+                {
+                    cell.nameLabel.text = @"";
+                    cell.contentLabel.text = studentNum;
+                }
+            }
+            
+            CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+            UIImageView *lineImageView = [[UIImageView alloc] init];
+            lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            [cell.contentView addSubview:lineImageView];
             cell.contentView.backgroundColor = [UIColor whiteColor];
+        }
+        else if(indexPath.row == 3)
+        {
+            cell.nameLabel.frame = CGRectMake(15, 10, SCREEN_WIDTH-30, 40);
+            cell.nameLabel.backgroundColor = self.bgView.backgroundColor;
+            cell.nameLabel.textColor = TITLE_COLOR;
+            cell.nameLabel.textAlignment = NSTextAlignmentCenter;
+            cell.nameLabel.numberOfLines = 2;
+            cell.nameLabel.lineBreakMode = NSLineBreakByWordWrapping;
+            cell.contentView.backgroundColor = self.bgView.backgroundColor;
+            cell.backgroundColor = self.bgView.backgroundColor;
             
             
             if (![role isEqual:[NSNull null]])
             {
-                if ([role isEqualToString:@"students"])
+                if ([role isEqualToString:@"students"] || [role isEqualToString:@"unin_students"])
                 {
                     cell.nameLabel.text = [NSString stringWithFormat:@"%@想申请成为本班的学生",applyName];
                 }
@@ -257,17 +401,18 @@
                     cell.nameLabel.text = [NSString stringWithFormat:@"%@想申请成为本班%@",applyName,title];
                 }
             }
+            
+            cell.contentView.backgroundColor = self.bgView.backgroundColor;
         }
         else
         {
-            
             cell.button1.frame = CGRectMake(10, 10, 145, 43.5);
             [cell.button1 setTitle:ADDFRIEND forState:UIControlStateNormal];
             [cell.button1 setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
             
             [cell.button1 setTitle:@"同意申请" forState:UIControlStateNormal];
             
-            [cell.button1 addTarget:self action:@selector(allowApply) forControlEvents:UIControlEventTouchUpInside];
+            [cell.button1 addTarget:self action:@selector(getStudentsByClassId) forControlEvents:UIControlEventTouchUpInside];
             
             cell.button2.frame = CGRectMake(165, 10, 145, 43.5);
             [cell.button2 setTitle:CHATTO forState:UIControlStateNormal];
@@ -312,6 +457,17 @@
             [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel://%@",phoneNum]]];
         }
     }
+    else if(alertView.tag == RepeatStuTag)
+    {
+        if (buttonIndex == 1)
+        {
+            if ([[alertView textFieldAtIndex:0].text length] > 0)
+            {
+                newsn = [alertView textFieldAtIndex:0].text;
+                [self allowApply];
+            }
+        }
+    }
     else
     {
         [self unShowSelfViewController];
@@ -324,7 +480,7 @@
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
-                                                                      @"other_id":j_id,
+                                                                      @"other_id":userid,
                                                                       @"c_id":classID
                                                                       } API:MB_GETUSERINFO];
         [request setCompletionBlock:^{
@@ -336,19 +492,47 @@
             {
                 if (![[responseDict objectForKey:@"data" ] isEqual:[NSNull null]])
                 {
+                    NSDictionary *dict = [responseDict objectForKey:@"data"];
                     
-                    phoneNum = [[responseDict objectForKey:@"data"] objectForKey:@"phone"];
-                    headerImg = [[responseDict objectForKey:@"data"] objectForKey:@"img_icon"];
-                    
-                    if ([[[responseDict objectForKey:@"data"] objectForKey:@"sex"] intValue] == 1)
+                    if ([dict objectForKey:@"phone"] && ![[dict objectForKey:@"phone"] isEqual:[NSNull null]])
                     {
-                        //男
-                        sexureimage = @"male";
+                        if ([db updeteKey:@"phone" toValue:[dict objectForKey:@"phone"] withParaDict:@{@"uid":j_id,@"classid":classID} andTableName:CLASSMEMBERTABLE])
+                        {
+                            DDLOG(@"teach phone update success!");
+                        }
+                        phoneNum = [dict objectForKey:@"phone"];
                     }
-                    else if ([[[responseDict objectForKey:@"data"] objectForKey:@"sex"] intValue] == 0)
+                    
+                    if ([dict objectForKey:@"sex"] && ![[dict objectForKey:@"sex"] isEqual:[NSNull null]])
                     {
-                        //
-                        sexureimage = @"famale";
+                        if ([[dict objectForKey:@"sex"] integerValue] == 1)
+                        {
+                            //男
+                            sexureimage = @"male";
+                        }
+                        else
+                        {
+                            //
+                            sexureimage = @"female";
+                        }
+                        
+                        if ([db updeteKey:@"sex" toValue:[dict objectForKey:@"sex"] withParaDict:@{@"uid":j_id,@"classid":classID} andTableName:CLASSMEMBERTABLE])
+                        {
+                            DDLOG(@"update sex success");
+                        }
+                    }
+                    
+                    if ([dict objectForKey:@"birth"] && ![[dict objectForKey:@"birth"] isEqualToString:@"请设置生日"])
+                    {
+                        if ([db updeteKey:@"birth" toValue:[dict objectForKey:@"birth"] withParaDict:@{@"uid":j_id,@"classid":classID} andTableName:CLASSMEMBERTABLE])
+                        {
+                            DDLOG(@"teach birth update success!");
+                        }
+                        birth = [dict objectForKey:@"birth"];
+                    }
+                    if ([dict objectForKey:@"img_icon"] && ![[dict objectForKey:@"img_icon"] isEqual:[NSNull null]])
+                    {
+                        headerImg = [dict objectForKey:@"img_icon"];
                     }
                 }
                 [infoView reloadData];
@@ -369,16 +553,147 @@
     }
 }
 
+-(void)getStudentsByClassId
+{
+    NSString *name = @"";
+    if ([Tools NetworkReachable])
+    {
+        if ([role isEqualToString:@"parents"])
+        {
+            name = [applyDict objectForKey:@"re_name"];
+        }
+        else
+        {
+            name = applyName;
+        }
+        
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"c_id":classID,
+                                                                      @"name":name
+                                                                      } API:GETCHILDBYNAME];
+        
+        [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"getStudentByClassId responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                
+                [studentsArray removeAllObjects];
+                NSArray *tmpArray = [responseDict objectForKey:@"data"];
+                for(NSDictionary *dict in tmpArray)
+                {
+                    if ([role isEqualToString:@"students"])
+                    {
+                        [studentsArray addObject:dict];
+                    }
+                    else if([role isEqualToString:@"students"] &&
+                            [role isEqualToString:[dict objectForKey:@"role"]] &&
+                            [[dict objectForKey:@"name"] isEqualToString:applyName] &&
+                            [[dict objectForKey:@"sn"] isEqualToString:[applyDict objectForKey:@"sn"]])
+                    {
+                        UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"" message:@"班级中已存在同名同学号学生，请输入学号加以区分" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
+                        al.alertViewStyle = UIAlertViewStylePlainTextInput;
+                        al.tag = RepeatStuTag;
+                        [al show];
+                        return ;
+                    }
+                    else if([role isEqualToString:@"parents"])
+                    {
+                        [studentsArray addObject:dict];
+                    }
+                }
+                
+                if ([studentsArray count] > 0 && [re_id length] == 0)
+                {
+                    AlreadyInStudentsListViewController *alreadyStu = [[AlreadyInStudentsListViewController alloc] init];
+                    [alreadyStu.studentsArray addObjectsFromArray:studentsArray];
+                    alreadyStu.stulistdel = self;
+                    alreadyStu.applyDict = applyDict;
+                    [self.navigationController pushViewController:alreadyStu animated:YES];
+                }
+                else
+                {
+                    [self allowApply];
+                }
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools hideProgress:self.bgView];
+        }];
+        [Tools showProgress:self.bgView];
+        [request startAsynchronous];
+    }
+    
+}
+
+-(void)selectUninstu:(NSString *)uninstuId
+{
+    otherId = uninstuId;
+    [self allowApply];
+}
+
+
 -(void)allowApply
 {
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
-                                                                      @"token":[Tools client_token],
-                                                                      @"c_id":classID,
-                                                                      @"role":role,
-                                                                      @"j_id":j_id
-                                                                      } API:ALLOWJOIN];
+        
+        NSDictionary *paraDict;
+        if ([otherId length] > 0)
+        {
+            if ([role isEqualToString:@"students"] || [role isEqualToString:@"unin_students"])
+            {
+                paraDict = @{@"u_id":[Tools user_id],
+                             @"token":[Tools client_token],
+                             @"c_id":classID,
+                             @"role":role,
+                             @"j_id":j_id,
+                             @"unin_id":otherId
+                             };
+                
+            }
+            else if([role isEqualToString:@"parents"])
+            {
+                paraDict = @{@"u_id":[Tools user_id],
+                             @"token":[Tools client_token],
+                             @"c_id":classID,
+                             @"role":role,
+                             @"j_id":j_id,
+                             @"re_id":otherId
+                             };
+            }
+        }
+        else if([newsn length] == 0 || [re_id length] > 0)
+        {
+            paraDict = @{@"u_id":[Tools user_id],
+                         @"token":[Tools client_token],
+                         @"c_id":classID,
+                         @"role":role,
+                         @"j_id":j_id
+                         };
+        }
+        else
+        {
+            paraDict = @{@"u_id":[Tools user_id],
+                         @"token":[Tools client_token],
+                         @"c_id":classID,
+                         @"role":role,
+                         @"j_id":j_id,
+                         @"sn":newsn
+                         };
+        }
+        
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:paraDict API:ALLOWJOIN];
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
             NSString *responseString = [request responseString];
@@ -391,10 +706,10 @@
                     DDLOG(@"c_apply %@ delete success!",[Tools user_id]);
                     if ([[applyDict objectForKey:@"role"] isEqualToString:@"parents"])
                     {
-                         NSDictionary *studentDict = [[db findSetWithDictionary:@{@"classid":classID,@"name":[applyDict objectForKey:@"re_name"],@"role":@"students"} andTableName:CLASSMEMBERTABLE] firstObject];
+                         NSDictionary *studentDict = [[db findSetWithDictionary:@{@"classid":classID,@"name":[applyDict objectForKey:@"re_name"],@"sn":re_sn} andTableName:CLASSMEMBERTABLE] firstObject];
                         if ([[studentDict objectForKey:@"checked"] integerValue] == 0)
                         {
-                            if ([db updeteKey:@"checked" toValue:@"1" withParaDict:@{@"classid":classID,@"name":[applyDict objectForKey:@"re_name"],@"role":@"students"} andTableName:CLASSMEMBERTABLE])
+                            if ([db updeteKey:@"checked" toValue:@"1" withParaDict:@{@"classid":classID,@"name":[applyDict objectForKey:@"re_name"],@"sn":re_sn} andTableName:CLASSMEMBERTABLE])
                             {
                                 DDLOG(@"allow parent update student checked success!");
                             }
@@ -407,9 +722,9 @@
                             DDLOG(@"update teacher admin");
                         }
                     }
-                    else if([[applyDict objectForKey:@"role"] isEqualToString:@"students"])
+                    else if([[applyDict objectForKey:@"role"] isEqualToString:@"students"] )
                     {
-                        if ([db deleteRecordWithDict:@{@"classid":classID,@"name":applyName} andTableName:CLASSMEMBERTABLE])
+                        if ([db deleteRecordWithDict:@{@"classid":classID,@"name":applyName,@"sn":studentNum} andTableName:CLASSMEMBERTABLE])
                         {
                             NSDictionary *dict = @{@"classid":classID,
                                                    @"name":applyName,
@@ -423,7 +738,9 @@
                                                    @"role":@"students",
                                                    @"re_type":@"",
                                                    @"birth":birth,
-                                                   @"admin":@"0"};
+                                                   @"admin":@"0",
+                                                   @"sn":studentNum,
+                                                   @"re_sn":@""};
                             if ([db insertRecord:dict andTableName:CLASSMEMBERTABLE])
                             {
                                 DDLOG(@"update students success");

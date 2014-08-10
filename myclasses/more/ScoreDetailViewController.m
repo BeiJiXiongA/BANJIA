@@ -12,13 +12,12 @@
 
 @interface ScoreDetailViewController ()<UITableViewDataSource,UITableViewDelegate>
 {
-    NSMutableArray *objectArray;
     UITableView *objectTableView;
 }
 @end
 
 @implementation ScoreDetailViewController
-@synthesize testName,pubName,pubTime;
+@synthesize testName,pubName,pubTime,scoreId,objectArray,stuName;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -35,8 +34,6 @@
     
     self.titleLabel.text = @"成绩单";
     
-    objectArray = [[NSMutableArray alloc] initWithCapacity:0];
-    
     objectTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
     objectTableView.delegate = self;
     objectTableView.dataSource = self;
@@ -45,9 +42,13 @@
     
     objectTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     
-    [objectArray addObjectsFromArray:[NSArray arrayWithObjects:@{@"name":@"语文",@"score":@"97"},@{@"name":@"数学",@"score":@"97"},@{@"name":@"英语",@"score":@"111"},@{@"name":@"总分",@"score":@"305"}, nil]];
-    
     [objectTableView reloadData];
+    
+    if (scoreId)
+    {
+        [self getScoreDetail];
+    }
+    
 }
 
 - (void)didReceiveMemoryWarning
@@ -85,9 +86,17 @@
     }
     UIView *headerView = [[UIView alloc] init];
     headerView.backgroundColor = self.bgView.backgroundColor;
-    UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 13, 100, 20)];
+    UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 13, 300, 20)];
     headerLabel.backgroundColor = self.bgView.backgroundColor;
-    headerLabel.text = @"我的成绩";
+    if (stuName)
+    {
+         headerLabel.text = [NSString stringWithFormat:@"%@的成绩", stuName];
+    }
+    else
+    {
+         headerLabel.text = @"我的成绩";
+    }
+   
     headerLabel.textColor = COMMENTCOLOR;
     [headerView addSubview:headerLabel];
     return headerView;
@@ -129,6 +138,7 @@
         nameLabel.frame = CGRectMake(16, 15, 220, 30);
         nameLabel.textColor = [UIColor whiteColor];
         nameLabel.font = [UIFont boldSystemFontOfSize:20];
+        nameLabel.backgroundColor = [UIColor clearColor];
         [cell.contentView addSubview:nameLabel];
         nameLabel.text = testName;
         
@@ -137,6 +147,7 @@
         pubLabel.textColor = [UIColor whiteColor];
         pubLabel.font = [UIFont systemFontOfSize:14];
         [cell.contentView addSubview:pubLabel];
+        pubLabel.backgroundColor = [UIColor clearColor];
         pubLabel.text = [NSString stringWithFormat:@"发布人:%@",pubName];
         
         UILabel *timeLabel = [[UILabel alloc] init];
@@ -144,8 +155,8 @@
         timeLabel.textColor = [UIColor whiteColor];
         timeLabel.font = [UIFont systemFontOfSize:14];
         [cell.contentView addSubview:timeLabel];
-        timeLabel.text = [NSString stringWithFormat:@"发布时间:%@",pubTime];
-        
+        timeLabel.backgroundColor = [UIColor clearColor];
+        timeLabel.text = [NSString stringWithFormat:@"发布时间:%@",[Tools showTime:pubTime andFromat:@"yyyy-MM-dd"]];
         return cell;
 
     }
@@ -160,13 +171,24 @@
     cell.setLabel.textColor = CONTENTCOLOR;
     cell.setLabel.font = [UIFont systemFontOfSize:16];
     
-    cell.markLabel.frame = CGRectMake(SCREEN_WIDTH-50, 11, 40, 20);
+    cell.markLabel.frame = CGRectMake(SCREEN_WIDTH-70, 11, 60, 20);
     cell.markLabel.backgroundColor = [UIColor whiteColor];
     cell.markLabel.font = [UIFont systemFontOfSize:16];
     
     cell.setLabel.text = [dict objectForKey:@"name"];
     
-    cell.markLabel.text = [dict objectForKey:@"score"];
+    if ([dict objectForKey:@"score"] && ![[dict objectForKey:@"score"] isEqual:[NSNull null]])
+    {
+        if ([[dict objectForKey:@"score"] isKindOfClass:[NSString class]])
+        {
+            cell.markLabel.text = [dict objectForKey:@"score"];
+        }
+        else
+        {
+            cell.markLabel.text = [NSString stringWithFormat:@"%.1f",[[dict objectForKey:@"score"] floatValue]];
+        }
+    }
+    
     
     cell.markLabel.textColor = RGB(51, 204, 102, 0.8);
     
@@ -177,8 +199,70 @@
     lineImageView.image = [UIImage imageNamed:@"sepretorline"];
     [cell.contentView addSubview:lineImageView];
     cell.contentView.backgroundColor = [UIColor whiteColor];
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
 }
+
+-(void)getScoreDetail
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"e_id":scoreId,
+                                                                      } API:SCOREDETAIL];
+        [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"score detail responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                
+                pubTime = [[[responseDict objectForKey:@"data"] objectForKey:@"pTime"] objectForKey:@"sec"];
+                pubName = [[[responseDict objectForKey:@"data"] objectForKey:@"publishedBy"] objectForKey:@"name"];
+                NSDictionary *details = [[[responseDict objectForKey:@"data"] objectForKey:@"details"] firstObject];
+                objectArray = [details objectForKey:@"scores"];
+                
+                NSString *stunum = @"";
+                NSString *name = @"";
+                NSString *role = [[NSUserDefaults standardUserDefaults]objectForKey:@"role"];
+                if (role && [role isEqualToString:@"parents"])
+                {
+                    NSRange range = [[details objectForKey:@"index"] rangeOfString:@"|"];
+                    if (range.length > 0)
+                    {
+                        name = [[details objectForKey:@"index"] substringToIndex:range.location];
+                        stunum = [[details objectForKey:@"index"] substringFromIndex:range.location+1];
+                        if ([stunum length] > 0)
+                        {
+                            stuName = [NSString stringWithFormat:@"%@(%@)",name,stunum];
+                        }
+                        else
+                        {
+                            stuName = name;
+                        }
+                    }
+                }
+                [objectTableView reloadData];
+                
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools hideProgress:self.bgView];
+        }];
+        [Tools showProgress:self.bgView];
+        [request startAsynchronous];
+    }
+}
+
 
 
 /*

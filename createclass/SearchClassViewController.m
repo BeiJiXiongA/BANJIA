@@ -45,6 +45,7 @@ ZBarReaderDelegate>
     searchClassTableView.delegate = self;
     searchClassTableView.dataSource  = self;
     searchClassTableView.scrollEnabled = NO;
+    searchClassTableView.backgroundColor = self.bgView.backgroundColor;
     [self.bgView addSubview:searchClassTableView];
     
     if ([searchClassTableView respondsToSelector:@selector(setSeparatorInset:)])
@@ -86,6 +87,11 @@ ZBarReaderDelegate>
     cell.nametf.hidden = YES;
     cell.iconImageView.hidden = YES;
     cell.relateButton.hidden = YES;
+    UIImageView *markView = [[UIImageView alloc] init];
+    markView.hidden = YES;
+    markView.frame = CGRectMake(SCREEN_WIDTH-20, 17, 8, 12);
+    [markView setImage:[UIImage imageNamed:@"discovery_arrow"]];
+    [cell.contentView addSubview:markView];
     
     if (indexPath.row == 1)
     {
@@ -94,7 +100,7 @@ ZBarReaderDelegate>
         cell.nametf.delegate = self;
         cell.nametf.background = nil;
         cell.nametf.clearButtonMode = UITextFieldViewModeWhileEditing;
-        
+        cell.contentView.backgroundColor = [UIColor whiteColor];
         cell.nametf.returnKeyType = UIReturnKeySearch;
         
         cell.nametf.frame = CGRectMake(0, 0, SCREEN_WIDTH, 44);
@@ -104,18 +110,20 @@ ZBarReaderDelegate>
     else if(indexPath.row == 2 || indexPath.row == 4 || indexPath.row == 0)
     {
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        cell.backgroundColor = self.bgView.backgroundColor;
+        cell.contentView.backgroundColor = self.bgView.backgroundColor;
         if (indexPath.row == 0)
         {
             cell.contentLabel.frame = CGRectMake(10, 5, 100, 25);
             cell.contentLabel.hidden = NO;
             cell.contentLabel.text = @"  输入班号";
+            cell.contentLabel.backgroundColor = self.bgView.backgroundColor;
         }
     }
     else
     {
         cell.contentLabel.hidden = NO;
         cell.iconImageView.hidden = NO;
+        cell.contentLabel.backgroundColor = [UIColor whiteColor];
         
         cell.iconImageView.frame = CGRectMake(15, 7, 30, 30);
         cell.iconImageView.backgroundColor = [UIColor greenColor];
@@ -133,7 +141,10 @@ ZBarReaderDelegate>
             [cell.iconImageView setImage:[UIImage imageNamed:@"icon_qr"]];
             cell.contentLabel.text = @"扫一扫";
         }
-        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+        markView.hidden = NO;
+        cell.contentView.backgroundColor = [UIColor whiteColor];
+        cell.backgroundColor = [UIColor whiteColor];
+        cell.selectionStyle = UITableViewCellSelectionStyleGray;
     }
     return cell;
 }

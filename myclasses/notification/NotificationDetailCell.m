@@ -10,7 +10,7 @@
 #import "Header.h"
 
 @implementation NotificationDetailCell
-@synthesize headerImageView,nameLabel,contactButton;
+@synthesize headerImageView,nameLabel,contactButton,button2,textField,numLabel;
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
@@ -32,6 +32,23 @@
         [contactButton setHidden:NO];
         contactButton.backgroundColor = [UIColor clearColor];
         [self.contentView addSubview:contactButton];
+        
+        numLabel = [[UILabel alloc] init];
+        numLabel.hidden = YES;
+        [self.contentView addSubview:numLabel];
+        
+        button2 = [UIButton buttonWithType:UIButtonTypeCustom];
+        button2.hidden = YES;
+        button2.backgroundColor = [UIColor clearColor];
+        [self.contentView addSubview:button2];
+        
+        textField = [[MyTextField alloc] init];
+        textField.background = nil;
+        textField.layer.cornerRadius = 5;
+        textField.clipsToBounds = YES;
+        textField.backgroundColor = [UIColor whiteColor];
+        [self.contentView addSubview:textField];
+        
     }
     return self;
 }

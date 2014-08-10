@@ -527,7 +527,7 @@ recordButton;
     inputTextViewSize = size;
     [self inputChange];
     
-    
+    DDLOG(@"length %d",[textView.text length]);
     if ([textView.text length] > 200)
     {
         [Tools showAlertView:@"字数不能超过200" delegateViewController:nil];

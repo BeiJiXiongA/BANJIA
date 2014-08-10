@@ -1087,6 +1087,7 @@ static NSOperationQueue *sharedQueue = nil;
 	[self applyCookieHeader];
 	
 	// Build and set the user agent string if the request does not already have a custom user agent specified
+    
 	if (![[self requestHeaders] objectForKey:@"User-Agent"]) {
 		NSString *tempUserAgentString = [self userAgentString];
 		if (!tempUserAgentString) {

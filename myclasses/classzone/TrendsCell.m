@@ -161,7 +161,7 @@ verticalLineView;
         commentsTableView.layer.borderColor =UIColorFromRGB(0xe4e4e2).CGColor;
         commentsTableView.layer.borderWidth = 0.5;
         commentsTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-        commentsTableView.separatorColor = UIColorFromRGB(0xe4e4e2);
+//        commentsTableView.separatorColor = UIColorFromRGB(0xe4e4e2);
         commentsTableView.backgroundColor = UIColorFromRGB(0xfcfcfc);
         if ([commentsTableView respondsToSelector:@selector(setSeparatorInset:)])
         {
@@ -325,8 +325,8 @@ verticalLineView;
 //    CGFloat c_width = 15;
     CGFloat minCellHei = 35;
     CGFloat hei = 8;
-    CGFloat originalY = 5;
-    CGFloat topSpace = 8;
+    CGFloat originalY = 0;
+    CGFloat topSpace = 5;
     cell.openPraiseButton.hidden = YES;
     [cell.nameButton setTitle:@"" forState:UIControlStateNormal];
     [cell.nameButton setImage:nil forState:UIControlStateNormal];
@@ -341,7 +341,7 @@ verticalLineView;
                 [cell.nameButton setTitle:@"" forState:UIControlStateNormal];
                 
                 
-                cell.nameButton.frame = CGRectMake(12, 9, 18, 18);
+                cell.nameButton.frame = CGRectMake(12, 6, 18, 18);
 //                [cell.nameButton setImage:[UIImage imageNamed:@"praised"] forState:UIControlStateNormal];
                 cell.nameButton.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"praised"]];
                 
@@ -424,13 +424,22 @@ verticalLineView;
             NSString *name = [NSString stringWithFormat:@"%@:",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
             NSString *content = [[commitDict objectForKey:@"content"] emojizedString];
             CGSize s = [Tools getSizeWithString:content andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
-            if (s.height > minCellHei)
+            
+            DDLOG(@"%.2f==%@==%@",s.height,name,content);
+            if (indexPath.row == 0)
             {
                 cell.commentContentLabel.topSpace = topSpace;
             }
             else
             {
-                cell.commentContentLabel.topSpace = 0;
+                if (s.height > minCellHei)
+                {
+                    cell.commentContentLabel.topSpace = topSpace;
+                }
+                else
+                {
+                    cell.commentContentLabel.topSpace = 0;
+                }
             }
             cell.commentContentLabel.frame = CGRectMake(12, originalY, MaxCommentWidth, s.height+hei);
             [cell.commentContentLabel cnv_setUILabelText:[NSString stringWithFormat:@"%@%@",name,content] andKeyWord:name];
@@ -445,7 +454,7 @@ verticalLineView;
             cell.praiseView.hidden = NO;
             [cell.nameButton setTitle:@"" forState:UIControlStateNormal];
             
-            cell.nameButton.frame = CGRectMake(12, 9, 18, 18);
+            cell.nameButton.frame = CGRectMake(12, 6, 18, 18);
 //            [cell.nameButton setImage:[UIImage imageNamed:@"praised"] forState:UIControlStateNormal];
             cell.nameButton.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"praised"]];
             
@@ -506,7 +515,7 @@ verticalLineView;
                 [cell.nameButton setTitle:@"" forState:UIControlStateNormal];
                 cell.praiseView.hidden = YES;
                 
-                cell.nameButton.frame = CGRectMake(12, 9, 18, 18);
+                cell.nameButton.frame = CGRectMake(12, 6, 18, 18);
 //                [cell.nameButton setImage:[UIImage imageNamed:@"praised"] forState:UIControlStateNormal];
                 cell.nameButton.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"praised"]];
                 
@@ -563,13 +572,20 @@ verticalLineView;
                 NSString *name = [NSString stringWithFormat:@"%@:",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
                 NSString *content = [[commitDict objectForKey:@"content"] emojizedString];
                 CGSize s = [Tools getSizeWithString:content andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
-                if (s.height > minCellHei)
+                if (indexPath.row == 0)
                 {
                     cell.commentContentLabel.topSpace = topSpace;
                 }
                 else
                 {
-                    cell.commentContentLabel.topSpace = 0;
+                    if (s.height > minCellHei)
+                    {
+                        cell.commentContentLabel.topSpace = topSpace;
+                    }
+                    else
+                    {
+                        cell.commentContentLabel.topSpace = 0;
+                    }
                 }
                 
                 cell.commentContentLabel.frame = CGRectMake(12, originalY, MaxCommentWidth, s.height+hei);
@@ -592,7 +608,7 @@ verticalLineView;
         else if(!commentsArray && praiseArray)
         {
             cell.nameButton.hidden = NO;
-            cell.nameButton.frame = CGRectMake(12, 9, 18, 18);
+            cell.nameButton.frame = CGRectMake(12, 6, 18, 18);
 //            [cell.nameButton setImage:[UIImage imageNamed:@"praised"] forState:UIControlStateNormal];
             cell.nameButton.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"praised"]];
             

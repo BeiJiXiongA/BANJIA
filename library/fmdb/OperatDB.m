@@ -159,7 +159,7 @@
         //chatMsg
         NSString *sql = [NSString stringWithFormat:@"CREATE TABLE %@ (userindex INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\
                          mid VARCHAR(30) NOT NULL,\
-                         userid VARCHAR(30),fid VARCHAR(30),fname VARCHAR(30),ficon VARCHAR(50),tid VARCHAR(30),direct VARCHAR(2),readed VARCHAR(2), content VARCHAR(20),msgType VARCHAR(8),time VARCHAR(15),by VARCHAR(10))",TableName];
+                         userid VARCHAR(30),fid VARCHAR(30),fname VARCHAR(30),ficon VARCHAR(50),tid VARCHAR(30),direct VARCHAR(2),readed VARCHAR(2), content VARCHAR(20),msgType VARCHAR(8),time VARCHAR(15),by VARCHAR(10),byname VARCHAR(20))",TableName];
         BOOL res = [_db executeUpdate:sql];
         if (!res)
         {
@@ -274,7 +274,7 @@
     else
     {
         NSString *sql = [NSString stringWithFormat:@"CREATE TABLE %@ (userindex INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\
-                         classid VARCHAR(30),name VARCHAR(20),jianpin VARCHAR(10),quanpin VARCHAR(10),uid VARCHAR(30),img_icon VARCHAR(30),re_id VARCHAR(30),re_name VARCHAR(30),checked VARCHAR(5),phone VARCHAR(15),role VARCHAR(15),re_type VARCHAR(20),title VARCHAR(20),birth VARCHAR(20),admin VARCHAR(4))",CLASSMEMBERTABLE];
+                         classid VARCHAR(30),name VARCHAR(20),jianpin VARCHAR(10),quanpin VARCHAR(10),uid VARCHAR(30),img_icon VARCHAR(30),re_id VARCHAR(30),re_name VARCHAR(30),checked VARCHAR(5),phone VARCHAR(15),role VARCHAR(15),re_type VARCHAR(20),title VARCHAR(20),birth VARCHAR(20),admin VARCHAR(4),sex VARCHAR(8),sn VARCHAR(20),cb_id VARCHAR(50),re_sn VARCHAR(20))",CLASSMEMBERTABLE];
         BOOL res = [_db executeUpdate:sql];
         if (!res)
         {
@@ -318,7 +318,8 @@
 -(NSMutableArray *)findChatUseridWithTableName:(NSString *)tableName
 {
     NSMutableArray *msgArray = [[NSMutableArray alloc] initWithCapacity:0];
-    NSMutableString *query = [NSMutableString stringWithFormat:@"SELECT  * FROM chatMsg where fid IN (SELECT DISTINCT fid FROM chatMsg WHERE userid='%@' AND fid != '%@') AND  userid='%@' GROUP BY fid",[Tools user_id],[Tools user_id],[Tools user_id]];
+//    NSMutableString *query = [NSMutableString stringWithFormat:@"SELECT  * FROM chatMsg where fid IN (SELECT DISTINCT fid FROM chatMsg WHERE userid='%@') AND  userid='%@' GROUP BY fid",[Tools user_id],[Tools user_id]];
+    NSMutableString *query = [NSMutableString stringWithFormat:@"select distinct tid from chatMsg where userid = '%@' and fid= '%@' and direct = 't' union select distinct fid from chatMsg where userid = '%@' and tid= '%@' and direct = 'f'",[Tools user_id],[Tools user_id],[Tools user_id],[Tools user_id]];
     NSString *queryStr = [query substringToIndex:[query length]];
     FMResultSet *resultSet = [_db executeQuery:queryStr];
     DDLOG(@"quert dictinct %@",queryStr);
@@ -328,7 +329,6 @@
     }
     DDLOG(@"chat list=%@",msgArray);
     return msgArray;
-    
 }
 
 #pragma mark - operate DB

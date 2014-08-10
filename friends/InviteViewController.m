@@ -228,7 +228,10 @@ UIAlertViewDelegate>
         {
             NSMutableArray *sectionArray = [[NSMutableArray alloc] initWithCapacity:0];
             NSArray *letters = [NSArray arrayWithObjects:@"A",@"B",@"C",@"D",@"E",@"F",@"G",@"H",@"I",@"J",@"K",@"L",@"M",@"N",@"O",@"P",@"Q",@"R",@"S",@"T",@"U",@"V",@"W",@"X",@"Y",@"Z", nil];
-            [sectionArray addObject:@"*"];
+            if ([alreadyUsers count] > 0)
+            {
+                [sectionArray addObject:@"*"];
+            }
             for (int i=0; i<[letters count]; ++i)
             {
                 NSString *letter = [letters objectAtIndex:i];
@@ -245,6 +248,7 @@ UIAlertViewDelegate>
                 }
             }
             DDLOG(@"sectionArray=%@",sectionArray);
+            [sectionArray addObject:@"#"];
             return sectionArray;
         }
     }
@@ -371,6 +375,18 @@ UIAlertViewDelegate>
             {
                 cell = [[FriendsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellName];
             }
+            
+            CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+            UIImageView *lineImageView = [[UIImageView alloc] init];
+            lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            [cell.contentView addSubview:lineImageView];
+            cell.contentView.backgroundColor = [UIColor whiteColor];
+            if (indexPath.row < [tableView numberOfRowsInSection:indexPath.section]-1)
+            {
+                lineImageView.frame = CGRectMake( 55, cellHeight-0.5, cell.frame.size.width, 0.5);
+            }
+            
             cell.nameLabel.frame = CGRectMake(60, 10, SCREEN_WIDTH - 80, 30);
             cell.nameLabel.font = [UIFont systemFontOfSize:16];
             
@@ -408,13 +424,7 @@ UIAlertViewDelegate>
                 [cell.inviteButton addTarget:self action:@selector(addFriendWithID:) forControlEvents:UIControlEventTouchUpInside];
             }
             
-            UIImageView *bgImageBG = [[UIImageView alloc] init];
-            bgImageBG.image = [UIImage imageNamed:@"line3"];
-            bgImageBG.backgroundColor = [UIColor clearColor];
-            cell.backgroundView = bgImageBG;
-            cell.selectionStyle = UITableViewCellSelectionStyleNone;
             return cell;
-
         }
         else if(indexPath.section > 0)
         {
@@ -452,12 +462,12 @@ UIAlertViewDelegate>
                     }
                 }
                 [cell.inviteButton addTarget:self action:@selector(inviteButtonCLick:) forControlEvents:UIControlEventTouchUpInside];
-                UIImageView *bgImageBG = [[UIImageView alloc] init];
-                bgImageBG.image = [UIImage imageNamed:@"line3"];
-                bgImageBG.backgroundColor = [UIColor clearColor];
-                cell.backgroundView = bgImageBG;
-                cell.selectionStyle = UITableViewCellSelectionStyleNone;
-                cell.backgroundColor = [UIColor clearColor];
+                CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+                UIImageView *lineImageView = [[UIImageView alloc] init];
+                lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+                lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+                [cell.contentView addSubview:lineImageView];
+                cell.contentView.backgroundColor = [UIColor whiteColor];
             }
             return cell;
         }

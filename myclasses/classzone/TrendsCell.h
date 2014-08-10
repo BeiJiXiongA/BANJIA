@@ -13,7 +13,7 @@
 #define ColumnPerRow  8
 #define PraiseW   31
 #define PraiseH   31
-#define PraiseCellHeight  37
+#define PraiseCellHeight  30
 
 @protocol NameButtonDel;
 

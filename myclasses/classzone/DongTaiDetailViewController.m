@@ -77,7 +77,6 @@ UIActionSheetDelegate,NameButtonDel>
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
-    
 }
 
 -(void)viewWillAppear:(BOOL)animated
@@ -849,13 +848,14 @@ UIActionSheetDelegate,NameButtonDel>
     UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"转发到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"QQ空间",@"腾讯微博",@"QQ好友",@"微信朋友圈",@"人人网", nil];
     actionSheet.tag = 4444;
     [actionSheet showInView:self.bgView];
+    waitTransDict = [diaryDetailDict objectForKey:@"detail"];
 }
 
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
     if (actionSheet.tag == 4444)
     {
-        DDLOG(@"waittransdict %@",diaryDetailDict);
+        DDLOG(@"waittransdict %@",waitTransDict);
         switch (buttonIndex)
         {
             case 0:
@@ -946,7 +946,7 @@ UIActionSheetDelegate,NameButtonDel>
                                                 image:[ShareSDK imageWithUrl:imagePath]
                                                 title:@"班家"
                                                   url:ShareUrl
-                                          description:content
+                                          description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                             mediaType:SSPublishContentMediaTypeText];
     
     //创建弹出菜单容器
@@ -1016,17 +1016,17 @@ UIActionSheetDelegate,NameButtonDel>
     {
         if ([[waitTransDict objectForKey:@"img"] count] > 0)
         {
-            imagePath = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[waitTransDict objectForKey:@"img"] firstObject]];
+            imagePath = [NSString stringWithFormat:@"%@%@@150w",IMAGEURL,[[waitTransDict objectForKey:@"img"] firstObject]];
         }
     }
     
     //创建分享内容[ShareSDK imageWithUrl:imagePath]
-    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
+    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                        defaultContent:@""
-                                                image:[ShareSDK imageWithPath:imagePath]
+                                                image:[ShareSDK imageWithUrl:imagePath]
                                                 title:@"班家"
                                                   url:ShareUrl
-                                          description:[content length]>0?content:ShareContent
+                                          description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                             mediaType:SSPublishContentMediaTypeNews];
     
     //创建弹出菜单容器
@@ -1102,12 +1102,12 @@ UIActionSheetDelegate,NameButtonDel>
         }
     }
     //创建分享内容
-    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
+    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                        defaultContent:@""
                                                 image:[ShareSDK imageWithUrl:imagePath]
                                                 title:@"班家"
                                                   url:ShareUrl
-                                          description:[content length]>0?content:ShareContent
+                                          description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                             mediaType:SSPublishContentMediaTypeText];
     
     //创建弹出菜单容器
@@ -1181,12 +1181,12 @@ UIActionSheetDelegate,NameButtonDel>
         }
     }
     //创建分享内容
-    id<ISSContent> publishContent = [ShareSDK content:content
+    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                        defaultContent:@""
                                                 image:[ShareSDK imageWithUrl:imagePath]
                                                 title:@"班家"
                                                   url:ShareUrl
-                                          description:content
+                                          description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                             mediaType:SSPublishContentMediaTypeNews];
     
     id<ISSAuthOptions> authOptions = [ShareSDK authOptionsWithAutoAuth:YES
@@ -1257,12 +1257,12 @@ UIActionSheetDelegate,NameButtonDel>
         }
     }
     //创建分享内容
-    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
+    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                        defaultContent:@""
-                                                image:[ShareSDK imageWithPath:imagePath]
-                                                title:@"班家"
+                                                image:[ShareSDK imageWithUrl:imagePath]
+                                                title:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                                   url:ShareUrl
-                                          description:[content length]>0?content:ShareContent
+                                          description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                             mediaType:SSPublishContentMediaTypeNews];
     
     id<ISSAuthOptions> authOptions = [ShareSDK authOptionsWithAutoAuth:YES
@@ -1333,12 +1333,12 @@ UIActionSheetDelegate,NameButtonDel>
         }
     }
     //创建分享内容
-    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
+    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                        defaultContent:@""
                                                 image:[ShareSDK imageWithUrl:imagePath]
                                                 title:@"班家"
                                                   url:ShareUrl
-                                          description:[content length]>0?content:ShareContent
+                                          description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                             mediaType:SSPublishContentMediaTypeText];
     
     //    //创建弹出菜单容器

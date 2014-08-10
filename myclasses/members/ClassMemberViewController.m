@@ -87,7 +87,7 @@ MsgDelegate>
     
     updateGroup = @"";
     
-    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(manageClassMember) name:UPDATECLASSMEMBERLIST object:nil];
+    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(getMembersByClass) name:UPDATECLASSMEMBERLIST object:nil];
     
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
@@ -183,13 +183,9 @@ MsgDelegate>
     searchTableView.delegate = self;
     searchTableView.dataSource = self;
     searchTableView.backgroundColor = [UIColor whiteColor];
+    searchTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     searchTableView.tag = SearchTableViewTag;
     [searchView addSubview:searchTableView];
-    
-    if (SYSVERSION >= 7.0)
-    {
-        searchTableView.contentInset = UIEdgeInsetsMake(-20, 0, 0, 0);
-    }
     
     searchTableView.contentOffset = CGPointZero;
 
@@ -217,6 +213,12 @@ MsgDelegate>
     }
 }
 
+-(void)dealloc
+{
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UPDATECLASSMEMBERLIST object:nil];
+}
+
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
@@ -241,10 +243,6 @@ MsgDelegate>
     [[NSUserDefaults standardUserDefaults] setObject:NOTFROMCLASS forKey:FROMWHERE];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
--(void)dealloc
-{
-    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
-}
 
 #pragma mark - chatDel
 -(void)dealNewChatMsg:(NSDictionary *)dict
@@ -264,7 +262,7 @@ MsgDelegate>
 {
     if (update)
     {
-        [self manageClassMember];
+        [self getMembersByClass];
     }
 }
 #pragma mark - memdel
@@ -316,6 +314,11 @@ MsgDelegate>
     {
         [self searchWithText:searchText];
     }
+    else
+    {
+        [searchResultArray removeAllObjects];
+        [searchTableView reloadData];
+    }
 }
 -(void)searchBarCancelButtonClicked:(UISearchBar *)searchBar
 {
@@ -366,6 +369,7 @@ MsgDelegate>
 
 -(void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
+    [mySearchBar resignFirstResponder];
     [pullRefreshView egoRefreshScrollViewDidScroll:memberTableView];
 }
 -(void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
@@ -443,7 +447,7 @@ MsgDelegate>
                 if ([[responseDict objectForKey:@"data"] count] > 0)
                 {
                     [adminIDDict setDictionary:[responseDict objectForKey:@"data"]];
-                    [self getMembersByClass:@"all"];
+                    [self getMembersByClass];
                 }
             }
             else
@@ -479,14 +483,14 @@ MsgDelegate>
     return NO;
 }
 
--(void)getMembersByClass:(NSString *)role
+-(void)getMembersByClass
 {
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
                                                                       @"c_id":classID,
-                                                                      @"role":role
+                                                                      @"role":@"all"
                                                                       } API:GETUSERSBYCLASS];
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
@@ -520,7 +524,18 @@ MsgDelegate>
                     {
                         [memDict setObject:@"" forKey:@"role"];
                     }
-                    if ([[dict objectForKey:@"role"] isEqualToString:@"unin_students"])
+                    NSString *sn = @"";
+                    if ([[dict objectForKey:@"role"] isEqualToString:@"students"] || [[dict objectForKey:@"role"] isEqualToString:@"unin_students"])
+                    {
+                        if ([dict objectForKey:@"sn"] && ![[dict objectForKey:@"sn"] isEqual:[NSNull null]])
+                        {
+                            
+                            sn = [dict objectForKey:@"sn"];
+                        }
+                    }
+                    [memDict setObject:sn forKey:@"sn"];
+                    
+                    if (![dict objectForKey:@"_id"])
                     {
                         continue ;
                     }
@@ -545,6 +560,10 @@ MsgDelegate>
                     {
                         [memDict setObject:[NSString stringWithFormat:@"%d",[[adminIDDict objectForKey:[dict objectForKey:@"_id"]] integerValue]] forKey:@"admin"];
                     }
+                    else if([[dict objectForKey:@"role"] isEqualToString:@"teachers"] && [[dict objectForKey:@"checked"] integerValue] == 1)
+                    {
+                        [memDict setObject:@"1" forKey:@"admin"];
+                    }
                     else
                     {
                         [memDict setObject:@"0" forKey:@"admin"];
@@ -558,6 +577,7 @@ MsgDelegate>
                     {
                         [memDict setObject:@"" forKey:@"re_id"];
                     }
+                    
                     if ([dict objectForKey:@"re_name"])
                     {
                         [memDict setObject:[dict objectForKey:@"re_name"] forKey:@"re_name"];
@@ -566,18 +586,43 @@ MsgDelegate>
                     {
                         [memDict setObject:@"" forKey:@"re_name"];
                     }
+                    
+                    if ([dict objectForKey:@"re_sn"])
+                    {
+                        [memDict setObject:[dict objectForKey:@"re_sn"] forKey:@"re_sn"];
+                    }
+                    else
+                    {
+                        [memDict setObject:@"" forKey:@"re_sn"];
+                    }
+                    
                     if ([dict objectForKey:@"re_type"])
                     {
                         [memDict setObject:[dict objectForKey:@"re_type"] forKey:@"re_type"];
                     }
+                    else
+                    {
+                        [memDict setObject:@"" forKey:@"re_type"];
+                    }
+                    
                     if ([dict objectForKey:@"img_icon"])
                     {
                         [memDict setObject:[dict objectForKey:@"img_icon"] forKey:@"img_icon"];
                     }
+                    else
+                    {
+                        [memDict setObject:@"" forKey:@"img_icon"];
+                    }
+                    
                     if ([dict objectForKey:@"phone"])
                     {
                         [memDict setObject:[dict objectForKey:@"phone"] forKey:@"phone"];
                     }
+                    else
+                    {
+                        [memDict setObject:@"" forKey:@"phone"];
+                    }
+                    
                     if ([dict objectForKey:@"title"])
                     {
                         if ([[adminIDDict objectForKey:[dict objectForKey:@"_id"]] intValue] == 2)
@@ -593,6 +638,10 @@ MsgDelegate>
                             [memDict setObject:[dict objectForKey:@"title"] forKey:@"title"];
                         }
                     }
+                    else
+                    {
+                        [memDict setObject:@"" forKey:@"title"];
+                    }
                     
                     if ([dict objectForKey:@"re_name"])
                     {
@@ -605,52 +654,25 @@ MsgDelegate>
                         {
                             checked = @"1";
                         }
-                        if ([[_db findSetWithDictionary:@{@"classid":classID,@"role":@"students",@"name":[dict objectForKey:@"re_name"],@"checked":checked} andTableName:CLASSMEMBERTABLE] count] == 0)
-                        {
-                            NSDictionary *tmpDict = @{@"name":[dict objectForKey:@"re_name"],@"classid":classID,@"role":@"students",@"checked":checked};
-                            if ([_db insertRecord:tmpDict andTableName:CLASSMEMBERTABLE])
-                            {
-                                DDLOG(@"insert stu of parent without stu success!");
-                            }
-                        }
                         [memDict setObject:[dict objectForKey:@"re_name"] forKey:@"re_name"];
-                    }
-                    if ([[memDict objectForKey:@"role"] isEqualToString:@"students"])
-                    {
-                        if ([[_db findSetWithDictionary:@{@"name":[memDict objectForKey:@"name"],@"classid":classID,@"role":@"students"} andTableName:CLASSMEMBERTABLE] count] == 0)
-                        {
-                            if ([_db insertRecord:memDict andTableName:CLASSMEMBERTABLE])
-                            {
-                                DDLOG(@"insert mem success!");
-                            }
-                        }
-                        else
-                        {
-                            if ([[memDict objectForKey:@"checked"] integerValue] == 0)
-                            {
-                                if ([_db insertRecord:memDict andTableName:CLASSMEMBERTABLE])
-                                {
-                                    DDLOG(@"insert mem success!");
-                                }
-                            }
-                            else if([[memDict objectForKey:@"checked"] integerValue] == 1)
-                            {
-                                if ([_db deleteRecordWithDict:@{@"name":[memDict objectForKey:@"name"],@"classid":classID,@"role":@"students"} andTableName:CLASSMEMBERTABLE])
-                                {
-                                    if ([_db insertRecord:memDict andTableName:CLASSMEMBERTABLE])
-                                    {
-                                        DDLOG(@"insert student success!");
-                                    }
-                                }
-                            }
-                        }
                     }
                     else
                     {
-                        if ([_db insertRecord:memDict andTableName:CLASSMEMBERTABLE])
-                        {
-                            ;
-                        }
+                        [memDict setObject:@"" forKey:@"re_name"];
+                    }
+                    
+                    if ([dict objectForKey:@"cb_id"] && ![[dict objectForKey:@"cb_id"] isEqual:[NSNull null]])
+                    {
+                        [memDict setObject:[dict objectForKey:@"cb_id"] forKey:@"cb_id"];
+                    }
+                    else
+                    {
+                        [memDict setObject:@"" forKey:@"cb_id"];
+                    }
+                    
+                    if ([_db insertRecord:memDict andTableName:CLASSMEMBERTABLE])
+                    {
+                        DDLOG(@"insert success");
                     }
                 }
                 [self manageClassMember];
@@ -699,6 +721,7 @@ MsgDelegate>
     }
     
     [allMembersArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID} andTableName:CLASSMEMBERTABLE]];
+    DDLOG(@"all mem %@",allMembersArray);
     //老师
     [teachersArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"role":@"teachers",@"checked":@"1"} andTableName:CLASSMEMBERTABLE]];
     
@@ -728,7 +751,8 @@ MsgDelegate>
     
     
     [parentsArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"role":@"parents",@"checked":@"1"} andTableName:CLASSMEMBERTABLE]];
-    studentArray = [_db findSetWithDictionary:@{@"classid":classID,@"role":@"students",@"checked":@"1"} andTableName:CLASSMEMBERTABLE];
+    [studentArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"role":@"students",@"checked":@"1"} andTableName:CLASSMEMBERTABLE]];
+    [studentArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"role":@"unin_students",@"checked":@"1"} andTableName:CLASSMEMBERTABLE]];
     
     for (int i=0; i<[studentArray count]; ++i)
     {
@@ -899,6 +923,20 @@ MsgDelegate>
             {
                 cell = [[MemberCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:studentCell];
             }
+            
+            CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+            UIImageView *lineImageView = [[UIImageView alloc] init];
+            lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            [cell.contentView addSubview:lineImageView];
+            
+            UIImageView *markView = [[UIImageView alloc] init];
+            cell.contentView.backgroundColor = [UIColor whiteColor];
+            if (indexPath.row < [memberTableView numberOfRowsInSection:indexPath.section]-1)
+            {
+                lineImageView.frame = CGRectMake( 60, cellHeight-0.5, cell.frame.size.width, 0.5);
+            }
+
             cell.headerImageView.hidden = YES;
             cell.headerImageView.layer.cornerRadius = 3;
             cell.headerImageView.clipsToBounds = YES;
@@ -946,6 +984,7 @@ MsgDelegate>
                     cell.headerImageView.hidden = YES;
                     cell.contentLabel.hidden = YES;
                 }
+                cell.selectionStyle = UITableViewCellSelectionStyleGray;
             }
             else if (indexPath.row == 1)
             {
@@ -954,7 +993,10 @@ MsgDelegate>
                 [cell.markView setImage:image];
                 cell.memNameLabel.text = @"老师";
                 cell.remarkLabel.text = [NSString stringWithFormat:@"%d人",[teachersArray count]];
-                cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+                markView.hidden = NO;
+                markView.frame = CGRectMake(SCREEN_WIDTH-20, 24, 8, 12);
+                [markView setImage:[UIImage imageNamed:@"discovery_arrow"]];
+                [cell.contentView addSubview:markView];
                 cell.selectionStyle = UITableViewCellSelectionStyleGray;
             }
             else if(indexPath.row == 2)
@@ -964,7 +1006,10 @@ MsgDelegate>
                 [cell.markView setImage:image];
                 cell.memNameLabel.text = @"管理员";
                 cell.remarkLabel.text = [NSString stringWithFormat:@"%d人",[adminArray count]];
-                cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+                markView.hidden = NO;
+                markView.frame = CGRectMake(SCREEN_WIDTH-20, 24, 8, 12);
+                [markView setImage:[UIImage imageNamed:@"discovery_arrow"]];
+                [cell.contentView addSubview:markView];
                 cell.selectionStyle = UITableViewCellSelectionStyleGray;
             }
             else if(indexPath.row == 3)
@@ -974,14 +1019,12 @@ MsgDelegate>
                 [cell.markView setImage:image];
                 cell.memNameLabel.text = @"应添加家长的学生";
                 cell.remarkLabel.text = [NSString stringWithFormat:@"%d人",[withoutParentStuArray count]];
-                cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+                markView.hidden = NO;
+                markView.frame = CGRectMake(SCREEN_WIDTH-20, 24, 8, 12);
+                [markView setImage:[UIImage imageNamed:@"discovery_arrow"]];
+                [cell.contentView addSubview:markView];
                 cell.selectionStyle = UITableViewCellSelectionStyleGray;
             }
-            
-            UIImageView *bgImageBG = [[UIImageView alloc] init];
-            bgImageBG.image = [UIImage imageNamed:@"line3"];
-            bgImageBG.backgroundColor = [UIColor clearColor];
-            cell.backgroundView = bgImageBG;
             return cell;
         }
         else if(indexPath.section == 1)
@@ -992,23 +1035,35 @@ MsgDelegate>
             {
                 cell = [[MemberCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:studentCell];
             }
+            CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+            UIImageView *lineImageView = [[UIImageView alloc] init];
+            lineImageView.frame = CGRectMake(60, cellHeight-0.5, cell.frame.size.width, 0.5);
+            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            [cell.contentView addSubview:lineImageView];
+            cell.contentView.backgroundColor = [UIColor whiteColor];
+            if (indexPath.row < [memberTableView numberOfRowsInSection:indexPath.section]-1)
+            {
+                lineImageView.frame = CGRectMake( 60, cellHeight-0.5, cell.frame.size.width, 0.5);
+            }
+
             NSDictionary *dict = [classLeadersArray objectAtIndex:indexPath.row];
             cell.memNameLabel.frame = CGRectMake(60, 15, 150, 30);
-            cell.memNameLabel.text = [dict objectForKey:@"name"];
+            if ([dict objectForKey:@"sn"] && ![[dict objectForKey:@"sn"] isEqual:[NSNull null]] && [[dict objectForKey:@"sn"] length] > 0)
+            {
+                cell.memNameLabel.text = [NSString stringWithFormat:@"%@(%@)",[dict objectForKey:@"name"],[dict objectForKey:@"sn"]];
+            }
+            else
+            {
+                cell.memNameLabel.text = [dict objectForKey:@"name"];
+            }
             [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERICON];
             cell.headerImageView.layer.cornerRadius = 3;
             cell.headerImageView.clipsToBounds = YES;
             cell.remarkLabel.hidden = NO;
-//            cell.remarkLabel.font = [UIFont systemFontOfSize:16];
             if (![[dict objectForKey:@"title"] isEqual:[NSNull null]])
             {
                 cell.remarkLabel.text = [dict objectForKey:@"title"];
             }
-            
-            UIImageView *bgImageBG = [[UIImageView alloc] init];
-            bgImageBG.image = [UIImage imageNamed:@"line3"];
-            bgImageBG.backgroundColor = [UIColor clearColor];
-            cell.backgroundView = bgImageBG;
             return cell;
         }
         else
@@ -1019,20 +1074,37 @@ MsgDelegate>
             {
                 cell = [[MemberCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:studentCell];
             }
+            CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+            UIImageView *lineImageView = [[UIImageView alloc] init];
+            lineImageView.frame = CGRectMake(60, cellHeight-0.5, cell.frame.size.width, 0.5);
+            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            [cell.contentView addSubview:lineImageView];
+            cell.contentView.backgroundColor = [UIColor whiteColor];
+            
+            DDLOG(@"%d/%d",indexPath.row,[tableView numberOfRowsInSection:indexPath.section]);
+            if (indexPath.row < [tableView numberOfRowsInSection:indexPath.section]-1)
+            {
+                lineImageView.frame = CGRectMake( 60, cellHeight-0.5, cell.frame.size.width, 0.5);
+            }
+
             NSDictionary *dict = [[[membersArray objectAtIndex:indexPath.section-2] objectForKey:@"array"] objectAtIndex:indexPath.row];
-            cell.memNameLabel.frame = CGRectMake(60, 15, 150, 30);
+            cell.memNameLabel.frame = CGRectMake(60, 20, 100, 20);
             cell.headerImageView.layer.cornerRadius = 3;
             cell.headerImageView.clipsToBounds = YES;
+
             cell.memNameLabel.text = [dict objectForKey:@"name"];
+            
             cell.remarkLabel.hidden = NO;
+            cell.remarkLabel.frame = CGRectMake(SCREEN_WIDTH-cell.memNameLabel.frame.origin.x-cell.memNameLabel.frame.size.width, 20, 100, 20);
             if (![[dict objectForKey:@"title"] isEqual:[NSNull null]])
             {
                 cell.remarkLabel.text = [dict objectForKey:@"title"];
+                cell.remarkLabel.textAlignment = NSTextAlignmentLeft;
             }
             [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERICON];
             
             cell.button2.hidden = YES;
-            if (![self haveParents:[dict objectForKey:@"name"]])
+            if (![self haveParents:[dict objectForKey:@"uid"]])
             {
                 cell.button2.hidden = NO;
                 [cell.button2 setTitle:@"邀请家长" forState:UIControlStateNormal];
@@ -1042,16 +1114,14 @@ MsgDelegate>
                 cell.button2.tag = (indexPath.section-2) * 3333 +indexPath.row;
                 [cell.button2 addTarget:self action:@selector(inviteButtonClick:) forControlEvents:UIControlEventTouchUpInside];
                 [cell.button2 setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-                cell.remarkLabel.frame = CGRectMake(SCREEN_WIDTH-100-cell.remarkLabel.frame.size.width, cell.remarkLabel.frame.origin.y, cell.remarkLabel.frame.size.width, cell.remarkLabel.frame.size.height);
+            }
+            else
+            {
+                cell.remarkLabel.frame = CGRectMake(SCREEN_WIDTH-120, 20, 100, 20);
+                cell.remarkLabel.textAlignment = NSTextAlignmentRight;
             }
             
             cell.selectionStyle = UITableViewCellSelectionStyleGray;
-            
-            UIImageView *bgImageBG = [[UIImageView alloc] init];
-            bgImageBG.image = [UIImage imageNamed:@"line3"];
-            bgImageBG.backgroundColor = [UIColor clearColor];
-            cell.backgroundView = bgImageBG;
-
             return cell;
         }
     }
@@ -1063,15 +1133,32 @@ MsgDelegate>
         {
             cell = [[MemberCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:searchCell];
         }
+        CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+        UIImageView *lineImageView = [[UIImageView alloc] init];
+        lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+        [cell.contentView addSubview:lineImageView];
+        cell.contentView.backgroundColor = [UIColor whiteColor];
+        if (indexPath.row < [tableView numberOfRowsInSection:indexPath.section]-1)
+        {
+            lineImageView.frame = CGRectMake( 60, cellHeight-0.5, cell.frame.size.width, 0.5);
+        }
+
         NSDictionary *dict = [searchResultArray objectAtIndex:indexPath.row];
         
         [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERICON];
         cell.headerImageView.frame = CGRectMake(5, 4, 35, 35);
         cell.headerImageView.layer.cornerRadius = 5;
         cell.headerImageView.clipsToBounds = YES;
-        
-        cell.memNameLabel.frame = CGRectMake(cell.headerImageView.frame.size.width+cell.headerImageView.frame.origin.x+5, 12, 100, 20);
-        cell.memNameLabel.text = [dict objectForKey:@"name"];
+        if (![[dict objectForKey:@"title"] isEqual:[NSNull null]] && [[dict objectForKey:@"title"] length] > 0)
+        {
+            cell.memNameLabel.text = [NSString stringWithFormat:@"%@(%@)",[dict objectForKey:@"name"],[dict objectForKey:@"title"]];
+        }
+        else
+        {
+            cell.memNameLabel.text = [dict objectForKey:@"name"];
+        }
+        cell.memNameLabel.frame = CGRectMake(cell.headerImageView.frame.size.width + cell.headerImageView.frame.origin.x+5, 12, 250, 20);
         cell.selectionStyle = UITableViewCellSelectionStyleGray;
         return cell;
     }
@@ -1098,9 +1185,9 @@ MsgDelegate>
     [[XDTabViewController sharedTabViewController].navigationController pushViewController:invite animated:YES];
 }
 
--(BOOL)haveParents:(NSString *)re_name
+-(BOOL)haveParents:(NSString *)re_id
 {
-    if ([[_db findSetWithDictionary:@{@"re_name":re_name,@"classid":classID,@"checked":@"1"} andTableName:CLASSMEMBERTABLE] count] > 0)
+    if ([[_db findSetWithDictionary:@{@"re_id":re_id,@"classid":classID,@"checked":@"1"} andTableName:CLASSMEMBERTABLE] count] > 0)
     {
         return YES;
     }
@@ -1212,6 +1299,7 @@ MsgDelegate>
         else if([[dict objectForKey:@"role"] isEqualToString:@"unin_students"])
         {
             StudentDetailViewController *studentDetail = [[StudentDetailViewController alloc] init];
+            studentDetail.studentID = [dict objectForKey:@"uid"];
             if (![[dict objectForKey:@"title"] isEqual:[NSNull null]])
             {
                 studentDetail.title = [dict objectForKey:@"title"];
@@ -1255,3 +1343,35 @@ MsgDelegate>
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
 }
 @end
+//if ([[memDict objectForKey:@"role"] isEqualToString:@"students"])
+//{
+//    if ([[_db findSetWithDictionary:@{@"name":[memDict objectForKey:@"name"],@"classid":classID,@"role":@"students",@"sn":sn} andTableName:CLASSMEMBERTABLE] count] == 0)
+//    {
+//        if ([_db insertRecord:memDict andTableName:CLASSMEMBERTABLE])
+//        {
+//            DDLOG(@"insert mem success!");
+//        }
+//    }
+//    else
+//    {
+//        if ([[memDict objectForKey:@"checked"] integerValue] == 0)
+//        {
+//            if ([_db insertRecord:memDict andTableName:CLASSMEMBERTABLE])
+//            {
+//                DDLOG(@"insert mem success!");
+//            }
+//        }
+//        else if([[memDict objectForKey:@"checked"] integerValue] == 1)
+//        {
+//            if ([_db deleteRecordWithDict:@{@"name":[memDict objectForKey:@"name"],@"classid":classID,@"role":@"students",@"sn":sn} andTableName:CLASSMEMBERTABLE])
+//            {
+//                if ([_db insertRecord:memDict andTableName:CLASSMEMBERTABLE])
+//                {
+//                    DDLOG(@"insert student success!");
+//                }
+//            }
+//        }
+//    }
+//}
+//else
+//{//NTNkZGViOWEzNGRhYjU1Mjc0OGI0NjVh

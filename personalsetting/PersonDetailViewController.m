@@ -219,12 +219,12 @@ MFMailComposeViewControllerDelegate>
     }
     else if (indexPath.section == 1)
     {
-        if (indexPath.row < 3)
+        if (indexPath.row < 2)
         {
             return 40;
         }
     }
-    return 60;
+    return 65;
 }
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -312,11 +312,12 @@ MFMailComposeViewControllerDelegate>
                 cell.contentLabel.text = birth;
             }
             
-            UIImageView *bgImageBG = [[UIImageView alloc] init];
-            bgImageBG.image = [UIImage imageNamed:@"line3"];
-            bgImageBG.backgroundColor = [UIColor clearColor];
-            cell.backgroundView = bgImageBG;
-            cell.backgroundColor = [UIColor whiteColor];
+            CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+            UIImageView *lineImageView = [[UIImageView alloc] init];
+            lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            [cell.contentView addSubview:lineImageView];
+            cell.contentView.backgroundColor = [UIColor whiteColor];
         }
         else
         {
@@ -356,7 +357,6 @@ MFMailComposeViewControllerDelegate>
             }
             
             [cell.button2 addTarget:self action:@selector(toChat) forControlEvents:UIControlEventTouchUpInside];
-            cell.selectionStyle = UITableViewCellSelectionStyleNone;
         }
     }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
@@ -640,12 +640,13 @@ MFMailComposeViewControllerDelegate>
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
                                                                       @"other_id":personID
+//                                                                      @"other_id":@"NTM4NjhmYTMzNGRhYjVhZTFjOGI0NThm"
                                                                       } API:MB_GETUSERINFO];
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"memberinfo responsedict %@",responseDict);
+            DDLOG(@"memberinfo responsedict %@",responseString);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 NSDictionary *dict = [responseDict objectForKey:@"data"];

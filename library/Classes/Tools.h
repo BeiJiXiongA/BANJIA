@@ -24,6 +24,7 @@
 + (void) fillImageView:(UIImageView *)imageView withImageFromURL:(NSString*)URL andDefault:(NSString *)defaultName;
 + (void) fillImageView:(UIImageView *)imageView withImageFromURL:(NSString*)URL imageWidth:(CGFloat)imageWidth andDefault:(NSString *)defaultName;
 +(BOOL)isPhoneNumber:(NSString *)numStr;
++(BOOL)isStudentsNumber:(NSString *)numStr;
 +(BOOL)isMailAddress:(NSString *)mailStr;
 +(BOOL)isPassWord:(NSString *)passStr;
 +(BOOL)islogin;
@@ -70,6 +71,7 @@
 #pragma mark - aboutTime
 +(NSString *)showTime:(NSString *)time;
 +(NSString *)showTimeOfToday:(NSString *)time;
++(NSString *)showTime:(NSString *)time andFromat:(NSString *)timeFormat;
 
 #pragma mark - getimageFromView
 +(UIImage*)convertViewToImage:(UIView*)v;

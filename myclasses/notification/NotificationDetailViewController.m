@@ -14,6 +14,8 @@
 #import "ParentsDetailViewController.h"
 #import "MemberDetailViewController.h"
 #import "ReportViewController.h"
+#import "ScoreMemListViewController.h"
+#import "ScoreDetailViewController.h"
 
 #define UnreadTabelTag 2000
 #define ReadTableTag  3000
@@ -49,6 +51,7 @@ UIActionSheetDelegate>
     
     UIButton *moreButton;
     
+    NSString *scoreId;
 }
 @end
 
@@ -69,7 +72,7 @@ UIActionSheetDelegate>
 	// Do any additional setup after loading the view.
     
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
-    
+    scoreId = @"";
     
     moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
     moreButton.frame = CGRectMake(SCREEN_WIDTH-CORNERMORERIGHT, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
@@ -81,15 +84,20 @@ UIActionSheetDelegate>
     readArray = [[NSMutableArray alloc] initWithCapacity:0];
     unreaderArray = [[NSMutableArray alloc] initWithCapacity:0];
     
-    UIImageView *inputBg = [[UIImageView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, 155)];
+    UIView *inputBg = [[UIView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, 155)];
     inputBg.backgroundColor = [UIColor whiteColor];
     [self.bgView addSubview:inputBg];
+    
+    NSRange range = [noticeContent rangeOfString:@"$!#"];
+    if (range.length > 0)
+    {
+        scoreId = [noticeContent substringToIndex:range.location];
+        noticeContent = [noticeContent substringFromIndex:range.location+range.length];
+    }
     
     contentTextView = [[UITextView alloc] initWithFrame:CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH-20, 115)];
     contentTextView.backgroundColor = [UIColor whiteColor];
     contentTextView.editable = NO;
-//    contentTextView.scrollEnabled = NO;
-//    contentTextView.contentInset = UIEdgeInsetsMake(10, 10, 18, 10);
     contentTextView.textColor = CONTENTCOLOR;
     contentTextView.font = [UIFont systemFontOfSize:16];
     contentTextView.text = noticeContent;
@@ -101,6 +109,16 @@ UIActionSheetDelegate>
     markLabel.textColor = TIMECOLOR;
     markLabel.font = [UIFont systemFontOfSize:12];
     [inputBg addSubview:markLabel];
+    
+    if ([scoreId length] > 0)
+    {
+        UIButton *scoreButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        scoreButton.frame = CGRectMake(SCREEN_WIDTH-90, markLabel.frame.origin.y, 80, 30);
+        [scoreButton setTitle:@"查看详情" forState:UIControlStateNormal];
+        [scoreButton setTitleColor:RGB(61, 197, 113, 1) forState:UIControlStateNormal];
+        [inputBg addSubview:scoreButton];
+        [scoreButton addTarget:self action:@selector(getScoreDetail) forControlEvents:UIControlEventTouchUpInside];
+    }
 
     
     if ([c_read integerValue] == 0)
@@ -184,6 +202,56 @@ UIActionSheetDelegate>
 {
     [self.navigationController popViewControllerAnimated:YES];
 }
+
+-(void)getScoreDetail
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"e_id":scoreId,
+                                                                      } API:SCOREDETAIL];
+        [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"score detail responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                
+                
+                NSArray *objectArray = [[responseDict objectForKey:@"data"] objectForKey:@"details"];
+                if ([[responseDict objectForKey:@"isTeacher"] integerValue] == 0)
+                {
+                    ScoreDetailViewController *scoreDetailViewController = [[ScoreDetailViewController alloc] init];
+                    scoreDetailViewController.scoreId = scoreId;
+                    scoreDetailViewController.testName = [[responseDict objectForKey:@"data"] objectForKey:@"name"];
+                    [self.navigationController pushViewController:scoreDetailViewController animated:YES];
+                }
+                else if([[responseDict objectForKey:@"isTeacher"] integerValue] == 1)
+                {
+                    ScoreMemListViewController *memlist = [[ScoreMemListViewController alloc] init];
+                    memlist.scoreid = scoreId;
+                    [memlist.memListArray addObjectsFromArray:objectArray];
+                    [self.navigationController pushViewController:memlist animated:YES];
+                }
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools hideProgress:self.bgView];
+        }];
+        [Tools showProgress:self.bgView];
+        [request startAsynchronous];
+    }
+}
+
 
 -(void)moreClick
 {
@@ -458,9 +526,12 @@ UIActionSheetDelegate>
         cell.contactButton.backgroundColor = [UIColor yellowColor];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
 
-        UIImage *inputImage = [UIImage imageNamed:@"line3"];
-        UIImageView *bgImageBG = [[UIImageView alloc] initWithImage:inputImage];
-        cell.backgroundView = bgImageBG;
+        CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+        UIImageView *lineImageView = [[UIImageView alloc] init];
+        lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+        [cell.contentView addSubview:lineImageView];
+        cell.contentView.backgroundColor = [UIColor whiteColor];
         return cell;
     }
     else if(tableView.tag == UnreadTabelTag)
@@ -501,9 +572,12 @@ UIActionSheetDelegate>
         [cell.contactButton addTarget:self action:@selector(callUser:) forControlEvents:UIControlEventTouchUpInside];
         cell.contactButton.tag = UnreadTabelTag+indexPath.row;
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        UIImage *inputImage = [UIImage imageNamed:@"line3"];
-        UIImageView *bgImageBG = [[UIImageView alloc] initWithImage:inputImage];
-        cell.backgroundView = bgImageBG;
+        CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+        UIImageView *lineImageView = [[UIImageView alloc] init];
+        lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+        [cell.contentView addSubview:lineImageView];
+        cell.contentView.backgroundColor = [UIColor whiteColor];
         return cell;
     }
     return nil;
@@ -632,29 +706,27 @@ UIActionSheetDelegate>
                 if ([[[responseDict objectForKey:@"data"] objectForKey:@"unread_list"] count]>0)
                 {
                     [unreaderArray addObjectsFromArray:[[[responseDict objectForKey:@"data"] objectForKey:@"unread_list"] allValues]];
-//                    for (int i=0; i<[unreaderArray count]; ++i)
-//                    {
-//                        NSString *unReadID = [[unreaderArray objectAtIndex:i] objectForKey:@"_id"];
-//                        if ([unReadID isEqualToString:byID])
-//                        {
-//                            [unreaderArray removeObject:[unreaderArray objectAtIndex:i]];
-//                            break;
-//                        }
-//                    }
+                    for (int i = 0;i<[unreaderArray count];i++)
+                    {
+                        NSDictionary *dict = [unreaderArray objectAtIndex:i];
+                        if ([[dict objectForKey:@"role"] isEqualToString:@"unin_students"])
+                        {
+                            [unreaderArray removeObject:dict];
+                        }
+                    }
                     [unreadTableView reloadData];
                 }
                 if ([[[responseDict objectForKey:@"data"] objectForKey:@"read_list"] count]>0)
                 {
                     [readArray addObjectsFromArray:[[[responseDict objectForKey:@"data"] objectForKey:@"read_list"] allValues]];
-//                    for (int i=0; i<[readArray count]; ++i)
-//                    {
-//                        NSString *unReadID = [[readArray objectAtIndex:i] objectForKey:@"_id"];
-//                        if ([unReadID isEqualToString:byID])
-//                        {
-//                            [readArray removeObject:[readArray objectAtIndex:i]];
-//                            break;
-//                        }
-//                    }
+                    for (int i = 0;i<[readArray count];i++)
+                    {
+                        NSDictionary *dict = [readArray objectAtIndex:i];
+                        if ([[dict objectForKey:@"role"] isEqualToString:@"unin_students"])
+                        {
+                            [readArray removeObject:dict];
+                        }
+                    }
                     [readedTableView reloadData];
                 }
                 if (![[[responseDict objectForKey:@"data"] objectForKey:@"read_num"] isEqual:[NSNull null]])

@@ -63,12 +63,11 @@
 {
     [super viewDidLoad];
     
-    
 //    [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleBlackTranslucent;
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(postlogOut) name:@"logout" object:nil];
+    DDLOG(@"screenheight %.1f==%.1f",SCREEN_HEIGHT,[UIScreen mainScreen].bounds.size.height);
     
-    DDLOG(@"UI_SCREEN_HEIGHT %f",UI_SCREEN_HEIGHT);
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(postlogOut) name:@"logout" object:nil];
     
     _bgView = [[UIView alloc] initWithFrame:CGRectMake(0, 0,
                                                        UI_SCREEN_WIDTH,
@@ -125,18 +124,6 @@
     _bgView.backgroundColor = UIColorFromRGB(0xf1f0ec);
     [self.view addSubview:_bgView];
     
-//    _stateView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 20)];
-//    _stateView.backgroundColor = [UIColor whiteColor];
-//    if (SYSVERSION >= 7.0)
-//    {
-//        [self.view addSubview:_stateView];
-//    }
-    
-//    if ([[[NSUserDefaults standardUserDefaults] objectForKey:FROMWHERE] isEqualToString:FROMCLASS])
-//    {
-//        self.view.backgroundColor = [UIColor blackColor];
-//        self.stateView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-//    }
 }
 
 -(void)viewWillAppear:(BOOL)animated

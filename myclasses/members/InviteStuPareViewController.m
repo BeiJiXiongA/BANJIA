@@ -123,12 +123,13 @@
     parentTextField = [[UITextField alloc] initWithFrame:CGRectMake(parentButton.frame.size.width+parentButton.frame.origin.x+20 , parentButton.frame.origin.y, 100, 42)];
     parentTextField.enabled = NO;
     parentTextField.hidden = YES;
+    parentTextField.textColor = TITLE_COLOR;
     parentTextField.placeholder = @"输入";
     parentTextField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
     parentTextField.delegate = self;
     parentTextField.backgroundColor = [UIColor whiteColor];
     parentTextField.textAlignment = NSTextAlignmentCenter;
-    parentTextField.font = [UIFont systemFontOfSize:15];
+    parentTextField.font = [UIFont systemFontOfSize:16];
     [self.bgView addSubview:parentTextField];
     parentTextField.clipsToBounds = YES;
     parentTextField.layer.cornerRadius = 5;
@@ -145,6 +146,7 @@
     inviteWayTableview.tag = InviteWayTag;
     inviteWayTableview.delegate = self;
     inviteWayTableview.dataSource = self;
+    inviteWayTableview.backgroundColor = self.bgView.backgroundColor;
     [self.bgView addSubview:inviteWayTableview];
     
     [self.bgView addSubview:parentsTableView];
@@ -168,12 +170,14 @@
         
         [UIView animateWithDuration:0.2 animations:^{
             parentsTableView.frame = CGRectMake(27, parentsTableView.frame.origin.y, tipLabel.frame.size.width, [parentArray count]*42);
+            [arrowImageView setImage:[UIImage imageNamed:@"arrow_up"]];
         }];
     }
     else
     {
         [UIView animateWithDuration:0.2 animations:^{
             parentsTableView.frame = CGRectMake(27, parentsTableView.frame.origin.y, tipLabel.frame.size.width, 0);
+            [arrowImageView setImage:[UIImage imageNamed:@"arrow_down"]];
         }];
     }
     open = !open;
@@ -234,6 +238,14 @@
         {
             cell = [[ClassCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:parentcell];
         }
+        
+        CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+        UIImageView *lineImageView = [[UIImageView alloc] init];
+        lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+        [cell.contentView addSubview:lineImageView];
+        cell.contentView.backgroundColor = [UIColor whiteColor];
+        
         cell.nameLabel.text = [parentArray objectAtIndex:indexPath.row];
         cell.nameLabel.frame = CGRectMake(20, 6, 150, 30);
         return cell;
@@ -266,7 +278,20 @@
         cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"discovery_arrow"]];
         [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 15, 10, 15)];
         
-        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        cell.selectionStyle = UITableViewCellSelectionStyleGray;
+        
+        CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+        UIImageView *lineImageView = [[UIImageView alloc] init];
+        lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+        [cell.contentView addSubview:lineImageView];
+        cell.contentView.backgroundColor = [UIColor whiteColor];
+        
+        if (indexPath.row < [tableView numberOfRowsInSection:indexPath.section]-1)
+        {
+            lineImageView.frame = CGRectMake(60, cellHeight-0.5, cell.frame.size.width, 0.5);
+        }
+        
         return cell;
     }
     return nil;
@@ -280,7 +305,6 @@
         if (indexPath.row == [parentArray count]-1)
         {
             parentLabel.text = [NSString stringWithFormat:@"    %@",[parentArray objectAtIndex:indexPath.row]];
-            parentLabel.text = nil;
             parentTextField.enabled = YES;
             parentTextField.hidden = NO;
             [parentTextField becomeFirstResponder];
@@ -321,7 +345,7 @@
 #pragma  mark - showmsg
 -(void)showMessageView
 {
-    if ([parentLabel.text length]<=0 && [parentTextField.text length] <=0)
+    if ([parentLabel.text length]<=0 && ![parentLabel.text isEqualToString:@"其他"] && [parentTextField.text length] <=0)
     {
         [Tools showAlertView:@"请先确定孩子和家长的关系" delegateViewController:nil];
         return;
@@ -438,7 +462,7 @@
                                        defaultContent:@""
                                                 image:nil
                                                 title:@"班家"
-                                                  url:@"http://www.banjiaedu.com"
+                                                  url:ShareUrl
                                           description:nil
                                             mediaType:SSPublishContentMediaTypeNews];
     
@@ -519,7 +543,7 @@
                                 defaultContent:nil
                                          image:nil
                                          title:NSLocalizedString(@"班家", @"这是App消息")
-                                           url:@"http://www.banjiaedu.com"
+                                           url:ShareUrl
                                    description:inviteBody
                                      mediaType:SSPublishContentMediaTypeApp];
     [content addWeixinSessionUnitWithType:INHERIT_VALUE

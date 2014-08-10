@@ -29,6 +29,7 @@
 #import "NSString+Emojize.h"
 
 #import "ApplyInfoViewController.h"
+#import "MessageViewController.h"
 
 //Õı»
 #define NewVersionTag  1000
@@ -46,7 +47,7 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for cupstomization after application launch.
     
-    [[NSUserDefaults standardUserDefaults] setObject:@"0019" forKey:@"currentVersion"];
+    [[NSUserDefaults standardUserDefaults] setObject:@"0006" forKey:@"currentVersion"];
     [[NSUserDefaults standardUserDefaults] setObject:SCHEMERELEASE forKey:SCHEMETYPE];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
@@ -54,43 +55,11 @@
     
     _db = [[OperatDB alloc] init];
     
+//    [self initialize];
+    
+    [self undateDatabase];
+    
     [APService setAlias:[APService registrionID] callbackSelector:nil object:nil];
-    
-    NSArray *array = [_db findSetWithDictionary:@{} andTableName:CLASSMEMBERTABLE];
-    NSDictionary *dict = [array firstObject];
-    if (![[dict allKeys] containsObject:@"admin"])
-    {
-        [_db alterTableAdd:@"admin" charLength:8 defaultValue:@"0" andTableName:CLASSMEMBERTABLE];
-    }
-    
-    NSArray *array2 = [_db findSetWithDictionary:@{} andTableName:CLASSMEMBERTABLE];
-    NSDictionary *dict2 = [array2 firstObject];
-    if (![[dict2 allKeys] containsObject:@"jianpin"])
-    {
-        [_db alterTableAdd:@"jianpin" charLength:8 defaultValue:@"" andTableName:CLASSMEMBERTABLE];
-        [_db alterTableAdd:@"quanpin" charLength:8 defaultValue:@"" andTableName:CLASSMEMBERTABLE];
-    }
-    
-    NSArray *array3 = [_db findSetWithDictionary:@{} andTableName:CHATTABLE];
-    NSDictionary *dict3 = [array3 firstObject];
-    if (![[dict3 allKeys] containsObject:@"by"])
-    {
-        [_db alterTableAdd:@"by" charLength:8 defaultValue:@"" andTableName:CHATTABLE];
-    }
-    
-    NSArray *array4 = [_db findSetWithDictionary:@{} andTableName:USERICONTABLE];
-    NSDictionary *dict4 = [array4 firstObject];
-    if (![[dict4 allKeys] containsObject:@"by"])
-    {
-        [_db alterTableAdd:@"username" charLength:8 defaultValue:@"" andTableName:USERICONTABLE];
-    }
-    
-    NSArray *array5 = [_db findSetWithDictionary:@{} andTableName:FRIENDSTABLE];
-    NSDictionary *dict5 = [array5 firstObject];
-    if (![[dict5 allKeys] containsObject:@"cgroup"])
-    {
-        [_db alterTableAdd:@"cgroup" charLength:8 defaultValue:@"" andTableName:USERICONTABLE];
-    }
     
     if ([[_db findSetWithDictionary:@{} andTableName:CITYTABLE] count] <= 0)
     {
@@ -138,6 +107,8 @@
     {
         if ([[Tools user_name] length] <= 0 || [[Tools user_name] isEqualToString:ANONYMITY])
         {
+            [[UIApplication sharedApplication] cancelAllLocalNotifications];
+            [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
             FillInfo2ViewController *fillInfoVC = [[FillInfo2ViewController alloc] init];
             fillInfoVC.fromRoot = YES;
             KKNavigationController *fillNav = [[KKNavigationController alloc] initWithRootViewController:fillInfoVC];
@@ -150,9 +121,9 @@
             SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
             HomeViewController *homeViewController = [[HomeViewController alloc] init];
             KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:homeViewController];
+            [sideMenuViewController.buttonTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:2 inSection:0] animated:YES scrollPosition:UITableViewScrollPositionNone];
             JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:homeNav menuController:sideMenuViewController];
             self.window.rootViewController = sideMenu;
-            
         }
     }
     else
@@ -160,6 +131,8 @@
         WelcomeViewController *welcomeViewCOntroller = [[WelcomeViewController alloc]init];
         KKNavigationController *welNav = [[KKNavigationController alloc] initWithRootViewController:welcomeViewCOntroller];
         self.window.rootViewController = welNav;
+        [[UIApplication sharedApplication] cancelAllLocalNotifications];
+        [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
     }
     
     DDLOG(@"uinavigation bar height %d",UI_NAVIGATION_BAR_HEIGHT);
@@ -174,9 +147,99 @@
     
     [APService setupWithOption:launchOptions];
     
+//    [self 你哈];
+    
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
     return YES;
+}
+
+-(void)initialize
+{
+    NSDictionary *dictionnary = [[NSDictionary alloc] initWithObjectsAndKeys:@"laallalalal", @"UserAgent", nil];
+    [[NSUserDefaults standardUserDefaults] registerDefaults:dictionnary];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+//typedef void 空;
+//typedef NSString 字符串;
+//-(空)你哈
+//{
+//    字符串 *好哈 = @"=============就安静安静";
+//    DDLOG(@"%@",好哈);
+//}
+
+
+-(void)undateDatabase
+{
+    NSArray *array = [_db findSetWithDictionary:@{} andTableName:CLASSMEMBERTABLE];
+    NSDictionary *dict = [array firstObject];
+    if (![[dict allKeys] containsObject:@"admin"])
+    {
+        [_db alterTableAdd:@"admin" charLength:8 defaultValue:@"0" andTableName:CLASSMEMBERTABLE];
+    }
+    
+    NSArray *array2 = [_db findSetWithDictionary:@{} andTableName:CLASSMEMBERTABLE];
+    NSDictionary *dict2 = [array2 firstObject];
+    if (![[dict2 allKeys] containsObject:@"jianpin"])
+    {
+        [_db alterTableAdd:@"jianpin" charLength:8 defaultValue:@"" andTableName:CLASSMEMBERTABLE];
+        [_db alterTableAdd:@"quanpin" charLength:8 defaultValue:@"" andTableName:CLASSMEMBERTABLE];
+    }
+    
+    NSArray *array3 = [_db findSetWithDictionary:@{} andTableName:CHATTABLE];
+    NSDictionary *dict3 = [array3 firstObject];
+    if (![[dict3 allKeys] containsObject:@"by"])
+    {
+        [_db alterTableAdd:@"by" charLength:8 defaultValue:@"" andTableName:CHATTABLE];
+    }
+    
+    NSArray *array4 = [_db findSetWithDictionary:@{} andTableName:USERICONTABLE];
+    NSDictionary *dict4 = [array4 firstObject];
+    if (![[dict4 allKeys] containsObject:@"by"])
+    {
+        [_db alterTableAdd:@"username" charLength:8 defaultValue:@"" andTableName:USERICONTABLE];
+    }
+    
+    NSArray *array5 = [_db findSetWithDictionary:@{} andTableName:FRIENDSTABLE];
+    NSDictionary *dict5 = [array5 firstObject];
+    if (![[dict5 allKeys] containsObject:@"cgroup"])
+    {
+        [_db alterTableAdd:@"cgroup" charLength:8 defaultValue:@"" andTableName:FRIENDSTABLE];
+    }
+    
+    NSArray *array6 = [_db findSetWithDictionary:@{} andTableName:CLASSMEMBERTABLE];
+    NSDictionary *dict6 = [array6 firstObject];
+    if (![[dict6 allKeys] containsObject:@"sn"])
+    {
+        [_db alterTableAdd:@"sn" charLength:20 defaultValue:@"" andTableName:CLASSMEMBERTABLE];
+    }
+    
+    NSArray *array7 = [_db findSetWithDictionary:@{} andTableName:CLASSMEMBERTABLE];
+    NSDictionary *dict7 = [array7 firstObject];
+    if (![[dict7 allKeys] containsObject:@"sex"])
+    {
+        [_db alterTableAdd:@"sex" charLength:6 defaultValue:@"" andTableName:CLASSMEMBERTABLE];
+    }
+    NSArray *array8 = [_db findSetWithDictionary:@{} andTableName:CLASSMEMBERTABLE];
+    NSDictionary *dict8 = [array8 firstObject];
+    if (![[dict8 allKeys] containsObject:@"cb_id"])
+    {
+        [_db alterTableAdd:@"cb_id" charLength:6 defaultValue:@"" andTableName:CLASSMEMBERTABLE];
+    }
+    
+    NSArray *array9 = [_db findSetWithDictionary:@{} andTableName:CHATTABLE];
+    NSDictionary *dict9 = [array9 firstObject];
+    if (![[dict9 allKeys] containsObject:@"byname"])
+    {
+        [_db alterTableAdd:@"byname" charLength:8 defaultValue:@"" andTableName:CHATTABLE];
+    }
+    NSArray *array10 = [_db findSetWithDictionary:@{} andTableName:CLASSMEMBERTABLE];
+    NSDictionary *dict10 = [array10 firstObject];
+    if (![[dict10 allKeys] containsObject:@"re_sn"])
+    {
+        [_db alterTableAdd:@"re_sn" charLength:8 defaultValue:@"" andTableName:CLASSMEMBERTABLE];
+    }
 }
 
 -(void)getNewVersion
@@ -369,7 +432,7 @@
 //    [[NSUserDefaults standardUserDefaults] synchronize];
 //    if (![[NSUserDefaults standardUserDefaults] objectForKey:@"receive"])
 //    {
-        [Tools showAlertView:@"你还不能收到推送的消息，不能及时收到班级通知，也不能正常聊天，您可以到系统设置里打开限制！" delegateViewController:nil];
+//        [Tools showAlertView:@"你还不能收到推送的消息，不能及时收到班级通知，也不能正常聊天，您可以到系统设置里打开限制！" delegateViewController:nil];
 //    }
 }
 
@@ -418,7 +481,7 @@
             [chatDict setObject:@"text" forKey:@"msgType"];
             [chatDict setObject:[Tools user_id] forKey:@"tid"];
             [chatDict setObject:@"0" forKey:@"readed"];
-            
+            [chatDict setObject:[userInfo objectForKey:@"f_name"] forKey:@"byname"];
             NSString *ficon = @"";
             [chatDict setObject:ficon forKey:@"ficon"];
 //            [chatDict setObject:fname forKey:@"fname"];
@@ -461,7 +524,13 @@
                     {
                         [self.chatDelegate dealNewChatMsg:chatDict];
                     }
-                    [[NSNotificationCenter defaultCenter] postNotificationName:@"receivenewmsg" object:nil];
+                    if (!([[NSUserDefaults standardUserDefaults] objectForKey:@"viewtype"] &&
+                          [[[NSUserDefaults standardUserDefaults] objectForKey:@"viewtype"] isEqualToString:@"chat"]))
+                    {
+                        [Tools showAlertView:[[userInfo objectForKey:@"aps"] objectForKey:@"alert"] delegateViewController:nil];
+                    }
+                    
+                    [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVENEWMSG object:nil];
                 }
             }
         }
@@ -489,6 +558,8 @@
                     [self.msgDelegate dealNewMsg:userInfo];
                 }
             }
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
         }
         else if ([[userInfo objectForKey:@"type"] isEqualToString:@"notice"])
         {
@@ -511,7 +582,9 @@
                     AudioServicesPlaySystemSound (soundID);
                 }
             }
+            
             [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVENEWNOTICE object:nil];
+            [Tools showAlertView:[[userInfo objectForKey:@"aps"] objectForKey:@"alert"] delegateViewController:nil];
             //            [self getClassInfo:userInfo];
         }
         else if([[userInfo objectForKey:@"type"] isEqualToString:@"f_apply"])

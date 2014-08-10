@@ -48,7 +48,9 @@ UITextFieldDelegate,
 CLLocationManagerDelegate,
 ASIProgressDelegate,
 UIActionSheetDelegate,
-SelectClasses
+SelectClasses,
+UINavigationControllerDelegate,
+UIImagePickerControllerDelegate
 >
 {
     AGImagePickerController *imagePickerController;
@@ -249,6 +251,7 @@ int count = 0;
     sysImagePickerController.delegate = self;
     
     imagePickerController = [[AGImagePickerController alloc] initWithDelegate:self];
+    imagePickerController.shouldShowSavedPhotosOnTop = YES;
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:YES];
     
     [self.backButton addTarget:self action:@selector(mybackClick) forControlEvents:UIControlEventTouchUpInside];
@@ -498,6 +501,7 @@ int count = 0;
     }
     DDLOG(@"image direction %d",originalImage.imageOrientation);
     originalImage = [Tools thumbnailWithImageWithoutScale:originalImage size:CGSizeMake(imageWidth, imageHeight)];
+    
     return originalImage;
 }
 
@@ -806,16 +810,16 @@ int count = 0;
             [request setPostValue:[NSString stringWithFormat:@"%f",latitude] forKey:@"lat"];
             [request setPostValue:[NSString stringWithFormat:@"%f",longitude] forKey:@"lng"];
         }
-        long total = 0.0f;
+        
         for (int i=0; i<[normalPhotosArray count]; ++i)
         {
             UIImage *image = [normalPhotosArray objectAtIndex:i];
             DDLOG(@"image size = %@",NSStringFromCGSize(image.size));
-            DDLOG(@"size======%ld",total);
-            NSData *imageData = UIImagePNGRepresentation(image);
-            total += [imageData length];
             
-            [request addData:imageData withFileName:[NSString stringWithFormat:@"%d.png",i+1] andContentType:@"image/png" forKey:[NSString stringWithFormat:@"file%d",i+1]];
+            NSData *imageData = UIImageJPEGRepresentation(image, 0.8f);
+            DDLOG(@"size======%d",[imageData length]);
+            
+            [request addData:imageData withFileName:[NSString stringWithFormat:@"%d.jpeg",i+1] andContentType:@"image/jpeg" forKey:[NSString stringWithFormat:@"file%d",i+1]];
         }
         [request setCompletionBlock:^{
             NSString *responseString = [request responseString];
@@ -1013,6 +1017,7 @@ int count = 0;
     imagePickerController.shouldShowSavedPhotosOnTop = NO;
     imagePickerController.shouldChangeStatusBarStyle = YES;
     imagePickerController.toolbarItemsForManagingTheSelection = @[];
+    imagePickerController.maximumNumberOfPhotosToBeSelected = 12 - [normalPhotosArray count];
     isSelectPhoto = YES;
     [self presentViewController:imagePickerController animated:YES completion:^{
         

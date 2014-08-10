@@ -61,6 +61,7 @@
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getGroupChatList) name:UPDATEGROUPCHATLIST object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getGroupChatList) name:RECEIVENEWMSG object:nil];
     
     UIButton *addButton = [UIButton buttonWithType:UIButtonTypeCustom];
     addButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);

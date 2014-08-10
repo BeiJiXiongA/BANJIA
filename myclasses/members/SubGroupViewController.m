@@ -69,6 +69,11 @@ updateGroupInfoDelegate>
     [self.navigationController popViewControllerAnimated:YES];
 }
 
+-(void)updateGroupInfo:(BOOL)update
+{
+    
+}
+
 #pragma mark - tableview
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
@@ -118,11 +123,13 @@ updateGroupInfoDelegate>
         cell.button2.tag = indexPath.row+1000;
         [cell.button2 addTarget:self action:@selector(refuseFriend:) forControlEvents:UIControlEventTouchUpInside];
 
-        UIImageView *bgImageBG = [[UIImageView alloc] init];
-        bgImageBG.image = [UIImage imageNamed:@"cell_bg"];
-        cell.backgroundView = bgImageBG;
-        cell.selectionStyle = UITableViewCellSelectionStyleNone;
-
+        CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+        UIImageView *lineImageView = [[UIImageView alloc] init];
+        lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+        [cell.contentView addSubview:lineImageView];
+        cell.contentView.backgroundColor = [UIColor whiteColor];
+        cell.selectionStyle = UITableViewCellSelectionStyleGray;
         return cell;
     }
     else if([titleString isEqualToString:@"群聊"])
@@ -137,6 +144,14 @@ updateGroupInfoDelegate>
         cell.memNameLabel.text = [dict objectForKey:@"fname"];
         cell.memNameLabel.frame = CGRectMake(70, 15, 220, 30);
         [cell.headerImageView setImage:[UIImage imageNamed:@"newapplyheader"]];
+        
+        CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+        UIImageView *lineImageView = [[UIImageView alloc] init];
+        lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+        [cell.contentView addSubview:lineImageView];
+        cell.contentView.backgroundColor = [UIColor whiteColor];
+        cell.selectionStyle = UITableViewCellSelectionStyleGray;
         return cell;
     }
     else
@@ -176,17 +191,17 @@ updateGroupInfoDelegate>
             }
             
         }
-        cell.headerImageView.layer.cornerRadius = cell.headerImageView.frame.size.width/2;
+        cell.headerImageView.layer.cornerRadius = 5;
         cell.headerImageView.clipsToBounds = YES;
         [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERICON];
-        cell.selectionStyle = UITableViewCellSelectionStyleGray;
-        cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_angle"]];
-        [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 20, 10, 16)];
         
-        UIImageView *bgImageBG = [[UIImageView alloc] init];
-        bgImageBG.image = [UIImage imageNamed:@"line3"];
-        bgImageBG.backgroundColor = [UIColor clearColor];
-        cell.backgroundView = bgImageBG;
+        CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+        UIImageView *lineImageView = [[UIImageView alloc] init];
+        lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+        [cell.contentView addSubview:lineImageView];
+        cell.contentView.backgroundColor = [UIColor whiteColor];
+        cell.selectionStyle = UITableViewCellSelectionStyleGray;
         return cell;
     }
     return nil;
@@ -199,7 +214,14 @@ updateGroupInfoDelegate>
         ApplyInfoViewController *applyInfoViewController = [[ApplyInfoViewController alloc] init];
         applyInfoViewController.role = [dict objectForKey:@"role"];
         applyInfoViewController.j_id = [dict objectForKey:@"uid"];
-        applyInfoViewController.title = [dict objectForKey:@"title"];
+        if (![[dict objectForKey:@"title"] isEqual:[NSNull null]])
+        {
+            applyInfoViewController.title = [dict objectForKey:@"title"];
+        }
+        else
+        {
+            applyInfoViewController.title = @"";
+        }
         applyInfoViewController.applyName = [dict objectForKey:@"name"];
         [self.navigationController pushViewController:applyInfoViewController animated:YES];
     }

@@ -84,6 +84,8 @@ ChatVCDelegate>
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:NewChatMsgNum];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
+    db = [[OperatDB alloc] init];
+    
     edittingTableView = NO;
     editButton = [UIButton buttonWithType:UIButtonTypeCustom];
     editButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
@@ -92,9 +94,6 @@ ChatVCDelegate>
     [editButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [editButton addTarget:self action:@selector(editTableView) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:editButton];
-
-    
-    db = [[OperatDB alloc] init];
     
     [self.backButton setHidden:YES];
     
@@ -128,7 +127,7 @@ ChatVCDelegate>
     tipLabel.hidden = YES;
     [friendsListTableView addSubview:tipLabel];
     
-    [self manageChatList];
+    [self getChatList];
 }
 
 -(void)viewWillAppear:(BOOL)animated
@@ -137,7 +136,6 @@ ChatVCDelegate>
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).ChatDelegate = self;
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = self;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dealNewChatMsg:) name:RECEIVENEWMSG object:nil];
-    
     
     [self dealNewChatMsg:nil];
     [self dealNewMsg:nil];
@@ -181,11 +179,15 @@ ChatVCDelegate>
                     {
                         [tmpDict setObject:[dict objectForKey:@"tid"] forKey:@"fid"];
                         [tmpDict setObject:[dict objectForKey:@"r_name"] forKey:@"fname"];
+                        [tmpDict setObject:[Tools user_id] forKey:@"tid"];
+                        [tmpDict setObject:[Tools user_id] forKey:@"userid"];
                         
                         NSDictionary *msgDict = [dict objectForKey:@"l_n"];
                         [tmpDict setObject:[msgDict objectForKey:@"msg"] forKey:@"content"];
                         [tmpDict setObject:[msgDict objectForKey:@"t"] forKey:@"time"];
                         [tmpDict setObject:[msgDict objectForKey:@"_id"] forKey:@"mid"];
+                        [tmpDict setObject:@"f" forKey:@"direct"];
+                        [tmpDict setObject:@"0" forKey:@"readed"];
                         if([[dict objectForKey:@"cgroup"] integerValue] == 1)
                         {
                             
@@ -213,8 +215,8 @@ ChatVCDelegate>
                             }
                         }
                     }
-                    [self dealNewChatMsg:nil];
                 }
+                [self dealNewChatMsg:nil];
                 _reloading = NO;
                 [pullRefreshView egoRefreshScrollViewDataSourceDidFinishedLoading:friendsListTableView];
             }
@@ -266,6 +268,7 @@ ChatVCDelegate>
     [newMessageArray removeAllObjects];
     [newMessageArray addObjectsFromArray:[db findChatUseridWithTableName:CHATTABLE]];
     [friendsListTableView reloadData];
+    DDLOG(@"new msg array %@",newMessageArray);
     if ([newMessageArray count] > 0)
     {
         editButton.hidden = NO;
@@ -385,19 +388,31 @@ ChatVCDelegate>
     {
         cell = [[MemberCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:chatCell];
     }
-    NSDictionary *dict = [newMessageArray objectAtIndex:indexPath.row];
+    CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+    UIImageView *lineImageView = [[UIImageView alloc] init];
+    lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+    lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+    [cell.contentView addSubview:lineImageView];
+    cell.contentView.backgroundColor = [UIColor whiteColor];
+    if (indexPath.row < [tableView numberOfRowsInSection:indexPath.section]-1)
+    {
+        lineImageView.frame = CGRectMake( 70, cellHeight-0.5, cell.frame.size.width, 0.5);
+    }
+    
+//    NSDictionary *dict = [newMessageArray objectAtIndex:indexPath.row];
+    NSString *otherid = [[[newMessageArray objectAtIndex:indexPath.row] allValues] firstObject];
     cell.headerImageView.frame = CGRectMake(10, 7, 46, 46);
     cell.headerImageView.layer.cornerRadius = 5;
     cell.headerImageView.clipsToBounds = YES;
     
     cell.memNameLabel.frame = CGRectMake(70, 7, 190, 20);
-    cell.memNameLabel.textColor = [UIColor blackColor];
-    cell.memNameLabel.font = [UIFont boldSystemFontOfSize:16];
+    cell.memNameLabel.textColor = TITLE_COLOR;
+    cell.memNameLabel.font = [UIFont systemFontOfSize:16];
     cell.unreadedMsgLabel.hidden = YES;
     
    
     
-    int unreadMsgCount = [self findCountOfUserId:[dict objectForKey:@"fid"]];
+    int unreadMsgCount = [self findCountOfUserId:otherid];
     if (unreadMsgCount > 0)
     {
         cell.unreadedMsgLabel.text = [NSString stringWithFormat:@"%d",unreadMsgCount];
@@ -410,46 +425,53 @@ ChatVCDelegate>
         cell.unreadedMsgLabel.hidden = YES;
     }
     
-    NSDictionary *lastMsgDict = [self findLastMsgWithUser:[dict objectForKey:@"fid"]];
+    NSDictionary *lastMsgDict = [self findLastMsgWithUser:otherid];
     
-    if ([[dict objectForKey:@"fid"] isEqualToString:OurTeamID])
+    NSDictionary *userIconDIct = [ImageTools iconDictWithUserID:otherid];
+    DDLOG(@"%@==%@",otherid,[userIconDIct objectForKey:@"username"]);
+    if(userIconDIct)
     {
-        [Tools fillImageView:cell.headerImageView withImageFromURL:OurTeamHeader andDefault:HEADERICON];
-    }
-    else
-    {
-        NSDictionary *userIconDIct = [ImageTools iconDictWithUserID:[dict objectForKey:@"fid"]];
-        if(userIconDIct)
+        [Tools fillImageView:cell.headerImageView withImageFromURL:[userIconDIct objectForKey:@"uicon"] andDefault:HEADERICON];
+        cell.memNameLabel.text = [userIconDIct objectForKey:@"username"];
+        
+        if (lastMsgDict)
         {
-            [Tools fillImageView:cell.headerImageView withImageFromURL:[userIconDIct objectForKey:@"uicon"] andDefault:HEADERICON];
-            cell.memNameLabel.text = [userIconDIct objectForKey:@"username"];
-            
-            
-            if (lastMsgDict)
+            cell.contentLabel.hidden = NO;
+            cell.contentLabel.font = [UIFont systemFontOfSize:14];
+            if (![[userIconDIct objectForKey:@"username"] isEqual:[NSNull null]] && [[userIconDIct objectForKey:@"username"] length] > 0  && [[userIconDIct objectForKey:@"username"] rangeOfString:@"人)"].length > 0)
             {
-                cell.contentLabel.hidden = NO;
-                cell.contentLabel.font = [UIFont systemFontOfSize:14];
-                if (![[userIconDIct objectForKey:@"username"] isEqual:[NSNull null]] && [[userIconDIct objectForKey:@"username"] length] > 0  && [[userIconDIct objectForKey:@"username"] rangeOfString:@"人)"].length > 0)
+                NSDictionary *userIconDict = [ImageTools iconDictWithUserID:[lastMsgDict objectForKey:@"by"]];
+                NSString *byName;
+                if (userIconDict)
                 {
-                    NSDictionary *userIconDict = [ImageTools iconDictWithUserID:[lastMsgDict objectForKey:@"by"]];
-                    NSString *byName;
-                    if (userIconDict)
-                    {
-                        byName = [userIconDict objectForKey:@"username"];
+                    byName = [userIconDict objectForKey:@"username"];
+                }
+                if ( !byName)
+                {
+                    if ([lastMsgDict objectForKey:@"byname"] && ![[lastMsgDict objectForKey:@"byname"] isEqual:[NSNull null]]) {
+                        byName = [lastMsgDict objectForKey:@"byname"];
                     }
-                    NSString *msgContent = [[lastMsgDict objectForKey:@"content"] emojizedString];
-                    if ([[msgContent pathExtension] isEqualToString:@"png"] || [[msgContent pathExtension] isEqualToString:@"jpg"])
-                    {
-                        cell.contentLabel.text = [NSString stringWithFormat:@"%@:%@",byName,@"图片"];
-                    }
-                    else
-                    {
-                        cell.contentLabel.text = [[NSString stringWithFormat:@"%@:%@",byName,[lastMsgDict objectForKey:@"content"]] emojizedString];
-                    }
+                }
+                NSString *msgContent = [[lastMsgDict objectForKey:@"content"] emojizedString];
+                if ([[msgContent pathExtension] isEqualToString:@"png"] || [[msgContent pathExtension] isEqualToString:@"jpg"])
+                {
+                    cell.contentLabel.text = [NSString stringWithFormat:@"%@:%@",byName,@"图片"];
                 }
                 else
                 {
-                    cell.contentLabel.text = [[lastMsgDict objectForKey:@"content"] emojizedString];
+                    cell.contentLabel.text = [[NSString stringWithFormat:@"%@:%@",byName,[lastMsgDict objectForKey:@"content"]] emojizedString];
+                }
+            }
+            else
+            {
+                NSString *msgContent = [[lastMsgDict objectForKey:@"content"] emojizedString];
+                if ([[msgContent pathExtension] isEqualToString:@"png"] || [[msgContent pathExtension] isEqualToString:@"jpg"])
+                {
+                    cell.contentLabel.text = [NSString stringWithFormat:@"%@",@"一张图片"];
+                }
+                else
+                {
+                    cell.contentLabel.text = [[NSString stringWithFormat:@"%@",[lastMsgDict objectForKey:@"content"]] emojizedString];
                 }
             }
         }
@@ -462,39 +484,27 @@ ChatVCDelegate>
         cell.contentLabel.text = [msgContent substringFromIndex:range.location+range.length];
     }
    
-    cell.remarkLabel.frame = CGRectMake(SCREEN_WIDTH-60, 7, 40, 15);
+    cell.remarkLabel.frame = CGRectMake(SCREEN_WIDTH-60, 7, 50, 25);
     cell.remarkLabel.font = [UIFont systemFontOfSize:10];
+    cell.remarkLabel.lineBreakMode = NSLineBreakByWordWrapping;
+    cell.remarkLabel.numberOfLines = 2;
     cell.remarkLabel.hidden = NO;
     cell.remarkLabel.text = [Tools showTime:[lastMsgDict objectForKey:@"time"]];
     
-    CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
-    UIImageView *lineImageView = [[UIImageView alloc] init];
-    lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-    lineImageView.image = [UIImage imageNamed:@"sepretorline"];
-    [cell.contentView addSubview:lineImageView];
-    cell.contentView.backgroundColor = [UIColor whiteColor];
     return cell;
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    NSDictionary *dict = [newMessageArray objectAtIndex:indexPath.row];
+    NSString *otherid = [[[newMessageArray objectAtIndex:indexPath.row] allValues] firstObject];
    
     ChatViewController *chat = [[ChatViewController alloc] init];
-    chat.toID = [dict objectForKey:@"fid"];
-    if ([chat.toID isEqualToString:OurTeamID])
-    {
-        chat.imageUrl = OurTeamHeader;
-    }
-    else
-    {
-        chat.imageUrl = [dict objectForKey:@"ficon"];
-    }
+    chat.toID = otherid;
     chat.chatVcDel = self;
     chat.fromClass = NO;
     
-    NSDictionary *userIconDIct = [ImageTools iconDictWithUserID:[dict objectForKey:@"fid"]];
+    NSDictionary *userIconDIct = [ImageTools iconDictWithUserID:otherid];
     if(userIconDIct)
     {
         if ([[userIconDIct objectForKey:@"username"] rangeOfString:@"人)"].length == 0)
@@ -506,6 +516,7 @@ ChatVCDelegate>
             chat.isGroup = YES;
         }
         chat.name = [userIconDIct objectForKey:@"username"];
+        chat.imageUrl = [userIconDIct objectForKey:@"uicon"];
     }
     
     [self.navigationController pushViewController:chat animated:YES];
@@ -535,12 +546,13 @@ ChatVCDelegate>
 
 -(void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSDictionary *dict = [newMessageArray objectAtIndex:indexPath.row];
+    NSString *otherid = [[[newMessageArray objectAtIndex:indexPath.row] allValues] firstObject];
 //    DDLOG(@"dict == %@",dict);
     
-    if ([db deleteRecordWithDict:@{@"userid":[Tools user_id],@"fid":[dict objectForKey:@"fid"]} andTableName:CHATTABLE])
+    if ([db deleteRecordWithDict:@{@"userid":[Tools user_id],@"fid":otherid,@"direct":@"f"} andTableName:CHATTABLE] &&
+        [db deleteRecordWithDict:@{@"userid":[Tools user_id],@"tid":otherid,@"direct":@"t"} andTableName:CHATTABLE])
     {
-        DDLOG(@"delete chat log of %@ success",[dict objectForKey:@"fname"]);
+        DDLOG(@"delete chat log  success");
     }
     [newMessageArray removeObjectAtIndex:indexPath.row];
     [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForItem:indexPath.row inSection:indexPath.section]] withRowAnimation:UITableViewRowAnimationFade];

@@ -21,6 +21,8 @@
     int columperrow;
     CGFloat headersize;
     
+    NSDictionary *waitDeleteDict;
+    
     UITapGestureRecognizer *imageTapTgr;
     
     OperatDB *db;
@@ -28,6 +30,7 @@
 @end
 
 #define EXITALTERTAG  1000
+#define DELETEALTERTAG 2000
 
 @implementation GroupInfoViewController
 @synthesize groupID,groupUsers,builderID,updateGroupInfoDel,g_r_a,g_a_f;
@@ -270,6 +273,16 @@
                 deleteButton.tag = i;
                 [deleteButton addTarget:self action:@selector(deleteClick:) forControlEvents:UIControlEventTouchUpInside];
             }
+            else if([[dict objectForKey:@"_id"] isEqualToString:builderID])
+            {
+                UIButton *deleteButton = [UIButton buttonWithType:UIButtonTypeCustom];
+                deleteButton.frame = CGRectMake(imageView.frame.origin.x+imageView.frame.size.width-15, imageView.frame.origin.y+imageView.frame.size.height-15, 20, 20);
+                deleteButton.backgroundColor = RGB(228, 211, 134, 1);
+                [deleteButton setImage:[UIImage imageNamed:@"builder"] forState:UIControlStateNormal];
+                deleteButton.layer.cornerRadius = 3;
+                deleteButton.clipsToBounds = YES;
+                [cell.contentView addSubview:deleteButton];
+            }
         }
         
         if ([cell respondsToSelector:@selector(setSeparatorInset:)])
@@ -443,9 +456,11 @@
 
 -(void)deleteClick:(UIButton *)button
 {
-    NSDictionary *dict = [groupUsers objectAtIndex:button.tag];
-    DDLOG(@"delete dict %@",dict);
-    [self deleteGroupUser:dict];
+    waitDeleteDict = [groupUsers objectAtIndex:button.tag];
+    DDLOG(@"delete dict %@",waitDeleteDict);
+    UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"" message:[NSString stringWithFormat:@"你确定要把[%@]从此群聊中移除吗？",[waitDeleteDict objectForKey:@"r_name"]] delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
+    al.tag = DELETEALTERTAG;
+    [al show];
 }
 
 -(void)exitButtonClick
@@ -471,6 +486,13 @@
         if (buttonIndex == 1)
         {
             [self exitGroup];
+        }
+    }
+    else if(alertView.tag == DELETEALTERTAG)
+    {
+        if (buttonIndex == 1)
+        {
+            [self deleteGroupUser:waitDeleteDict];
         }
     }
 }
@@ -536,7 +558,11 @@
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 
-                [db deleteRecordWithDict:@{@"userid":[Tools user_id],@"fid":groupID} andTableName:CHATTABLE];
+                if ([db deleteRecordWithDict:@{@"userid":[Tools user_id],@"fid":groupID,@"direct":@"f"} andTableName:CHATTABLE] &&
+                    [db deleteRecordWithDict:@{@"userid":[Tools user_id],@"tid":groupID,@"direct":@"t"} andTableName:CHATTABLE])
+                {
+                    DDLOG(@"exit group success!");
+                }
                 [[NSNotificationCenter defaultCenter] postNotificationName:UPDATEGROUPCHATLIST object:nil];
                 NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
                 if([[ud objectForKey:FROMWHERE]isEqualToString:FROMCLASS])

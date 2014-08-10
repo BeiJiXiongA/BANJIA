@@ -12,4 +12,7 @@
 @property (nonatomic, strong) NSString *testName;
 @property (nonatomic, strong) NSString *pubName;
 @property (nonatomic, strong) NSString *pubTime;
+@property (nonatomic, strong) NSString *scoreId;
+@property (nonatomic, strong) NSArray *objectArray;
+@property (nonatomic, strong) NSString *stuName;
 @end

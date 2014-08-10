@@ -77,16 +77,7 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:a]
 
 #define NAV_RIGHT_BUTTON_HEIGHT   40
 
-
-#ifdef YSTART
-
-#define SCREEN_HEIGHT  (([[UIScreen mainScreen] bounds].size.height))
-
-#else
-
-#define SCREEN_HEIGHT  ([[UIScreen mainScreen] bounds].size.height)
-
-#endif
+#define SCREEN_HEIGHT  (SYSVERSION > 7.0 ? ([[UIScreen mainScreen] bounds].size.height):([[UIScreen mainScreen] bounds].size.height-20))
 
 #define Y_STARTPOINT (([[[UIDevice currentDevice] systemVersion] floatValue] < 7.0) ? 0.0f:64.0f)
 
@@ -95,7 +86,7 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:a]
 #define UI_TAB_BAR_HEIGHT               49
 #define UI_STATUS_BAR_HEIGHT            20
 #define UI_SCREEN_WIDTH                 ([[UIScreen mainScreen] bounds].size.width)
-#define UI_SCREEN_HEIGHT                ([[UIScreen mainScreen] bounds].size.height)
+#define UI_SCREEN_HEIGHT                (SYSVERSION > 7.0 ? ([[UIScreen mainScreen] bounds].size.height):([[UIScreen mainScreen] bounds].size.height-20))
 #define UI_MAINSCREEN_HEIGHT            (UI_SCREEN_HEIGHT - UI_STATUS_BAR_HEIGHT)
 #define UI_MAINSCREEN_HEIGHT_ROTATE     (UI_SCREEN_WIDTH - UI_STATUS_BAR_HEIGHT)
 #define UI_WHOLE_SCREEN_FRAME           CGRectMake(0, 0, UI_SCREEN_WIDTH, UI_SCREEN_HEIGHT)
@@ -240,11 +231,12 @@ return shared##className; \
 #define InviteClassMemberKey  @"item2"
 #define ShareContentKey    @"item1"
 
+
 #define ShareContent [[NSUserDefaults standardUserDefaults] objectForKey:ShareContentKey]
 #define InviteClassMember [[NSUserDefaults standardUserDefaults] objectForKey:InviteClassMemberKey]
 #define InviteParent [[NSUserDefaults standardUserDefaults] objectForKey:InviteParentKey]
 
-
+#define ShareUrl @"https://itunes.apple.com/cn/app/ban-jia/id862315597?mt=8&uo=4"
 #pragma mark - aboutimagesize
 #define MAXHEIGHT     640
 #define MAXWIDTH      640

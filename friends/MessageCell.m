@@ -100,6 +100,8 @@
     self.messageTf.editable = NO;
     self.messageTf.hidden = NO;
     self.messageTf.backgroundColor = [UIColor clearColor];
+    self.msgImageView.layer.cornerRadius = 3;
+    self.msgImageView.clipsToBounds = YES;
     
 //    chatImageTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(chatimagetap:)];
 //    self.msgImageView.userInteractionEnabled = YES;
@@ -114,10 +116,10 @@
     {
         self.messageTf.font = [UIFont systemFontOfSize:14];
     }
-    
     if ([[dict objectForKey:DIRECT] isEqualToString:@"f"])
     {
-        if ([[msgContent pathExtension] isEqualToString:@"png"] || [[msgContent pathExtension] isEqualToString:@"jpg"])
+        NSString *extension =  [msgContent pathExtension];
+        if ([extension isEqualToString:@"png"] || [extension isEqualToString:@"jpg"])
         {
             self.messageTf.hidden = YES;
             self.msgImageView.hidden = NO;
@@ -125,22 +127,47 @@
             NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
             self.timeLabel.text = timeStr;
             
-            self.chatBg.frame = CGRectMake(SCREEN_WIDTH - 10- 100- 30-45, messageBgY, 100+PhotoSpace*2+5, 100+PhotoSpace*2);
+            self.chatBg.frame = CGRectMake(55, messageBgY, 100+PhotoSpace*2+5, 100+PhotoSpace*2);
             [self.chatBg setImage:fromImage];
             
-            self.msgImageView.frame = CGRectMake(self.chatBg.frame.origin.x+PhotoSpace+5, self.chatBg.frame.origin.y+PhotoSpace, 100, 100);
+            self.msgImageView.frame = CGRectMake(self.chatBg.frame.origin.x+PhotoSpace+5, self.chatBg.frame.origin.y+PhotoSpace+1, 100, 100);
+            self.msgImageView.layer.cornerRadius = 3;
+            self.msgImageView.clipsToBounds = YES;
             
             [Tools fillImageView:self.msgImageView withImageFromURL:msgContent imageWidth:200 andDefault:@"3100"];
             
             self.headerImageView.frame = CGRectMake(5, messageBgY, 40, 40);
             
-            if (isGroup)
+            CGFloat he = 0;
+            if (SYSVERSION >= 7)
             {
-                self.nameLabel.hidden = NO;
-                self.nameLabel.frame = CGRectMake(self.headerImageView.frame.size.width+self.headerImageView.frame.origin.x+5, self.headerImageView.frame.origin.y, 20, 100);
-                self.nameLabel.text = [dict objectForKey:@"fname"];
+                he = 3;
             }
-            
+            if(isGroup)
+            {
+                OperatDB *db = [[OperatDB alloc] init];
+                NSString *by = [dict objectForKey:@"by"];
+                NSDictionary *userDict = [[db findSetWithDictionary:@{@"uid":by} andTableName:USERICONTABLE] firstObject];
+                NSString *img_icon = [userDict objectForKey:@"uicon"];
+                NSString *name = [userDict objectForKey:@"username"];
+               
+                self.nameLabel.hidden = NO;
+                self.nameLabel.frame = CGRectMake(self.headerImageView.frame.size.width+self.headerImageView.frame.origin.x+5, self.headerImageView.frame.origin.y, 100, 20);
+                self.nameLabel.text = name;
+                self.chatBg.frame = CGRectMake(55, messageBgY+20, 100+PhotoSpace*2+5, 100+PhotoSpace*2);
+                [self.chatBg setImage:fromImage];
+                
+                self.msgImageView.frame = CGRectMake(self.chatBg.frame.origin.x+PhotoSpace+7, self.chatBg.frame.origin.y+PhotoSpace+2, 98, 98);
+                [Tools fillImageView:self.headerImageView withImageFromURL:img_icon andDefault:HEADERICON];
+            }
+            else
+            {
+                NSDictionary *usericondict = [ImageTools iconDictWithUserID:[dict objectForKey:@"fid"]];
+                if (usericondict)
+                {
+                    [Tools fillImageView:self.headerImageView withImageFromURL:[usericondict objectForKey:@"uicon"] andDefault:HEADERICON];
+                }
+            }
         }
         else
         {
@@ -164,12 +191,9 @@
             self.messageTf.text = [[dict objectForKey:@"content"] emojizedString];
             self.selectionStyle = UITableViewCellSelectionStyleNone;
             
-            if ([[dict objectForKey:@"content"] rangeOfString:@"$!#"].length >0)
+            NSRange range = [msgContent rangeOfString:@"$!#"];
+            if (range.length >0)
             {
-                
-                NSString *msgContent = [dict objectForKey:@"content"];
-                NSRange range = [msgContent rangeOfString:@"$!#"];
-                
                 self.messageTf.text = [msgContent substringFromIndex:range.location+range.length];
                 
                 size = [SizeTools getSizeWithString:[[msgContent substringFromIndex:range.location+range.length] emojizedString] andWidth:SCREEN_WIDTH/2+20 andFont:[UIFont systemFontOfSize:14]];
@@ -186,7 +210,7 @@
                 self.messageTf.userInteractionEnabled = YES;
                 
                 self.joinlable.frame = CGRectMake(15, size.height+15, size.width, 30);
-                self.joinlable.text = @"点击申请加入";
+                self.joinlable.text = @"点击查看详情";
                 self.joinlable.backgroundColor = [UIColor clearColor];
                 self.joinlable.hidden = NO;
                 
@@ -228,7 +252,8 @@
     else if([[dict objectForKey:DIRECT] isEqualToString:@"t"])
     {
         self.nameLabel.hidden = YES;
-        if ([[msgContent pathExtension] isEqualToString:@"png"] || [[msgContent pathExtension] isEqualToString:@"jpg"])
+        NSString *extension =  [msgContent pathExtension];
+        if ([extension isEqualToString:@"png"] || [extension isEqualToString:@"jpg"])
         {
             self.messageTf.hidden = YES;
             self.msgImageView.hidden = NO;

@@ -8,6 +8,9 @@
 
 #import "SettingRelateViewController.h"
 
+#define StudentsTableViewTag 1000
+#define RelateTableViewTag  2000
+
 @interface SettingRelateViewController ()<UITableViewDataSource,UITableViewDelegate>
 {
     NSMutableArray *studentsArray;
@@ -28,7 +31,7 @@
     
     NSString *studentName;
     NSString *re_type;
-    NSString *studentID;
+    NSString *re_id;
     
     UIButton *studentButton;
     
@@ -61,7 +64,7 @@
     OperatDB *db = [[OperatDB alloc] init];
     NSDictionary *parentDict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":parentID} andTableName:CLASSMEMBERTABLE] firstObject];
     studentName = [parentDict objectForKey:@"re_name"];
-    studentID = @"";
+    re_id = @"";
     
     studentsArray = [[NSMutableArray alloc] initWithCapacity:0];
     
@@ -92,7 +95,7 @@
     studentsTableView = [[UITableView alloc] initWithFrame:CGRectMake(studentButton.frame.origin.x, studentButton.frame.size.height+studentButton.frame.origin.y, studentButton.frame.size.width, 0) style:UITableViewStylePlain];
     studentsTableView.delegate = self;
     studentsTableView.dataSource = self;
-    studentsTableView.tag = 1000;
+    studentsTableView.tag = StudentsTableViewTag;
     studentsTableView.layer.cornerRadius = 5;
     studentsTableView.clipsToBounds = YES;
     studentsTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
@@ -114,6 +117,8 @@
     [relateButton setContentHorizontalAlignment:UIControlContentHorizontalAlignmentLeft];
     relateButton.clipsToBounds = YES;
     [relateButton setTitle:[NSString stringWithFormat:@"   %@",[title substringFromIndex:[title rangeOfString:@"."].location+1]] forState:UIControlStateNormal];
+    
+    re_type = [title substringFromIndex:[title rangeOfString:@"."].location+1];
     relateButton.frame = CGRectMake(studentButton.frame.origin.x, tipLabel2.frame.origin.y+tipLabel2.frame.size.height, 134, studentButton.frame.size.height);
     [relateButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [relateButton addTarget:self action:@selector(selectRelate) forControlEvents:UIControlEventTouchUpInside];
@@ -127,7 +132,7 @@
     relateTableView = [[UITableView alloc] initWithFrame:CGRectMake(relateButton.frame.origin.x, relateButton.frame.size.height+relateButton.frame.origin.y, relateButton.frame.size.width, 0) style:UITableViewStylePlain];
     relateTableView.delegate = self;
     relateTableView.dataSource = self;
-    relateTableView.tag = 2000;
+    relateTableView.tag = RelateTableViewTag;
     relateTableView.layer.cornerRadius = 5;
     relateTableView.clipsToBounds = YES;
     relateTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
@@ -213,11 +218,11 @@
 #pragma mark - tableView
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    if (tableView.tag == 1000)
+    if (tableView.tag == StudentsTableViewTag)
     {
         return [studentsArray count];
     }
-    else if(tableView.tag == 2000)
+    else if(tableView.tag == RelateTableViewTag)
     {
         return [relateArray count];
     }
@@ -225,7 +230,7 @@
 }
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (tableView.tag == 1000)
+    if (tableView.tag == StudentsTableViewTag)
     {
         static NSString *studentsCell = @"studentCell";
         UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:studentsCell];
@@ -233,7 +238,18 @@
         {
             cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:studentsCell];
         }
-        cell.textLabel.text = [[studentsArray objectAtIndex:indexPath.row] objectForKey:@"name"];
+        NSDictionary *dict = [studentsArray objectAtIndex:indexPath.row];
+        if ([dict objectForKey:@"sn"] &&
+            ![[dict objectForKey:@"sn"] isEqual:[NSNull null]] &&
+            [[dict objectForKey:@"sn"] length] > 0)
+        {
+            cell.textLabel.text = [NSString stringWithFormat:@"%@(%@)",[dict objectForKey:@"name"],[dict objectForKey:@"sn"]];
+        }
+        else
+        {
+            cell.textLabel.text = [dict objectForKey:@"name"];
+        }
+        
         cell.contentView.backgroundColor = [UIColor clearColor];
         cell.textLabel.textColor = [UIColor grayColor];
         cell.textLabel.font = [UIFont systemFontOfSize:16];
@@ -248,7 +264,7 @@
         }
         return cell;
     }
-    else if(tableView.tag == 2000)
+    else if(tableView.tag == RelateTableViewTag)
     {
         static NSString *relateCell = @"relateCell";
         UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:relateCell];
@@ -278,14 +294,16 @@
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (tableView.tag == 1000)
+    if (tableView.tag == StudentsTableViewTag)
     {
+        NSDictionary *dict = [studentsArray objectAtIndex:indexPath.row];
+        re_id = [dict objectForKey:@"uid"];
         studentName = [[studentsArray objectAtIndex:indexPath.row] objectForKey:@"name"];
         [studentButton setTitle:[NSString stringWithFormat:@"   %@",studentName] forState:UIControlStateNormal];
         [tableView deselectRowAtIndexPath:indexPath animated:YES];
         [self showStudents];
     }
-    else if(tableView.tag == 2000)
+    else if(tableView.tag == RelateTableViewTag)
     {
         if (indexPath.row == [relateArray count]-1)
         {
@@ -318,6 +336,7 @@
 {
     OperatDB *db = [[OperatDB alloc] init];
     [studentsArray addObjectsFromArray:[db findSetWithDictionary:@{@"classid":classID,@"role":@"students",@"checked":@"1"} andTableName:CLASSMEMBERTABLE]];
+    [studentsArray addObjectsFromArray:[db findSetWithDictionary:@{@"classid":classID,@"role":@"unin_students",@"checked":@"1"} andTableName:CLASSMEMBERTABLE]];
     [studentsTableView reloadData];
 }
 
@@ -343,6 +362,11 @@
             [Tools showAlertView:@"请确定您的孩子的关系" delegateViewController:nil];
             return ;
         }
+        if ([re_id length] == 0)
+        {
+            [Tools showAlertView:@"请选择新的学生" delegateViewController:nil];
+            return ;
+        }
         title = [NSString stringWithFormat:@"%@.%@",studentName,re_type];
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
@@ -352,7 +376,7 @@
                                                                       @"role":@"parents",
                                                                       @"re_name":studentName,
                                                                       @"re_type":re_type,
-                                                                      @"re_id":@""
+                                                                      @"re_id":re_id
                                                                       } API:CHANGE_MEM_TITLE];
         [request setCompletionBlock:^{
             NSString *responseString = [request responseString];

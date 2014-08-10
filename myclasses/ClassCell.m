@@ -33,7 +33,7 @@ arrowImageView;
         [bgView addSubview:headerImageView];
         
         nameLabel = [[UILabel alloc] init];
-        nameLabel.textColor = UIColorFromRGB(0x666464);
+        nameLabel.textColor = TITLE_COLOR;
         nameLabel.backgroundColor = [UIColor clearColor];
         nameLabel.font = [UIFont systemFontOfSize:18];
         [bgView addSubview:nameLabel];

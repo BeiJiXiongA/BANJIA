@@ -54,6 +54,8 @@ UIScrollViewDelegate>
     NSTimer *timer;
     int sec;
     
+    UIImageView *arrowImageView;
+    
     UITapGestureRecognizer *tapTgr;
 }
 @end
@@ -96,7 +98,6 @@ UIScrollViewDelegate>
     schoolInfoLabel.font = [UIFont systemFontOfSize:18];
     schoolInfoLabel.text = [NSString stringWithFormat:@"您希望加入%@-%@",schoolName,className];
     schoolInfoLabel.lineBreakMode = NSLineBreakByWordWrapping;
-    schoolInfoLabel.textAlignment = NSTextAlignmentCenter;
     schoolInfoLabel.backgroundColor = [UIColor clearColor];
     schoolInfoLabel.textColor = TITLE_COLOR;
     [mainScrollView addSubview:schoolInfoLabel];
@@ -128,7 +129,7 @@ UIScrollViewDelegate>
     showObjects = YES;
     checkCode = @"";
     
-    objectArray = @[@"语文老师",@"数学老师",@"英语老师",@"历史老师",@"其他"];
+    objectArray = @[@"   语文老师",@"   数学老师",@"   英语老师",@"   历史老师",@"   其他"];
     objectStr = [objectArray firstObject];
     
     
@@ -139,9 +140,16 @@ UIScrollViewDelegate>
     [showObjectButton setTitleColor:COMMENTCOLOR forState:UIControlStateNormal];
     showObjectButton.layer.cornerRadius = 5;
     showObjectButton.clipsToBounds = YES;
+    showObjectButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
     [showObjectButton setTitle:[objectArray firstObject] forState:UIControlStateNormal];
     [showObjectButton addTarget:self action:@selector(showObject) forControlEvents:UIControlEventTouchUpInside];
     [mainScrollView addSubview:showObjectButton];
+    
+    arrowImageView = [[UIImageView alloc] init];
+    arrowImageView.frame = CGRectMake(showObjectButton.frame.origin.x + showObjectButton.frame.size.width- 30, showObjectButton.frame.origin.y+16, 18, 10);
+    arrowImageView.backgroundColor = [UIColor whiteColor];
+    [arrowImageView setImage:[UIImage imageNamed:@"arrow_down"]];
+    [mainScrollView addSubview:arrowImageView];
     
     objectsTableView = [[UITableView alloc] initWithFrame:CGRectMake(showObjectButton.frame.origin.x, showObjectButton.frame.size.height+showObjectButton.frame.origin.y, showObjectButton.frame.size.width, 0) style:UITableViewStylePlain];
     objectsTableView.layer.cornerRadius = 5;
@@ -260,6 +268,8 @@ UIScrollViewDelegate>
     
     [mainScrollView addSubview:objectsTableView];
     
+    mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, 550);
+    
     tapTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapEvent)];
     mainScrollView.userInteractionEnabled = YES;
     [mainScrollView addGestureRecognizer:tapTgr];
@@ -290,11 +300,6 @@ UIScrollViewDelegate>
             if (![v isExclusiveTouch])
             {
                 [v resignFirstResponder];
-                [UIView animateWithDuration:0.25 animations:^{
-                    self.bgView.center = CENTER_POINT;
-                }completion:^(BOOL finished) {
-                    
-                }];
             }
         }
     }
@@ -369,7 +374,6 @@ UIScrollViewDelegate>
     else
     {
         [getCodeButton setTitle:@"重新获取" forState:UIControlStateNormal];
-        getCodeButton.enabled = YES;
         [timer invalidate];
         sec = 60;
     }
@@ -377,6 +381,10 @@ UIScrollViewDelegate>
 
 -(void)getcheckCode
 {
+    if (sec != 60)
+    {
+        return ;
+    }
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id]} API:MB_AUTHCODE];
@@ -487,6 +495,7 @@ UIScrollViewDelegate>
     cell.textLabel.textAlignment = NSTextAlignmentCenter;
     cell.textLabel.text = [objectArray objectAtIndex:indexPath.row];
     cell.textLabel.backgroundColor = [UIColor clearColor];
+    cell.textLabel.textAlignment = NSTextAlignmentLeft;
     UIImageView *bgImageBG = [[UIImageView alloc] init];
     bgImageBG.image = [UIImage imageNamed:@"line3"];
     cell.contentView.backgroundColor = [UIColor clearColor];
@@ -560,6 +569,7 @@ UIScrollViewDelegate>
         [UIView animateWithDuration:0.2 animations:^{
             
             objectsTableView.frame = CGRectMake(showObjectButton.frame.origin.x, showObjectButton.frame.size.height+showObjectButton.frame.origin.y, showObjectButton.frame.size.width, [objectArray count]*40);
+            [arrowImageView setImage:[UIImage imageNamed:@"arrow_up"]];
         }];
         [mainScrollView removeGestureRecognizer:tapTgr];
     }
@@ -567,6 +577,7 @@ UIScrollViewDelegate>
     {
         [UIView animateWithDuration:0.2 animations:^{
             objectsTableView.frame = CGRectMake(showObjectButton.frame.origin.x, showObjectButton.frame.size.height+showObjectButton.frame.origin.y, showObjectButton.frame.size.width, 0);
+            [arrowImageView setImage:[UIImage imageNamed:@"arrow_down"]];
         }];
         [mainScrollView addGestureRecognizer:tapTgr];
     }

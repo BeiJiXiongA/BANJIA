@@ -455,6 +455,10 @@ NameButtonDel>
                 NSString *key = [requestUrlStr MD5Hash];
                 [FTWCache setObject:[responseString dataUsingEncoding:NSUTF8StringEncoding] forKey:key];
                 [self dealClassSetting:responseDict];
+                if ([[[responseDict objectForKey:@"data"] objectForKey:@"admin"] integerValue] == 2)
+                {
+                    addButton.hidden = NO;
+                }
             }
             else
             {
@@ -1234,21 +1238,22 @@ NameButtonDel>
 - (void)shareToQQSpaceClickHandler:(UIButton *)sender
 {
     NSString *content;
-    if ([waitTransmitDict objectForKey:@"content"])
+    DDLOG(@"waittransdict QQSpace %@",waitTransmitDict);
+    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"])
     {
-        if ([[waitTransmitDict objectForKey:@"content"] length] > 0)
+        if ([[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"] length] > 0)
         {
-            content = [waitTransmitDict objectForKey:@"content"];
+            content = [[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"];
         }
     }
     
     
     NSString *imagePath;
-    if ([waitTransmitDict objectForKey:@"img"])
+    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"])
     {
-        if ([[waitTransmitDict objectForKey:@"img"] count] > 0)
+        if ([[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] count] > 0)
         {
-            imagePath = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[waitTransmitDict objectForKey:@"img"] firstObject]];
+            imagePath = [NSString stringWithFormat:@"%@%@@150w",IMAGEURL,[[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] firstObject]];
         }
     }
     
@@ -1259,8 +1264,8 @@ NameButtonDel>
                                                 image:[ShareSDK imageWithUrl:imagePath]
                                                 title:@"班家"
                                                   url:ShareUrl
-                                          description:content
-                                            mediaType:SSPublishContentMediaTypeText];
+                                          description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
+                                            mediaType:SSPublishContentMediaTypeNews];
     
     //创建弹出菜单容器
     id<ISSContainer> container = [ShareSDK container];
@@ -1317,31 +1322,31 @@ NameButtonDel>
 - (void)shareToSinaWeiboClickHandler:(UIButton *)sender
 {
     NSString *content;
-    if ([waitTransmitDict objectForKey:@"content"])
+    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"])
     {
-        if ([[waitTransmitDict objectForKey:@"content"] length] > 0)
+        if ([[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"] length] > 0)
         {
-            content = [NSString stringWithFormat:@"%@%@",[waitTransmitDict objectForKey:@"content"],ShareUrl];
+            content = [NSString stringWithFormat:@"%@%@",[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"],ShareUrl];
         }
     }
     
     
     NSString *imagePath;
-    if ([waitTransmitDict objectForKey:@"img"])
+    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"])
     {
-        if ([[waitTransmitDict objectForKey:@"img"] count] > 0)
+        if ([[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] count] > 0)
         {
-            imagePath = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[waitTransmitDict objectForKey:@"img"] firstObject]];
+            imagePath = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] firstObject]];
         }
     }
 
     //创建分享内容[ShareSDK imageWithUrl:imagePath]
-    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
+    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                        defaultContent:@""
-                                                image:[ShareSDK imageWithPath:imagePath]
+                                                image:[ShareSDK imageWithUrl:imagePath]
                                                 title:@"班家"
                                                   url:ShareUrl
-                                          description:[content length]>0?content:ShareContent
+                                          description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                             mediaType:SSPublishContentMediaTypeNews];
     
     //创建弹出菜单容器
@@ -1400,31 +1405,31 @@ NameButtonDel>
 {
     
     NSString *content;
-    if ([waitTransmitDict objectForKey:@"content"])
+    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"])
     {
-        if ([[waitTransmitDict objectForKey:@"content"] length] > 0)
+        if ([[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"] length] > 0)
         {
-            content = [NSString stringWithFormat:@"%@%@",[waitTransmitDict objectForKey:@"content"],ShareUrl];
+            content = [NSString stringWithFormat:@"%@%@",[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"],ShareUrl];
         }
     }
     
     
     NSString *imagePath;
-    if ([waitTransmitDict objectForKey:@"img"])
+    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"])
     {
-        if ([[waitTransmitDict objectForKey:@"img"] count] > 0)
+        if ([[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] count] > 0)
         {
-            imagePath = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[waitTransmitDict objectForKey:@"img"] firstObject]];
+            imagePath = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] firstObject]];
         }
     }
     //创建分享内容
-    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
+    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                        defaultContent:@""
                                                 image:[ShareSDK imageWithUrl:imagePath]
                                                 title:@"班家"
                                                   url:ShareUrl
-                                          description:[content length]>0?content:ShareContent
-                                            mediaType:SSPublishContentMediaTypeText];
+                                          description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
+                                            mediaType:SSPublishContentMediaTypeNews];
     
     //创建弹出菜单容器
     id<ISSContainer> container = [ShareSDK container];
@@ -1480,30 +1485,30 @@ NameButtonDel>
 - (void)shareToQQFriendClickHandler:(UIButton *)sender
 {
     NSString *content;
-    if ([waitTransmitDict objectForKey:@"content"])
+    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"])
     {
-        if ([[waitTransmitDict objectForKey:@"content"] length] > 0)
+        if ([[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"] length] > 0)
         {
-            content = [waitTransmitDict objectForKey:@"content"];
+            content = [[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"];
         }
     }
     
     
     NSString *imagePath;
-    if ([waitTransmitDict objectForKey:@"img"])
+    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"])
     {
-        if ([[waitTransmitDict objectForKey:@"img"] count] > 0)
+        if ([[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] count] > 0)
         {
-            imagePath = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[waitTransmitDict objectForKey:@"img"] firstObject]];
+            imagePath = [NSString stringWithFormat:@"%@%@@150w",IMAGEURL,[[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] firstObject]];
         }
     }
     //创建分享内容
-    id<ISSContent> publishContent = [ShareSDK content:content
+    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                        defaultContent:@""
                                                 image:[ShareSDK imageWithUrl:imagePath]
                                                 title:@"班家"
                                                   url:ShareUrl
-                                          description:content
+                                          description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                             mediaType:SSPublishContentMediaTypeNews];
     
     id<ISSAuthOptions> authOptions = [ShareSDK authOptionsWithAutoAuth:YES
@@ -1557,30 +1562,30 @@ NameButtonDel>
 - (void)shareToWeixinTimelineClickHandler:(UIButton *)sender
 {
     NSString *content;
-    if ([waitTransmitDict objectForKey:@"content"])
+    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"])
     {
-        if ([[waitTransmitDict objectForKey:@"content"] length] > 0)
+        if ([[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"] length] > 0)
         {
-            content = [waitTransmitDict objectForKey:@"content"];
+            content = [[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"];
         }
     }
     
     
     NSString *imagePath;
-    if ([waitTransmitDict objectForKey:@"img"])
+    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"])
     {
-        if ([[waitTransmitDict objectForKey:@"img"] count] > 0)
+        if ([[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] count] > 0)
         {
-            imagePath = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[waitTransmitDict objectForKey:@"img"] firstObject]];
+            imagePath = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] firstObject]];
         }
     }
     //创建分享内容
     id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
                                        defaultContent:@""
-                                                image:[ShareSDK imageWithPath:imagePath]
-                                                title:@"班家"
-                                                  url:ShareUrl
-                                          description:[content length]>0?content:ShareContent
+                                                image:[ShareSDK imageWithUrl:imagePath]
+                                                title:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
+                                                  url:HOST_URL
+                                          description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                             mediaType:SSPublishContentMediaTypeNews];
     
     id<ISSAuthOptions> authOptions = [ShareSDK authOptionsWithAutoAuth:YES
@@ -1633,31 +1638,31 @@ NameButtonDel>
 - (void)shareToRenRenClickHandler:(UIButton *)sender
 {
     NSString *content;
-    if ([waitTransmitDict objectForKey:@"content"])
+    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"])
     {
-        if ([[waitTransmitDict objectForKey:@"content"] length] > 0)
+        if ([[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"] length] > 0)
         {
-            content = [NSString stringWithFormat:@"%@%@",[waitTransmitDict objectForKey:@"content"],ShareUrl];
+            content = [NSString stringWithFormat:@"%@%@",[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"],ShareUrl];
         }
     }
     
     
     NSString *imagePath;
-    if ([waitTransmitDict objectForKey:@"img"])
+    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"])
     {
-        if ([[waitTransmitDict objectForKey:@"img"] count] > 0)
+        if ([[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] count] > 0)
         {
-            imagePath = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[waitTransmitDict objectForKey:@"img"] firstObject]];
+            imagePath = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] firstObject]];
         }
     }
     //创建分享内容
-    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
+    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                        defaultContent:@""
                                                 image:[ShareSDK imageWithUrl:imagePath]
                                                 title:@"班家"
                                                   url:ShareUrl
-                                          description:[content length]>0?content:ShareContent
-                                            mediaType:SSPublishContentMediaTypeText];
+                                          description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
+                                            mediaType:SSPublishContentMediaTypeNews];
     
     //    //创建弹出菜单容器
     //    id<ISSContainer> container = [ShareSDK container];

@@ -12,6 +12,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import "KKNavigationController.h"
 #import "UIImageView+WebCache.h"
+#import "MBProgressHUD.h"
 
 extern NSString *CTSettingCopyMyPhoneNumber();
 
@@ -53,11 +54,18 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 }
 +(BOOL)isPhoneNumber:(NSString *)numStr
 {
-//    NSString *mobileNum = @"^1(3[0-9]|5[0-35-9]|8[025-9])\\d{8}$";
     NSString *mobileNum = @"^1(3[0-9]|5[0-35-9]|8[025-9]|10|70)\\d{8}$";
     NSPredicate *mobilePredicate = [NSPredicate predicateWithFormat:@"SELF MATCHES %@",mobileNum];
     return [mobilePredicate evaluateWithObject:numStr];
 }
+
++(BOOL)isStudentsNumber:(NSString *)numStr
+{
+    NSString *studentsNum = @"([0-9]|[a-z]|[A-Z]){0,12}";
+    NSPredicate *studentsPredicate = [NSPredicate predicateWithFormat:@"SELF MATCHES %@",studentsNum];
+    return [studentsPredicate evaluateWithObject:numStr];
+}
+
 
 +(NSString *)getPhoneNumFromString:(NSString *)numStr
 {
@@ -345,13 +353,12 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 }
 + (void) showTips:(NSString *)text toView:(UIView *)view
 {
-//    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:view animated:YES];
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:view animated:YES];
 	// Configure for text only and offset down
-//	hud.mode = MBProgressHUDModeText;
-//	hud.labelText = text;
-    
-//	[hud show:YES];
-//	[hud hide:YES afterDelay:0.5];
+	hud.mode = MBProgressHUDModeText;
+	hud.labelText = text;
+	[hud show:YES];
+	[hud hide:YES afterDelay:0.5];
 }
 
 + (ASIHTTPRequest *)joinUrlWithDic:(NSDictionary *)parameterDict  andHostUrl:(NSString *)hostUrl
@@ -586,6 +593,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     NSData *imageData = UIImageJPEGRepresentation(newImage, 0.8);
     
     newImage = [UIImage imageWithData:imageData];
+    
     return newImage;
 }
 

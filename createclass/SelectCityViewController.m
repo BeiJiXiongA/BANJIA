@@ -176,9 +176,9 @@ UITableViewDelegate>
     [UIView animateWithDuration:0.2 animations:^{
         [searchView addGestureRecognizer:tapTgr];
         [self.bgView bringSubviewToFront:searchView];
-        mySearchBar.frame = CGRectMake(0, 0, SCREEN_WIDTH, 40);
+        mySearchBar.frame = CGRectMake(0, YSTART, SCREEN_WIDTH, 40);
         searchResultTableView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-        searchView.frame = CGRectMake(0, 40, SCREEN_WIDTH, SCREEN_HEIGHT-40);
+        searchView.frame = CGRectMake(0, 40+YSTART, SCREEN_WIDTH, SCREEN_HEIGHT-40);
         hotTableView.hidden = YES;
         searchResultTableView.hidden = NO;
         searchView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.4];
@@ -208,15 +208,18 @@ UITableViewDelegate>
 -(void)searchWithText:(NSString *)searchContent
 {
     [searchArray removeAllObjects];
-    NSArray *classMemberArray = [db fuzzyfindSetWithDictionary:@{@"citylevel":@"2"}
-                                                  andTableName:CITYTABLE
-                                            andFuzzyDictionary:@{@"cityname":mySearchBar.text,
-                                                                 @"jianpin":mySearchBar.text,
-                                                                 @"quanpin":mySearchBar.text}];
-    for (int i=0; i<[classMemberArray count]; ++i)
+    if ([searchContent length] > 0)
     {
-        NSDictionary *dict = [classMemberArray objectAtIndex:i];
-        [searchArray addObject:dict];
+        NSArray *classMemberArray = [db fuzzyfindSetWithDictionary:@{@"citylevel":@"2"}
+                                                      andTableName:CITYTABLE
+                                                andFuzzyDictionary:@{@"cityname":mySearchBar.text,
+                                                                     @"jianpin":mySearchBar.text,
+                                                                     @"quanpin":mySearchBar.text}];
+        for (int i=0; i<[classMemberArray count]; ++i)
+        {
+            NSDictionary *dict = [classMemberArray objectAtIndex:i];
+            [searchArray addObject:dict];
+        }
     }
     [searchResultTableView reloadData];
 }
@@ -302,17 +305,16 @@ UITableViewDelegate>
         UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 1.5, headerView.frame.size.width, 26.5)];
         //    headerLabel.backgroundColor = UIColorFromRGB(0x4abcc2);
         headerLabel.backgroundColor = [UIColor clearColor];
-        headerLabel.textAlignment = NSTextAlignmentCenter;
         headerLabel.font = [UIFont systemFontOfSize:17];
         headerLabel.textColor = TITLE_COLOR;
         if (section == 0)
         {
-            headerLabel.text = @"热门城市";
+            headerLabel.text = @"    热门城市";
         }
         else
         {
             NSDictionary *dict = [cityArray objectAtIndex:section-1];
-            headerLabel.text = [dict objectForKey:@"key"];
+            headerLabel.text = [NSString stringWithFormat:@"    %@",[dict objectForKey:@"key"]];
         }
         [headerView addSubview:headerLabel];
         return headerView;

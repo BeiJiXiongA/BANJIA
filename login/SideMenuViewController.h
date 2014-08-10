@@ -10,4 +10,5 @@
 
 @interface SideMenuViewController : XDContentViewController
 @property (nonatomic, strong) UIImageView *imageView;
+@property (nonatomic, strong) UITableView *buttonTableView;
 @end

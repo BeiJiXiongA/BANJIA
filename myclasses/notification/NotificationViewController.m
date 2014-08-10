@@ -300,7 +300,7 @@ EGORefreshTableDelegate>
         if (indexPath.row == 0)
         {
             NSString *schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
-            if ([schoolName isEqualToString:@"未设置学校"])
+            if ([schoolName isEqualToString:@"未指定学校"] || [schoolName isEqualToString:@"未设置学校"])
             {
                 return 56;
             }
@@ -338,7 +338,7 @@ EGORefreshTableDelegate>
         if (indexPath.row == 0)
         {
             NSString *schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
-            if ([schoolName isEqualToString:@"未设置学校"])
+            if ([schoolName isEqualToString:@"未指定学校"] || [schoolName isEqualToString:@"未设置学校"])
             {
                 cell.contentLabel.hidden = NO;
                 cell.nameLabel.hidden = NO;
@@ -422,6 +422,12 @@ EGORefreshTableDelegate>
         cell.bgImageView.clipsToBounds = YES;
         cell.bgImageView.frame = CGRectMake(8, 4, SCREEN_WIDTH-16, 80);
         
+        NSRange range = [noticeContent rangeOfString:@"$!#"];
+        if (range.length > 0)
+        {
+            noticeContent = [noticeContent substringFromIndex:range.location+range.length];
+        }
+        
         cell.contentLabel.text = noticeContent;
         cell.contentLabel.font = [UIFont systemFontOfSize:16];
         cell.contentLabel.textColor = CONTENTCOLOR;
@@ -450,13 +456,13 @@ EGORefreshTableDelegate>
         }
         
         
-        cell.statusLabel.textColor = TIMECOLOR;
+        cell.statusLabel.textColor = COMMENTCOLOR;
         cell.statusLabel.frame = CGRectMake(SCREEN_WIDTH-150, 60.5, 130, 15);
         
         
         cell.timeLabel.font = [UIFont systemFontOfSize:13];
         cell.timeLabel.text = [NSString stringWithFormat:@"%@发布于%@",byName,[Tools showTime:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]]];
-        cell.timeLabel.textColor = TIMECOLOR;
+        cell.timeLabel.textColor = COMMENTCOLOR;
         
         
         cell.statusLabel.text =[NSString stringWithFormat:@"%d人已读 %d人未读",[[dict objectForKey:@"read_num"] integerValue],[[dict objectForKey:@"unread_num"] integerValue]];

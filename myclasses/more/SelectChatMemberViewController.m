@@ -18,6 +18,10 @@
 #define RowTag    7777
 #define CheckBoxTag  5555
 
+#define ALLSTUDENTS  1111
+#define ALLPARENTS   2222
+#define ALLTEACHERS  3333
+
 @interface SelectChatMemberViewController ()<
 UITableViewDataSource,
 UITableViewDelegate,
@@ -50,6 +54,10 @@ UISearchBarDelegate>
     CGFloat keyBoardHeight;
     
     UIView *checkView;
+    
+    BOOL haveStudent;
+    BOOL haveParent;
+    BOOL haveTeacher;
 }
 
 @end
@@ -90,14 +98,9 @@ UISearchBarDelegate>
     role = [[NSUserDefaults standardUserDefaults] objectForKey:@"role"];
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
-    if ([[db findSetWithDictionary:@{@"classid":classID} andTableName:CLASSMEMBERTABLE] count] > 0)
-    {
-        [self dealClassMembers];
-    }
-    else
-    {
-        [self getMembersByClass];
-    }
+    haveStudent = NO;
+    haveParent = NO;
+    haveTeacher = NO;
     
     tableViewY = UI_NAVIGATION_BAR_HEIGHT+45;
     chedkViewH = 0;
@@ -111,19 +114,18 @@ UISearchBarDelegate>
         checkView = [[UIView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, 50)];
         checkView.backgroundColor = [UIColor whiteColor];
         [self.bgView addSubview:checkView];
-        
-        NSArray *nameArray = [[NSArray alloc] initWithObjects:@"全体老师",@"全体家长",@"全体学生", nil];
-        SSCheckBoxView *checkBox = nil;
-        for (int i=0; i<3; i++)
-        {
-            SSCheckBoxViewStyle style = kSSCheckBoxViewStyleBox;
-            checkBox = [[SSCheckBoxView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH/3*i, 5, SCREEN_WIDTH/3, 40)style:style checked:NO];
-            [checkBox setText:[nameArray objectAtIndex:i]];
-            [checkView addSubview:checkBox];
-            [checkBox setStateChangedTarget:self selector:@selector(checkBoxStateChange)];
-            checkBox.tag = CheckBoxTag + i;
-        }
     }
+    
+    
+    if ([[db findSetWithDictionary:@{@"classid":classID} andTableName:CLASSMEMBERTABLE] count] > 0)
+    {
+        [self dealClassMembers];
+    }
+    else
+    {
+        [self getMembersByClass];
+    }
+
     
     mySearchBar = [[UISearchBar alloc] initWithFrame:
                    CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT + chedkViewH, SCREEN_WIDTH-0, 40)];
@@ -225,8 +227,20 @@ UISearchBarDelegate>
         for (int i=0; i < [tmpArray count]; i++)
         {
             NSDictionary *dict  =[tmpArray objectAtIndex:i];
-            if([dict objectForKey:@"uid"] && [[dict objectForKey:@"uid"] isKindOfClass:[NSString class]] && [[dict objectForKey:@"uid"] length] > 10 && ![[dict objectForKey:@"uid"] isEqualToString:[Tools user_id]])
+            if(![[dict objectForKey:@"role"] isEqual:[NSNull null]] && ![[dict objectForKey:@"role"] isEqualToString:@"unin_students"] && ![[dict objectForKey:@"uid"] isEqualToString:[Tools user_id]])
             {
+                if ([[dict objectForKey:@"role"] isEqualToString:@"students"])
+                {
+                    haveStudent = YES;
+                }
+                if ([[dict objectForKey:@"role"] isEqualToString:@"teachers"])
+                {
+                    haveTeacher = YES;
+                }
+                if ([[dict objectForKey:@"role"] isEqualToString:@"parents"])
+                {
+                    haveParent = YES;
+                }
                 [allArray addObject:dict];
             }
         }
@@ -237,8 +251,9 @@ UISearchBarDelegate>
         for (int i=0; i < [tmpArray count]; i++)
         {
             NSDictionary *dict  =[tmpArray objectAtIndex:i];
-            if([dict objectForKey:@"uid"] && [[dict objectForKey:@"uid"] isKindOfClass:[NSString class]] && [[dict objectForKey:@"uid"] length] > 10 && ![[dict objectForKey:@"uid"] isEqualToString:[Tools user_id]])
+            if(![[dict objectForKey:@"role"] isEqualToString:@"unin_students"] && ![[dict objectForKey:@"uid"] isEqualToString:[Tools user_id]])
             {
+                haveStudent = YES;
                 [allArray addObject:dict];
             }
         }
@@ -246,10 +261,46 @@ UISearchBarDelegate>
         for (int i=0; i < [tmpArray count]; i++)
         {
             NSDictionary *dict  =[tmpArray objectAtIndex:i];
-            if([dict objectForKey:@"uid"] && [[dict objectForKey:@"uid"] isKindOfClass:[NSString class]] && [[dict objectForKey:@"uid"] length] > 10 && ![[dict objectForKey:@"uid"] isEqualToString:[Tools user_id]])
+            if(![[dict objectForKey:@"role"] isEqualToString:@"unin_students"] && ![[dict objectForKey:@"uid"] isEqualToString:[Tools user_id]])
             {
+                haveParent = YES;
                 [allArray addObject:dict];
             }
+        }
+    }
+    
+    NSMutableArray *nameArray = [[NSMutableArray alloc] initWithCapacity:0];
+    if (haveTeacher)
+    {
+        [nameArray addObject:@"全体老师"];
+    }
+    if (haveParent)
+    {
+        [nameArray addObject:@"全体家长"];
+    }
+    if (haveStudent)
+    {
+        [nameArray addObject:@"全体学生"];
+    }
+    SSCheckBoxView *checkBox = nil;
+    for (int i=0; i<[nameArray count]; i++)
+    {
+        SSCheckBoxViewStyle style = kSSCheckBoxViewStyleBox;
+        checkBox = [[SSCheckBoxView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH/3*i, 5, SCREEN_WIDTH/3, 40)style:style checked:NO];
+        [checkBox setText:[nameArray objectAtIndex:i]];
+        [checkView addSubview:checkBox];
+        [checkBox setStateChangedTarget:self selector:@selector(checkBoxStateChange)];
+        if ([[nameArray objectAtIndex:i] isEqualToString:@"全体老师"])
+        {
+            checkBox.tag = ALLTEACHERS;
+        }
+        else if([[nameArray objectAtIndex:i] isEqualToString:@"全体家长"])
+        {
+            checkBox.tag = ALLPARENTS;
+        }
+        else if([[nameArray objectAtIndex:i] isEqualToString:@"全体学生"])
+        {
+            checkBox.tag = ALLSTUDENTS;
         }
     }
     
@@ -261,7 +312,7 @@ UISearchBarDelegate>
 {
     if ([selectedArray count] < 2)
     {
-        [Tools showAlertView:@"闲聊至少需要选择两个成员！" delegateViewController:nil];
+        [Tools showAlertView:@"群聊至少需要选择两个成员！" delegateViewController:nil];
         return ;
     }
     SubmitGroupChatViewController *submitVC = [[SubmitGroupChatViewController alloc] init];
@@ -276,7 +327,7 @@ UISearchBarDelegate>
     for (int i=0; i < [tmpArray count]; i++)
     {
         NSDictionary *dict  =[tmpArray objectAtIndex:i];
-        if([dict objectForKey:@"uid"] && [[dict objectForKey:@"uid"] isKindOfClass:[NSString class]] && [[dict objectForKey:@"uid"] length] > 10 && ![[dict objectForKey:@"uid"] isEqualToString:[Tools user_id]])
+        if(![[dict objectForKey:@"role"] isEqualToString:@"unin_students"] && ![[dict objectForKey:@"uid"] isEqualToString:[Tools user_id]])
         {
             [studentArray addObject:dict];
         }
@@ -301,7 +352,7 @@ UISearchBarDelegate>
     for (int i=0; i < [tmpArray count]; i++)
     {
         NSDictionary *dict  =[tmpArray objectAtIndex:i];
-        if([dict objectForKey:@"uid"] && [[dict objectForKey:@"uid"] isKindOfClass:[NSString class]] && [[dict objectForKey:@"uid"] length] > 10 && ![[dict objectForKey:@"uid"] isEqualToString:[Tools user_id]])
+        if(![[dict objectForKey:@"role"] isEqualToString:@"unin_students"] && ![[dict objectForKey:@"uid"] isEqualToString:[Tools user_id]])
         {
             [teachersArray addObject:dict];
         }
@@ -326,7 +377,7 @@ UISearchBarDelegate>
     for (int i=0; i < [tmpArray count]; i++)
     {
         NSDictionary *dict  =[tmpArray objectAtIndex:i];
-        if([dict objectForKey:@"uid"] && [[dict objectForKey:@"uid"] isKindOfClass:[NSString class]] && [[dict objectForKey:@"uid"] length] > 10 && ![[dict objectForKey:@"uid"] isEqualToString:[Tools user_id]])
+        if(![[dict objectForKey:@"role"] isEqualToString:@"unin_students"] && ![[dict objectForKey:@"uid"] isEqualToString:[Tools user_id]])
         {
             [parentsArray addObject:dict];
         }
@@ -522,7 +573,7 @@ UISearchBarDelegate>
 -(void)checkBoxStateChange
 {
     [selectedArray removeAllObjects];
-    if ([((SSCheckBoxView *)[checkView viewWithTag:CheckBoxTag]) checked])
+    if ([((SSCheckBoxView *)[checkView viewWithTag:ALLTEACHERS]) checked])
     {
         //全体老师
         NSArray *tmpArray = [db findSetWithDictionary:@{@"classid":classID,@"role":@"teachers"} andTableName:CLASSMEMBERTABLE];
@@ -535,7 +586,7 @@ UISearchBarDelegate>
             }
         }
     }
-    if ([((SSCheckBoxView *)[checkView viewWithTag:CheckBoxTag+1]) checked])
+    if ([((SSCheckBoxView *)[checkView viewWithTag:ALLPARENTS]) checked])
     {
         //全体家长
         NSArray *tmpArray = [db findSetWithDictionary:@{@"classid":classID,@"role":@"parents"} andTableName:CLASSMEMBERTABLE];
@@ -548,7 +599,7 @@ UISearchBarDelegate>
             }
         }
     }
-    if ([((SSCheckBoxView *)[checkView viewWithTag:CheckBoxTag+2]) checked])
+    if ([((SSCheckBoxView *)[checkView viewWithTag:ALLSTUDENTS]) checked])
     {
         //全体学生
         NSArray *tmpArray = [db findSetWithDictionary:@{@"classid":classID,@"role":@"students"} andTableName:CLASSMEMBERTABLE];
@@ -625,7 +676,20 @@ UISearchBarDelegate>
     
     if ([role isEqualToString:@"teachers"])
     {
-        [searchResultArray addObjectsFromArray:[db fuzzyfindSetWithDictionary:@{@"classid":classID}
+        [searchResultArray addObjectsFromArray:[db fuzzyfindSetWithDictionary:@{@"classid":classID,
+                                                                                @"role":@"students"}
+                                                                 andTableName:CLASSMEMBERTABLE
+                                                           andFuzzyDictionary:@{@"name":mySearchBar.text,
+                                                                                @"jianpin":mySearchBar.text,
+                                                                                @"quanpin":mySearchBar.text}]];
+        [searchResultArray addObjectsFromArray:[db fuzzyfindSetWithDictionary:@{@"classid":classID,
+                                                                                @"role":@"parents"}
+                                                                 andTableName:CLASSMEMBERTABLE
+                                                           andFuzzyDictionary:@{@"name":mySearchBar.text,
+                                                                                @"jianpin":mySearchBar.text,
+                                                                                @"quanpin":mySearchBar.text}]];
+        [searchResultArray addObjectsFromArray:[db fuzzyfindSetWithDictionary:@{@"classid":classID,
+                                                                                @"role":@"teachers"}
                                                                  andTableName:CLASSMEMBERTABLE
                                                            andFuzzyDictionary:@{@"name":mySearchBar.text,
                                                                                 @"jianpin":mySearchBar.text,

@@ -17,8 +17,8 @@
     if (self) {
         // Initialization code
         
-        bgImageView = [[UIImageView alloc] initWithFrame:CGRectMake(9, 11, SCREEN_WIDTH-10, 35)];
-        self.backgroundView = bgImageView;
+//        bgImageView = [[UIImageView alloc] initWithFrame:CGRectMake(9, 11, SCREEN_WIDTH-10, 35)];
+//        self.backgroundView = bgImageView;
         
         iconImageView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 10, 40, 40)];
         iconImageView.backgroundColor = [UIColor whiteColor];
@@ -30,7 +30,6 @@
         nametf.hidden = NO;
         nametf.background = nil;
         nametf.textColor = CONTENTCOLOR;
-//        nametf.enabled = NO;
         [self.contentView addSubview:nametf];
         
         relateButton = [UIButton buttonWithType:UIButtonTypeCustom];

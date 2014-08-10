@@ -124,6 +124,8 @@
 		386B28B7196196AF00499F79 /* f@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 386B28B5196196AF00499F79 /* f@2x.png */; };
 		386B28BA19619E3D00499F79 /* t2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 386B28B919619E3D00499F79 /* t2@2x.png */; };
 		386E632E1947F1410091710E /* MyButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 386E632D1947F1410091710E /* MyButton.m */; };
+		387626201991C3B0009EE318 /* ParentApplyViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3876261F1991C3B0009EE318 /* ParentApplyViewController.m */; };
+		3876262319921890009EE318 /* AlreadyInStudentsListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3876262219921890009EE318 /* AlreadyInStudentsListViewController.m */; };
 		387AABE319371AE000657087 /* FooterView.m in Sources */ = {isa = PBXBuildFile; fileRef = 387AABE219371AE000657087 /* FooterView.m */; };
 		387D32D0194547C8006AE1C2 /* renrenicon.png in Resources */ = {isa = PBXBuildFile; fileRef = 387D32CA194547C8006AE1C2 /* renrenicon.png */; };
 		387D32D1194547C8006AE1C2 /* renrenicon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 387D32CB194547C8006AE1C2 /* renrenicon@2x.png */; };
@@ -150,7 +152,10 @@
 		3881A630195145C000DBA619 /* 640X960.png in Resources */ = {isa = PBXBuildFile; fileRef = 3881A62F195145C000DBA619 /* 640X960.png */; };
 		3881A632195145C900DBA619 /* 320X480.png in Resources */ = {isa = PBXBuildFile; fileRef = 3881A631195145C900DBA619 /* 320X480.png */; };
 		388207AA1978FF780033AAC0 /* RecordTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 388207A91978FF780033AAC0 /* RecordTools.m */; };
+		3885F5671994C95B00B4122A /* ScoreMemListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3885F5661994C95B00B4122A /* ScoreMemListViewController.m */; };
 		388665F31986150A00D8CDF2 /* CheckQRCodeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 388665F21986150A00D8CDF2 /* CheckQRCodeViewController.m */; };
+		3891064D1996554E009B73B0 /* qr_on@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3891064B1996554E009B73B0 /* qr_on@2x.png */; };
+		3891064E1996554E009B73B0 /* qr@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3891064C1996554E009B73B0 /* qr@2x.png */; };
 		38938FC618EEF0260014F169 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38938FC518EEF0260014F169 /* Foundation.framework */; };
 		38938FC818EEF0260014F169 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38938FC718EEF0260014F169 /* CoreGraphics.framework */; };
 		38938FCA18EEF0260014F169 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38938FC918EEF0260014F169 /* UIKit.framework */; };
@@ -234,7 +239,6 @@
 		3893933818EEF53D0014F169 /* ChooseSchoolViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3893932C18EEF53D0014F169 /* ChooseSchoolViewController.m */; };
 		3893933918EEF53D0014F169 /* ClassesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3893932E18EEF53D0014F169 /* ClassesViewController.m */; };
 		3893933A18EEF53D0014F169 /* CreateClassViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3893933018EEF53D0014F169 /* CreateClassViewController.m */; };
-		3893933B18EEF53D0014F169 /* ParentApplyViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3893933218EEF53D0014F169 /* ParentApplyViewController.m */; };
 		3893933C18EEF53D0014F169 /* StudentApplyViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3893933418EEF53D0014F169 /* StudentApplyViewController.m */; };
 		3893933D18EEF53D0014F169 /* TeacherApplyViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3893933618EEF53D0014F169 /* TeacherApplyViewController.m */; };
 		3893934918EEF5440014F169 /* ChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3893934018EEF5440014F169 /* ChatViewController.m */; };
@@ -510,6 +514,8 @@
 		38E8CB0A195044D10075BDEC /* Default~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = 38E8CB09195044D10075BDEC /* Default~iphone.png */; };
 		38F366621904AB5C0024BD7E /* libMobClickLibrary.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 38F3665F1904AB5C0024BD7E /* libMobClickLibrary.a */; };
 		38F366631904AB5C0024BD7E /* libMobClickLibrary_armv6.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 38F366601904AB5C0024BD7E /* libMobClickLibrary_armv6.a */; };
+		38F6591E198A5B4E00B553D9 /* builder@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38F6591D198A5B4E00B553D9 /* builder@2x.png */; };
+		38F65921198F363C00B553D9 /* searchbarbg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38F65920198F363C00B553D9 /* searchbarbg@2x.png */; };
 		38F69B8A195DB01C00C7D5CA /* newapplyheader@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38F69B89195DB01C00C7D5CA /* newapplyheader@2x.png */; };
 		38F69B95195EAC8D00C7D5CA /* bor_bg.png in Resources */ = {isa = PBXBuildFile; fileRef = 38F69B8B195EAC8D00C7D5CA /* bor_bg.png */; };
 		38F69B96195EAC8D00C7D5CA /* bor_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38F69B8C195EAC8D00C7D5CA /* bor_bg@2x.png */; };
@@ -720,6 +726,9 @@
 		386B28B919619E3D00499F79 /* t2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "t2@2x.png"; sourceTree = "<group>"; };
 		386E632C1947F1410091710E /* MyButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyButton.h; sourceTree = "<group>"; };
 		386E632D1947F1410091710E /* MyButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyButton.m; sourceTree = "<group>"; };
+		3876261F1991C3B0009EE318 /* ParentApplyViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParentApplyViewController.m; sourceTree = "<group>"; };
+		3876262119921890009EE318 /* AlreadyInStudentsListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AlreadyInStudentsListViewController.h; sourceTree = "<group>"; };
+		3876262219921890009EE318 /* AlreadyInStudentsListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AlreadyInStudentsListViewController.m; sourceTree = "<group>"; };
 		387AABE119371AE000657087 /* FooterView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FooterView.h; sourceTree = "<group>"; };
 		387AABE219371AE000657087 /* FooterView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FooterView.m; sourceTree = "<group>"; };
 		387D32CA194547C8006AE1C2 /* renrenicon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = renrenicon.png; sourceTree = "<group>"; };
@@ -748,8 +757,12 @@
 		3881A631195145C900DBA619 /* 320X480.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 320X480.png; sourceTree = "<group>"; };
 		388207A81978FF780033AAC0 /* RecordTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RecordTools.h; sourceTree = "<group>"; };
 		388207A91978FF780033AAC0 /* RecordTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RecordTools.m; sourceTree = "<group>"; };
+		3885F5651994C95B00B4122A /* ScoreMemListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScoreMemListViewController.h; sourceTree = "<group>"; };
+		3885F5661994C95B00B4122A /* ScoreMemListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScoreMemListViewController.m; sourceTree = "<group>"; };
 		388665F11986150A00D8CDF2 /* CheckQRCodeViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CheckQRCodeViewController.h; sourceTree = "<group>"; };
 		388665F21986150A00D8CDF2 /* CheckQRCodeViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CheckQRCodeViewController.m; sourceTree = "<group>"; };
+		3891064B1996554E009B73B0 /* qr_on@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "qr_on@2x.png"; sourceTree = "<group>"; };
+		3891064C1996554E009B73B0 /* qr@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "qr@2x.png"; sourceTree = "<group>"; };
 		38938FC218EEF0260014F169 /* BANJIA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BANJIA.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		38938FC518EEF0260014F169 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		38938FC718EEF0260014F169 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -913,7 +926,6 @@
 		3893932F18EEF53D0014F169 /* CreateClassViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CreateClassViewController.h; sourceTree = "<group>"; };
 		3893933018EEF53D0014F169 /* CreateClassViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CreateClassViewController.m; sourceTree = "<group>"; };
 		3893933118EEF53D0014F169 /* ParentApplyViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParentApplyViewController.h; sourceTree = "<group>"; };
-		3893933218EEF53D0014F169 /* ParentApplyViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParentApplyViewController.m; sourceTree = "<group>"; };
 		3893933318EEF53D0014F169 /* StudentApplyViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StudentApplyViewController.h; sourceTree = "<group>"; };
 		3893933418EEF53D0014F169 /* StudentApplyViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StudentApplyViewController.m; sourceTree = "<group>"; };
 		3893933518EEF53D0014F169 /* TeacherApplyViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TeacherApplyViewController.h; sourceTree = "<group>"; };
@@ -1343,6 +1355,8 @@
 		38F3665F1904AB5C0024BD7E /* libMobClickLibrary.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libMobClickLibrary.a; sourceTree = "<group>"; };
 		38F366601904AB5C0024BD7E /* libMobClickLibrary_armv6.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libMobClickLibrary_armv6.a; sourceTree = "<group>"; };
 		38F366611904AB5C0024BD7E /* MobClick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MobClick.h; sourceTree = "<group>"; };
+		38F6591D198A5B4E00B553D9 /* builder@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "builder@2x.png"; sourceTree = "<group>"; };
+		38F65920198F363C00B553D9 /* searchbarbg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "searchbarbg@2x.png"; sourceTree = "<group>"; };
 		38F69B89195DB01C00C7D5CA /* newapplyheader@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "newapplyheader@2x.png"; sourceTree = "<group>"; };
 		38F69B8B195EAC8D00C7D5CA /* bor_bg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bor_bg.png; sourceTree = "<group>"; };
 		38F69B8C195EAC8D00C7D5CA /* bor_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "bor_bg@2x.png"; sourceTree = "<group>"; };
@@ -2126,7 +2140,7 @@
 				3893932F18EEF53D0014F169 /* CreateClassViewController.h */,
 				3893933018EEF53D0014F169 /* CreateClassViewController.m */,
 				3893933118EEF53D0014F169 /* ParentApplyViewController.h */,
-				3893933218EEF53D0014F169 /* ParentApplyViewController.m */,
+				3876261F1991C3B0009EE318 /* ParentApplyViewController.m */,
 				3893933318EEF53D0014F169 /* StudentApplyViewController.h */,
 				3893933418EEF53D0014F169 /* StudentApplyViewController.m */,
 				3893933518EEF53D0014F169 /* TeacherApplyViewController.h */,
@@ -2265,6 +2279,8 @@
 				3893938818EEF5620014F169 /* SubGroupViewController.m */,
 				38F69BE7195F9F3500C7D5CA /* AddObjectViewController.h */,
 				38F69BE8195F9F3500C7D5CA /* AddObjectViewController.m */,
+				3876262119921890009EE318 /* AlreadyInStudentsListViewController.h */,
+				3876262219921890009EE318 /* AlreadyInStudentsListViewController.m */,
 			);
 			path = members;
 			sourceTree = "<group>";
@@ -2301,6 +2317,8 @@
 				3846AAB11980A0D70061B6CA /* BlankCell.m */,
 				38282D591988D1340087018A /* ScoreDetailViewController.h */,
 				38282D5A1988D1340087018A /* ScoreDetailViewController.m */,
+				3885F5651994C95B00B4122A /* ScoreMemListViewController.h */,
+				3885F5661994C95B00B4122A /* ScoreMemListViewController.m */,
 			);
 			path = more;
 			sourceTree = "<group>";
@@ -2653,6 +2671,10 @@
 		38AD6A6D18EF04050065A5F2 /* image */ = {
 			isa = PBXGroup;
 			children = (
+				3891064B1996554E009B73B0 /* qr_on@2x.png */,
+				3891064C1996554E009B73B0 /* qr@2x.png */,
+				38F65920198F363C00B553D9 /* searchbarbg@2x.png */,
+				38F6591D198A5B4E00B553D9 /* builder@2x.png */,
 				38282D48198887960087018A /* groupchat */,
 				38A24C0E197BF15900C718BA /* btnbg@2x.png */,
 				38282D571988BAF50087018A /* groupchaticon@2x.png */,
@@ -3089,6 +3111,7 @@
 				3899BC35196E3E830037C586 /* corner_4@2x.png in Resources */,
 				38AD6CAD18EF04050065A5F2 /* input.png in Resources */,
 				386B28AB1961387900499F79 /* release@2x.png in Resources */,
+				38F65921198F363C00B553D9 /* searchbarbg@2x.png in Resources */,
 				38AD6CD418EF04050065A5F2 /* bg_bor_red.png in Resources */,
 				38F69BF81960449F00C7D5CA /* FillInfo2ViewController.xib in Resources */,
 				38282D5219889F350087018A /* defaultheader@2x.png in Resources */,
@@ -3110,6 +3133,7 @@
 				38AD6CE918EF04060065A5F2 /* icon_sel.png in Resources */,
 				38282D4C198887AD0087018A /* groupadd@2x.png in Resources */,
 				38F69B9A195EAC8D00C7D5CA /* publish@2x.png in Resources */,
+				3891064E1996554E009B73B0 /* qr@2x.png in Resources */,
 				3842D86E194BE5F700ADBD6B /* icon_checked@2x.png in Resources */,
 				38A24C13197C030E00C718BA /* icon_take_pic@2x.png in Resources */,
 				387D32D0194547C8006AE1C2 /* renrenicon.png in Resources */,
@@ -3223,6 +3247,7 @@
 				38AD6CEF18EF04060065A5F2 /* icon_tel1@2x.png in Resources */,
 				38AD6CCD18EF04050065A5F2 /* pic@2x.png in Resources */,
 				38F69BE1195EE3D900C7D5CA /* invite_sina_on@2x.png in Resources */,
+				3891064D1996554E009B73B0 /* qr_on@2x.png in Resources */,
 				3899BC05196CE7900037C586 /* zbar-help.html in Resources */,
 				38282D611989038E0087018A /* sepretorline@2x.png in Resources */,
 				38AD6CCC18EF04050065A5F2 /* pic.png in Resources */,
@@ -3260,6 +3285,7 @@
 				389392A118EEF1A40014F169 /* EGORefresh.bundle in Resources */,
 				38282D5F1988FC160087018A /* scoretable@2x.png in Resources */,
 				38AD6CE418EF04060065A5F2 /* icon_infor@2x.png in Resources */,
+				38F6591E198A5B4E00B553D9 /* builder@2x.png in Resources */,
 				3842D871194BE5F700ADBD6B /* tips.png in Resources */,
 				387D334119472F3C006AE1C2 /* logo60.png in Resources */,
 				38AD6CE818EF04060065A5F2 /* icon_peo@2x.png in Resources */,
@@ -3369,6 +3395,7 @@
 				38B0F2CC192C581B00C0FC4B /* UserProtocolViewController.m in Sources */,
 				3852D09719406609000437E6 /* Reachability.m in Sources */,
 				38F69BF71960449F00C7D5CA /* FillInfo2ViewController.m in Sources */,
+				3876262319921890009EE318 /* AlreadyInStudentsListViewController.m in Sources */,
 				389393A018EEF5620014F169 /* HeaderCell.m in Sources */,
 				389393A418EEF5620014F169 /* ApplyInfoViewController.m in Sources */,
 				384CC9131918B3FE0051B446 /* UINavigationController+JDSideMenu.m in Sources */,
@@ -3453,12 +3480,12 @@
 				3893926A18EEF1A40014F169 /* XDContentViewController.m in Sources */,
 				3893926918EEF1A40014F169 /* XDContentViewController+JDSideMenu.m in Sources */,
 				3893933C18EEF53D0014F169 /* StudentApplyViewController.m in Sources */,
+				3885F5671994C95B00B4122A /* ScoreMemListViewController.m in Sources */,
 				389393A818EEF5620014F169 /* InviteStuPareViewController.m in Sources */,
 				3806882A19852B1E00529FE7 /* MJPhotoLoadingView.m in Sources */,
 				38B492B8192316BF00C0098D /* NearbySchoolListViewController.m in Sources */,
 				3806883419852B1E00529FE7 /* SDWebImageDownloaderOperation.m in Sources */,
 				3806883719852B1E00529FE7 /* SDWebImagePrefetcher.m in Sources */,
-				3893933B18EEF53D0014F169 /* ParentApplyViewController.m in Sources */,
 				38B570C91911523C00E7F2DB /* FiistLaunchViewController.m in Sources */,
 				3893926F18EEF1A40014F169 /* FMDatabasePool.m in Sources */,
 				3899BC10196CF0FC0037C586 /* ClassQRViewController.m in Sources */,
@@ -3466,6 +3493,7 @@
 				389393D518EEF56A0014F169 /* PersonalSettingViewController.m in Sources */,
 				38B711451924A0BB00AEB55D /* HeaderVIew.m in Sources */,
 				3893932418EEF2030014F169 /* School.m in Sources */,
+				387626201991C3B0009EE318 /* ParentApplyViewController.m in Sources */,
 				3852D094194065D1000437E6 /* JSONKit.m in Sources */,
 				3899BC28196CF1760037C586 /* rscode.c in Sources */,
 				389393B618EEF5620014F169 /* MoreViewController.m in Sources */,

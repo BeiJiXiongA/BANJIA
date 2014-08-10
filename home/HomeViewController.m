@@ -245,7 +245,8 @@ ZBarReaderViewDelegate>
     qrCodeButton.alpha = 0;
     [qrCodeButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     qrCodeButton.backgroundColor = [UIColor greenColor];
-    [qrCodeButton setTitle:@"扫一扫" forState:UIControlStateNormal];
+    [qrCodeButton setBackgroundImage:[UIImage imageNamed:@"qr"] forState:UIControlStateNormal];
+    [qrCodeButton setBackgroundImage:[UIImage imageNamed:@"qr_on"] forState:UIControlStateHighlighted];
     [addView addSubview:qrCodeButton];
     [qrCodeButton addTarget:self action:@selector(toqrview) forControlEvents:UIControlEventTouchUpInside];
     
@@ -711,7 +712,6 @@ ZBarReaderViewDelegate>
         }
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:paraDict
                                                                 API:HOMEDATA];
-        
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
             NSString *responseString = [request responseString];
@@ -734,17 +734,22 @@ ZBarReaderViewDelegate>
                 
                 if ([noticeArray count] == 0 && [diariesArray count] == 0)
                 {
-                    tipLabel.text = @"";
+                    tipLabel.text = @"你所在班级还没有人发布过空间和班级通知";
                     [joinClassButton setTitle:@"发表空间" forState:UIControlStateNormal];
+                    [joinClassButton removeTarget:self action:@selector(joinClass) forControlEvents:UIControlEventTouchUpInside];
                     [joinClassButton addTarget:self action:@selector(addDongtai) forControlEvents:UIControlEventTouchUpInside];
                     
                     [createClassButton setTitle:@"发布通知" forState:UIControlStateNormal];
+                    [createClassButton removeTarget:self action:@selector(createClass) forControlEvents:UIControlEventTouchUpInside];
                     [createClassButton addTarget:self action:@selector(addNotice) forControlEvents:UIControlEventTouchUpInside];
-                    tipLabel.hidden = NO;
+                    tipView.hidden = NO;
+                }
+                else
+                {
+                    tipView.hidden = YES;
                 }
                 
                 [self groupByTime:diariesArray];
-//                [classTableView reloadData];
             }
             else
             {
@@ -1126,6 +1131,11 @@ ZBarReaderViewDelegate>
         cell.bgImageView.clipsToBounds = YES;
         cell.bgImageView.frame = CGRectMake(8, 4, SCREEN_WIDTH-16, 80);
         
+        NSRange range = [noticeContent rangeOfString:@"$!#"];
+        if (range.length > 0)
+        {
+            noticeContent = [noticeContent substringFromIndex:range.location+range.length];
+        }
         cell.contentLabel.text = noticeContent;
         cell.contentLabel.backgroundColor = [UIColor clearColor];
         cell.contentLabel.font = [UIFont systemFontOfSize:16];
@@ -1135,13 +1145,13 @@ ZBarReaderViewDelegate>
         
        
         
-        cell.statusLabel.textColor = TIMECOLOR;
+        cell.statusLabel.textColor = COMMENTCOLOR;
         cell.statusLabel.frame = CGRectMake(SCREEN_WIDTH-150, 60.5, 130, 15);
         
         cell.timeLabel.frame = CGRectMake(40, 58, 240, 20);
         cell.timeLabel.font = [UIFont systemFontOfSize:12];
         cell.timeLabel.text = [NSString stringWithFormat:@"%@发布于%@",byName,[Tools showTime:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]]];
-        cell.timeLabel.textColor = TIMECOLOR;
+        cell.timeLabel.textColor = COMMENTCOLOR;
         
          cell.iconImageView.frame = CGRectMake(20, 17, 12, 12);
 //        [cell.iconImageView setImage:[UIImage imageNamed:@"unreadicon"]];
@@ -1891,19 +1901,19 @@ ZBarReaderViewDelegate>
     {
         if ([[waitTransmitDict objectForKey:@"img"] count] > 0)
         {
-            imagePath = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[waitTransmitDict objectForKey:@"img"] firstObject]];
+            imagePath = [NSString stringWithFormat:@"%@%@@150w",IMAGEURL,[[waitTransmitDict objectForKey:@"img"] firstObject]];
         }
     }
     
     //创建分享内容
     //    NSString *imagePath = [[NSBundle mainBundle] pathForResource:IMAGE_NAME ofType:IMAGE_EXT];
     id<ISSContent> publishContent = [ShareSDK content:content
-                                       defaultContent:@""
+                                       defaultContent:ShareContent
                                                 image:[ShareSDK imageWithUrl:imagePath]
                                                 title:@"班家"
                                                   url:ShareUrl
-                                          description:content
-                                            mediaType:SSPublishContentMediaTypeText];
+                                          description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
+                                            mediaType:SSPublishContentMediaTypeNews];
     
     //创建弹出菜单容器
     id<ISSContainer> container = [ShareSDK container];
@@ -1974,17 +1984,17 @@ ZBarReaderViewDelegate>
     {
         if ([[waitTransmitDict objectForKey:@"img"] count] > 0)
         {
-            imagePath = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[waitTransmitDict objectForKey:@"img"] firstObject]];
+            imagePath = [NSString stringWithFormat:@"%@%@@80w",IMAGEURL,[[waitTransmitDict objectForKey:@"img"] firstObject]];
         }
     }
     
     //创建分享内容[ShareSDK imageWithUrl:imagePath]
-    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
-                                       defaultContent:@""
-                                                image:[ShareSDK imageWithPath:imagePath]
+    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
+                                       defaultContent:ShareContent
+                                                image:[ShareSDK imageWithUrl:imagePath]
                                                 title:@"班家"
                                                   url:ShareUrl
-                                          description:[content length]>0?content:ShareContent
+                                          description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                             mediaType:SSPublishContentMediaTypeNews];
     
     //创建弹出菜单容器
@@ -2061,12 +2071,12 @@ ZBarReaderViewDelegate>
     }
     //创建分享内容
     id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
-                                       defaultContent:@""
+                                       defaultContent:ShareContent
                                                 image:[ShareSDK imageWithUrl:imagePath]
                                                 title:@"班家"
                                                   url:ShareUrl
-                                          description:[content length]>0?content:ShareContent
-                                            mediaType:SSPublishContentMediaTypeText];
+                                          description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
+                                            mediaType:SSPublishContentMediaTypeNews];
     
     //创建弹出菜单容器
     id<ISSContainer> container = [ShareSDK container];
@@ -2135,16 +2145,17 @@ ZBarReaderViewDelegate>
     {
         if ([[waitTransmitDict objectForKey:@"img"] count] > 0)
         {
-            imagePath = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[waitTransmitDict objectForKey:@"img"] firstObject]];
+            imagePath = [NSString stringWithFormat:@"%@%@@80w",IMAGEURL,[[waitTransmitDict objectForKey:@"img"] firstObject]];
         }
     }
     //创建分享内容
-    id<ISSContent> publishContent = [ShareSDK content:content
+    //创建分享内容
+    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                        defaultContent:@""
                                                 image:[ShareSDK imageWithUrl:imagePath]
                                                 title:@"班家"
                                                   url:ShareUrl
-                                          description:content
+                                          description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                             mediaType:SSPublishContentMediaTypeNews];
     
     id<ISSAuthOptions> authOptions = [ShareSDK authOptionsWithAutoAuth:YES
@@ -2180,6 +2191,7 @@ ZBarReaderViewDelegate>
                                  [self backInput];
                                  if (state == SSPublishContentStateSuccess)
                                  {
+                                     [self backInput];
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
                                  }
                                  else if (state == SSPublishContentStateFail)
@@ -2212,16 +2224,17 @@ ZBarReaderViewDelegate>
     {
         if ([[waitTransmitDict objectForKey:@"img"] count] > 0)
         {
-            imagePath = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[waitTransmitDict objectForKey:@"img"] firstObject]];
+            imagePath = [NSString stringWithFormat:@"%@%@@150w",IMAGEURL,[[waitTransmitDict objectForKey:@"img"] firstObject]];
         }
     }
+    DDLOG(@"image path %@",imagePath);
     //创建分享内容
     id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
                                        defaultContent:@""
-                                                image:[ShareSDK imageWithPath:imagePath]
-                                                title:@"班家"
-                                                  url:ShareUrl
-                                          description:[content length]>0?content:ShareContent
+                                                image:[ShareSDK imageWithUrl:imagePath]
+                                                title:[NSString stringWithFormat:@"%@-%@",content,ShareContent]
+                                                  url:HOST_URL
+                                          description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                             mediaType:SSPublishContentMediaTypeNews];
     
     id<ISSAuthOptions> authOptions = [ShareSDK authOptionsWithAutoAuth:YES
@@ -2297,7 +2310,7 @@ ZBarReaderViewDelegate>
                                                 image:[ShareSDK imageWithUrl:imagePath]
                                                 title:@"班家"
                                                   url:ShareUrl
-                                          description:[content length]>0?content:ShareContent
+                                          description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                             mediaType:SSPublishContentMediaTypeText];
     
     //    //创建弹出菜单容器

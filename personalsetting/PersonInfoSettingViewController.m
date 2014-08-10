@@ -310,9 +310,18 @@ EditNameDone>
         cell = [[RelatedCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:personInfoCell];
     }
     cell.iconImageView.backgroundColor = [UIColor clearColor];
-    cell.textLabel.text = [cellNameArray objectAtIndex:indexPath.row];
-    cell.textLabel.font = [UIFont systemFontOfSize:15];
-    cell.textLabel.textColor = TITLE_COLOR;
+    cell.contentLabel.text = [cellNameArray objectAtIndex:indexPath.row];
+    cell.contentLabel.font = [UIFont systemFontOfSize:15];
+    cell.contentLabel.textColor = TITLE_COLOR;
+    if (indexPath.row == 0)
+    {
+         cell.contentLabel.frame = CGRectMake(10, 12, 100, 30);
+    }
+    else
+    {
+         cell.contentLabel.frame = CGRectMake(10, 9, 100, 30);
+    }
+    
     
     UITapGestureRecognizer *iconTag = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(editInfo:)];
     cell.iconImageView.userInteractionEnabled = YES;
@@ -329,19 +338,26 @@ EditNameDone>
     cell.nametf.tag = indexPath.row+3000;
     cell.nametf.delegate = self;
     
+    CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+    UIImageView *lineImageView = [[UIImageView alloc] init];
+    lineImageView.frame = CGRectMake(00, cellHeight-0.5, cell.frame.size.width, 0.5);
+    lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+    [cell.contentView addSubview:lineImageView];
+    cell.contentView.backgroundColor = [UIColor whiteColor];
+    
     if (indexPath.row == 0)
     {
         cell.iconImageView.hidden = NO;
         cell.iconImageView.frame = CGRectMake(SCREEN_WIDTH-80, 7, 40, 40);
-//        cell.iconImageView.backgroundColor = [UIColor yellowColor];
-//        cell.iconImageView.layer.contentsGravity = kCAGravityResizeAspectFill;
+        cell.iconImageView.backgroundColor = [UIColor yellowColor];
+        cell.iconImageView.layer.contentsGravity = kCAGravityResizeAspectFill;
+        cell.iconImageView.clipsToBounds = YES;
         if (headerImage)
         {
             [cell.iconImageView setImage:headerImage];
         }
         else
         {
-//            [SetImageTools fillHeaderImage:cell.iconImageView withUserid:[Tools user_id] imageType:@"img_icon" defultImage:HEADERICON];
             [Tools fillImageView:cell.iconImageView withImageFromURL:[Tools header_image] andDefault:HEADERICON];
         }
 
@@ -383,14 +399,19 @@ EditNameDone>
     else if (indexPath.row == 4)
     {
         cell.nametf.hidden = NO;
-        cell.nametf.text = [Tools phone_num];
+        if ([Tools phone_num] && [[Tools phone_num] length] > 0)
+        {
+            cell.nametf.text = [Tools phone_num];
+        }
+        else
+        {
+            cell.nametf.text = @"尚未绑定";
+        }
     }
     cell.relateButton.frame = CGRectMake(45, 15, 40, 26);
     cell.relateButton.titleLabel.font = [UIFont systemFontOfSize:16];
     [cell.relateButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     cell.relateButton.tag = indexPath.row+333;
-    
-    [cell.bgImageView setImage:[UIImage imageNamed:@"line3"]];
     
     if (indexPath.row < 4)
     {
@@ -398,7 +419,6 @@ EditNameDone>
     }
     
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
-    cell.backgroundColor = [UIColor clearColor];
     return cell;
 }
 

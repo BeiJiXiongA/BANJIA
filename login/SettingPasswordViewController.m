@@ -291,7 +291,6 @@
                 timer = [NSTimer timerWithTimeInterval:1.0 target:self selector:@selector(timeRefresh)userInfo:nil repeats:YES];
                 [[NSRunLoop  currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
                 
-//                getCodeButton.enabled = NO;
 //                [[NSUserDefaults standardUserDefaults] setObject:[responseDict objectForKey:@"data"]forKey:USERID];
 //                [[NSUserDefaults standardUserDefaults] synchronize];
                 [self getVerifyCode];
@@ -326,7 +325,6 @@
     else
     {
         [getCodeButton setTitle:@"重新获取" forState:UIControlStateNormal];
-        getCodeButton.enabled = YES;
         [timer invalidate];
         sec = 60;
     }
@@ -387,9 +385,6 @@
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 user_id = [[responseDict objectForKey:@"data"] objectForKey:@"u_id"];
-                startButton.enabled = YES;
-                getCodeButton.hidden = YES;
-                codeTextField.enabled = NO;
                 [self start];
             }
             else

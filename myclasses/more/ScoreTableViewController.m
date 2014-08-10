@@ -9,11 +9,27 @@
 #import "ScoreTableViewController.h"
 #import "ClassCell.h"
 #import "ScoreDetailViewController.h"
+#import "EGORefreshTableHeaderView.h"
+#import "FooterView.h"
+#import "ScoreMemListViewController.h"
 
-@interface ScoreTableViewController ()<UITableViewDataSource,UITableViewDelegate>
+@interface ScoreTableViewController ()<
+UITableViewDataSource,
+UITableViewDelegate,
+EGORefreshTableHeaderDelegate,
+EGORefreshTableDelegate>
 {
     NSMutableArray *gradesArray;
     UITableView *gradeTableView;
+    int page;
+    
+    NSString *classid;
+    
+    EGORefreshTableHeaderView *pullRefreshView;
+    FooterView *footerView;
+    BOOL _reloading;
+    
+    NSString *role;
 }
 @end
 
@@ -35,6 +51,9 @@
     
     self.titleLabel.text = @"成绩簿";
     gradesArray = [[NSMutableArray alloc] initWithCapacity:0];
+    page = 0;
+    classid = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
+    role = [[NSUserDefaults standardUserDefaults] objectForKey:@"role"];
     
     UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
     moreButton.frame = CGRectMake(SCREEN_WIDTH-CORNERMORERIGHT, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
@@ -49,9 +68,10 @@
     gradeTableView.backgroundColor = self.bgView.backgroundColor;
     [self.bgView addSubview:gradeTableView];
     
-    [gradesArray addObjectsFromArray:[NSArray arrayWithObjects:@{@"name":@"3年级第2学期期中考",@"score":@"395",@"checked":@"0"},@{@"name":@"3年级第2学期期中考",@"score":@"395",@"checked":@"0"},@{@"name":@"3年级第2学期期中考",@"score":@"395",@"checked":@"1"}, nil]];
+    pullRefreshView = [[EGORefreshTableHeaderView alloc] initWithScrollView:gradeTableView orientation:EGOPullOrientationDown];
+    pullRefreshView.delegate = self;
     
-    [gradeTableView reloadData];
+    [self getScoreList];
 }
 
 - (void)didReceiveMemoryWarning
@@ -69,6 +89,50 @@
 {
     
 }
+
+#pragma mark - egodelegate
+-(void)egoRefreshTableHeaderDidTriggerRefresh:(EGORefreshTableHeaderView *)view
+{
+    page = 0;
+    [self getScoreList];
+}
+
+-(void)egoRefreshTableDidTriggerRefresh:(EGORefreshPos)aRefreshPos
+{
+    [self getScoreList];
+}
+
+- (BOOL)egoRefreshTableHeaderDataSourceIsLoading:(EGORefreshTableHeaderView*)view
+{
+    return _reloading;
+}
+
+-(BOOL)egoRefreshTableDataSourceIsLoading:(UIView *)view
+{
+    return _reloading;
+}
+
+- (NSDate*)egoRefreshTableHeaderDataSourceLastUpdated:(EGORefreshTableHeaderView*)view
+{
+    return [NSDate date];
+}
+
+-(void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    [pullRefreshView egoRefreshScrollViewDidScroll:gradeTableView];
+    if (scrollView.contentOffset.y+(scrollView.frame.size.height) > scrollView.contentSize.height+65)
+    {
+        [footerView egoRefreshScrollViewDidScroll:gradeTableView];
+    }
+    
+}
+-(void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
+{
+    [pullRefreshView egoRefreshScrollViewDidEndDragging:gradeTableView];
+    [footerView egoRefreshScrollViewDidEndDragging:gradeTableView];
+}
+
+
 #pragma mark - tableview
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
@@ -86,30 +150,34 @@
     {
         cell = [[ClassCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:identifier];
     }
-    cell.nameLabel.frame = CGRectMake(30, 10, 200, 30);
+    cell.nameLabel.frame = CGRectMake(20, 10, 200, 30);
     
     cell.contentLable.frame = CGRectMake(12, 20, 12, 12);
     cell.contentLable.layer.cornerRadius = 6;
     cell.contentLable.clipsToBounds = YES;
     cell.contentLable.backgroundColor = RGB(201, 49, 49, 1);
-    
-    cell.timeLabel.frame = CGRectMake(30, 44, 150, 20);
+    cell.contentLable.hidden = YES;
+    cell.timeLabel.frame = CGRectMake(20, 44, 150, 20);
     
     NSDictionary *dict = [gradesArray objectAtIndex:indexPath.row];
     cell.nameLabel.text = [dict objectForKey:@"name"];
     
-    [cell.timeLabel cnv_setUILabelText:[NSString stringWithFormat:@"总成绩%d分",[[dict objectForKey:@"score"] integerValue]] andKeyWord:[dict objectForKey:@"score"]];
-    cell.timeLabel.font = [UIFont systemFontOfSize:12];
-    [cell.timeLabel cnv_setUIlabelTextColor:TIMECOLOR andKeyWordColor:RGB(51, 204, 102, 0.8)];
     
-    if ([[dict objectForKey:@"checked"] integerValue] == 0)
+    if ([role isEqualToString:@"teachers"])
     {
-        cell.contentLable.hidden = NO;
+        [cell.timeLabel cnv_setUILabelText:[NSString stringWithFormat:@"共有%d人参加考试",[[dict objectForKey:@"members_num"] integerValue]] andKeyWord:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"members_num"] integerValue]]];
     }
     else
     {
-        cell.contentLable.hidden = YES;
+        
+        [cell.timeLabel cnv_setUILabelText:[NSString stringWithFormat:@"总成绩%d分",[[dict objectForKey:@"total"] integerValue]] andKeyWord:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"total"] integerValue]]];
     }
+    cell.timeLabel.font = [UIFont systemFontOfSize:12];
+    [cell.timeLabel cnv_setUIlabelTextColor:TIMECOLOR andKeyWordColor:RGB(51, 204, 102, 0.8)];
+    
+    cell.arrowImageView.hidden = NO;
+    [cell.arrowImageView setFrame:CGRectMake(SCREEN_WIDTH-20, 27.5, 10, 15)];
+    [cell.arrowImageView setImage:[UIImage imageNamed:@"discovery_arrow"]];
     
     CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
     UIImageView *lineImageView = [[UIImageView alloc] init];
@@ -117,18 +185,27 @@
     lineImageView.image = [UIImage imageNamed:@"sepretorline"];
     [cell.contentView addSubview:lineImageView];
     cell.contentView.backgroundColor = [UIColor whiteColor];
+    cell.selectionStyle = UITableViewCellSelectionStyleGray;
     
-    cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     return cell;
 }
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSDictionary *dict = [gradesArray objectAtIndex:indexPath.row];
-    ScoreDetailViewController *scoreDetailViewController = [[ScoreDetailViewController alloc] init];
-    scoreDetailViewController.testName = [dict objectForKey:@"name"];
-    scoreDetailViewController.pubName = @"张晓伟(数学老师)";
-    scoreDetailViewController.pubTime = @"2014-08-01";
-    [self.navigationController pushViewController:scoreDetailViewController animated:YES];
+    if ([role isEqualToString:@"teachers"])
+    {
+        ScoreMemListViewController *memlist = [[ScoreMemListViewController alloc] init];
+        memlist.scoreid = [dict objectForKey:@"_id"];
+        [self.navigationController pushViewController:memlist animated:YES];
+    }
+    else
+    {
+        ScoreDetailViewController *scoreDetailViewController = [[ScoreDetailViewController alloc] init];
+        scoreDetailViewController.scoreId = [dict objectForKey:@"_id"];
+        scoreDetailViewController.testName = [dict objectForKey:@"name"];
+        
+        [self.navigationController pushViewController:scoreDetailViewController animated:YES];
+    }
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
@@ -138,15 +215,42 @@
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
-                                                                      } API:MB_APPLY_FRIEND];
+                                                                      @"c_id":classid,
+                                                                      @"page":[NSString stringWithFormat:@"%d",page],
+                                                                      @"role":[[NSUserDefaults standardUserDefaults] objectForKey:@"role"]
+                                                                      } API:SCORELIST];
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"memberByClass responsedict %@",responseDict);
+            DDLOG(@"score list responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 
+                if (page == 0)
+                {
+                    [gradesArray removeAllObjects];
+                    NSString *requestUrlStr = [NSString stringWithFormat:@"%@=%@=%@",GETNOTIFICATIONS,[Tools user_id],classid];
+                    NSString *key = [requestUrlStr MD5Hash];
+                    [FTWCache setObject:[responseString dataUsingEncoding:NSUTF8StringEncoding] forKey:key];
+                }
+                [gradesArray addObjectsFromArray:[[responseDict objectForKey:@"data"] objectForKey:@"exams"]];
+                
+                [gradeTableView reloadData];
+                if (footerView)
+                {
+                    [footerView removeFromSuperview];
+                    footerView = [[FooterView alloc] initWithScrollView:gradeTableView];
+                    footerView.delegate = self;
+                }
+                else
+                {
+                    footerView = [[FooterView alloc] initWithScrollView:gradeTableView];
+                    footerView.delegate = self;
+                }
+                _reloading = NO;
+                [footerView egoRefreshScrollViewDataSourceDidFinishedLoading:gradeTableView];
+                [pullRefreshView egoRefreshScrollViewDataSourceDidFinishedLoading:gradeTableView];
             }
             else
             {

@@ -253,9 +253,15 @@
         [Tools showAlertView:@"请输入您的姓名！" delegateViewController:nil];
         return;
     }
-    if ([nameTextField.text lengthOfBytesUsingEncoding:NSUTF8StringEncoding] > 45)
+    if ([nameTextField.text lengthOfBytesUsingEncoding:NSUTF8StringEncoding] <=1)
     {
-        [Tools showAlertView:@"名字最多有15个汉字组成！" delegateViewController:nil];
+        [Tools showAlertView:@"名字的长度应该大于1个字符" delegateViewController:nil];
+        return;
+    }
+    
+    if ([nameTextField.text lengthOfBytesUsingEncoding:NSUTF8StringEncoding] > 15)
+    {
+        [Tools showAlertView:@"名字的长度应该小于15个字符" delegateViewController:nil];
         return;
     }
     
@@ -280,7 +286,7 @@
             [Tools showAlertView:@"请输入您的密码！" delegateViewController:nil];
             return;
         }
-        if ([Tools isPassWord:pwdTextField.text])
+        if (![Tools isPassWord:pwdTextField.text])
         {
             [Tools showAlertView:@"密码由6-20位字母或数字组成" delegateViewController:nil];
             return ;

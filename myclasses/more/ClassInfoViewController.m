@@ -52,6 +52,8 @@ SetClassInfoDel>
     NSString *regionStr;
     
     NSArray *schoolLevelArray;
+    
+    BOOL first;
 }
 @end
 
@@ -74,6 +76,8 @@ SetClassInfoDel>
     self.titleLabel.text = @"班级信息";
     classInfo = @"";
     regionStr = @"";
+    
+    first = YES;
     
     schoolLevelArray = SCHOOLLEVELARRAY;
     
@@ -200,13 +204,19 @@ SetClassInfoDel>
 
 #pragma mark - tableview
 
-- (void)scrollViewDidScroll:(UIScrollView *)scrollView{
-    CGFloat yOffset  = scrollView.contentOffset.y;
-    if (yOffset < -TOP_HEIGHT) {
-        CGRect f = topicImageView.frame;
-        f.origin.y = yOffset;
-        f.size.height =  -yOffset;
-        topicImageView.frame = f;
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    if (first)
+    {
+        CGFloat yOffset  = scrollView.contentOffset.y;
+        if (yOffset < -TOP_HEIGHT)
+        {
+            CGRect f = topicImageView.frame;
+            f.origin.y = yOffset;
+            f.size.height =  -yOffset;
+            topicImageView.frame = f;
+        }
+        first = NO;
     }
 }
 
@@ -246,6 +256,13 @@ SetClassInfoDel>
     cell.objectsLabel.lineBreakMode = NSLineBreakByWordWrapping;
     cell.objectsLabel.textAlignment = NSTextAlignmentRight;
     cell.nameLabel.textAlignment = NSTextAlignmentLeft;
+    
+    CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+    UIImageView *lineImageView = [[UIImageView alloc] init];
+    lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+    lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+    [cell.contentView addSubview:lineImageView];
+    cell.contentView.backgroundColor = [UIColor whiteColor];
     
     CGFloat left = 210;
     if (indexPath.row < 6)
@@ -341,17 +358,22 @@ SetClassInfoDel>
     UIImageView *bgImageBG = [[UIImageView alloc] init];
     bgImageBG.image = [UIImage imageNamed:@"cell_bg2"];
     cell.backgroundView = bgImageBG;
-    if (indexPath.row == 1 || indexPath.row == 4 || indexPath.row == 6 || indexPath.row == 3)
+    if (indexPath.row == 1 || indexPath.row == 4 || indexPath.row == 6 || indexPath.row == 3 || indexPath.row == 2)
     {
+        UIImageView *markView = [[UIImageView alloc] init];
+        markView.hidden = YES;
         OperatDB *db = [[OperatDB alloc] init];
         NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
         int userAdmin = [[dict objectForKey:@"admin"] integerValue];
-        if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] intValue] == 2)
+        if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] intValue] == 2 || indexPath.row == 2)
         {
-            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+            markView.hidden = NO;
+            markView.frame = CGRectMake(SCREEN_WIDTH-20, 17, 8, 12);
+            [markView setImage:[UIImage imageNamed:@"discovery_arrow"]];
+            [cell.contentView addSubview:markView];
         }
     }
-
+    cell.contentView.backgroundColor = [UIColor whiteColor];
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
 }

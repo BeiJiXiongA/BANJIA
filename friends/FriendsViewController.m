@@ -356,7 +356,7 @@ OperateFriends>
             cell.memNameLabel.text = [NSString stringWithFormat:@"您有%d个新好友",[newFriendsApply count]];
             cell.memNameLabel.font = [UIFont systemFontOfSize:17];
             
-            cell.markView.frame = CGRectMake(236, 25, 8, 12);
+            cell.markView.frame = CGRectMake(SCREEN_WIDTH-20, 25, 8, 12);
             [cell.markView setImage:[UIImage imageNamed:@"discovery_arrow"]];
             cell.markView.hidden = NO;
             cell.backgroundColor = self.bgView.backgroundColor;
@@ -392,10 +392,12 @@ OperateFriends>
         }
         CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
         UIImageView *lineImageView = [[UIImageView alloc] init];
-        lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+        lineImageView.frame = CGRectMake(70, cellHeight-0.5, cell.frame.size.width, 0.5);
         lineImageView.image = [UIImage imageNamed:@"sepretorline"];
         [cell.contentView addSubview:lineImageView];
         cell.contentView.backgroundColor = [UIColor whiteColor];
+        
+        cell.selectionStyle = UITableViewCellSelectionStyleGray;
         return cell;
     }
     else
@@ -405,6 +407,17 @@ OperateFriends>
         if (cell == nil)
         {
             cell = [[MemberCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:friendsCell];
+        }
+        
+        CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+        UIImageView *lineImageView = [[UIImageView alloc] init];
+        lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+        [cell.contentView addSubview:lineImageView];
+        cell.contentView.backgroundColor = [UIColor whiteColor];
+        if (indexPath.row < [tableView numberOfRowsInSection:indexPath.section]-1)
+        {
+            lineImageView.frame = CGRectMake( 70, cellHeight-0.5, cell.frame.size.width, 0.5);
         }
         if ([tmpListArray count] > 0 && [tmpListArray count] < 20)
         {
@@ -436,13 +449,6 @@ OperateFriends>
             cell.memNameLabel.frame = CGRectMake(70, 15, 150, 30);
             cell.memNameLabel.text = [friendDict objectForKey:@"fname"];
         }
-        
-        CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
-        UIImageView *lineImageView = [[UIImageView alloc] init];
-        lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
-        [cell.contentView addSubview:lineImageView];
-        cell.contentView.backgroundColor = [UIColor whiteColor];
         return cell;
     }
     return nil;

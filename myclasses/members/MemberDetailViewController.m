@@ -79,7 +79,7 @@ UIActionSheetDelegate>
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
     qqnum = @"未绑定";
-    birth = @"未设置";
+    birth = @"";
     
     self.titleLabel.text = @"个人信息";
     
@@ -139,6 +139,19 @@ UIActionSheetDelegate>
         if (![[dict objectForKey:@"birth"] isEqual:[NSNull null]])
         {
             birth = [dict objectForKey:@"birth"];
+        }
+        if (![[dict objectForKey:@"sex"] isEqual:[NSNull null]] && [[dict objectForKey:@"sex"] length] > 0)
+        {
+            if ([[dict objectForKey:@"sex"] intValue] == 1)
+            {
+                //男
+                sexureimage = @"male";
+            }
+            else if ([[dict objectForKey:@"sex"] intValue] == 0)
+            {
+                //
+                sexureimage = @"female";
+            }
         }
     }
     
@@ -220,10 +233,20 @@ UIActionSheetDelegate>
     {
         if (indexPath.row < 2)
         {
-            return 40;
+            if (indexPath.row == 0 && [phoneNum length] > 0)
+            {
+                return 40;
+            }
+            if (indexPath.row == 1 && [birth length] > 0)
+            {
+                return 40;
+            }
         }
+        else
+            return 60;
     }
-    return 60;
+    return 0;
+    
 }
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -292,19 +315,34 @@ UIActionSheetDelegate>
             cell.contentLabel.textAlignment = NSTextAlignmentRight;
             if (indexPath.row == 0)
             {
-                cell.nameLabel.text = @"手机号";
-                cell.contentLabel.text = phoneNum;
+                if([phoneNum length] > 0)
+                {
+                    cell.nameLabel.text = @"手机号";
+                    cell.contentLabel.text = phoneNum;
+                }
+                else
+                {
+                    cell.nameLabel.text = @"";
+                }
             }
             else if(indexPath.row == 1)
             {
-                cell.nameLabel.text = @"生日";
-                cell.contentLabel.text = birth;
+                if([birth length] > 0)
+                {
+                    cell.nameLabel.text = @"生日";
+                    cell.contentLabel.text = birth;
+                }
+                else
+                {
+                    cell.nameLabel.text = @"";
+                }
             }
-            UIImageView *bgImageBG = [[UIImageView alloc] init];
-            bgImageBG.image = [UIImage imageNamed:@"line3"];
-            bgImageBG.backgroundColor = [UIColor clearColor];
-            cell.backgroundView = bgImageBG;
-            cell.backgroundColor = [UIColor whiteColor];
+            CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+            UIImageView *lineImageView = [[UIImageView alloc] init];
+            lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            [cell.contentView addSubview:lineImageView];
+            cell.contentView.backgroundColor = [UIColor whiteColor];
         }
         else
         {
@@ -676,6 +714,10 @@ UIActionSheetDelegate>
                         //
                         sexureimage = @"female";
                     }
+                    if ([db updeteKey:@"sex" toValue:[dict objectForKey:@"sex"] withParaDict:@{@"uid":teacherID,@"classid":classID} andTableName:CLASSMEMBERTABLE])
+                    {
+                        DDLOG(@"update sex success");
+                    }
                     if ([dict objectForKey:@"phone"])
                     {
                         if ([db updeteKey:@"phone" toValue:[dict objectForKey:@"phone"] withParaDict:@{@"uid":teacherID,@"classid":classID} andTableName:CLASSMEMBERTABLE])
@@ -684,7 +726,7 @@ UIActionSheetDelegate>
                         }
                         phoneNum = [dict objectForKey:@"phone"];
                     }
-                    if ([dict objectForKey:@"birth"])
+                    if ([dict objectForKey:@"birth"] && ![[dict objectForKey:@"birth"] isEqualToString:@"请设置生日"])
                     {
                         if ([db updeteKey:@"birth" toValue:[dict objectForKey:@"birth"] withParaDict:@{@"uid":teacherID,@"classid":classID} andTableName:CLASSMEMBERTABLE])
                         {

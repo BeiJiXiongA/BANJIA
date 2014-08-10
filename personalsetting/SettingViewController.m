@@ -67,13 +67,10 @@ MFMailComposeViewControllerDelegate>
         settingDict = [[NSMutableDictionary alloc] initWithCapacity:4];
     }
     
-    UIView *tableViewBg = [[UIView alloc] initWithFrame:self.bgView.frame];
-    [tableViewBg setBackgroundColor:UIColorFromRGB(0xf1f0ec)];
-    
     settingTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
     settingTableView.delegate = self;
-    settingTableView.backgroundView = tableViewBg;
     settingTableView.dataSource = self;
+    settingTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     settingTableView.backgroundColor = self.bgView.backgroundColor;
     [self.bgView addSubview:settingTableView];
     
@@ -164,7 +161,7 @@ MFMailComposeViewControllerDelegate>
     {
         [cell setSeparatorInset:UIEdgeInsetsZero];
     }
-    
+    cell.contentView.backgroundColor = [UIColor whiteColor];
     for(UIView *v in cell.contentView.subviews)
     {
         if ([v isKindOfClass:[UIButton class]])
@@ -172,6 +169,11 @@ MFMailComposeViewControllerDelegate>
             [v removeFromSuperview];
         }
     }
+    CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+    UIImageView *lineImageView = [[UIImageView alloc] init];
+    lineImageView.frame = CGRectMake(0, cellHeight-0.3, cell.frame.size.width, 0.3);
+    lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+    [cell.contentView addSubview:lineImageView];
     
     cell.mySwitch.hidden = YES;
     cell.mySwitch.frame = CGRectMake( SCREEN_WIDTH-65, 7, 50, 30);
@@ -312,24 +314,18 @@ MFMailComposeViewControllerDelegate>
             [loginOutButton addTarget:self action:@selector(askloginOut) forControlEvents:UIControlEventTouchUpInside];
             [cell.contentView addSubview:loginOutButton];
             cell.backgroundColor = self.bgView.backgroundColor;
-            cell.contentView.backgroundColor = [UIColor clearColor];
+            cell.contentView.backgroundColor = self.bgView.backgroundColor;
             cell.backgroundView = nil;
-//            if ([cell respondsToSelector:@selector(setSeparatorInset:)])
-//            {
-//                [cell setSeparatorInset:UIEdgeInsetsMake(1000, 1001, 10011, 0)];
-//            }
+            lineImageView.hidden = YES;
         }
         else
         {
             cell.arrowImageView.frame = CGRectMake(SCREEN_WIDTH-25, 14, 10, 15);
             [cell.arrowImageView setImage:[UIImage imageNamed:@"discovery_arrow"]];
             cell.arrowImageView.backgroundColor = [UIColor whiteColor];
-//            cell.backgroundColor = [UIColor whiteColor];
         }
     }
-    
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
-    cell.contentView.backgroundColor = [UIColor whiteColor];
     return cell;
 }
 
@@ -407,7 +403,7 @@ MFMailComposeViewControllerDelegate>
                 NSDictionary *infoDict = [[NSBundle mainBundle] infoDictionary];
                 NSString *currentVersion = [infoDict objectForKey:@"CFBundleShortVersionString"];
                 
-                if (currentVersion < latestVersion) {
+                if ([currentVersion compare:latestVersion] < 0) {
                     
                     UIAlertView *alert;
                     alert = [[UIAlertView alloc] initWithTitle:trackName

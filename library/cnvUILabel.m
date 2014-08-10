@@ -105,7 +105,11 @@
 //设置颜色属性和字体属性
 - (NSAttributedString *)illuminatedString:(NSString *)text 
                                      font:(UIFont *)AtFont{
-	
+    
+    if (!text)
+    {
+        text = @"";
+    }
     int len = [text length];
     //创建一个可变的属性字符串
     NSMutableAttributedString *mutaString = [[[NSMutableAttributedString alloc] initWithString:text] autorelease];

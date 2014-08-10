@@ -105,6 +105,7 @@ UIActionSheetDelegate>
     personalSettiongTableView.backgroundView = tableViewBg;
     personalSettiongTableView.backgroundColor = [UIColor whiteColor];
     personalSettiongTableView.dataSource = self;
+    personalSettiongTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     if ([personalSettiongTableView respondsToSelector:@selector(setSeparatorInset:)])
     {
         [personalSettiongTableView setSeparatorInset:UIEdgeInsetsZero];
@@ -305,6 +306,13 @@ UIActionSheetDelegate>
             cell.backgroundColor = [UIColor whiteColor];
             cell.contentView.backgroundColor = [UIColor whiteColor];
             
+            CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+            UIImageView *lineImageView = [[UIImageView alloc] init];
+            lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            [cell.contentView addSubview:lineImageView];
+            cell.contentView.backgroundColor = [UIColor whiteColor];
+            
             return cell;
         }
     }
@@ -348,6 +356,14 @@ UIActionSheetDelegate>
             cell.selectionStyle = UITableViewCellSelectionStyleGray;
             cell.backgroundColor = [UIColor whiteColor];
             cell.contentView.backgroundColor = [UIColor whiteColor];
+            
+            CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+            UIImageView *lineImageView = [[UIImageView alloc] init];
+            lineImageView.frame = CGRectMake(60, cellHeight-0.5, cell.frame.size.width, 0.5);
+            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            [cell.contentView addSubview:lineImageView];
+            cell.contentView.backgroundColor = [UIColor whiteColor];
+            
             return cell;
         }
         else
@@ -366,6 +382,13 @@ UIActionSheetDelegate>
             [cell.relateButton setTitle:@"" forState:UIControlStateNormal];
             [cell.relateButton setTitleColor:COMMENTCOLOR forState:UIControlStateNormal];
             cell.nametf.frame = CGRectMake(SCREEN_WIDTH-150, 17, 120, 26);
+            
+            CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+            UIImageView *lineImageView = [[UIImageView alloc] init];
+            lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            [cell.contentView addSubview:lineImageView];
+            
             if (indexPath.row == 1)
             {
                 if ([[[NSUserDefaults standardUserDefaults] objectForKey:QQNICKNAME] length] >0)
@@ -384,6 +407,7 @@ UIActionSheetDelegate>
                     [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
                     [cell.relateButton setTitle:@"未关联" forState:UIControlStateNormal];
                 }
+                lineImageView.frame = CGRectMake(60, cellHeight-0.5, cell.frame.size.width, 0.5);
                 [cell.iconImageView setImage:[UIImage imageNamed:@"QQicon"]];
             }
             else if(indexPath.row == 2)
@@ -405,7 +429,7 @@ UIActionSheetDelegate>
                     [cell.relateButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
                     [cell.relateButton setTitle:@"未关联" forState:UIControlStateNormal];
                 }
-                
+                lineImageView.frame = CGRectMake(60, cellHeight-0.5, cell.frame.size.width, 0.5);
                 [cell.iconImageView setImage:[UIImage imageNamed:@"sinaicon"]];
             }
             else if(indexPath.row == 3)
@@ -437,6 +461,8 @@ UIActionSheetDelegate>
             cell.contentLabel.frame = CGRectMake(cell.iconImageView.frame.size.width+cell.iconImageView.frame.origin.x+10, cell.iconImageView.frame.origin.y+4, 150, 30);
             cell.contentLabel.font = [UIFont systemFontOfSize:18];
             cell.nametf.returnKeyType = UIReturnKeyDone;
+            
+            cell.contentView.backgroundColor = [UIColor whiteColor];
             cell.selectionStyle = UITableViewCellSelectionStyleGray;
             cell.backgroundColor = [UIColor whiteColor];
             cell.contentView.backgroundColor = [UIColor whiteColor];
@@ -485,6 +511,14 @@ UIActionSheetDelegate>
             }
             else
                 cell.nameLabel.hidden = YES;
+            
+            CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+            UIImageView *lineImageView = [[UIImageView alloc] init];
+            lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            [cell.contentView addSubview:lineImageView];
+            cell.contentView.backgroundColor = [UIColor whiteColor];
+            
             cell.selectionStyle = UITableViewCellSelectionStyleGray;
             cell.contentView.backgroundColor = [UIColor whiteColor];
             return cell;
@@ -502,6 +536,13 @@ UIActionSheetDelegate>
             cell.textLabel.textColor = TITLE_COLOR;
             
             cell.selectionStyle = UITableViewCellSelectionStyleGray;
+            cell.contentView.backgroundColor = [UIColor whiteColor];
+            
+            CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+            UIImageView *lineImageView = [[UIImageView alloc] init];
+            lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            [cell.contentView addSubview:lineImageView];
             cell.contentView.backgroundColor = [UIColor whiteColor];
             return cell;
         }
@@ -941,9 +982,9 @@ static int loginID;
                                        defaultContent:@""
                                                 image:[ShareSDK imageWithPath:imagePath]
                                                 title:@"班家"
-                                                  url:@"http://www.banjiaedu.com"
+                                                  url:ShareUrl
                                           description:ShareContent
-                                            mediaType:SSPublishContentMediaTypeText];
+                                            mediaType:SSPublishContentMediaTypeApp];
     
     //创建弹出菜单容器
     id<ISSContainer> container = [ShareSDK container];
@@ -1003,7 +1044,7 @@ static int loginID;
                                        defaultContent:@""
                                                 image:nil
                                                 title:@"班家"
-                                                  url:@"http://www.banjiaedu.com"
+                                                  url:ShareUrl
                                           description:ShareContent
                                             mediaType:SSPublishContentMediaTypeText];
     
@@ -1061,14 +1102,14 @@ static int loginID;
 - (void)shareToTencentWeiboClickHandler:(UIButton *)sender
 {
     //创建分享内容
-    //    NSString *imagePath = [[NSBundle mainBundle] pathForResource:IMAGE_NAME ofType:IMAGE_EXT];
+    NSString *imagePath = [[NSBundle mainBundle] pathForResource:IMAGE_NAME ofType:IMAGE_EXT];
     id<ISSContent> publishContent = [ShareSDK content:ShareContent
                                        defaultContent:@""
-                                                image:nil
+                                                image:[ShareSDK imageWithPath:imagePath]
                                                 title:@"班家"
-                                                  url:@"http://www.banjiaedu.com"
+                                                  url:ShareUrl
                                           description:ShareContent
-                                            mediaType:SSPublishContentMediaTypeText];
+                                            mediaType:SSPublishContentMediaTypeNews];
     
     //创建弹出菜单容器
     id<ISSContainer> container = [ShareSDK container];
@@ -1123,12 +1164,12 @@ static int loginID;
 - (void)shareToQQFriendClickHandler:(UIButton *)sender
 {
     //创建分享内容
-    //    NSString *imagePath = [[NSBundle mainBundle] pathForResource:IMAGE_NAME ofType:IMAGE_EXT];
+    NSString *imagePath = [[NSBundle mainBundle] pathForResource:IMAGE_NAME ofType:IMAGE_EXT];
     id<ISSContent> publishContent = [ShareSDK content:ShareContent
                                        defaultContent:@""
-                                                image:nil
+                                                image:[ShareSDK imageWithPath:imagePath]
                                                 title:@"班家"
-                                                  url:@"http://www.banjiaedu.com"
+                                                  url:ShareUrl
                                           description:ShareContent
                                             mediaType:SSPublishContentMediaTypeNews];
     
@@ -1187,7 +1228,7 @@ static int loginID;
                                        defaultContent:@""
                                                 image:[ShareSDK imageWithPath:imagePath]
                                                 title:@"班家"
-                                                  url:@"http://www.banjiaedu.com"
+                                                  url:ShareUrl
                                           description:ShareContent
                                             mediaType:SSPublishContentMediaTypeNews];
     
@@ -1241,11 +1282,12 @@ static int loginID;
 - (void)shareToRenRenClickHandler:(UIButton *)sender
 {
     //创建分享内容
+    NSString *imagePath = [[NSBundle mainBundle] pathForResource:IMAGE_NAME ofType:IMAGE_EXT];
     id<ISSContent> publishContent = [ShareSDK content:ShareContent
                                        defaultContent:@""
-                                                image:nil
+                                                image:[ShareSDK imageWithPath:imagePath]
                                                 title:@"班家"
-                                                  url:@"http://www.banjiaedu.com"
+                                                  url:ShareUrl
                                           description:ShareContent
                                             mediaType:SSPublishContentMediaTypeText];
     

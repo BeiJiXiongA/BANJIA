@@ -36,15 +36,13 @@
     NSArray *menuNamesArray;
     NSArray *menuIconArray;
     
-    UITableView *buttonTableView;
-    
     NSInteger selectIndex;
     UILabel *nameLabel;
 }
 @end
 
 @implementation SideMenuViewController
-@synthesize imageView;
+@synthesize imageView,buttonTableView;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -132,10 +130,11 @@
     cell.nameLabel.font = [UIFont systemFontOfSize:18];
     if (indexPath.row == selectIndex)
     {
-        cell.backgroundColor = RGB(58, 63, 67, 1);
+        cell.contentView.backgroundColor = RGB(58, 63, 67, 1);
     }
     else
     {
+        cell.contentView.backgroundColor = [UIColor clearColor];
         cell.backgroundColor = [UIColor clearColor];
     }
     

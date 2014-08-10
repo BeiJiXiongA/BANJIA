@@ -12,4 +12,7 @@
 @property (nonatomic, strong) UIImageView *headerImageView;
 @property (nonatomic, strong) UILabel *nameLabel;
 @property (nonatomic, strong) UIButton *contactButton;
+@property (nonatomic, strong) UIButton *button2;
+@property (nonatomic, strong) MyTextField *textField;
+@property (nonatomic, strong) UILabel *numLabel;
 @end

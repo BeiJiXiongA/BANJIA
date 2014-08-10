@@ -272,6 +272,10 @@
 
 -(void)nextStep
 {
+    if (sec != 60)
+    {
+        return ;
+    }
     if ([phoneNumTextfield.text length] == 0)
     {
         [Tools showAlertView:@"请输入手机号码！" delegateViewController:nil];

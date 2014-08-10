@@ -41,8 +41,6 @@ UIActionSheetDelegate>
     
     UITableView *infoView;
     
-    NSMutableArray *pArray;
-    
     NSString *otherUserAdmin;
     OperatDB *db;
     
@@ -60,18 +58,27 @@ UIActionSheetDelegate>
     NSString *sexureimage;
     NSString *birth;
     
-    
     CGFloat bgImageHeight;
 }
 @end
 
 @implementation StudentDetailViewController
-@synthesize studentName,studentID,title,admin,headerImg,role,memDel;
+@synthesize studentName,studentID,title,admin,headerImg,role,memDel,pArray,studentNum;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
+    }
+    return self;
+}
+
+-(id)init
+{
+    self = [super init];
+    if (self)
+    {
+        pArray = [[NSMutableArray alloc] initWithCapacity:0];
     }
     return self;
 }
@@ -85,27 +92,29 @@ UIActionSheetDelegate>
     className = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
-    qqnum = @"未绑定";
-    birth = @"未设置";
+    qqnum = @"";
+    birth = @"";
     
     self.titleLabel.text = @"个人信息";
-    
-    pArray = [[NSMutableArray alloc] initWithCapacity:0];
     
     db = [[OperatDB alloc] init];
     
     otherUserAdmin = @"0";
-    role = @"students";
+    if ([studentNum length] == 0)
+    {
+        studentNum = @"";
+    }
+    
     
     UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
     moreButton.frame = CGRectMake(SCREEN_WIDTH-CORNERMORERIGHT, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     moreButton.hidden = YES;
     [moreButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
     [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
-    if (![studentID isEqual:[NSNull null]] && [studentID length] > 0)
+    if (![role isEqualToString:@"unin_students"])
     {
         [self.navigationBarView addSubview:moreButton];
-        if ([studentID length] > 10)
+        if (![role isEqualToString:@"unin_students"])
         {
             if (![studentID isEqualToString:[Tools user_id]])
             {
@@ -140,6 +149,23 @@ UIActionSheetDelegate>
                 if (![[dict objectForKey:@"birth"] isEqual:[NSNull null]])
                 {
                     birth = [dict objectForKey:@"birth"];
+                }
+                if ([dict objectForKey:@"sn"] && ![[dict objectForKey:@"sn"] isEqual:[NSNull null]])
+                {
+                    studentNum = [dict objectForKey:@"sn"];
+                }
+                if (![[dict objectForKey:@"sex"] isEqual:[NSNull null]] && [[dict objectForKey:@"sex"] length] > 0)
+                {
+                    if ([[dict objectForKey:@"sex"] intValue] == 1)
+                    {
+                        //男
+                        sexureimage = @"male";
+                    }
+                    else
+                    {
+                        //
+                        sexureimage = @"female";
+                    }
                 }
             }
         }
@@ -180,7 +206,7 @@ UIActionSheetDelegate>
 -(void)getParentsWithStudentName
 {
     [pArray removeAllObjects];
-    NSArray *tmpParentsArray = [db findSetWithDictionary:@{@"classid":classID,@"role":@"parents",@"re_name":studentName,@"checked":@"1"} andTableName:CLASSMEMBERTABLE];
+    NSArray *tmpParentsArray = [db findSetWithDictionary:@{@"classid":classID,@"role":@"parents",@"re_id":studentID,@"checked":@"1"} andTableName:CLASSMEMBERTABLE];
     if ([tmpParentsArray count] > 0)
     {
         [pArray addObjectsFromArray:tmpParentsArray];
@@ -305,11 +331,34 @@ UIActionSheetDelegate>
     {
         if ([studentID length] > 10)
         {
-            if (indexPath.row < 2)
+            if (indexPath.row < 3)
             {
-                return 40;
+                if (indexPath.row == 0)
+                {
+                    if ([phoneNum length] > 0)
+                    {
+                        return 40;
+                    }
+                }
+                else if(indexPath.row == 1)
+                {
+                    if ([birth length] > 0)
+                    {
+                        return 40;
+                    }
+                }
+                else if(indexPath.row == 2)
+                {
+                    if ([studentNum length] > 0)
+                    {
+                        return 40;
+                    }
+                }
             }
-            return 60;
+            else if(![role isEqualToString:@"unin_students"])
+            {
+                return 60;
+            }
         }
     }
     return 0;
@@ -329,7 +378,7 @@ UIActionSheetDelegate>
     {
         if ([studentID length] > 10)
         {
-            return 3;
+            return 4;
         }
     }
     return 0;
@@ -377,8 +426,11 @@ UIActionSheetDelegate>
         cell.nameLabel.shadowOffset = CGSizeMake(0.5, 0.5);
         cell.nameLabel.font = [UIFont systemFontOfSize:18];
         
-        cell.sexureImageView.frame = CGRectMake(cell.nameLabel.frame.origin.x+cell.nameLabel.frame.size.width+10, cell.nameLabel.frame.origin.y, 20, 20);
-        [cell.sexureImageView setImage:[UIImage imageNamed:sexureimage]];
+        if (![role isEqualToString:@"unin_students"])
+        {
+            cell.sexureImageView.frame = CGRectMake(cell.nameLabel.frame.origin.x+cell.nameLabel.frame.size.width+10, cell.nameLabel.frame.origin.y, 20, 20);
+            [cell.sexureImageView setImage:[UIImage imageNamed:sexureimage]];
+        }
         
         cell.contentLabel.frame = CGRectMake(DetailHeaderHeight+30, cell.headerImageView.frame.origin.y+35, 100, 20);
         cell.contentLabel.text = title;
@@ -421,7 +473,7 @@ UIActionSheetDelegate>
         {
             return nil;
         }
-        if (indexPath.row < 2)
+        if (indexPath.row < ([studentNum length] > 0?3:2))
         {
             cell.nameLabel.frame = CGRectMake(15, 5, 100, 30);
             cell.nameLabel.textColor = TITLE_COLOR;
@@ -430,25 +482,55 @@ UIActionSheetDelegate>
             cell.contentLabel.textAlignment = NSTextAlignmentRight;
             if (indexPath.row == 0)
             {
-                cell.nameLabel.text = @"手机号";
-                cell.contentLabel.text = phoneNum;
+                if([phoneNum length] > 0)
+                {
+                    cell.nameLabel.text = @"手机号";
+                    cell.contentLabel.text = phoneNum;
+                }
+                else
+                {
+                    cell.nameLabel.text = @"";
+                }
             }
             else if(indexPath.row == 1)
             {
-                cell.nameLabel.text = @"生日";
-                cell.contentLabel.text = birth;
+                if ([birth length] > 0)
+                {
+                    cell.nameLabel.text = @"生日";
+                    cell.contentLabel.text = birth;
+                }
+                else
+                {
+                    cell.nameLabel.text = @"";
+                    cell.contentLabel.text = @"";
+                }
+                
             }
-            UIImageView *bgImageBG = [[UIImageView alloc] init];
-            bgImageBG.image = [UIImage imageNamed:@"line3"];
-            bgImageBG.backgroundColor = [UIColor clearColor];
-            cell.backgroundView = bgImageBG;
-            cell.backgroundColor = [UIColor whiteColor];
+            else if(indexPath.row == 2)
+            {
+                if ([studentNum length] > 0)
+                {
+                    cell.nameLabel.text = @"学号";
+                    cell.contentLabel.text = studentNum;
+                }
+                else
+                {
+                    cell.nameLabel.text = @"";
+                    cell.contentLabel.text = @"";
+                }
+            }
+            CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+            UIImageView *lineImageView = [[UIImageView alloc] init];
+            lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            [cell.contentView addSubview:lineImageView];
+            cell.contentView.backgroundColor = [UIColor whiteColor];
         }
         else
         {
             cell.nameLabel.hidden = YES;
             cell.contentLabel.hidden = YES;
-            if (![studentID isEqualToString:[Tools user_id]])
+            if (![studentID isEqualToString:[Tools user_id]] && ![role isEqualToString:@"unin_students"])
             {
                 cell.button1.hidden = NO;
                 cell.button2.hidden = NO;
@@ -918,28 +1000,18 @@ UIActionSheetDelegate>
             DDLOG(@"kickuser responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-//                for (int i=0 ; i<[pArray count]; i++)
-//                {
-//                    NSDictionary *pDict = [pArray objectAtIndex:i];
-//                    if ([db deleteRecordWithDict:@{@"uid":[pDict objectForKey:@"uid"],@"class":classID,@"re_id":studentID} andTableName:CLASSMEMBERTABLE])
-//                    {
-//                        DDLOG(@"delete stu parents success");
-//                    }
-//                }
-                
-                if ([pArray count] > 0)
+                for (int i=0 ; i<[pArray count]; i++)
                 {
-                    if ([db updeteKey:@"uid" toValue:@"" withParaDict:@{@"classid":classID,@"uid":studentID} andTableName:CLASSMEMBERTABLE])
+                    NSDictionary *pDict = [pArray objectAtIndex:i];
+                    if ([db deleteRecordWithDict:@{@"uid":[pDict objectForKey:@"uid"],@"class":classID,@"re_id":studentID} andTableName:CLASSMEMBERTABLE])
                     {
-                        DDLOG(@"update stu success with parents");
+                        DDLOG(@"delete stu parents success");
                     }
                 }
-                else
+                
+                if ([db deleteRecordWithDict:@{@"classid":classID,@"uid":studentID} andTableName:CLASSMEMBERTABLE])
                 {
-                    if ([db deleteRecordWithDict:@{@"classid":classID,@"uid":studentID} andTableName:CLASSMEMBERTABLE])
-                    {
-                        DDLOG(@"delete stu success without parents");
-                    }
+                    DDLOG(@"delete stu success without parents");
                 }
                 
                 [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
@@ -989,7 +1061,6 @@ UIActionSheetDelegate>
                             DDLOG(@"teach phone update success!");
                         }
                         phoneNum = [dict objectForKey:@"phone"];
-                        phoneNum = [dict objectForKey:@"phone"];
                     }
                     
                     if ([[dict objectForKey:@"sex"] intValue] == 1)
@@ -1003,7 +1074,12 @@ UIActionSheetDelegate>
                         sexureimage = @"female";
                     }
                     
-                    if ([dict objectForKey:@"birth"])
+                    if ([db updeteKey:@"sex" toValue:[dict objectForKey:@"sex"] withParaDict:@{@"uid":studentID,@"classid":classID} andTableName:CLASSMEMBERTABLE])
+                    {
+                        DDLOG(@"update sex success");
+                    }
+                    
+                    if ([dict objectForKey:@"birth"] && ![[dict objectForKey:@"birth"] isEqualToString:@"请设置生日"])
                     {
                         if ([db updeteKey:@"birth" toValue:[dict objectForKey:@"birth"] withParaDict:@{@"uid":studentID,@"classid":classID} andTableName:CLASSMEMBERTABLE])
                         {

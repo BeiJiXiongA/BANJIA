@@ -17,6 +17,8 @@
 #import "ReportViewController.h"
 #import "PersonDetailViewController.h"
 #import "GroupInfoViewController.h"
+#import "ScoreDetailViewController.h"
+#import "ScoreMemListViewController.h"
 
 
 #define DIRECT  @"direct"
@@ -74,6 +76,8 @@ updateGroupInfoDelegate>
     
     NSString *g_a_f;
     NSString *g_r_a;
+    
+    NSString *scoreid;
 }
 @end
 
@@ -95,8 +99,17 @@ updateGroupInfoDelegate>
     [groupInfoVC.groupUsers addObjectsFromArray:users];
     groupInfoVC.builderID = builder;
     groupInfoVC.updateGroupInfoDel = self;
-    groupInfoVC.g_a_f = g_a_f;
-    groupInfoVC.g_r_a = g_r_a;
+    scoreid = @"";
+    if(![g_a_f isEqual:[NSNull null]] && ![g_r_a isEqual:[NSNull null]])
+    {
+        groupInfoVC.g_a_f = g_a_f;
+        groupInfoVC.g_r_a = g_r_a;
+    }
+    else
+    {
+        groupInfoVC.g_a_f = @"";
+        groupInfoVC.g_r_a = @"";
+    }
     [self.navigationController pushViewController:groupInfoVC animated:YES];
 }
 
@@ -249,6 +262,9 @@ updateGroupInfoDelegate>
 {
     [super viewWillAppear:animated];
     
+    [[NSUserDefaults standardUserDefaults] setObject:@"chat" forKey:@"viewtype"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    
     [MobClick beginLogPageView:@"PageOne"];
     [self uploadLastViewTime];
 }
@@ -257,6 +273,9 @@ updateGroupInfoDelegate>
     [super viewWillDisappear:animated];
     [MobClick endLogPageView:@"PageOne"];
     [self uploadLastViewTime];
+    
+    [[NSUserDefaults standardUserDefaults] setObject:@"notchat" forKey:@"viewtype"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 -(void)dealloc
@@ -305,7 +324,7 @@ updateGroupInfoDelegate>
             DDLOG(@"chat=log=responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                
+                //NTNhM2U1OWIzNGRhYjVkODFjOGI0NWIy
                 NSArray *array = [[NSArray alloc] initWithArray:[responseDict objectForKey:@"data"]];
                 for (int i=0; i<[array count]; ++i)
                 {
@@ -403,7 +422,14 @@ updateGroupInfoDelegate>
                         [db insertRecord:tmpDict andTableName:USERICONTABLE];
                     }
                 }
-                builder = [[responseDict objectForKey:@"data"] objectForKey:@"builder"];
+                if (![[[responseDict objectForKey:@"data"] objectForKey:@"builder"] isEqual:[NSNull null]])
+                {
+                    builder = [[responseDict objectForKey:@"data"] objectForKey:@"builder"];
+                }
+                else
+                {
+                    builder = @"";
+                }
                 
                 name = [[responseDict objectForKey:@"data"] objectForKey:@"name"];
                 NSDictionary *userIconDict = @{@"uid":toID,@"username":name,@"uicon":@""};
@@ -416,8 +442,16 @@ updateGroupInfoDelegate>
                 {
                     [db insertRecord:userIconDict andTableName:USERICONTABLE];
                 }
-                g_a_f = [[[responseDict objectForKey:@"data"] objectForKey:@"opt"] objectForKey:@"g_a_f"];
-                g_r_a = [[[responseDict objectForKey:@"data"] objectForKey:@"opt"] objectForKey:@"g_r_a"];
+                if ([[[responseDict objectForKey:@"data"] objectForKey:@"opt"] count] > 0)
+                {
+                    g_a_f = [[[responseDict objectForKey:@"data"] objectForKey:@"opt"] objectForKey:@"g_a_f"];
+                    g_r_a = [[[responseDict objectForKey:@"data"] objectForKey:@"opt"] objectForKey:@"g_r_a"];
+                }
+                else
+                {
+                    g_r_a = @"";
+                    g_a_f = @"";
+                }
                 [self getChatLog];
             }
             else
@@ -965,38 +999,51 @@ updateGroupInfoDelegate>
 
 -(void)joinClassWithMsgContent:(NSString *)msgContent
 {
-    NSRange range1 = [msgContent rangeOfString:@"$!#"];
-    NSRange range2 = [msgContent rangeOfString:@"["];
-    NSRange range3 = [msgContent rangeOfString:@"—"];
-    NSRange range4 = [msgContent rangeOfString:@"]"];
-//    NSRange range5 = [msgContent rangeOfString:@"("];
-    NSString *classID = [msgContent substringToIndex:range1.location];
-    
-    if ([self isInThisClass:classID])
+    NSRange range = [msgContent rangeOfString:@"$!#"];
+    NSString *jsonStr = [msgContent substringToIndex:range.location];
+    if ([[Tools JSonFromString:jsonStr] isKindOfClass:[NSDictionary class]])
     {
-        [Tools showAlertView:@"您已经是这个班的一员了" delegateViewController:nil];
-        return;
+        NSDictionary *dict = [Tools JSonFromString:jsonStr];
+        scoreid = [dict objectForKey:@"e_id"];
+        [self getScoreDetail];
     }
-    
-    NSString *schoolName;
-    if (range2.length >0 && range4.length > 0)
+    else
     {
-        schoolName = [msgContent substringWithRange:NSMakeRange(range2.location+1,range4.location-range2.location-1)];
+//        1411142370
+        NSRange range1 = [msgContent rangeOfString:@"$!#"];
+        NSRange range2 = [msgContent rangeOfString:@"["];
+        NSRange range3 = [msgContent rangeOfString:@"—"];
+        NSRange range4 = [msgContent rangeOfString:@"]"];
+        //    NSRange range5 = [msgContent rangeOfString:@"("];
+        NSString *classID = [msgContent substringToIndex:range1.location];
+
+        if ([self isInThisClass:classID])
+        {
+            [Tools showAlertView:@"您已经是这个班的一员了" delegateViewController:nil];
+            return;
+        }
+
+        NSString *schoolName;
+        if (range2.length >0 && range4.length > 0)
+        {
+            schoolName = [msgContent substringWithRange:NSMakeRange(range2.location+1,range4.location-range2.location-1)];
+        }
+
+        NSString *className;
+        if (range3.length>0 && range4.length>0)
+        {
+            className = [msgContent substringWithRange:NSMakeRange(range3.location+1, range4.location-range3.location-1)];
+        }
+
+        ClassZoneViewController *classZone = [[ClassZoneViewController alloc] init];
+        classZone.isApply = YES;
+        [[NSUserDefaults standardUserDefaults] setObject:classID forKey:@"classid"];
+        [[NSUserDefaults standardUserDefaults] setObject:className forKey:@"classname"];
+        [[NSUserDefaults standardUserDefaults] setObject:schoolName forKey:@"schoolname"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+        [self.navigationController pushViewController:classZone animated:YES];
     }
-    
-    NSString *className;
-    if (range3.length>0 && range4.length>0)
-    {
-        className = [msgContent substringWithRange:NSMakeRange(range3.location+1, range4.location-range3.location-1)];
-    }
-    
-    ClassZoneViewController *classZone = [[ClassZoneViewController alloc] init];
-    classZone.isApply = YES;
-    [[NSUserDefaults standardUserDefaults] setObject:classID forKey:@"classid"];
-    [[NSUserDefaults standardUserDefaults] setObject:className forKey:@"classname"];
-    [[NSUserDefaults standardUserDefaults] setObject:schoolName forKey:@"schoolname"];
-    [[NSUserDefaults standardUserDefaults] synchronize];
-    [self.navigationController pushViewController:classZone animated:YES];
+
 }
 
 -(UITableViewCellEditingStyle)tableView:(UITableView *)tableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -1053,34 +1100,34 @@ updateGroupInfoDelegate>
             DDLOG(@"chat responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                NSMutableDictionary *chatDict = [[NSMutableDictionary alloc] initWithCapacity:0];
-                NSString *messageID = [[responseDict objectForKey:@"data"] objectForKey:@"m_id"];
-                
-                [chatDict setObject:messageID forKey:@"mid"];
-                [chatDict setObject:msgContent forKey:@"content"];
-                [chatDict setObject:[Tools user_id] forKey:@"userid"];
-                [chatDict setObject:[Tools user_id] forKey:@"fid"];
-                [chatDict setObject:[Tools user_name] forKey:@"fname"];
-                [chatDict setObject:@"null" forKey:@"ficon"];
-                [chatDict setObject:[NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"] objectForKey:@"time"] integerValue]] forKey:@"time"];
-                [chatDict setObject:@"t" forKey:@"direct"];
-                [chatDict setObject:@"text" forKey:@"msgType"];
-                [chatDict setObject:toID forKey:@"tid"];
-                [chatDict setObject:@"1" forKey:@"readed"];
-                if (isGroup)
-                {
-                    [chatDict setObject:[Tools user_id] forKey:@"by"];
-                }
-                
-                if ([[db findSetWithDictionary:@{@"mid":messageID,@"userid":[Tools user_id]} andTableName:CHATTABLE] count] == 0)
-                {
-                    [db insertRecord:chatDict andTableName:CHATTABLE];
-                }
-                if ([self.chatVcDel respondsToSelector:@selector(updateChatList:)])
-                {
-                    [self.chatVcDel updateChatList:YES];
-                }
-                [self dealNewChatMsg:nil];
+                    NSMutableDictionary *chatDict = [[NSMutableDictionary alloc] initWithCapacity:0];
+                    NSString *messageID = [[responseDict objectForKey:@"data"] objectForKey:@"m_id"];
+                    
+                    [chatDict setObject:messageID forKey:@"mid"];
+                    [chatDict setObject:msgContent forKey:@"content"];
+                    [chatDict setObject:[Tools user_id] forKey:@"userid"];
+                    [chatDict setObject:[Tools user_id] forKey:@"fid"];
+                    [chatDict setObject:[Tools user_name] forKey:@"fname"];
+                    [chatDict setObject:@"null" forKey:@"ficon"];
+                    [chatDict setObject:[NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"] objectForKey:@"time"] integerValue]] forKey:@"time"];
+                    [chatDict setObject:@"t" forKey:@"direct"];
+                    [chatDict setObject:@"text" forKey:@"msgType"];
+                    [chatDict setObject:toID forKey:@"tid"];
+                    [chatDict setObject:@"1" forKey:@"readed"];
+                    if (isGroup)
+                    {
+                        [chatDict setObject:[Tools user_id] forKey:@"by"];
+                    }
+                    
+                    if ([[db findSetWithDictionary:@{@"mid":messageID,@"userid":[Tools user_id]} andTableName:CHATTABLE] count] == 0)
+                    {
+                        [db insertRecord:chatDict andTableName:CHATTABLE];
+                    }
+                    if ([self.chatVcDel respondsToSelector:@selector(updateChatList:)])
+                    {
+                        [self.chatVcDel updateChatList:YES];
+                    }
+                    [self dealNewChatMsg:nil];
             }
             else
             {
@@ -1099,5 +1146,55 @@ updateGroupInfoDelegate>
         [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
     }
 }
+
+-(void)getScoreDetail
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"e_id":scoreid,
+                                                                      } API:SCOREDETAIL];
+        [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"score detail responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                
+                
+                NSArray *objectArray = [[responseDict objectForKey:@"data"] objectForKey:@"details"];
+                if ([[responseDict objectForKey:@"isTeacher"] integerValue] == 0)
+                {
+                    ScoreDetailViewController *scoreDetailViewController = [[ScoreDetailViewController alloc] init];
+                    scoreDetailViewController.scoreId = scoreid;
+                    scoreDetailViewController.testName = [[responseDict objectForKey:@"data"] objectForKey:@"name"];
+                    [self.navigationController pushViewController:scoreDetailViewController animated:YES];
+                }
+                else if([[responseDict objectForKey:@"isTeacher"] integerValue] == 1)
+                {
+                    ScoreMemListViewController *memlist = [[ScoreMemListViewController alloc] init];
+                    memlist.scoreid = scoreid;
+                    [memlist.memListArray addObjectsFromArray:objectArray];
+                    [self.navigationController pushViewController:memlist animated:YES];
+                }
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools hideProgress:self.bgView];
+        }];
+        [Tools showProgress:self.bgView];
+        [request startAsynchronous];
+    }
+}
+
 
 @end
