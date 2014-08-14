@@ -264,7 +264,7 @@ UITextFieldDelegate>
                                    @"pwd":passwordTextfield.text,
                                    @"c_ver":[Tools client_ver],
                                    @"d_name":[Tools device_name],
-                                   @"d_imei":[Tools device_uid],
+                                   @"d_imei":userStr,
                                    @"c_os":[Tools device_os],
                                    @"d_type":@"iOS",
                                    @"registrationID":userStr,
@@ -279,6 +279,7 @@ UITextFieldDelegate>
             
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
             DDLOG(@"login responsedict %@",responseDict);
+
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 NSDictionary *dict = [responseDict objectForKey:@"data"];

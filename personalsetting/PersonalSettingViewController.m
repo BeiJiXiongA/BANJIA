@@ -42,6 +42,8 @@ UIActionSheetDelegate>
     NSString *qqNickName;
     NSString *sinaNickName;
     NSString *rrNickName;
+    
+    int gf;
 }
 @end
 
@@ -66,6 +68,8 @@ UIActionSheetDelegate>
     qqNickName = @"";
     rrNickName = @"";
     sinaNickName = @"";
+    
+    gf = 0;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
@@ -113,6 +117,7 @@ UIActionSheetDelegate>
     [self.bgView addSubview:personalSettiongTableView];
     
     [self getAccount];
+    [self getUserInfo];
     
     UIButton *shareButton = [UIButton buttonWithType:UIButtonTypeCustom];
     shareButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
@@ -279,10 +284,14 @@ UIActionSheetDelegate>
             {
                 cell = [[PersonalSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:firstCell];
             }
-            cell.nameLabel.frame = CGRectMake(90, 30, 18*[[Tools user_name] length], 30);
+            cell.nameLabel.frame = CGRectMake(90, 20, 18*[[Tools user_name] length], 20);
             cell.nameLabel.text = [Tools user_name];
             cell.nameLabel.font = [UIFont systemFontOfSize:18];
             cell.nameLabel.textColor = TITLE_COLOR;
+            
+            cell.objectsLabel.frame = CGRectMake(95, 45, 100, 20);
+            cell.objectsLabel.textColor = TITLE_COLOR;
+            cell.objectsLabel.text = [NSString stringWithFormat:@"积分:%d",gf];
         
             cell.headerImageView.layer.cornerRadius = 5;
             cell.headerImageView.clipsToBounds = YES;
@@ -532,7 +541,7 @@ UIActionSheetDelegate>
                 cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:authcell];
             }
             cell.textLabel.font = [UIFont systemFontOfSize:18];
-            cell.textLabel.text = @" 设置";
+            cell.textLabel.text = @" 个人设置";
             cell.textLabel.textColor = TITLE_COLOR;
             
             cell.selectionStyle = UITableViewCellSelectionStyleGray;
@@ -935,6 +944,39 @@ static int loginID;
         [request startAsynchronous];
     }
 }
+
+-(void)getUserInfo
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"other_id":[Tools user_id]
+                                                                      } API:MB_GETUSERINFO];
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"getuserinfo responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue] == 1)
+            {
+                gf = [[[responseDict objectForKey:@"data"] objectForKey:@"jf"] integerValue];
+                [personalSettiongTableView reloadData];
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools showAlertView:@"连接错误" delegateViewController:nil];
+        }];
+        [request startAsynchronous];
+    }
+}
+
 #pragma mark - shareAPP
 -(void)shareAPP:(UIButton *)sender
 {

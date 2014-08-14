@@ -149,18 +149,27 @@ UIActionSheetDelegate>
     tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapEvent)];
     mainScrollView.userInteractionEnabled = YES;
     
-    schoolInfoLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 0, SCREEN_WIDTH-40, 90)];
+    NSString *schollInfo = [NSString stringWithFormat:@"您希望加入%@-%@",schoolName,className];
+    CGSize size = [Tools getSizeWithString:schollInfo andWidth:SCREEN_WIDTH-40 andFont:[UIFont systemFontOfSize:18]];
+    
+    schoolInfoLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 20, SCREEN_WIDTH-40, size.height)];
     schoolInfoLabel.numberOfLines = 2;
     schoolInfoLabel.font = [UIFont systemFontOfSize:18];
-    schoolInfoLabel.text = [NSString stringWithFormat:@"您希望加入%@-%@",schoolName,className];
+    schoolInfoLabel.text = schollInfo;
     schoolInfoLabel.lineBreakMode = NSLineBreakByWordWrapping;
     schoolInfoLabel.backgroundColor = [UIColor clearColor];
     schoolInfoLabel.textColor = TITLE_COLOR;
     [mainScrollView addSubview:schoolInfoLabel];
     
+    
+    UIImageView *lineImageView = [[UIImageView alloc] init];
+    lineImageView.frame = CGRectMake( 0, schoolInfoLabel.frame.size.height+schoolInfoLabel.frame.origin.y+20, SCREEN_WIDTH, 0.5);
+    lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+    [mainScrollView addSubview:lineImageView];
+    
     CGFloat lableL = 110;
 
-    mySearchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(20, schoolInfoLabel.frame.size.height+schoolInfoLabel.frame.origin.y-6, SCREEN_WIDTH-40, 42)];
+    mySearchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(20, schoolInfoLabel.frame.size.height+schoolInfoLabel.frame.origin.y+40, SCREEN_WIDTH-40, 42)];
     mySearchBar.backgroundColor = [UIColor whiteColor];
     mySearchBar.tag = 1000;
     mySearchBar.layer.cornerRadius = 5;
@@ -403,7 +412,6 @@ UIActionSheetDelegate>
     UIImage *btnImage  =[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
     studentButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [studentButton setTitle:@"提交" forState:UIControlStateNormal];
-    studentButton.enabled = NO;
     if (tipLabel.frame.size.height > 0)
     {
         studentButton.frame = CGRectMake(38, tipLabel.frame.size.height + tipLabel.frame.origin.y+15, SCREEN_WIDTH-76, 40);

@@ -12,15 +12,15 @@
 #pragma mark - 接口网址
 
 //
-#define HOST_URL       @"http://api.banjiaedu.com"
-#define IMAGEURL       @"http://img.banjiaedu.com"
+//#define HOST_URL       @"http://api.banjiaedu.com"
+//#define IMAGEURL       @"http://img.banjiaedu.com"
 
 //头像地址 人(host)\ur\(uid)\(img_icon||img_bk).(你想要啥格式就写啥)
 
 //班级地址 人(host)\cl\(cid)\(img_icon||img_bk).(你想要啥格式就写啥)
 
-//#define HOST_URL      @"http://mytest.banjiaedu.com"
-//#define IMAGEURL       @"http://imgtest.banjiaedu.com"
+#define HOST_URL      @"http://mytest.banjiaedu.com"
+#define IMAGEURL       @"http://imgtest.banjiaedu.com"
 
 #pragma mark - userprotocol
 #define USER_PROTOCOL   @"/protocol.html"
@@ -50,6 +50,8 @@
 #define MB_SETUSERINFO    @"/users/mbSetUserInfo"   //u_id,birth
 #define MB_RMFRIEND       @"/users/mbRmFriend"
 #define SCOREDETAIL   @"/users/mbExamDetails"
+#define MB_TRANSMIT     @"/users/mbRetransmit"
+#define MB_INVITE     @"/users/mbInvite"
 
 #define MB_SETUSERSETOFCLASS  @"/users/mbSetUserSetByClass"
 #define MB_GETUSERSETOFCLASS  @"/users/mbSetUserSetByClass"

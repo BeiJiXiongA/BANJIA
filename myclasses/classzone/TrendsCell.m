@@ -260,7 +260,7 @@ verticalLineView;
                 NSString *content = [[commentDict objectForKey:@"content"] emojizedString];
                 NSString *contentString = [NSString stringWithFormat:@"%@:%@",name,content];
                 CGSize s = [Tools getSizeWithString:contentString andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
-                return s.height+chaHeight;
+                return s.height+chaHeight+40;
             }
         }
     }
@@ -289,7 +289,7 @@ verticalLineView;
             NSString *content = [[commentDict objectForKey:@"content"] emojizedString];
             NSString *contentString = [NSString stringWithFormat:@"%@:%@",name,content];
             CGSize s = [Tools getSizeWithString:contentString andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
-            return s.height+chaHeight;
+            return s.height+chaHeight+40;
         }
     }
     else if(praiseArray && !commentsArray)
@@ -330,8 +330,17 @@ verticalLineView;
     cell.openPraiseButton.hidden = YES;
     [cell.nameButton setTitle:@"" forState:UIControlStateNormal];
     [cell.nameButton setImage:nil forState:UIControlStateNormal];
+    CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+    UIImageView *lineImageView = [[UIImageView alloc] init];
+    lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+    lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+    [cell.contentView addSubview:lineImageView];
+    cell.contentView.backgroundColor = [UIColor whiteColor];
+    
+    
     if (showAllComments)
     {
+        lineImageView.hidden = NO;
         if (praiseArray && commentsArray)
         {
             if (indexPath.row == 0)
@@ -379,6 +388,8 @@ verticalLineView;
                     headerButton.layer.cornerRadius = 2;
                     headerButton.tag = 3333+i;
                     headerButton.clipsToBounds = YES;
+                    headerButton.layer.cornerRadius = 3;
+                    headerButton.clipsToBounds = YES;
                     [headerButton addTarget:self action:@selector(praiseClick:) forControlEvents:UIControlEventTouchUpInside];
                     [cell.praiseView addSubview:headerButton];
                 }
@@ -389,12 +400,11 @@ verticalLineView;
             }
             else
             {
-                cell.nameButton.hidden = YES;
                 cell.praiseView.hidden = YES;
                 [cell.nameButton setTitleColor:RGB(64, 196, 110, 1) forState:UIControlStateNormal];
                 
                 NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row];
-                NSString *name = [NSString stringWithFormat:@"%@:",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
+                NSString *name = [NSString stringWithFormat:@"%@",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
                 NSString *content = [[commitDict objectForKey:@"content"] emojizedString];
                 CGSize s = [Tools getSizeWithString:content andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
                 if (s.height > minCellHei)
@@ -405,10 +415,34 @@ verticalLineView;
                 {
                     cell.commentContentLabel.topSpace = 0;
                 }
-                cell.commentContentLabel.frame = CGRectMake(12, originalY, MaxCommentWidth, s.height+hei);
-                [cell.commentContentLabel cnv_setUILabelText:[NSString stringWithFormat:@"%@%@",name,content] andKeyWord:name];
+                
+                cell.headerImageView.frame = CGRectMake(7, 7, 35, 35);
+                cell.headerImageView.backgroundColor = [UIColor yellowColor];
+                [Tools fillImageView:cell.headerImageView withImageFromURL:[[commitDict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERICON];
+                cell.headerImageView.tag = [commentsArray count]-indexPath.row;
+                cell.headerImageView.layer.cornerRadius = 3;
+                cell.headerImageView.clipsToBounds = YES;
+                
+                UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showDetail:)];
+                cell.headerImageView.userInteractionEnabled = YES;
+                [cell.headerImageView addGestureRecognizer:tap];
+                
+                cell.nameButton.hidden = NO;
+                cell.nameButton.frame = CGRectMake(48, 7, 100, 20);
+                cell.nameButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
+                [cell.nameButton setTitle:name forState:UIControlStateNormal];
+                
+                cell.commentContentLabel.frame = CGRectMake(48, 45, MaxCommentWidth-30, s.height+hei);
+                cell.commentContentLabel.text = content;
+//                [cell.commentContentLabel cnv_setUILabelText:[NSString stringWithFormat:@"%@%@",name,content] andKeyWord:name];
                 [cell.commentContentLabel cnv_setUIlabelTextColor:COMMENTCOLOR andKeyWordColor:RGB(64, 196, 110, 1)];
 //                cell.commentContentLabel.text = [NSString stringWithFormat:@"%@%@",name,content];
+                
+                cell.timeLabel.frame = CGRectMake(48, 25, 200, 20);
+                cell.timeLabel.text = [Tools showTime:[[commitDict objectForKey:@"created"] objectForKey:@"sec"]];
+                cell.timeLabel.textColor = TIMECOLOR;
+                cell.timeLabel.font = [UIFont systemFontOfSize:12];
+                
                 return cell;
             }
         }
@@ -506,7 +540,7 @@ verticalLineView;
     }
     else
     {
-        
+        lineImageView.hidden = YES;
         if (praiseArray && commentsArray)
         {
             if (indexPath.row == 0)
@@ -688,6 +722,15 @@ verticalLineView;
     if ([self.nameButtonDel respondsToSelector:@selector(nameButtonClick:)])
     {
         [self.nameButtonDel nameButtonClick:diaryDetailDict];
+    }
+}
+
+-(void)showDetail:(UITapGestureRecognizer *)tap
+{
+    NSDictionary *dict = [commentsArray  objectAtIndex:tap.view.tag];
+    if ([self.nameButtonDel respondsToSelector:@selector(showPersonDetail:)])
+    {
+        [self.nameButtonDel showPersonDetail:dict];
     }
 }
 

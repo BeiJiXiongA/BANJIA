@@ -235,28 +235,28 @@ UIActionSheetDelegate,NameButtonDel>
 {
     if ([changeType isEqualToString:@"face"])
     {
-        faceViewHeight = FaceViewHeight;
-        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10-faceViewHeight, SCREEN_WIDTH, inputSize.height+10 + faceViewHeight);
+        tmpheight = FaceViewHeight;
+        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10-tmpheight, SCREEN_WIDTH, inputSize.height+10 + tmpheight);
     }
     else if([changeType isEqualToString:@"key"])
     {
-        faceViewHeight = inputSize.height;
-        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10-tmpheight, SCREEN_WIDTH, inputSize.height+10 + faceViewHeight);
+        tmpheight = inputSize.height;
+        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10-tmpheight, SCREEN_WIDTH, inputSize.height+10 + tmpheight);
     }
-}
-
--(void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
-{
-    [self backInput];
-    [inputTabBar backKeyBoard];
 }
 
 -(void)changeInputViewSize:(CGSize)size
 {
     inputSize = size;
     [UIView animateWithDuration:0.2 animations:^{
-        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-size.height-10-tmpheight, SCREEN_WIDTH, size.height+10+faceViewHeight);
+        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-size.height-10-tmpheight, SCREEN_WIDTH, size.height+10+tmpheight);
     }];
+}
+
+-(void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
+{
+    [self backInput];
+    [inputTabBar backKeyBoard];
 }
 
 

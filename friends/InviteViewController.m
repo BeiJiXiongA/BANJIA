@@ -19,8 +19,10 @@
 #define tableViewTagBase   77777777
 
 #define ContactTableViewTag  tableViewTagBase
+
 #define TencentTableViewTag     (tableViewTagBase+1)
 #define WeiXinTag             (tableViewTagBase+2)
+#define SearchTableViewTag (tableViewTagBase+3)
 
 #define TIPSLABEL_TAG 10086
 
@@ -31,7 +33,8 @@
 @interface InviteViewController ()<UITableViewDataSource,
 UITableViewDelegate,
 MFMessageComposeViewControllerDelegate,
-UIAlertViewDelegate>
+UIAlertViewDelegate,
+UISearchBarDelegate>
 {
     UIScrollView *bgScrollView;
     
@@ -48,9 +51,9 @@ UIAlertViewDelegate>
     NSMutableArray *contactInviteArray;
     NSMutableArray *groupContactArray;
     
-    NSMutableArray *alreadyPhoneNameArray;
-    NSMutableArray *allContacts;
+    NSMutableArray *addedContactArray;
     
+    NSMutableArray *allContacts;
     
     UIView *phoneBgView;
     NSString *_userName;
@@ -73,6 +76,19 @@ UIAlertViewDelegate>
     NSArray *iconOnArray;
     NSArray *iconArray;
     UIScrollView *buttonScrollView;
+    
+    NSMutableArray *selectedUsers;
+    
+    UISearchBar *mySearchBar;
+    
+    UIView *searchView;
+    NSMutableArray *searchResultArray;
+    UITableView *searchTableView;
+    
+    UITapGestureRecognizer *tapTgr;
+    
+    UIView *selectView;
+    UIScrollView *selectScrollView;
 }
 @end
 
@@ -92,7 +108,7 @@ UIAlertViewDelegate>
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     
-    self.titleLabel.text = @"邀请";
+    self.titleLabel.text = @"好友";
         
     schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
     className = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
@@ -108,17 +124,29 @@ UIAlertViewDelegate>
     
     //手机联系人
     contactArray = [[NSMutableArray alloc]initWithCapacity:0];
+    //已经选择的手机号数组 
     contactInviteArray  = [[NSMutableArray alloc] initWithCapacity:0];
+    //已注册班家的联系人
     alreadyUsers = [[NSMutableArray alloc] initWithCapacity:0];
+    //按字母排序后的数据
     groupContactArray = [[NSMutableArray alloc] initWithCapacity:0];
-    alreadyPhoneNameArray = [[NSMutableArray alloc] initWithCapacity:0];
+    //
     allContacts = [[NSMutableArray alloc] initWithCapacity:0];
+    //已经邀请或是加好友的已注册联系人
+    selectedUsers = [[NSMutableArray alloc] initWithCapacity:0];
+    //搜索到的联系人
+    searchResultArray = [[NSMutableArray alloc] initWithCapacity:0];
+    //已经选择的联系人
+    addedContactArray = [[NSMutableArray alloc] initWithCapacity:0];
+    
+    tapTgr = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(cancelSearch)];
+    
     
     
     inviteButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [inviteButton setTitle:@"邀请" forState:UIControlStateNormal];
     [inviteButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
-    inviteButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
+    inviteButton.frame = CGRectMake(SCREEN_WIDTH - 80, self.backButton.frame.origin.y, 70, NAV_RIGHT_BUTTON_HEIGHT);
     [inviteButton addTarget:self action:@selector(inviteClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:inviteButton];
     
@@ -159,7 +187,64 @@ UIAlertViewDelegate>
     bgScrollView.contentSize = CGSizeMake(SCREEN_WIDTH*3, bgScrollView.frame.size.height);
     [self.bgView addSubview:bgScrollView];
     
-    contactTableView = [[UITableView alloc]initWithFrame:CGRectMake((ContactTableViewTag%tableViewTagBase)*SCREEN_WIDTH, 0, bgScrollView.frame.size.width, bgScrollView.frame.size.height) style:UITableViewStylePlain];
+    mySearchBar = [[UISearchBar alloc] initWithFrame:
+                   CGRectMake((ContactTableViewTag%tableViewTagBase)*SCREEN_WIDTH, 0, SCREEN_WIDTH-0, 40)];
+    mySearchBar.delegate = self;
+    mySearchBar.placeholder = @"输入联系人姓名";
+    mySearchBar.contentMode = UIControlContentHorizontalAlignmentLeft;
+    mySearchBar.backgroundColor = [UIColor whiteColor];
+    [bgScrollView addSubview:mySearchBar];
+    
+    if (SYSVERSION >= 7.0)
+    {
+//        mySearchBar.searchBarStyle = UISearchBarStyleMinimal;
+//        [mySearchBar setSearchFieldBackgroundImage:[UIImage imageNamed:@""] forState:UIControlStateNormal];
+//        [mySearchBar setImage:[UIImage imageNamed:@""] forSearchBarIcon:UISearchBarIconSearch state:UIControlStateNormal];
+    }
+    else
+    {
+        UITextField* searchField = nil;
+        for (UIView* subview in mySearchBar.subviews)
+        {
+            if ([subview isKindOfClass:[UITextField class]])
+            {
+                searchField = (UITextField*)subview;
+                searchField.leftView=nil;
+                [searchField setBackground:nil];
+                searchField.layer.cornerRadius = 3;
+                searchField.clipsToBounds = YES;
+                [searchField setBackgroundColor:[UIColor whiteColor]];
+                searchField.background = [Tools getImageFromImage:[UIImage imageNamed:@""] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
+                break;
+            }
+        }
+        
+        for (UIView *subview in mySearchBar.subviews)
+        {
+            if ([subview isKindOfClass:NSClassFromString(@"UISearchBarBackground")])
+            {
+                subview.backgroundColor = TIMECOLOR;
+                break;
+            }
+        }
+        [mySearchBar setBackgroundImage:[UIImage imageNamed:@"searchbarbg1"]];
+    }
+
+
+    
+    searchView = [[UIView alloc] init];
+    searchView.frame = CGRectMake(mySearchBar.frame.origin.x, mySearchBar.frame.size.height+mySearchBar.frame.origin.y, SCREEN_WIDTH, SCREEN_HEIGHT-YSTART-mySearchBar.frame.size.height);
+    searchView.alpha = 0;
+    searchView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
+    [bgScrollView addSubview:searchView];
+    
+    searchTableView = [[UITableView alloc] initWithFrame:CGRectMake(mySearchBar.frame.origin.x, 0, mySearchBar.frame.size.width, 0) style:UITableViewStylePlain];
+    searchTableView.delegate = self;
+    searchTableView.dataSource = self;
+    searchTableView.tag = SearchTableViewTag;
+    [searchView addSubview:searchTableView];
+    
+    contactTableView = [[UITableView alloc]initWithFrame:CGRectMake((ContactTableViewTag%tableViewTagBase)*SCREEN_WIDTH, 40, bgScrollView.frame.size.width, bgScrollView.frame.size.height-mySearchBar.frame.size.height) style:UITableViewStylePlain];
     contactTableView.delegate = self;
     contactTableView.dataSource = self;
     contactTableView.tag = ContactTableViewTag;
@@ -171,6 +256,16 @@ UIAlertViewDelegate>
     contactTableView.backgroundColor = self.bgView.backgroundColor;
     contactTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     [bgScrollView addSubview:contactTableView];
+    
+    selectView = [[UIView alloc] init];
+    selectView.backgroundColor = [UIColor yellowColor];
+    selectView.frame = CGRectMake(0, bgScrollView.frame.size.height, SCREEN_WIDTH, 50);
+    [bgScrollView addSubview:selectView];
+    
+    selectScrollView = [[UIScrollView alloc] init];
+    selectScrollView.backgroundColor = self.bgView.backgroundColor;
+    selectScrollView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 50);
+    [selectView addSubview:selectScrollView];
     
     
     inviteTencentButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -186,6 +281,8 @@ UIAlertViewDelegate>
     [inviteWeiXinButton setTitle:@"邀请微信好友" forState:UIControlStateNormal];
     [inviteWeiXinButton addTarget:self action:@selector(inviteWeiXin) forControlEvents:UIControlEventTouchUpInside];
     [bgScrollView addSubview:inviteWeiXinButton];
+    
+
     
     [self getLocalContacts];
 }
@@ -205,10 +302,103 @@ UIAlertViewDelegate>
     [self.navigationController popViewControllerAnimated:YES];
 }
 
+#pragma mark - searchbardelegate
+
+-(void)cancelSearch
+{
+    [searchResultArray removeAllObjects];
+    mySearchBar.text = nil;
+    [searchTableView reloadData];
+    [UIView animateWithDuration:0.2 animations:^{
+        [bgScrollView sendSubviewToBack:searchView];
+        contactTableView.hidden = NO;
+//        searchTableView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+//        mySearchBar.frame = CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, 40);
+        [searchView removeGestureRecognizer:tapTgr];
+        mySearchBar.showsCancelButton = NO;
+        bgScrollView.frame = CGRectMake(0, buttonScrollView.frame.size.height+buttonScrollView.frame.origin.y, SCREEN_WIDTH, SCREEN_HEIGHT - buttonScrollView.frame.origin.y-buttonScrollView.frame.size.height);
+    }];
+    
+    [mySearchBar resignFirstResponder];
+}
+-(void)searchBarTextDidBeginEditing:(UISearchBar *)searchBar
+{
+    [UIView animateWithDuration:0.2 animations:^{
+        
+        searchBar.showsCancelButton = YES;
+        for(id cc in [searchBar subviews])
+        {
+            if([cc isKindOfClass:[UIButton class]])
+            {
+                UIButton *btn = (UIButton *)cc;
+                [btn setTitle:@"完成"  forState:UIControlStateNormal];
+                [btn setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+                btn.titleLabel.font = [UIFont systemFontOfSize:16];
+                [btn setTitleShadowColor:[UIColor clearColor] forState:UIControlStateNormal];
+                [btn setBackgroundImage:[UIImage imageNamed:@"searchbarbg1"] forState:UIControlStateNormal];
+                [btn setBackgroundImage:[UIImage imageNamed:@"searchbarbg1"] forState:UIControlStateHighlighted];
+            }
+        }
+        
+        [searchView addGestureRecognizer:tapTgr];
+        bgScrollView.frame = CGRectMake(0, YSTART, SCREEN_WIDTH, SCREEN_HEIGHT-YSTART);
+        mySearchBar.frame = CGRectMake(0, 0, SCREEN_WIDTH, 40);
+        searchView.alpha = 1;
+        [bgScrollView bringSubviewToFront:searchView];
+//        searchTableView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
+        searchView.frame = CGRectMake(0, 40, SCREEN_WIDTH, SCREEN_HEIGHT-40-YSTART);
+        contactTableView.hidden = YES;
+    }];
+    
+}
+
+-(void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText
+{
+    if ([searchBar.text length] > 0)
+    {
+        [self searchWithText:searchText];
+    }
+    else
+    {
+        [searchResultArray removeAllObjects];
+        [searchTableView reloadData];
+    }
+}
+-(void)searchBarCancelButtonClicked:(UISearchBar *)searchBar
+{
+    [self cancelSearch];
+}
+-(void)searchBarSearchButtonClicked:(UISearchBar *)searchBar
+{
+    NSString *searchContent = [searchBar text];
+    [self searchWithText:searchContent];
+}
+
+-(void)searchBarResultsListButtonClicked:(UISearchBar *)searchBar
+{
+    DDLOG_CURRENT_METHOD;
+}
+-(void)searchWithText:(NSString *)searchContent
+{
+    DDLOG(@"contact array %@",contactArray);
+    [searchResultArray removeAllObjects];
+    for(NSDictionary *dict in contactArray)
+    {
+        if ([[dict objectForKey:@"name"] rangeOfString:searchContent].length > 0)
+        {
+            [searchResultArray addObject:dict];
+        }
+    }
+    [searchTableView reloadData];
+    
+}
+
+
 #pragma mark - tableview
 
 -(void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
+    
     if (scrollView.tag == 1001)
     {
         if (scrollView.contentOffset.y>scrollView.contentSize.height-scrollView.frame.size.height+30)
@@ -217,6 +407,10 @@ UIAlertViewDelegate>
 //            DDLOG(@"pagenum == %d",pageNum);
 //            [self getSinaFriends:sinaAuthOptions andPageNumber:pageNum];
         }
+    }
+    else if(scrollView.tag == SearchTableViewTag)
+    {
+        [mySearchBar resignFirstResponder];
     }
 }
 
@@ -268,6 +462,45 @@ UIAlertViewDelegate>
 {
     if(tableView.tag == ContactTableViewTag)
     {
+        for(UIView *v in selectScrollView.subviews)
+        {
+            [v removeFromSuperview];
+        }
+        if ([addedContactArray count] > 0)
+        {
+            [UIView animateWithDuration:0.2 animations:^{
+                contactTableView.frame = CGRectMake(0, mySearchBar.frame.size.height, SCREEN_WIDTH,bgScrollView.frame.size.height-mySearchBar.frame.size.height-50);
+                selectView.frame = CGRectMake(0, bgScrollView.frame.size.height-50, SCREEN_WIDTH, 50);
+            }];
+            for(int i = 0 ; i< [addedContactArray count] ; i++)
+            {
+                NSDictionary *dict = [addedContactArray objectAtIndex:i];
+                NSString *name = [dict objectForKey:@"name"];
+                UIButton *nameLabel = [UIButton buttonWithType:UIButtonTypeCustom];
+                nameLabel.frame = CGRectMake(5+40*i, 7.5, 35, 35);
+                nameLabel.layer.cornerRadius = 17.5;
+                nameLabel.tag = i;
+                [nameLabel addTarget:self action:@selector(delSelectContact:) forControlEvents:UIControlEventTouchUpInside];
+                nameLabel.backgroundColor = LIGHT_BLUE_COLOR;
+                [nameLabel setTitle:[name substringFromIndex:[name length] -1] forState:UIControlStateNormal];
+                [selectScrollView addSubview:nameLabel];
+            }
+            selectScrollView.contentSize = CGSizeMake(10+40*[addedContactArray count], 50);
+            if ((10+40*[addedContactArray count]) > SCREEN_WIDTH)
+            {
+                selectScrollView.contentOffset = CGPointMake((10+40*[addedContactArray count])-SCREEN_WIDTH, 0);
+            }
+            [inviteButton setTitle:[NSString stringWithFormat:@"邀请(%d)",[addedContactArray count]] forState:UIControlStateNormal];
+        }
+        else
+        {
+            [UIView animateWithDuration:0.2 animations:^{
+                contactTableView.frame = CGRectMake(0, mySearchBar.frame.size.height, SCREEN_WIDTH,bgScrollView.frame.size.height-mySearchBar.frame.size.height);
+                selectView.frame = CGRectMake(0, bgScrollView.frame.size.height, SCREEN_WIDTH, 50);
+                
+            }];
+            [inviteButton setTitle:@"邀请" forState:UIControlStateNormal];
+        }
         if ([groupContactArray count] > 0 || [alreadyUsers count] > 0)
         {
             contactTableView.hidden = NO;
@@ -286,7 +519,47 @@ UIAlertViewDelegate>
             }
         }
     }
+    else if(tableView.tag == SearchTableViewTag)
+    {
+        
+        if ([searchResultArray count] > 0)
+        {
+            [searchView removeGestureRecognizer:tapTgr];
+        }
+        else
+        {
+            [UIView animateWithDuration:0.2 animations:^{
+                searchTableView.frame = CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - YSTART-mySearchBar.frame.size.height);
+            }];
+            [searchView addGestureRecognizer:tapTgr];
+        }
+        return [searchResultArray count];
+    }
+    
     return 0;
+}
+
+-(void)delSelectContact:(UIButton *)button
+{
+    NSDictionary *dict = [addedContactArray objectAtIndex:button.tag];
+    if ([addedContactArray containsObject:dict])
+    {
+        [addedContactArray removeObject:dict];
+        NSArray *homePhoneArray = [self getPhoneArrayFromContactDict:dict];
+        for (int i=0; i<[homePhoneArray count]; ++i)
+        {
+            if ([self haveThisPhone:[homePhoneArray objectAtIndex:i]])
+            {
+                [contactInviteArray removeObject:[homePhoneArray objectAtIndex:i]];
+            }
+            else
+            {
+                [contactInviteArray addObject:[homePhoneArray objectAtIndex:i]];
+            }
+        }
+        [contactTableView reloadData];
+    }
+    
 }
 
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
@@ -321,7 +594,7 @@ UIAlertViewDelegate>
             {
                 
                 UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 0, SCREEN_WIDTH-15, 27)];
-                headerLabel.text = @"    注册联系人";
+                headerLabel.text = @"    已注册班家的联系人";
                 headerLabel.backgroundColor = RGB(54, 188, 59, 1);
                 headerLabel.font = [UIFont systemFontOfSize:14];
                 headerLabel.textColor = [UIColor whiteColor];
@@ -409,7 +682,27 @@ UIAlertViewDelegate>
             }
             cell.inviteButton.hidden = NO;
             cell.inviteButton.frame = CGRectMake(SCREEN_WIDTH-50, 12.5, 25, 25);
-            [cell.inviteButton setImage:[UIImage imageNamed:@"roundadd"] forState:UIControlStateNormal];
+            if ([selectedUsers containsObject:dict])
+            {
+                cell.inviteButton.frame = CGRectMake(SCREEN_WIDTH-80, 12.5, 60, 25);
+                cell.inviteButton.titleLabel.font = [UIFont systemFontOfSize:14];
+                if (fromClass)
+                {
+                    [cell.inviteButton setTitle:@"已邀请" forState:UIControlStateNormal];
+                }
+                else
+                {
+                    [cell.inviteButton setTitle:@"已添加" forState:UIControlStateNormal];
+                }
+                [cell.inviteButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+                [cell.inviteButton setImage:nil forState:UIControlStateNormal];
+            }
+            else
+            {
+                [cell.inviteButton setTitle:@"" forState:UIControlStateNormal];
+                [cell.inviteButton setImage:[UIImage imageNamed:@"roundadd"] forState:UIControlStateNormal];
+            }
+            
             
             cell.inviteButton.enabled = YES;
             
@@ -472,6 +765,45 @@ UIAlertViewDelegate>
             return cell;
         }
     }
+    else if(tableView.tag == SearchTableViewTag)
+    {
+        static NSString *cellName = @"searchcell";
+        FriendsCell *cell = [tableView dequeueReusableCellWithIdentifier:cellName];
+        if (cell == nil)
+        {
+            cell = [[FriendsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellName];
+        }
+        DDLOG(@"current section %d",indexPath.section);
+        cell.nameLabel.frame = CGRectMake(10, 10, SCREEN_WIDTH - 80, 30);
+        cell.nameLabel.font = [UIFont systemFontOfSize:16];
+            
+        NSDictionary *dict = [searchResultArray objectAtIndex:indexPath.row];
+        cell.nameLabel.text = [dict objectForKey:@"name"];
+        cell.inviteButton.frame = CGRectMake(SCREEN_WIDTH-50, 12.5, 25, 25);
+        cell.inviteButton.backgroundColor = [UIColor clearColor];
+        [cell.inviteButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+        cell.inviteButton.tag = indexPath.row;
+        NSArray *array = [self getPhoneArrayFromContactDict:dict];
+        for (int i=0; i<[array count]; ++i)
+        {
+            if ([self haveThisPhone:[array objectAtIndex:i]])
+            {
+                [cell.inviteButton setImage:[UIImage imageNamed:@"selectBtn"] forState:UIControlStateNormal];
+            }
+            else
+            {
+                [cell.inviteButton setImage:[UIImage imageNamed:@"unselectBtn"] forState:UIControlStateNormal];
+            }
+        }
+        [cell.inviteButton addTarget:self action:@selector(inviteSearchButtonCLick:) forControlEvents:UIControlEventTouchUpInside];
+        CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+        UIImageView *lineImageView = [[UIImageView alloc] init];
+        lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+        [cell.contentView addSubview:lineImageView];
+        cell.contentView.backgroundColor = [UIColor whiteColor];
+        return cell;
+    }
     return nil;
 }
 
@@ -496,9 +828,65 @@ UIAlertViewDelegate>
                     [contactInviteArray addObject:[homePhoneArray objectAtIndex:i]];
                 }
             }
+            
+            if ([addedContactArray containsObject:dict])
+            {
+                [addedContactArray removeObject:dict];
+            }
+            else
+            {
+                [addedContactArray addObject:dict];
+            }
             [contactTableView reloadData];
         }
+        else
+        {
+            NSDictionary *dict = [alreadyUsers objectAtIndex:indexPath.row];
+            if (![selectedUsers containsObject:dict])
+            {
+                if (fromClass)
+                {
+                    NSString *sendMsg = [NSString stringWithFormat:@"%@$!#我是%@,我在[%@—%@],你也一起加入吧！",classID,[Tools user_name],schoolName,className];
+                    [self sendMsgWithString:sendMsg andUserID:[dict objectForKey:@"_id"] andUserInfo:dict];
+                }
+                else
+                {
+                    [self addFriendWith:[dict objectForKey:@"_id"] andUserInfo:dict];
+                }
+                [selectedUsers addObject:dict];
+                [contactTableView reloadData];
+            }
+        }
     }
+    else if (tableView.tag == SearchTableViewTag)
+    {
+        NSDictionary *dict = [searchResultArray objectAtIndex:indexPath.row];
+        NSArray *homePhoneArray = [self getPhoneArrayFromContactDict:dict];
+        for (int i=0; i<[homePhoneArray count]; ++i)
+        {
+            if ([self haveThisPhone:[homePhoneArray objectAtIndex:i]])
+            {
+                [contactInviteArray removeObject:[homePhoneArray objectAtIndex:i]];
+            }
+            else
+            {
+                [contactInviteArray addObject:[homePhoneArray objectAtIndex:i]];
+            }
+        }
+        
+        if ([addedContactArray containsObject:dict])
+        {
+            [addedContactArray removeObject:dict];
+        }
+        else
+        {
+            [addedContactArray addObject:dict];
+        }
+
+        [contactTableView reloadData];
+        [self cancelSearch];
+    }
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
 -(NSString *)nameInContacts:(NSString *)phoneNum
@@ -534,6 +922,32 @@ UIAlertViewDelegate>
     }
 }
 
+-(void)inviteSearchButtonCLick:(UIButton *)button
+{
+    NSDictionary *dict = [searchResultArray objectAtIndex:button.tag];
+    NSArray *homePhoneArray = [self getPhoneArrayFromContactDict:dict];
+    for (int i=0; i<[homePhoneArray count]; ++i)
+    {
+        if ([self haveThisPhone:[homePhoneArray objectAtIndex:i]])
+        {
+            [contactInviteArray removeObject:[homePhoneArray objectAtIndex:i]];
+        }
+        else
+        {
+            [contactInviteArray addObject:[homePhoneArray objectAtIndex:i]];
+        }
+    }
+    if ([addedContactArray containsObject:dict])
+    {
+        [addedContactArray removeObject:dict];
+    }
+    else
+    {
+        [addedContactArray addObject:dict];
+    }
+    [searchTableView reloadData];
+}
+
 
 -(void)inviteButtonCLick:(UIButton *)button
 {
@@ -553,6 +967,15 @@ UIAlertViewDelegate>
             {
                 [contactInviteArray addObject:[homePhoneArray objectAtIndex:i]];
             }
+        }
+        
+        if ([addedContactArray containsObject:dict])
+        {
+            [addedContactArray removeObject:dict];
+        }
+        else
+        {
+            [addedContactArray addObject:dict];
         }
         [contactTableView reloadData];
     }
@@ -963,7 +1386,11 @@ UIAlertViewDelegate>
                                  
                                  if (state == SSPublishContentStateSuccess)
                                  {
-                                     NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
+//                                     NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
+//                                     NSData *data = [@"qq" dataUsingEncoding:NSUTF8StringEncoding];
+//                                     NSString *base64Str = [ASIHTTPRequest base64forData:data];
+//                                     DDLOG(@"=========%@",base64Str);
+//                                     [self dealJiFenWithID:[N]]
                                  }
                                  else if (state == SSPublishContentStateFail)
                                  {
@@ -1106,12 +1533,78 @@ UIAlertViewDelegate>
             [self alertWithTitle:@"提示信息" msg:@"发送失败"];
             break;
         case MessageComposeResultSent:
+        {
             [self alertWithTitle:@"提示信息" msg:@"发送成功"];
+            [self dealJiFen];
             break;
+        }
         default:
             break;
     }
 }
+
+-(void)dealJiFen
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"phone":[Tools user_id]
+                                                                      } API:MB_INVITE];
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"getuserinfo responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue] == 1)
+            {
+               
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools showAlertView:@"连接错误" delegateViewController:nil];
+        }];
+        [request startAsynchronous];
+    }
+}
+
+-(void)dealJiFenWithID:(NSString *)p_id
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"p_id":p_id
+                                                                      } API:MB_INVITE];
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"getuserinfo responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue] == 1)
+            {
+                
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools showAlertView:@"连接错误" delegateViewController:nil];
+        }];
+        [request startAsynchronous];
+    }
+}
+
 
 - (void) alertWithTitle:(NSString *)title msg:(NSString *)msg {
     
@@ -1139,10 +1632,15 @@ UIAlertViewDelegate>
 -(void)inviteFriend:(UIButton *)button
 {
     NSDictionary *dict = [alreadyUsers objectAtIndex:button.tag-ContactTableViewTag-3333];
-    
-    NSString *sendMsg = [NSString stringWithFormat:@"%@$!#我是%@,我在[%@—%@],你也一起加入吧！",classID,[Tools user_name],schoolName,className];
-    [self sendMsgWithString:sendMsg andUserID:[dict objectForKey:@"_id"] andUserInfo:dict];
+    if (![selectedUsers containsObject:dict])
+    {
+        NSString *sendMsg = [NSString stringWithFormat:@"%@$!#我是%@,我在[%@—%@],你也一起加入吧！",classID,[Tools user_name],schoolName,className];
+        [self sendMsgWithString:sendMsg andUserID:[dict objectForKey:@"_id"] andUserInfo:dict];
+        [selectedUsers addObject:dict];
+        [contactTableView reloadData];
+    }
 }
+
 
 #pragma mark - sendmsg
 -(void)sendMsgWithString:(NSString *)msgContent andUserID:(NSString *)uid andUserInfo:(NSDictionary *)userInfo
@@ -1203,7 +1701,12 @@ UIAlertViewDelegate>
 -(void)addFriendWithID:(UIButton *)button
 {
     NSDictionary *dict = [alreadyUsers objectAtIndex:button.tag-ContactTableViewTag-3333];
-    [self addFriendWith:[dict objectForKey:@"_id"] andUserInfo:dict];
+    if (![selectedUsers containsObject:dict])
+    {
+        [self addFriendWith:[dict objectForKey:@"_id"] andUserInfo:dict];
+        [selectedUsers addObject:dict];
+        [contactTableView reloadData];
+    }
 }
 -(void)addFriendWith:(NSString *)uid andUserInfo:(NSDictionary *)userInfo
 {

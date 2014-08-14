@@ -141,9 +141,21 @@ updateGroupInfoDelegate>
             cell = [[MemberCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:groupChat];
         }
         NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
-        cell.memNameLabel.text = [dict objectForKey:@"fname"];
+        
+        NSString *fname = [dict objectForKey:@"fname"];
+        NSRange range = [fname rangeOfString:@"("];
+        NSRange range1 = [fname rangeOfString:@"人"];
+        if ([fname length] > 13 && range.length > 0 && range1.length > 0)
+        {
+            cell.memNameLabel.text = [NSString stringWithFormat:@"%@...%@",[fname substringToIndex:8],[fname substringFromIndex:range.location]];
+        }
+        else
+        {
+            cell.memNameLabel.text = [dict objectForKey:@"fname"];
+        }
+        
         cell.memNameLabel.frame = CGRectMake(70, 15, 220, 30);
-        [cell.headerImageView setImage:[UIImage imageNamed:@"newapplyheader"]];
+        [cell.headerImageView setImage:[UIImage imageNamed:@"headpic.jpg"]];
         
         CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
         UIImageView *lineImageView = [[UIImageView alloc] init];

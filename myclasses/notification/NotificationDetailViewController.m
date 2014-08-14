@@ -259,7 +259,7 @@ UIActionSheetDelegate>
     {
         OperatDB *db = [[OperatDB alloc] init];
         NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
-        int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+        NSInteger userAdmin = [[dict objectForKey:@"admin"] integerValue];
         if ((userAdmin == 2 && [byID isEqualToString:[Tools user_id]]) || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
         {
             UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"删除", nil];
@@ -304,7 +304,7 @@ UIActionSheetDelegate>
         {
             OperatDB *db = [[OperatDB alloc] init];
             NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
-            int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+            NSInteger userAdmin = [[dict objectForKey:@"admin"] integerValue];
             if ((userAdmin == 2 && [byID isEqualToString:[Tools user_id]]) || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
             {
                 if (buttonIndex == 0)
@@ -731,7 +731,7 @@ UIActionSheetDelegate>
                 }
                 if (![[[responseDict objectForKey:@"data"] objectForKey:@"read_num"] isEqual:[NSNull null]])
                 {
-                    [readButton setTitle:[NSString stringWithFormat:@"已读(%d)",[readArray count]] forState:UIControlStateNormal];
+                    [readButton setTitle:[NSString stringWithFormat:@"已读(%lu)",[readArray count]] forState:UIControlStateNormal];
                 }
                 else
                 {
@@ -739,7 +739,7 @@ UIActionSheetDelegate>
                 }
                 if (![[[responseDict objectForKey:@"data"] objectForKey:@"unread_num"] isEqual:[NSNull null]])
                 {
-                    [unreadButton setTitle:[NSString stringWithFormat:@"未读(%d)",[unreaderArray count]] forState:UIControlStateNormal];
+                    [unreadButton setTitle:[NSString stringWithFormat:@"未读(%lu)",[unreaderArray count]] forState:UIControlStateNormal];
                 }
                 else
                 {

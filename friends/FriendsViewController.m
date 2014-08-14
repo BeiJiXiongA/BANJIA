@@ -20,6 +20,8 @@
 #import "SubGroupViewController.h"
 #import "PersonDetailViewController.h"
 
+#define MinSortCount 5
+
 @interface FriendsViewController ()<UITableViewDataSource,
 UITableViewDelegate,
 EGORefreshTableHeaderDelegate,
@@ -253,16 +255,12 @@ OperateFriends>
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    if ([tmpListArray count] >0 && [tmpListArray count] < 20)
-    {
-        return 2;
-    }
     return [tmpArray count]+1;
 }
 
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
-    if ([tmpListArray count] > 0 && [tmpListArray count] < 20)
+    if ([tmpListArray count] > 0 && [tmpListArray count] < MinSortCount)
     {
         return 0;
     }
@@ -275,7 +273,7 @@ OperateFriends>
 
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
-    if ([tmpListArray count] > 0 && [tmpListArray count] < 20)
+    if ([tmpListArray count] > 0 && [tmpListArray count] < MinSortCount)
     {
         return nil;
     }
@@ -294,14 +292,6 @@ OperateFriends>
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    if ([tmpListArray count] > 0 && [tmpListArray count] < 20)
-    {
-        if (section == 0)
-        {
-            return 2;
-        }
-        return [tmpArray count];
-    }
     if(section == 0)
     {
         return 2;
@@ -361,7 +351,7 @@ OperateFriends>
             cell.markView.hidden = NO;
             cell.backgroundColor = self.bgView.backgroundColor;
             
-            cell.selectionStyle = UITableViewCellSelectionStyleNone;
+            cell.selectionStyle = UITableViewCellSelectionStyleGray;
         }
         
         else  if(indexPath.row == 1 && [groupChatArray count] > 0)
@@ -419,36 +409,19 @@ OperateFriends>
         {
             lineImageView.frame = CGRectMake( 70, cellHeight-0.5, cell.frame.size.width, 0.5);
         }
-        if ([tmpListArray count] > 0 && [tmpListArray count] < 20)
-        {
-            NSDictionary *friendDict = [tmpArray objectAtIndex:indexPath.row];
-            
-            cell.headerImageView.frame = CGRectMake(10, 7, 46, 46);
-            cell.headerImageView.layer.cornerRadius = 5;
-            cell.headerImageView.clipsToBounds = YES;
-            
-            cell.unreadedMsgLabel.hidden = YES;
-            [Tools fillImageView:cell.headerImageView withImageFromURL:[friendDict objectForKey:@"ficon"] andDefault:HEADERICON];
-            
-            cell.memNameLabel.frame = CGRectMake(70, 15, 150, 30);
-            cell.memNameLabel.text = [friendDict objectForKey:@"fname"];
-        }
-        else
-        {
-            NSDictionary *groupDict = [tmpArray objectAtIndex:indexPath.section-1];
-            NSArray *array = [groupDict objectForKey:@"array"];
-            NSDictionary *friendDict = [array objectAtIndex:indexPath.row];
-            
-            cell.headerImageView.frame = CGRectMake(10, 7, 46, 46);
-            cell.headerImageView.layer.cornerRadius = 5;
-            cell.headerImageView.clipsToBounds = YES;
-            
-            cell.unreadedMsgLabel.hidden = YES;
-            [Tools fillImageView:cell.headerImageView withImageFromURL:[friendDict objectForKey:@"ficon"] andDefault:HEADERICON];
-            
-            cell.memNameLabel.frame = CGRectMake(70, 15, 150, 30);
-            cell.memNameLabel.text = [friendDict objectForKey:@"fname"];
-        }
+        NSDictionary *groupDict = [tmpArray objectAtIndex:indexPath.section-1];
+        NSArray *array = [groupDict objectForKey:@"array"];
+        NSDictionary *friendDict = [array objectAtIndex:indexPath.row];
+        
+        cell.headerImageView.frame = CGRectMake(10, 7, 46, 46);
+        cell.headerImageView.layer.cornerRadius = 5;
+        cell.headerImageView.clipsToBounds = YES;
+        
+        cell.unreadedMsgLabel.hidden = YES;
+        [Tools fillImageView:cell.headerImageView withImageFromURL:[friendDict objectForKey:@"ficon"] andDefault:HEADERICON];
+        
+        cell.memNameLabel.frame = CGRectMake(70, 15, 150, 30);
+        cell.memNameLabel.text = [friendDict objectForKey:@"fname"];
         return cell;
     }
     return nil;
@@ -476,29 +449,15 @@ OperateFriends>
     }
     else
     {
-        if ([tmpListArray count] > 0 && [tmpListArray count] <20)
-        {
-            NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
-            
-            PersonDetailViewController *personDetailVC = [[PersonDetailViewController alloc] init];
-            personDetailVC.personName = [dict objectForKey:@"fname"];
-            personDetailVC.personID = [dict objectForKey:@"fid"];
-            [self.sideMenuController hideMenuAnimated:YES];
-            [self.navigationController pushViewController:personDetailVC animated:YES];
-
-        }
-        else
-        {
-            NSDictionary *groupDict = [tmpArray objectAtIndex:indexPath.section-1];
-            NSArray *array = [groupDict objectForKey:@"array"];
-            NSDictionary *dict = [array objectAtIndex:indexPath.row];
-            
-            PersonDetailViewController *personDetailVC = [[PersonDetailViewController alloc] init];
-            personDetailVC.personName = [dict objectForKey:@"fname"];
-            personDetailVC.personID = [dict objectForKey:@"fid"];
-            [self.sideMenuController hideMenuAnimated:YES];
-            [self.navigationController pushViewController:personDetailVC animated:YES];
-        }
+        NSDictionary *groupDict = [tmpArray objectAtIndex:indexPath.section-1];
+        NSArray *array = [groupDict objectForKey:@"array"];
+        NSDictionary *dict = [array objectAtIndex:indexPath.row];
+        
+        PersonDetailViewController *personDetailVC = [[PersonDetailViewController alloc] init];
+        personDetailVC.personName = [dict objectForKey:@"fname"];
+        personDetailVC.personID = [dict objectForKey:@"fid"];
+        [self.sideMenuController hideMenuAnimated:YES];
+        [self.navigationController pushViewController:personDetailVC animated:YES];
     }
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
 }
@@ -624,15 +583,8 @@ OperateFriends>
     [newFriendsApply addObjectsFromArray:[db findSetWithDictionary:@{@"uid":[Tools user_id],@"checked":@"0",@"cgroup":@"0"} andTableName:FRIENDSTABLE]];
     [groupChatArray addObjectsFromArray:[db findSetWithDictionary:@{@"uid":[Tools user_id],@"cgroup":@"1"} andTableName:FRIENDSTABLE]];
     tmpListArray = [db findSetWithDictionary:@{@"uid":[Tools user_id],@"checked":@"1",@"cgroup":@"0"} andTableName:FRIENDSTABLE];
-    
-    if ([tmpListArray count] >0 && [tmpListArray count] <20)
-    {
-        [tmpArray addObjectsFromArray:tmpListArray];
-    }
-    else if ([tmpListArray count] >= 20)
-    {
-        [tmpArray addObjectsFromArray:[Tools getSpellSortArrayFromChineseArray:tmpListArray andKey:@"fname"]];
-    }
+
+    [tmpArray addObjectsFromArray:[Tools getSpellSortArrayFromChineseArray:tmpListArray andKey:@"fname"]];
     
     [friendsListTableView reloadData];
     

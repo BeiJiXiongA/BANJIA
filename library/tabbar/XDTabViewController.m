@@ -141,7 +141,7 @@ static XDTabViewController *_tabViewController = nil;
     if ([newApplyArray count] > 0)
     {
         [XDTabViewController sharedTabViewController].label2.hidden = NO;
-        [XDTabViewController sharedTabViewController].label2.text = [NSString stringWithFormat:@"%d",[newApplyArray count]];
+        [XDTabViewController sharedTabViewController].label2.text = [NSString stringWithFormat:@"%lu",[newApplyArray count]];
     }
     else
     {

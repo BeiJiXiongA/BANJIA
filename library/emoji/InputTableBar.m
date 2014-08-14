@@ -46,6 +46,8 @@ recordButton;
     more = YES;
     sound = NO;
     
+    pageControlHei = 80;
+    
     
     fileNameArray = [[NSMutableArray alloc] initWithCapacity:0];
     
@@ -121,13 +123,42 @@ recordButton;
         inputButton.frame = CGRectMake(SCREEN_WIDTH-80, INPUTBUTTONT, INPUTBUTTONH, INPUTBUTTONH);
     }
     
-    faceView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, FaceViewHeight+40, SCREEN_WIDTH, 0)];
+    faceView = [[UIView alloc] init];
+    faceView.frame = CGRectMake(0, FaceViewHeight+38, SCREEN_WIDTH, 0);
     faceView.backgroundColor = [UIColor whiteColor];
-    faceView.pagingEnabled = YES;
-    faceView.tag = FaceViewTag;
-    faceView.bounces = NO;
-    faceView.delegate = self;
     [self addSubview:faceView];
+    
+    faceScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 0)];
+    faceScrollView.backgroundColor = [UIColor whiteColor];
+    faceScrollView.pagingEnabled = YES;
+    faceScrollView.tag = FaceViewTag;
+    faceScrollView.bounces = NO;
+    faceScrollView.delegate = self;
+    [faceView addSubview:faceScrollView];
+    
+    emoButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    emoButton.frame = CGRectMake(-10, FaceViewHeight-10, 110, 49);
+    emoButton.layer.cornerRadius = 3;
+    emoButton.clipsToBounds = YES;
+    [emoButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+    [emoButton setTitle:@"Emoji" forState:UIControlStateNormal];
+    emoButton.backgroundColor = [UIColor whiteColor];
+    [self addSubview:emoButton];
+    
+    sendButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    //    sendButton.layer.cornerRadius = 3;
+    sendButton.backgroundColor = [UIColor whiteColor];
+    sendButton.layer.borderColor = TITLE_COLOR.CGColor;
+    sendButton.layer.borderWidth = 0.5;
+    sendButton.layer.cornerRadius = 2;
+    sendButton.clipsToBounds = YES;
+    [sendButton setTitle:@"发送" forState:UIControlStateNormal];
+    [sendButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+    [sendButton setTitleColor:LIGHT_BLUE_COLOR forState:UIControlStateHighlighted];
+    sendButton.frame = CGRectMake(SCREEN_WIDTH-70, FaceViewHeight+5, 60, 30);
+    [sendButton addTarget:self action:@selector(sendFace) forControlEvents:UIControlEventTouchUpInside];
+    [self addSubview:sendButton];
+
     
     moreView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, FaceViewHeight+40, SCREEN_WIDTH, 0)];
     moreView.backgroundColor = [UIColor whiteColor];
@@ -141,6 +172,14 @@ recordButton;
     [albumButton addTarget:self action:@selector(selectImage:) forControlEvents:UIControlEventTouchUpInside];
     [moreView addSubview:albumButton];
     
+    UILabel *albumLabel = [[UILabel alloc] init];
+    albumLabel.frame = CGRectMake(albumButton.frame.origin.x, albumButton.frame.size.height+albumButton.frame.origin.y, albumButton.frame.size.width, 20);
+    albumLabel.font = [UIFont systemFontOfSize:12];
+    albumLabel.text = @"相册";
+    albumLabel.textAlignment = NSTextAlignmentCenter;
+    albumLabel.textColor = COMMENTCOLOR;
+    [moreView addSubview:albumLabel];
+    
     UIButton *photoButton = [UIButton buttonWithType:UIButtonTypeCustom];
     photoButton.backgroundColor = [UIColor whiteColor];
     photoButton.frame = CGRectMake(80, 10, 60, 60);
@@ -149,171 +188,200 @@ recordButton;
     [photoButton addTarget:self action:@selector(selectImage:) forControlEvents:UIControlEventTouchUpInside];
     [moreView addSubview:photoButton];
     
+    UILabel *photoLabel = [[UILabel alloc] init];
+    photoLabel.frame = CGRectMake(photoButton.frame.origin.x, photoButton.frame.size.height+photoButton.frame.origin.y, photoButton.frame.size.width, 20);
+    photoLabel.font = [UIFont systemFontOfSize:12];
+    photoLabel.text = @"拍照";
+    photoLabel.textAlignment = NSTextAlignmentCenter;
+    photoLabel.textColor = COMMENTCOLOR;
+    [moreView addSubview:photoLabel];
+    
     
     faceDict = [NSString emojiAliases];
     
-    NSInteger row = 4;
+    NSInteger row = 3;
     NSInteger colum = 7;
     NSInteger i=0;
     NSInteger count=0;
     CGFloat faceWidth = SCREEN_WIDTH/colum;
     CGFloat faceHeight = faceWidth;
     
-    NSString *path = [self getParentPath:[[NSBundle mainBundle] pathForResource:@"emoji_-1" ofType:@"png"]];
-    
-    NSArray *fileArray = [self getContentsOfDirectoryAtPath:path];
-    for(NSString *name in fileArray)
-    {
-        if ([name rangeOfString:@"emoji_"].length > 0)
-        {
-            [fileNameArray addObject:name];
-        }
-    }
     faceArray = @[@"smile",
-                  @"wink",
-                  @"hushed",
-                  @"kissing_smiling_eyes",
-                  @"kissing",
-                  @"kissing_heart",
-                  @"laughing",
-                  @"tired_face",
-                  @"unamused",
-                  @"neutral_face",
-                  @"open_mouth",
-                  @"sleeping",
-                  @"stuck_out_tongue",
-                  @"stuck_out_tongue_closed_eyes",
-                  @"stuck_out_tongue_winking_eye",
-                  @"yum",
-                  @"astonished",
-                  @"flushed",
-                  @"frowning",
-                  @"grimacing",
-                  @"grinning",
-                  @"heart_eyes",
-                  @"sob",
-                  @"rage",
-                  @"joy",
-                  @"kissing_closed_eyes",
-                  @"kissing_heart",
-                  @"mask",
-                  @"no_mouth",
-                  @"pensive",
-                  @"sweat",
-                  @"sunglasses",
-                  @"innocent",
-                  @"sleepy",
-                  @"disappointed_relieved",
-                  @"sweat_smile",
-                  @"cold_sweat",
-                  @"fearful",
-                  @"scream",
-                  @"eyes",
-                  @"poop",
-                  @"pray",
-                  @"tongue",
-                  @"ear",
-                  @"thumbsup",
-                  @"thumbsdown",
-                  @"clap",
-                  @"raised_hand",
-                  @"wave",
-                  @"open_hands",
-                  @"raised_hands",
-                  @"ok_hand",
-                  @"point_up",
-                  @"v",
-                  @"point_up_2",
-                  @"point_left",
-                  @"point_down",
-                  @"point_right",
-                  @"punch",
-                  @"muscle",
-                  @"kiss",
-                  @"heart",
-                  @"broken_heart",
-                  @"heartpulse",
-                  @"heartbeat",
-                  @"cupid",
-                  @"smile_cat",
-                  @"smiley_cat",
-                  @"crying_cat_face",
-                  @"smirk_cat",
-                  @"pouting_cat",
-                  @"heart_eyes_cat",
-                  @"mouse",
-                  @"tiger",
-                  @"rabbit",
-                  @"snake",
-                  @"sheep",
-                  @"dog",
-                  @"pig",
-                  @"bird",
-                  @"frog",
-                  @"hear_no_evil",
-                  @"speak_no_evil",
-                  @"see_no_evil",
-                  @"monkey",
-                  @"bear",
-                  @"wolf",
-                  @"older_woman",
-                  @"person_with_blond_hair",
-                  @"princess",
-                  @"baby",
-                  @"bow",
-                  @"boy",
-                  @"man",
-                  @"older_man",
-                  @"girl",
-                  @"woman",
-                  @"bride_with_veil",
-                  @"older_woman",
-                  @"construction_worker",
-                  @"cop",
-                  @"guardsman",
-                  @"man_with_gua_pi_mao",
-                  @"no_good",
-                  @"person_frowning",
-                  @"couple_with_heart",
-                  @"couplekiss",
-                  @"family",
-                  @"cloud",
-                  @"zap",
-                  @"foggy",
-                  @"snowflake",
-                  @"exclamation",
-                  @"grey_exclamation",
-                  @"grey_question"];
+                    @"blush",
+                    @"smiley",
+                    @"relaxed",
+                    @"smirk",
+                    @"heart_eyes",
+                    @"kissing_heart",
+                    @"kissing_closed_eyes",
+                    @"flushed",
+                    @"relieved",
+                    @"grin",
+                    @"stuck_out_tongue_winking_eye",
+                    @"stuck_out_tongue_closed_eyes",
+                    @"worried",
+                    @"confused",
+                    @"wink",
+                    @"sweat",
+                    @"pensive",
+                    @"disappointed",
+                    @"confounded",
+                    @"disappointed_relieved",
+                    @"fearful",
+                    @"cold_sweat",
+                    @"cry",
+                    @"sob",
+                    @"joy",
+                    @"astonished",
+                    @"scream",
+                    @"angry",
+                    @"rage",
+                    @"sleepy",
+                    @"mask",
+                    @"no_mouth",
+                    @"alien",
+                    @"smiling_imp",
+                    @"innocent",
+                    @"heart",
+                    @"broken_heart",
+                    @"cupid",
+                    @"two_hearts",
+                    @"sparkling_heart",
+                    @"sparkles",
+                    @"star",
+                    @"zzz",
+                    @"dash",
+                    @"sweat_drops",
+                    @"musical_note",
+                    @"fire",
+                    @"hankey",
+                    @"shit",
+                    @"thumbsup",
+                    @"thumbsdown",
+                    @"ok_hand",
+                    @"punch",
+                    @"facepunch",
+                    @"fist",
+                    @"wave",
+                    @"hand",
+                    @"point_up",
+                    @"pray",
+                    @"clap",
+                    @"muscle",
+                    @"walking",
+                    @"runner",
+                    @"couple",
+                    @"family",
+                    @"bow",
+                    @"couplekiss",
+                    @"couple_with_heart",
+                    @"massage",
+                    @"boy",
+                    @"girl",
+                    @"woman",
+                    @"man",
+                    @"baby",
+                    @"older_woman",
+                    @"older_man",
+                    @"person_with_blond_hair",
+                    @"man_with_gua_pi_mao",
+                    @"man_with_turban",
+                    @"construction_worker",
+                    @"cop",
+                    @"angel",
+                    @"princess",
+                    @"smile_cat",
+                    @"kiss",
+                ];
     
-    DDLOG(@"dddd ---\U00002653");
     for (;i<[faceArray count];)
     {
-        NSString *faceName = [NSString emojizedStringWithString:[NSString stringWithFormat:@":%@:",[faceArray objectAtIndex:i]]];
-        
-        UITapGestureRecognizer *faceTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(faceClick:)];
-        UILabel *faceLabel = [[UILabel alloc] initWithFrame:CGRectMake(5+SCREEN_WIDTH*(count/(row*colum)) +faceWidth*((count%(row*colum))%colum),5+ faceHeight*((i%(row*colum))/colum), faceWidth-5, faceHeight-5)];
-        faceLabel.tag = i;
-        faceLabel.text = faceName;
-        faceLabel.textAlignment = NSTextAlignmentCenter;
-        faceLabel.font = [UIFont systemFontOfSize:30];
-        faceLabel.backgroundColor = [UIColor clearColor];
-        faceLabel.userInteractionEnabled = YES;
-        [faceLabel addGestureRecognizer:faceTap];
-        [faceView addSubview:faceLabel];
+        if ((i+1)%(colum * row) == 0)
+        {
+            UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(delCharacter)];
+
+            UIButton *delFaceButton = [UIButton buttonWithType:UIButtonTypeCustom];
+            delFaceButton.backgroundColor = [UIColor whiteColor];
+            [delFaceButton setBackgroundImage:[UIImage imageNamed:@"facedel"] forState:UIControlStateNormal];
+            delFaceButton.frame = CGRectMake(5+SCREEN_WIDTH*(count/(row*colum)) +faceWidth*((count%(row*colum))%colum)+3,5+ faceHeight*((i%(row*colum))/colum)+8, 30, 25);
+            [delFaceButton addTarget:self action:@selector(delCharacter) forControlEvents:UIControlEventTouchUpInside];
+            delFaceButton.userInteractionEnabled = YES;
+            [delFaceButton addGestureRecognizer:longPress];
+            [faceScrollView addSubview:delFaceButton];
+        }
+        else
+        {
+            DDLOG(@"%d--%@",i,[faceArray objectAtIndex:i-(i+1)/(colum*3)]);
+            NSString *faceName = [NSString emojizedStringWithString:[NSString stringWithFormat:@":%@:",[faceArray objectAtIndex:i]]];
+            
+            UITapGestureRecognizer *faceTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(faceClick:)];
+            UILabel *faceLabel = [[UILabel alloc] initWithFrame:CGRectMake(5+SCREEN_WIDTH*(count/(row*colum)) +faceWidth*((count%(row*colum))%colum),5+ faceHeight*((i%(row*colum))/colum), faceWidth-5, faceHeight-5)];
+            faceLabel.tag = i;
+            faceLabel.text = faceName;
+            faceLabel.textAlignment = NSTextAlignmentCenter;
+            faceLabel.font = [UIFont systemFontOfSize:30];
+            faceLabel.backgroundColor = [UIColor clearColor];
+            faceLabel.userInteractionEnabled = YES;
+            [faceLabel addGestureRecognizer:faceTap];
+            [faceScrollView addSubview:faceLabel];
+        }
+       
         count++;
         i++;
     }
+    UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(delCharacter)];
+
+    UIButton *delFaceButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    delFaceButton.backgroundColor = [UIColor whiteColor];
+    [delFaceButton setBackgroundImage:[UIImage imageNamed:@"facedel"] forState:UIControlStateNormal];
+    delFaceButton.frame = CGRectMake(5+SCREEN_WIDTH*(104/(row*colum)) +faceWidth*((104%(row*colum))%colum)+3,5+ faceHeight*((104%(row*colum))/colum)+8, 30, 25);
+    delFaceButton.userInteractionEnabled = YES;
+    [delFaceButton addGestureRecognizer:longPress];
+    [delFaceButton addTarget:self action:@selector(delCharacter) forControlEvents:UIControlEventTouchUpInside];
+    [faceScrollView addSubview:delFaceButton];
     
-    int page = count%(row*colum)>0?(count/(row*colum)+1):(count/(row*colum));
+    page = count%(row*colum)>0?(count/(row*colum)+1):(count/(row*colum));
     
-    faceView.contentSize = CGSizeMake(SCREEN_WIDTH*page, FaceViewHeight);
-    pageControl = [[UIPageControl alloc] initWithFrame:CGRectMake(SCREEN_WIDTH/2-70, faceView.frame.size.height+faceView.frame.origin.y-50, 140, 0)];
+    faceScrollView.contentSize = CGSizeMake(SCREEN_WIDTH*page, FaceViewHeight-77);
+    faceScrollView.showsHorizontalScrollIndicator = NO;
+    pageControl = [[UIPageControl alloc] initWithFrame:CGRectMake(SCREEN_WIDTH/2-70, faceView.frame.size.height-35, 140, row*faceWidth)];
     pageControl.backgroundColor = [UIColor clearColor];
     pageControl.numberOfPages = page;
     pageControl.hidden = YES;
     pageControl.pageIndicatorTintColor = [UIColor grayColor];
     pageControl.currentPageIndicatorTintColor = [UIColor redColor];
-    [self addSubview:pageControl];
+    [faceView addSubview:pageControl];
+    
+    
+    self.backgroundColor = TITLE_COLOR;
+}
+
+-(void)delCharacter
+{
+    if ([inputTextView.text length] > 0)
+    {
+        inputTextView.text = [[inputTextView.text substringToIndex:[inputTextView.text length]-1] emojizedString];
+        CGSize size = inputTextView.contentSize;
+        inputTextViewSize = size;
+        [self inputChange];
+        if ([self.returnFunDel respondsToSelector:@selector(changeInputViewSize:)])
+        {
+            [self.returnFunDel changeInputViewSize:size];
+        }
+    }
+}
+
+-(void)sendFace
+{
+    inputTextViewSize = CGSizeMake(250, DEFAULTTEXTHEIGHT);
+    [self inputChange];
+    if ([self.returnFunDel respondsToSelector:@selector(myReturnFunction)])
+    {
+        [self.returnFunDel myReturnFunction];
+    }
+    [inputTextView setText:nil];
+    [sendString  setString:@""];
+    [self backKeyBoard];
 }
 
 -(void)dealloc
@@ -352,10 +420,14 @@ recordButton;
         //切换到表情
         [inputTextView resignFirstResponder];
         [UIView animateWithDuration:0.2 animations:^{
-            self.frame = CGRectMake(0, SCREEN_HEIGHT-FaceViewHeight-inputTextViewSize.height-10, SCREEN_WIDTH, FaceViewHeight+inputTextViewSize.height);
+            self.frame = CGRectMake(0, SCREEN_HEIGHT-FaceViewHeight-inputTextViewSize.height-8, SCREEN_WIDTH, FaceViewHeight+inputTextViewSize.height);
             moreView.frame = CGRectMake(0, FaceViewHeight+inputTextViewSize.height+10, SCREEN_WIDTH, 0);
-            faceView.frame = CGRectMake(0, inputTextViewSize.height+10, SCREEN_WIDTH, FaceViewHeight);
-            pageControl.frame = CGRectMake(SCREEN_WIDTH/2-70, faceView.frame.size.height+faceView.frame.origin.y-50, 140, 30);
+            faceView.frame = CGRectMake(0, inputTextViewSize.height+8, SCREEN_WIDTH, FaceViewHeight-40);
+            emoButton.frame = CGRectMake(0, faceView.frame.size.height+inputTextViewSize.height, 110, 49);
+            sendButton.frame = CGRectMake(SCREEN_WIDTH-70, faceView.frame.size.height+8+inputTextViewSize.height+8, 60, 30);
+            faceScrollView.frame = CGRectMake(0, 0, SCREEN_WIDTH, faceView.frame.size.height-30);
+            faceScrollView.contentSize = CGSizeMake(SCREEN_WIDTH*page, FaceViewHeight-77);
+            pageControl.frame = CGRectMake(SCREEN_WIDTH/2-70, faceView.frame.size.height-35, 140, 30);
             pageControl.hidden = NO;
             [inputButton setImage:[UIImage imageNamed:@"keyboard"] forState:UIControlStateNormal];
             if ([self.returnFunDel respondsToSelector:@selector(changeInputType:)])
@@ -369,9 +441,9 @@ recordButton;
         //切换到键盘
         [inputTextView becomeFirstResponder];
         [UIView animateWithDuration:0.2 animations:^{
-            self.frame = CGRectMake(0,SCREEN_HEIGHT - keyBoardHeight-inputTextViewSize.height-10, SCREEN_WIDTH, inputTextViewSize.height);
+            self.frame = CGRectMake(0,SCREEN_HEIGHT - keyBoardHeight-inputTextViewSize.height-8, SCREEN_WIDTH, inputTextViewSize.height);
             faceView.frame = CGRectMake(0, FaceViewHeight+inputTextViewSize.height+10, SCREEN_WIDTH, 0);
-            pageControl.frame = CGRectMake(SCREEN_WIDTH/2-70, faceView.frame.size.height+faceView.frame.origin.y-50, 140, 0);
+            pageControl.frame = CGRectMake(SCREEN_WIDTH/2-70, faceView.frame.size.height+faceView.frame.origin.y-pageControlHei, 140, 0);
             pageControl.hidden = YES;
             [inputButton setImage:[UIImage imageNamed:@"face"] forState:UIControlStateNormal];
             if ([self.returnFunDel respondsToSelector:@selector(changeInputType:)])
@@ -393,9 +465,9 @@ recordButton;
         //切换到more
         [inputTextView resignFirstResponder];
         [UIView animateWithDuration:0.2 animations:^{
-            self.frame = CGRectMake(0, SCREEN_HEIGHT-FaceViewHeight-inputTextViewSize.height-10, SCREEN_WIDTH, FaceViewHeight+inputTextViewSize.height);
-            faceView.frame = CGRectMake(0, FaceViewHeight+inputTextViewSize.height+10, SCREEN_WIDTH, 0);
-            moreView.frame = CGRectMake(0, inputTextViewSize.height+10, SCREEN_WIDTH, FaceViewHeight);
+            self.frame = CGRectMake(0, SCREEN_HEIGHT-FaceViewHeight-inputTextViewSize.height-8, SCREEN_WIDTH, FaceViewHeight+inputTextViewSize.height);
+            faceView.frame = CGRectMake(0, FaceViewHeight+inputTextViewSize.height+8, SCREEN_WIDTH, 0);
+            moreView.frame = CGRectMake(0, inputTextViewSize.height+8, SCREEN_WIDTH, FaceViewHeight);
             [moreButton setImage:[UIImage imageNamed:@"keyboard"] forState:UIControlStateNormal];
             if ([self.returnFunDel respondsToSelector:@selector(changeInputType:)])
             {
@@ -433,6 +505,14 @@ recordButton;
         NSString *text2 = @"";
         text2 = [text stringByAppendingString:[NSString emojizedStringWithString:[NSString stringWithFormat:@":%@:",imageFileName]]];
         inputTextView.text = text2;
+        CGSize size = inputTextView.contentSize;
+        inputTextViewSize = size;
+        
+        [self inputChange];
+        if ([self.returnFunDel respondsToSelector:@selector(changeInputViewSize:)])
+        {
+            [self.returnFunDel changeInputViewSize:size];
+        }
     }
 }
 
@@ -484,7 +564,7 @@ recordButton;
     keyBoardHeight = keyboardRect.size.height;
     
     [UIView animateWithDuration:0.25 animations:^{
-        self.frame = CGRectMake(0, SCREEN_HEIGHT-keyBoardHeight-inputTextViewSize.height-10, SCREEN_WIDTH, FaceViewHeight+inputTextViewSize.height+10);
+        self.frame = CGRectMake(0, SCREEN_HEIGHT-keyBoardHeight-inputTextViewSize.height-8, SCREEN_WIDTH, FaceViewHeight+inputTextViewSize.height+10);
         [inputButton setImage:[UIImage imageNamed:@"face"] forState:UIControlStateNormal];
         if ([self.returnFunDel respondsToSelector:@selector(showKeyBoard:)])
         {
@@ -558,6 +638,8 @@ recordButton;
             soundButton.frame = CGRectMake( 5, inputTextViewSize.height-DEFAULTTEXTHEIGHT+INPUTBUTTONT, INPUTBUTTONH, INPUTBUTTONH);
             inputBgView.frame = CGRectMake(0, 0, SCREEN_WIDTH, inputTextViewSize.height+10);
             inputTextView.frame = CGRectMake( 5, INPUTBUTTONT, inputWidth , inputTextViewSize.height+2.5);
+            
+            
         }
         else
         {
@@ -565,6 +647,9 @@ recordButton;
             inputBgView.frame = CGRectMake(0, 0, SCREEN_WIDTH, inputTextViewSize.height+10);
             inputTextView.frame = CGRectMake( 5, INPUTBUTTONT, inputWidth , inputTextViewSize.height);
         }
+        faceView.frame = CGRectMake(0, inputTextViewSize.height+8, SCREEN_WIDTH, FaceViewHeight-40);
+        emoButton.frame = CGRectMake(0, faceView.frame.size.height+inputTextViewSize.height, 110, 49);
+        sendButton.frame = CGRectMake(SCREEN_WIDTH-70, faceView.frame.size.height+8+inputTextViewSize.height+8, 60, 30);
     }];
 }
 

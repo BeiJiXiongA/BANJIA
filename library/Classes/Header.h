@@ -26,7 +26,7 @@
 #import "MJPhoto.h"
 #import "MJPhotoBrowser.h"
 
-#define FaceViewHeight  220
+#define FaceViewHeight  200
 
 #pragma mark - Debug log macro
 #ifdef DEBUG
@@ -211,6 +211,8 @@ return shared##className; \
 
 #define OurTeamID  @"YmFuamlh"
 #define OurTeamHeader  @"/teamlogo.png"
+
+#define AssistantID  @"YXNzaXN0YW50"
 
 #define ClassAssistantHeader   @"/assistant.png"
 

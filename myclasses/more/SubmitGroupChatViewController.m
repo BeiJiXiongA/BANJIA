@@ -113,7 +113,7 @@
 {
     if ([nameTextField.text length] == 0)
     {
-        [Tools showAlertView:@"请输入闲聊名字" delegateViewController:nil];
+        [Tools showAlertView:@"请输入群聊名字" delegateViewController:nil];
         return ;
     }
     

@@ -15,4 +15,6 @@
 @property (nonatomic, strong) NSDictionary *commentDict;
 @property (nonatomic, strong) UIView *praiseView;
 @property (nonatomic, strong) UIButton *openPraiseButton;
+@property (nonatomic, strong) UIImageView *headerImageView;
+@property (nonatomic, strong) UILabel *timeLabel;
 @end

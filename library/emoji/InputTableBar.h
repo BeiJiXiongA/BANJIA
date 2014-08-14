@@ -18,7 +18,8 @@
     UIButton *addButton;
     CGFloat inputLength;
     
-    UIScrollView *faceView;
+    UIView *faceView;
+    UIScrollView *faceScrollView;
     NSMutableArray *fileNameArray;
     UIPageControl *pageControl;
     NSDictionary *faceDict;
@@ -32,6 +33,11 @@
     NSArray *faceArray;
     
     CGFloat inputWidth;
+    CGFloat pageControlHei;
+    int page;
+    
+    UIButton *emoButton;
+    UIButton *sendButton;
 }
 @property (nonatomic, strong) UITextView *inputTextView;
 @property (nonatomic, strong) UIView *inputBgView;
@@ -61,7 +67,7 @@
 -(void)changeInputType:(NSString *)changeType;
 
 -(void)changeInputViewSize:(CGSize)size;
-
+@optional
 -(void)selectPic:(int)selectPicTag;
 
 @end

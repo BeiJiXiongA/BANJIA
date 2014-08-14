@@ -10,7 +10,7 @@
 #import "PopView.h"
 
 @implementation CommentCell
-@synthesize nameButton,commentContentLabel,commentDict,praiseView,openPraiseButton;
+@synthesize nameButton,commentContentLabel,commentDict,praiseView,openPraiseButton,headerImageView,timeLabel;
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
@@ -38,6 +38,12 @@
         openPraiseButton = [UIButton buttonWithType:UIButtonTypeCustom];
         openPraiseButton.hidden = YES;
         [self.contentView addSubview:openPraiseButton];
+        
+        headerImageView = [[UIImageView alloc] init];
+        [self.contentView addSubview:headerImageView];
+        
+        timeLabel = [[UILabel alloc] init];
+        [self.contentView addSubview:timeLabel];
         
         self.backgroundColor = RGB(252, 252, 252, 1);
         self.contentView.backgroundColor = RGB(252, 252, 252, 1);

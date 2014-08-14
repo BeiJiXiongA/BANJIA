@@ -72,6 +72,7 @@
     groupChatTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
     groupChatTableView.delegate = self;
     groupChatTableView.dataSource = self;
+    groupChatTableView.backgroundColor = self.bgView.backgroundColor;
     groupChatTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     [self.bgView addSubview:groupChatTableView];
     
@@ -178,8 +179,19 @@
     [cell.headerImageView setImage:[UIImage imageNamed:@"headpic.jpg"]];
     
     cell.memNameLabel.frame = CGRectMake(70, 7, 220, 20);
-    cell.memNameLabel.text = [dict objectForKey:@"name"];
     
+    NSString *fname = [dict objectForKey:@"name"];
+    NSRange range = [fname rangeOfString:@"("];
+    NSRange range1 = [fname rangeOfString:@"人"];
+    if ([fname length] > 13 && range.length > 0 && range1.length > 0)
+    {
+        cell.memNameLabel.text = [NSString stringWithFormat:@"%@...%@",[fname substringToIndex:8],[fname substringFromIndex:range.location]];
+    }
+    else
+    {
+        cell.memNameLabel.text = [dict objectForKey:@"name"];
+    }
+
     cell.memNameLabel.font = [UIFont systemFontOfSize:16];
     cell.unreadedMsgLabel.hidden = YES;
     
@@ -222,13 +234,19 @@
         cell.unreadedMsgLabel.hidden = YES;
     }
     
+    CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+    UIImageView *lineImageView = [[UIImageView alloc] init];
+    lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+    lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+    [cell.contentView addSubview:lineImageView];
+    cell.contentView.backgroundColor = [UIColor whiteColor];
     
-    UIImageView *bgImageBG = [[UIImageView alloc] init];
-    bgImageBG.image = [UIImage imageNamed:@"line3"];
-    cell.backgroundView = bgImageBG;
-    cell.selectionStyle = UITableViewCellSelectionStyleGray;
-    
-    cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    UIImageView *markView = [[UIImageView alloc] init];
+    markView.hidden = NO;
+    markView.frame = CGRectMake(SCREEN_WIDTH-20, 24, 8, 12);
+    [markView setImage:[UIImage imageNamed:@"discovery_arrow"]];
+    [cell.contentView addSubview:markView];
+
     return cell;
 }
 

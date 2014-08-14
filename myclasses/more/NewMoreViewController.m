@@ -200,7 +200,8 @@
     }
     else if (button.tag - 333 == 1)
     {
-        //闲聊
+        //群聊
+        
         GroupChatViewController *groupChatViewController = [[GroupChatViewController alloc] init];
         [[XDTabViewController sharedTabViewController].navigationController pushViewController:groupChatViewController animated:YES];
     }

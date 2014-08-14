@@ -491,7 +491,7 @@ EditNameDone>
 
 -(void)editInfo1:(NSInteger)tag
 {
-    DDLOG(@"buttontag==%d",tag-333);
+    DDLOG(@"buttontag==%d",(int)tag-333);
     if (tag-333<1)
     {
 //        ((UITextField *)[personInfoTableView viewWithTag:tag-330]).backgroundColor = [[UIColor whiteColor]colorWithAlphaComponent:0.5];
@@ -810,7 +810,7 @@ EditNameDone>
 }
 -(void)textFieldDidBeginEditing:(UITextField *)textField
 {
-    DDLOG(@"===%d",textField.tag);
+    DDLOG(@"===%d",(int)textField.tag);
     [UIView animateWithDuration:0.2 animations:^{
         self.bgView.center = CGPointMake(CENTER_POINT.x, CENTER_POINT.y-textField.tag*25);
     }];

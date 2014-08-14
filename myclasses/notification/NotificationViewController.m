@@ -83,7 +83,7 @@ EGORefreshTableDelegate>
     
     
     NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
-    int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+    NSInteger userAdmin = [[dict objectForKey:@"admin"] integerValue];
     if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
     {
         [self.navigationBarView addSubview:addButton];
@@ -461,11 +461,11 @@ EGORefreshTableDelegate>
         
         
         cell.timeLabel.font = [UIFont systemFontOfSize:13];
-        cell.timeLabel.text = [NSString stringWithFormat:@"%@发布于%@",byName,[Tools showTime:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]]];
+        cell.timeLabel.text = [NSString stringWithFormat:@"%@发布于%@",byName,[Tools showTime:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] intValue]]]];
         cell.timeLabel.textColor = COMMENTCOLOR;
         
         
-        cell.statusLabel.text =[NSString stringWithFormat:@"%d人已读 %d人未读",[[dict objectForKey:@"read_num"] integerValue],[[dict objectForKey:@"unread_num"] integerValue]];
+        cell.statusLabel.text =[NSString stringWithFormat:@"%d人已读 %d人未读",[[dict objectForKey:@"read_num"] intValue],[[dict objectForKey:@"unread_num"] intValue]];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         cell.backgroundColor = [UIColor clearColor];
         return cell;
@@ -500,12 +500,12 @@ EGORefreshTableDelegate>
     notificationDetailViewController.readnotificationDetaildel = self;
     notificationDetailViewController.fromClass = YES;
     notificationDetailViewController.byID = [[dict objectForKey:@"by"] objectForKey:@"_id"];
-    notificationDetailViewController.markString = [NSString stringWithFormat:@"%@发布于%@",[[dict objectForKey:@"by"] objectForKey:@"name"],[Tools showTime:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]]];
+    notificationDetailViewController.markString = [NSString stringWithFormat:@"%@发布于%@",[[dict objectForKey:@"by"] objectForKey:@"name"],[Tools showTime:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] intValue]]]];
     if ([[dict objectForKey:@"new"] integerValue] == 1)
     {
         notificationDetailViewController.isnew = YES;
         
-        int newNoticeNum = [[[NSUserDefaults standardUserDefaults]objectForKey:[NSString stringWithFormat:@"%@-notice",classID]] integerValue];
+        int newNoticeNum = [[[NSUserDefaults standardUserDefaults]objectForKey:[NSString stringWithFormat:@"%@-notice",classID]] intValue];
         [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",--newNoticeNum ] forKey:[NSString stringWithFormat:@"%@-notice",classID]];
         [[NSUserDefaults standardUserDefaults] synchronize];
         [[XDTabViewController sharedTabViewController] viewWillAppear:YES];

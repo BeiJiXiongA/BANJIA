@@ -84,7 +84,7 @@ UISearchBarDelegate>
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
-    self.titleLabel.text = @"创建闲聊";
+    self.titleLabel.text = @"创建群聊";
     
     db = [[OperatDB alloc] init];
     
@@ -327,7 +327,8 @@ UISearchBarDelegate>
     for (int i=0; i < [tmpArray count]; i++)
     {
         NSDictionary *dict  =[tmpArray objectAtIndex:i];
-        if(![[dict objectForKey:@"role"] isEqualToString:@"unin_students"] && ![[dict objectForKey:@"uid"] isEqualToString:[Tools user_id]])
+        if([[dict objectForKey:@"role"] isEqualToString:@"students"] &&
+            ![[dict objectForKey:@"uid"] isEqualToString:[Tools user_id]])
         {
             [studentArray addObject:dict];
         }
@@ -352,7 +353,7 @@ UISearchBarDelegate>
     for (int i=0; i < [tmpArray count]; i++)
     {
         NSDictionary *dict  =[tmpArray objectAtIndex:i];
-        if(![[dict objectForKey:@"role"] isEqualToString:@"unin_students"] && ![[dict objectForKey:@"uid"] isEqualToString:[Tools user_id]])
+        if([[dict objectForKey:@"role"] isEqualToString:@"teachers"] && ![[dict objectForKey:@"uid"] isEqualToString:[Tools user_id]])
         {
             [teachersArray addObject:dict];
         }
@@ -377,7 +378,7 @@ UISearchBarDelegate>
     for (int i=0; i < [tmpArray count]; i++)
     {
         NSDictionary *dict  =[tmpArray objectAtIndex:i];
-        if(![[dict objectForKey:@"role"] isEqualToString:@"unin_students"] && ![[dict objectForKey:@"uid"] isEqualToString:[Tools user_id]])
+        if([[dict objectForKey:@"role"] isEqualToString:@"parents"] && ![[dict objectForKey:@"uid"] isEqualToString:[Tools user_id]])
         {
             [parentsArray addObject:dict];
         }
@@ -867,6 +868,13 @@ UISearchBarDelegate>
         {
             [cell.button1 setImage:[UIImage imageNamed:@"unchecked"] forState:UIControlStateNormal];
         }
+        
+        CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+        UIImageView *lineImageView = [[UIImageView alloc] init];
+        lineImageView.frame = CGRectMake(70, cellHeight-0.5, cell.frame.size.width, 0.5);
+        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+        [cell.contentView addSubview:lineImageView];
+        cell.contentView.backgroundColor = [UIColor whiteColor];
         cell.selectionStyle = UITableViewCellSelectionStyleGray;
         return cell;
     }
@@ -882,6 +890,13 @@ UISearchBarDelegate>
         NSArray *groupArray = [groupDict objectForKey:@"array"];
         NSDictionary *dict = [groupArray objectAtIndex:indexPath.row];
         DDLOG(@"dict %@",dict);
+        
+        CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+        UIImageView *lineImageView = [[UIImageView alloc] init];
+        lineImageView.frame = CGRectMake(60, cellHeight-0.5, cell.frame.size.width, 0.5);
+        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+        [cell.contentView addSubview:lineImageView];
+        cell.contentView.backgroundColor = [UIColor whiteColor];
         
         cell.memNameLabel.frame = CGRectMake(60, 15, 220, 30);
         if (![[dict objectForKey:@"title"] isEqual:[NSNull null]] && [[dict objectForKey:@"title"] length] > 0)
@@ -1021,9 +1036,9 @@ UISearchBarDelegate>
     
     if ([role isEqualToString:@"teachers"])
     {
-        [((SSCheckBoxView *)[checkView viewWithTag:CheckBoxTag]) setChecked:[self containAllTeacher]];
-        [((SSCheckBoxView *)[checkView viewWithTag:CheckBoxTag+1]) setChecked:[self containAllParents]];
-        [((SSCheckBoxView *)[checkView viewWithTag:CheckBoxTag+2]) setChecked:[self containAllStudent]];
+        [((SSCheckBoxView *)[checkView viewWithTag:ALLTEACHERS]) setChecked:[self containAllTeacher]];
+        [((SSCheckBoxView *)[checkView viewWithTag:ALLPARENTS]) setChecked:[self containAllParents]];
+        [((SSCheckBoxView *)[checkView viewWithTag:ALLSTUDENTS]) setChecked:[self containAllStudent]];
     }
     
     [memberTableView reloadData];

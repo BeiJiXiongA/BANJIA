@@ -52,7 +52,7 @@
                 NSString *content = [[dict objectForKey:@"content"] emojizedString];
                 NSString *contentString = [NSString stringWithFormat:@"%@:%@",name,content];
                 CGSize s = [Tools getSizeWithString:contentString andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
-                tmpcommentHeight += (s.height+10);
+                tmpcommentHeight += (s.height+55);
             }
         }
         else

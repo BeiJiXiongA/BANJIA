@@ -414,7 +414,6 @@
         [query deleteCharactersInRange:NSMakeRange([query length]-3, 3)];
         [query insertString:[NSString stringWithFormat:@" order by %@",orderKey] atIndex:[query length]];
     }
-    DDLOG(@"find query %@",query);
     FMResultSet *resultSet = [_db executeQuery:query];
     while ([resultSet next])
     {

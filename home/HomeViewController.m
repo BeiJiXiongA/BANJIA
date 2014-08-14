@@ -257,7 +257,7 @@ ZBarReaderViewDelegate>
     
     if ([Tools NetworkReachable])
     {
-        [self getHomeData];
+        [self getHomeCache];
         [self getHomeData];
     }
     else
@@ -1051,13 +1051,14 @@ ZBarReaderViewDelegate>
 {
     if (section < [noticeArray count])
     {
-        return [[[noticeArray objectAtIndex:section] objectForKey:@"news"] count];
+        NSArray *tmpArray = [[noticeArray objectAtIndex:section] objectForKey:@"news"];
+        return [tmpArray count];
     }
     else if(section > [noticeArray count])
     {
         if ([noticeArray count] > 0)
         {
-            int cha = [noticeArray count]>0?([noticeArray count]+1):0;
+            int cha = (int)([noticeArray count]>0?([noticeArray count]+1):0);
             NSDictionary *groupDict = [groupDiaries objectAtIndex:section-cha];
             NSArray *tmpArray = [groupDict objectForKey:@"diaries"];
             return [tmpArray count];
@@ -1079,7 +1080,7 @@ ZBarReaderViewDelegate>
     }
     else if(indexPath.section > [noticeArray count])
     {
-        int cha = [noticeArray count]>0?([noticeArray count]+1):0;
+        int cha = (int)([noticeArray count]>0?([noticeArray count]+1):0);
         NSDictionary *groupDict;
         if ([noticeArray count] > 0)
         {
@@ -1266,7 +1267,8 @@ ZBarReaderViewDelegate>
         
         CGFloat imageViewHeight = ImageHeight;
         CGFloat imageViewWidth = ImageHeight;
-        if ([[[dict objectForKey:@"detail"] objectForKey:@"img"] count] > 0)
+        NSArray *tmpArray1 = [[dict objectForKey:@"detail"] objectForKey:@"img"];
+        if ([tmpArray1 count] > 0)
         {
             //有图片
             
@@ -1357,7 +1359,7 @@ ZBarReaderViewDelegate>
         
         if ([[dict objectForKey:@"likes_num"] integerValue] > 0)
         {
-            [cell.praiseButton setTitle:[NSString stringWithFormat:@"    %d",[[dict objectForKey:@"likes_num"] integerValue]] forState:UIControlStateNormal];
+            [cell.praiseButton setTitle:[NSString stringWithFormat:@"    %d",[[dict objectForKey:@"likes_num"] intValue]] forState:UIControlStateNormal];
         }
         else
         {
@@ -1626,13 +1628,13 @@ ZBarReaderViewDelegate>
 {
     if ([changeType isEqualToString:@"face"])
     {
-        faceViewHeight = FaceViewHeight;
-        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10-faceViewHeight, SCREEN_WIDTH, inputSize.height+10 + faceViewHeight);
+        tmpheight = FaceViewHeight;
+        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10-tmpheight, SCREEN_WIDTH, inputSize.height+10 + tmpheight);
     }
     else if([changeType isEqualToString:@"key"])
     {
-        faceViewHeight = inputSize.height;
-        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10-tmpheight, SCREEN_WIDTH, inputSize.height+10 + faceViewHeight);
+        tmpheight = inputSize.height;
+        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10-tmpheight, SCREEN_WIDTH, inputSize.height+10 + tmpheight);
     }
 }
 
@@ -1640,7 +1642,7 @@ ZBarReaderViewDelegate>
 {
     inputSize = size;
     [UIView animateWithDuration:0.2 animations:^{
-        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-size.height-10-tmpheight, SCREEN_WIDTH, size.height+10+faceViewHeight);
+        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-size.height-10-tmpheight, SCREEN_WIDTH, size.height+10+tmpheight);
     }];
 }
 
@@ -1899,7 +1901,8 @@ ZBarReaderViewDelegate>
     NSString *imagePath;
     if ([waitTransmitDict objectForKey:@"img"])
     {
-        if ([[waitTransmitDict objectForKey:@"img"] count] > 0)
+        NSArray *tmpArray = [waitTransmitDict objectForKey:@"img"];
+        if ([tmpArray count] > 0)
         {
             imagePath = [NSString stringWithFormat:@"%@%@@150w",IMAGEURL,[[waitTransmitDict objectForKey:@"img"] firstObject]];
         }
@@ -1982,7 +1985,8 @@ ZBarReaderViewDelegate>
     NSString *imagePath;
     if ([waitTransmitDict objectForKey:@"img"])
     {
-        if ([[waitTransmitDict objectForKey:@"img"] count] > 0)
+        NSArray *tmpArray = [waitTransmitDict objectForKey:@"img"];
+        if ([tmpArray count] > 0)
         {
             imagePath = [NSString stringWithFormat:@"%@%@@80w",IMAGEURL,[[waitTransmitDict objectForKey:@"img"] firstObject]];
         }
@@ -2064,7 +2068,8 @@ ZBarReaderViewDelegate>
     NSString *imagePath;
     if ([waitTransmitDict objectForKey:@"img"])
     {
-        if ([[waitTransmitDict objectForKey:@"img"] count] > 0)
+        NSArray *tmpArray = [waitTransmitDict objectForKey:@"img"];
+        if ([tmpArray count] > 0)
         {
             imagePath = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[waitTransmitDict objectForKey:@"img"] firstObject]];
         }
@@ -2143,7 +2148,8 @@ ZBarReaderViewDelegate>
     NSString *imagePath;
     if ([waitTransmitDict objectForKey:@"img"])
     {
-        if ([[waitTransmitDict objectForKey:@"img"] count] > 0)
+        NSArray *tmpArray = [waitTransmitDict objectForKey:@"img"];
+        if ([tmpArray count] > 0)
         {
             imagePath = [NSString stringWithFormat:@"%@%@@80w",IMAGEURL,[[waitTransmitDict objectForKey:@"img"] firstObject]];
         }
@@ -2222,7 +2228,8 @@ ZBarReaderViewDelegate>
     NSString *imagePath;
     if ([waitTransmitDict objectForKey:@"img"])
     {
-        if ([[waitTransmitDict objectForKey:@"img"] count] > 0)
+        NSArray *tmpArray = [waitTransmitDict objectForKey:@"img"];
+        if ([tmpArray count] > 0)
         {
             imagePath = [NSString stringWithFormat:@"%@%@@150w",IMAGEURL,[[waitTransmitDict objectForKey:@"img"] firstObject]];
         }
@@ -2299,7 +2306,8 @@ ZBarReaderViewDelegate>
     NSString *imagePath;
     if ([waitTransmitDict objectForKey:@"img"])
     {
-        if ([[waitTransmitDict objectForKey:@"img"] count] > 0)
+        NSArray *tmpArray = [waitTransmitDict objectForKey:@"img"];
+        if ([tmpArray count] > 0)
         {
             imagePath = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[waitTransmitDict objectForKey:@"img"] firstObject]];
         }

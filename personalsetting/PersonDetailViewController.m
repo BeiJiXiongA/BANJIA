@@ -678,7 +678,7 @@ MFMailComposeViewControllerDelegate>
                     if (![[dict objectForKey:@"img_icon"] isEqual:[NSNull null]])
                     {
                         
-                        if ([[dict objectForKey:@"img_icon"] length] > 10)
+                        if ([[dict objectForKey:@"img_icon"] isKindOfClass:[NSString class]] && [[dict objectForKey:@"img_icon"] length] > 10)
                         {
                             headerImg = [dict objectForKey:@"img_icon"];
                         }

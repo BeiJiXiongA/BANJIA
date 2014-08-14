@@ -78,6 +78,8 @@ updateGroupInfoDelegate>
     NSString *g_r_a;
     
     NSString *scoreid;
+    
+    CGFloat inputTabBarH;
 }
 @end
 
@@ -229,11 +231,19 @@ updateGroupInfoDelegate>
     
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = self;
     
-    inputTabBar = [[InputTableBar alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT-20, SCREEN_WIDTH, 40)];
+    inputTabBarH = 40;
+    if ([toID isEqual:AssistantID])
+    {
+        inputTabBarH = 0;
+        moreButton.hidden = YES;
+    }
+    
+    inputTabBar = [[InputTableBar alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT-inputTabBarH+YSTART, SCREEN_WIDTH, inputTabBarH)];
     inputTabBar.backgroundColor = [UIColor whiteColor];
     inputTabBar.returnFunDel = self;
     inputTabBar.notOnlyFace = YES;
     inputTabBar.layer.anchorPoint = CGPointMake(0.5, 1);
+    messageTableView.frame = CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT-inputTabBarH);
     [self.bgView addSubview:inputTabBar];
     [inputTabBar setLayout];
 }
@@ -399,6 +409,20 @@ updateGroupInfoDelegate>
             {
                 users = [[responseDict objectForKey:@"data"] objectForKey:@"users"];
                 self.titleLabel.text = [[responseDict objectForKey:@"data"] objectForKey:@"name"];
+                
+                NSString *fname = [[responseDict objectForKey:@"data"] objectForKey:@"name"];
+                NSRange range = [fname rangeOfString:@"("];
+                NSRange range1 = [fname rangeOfString:@"人"];
+                if ([fname length] > 8 && range.length > 0 && range1.length > 0)
+                {
+                    self.titleLabel.text = [NSString stringWithFormat:@"%@...%@",[fname substringToIndex:4],[fname substringFromIndex:range.location]];
+                }
+                else
+                {
+                    self.titleLabel.text = fname;
+                }
+
+                
                 for(NSDictionary *dict in users)
                 {
                     NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithCapacity:0];
@@ -557,7 +581,7 @@ updateGroupInfoDelegate>
     if ([inputTabBar.inputTextView.text length]>0)
     {
         inputSize = CGSizeMake(250, 30);
-        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10-keyboardHeight, SCREEN_WIDTH, inputSize.height+10+ FaceViewHeight);
+        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10-tmpheight, SCREEN_WIDTH, inputSize.height+10+ tmpheight);
         [self sendMsgWithString:[inputTabBar analyString:inputTabBar.inputTextView.text]];
     }
 }
@@ -574,21 +598,6 @@ updateGroupInfoDelegate>
         }
         iseditting = YES;
     }];
-}
-
--(void)changeInputType:(NSString *)changeType
-{
-    if ([changeType isEqualToString:@"face"])
-    {
-        faceViewHeight = FaceViewHeight;
-        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-FaceViewHeight-10, SCREEN_WIDTH, 40 + FaceViewHeight);
-    }
-    else if([changeType isEqualToString:@"key"])
-    {
-        faceViewHeight = 0;
-        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-tmpheight-10, SCREEN_WIDTH, 40 + FaceViewHeight);
-    }
-    iseditting = YES;
 }
 
 -(void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
@@ -617,11 +626,26 @@ updateGroupInfoDelegate>
     }];
 }
 
+-(void)changeInputType:(NSString *)changeType
+{
+    if ([changeType isEqualToString:@"face"])
+    {
+        tmpheight = FaceViewHeight;
+        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10-tmpheight, SCREEN_WIDTH, inputSize.height+10 + tmpheight);
+    }
+    else if([changeType isEqualToString:@"key"])
+    {
+        tmpheight = inputSize.height;
+        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10-tmpheight, SCREEN_WIDTH, inputSize.height+10 + tmpheight);
+    }
+    iseditting = YES;
+}
+
 -(void)changeInputViewSize:(CGSize)size
 {
     inputSize = size;
     [UIView animateWithDuration:0.2 animations:^{
-        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-size.height-10-tmpheight, SCREEN_WIDTH, size.height+10+faceViewHeight);
+        inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-size.height-10-tmpheight, SCREEN_WIDTH, size.height+10+tmpheight);
         
         if (messageTableView.contentSize.height>tmpheight)
         {
@@ -963,22 +987,38 @@ updateGroupInfoDelegate>
     PersonDetailViewController *personDetailVC = [[PersonDetailViewController alloc] init];
     if (isGroup)
     {
-        NSDictionary *usericondict = [ImageTools iconDictWithUserID:[personDict objectForKey:@"by"]];
-        if (usericondict)
+        if([[personDict objectForKey:DIRECT] isEqualToString:@"t"])
         {
-            personDetailVC.personName = [usericondict objectForKey:@"username"];
+            personDetailVC.personName = [Tools user_name];
+            personDetailVC.personID = [Tools user_id];
         }
-        personDetailVC.personID = [personDict objectForKey:@"by"];
+        else
+        {
+            NSDictionary *usericondict = [ImageTools iconDictWithUserID:[personDict objectForKey:@"by"]];
+            if (usericondict)
+            {
+                personDetailVC.personName = [usericondict objectForKey:@"username"];
+            }
+            personDetailVC.personID = [personDict objectForKey:@"by"];
+        }
     }
     else
     {
-        NSDictionary *usericondict = [ImageTools iconDictWithUserID:[personDict objectForKey:@"fid"]];
-        if (usericondict)
+        if([[personDict objectForKey:DIRECT] isEqualToString:@"t"])
         {
-            personDetailVC.personName = [usericondict objectForKey:@"username"];
+            personDetailVC.personName = [Tools user_name];
+            personDetailVC.personID = [Tools user_id];
         }
-
-        personDetailVC.personID = [personDict objectForKey:@"fid"];
+        else
+        {
+            NSDictionary *usericondict = [ImageTools iconDictWithUserID:[personDict objectForKey:@"fid"]];
+            if (usericondict)
+            {
+                personDetailVC.personName = [usericondict objectForKey:@"username"];
+            }
+            
+            personDetailVC.personID = [personDict objectForKey:@"fid"];
+        }
     }
     if (!isGroup)
     {

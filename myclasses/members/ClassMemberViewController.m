@@ -554,11 +554,11 @@ MsgDelegate>
                     }
                     
                     [memDict setObject:classID forKey:@"classid"];
-                    [memDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"checked"] integerValue]] forKey:@"checked"];
+                    [memDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"checked"] intValue]] forKey:@"checked"];
                     
                     if ([[adminIDDict objectForKey:[dict objectForKey:@"_id"]] intValue] > 0)
                     {
-                        [memDict setObject:[NSString stringWithFormat:@"%d",[[adminIDDict objectForKey:[dict objectForKey:@"_id"]] integerValue]] forKey:@"admin"];
+                        [memDict setObject:[NSString stringWithFormat:@"%d",[[adminIDDict objectForKey:[dict objectForKey:@"_id"]] intValue]] forKey:@"admin"];
                     }
                     else if([[dict objectForKey:@"role"] isEqualToString:@"teachers"] && [[dict objectForKey:@"checked"] integerValue] == 1)
                     {
@@ -713,7 +713,7 @@ MsgDelegate>
     [studentArray removeAllObjects];
     [withoutParentStuArray removeAllObjects];
     
-    int userAmin = [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue];
+    int userAmin = [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] intValue];
     
     if ([_db updeteKey:@"admin" toValue:[NSString stringWithFormat:@"%d",userAmin] withParaDict:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE])
     {
@@ -767,7 +767,7 @@ MsgDelegate>
         }
     }
     
-    self.titleLabel.text = [NSString stringWithFormat:@"班级成员(%d)",[teachersArray count]+[studentArray count]];
+    self.titleLabel.text = [NSString stringWithFormat:@"班级成员(%d)",(int)[teachersArray count]+(int)[studentArray count]];
     
     [membersArray addObjectsFromArray:[Tools getSpellSortArrayFromChineseArray:studentArray andKey:@"name"]];
     [memberTableView reloadData];
@@ -969,7 +969,7 @@ MsgDelegate>
                     cell.memNameLabel.hidden = NO;
                     cell.memNameLabel.textColor = CONTENTCOLOR;
                     cell.memNameLabel.frame = CGRectMake(120, 16, 105, 30);
-                    cell.memNameLabel.text = [NSString stringWithFormat:@"%d个新申请",[newAppleArray count]];
+                    cell.memNameLabel.text = [NSString stringWithFormat:@"%d个新申请",(int)[newAppleArray count]];
                     
                     cell.markView.frame = CGRectMake(226, 25, 8, 12);
                     [cell.markView setImage:[UIImage imageNamed:@"discovery_arrow"]];
@@ -992,7 +992,7 @@ MsgDelegate>
                 cell.markView.hidden = NO;
                 [cell.markView setImage:image];
                 cell.memNameLabel.text = @"老师";
-                cell.remarkLabel.text = [NSString stringWithFormat:@"%d人",[teachersArray count]];
+                cell.remarkLabel.text = [NSString stringWithFormat:@"%d人",(int)[teachersArray count]];
                 markView.hidden = NO;
                 markView.frame = CGRectMake(SCREEN_WIDTH-20, 24, 8, 12);
                 [markView setImage:[UIImage imageNamed:@"discovery_arrow"]];
@@ -1005,7 +1005,7 @@ MsgDelegate>
                 cell.markView.hidden = NO;
                 [cell.markView setImage:image];
                 cell.memNameLabel.text = @"管理员";
-                cell.remarkLabel.text = [NSString stringWithFormat:@"%d人",[adminArray count]];
+                cell.remarkLabel.text = [NSString stringWithFormat:@"%d人",(int)[adminArray count]];
                 markView.hidden = NO;
                 markView.frame = CGRectMake(SCREEN_WIDTH-20, 24, 8, 12);
                 [markView setImage:[UIImage imageNamed:@"discovery_arrow"]];
@@ -1018,7 +1018,7 @@ MsgDelegate>
                 cell.markView.hidden = NO;
                 [cell.markView setImage:image];
                 cell.memNameLabel.text = @"应添加家长的学生";
-                cell.remarkLabel.text = [NSString stringWithFormat:@"%d人",[withoutParentStuArray count]];
+                cell.remarkLabel.text = [NSString stringWithFormat:@"%d人",(int)[withoutParentStuArray count]];
                 markView.hidden = NO;
                 markView.frame = CGRectMake(SCREEN_WIDTH-20, 24, 8, 12);
                 [markView setImage:[UIImage imageNamed:@"discovery_arrow"]];
@@ -1081,7 +1081,7 @@ MsgDelegate>
             [cell.contentView addSubview:lineImageView];
             cell.contentView.backgroundColor = [UIColor whiteColor];
             
-            DDLOG(@"%d/%d",indexPath.row,[tableView numberOfRowsInSection:indexPath.section]);
+            DDLOG(@"%d/%d",(int)indexPath.row,(int)[tableView numberOfRowsInSection:indexPath.section]);
             if (indexPath.row < [tableView numberOfRowsInSection:indexPath.section]-1)
             {
                 lineImageView.frame = CGRectMake( 60, cellHeight-0.5, cell.frame.size.width, 0.5);
@@ -1167,7 +1167,7 @@ MsgDelegate>
 
 -(void)inviteButtonClick:(UIButton *)button
 {
-    int section = button.tag/3333;
+    int section = (int)button.tag/3333;
     int row = button.tag % 3333;
     NSDictionary *groupDict = [membersArray objectAtIndex:section];
     NSDictionary *dict = [[groupDict objectForKey:@"array"] objectAtIndex:row];
@@ -1196,7 +1196,7 @@ MsgDelegate>
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    DDLOG(@"tableview tag= %d",tableView.tag);
+    DDLOG(@"tableview tag= %d",(int)tableView.tag);
     if (tableView.tag == MemTableViewTag)
     {
         if (indexPath.section == 0)
