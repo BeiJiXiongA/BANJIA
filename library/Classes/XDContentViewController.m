@@ -65,7 +65,7 @@
     
 //    [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleBlackTranslucent;
     
-    DDLOG(@"screenheight %.1f==%.1f",SCREEN_HEIGHT,[UIScreen mainScreen].bounds.size.height);
+    DDLOG(@"version %@ screenheight %.1f==%.1f",[Tools device_version],SCREEN_HEIGHT,[UIScreen mainScreen].bounds.size.height);
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(postlogOut) name:@"logout" object:nil];
     

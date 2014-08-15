@@ -25,6 +25,13 @@
 #import "MessageViewController.h"
 
 #import <ShareSDK/ShareSDK.h>
+#import <RennSDK/RennSDK.h>
+#import <TencentOpenAPI/QQApi.h>
+#import <TencentOpenAPI/QQApiInterface.h>
+#import <TencentOpenAPI/TencentOAuth.h>
+#import "WeiboApi.h"
+#import "MobClick.h"
+#import "WXApi.h"
 
 //Õı»
 #define NewVersionTag  1000

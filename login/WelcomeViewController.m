@@ -274,7 +274,7 @@ UITextFieldDelegate>
                                    @"pwd":passwordTextfield.text,
                                    @"c_ver":[Tools client_ver],
                                    @"d_name":[Tools device_name],
-                                   @"d_imei":userStr,
+                                   @"d_imei":[Tools device_uid],
                                    @"c_os":[Tools device_os],
                                    @"d_type":@"iOS",
                                    @"registrationID":userStr,
