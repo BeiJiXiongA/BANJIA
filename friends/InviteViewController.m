@@ -308,15 +308,13 @@ UISearchBarDelegate>
 {
     [searchResultArray removeAllObjects];
     mySearchBar.text = nil;
-    [searchTableView reloadData];
     [UIView animateWithDuration:0.2 animations:^{
         [bgScrollView sendSubviewToBack:searchView];
         contactTableView.hidden = NO;
-//        searchTableView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-//        mySearchBar.frame = CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, 40);
         [searchView removeGestureRecognizer:tapTgr];
         mySearchBar.showsCancelButton = NO;
         bgScrollView.frame = CGRectMake(0, buttonScrollView.frame.size.height+buttonScrollView.frame.origin.y, SCREEN_WIDTH, SCREEN_HEIGHT - buttonScrollView.frame.origin.y-buttonScrollView.frame.size.height);
+        selectView.frame = CGRectMake(0, bgScrollView.frame.size.height-50, SCREEN_WIDTH, 50);
     }];
     
     [mySearchBar resignFirstResponder];
@@ -1386,11 +1384,7 @@ UISearchBarDelegate>
                                  
                                  if (state == SSPublishContentStateSuccess)
                                  {
-//                                     NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
-//                                     NSData *data = [@"qq" dataUsingEncoding:NSUTF8StringEncoding];
-//                                     NSString *base64Str = [ASIHTTPRequest base64forData:data];
-//                                     DDLOG(@"=========%@",base64Str);
-//                                     [self dealJiFenWithID:[N]]
+                                     [DealJiFen dealJiFenWithID:QQBASE64];
                                  }
                                  else if (state == SSPublishContentStateFail)
                                  {
@@ -1464,7 +1458,7 @@ UISearchBarDelegate>
                         
                         if (state == SSPublishContentStateSuccess)
                         {
-                            NSLog(@"success");
+                            [DealJiFen dealJiFenWithID:WXBASE64];
                         }
                         else if (state == SSPublishContentStateFail)
                         {
@@ -1535,76 +1529,13 @@ UISearchBarDelegate>
         case MessageComposeResultSent:
         {
             [self alertWithTitle:@"提示信息" msg:@"发送成功"];
-            [self dealJiFen];
+            [DealJiFen dealJiFenWithPhones:contactInviteArray];
             break;
         }
         default:
             break;
     }
 }
-
--(void)dealJiFen
-{
-    if ([Tools NetworkReachable])
-    {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
-                                                                      @"token":[Tools client_token],
-                                                                      @"phone":[Tools user_id]
-                                                                      } API:MB_INVITE];
-        [request setCompletionBlock:^{
-            NSString *responseString = [request responseString];
-            NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"getuserinfo responsedict %@",responseDict);
-            if ([[responseDict objectForKey:@"code"] intValue] == 1)
-            {
-               
-            }
-            else
-            {
-                [Tools dealRequestError:responseDict fromViewController:nil];
-            }
-        }];
-        
-        [request setFailedBlock:^{
-            NSError *error = [request error];
-            DDLOG(@"error %@",error);
-            [Tools showAlertView:@"连接错误" delegateViewController:nil];
-        }];
-        [request startAsynchronous];
-    }
-}
-
--(void)dealJiFenWithID:(NSString *)p_id
-{
-    if ([Tools NetworkReachable])
-    {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
-                                                                      @"token":[Tools client_token],
-                                                                      @"p_id":p_id
-                                                                      } API:MB_INVITE];
-        [request setCompletionBlock:^{
-            NSString *responseString = [request responseString];
-            NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"getuserinfo responsedict %@",responseDict);
-            if ([[responseDict objectForKey:@"code"] intValue] == 1)
-            {
-                
-            }
-            else
-            {
-                [Tools dealRequestError:responseDict fromViewController:nil];
-            }
-        }];
-        
-        [request setFailedBlock:^{
-            NSError *error = [request error];
-            DDLOG(@"error %@",error);
-            [Tools showAlertView:@"连接错误" delegateViewController:nil];
-        }];
-        [request startAsynchronous];
-    }
-}
-
 
 - (void) alertWithTitle:(NSString *)title msg:(NSString *)msg {
     

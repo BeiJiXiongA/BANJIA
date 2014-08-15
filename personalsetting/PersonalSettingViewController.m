@@ -1065,6 +1065,7 @@ static int loginID;
                                  
                                  if (state == SSPublishContentStateSuccess)
                                  {
+                                     [DealJiFen dealJiFenWithID:QQBASE64];
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
                                  }
                                  else if (state == SSPublishContentStateFail)
@@ -1127,6 +1128,7 @@ static int loginID;
                                  
                                  if (state == SSPublishContentStateSuccess)
                                  {
+                                     [DealJiFen dealJiFenWithID:SWBASE64];
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
                                  }
                                  else if (state == SSPublishContentStateFail)
@@ -1190,6 +1192,7 @@ static int loginID;
                                  
                                  if (state == SSPublishContentStateSuccess)
                                  {
+                                     [DealJiFen dealJiFenWithID:QQBASE64];
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
                                  }
                                  else if (state == SSPublishContentStateFail)
@@ -1248,6 +1251,7 @@ static int loginID;
                                  
                                  if (state == SSPublishContentStateSuccess)
                                  {
+                                     [DealJiFen dealJiFenWithID:QQBASE64];
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
                                  }
                                  else if (state == SSPublishContentStateFail)
@@ -1307,6 +1311,7 @@ static int loginID;
                                  
                                  if (state == SSPublishContentStateSuccess)
                                  {
+                                     [DealJiFen dealJiFenWithID:WXBASE64];
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
                                  }
                                  else if (state == SSPublishContentStateFail)
@@ -1370,6 +1375,7 @@ static int loginID;
                                  
                                  if (state == SSPublishContentStateSuccess)
                                  {
+                                     [DealJiFen dealJiFenWithID:WXBASE64];
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
                                  }
                                  else if (state == SSPublishContentStateFail)

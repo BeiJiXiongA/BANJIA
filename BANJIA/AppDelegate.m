@@ -17,19 +17,14 @@
 #import "MCSoundBoard.h"
 #import "KKNavigationController.h"
 
-#import <ShareSDK/ShareSDK.h>
-#import <RennSDK/RennSDK.h>
-#import <TencentOpenAPI/QQApi.h>
-#import <TencentOpenAPI/QQApiInterface.h>
-#import <TencentOpenAPI/TencentOAuth.h>
-#import "WeiboApi.h"
 #import "MobClick.h"
-#import "WXApi.h"
 #import "ChineseToPinyin.h"
 #import "NSString+Emojize.h"
 
 #import "ApplyInfoViewController.h"
 #import "MessageViewController.h"
+
+#import <ShareSDK/ShareSDK.h>
 
 //Õı»
 #define NewVersionTag  1000
@@ -47,8 +42,13 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for cupstomization after application launch.
     
-    [[NSUserDefaults standardUserDefaults] setObject:@"0006" forKey:@"currentVersion"];
+//    [[NSUserDefaults standardUserDefaults] setObject:@"0006" forKey:@"currentVersion"];
+    [[NSUserDefaults standardUserDefaults] setObject:@"0020" forKey:@"currentVersion"];
     [[NSUserDefaults standardUserDefaults] setObject:SCHEMERELEASE forKey:SCHEMETYPE];
+    
+    [[NSUserDefaults standardUserDefaults] setObject:FROMBACKGROUD forKey:BECOMEACTIVE];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    
     [[NSUserDefaults standardUserDefaults] synchronize];
     
     [application setStatusBarHidden:NO withAnimation:UIStatusBarAnimationFade];
@@ -524,10 +524,22 @@
                     {
                         [self.chatDelegate dealNewChatMsg:chatDict];
                     }
+                    DDLOG(@"======%@",[[NSUserDefaults standardUserDefaults] objectForKey:BECOMEACTIVE]);
                     if (!([[NSUserDefaults standardUserDefaults] objectForKey:@"viewtype"] &&
                           [[[NSUserDefaults standardUserDefaults] objectForKey:@"viewtype"] isEqualToString:@"chat"]))
                     {
-                        [Tools showAlertView:[[userInfo objectForKey:@"aps"] objectForKey:@"alert"] delegateViewController:nil];
+                        if ([[[NSUserDefaults standardUserDefaults]objectForKey:BECOMEACTIVE] isEqualToString:FROMBACKGROUD])
+                        {
+                            SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
+                            MessageViewController *msgViewController = [[MessageViewController alloc] init];
+                            KKNavigationController *msgNav = [[KKNavigationController alloc] initWithRootViewController:msgViewController];
+                            [sideMenuViewController.buttonTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:2 inSection:0] animated:YES scrollPosition:UITableViewScrollPositionNone];
+                            JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:msgNav menuController:sideMenuViewController];
+                            self.window.rootViewController = sideMenu;
+                            
+                            [[NSUserDefaults standardUserDefaults] setObject:FROMFORGROUD forKey:BECOMEACTIVE];
+                            [[NSUserDefaults standardUserDefaults] synchronize];
+                        }
                     }
                     
                     [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVENEWMSG object:nil];
@@ -743,6 +755,8 @@
     {
         [self getNewChat];
         [self getNewClass];
+        [[NSUserDefaults standardUserDefaults] setObject:FROMBACKGROUD forKey:BECOMEACTIVE];
+        [[NSUserDefaults standardUserDefaults] synchronize];
     }
 }
 
@@ -750,6 +764,8 @@
 {
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
 //    [self getNewChat];
+    
+    
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application

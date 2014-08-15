@@ -31,6 +31,7 @@ UIActionSheetDelegate,NameButtonDel>
     UITableView *diaryDetailTableView;
     NSDictionary *diaryDetailDict;
     NSDictionary *waitTransDict;
+    NSString *diaryID;
     
     UIView *commitView;
     UITextField *commitTextField;
@@ -856,6 +857,7 @@ UIActionSheetDelegate,NameButtonDel>
     if (actionSheet.tag == 4444)
     {
         DDLOG(@"waittransdict %@",waitTransDict);
+        diaryID = [diaryDetailDict objectForKey:@"_id"];
         switch (buttonIndex)
         {
             case 0:
@@ -986,6 +988,7 @@ UIActionSheetDelegate,NameButtonDel>
                                  [self backInput];
                                  if (state == SSPublishContentStateSuccess)
                                  {
+                                     [DealJiFen dealJiFenWithID:diaryID];
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
                                  }
                                  else if (state == SSPublishContentStateFail)
@@ -1066,6 +1069,7 @@ UIActionSheetDelegate,NameButtonDel>
                                  [self backInput];
                                  if (state == SSPublishContentStateSuccess)
                                  {
+                                     [DealJiFen dealJiFenWithID:diaryID];
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
                                  }
                                  else if (state == SSPublishContentStateFail)
@@ -1147,6 +1151,7 @@ UIActionSheetDelegate,NameButtonDel>
                                  [self backInput];
                                  if (state == SSPublishContentStateSuccess)
                                  {
+                                     [DealJiFen dealJiFenWithID:diaryID];
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
                                  }
                                  else if (state == SSPublishContentStateFail)
@@ -1222,6 +1227,7 @@ UIActionSheetDelegate,NameButtonDel>
                                  [self backInput];
                                  if (state == SSPublishContentStateSuccess)
                                  {
+                                     [DealJiFen dealJiFenWithID:diaryID];
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
                                  }
                                  else if (state == SSPublishContentStateFail)
@@ -1298,6 +1304,7 @@ UIActionSheetDelegate,NameButtonDel>
                                  [self backInput];
                                  if (state == SSPublishContentStateSuccess)
                                  {
+                                     [DealJiFen dealJiFenWithID:diaryID];
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
                                  }
                                  else if (state == SSPublishContentStateFail)
@@ -1378,6 +1385,7 @@ UIActionSheetDelegate,NameButtonDel>
                                  [self backInput];
                                  if (state == SSPublishContentStateSuccess)
                                  {
+                                     [DealJiFen dealJiFenWithID:diaryID];
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
                                  }
                                  else if (state == SSPublishContentStateFail)

@@ -231,14 +231,17 @@ updateGroupInfoDelegate>
     
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = self;
     
+    CGFloat hei = 20;
     inputTabBarH = 40;
     if ([toID isEqual:AssistantID])
     {
         inputTabBarH = 0;
+        hei = 0;
         moreButton.hidden = YES;
     }
+    DDLOG(@"%f",SCREEN_HEIGHT);
+    inputTabBar = [[InputTableBar alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT+hei-inputTabBarH, SCREEN_WIDTH, inputTabBarH)];
     
-    inputTabBar = [[InputTableBar alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT-inputTabBarH+YSTART, SCREEN_WIDTH, inputTabBarH)];
     inputTabBar.backgroundColor = [UIColor whiteColor];
     inputTabBar.returnFunDel = self;
     inputTabBar.notOnlyFace = YES;

@@ -138,30 +138,45 @@
         cell.backgroundColor = [UIColor clearColor];
     }
     
-    cell.contentLable.frame = CGRectMake(140, 12.5, 15, 15);
+    cell.contentLable.frame = CGRectMake(140, 10, 20, 20);
     cell.contentLable.backgroundColor = RGB(242, 87, 87, 1);
-    cell.contentLable.layer.cornerRadius = 7.5;
+    cell.contentLable.layer.cornerRadius = 10;
     cell.contentLable.clipsToBounds = YES;
     cell.contentLable.layer.borderColor = [UIColor whiteColor].CGColor;
-    cell.contentLable.layer.borderWidth = 2;
+    cell.contentLable.layer.borderWidth = 1;
+    cell.contentLable.textAlignment = NSTextAlignmentCenter;
+    cell.contentLable.textColor = [UIColor whiteColor];
     cell.contentLable.hidden = YES;
-    if (indexPath.row == 2)
+    
+    if (indexPath.row == 1)
     {
-        if ([self haveNewFriendApply])
+        if ([self haveNewNotice] > 0)
         {
             cell.contentLable.hidden = NO;
+            cell.contentLable.text = [NSString stringWithFormat:@"%d",[self haveNewNotice]];
         }
     }
-    if (indexPath.row == 3)
+    else if (indexPath.row == 2)
     {
-        if ([self haveNewMsg])
+        if ([self haveNewFriendApply] > 0)
         {
             cell.contentLable.hidden = NO;
+            cell.contentLable.text = [NSString stringWithFormat:@"%d",[self haveNewFriendApply]];
+        }
+    }
+    else if (indexPath.row == 3)
+    {
+        if ([self haveNewMsg] > 0)
+        {
+            cell.contentLable.hidden = NO;
+            cell.contentLable.text = [NSString stringWithFormat:@"%d",[self haveNewMsg]];
         }
     }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
 }
+
+
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -237,31 +252,15 @@
     // Dispose of any resources that can be recreated.
 }
 
--(BOOL)haveNewMsg
+-(NSInteger)haveNewMsg
 {
-    NSMutableArray *array = [db findSetWithDictionary:@{@"readed":@"0",@"userid":[Tools user_id]} andTableName:@"chatMsg"];
-    if ([array count] > 0)
-    {
-        return YES;
-    }
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue]>0)
-    {
-        return YES;
-    }
-    else
-    {
-        return NO;
-    }
-    return NO;
+    NSMutableArray *array = [db findSetWithDictionary:@{@"readed":@"0",@"userid":[Tools user_id]} andTableName:CHATTABLE];
+    return [array count];
 }
--(BOOL)haveNewNotice
+-(NSInteger)haveNewNotice
 {
-    NSMutableArray *array = [db findSetWithDictionary:@{@"readed":@"0",@"uid":[Tools user_id]} andTableName:@"notice"];
-    if ([array count] > 0)
-    {
-        return YES;
-    }
-    return NO;
+    NSMutableArray *array = [db findSetWithDictionary:@{@"readed":@"0",@"uid":[Tools user_id]} andTableName:NOTICETABLE];
+    return [array count];
 }
 -(BOOL)haveNewFriendApply
 {
@@ -269,14 +268,11 @@
     int ucfriendNum = [[ud objectForKey:UCFRIENDSUM] intValue];
     if (ucfriendNum > 0)
     {
-        return YES;
+        return ucfriendNum;
     }
+    
     NSArray *ucfriends = [db findSetWithDictionary:@{@"uid":[Tools user_id],@"checked":@"0"} andTableName:FRIENDSTABLE];
-    if ([ucfriends count] > 0)
-    {
-        return YES;
-    }
-    return NO;
+    return [ucfriends count];
 }
 
 -(void)buttonClick:(UIButton *)button

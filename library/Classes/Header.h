@@ -25,6 +25,7 @@
 #import "PlayerTools.h"
 #import "MJPhoto.h"
 #import "MJPhotoBrowser.h"
+#import "DealJiFen.h"
 
 #define FaceViewHeight  200
 
@@ -246,3 +247,14 @@ return shared##className; \
 #define AlbumTag      9999
 
 #define PhotoSpace  7
+
+#pragma mark - aboutpushnotification
+#define BECOMEACTIVE  @"becomeactive"
+#define FROMBACKGROUD  @"frombackgroud"
+#define FROMFORGROUD  @"fromforgroud"
+
+#pragma mark - base64
+#define QQBASE64   @"cXE="
+#define RRBASE64   @"cnI="
+#define WXBASE64   @"d3g="
+#define SWBASE64   @"c3c="

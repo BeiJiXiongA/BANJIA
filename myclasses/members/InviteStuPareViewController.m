@@ -340,6 +340,7 @@
             
         }
     }
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
 #pragma  mark - showmsg
@@ -398,8 +399,11 @@
             [self alertWithTitle:@"提示信息" msg:@"发送取消"];
             break;
         case MessageComposeResultFailed:// send failed
+        {
             [self alertWithTitle:@"提示信息" msg:@"发送成功"];
+            
             break;
+        }
         case MessageComposeResultSent:
             [self alertWithTitle:@"提示信息" msg:@"发送失败"];
             break;
@@ -499,6 +503,7 @@
                                  
                                  if (state == SSPublishContentStateSuccess)
                                  {
+                                     [DealJiFen dealJiFenWithID:QQBASE64];
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
                                  }
                                  else if (state == SSPublishContentStateFail)
@@ -578,6 +583,7 @@
                         
                         if (state == SSPublishContentStateSuccess)
                         {
+                            [DealJiFen dealJiFenWithID:WXBASE64];
                             NSLog(@"success");
                         }
                         else if (state == SSPublishContentStateFail)

@@ -490,7 +490,7 @@ ChatVCDelegate>
     cell.remarkLabel.numberOfLines = 2;
     cell.remarkLabel.hidden = NO;
     cell.remarkLabel.text = [Tools showTime:[lastMsgDict objectForKey:@"time"]];
-    
+    cell.selectionStyle = UITableViewCellSelectionStyleGray;
     return cell;
 }
 

@@ -319,7 +319,14 @@ recordButton;
             faceLabel.tag = i;
             faceLabel.text = faceName;
             faceLabel.textAlignment = NSTextAlignmentCenter;
-            faceLabel.font = [UIFont systemFontOfSize:30];
+            if (SYSVERSION < 7.0)
+            {
+                faceLabel.font = [UIFont systemFontOfSize:40];
+            }
+            else
+            {
+                faceLabel.font = [UIFont systemFontOfSize:30];
+            }
             faceLabel.backgroundColor = [UIColor clearColor];
             faceLabel.userInteractionEnabled = YES;
             [faceLabel addGestureRecognizer:faceTap];

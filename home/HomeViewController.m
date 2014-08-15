@@ -68,8 +68,10 @@ ZBarReaderViewDelegate>
     MyButton *addNoticeButton;
     MyButton *addDiaryButton;
     MyButton *qrCodeButton;
+    NSDictionary *diaryDict;
     NSDictionary *waitTransmitDict;
     NSDictionary *waitCommentDict;
+    NSString *waitDiaryID;
     DemoVIew *demoView;
     
     CGFloat tmpheight;
@@ -146,6 +148,8 @@ ZBarReaderViewDelegate>
     tmpheight = 0;
     
     db = [[OperatDB alloc]init];
+    
+    waitDiaryID = @"";
     
     self.backButton.hidden = YES;
     self.returnImageView.hidden = YES;
@@ -1811,6 +1815,7 @@ ZBarReaderViewDelegate>
 {
     NSDictionary *groupDict = [groupDiaries objectAtIndex:button.tag/SectionTag];
     NSArray *array = [groupDict objectForKey:@"diaries"];
+    diaryDict = [array objectAtIndex:button.tag%SectionTag];
     waitTransmitDict = [[array objectAtIndex:button.tag%SectionTag] objectForKey:@"detail"];
     [self shareAPP:nil];
 }
@@ -1855,6 +1860,7 @@ ZBarReaderViewDelegate>
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
     DDLOG(@"waittransdict %@",waitTransmitDict);
+    waitDiaryID = [diaryDict objectForKey:@"_id"];
     switch (buttonIndex)
     {
         case 0:
@@ -1955,8 +1961,7 @@ ZBarReaderViewDelegate>
                                  [self backInput];
                                  if (state == SSPublishContentStateSuccess)
                                  {
-                                     
-                                     NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
+                                     [DealJiFen dealJiFenWithID:waitDiaryID];
                                  }
                                  else if (state == SSPublishContentStateFail)
                                  {
@@ -2038,7 +2043,7 @@ ZBarReaderViewDelegate>
                                  [self backInput];
                                  if (state == SSPublishContentStateSuccess)
                                  {
-                                     NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
+                                     [DealJiFen dealJiFenWithID:waitDiaryID];
                                  }
                                  else if (state == SSPublishContentStateFail)
                                  {
@@ -2120,7 +2125,7 @@ ZBarReaderViewDelegate>
                                  [self backInput];
                                  if (state == SSPublishContentStateSuccess)
                                  {
-                                     NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
+                                     [DealJiFen dealJiFenWithID:waitDiaryID];
                                  }
                                  else if (state == SSPublishContentStateFail)
                                  {
@@ -2197,8 +2202,7 @@ ZBarReaderViewDelegate>
                                  [self backInput];
                                  if (state == SSPublishContentStateSuccess)
                                  {
-                                     [self backInput];
-                                     NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
+                                     [DealJiFen dealJiFenWithID:waitDiaryID];
                                  }
                                  else if (state == SSPublishContentStateFail)
                                  {
@@ -2277,7 +2281,7 @@ ZBarReaderViewDelegate>
                                  
                                  if (state == SSPublishContentStateSuccess)
                                  {
-                                     NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
+                                     [DealJiFen dealJiFenWithID:waitDiaryID];
                                  }
                                  else if (state == SSPublishContentStateFail)
                                  {
@@ -2357,7 +2361,7 @@ ZBarReaderViewDelegate>
                                  [self backInput];
                                  if (state == SSPublishContentStateSuccess)
                                  {
-                                     NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
+                                     [DealJiFen dealJiFenWithID:waitDiaryID];
                                  }
                                  else if (state == SSPublishContentStateFail)
                                  {

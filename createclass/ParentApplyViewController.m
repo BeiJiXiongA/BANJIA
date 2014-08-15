@@ -247,7 +247,7 @@ UIActionSheetDelegate>
     [selectStuButton setTitle:@"修改" forState:UIControlStateNormal];
     selectStuButton.frame = CGRectMake(mySearchBar.frame.size.width-60, 10, 40, 30);
     selectStuButton.backgroundColor = [UIColor whiteColor];
-    [selectStuButton setTitleColor:RGB(136, 193, 91, 1) forState:UIControlStateNormal];
+    [selectStuButton setTitleColor:LIGHT_BLUE_COLOR forState:UIControlStateNormal];
     [selectStudentsView addSubview:selectStuButton];
     [selectStuButton addTarget:self action:@selector(modifySelectStu) forControlEvents:UIControlEventTouchUpInside];
     
@@ -324,15 +324,14 @@ UIActionSheetDelegate>
     childView.hidden = YES;
     [mainScrollView addSubview:childView];
     
-    childLabel = [[UILabel alloc] initWithFrame:CGRectMake(5, 5, 200, 20)];
+    childLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 5, 200, 20)];
     childLabel.font = [UIFont systemFontOfSize:16];
     childLabel.text = [NSString stringWithFormat:@"您的孩子可能已在班级中:"];
     childLabel.backgroundColor = self.bgView.backgroundColor;
-    childLabel.textColor = TITLE_COLOR;
-    childLabel.textAlignment = NSTextAlignmentRight;
+    childLabel.textColor = COMMENTCOLOR;
     [childView addSubview:childLabel];
     
-    childTableView = [[UITableView alloc] initWithFrame:CGRectMake(10, 25, SCREEN_WIDTH-20, 0) style:UITableViewStylePlain];
+    childTableView = [[UITableView alloc] initWithFrame:CGRectMake(10, 35, SCREEN_WIDTH-20, 0) style:UITableViewStylePlain];
     childTableView.delegate = self;
     childTableView.dataSource = self;
     childTableView.tag = ChildTableViewTag;
@@ -803,10 +802,10 @@ UIActionSheetDelegate>
     else if(tableView.tag == ChildTableViewTag)
     {
         
-        CGFloat height = ([childArray count]+1)*50;
+        CGFloat height = [childArray count]*50+80;
         
-        childTableView.frame = CGRectMake(10, 25, SCREEN_WIDTH-40, height);
-        childView.frame = CGRectMake(10, mySearchBar.frame.size.height+mySearchBar.frame.origin.y+20,SCREEN_WIDTH-20, height+25);
+        childTableView.frame = CGRectMake(10, 35, SCREEN_WIDTH-40, height);
+        childView.frame = CGRectMake(10, mySearchBar.frame.size.height+mySearchBar.frame.origin.y+20,SCREEN_WIDTH-20, height+35);
         if ([childArray count] > 0)
         {
             childLabel.text = @"您的孩子可能已在班级中";
@@ -829,7 +828,11 @@ UIActionSheetDelegate>
     }
     else if (tableView.tag == ChildTableViewTag)
     {
-        return 50;
+        if(indexPath.row < [childArray count])
+        {
+            return 50;
+        }
+        return 80;
     }
     return 0;
 }
@@ -875,17 +878,23 @@ UIActionSheetDelegate>
         cell.headerImageView.frame = CGRectMake(10, 5, 40, 40);
         
         cell.nameLabel.frame = CGRectMake(60, 5, 200, 30);
-        
         CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
         UIImageView *lineImageView = [[UIImageView alloc] init];
-        
         lineImageView.image = [UIImage imageNamed:@"sepretorline"];
         [cell.contentView addSubview:lineImageView];
         cell.contentView.backgroundColor = [UIColor whiteColor];
-        
+        lineImageView.frame = CGRectMake(0, cellHeight-0.5, 0, 0);
         if (indexPath.row < [childArray count])
         {
-            lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+            
+            if (indexPath.row < [childArray count]-1)
+            {
+                lineImageView.frame = CGRectMake(60, cellHeight-0.5, cell.frame.size.width, 0.5);
+            }
+            else
+            {
+                lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+            }
             cell.headerImageView.hidden = NO;
             cell.nameLabel.hidden = NO;
             cell.button2.hidden = NO;
@@ -924,15 +933,13 @@ UIActionSheetDelegate>
             
             cell.button2.frame = CGRectMake(mySearchBar.frame.size.width-50, 10, 40, 30);
             cell.button2.tag = indexPath.row;
-            [cell.button2 setTitle:@"选择" forState:UIControlStateNormal];
-//            [cell.button2 setImage:[UIImage imageNamed:@"unselectBtn"] forState:UIControlStateNormal];
+            [cell.button2 setImage:[UIImage imageNamed:@"unchecked1"] forState:UIControlStateNormal];
             cell.button2.hidden = NO;
             [cell.button2 setTitleColor:RGB(136, 193, 95, 1) forState:UIControlStateNormal];
             [cell.button2 addTarget:self action:@selector(combine:) forControlEvents:UIControlEventTouchUpInside];
         }
         else
         {
-            lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
             cell.nameLabel.numberOfLines = 2;
             cell.nameLabel.lineBreakMode = NSLineBreakByWordWrapping;
             if ([childArray count] > 0)
@@ -947,13 +954,13 @@ UIActionSheetDelegate>
             }
             cell.numLabel.text = @"";
             cell.numLabel.hidden = YES;
-            cell.nameLabel.textColor = TITLE_COLOR;
-            cell.nameLabel.font = [UIFont systemFontOfSize:14];
+            cell.nameLabel.textColor = COMMENTCOLOR;
+            cell.nameLabel.font = [UIFont systemFontOfSize:16];
             cell.button2.hidden = YES;
             cell.contactButton.hidden = YES;
             cell.headerImageView.backgroundColor = [UIColor whiteColor];;
             cell.headerImageView.frame = CGRectMake(10, 5, 40, 40);
-            [cell.headerImageView setImage:[UIImage imageNamed:@"diary_add_image"]];
+            [cell.headerImageView setImage:[UIImage imageNamed:@"applyadd"]];
         }
         
         return cell;
