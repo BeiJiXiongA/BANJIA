@@ -180,81 +180,12 @@ UIScrollViewDelegate>
     
 //    [self getAdmins];
     
-    if ([[Tools phone_num] length] > 0)
-    {
-        UILabel *tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, objectTextField.frame.size.height+objectTextField.frame.origin.y+40, SCREEN_WIDTH-20, 20)];
-        tipLabel.numberOfLines = 1;
-        tipLabel.font = [UIFont systemFontOfSize:16];
-        tipLabel.text = [NSString stringWithFormat:@"您已绑定手机：%@",[Tools phone_num]];
-        tipLabel.textAlignment = NSTextAlignmentCenter;
-        tipLabel.textColor = COMMENTCOLOR;
-        tipLabel.backgroundColor = [UIColor clearColor];
-        [mainScrollView addSubview:tipLabel];
-    }
-    else
-    {
-        
-        phoneNumTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(29, objectTextField.frame.size.height+objectTextField.frame.origin.y+20, SCREEN_WIDTH-58, 42)];
-        phoneNumTextfield.delegate = self;
-        phoneNumTextfield.keyboardType = UIKeyboardTypeNumberPad;
-        phoneNumTextfield.clearButtonMode = UITextFieldViewModeWhileEditing;
-        phoneNumTextfield.tag = 3000;
-        phoneNumTextfield.layer.cornerRadius = 5;
-        phoneNumTextfield.clipsToBounds = YES;
-        phoneNumTextfield.backgroundColor = [UIColor whiteColor];
-        phoneNumTextfield.placeholder = @"手机号码";
-        phoneNumTextfield.background = nil;
-        phoneNumTextfield.textColor = COMMENTCOLOR;
-        phoneNumTextfield.enabled = YES;
-        phoneNumTextfield.numericFormatter = [AKNumericFormatter formatterWithMask:PHONE_FORMAT placeholderCharacter:'*'];
-        [mainScrollView addSubview:phoneNumTextfield];
-        
-        UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
-        getCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        getCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, phoneNumTextfield.frame.origin.y+5, 58, 32);
-        [getCodeButton setBackgroundImage:btnImage forState:UIControlStateNormal];
-        [getCodeButton setTitle:@"短信验证" forState:UIControlStateNormal];
-        getCodeButton.titleLabel.font = [UIFont boldSystemFontOfSize:13];
-        [getCodeButton addTarget:self action:@selector(getVerifyCode) forControlEvents:UIControlEventTouchUpInside];
-        [mainScrollView addSubview:getCodeButton];
-        
-        codeTextField = [[MyTextField alloc] initWithFrame:CGRectMake(29, phoneNumTextfield.frame.size.height+phoneNumTextfield.frame.origin.y+3, SCREEN_WIDTH-58, 42)];
-        codeTextField.delegate = self;
-        codeTextField.background = nil;
-        codeTextField.keyboardType = UIKeyboardTypeNumberPad;
-        codeTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
-        codeTextField.tag = 4000;
-        codeTextField.layer.cornerRadius = 5;
-        codeTextField.clipsToBounds = YES;
-        codeTextField.backgroundColor = [UIColor whiteColor];
-        codeTextField.textColor = COMMENTCOLOR;
-        codeTextField.placeholder = @"验证码";
-        [mainScrollView addSubview:codeTextField];
-        
-        UIButton *checkCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        checkCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, codeTextField.frame.origin.y+5, 58, 32);
-        [checkCodeButton setBackgroundImage:btnImage forState:UIControlStateNormal];
-        [checkCodeButton setTitle:@"验证" forState:UIControlStateNormal];
-        checkCodeButton.titleLabel.font = [UIFont boldSystemFontOfSize:13];
-        [checkCodeButton addTarget:self action:@selector(verify) forControlEvents:UIControlEventTouchUpInside];
-        [mainScrollView addSubview:checkCodeButton];
-    }
-
-    
-    
     UIImage *btnImage  =[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
     studentButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [studentButton setTitle:@"提交" forState:UIControlStateNormal];
     studentButton.enabled = NO;
-    if ([[Tools phone_num] length] > 0)
-    {
-        studentButton.frame = CGRectMake(38, objectTextField.frame.size.height+objectTextField.frame.origin.y+100, SCREEN_WIDTH-76, 40);
-        studentButton.enabled = YES;
-    }
-    else
-    {
-        studentButton.frame = CGRectMake(38, objectTextField.frame.size.height+objectTextField.frame.origin.y+130, SCREEN_WIDTH-76, 40);
-    }
+    studentButton.frame = CGRectMake(38, objectTextField.frame.size.height+objectTextField.frame.origin.y+100, SCREEN_WIDTH-76, 40);
+    studentButton.enabled = YES;
     
     studentButton.layer.cornerRadius = 2;
     studentButton.clipsToBounds = YES;

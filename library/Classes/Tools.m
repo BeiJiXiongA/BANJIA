@@ -429,7 +429,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     return request;
 }
 
-+ (ASIFormDataRequest *)upLoadSoundFiles:(NSArray *)filesArray withSubURL:(NSString *)subUrl andParaDict:(NSDictionary *)pareDict
++ (ASIFormDataRequest *)upLoadSoundFiles:(NSArray *)filesArray withSubURL:(NSString *)subUrl andParaDict:(NSDictionary *)pareDict timeLength:(int)length
 {
     ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:
                                                                       [NSString stringWithFormat:@"%@%@",HOST_URL,subUrl]]];
@@ -444,10 +444,8 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     
     for (int i=0; i<[filesArray count]; ++i)
     {
-        UIImage *image = [filesArray objectAtIndex:i];
-        NSData *imageData = UIImagePNGRepresentation(image);
-        DDLOG(@"%@",NSStringFromCGSize(image.size));
-        [request addData:imageData withFileName:[NSString stringWithFormat:@"%d@%.0fX%.0f.png",i+1,image.size.width,image.size.height] andContentType:@"file" forKey:[NSString stringWithFormat:@"file%@",i==0?@"":[NSString stringWithFormat:@"%d",i+1]]];
+        NSData *data = [filesArray objectAtIndex:i];
+        [request addData:data withFileName:[NSString stringWithFormat:@"%d.amr?time=%d",i+1,length] andContentType:@"file" forKey:[NSString stringWithFormat:@"file%@",i==0?@"":[NSString stringWithFormat:@"%d",i+1]]];
     }
     return request;
 }

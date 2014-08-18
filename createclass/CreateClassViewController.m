@@ -249,9 +249,14 @@ UITableViewDelegate>
         }
         cell.nameLabel.frame = CGRectMake(10, 11, 100, 20);
         cell.nameLabel.text = [cellNameArray objectAtIndex:indexPath.row];
-        cell.contentLable.frame = CGRectMake(SCREEN_WIDTH-235, 11, 170, 20);
+        cell.contentLable.frame = CGRectMake(SCREEN_WIDTH-255, 11, 170, 20);
         cell.contentLable.font = cell.nameLabel.font;
         cell.contentLable.textAlignment = NSTextAlignmentRight;
+        
+        cell.arrowImageView.frame = CGRectMake(SCREEN_WIDTH-75, 16, 18, 10);
+        [cell.arrowImageView setImage:[UIImage imageNamed:@"arrow_down"]];
+        
+        
         if (indexPath.row == 0)
         {
             cell.contentLable.text = [schoolLevelArray objectAtIndex:[schoolType integerValue]-1];

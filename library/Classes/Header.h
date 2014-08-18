@@ -21,8 +21,6 @@
 #import "cnvUILabel.h"
 #import "SizeTools.h"
 #import "ImageTools.h"
-#import "RecordTools.h"
-#import "PlayerTools.h"
 #import "MJPhoto.h"
 #import "MJPhotoBrowser.h"
 #import "DealJiFen.h"

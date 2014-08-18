@@ -498,8 +498,13 @@ UIActionSheetDelegate>
                 cell.nameLabel.hidden = NO;
                 cell.nameLabel.text = @"您尚未进行教师认证";
                 cell.nameLabel.frame = CGRectMake(20, 13, 200, 20);
-                
-                if ([accountDict objectForKey:@"t_checked"])
+                if (!([Tools phone_num] && [[Tools phone_num] length] > 0))
+                {
+                    cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-120, 13, 110, 20);
+                    cell.objectsLabel.text = @"请绑定手机号";
+                    cell.objectsLabel.font = [UIFont systemFontOfSize:14];
+                }
+                else if ([accountDict objectForKey:@"t_checked"])
                 {
                     if ([[accountDict objectForKey:@"t_checked"] integerValue] == 0)
                     {
@@ -560,6 +565,7 @@ UIActionSheetDelegate>
 }
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
     if (indexPath.section == 0)
     {
         PersonInfoSettingViewController *personInfoSettiongViewController = [[PersonInfoSettingViewController alloc] init];
@@ -611,6 +617,12 @@ UIActionSheetDelegate>
     {
         if (indexPath.row == 0)
         {
+            if (!([Tools phone_num] && [[Tools phone_num] length] > 0))
+            {
+                [Tools showAlertView:@"请先绑定手机号" delegateViewController:nil];
+                return ;
+            }
+            
             AuthViewController *authViewController = [[AuthViewController alloc] init];
             if ([accountDict objectForKey:@"img_id"])
             {
@@ -635,7 +647,7 @@ UIActionSheetDelegate>
             [self settingClick];
         }
     }
-    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
 }
 
 #pragma mark - loginAccount

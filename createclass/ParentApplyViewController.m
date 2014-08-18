@@ -46,6 +46,8 @@ UIActionSheetDelegate>
     UIScrollView *mainScrollView;
     
     UILabel *schoolInfoLabel;
+    
+    UILabel *tipLabel;
 //    MyTextField *childNameTextField;
     
     UISearchBar *mySearchBar;
@@ -343,14 +345,20 @@ UIActionSheetDelegate>
     [childView addSubview:childTableView];
     
     phoneNumView = [[UIView alloc] init];
-    phoneNumView.frame = CGRectMake(0, childView.frame.size.height+childView.frame.origin.y+10, SCREEN_WIDTH, 150);
+    phoneNumView.frame = CGRectMake(0, childView.frame.size.height+childView.frame.origin.y+10, SCREEN_WIDTH, 230);
     phoneNumView.backgroundColor = self.bgView.backgroundColor;
     [mainScrollView addSubview:phoneNumView];
     
+    UIImageView *lineImageView1 = [[UIImageView alloc] init];
+    lineImageView1.frame = CGRectMake( 0, 0, SCREEN_WIDTH, 0.5);
+    lineImageView1.image = [UIImage imageNamed:@"sepretorline"];
+    [phoneNumView addSubview:lineImageView1];
     
-    UILabel *tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 20, SCREEN_WIDTH-20, 0)];
+    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
+    
     if ([[Tools phone_num] length] > 0)
     {
+        tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 20, SCREEN_WIDTH-20, 0)];
         tipLabel.frame = CGRectMake(10, 20, SCREEN_WIDTH-20, 20);
         tipLabel.numberOfLines = 1;
         tipLabel.font = [UIFont systemFontOfSize:16];
@@ -362,7 +370,17 @@ UIActionSheetDelegate>
     }
     else
     {
-        phoneNumTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(29, 20, SCREEN_WIDTH-58, 42)];
+        tipLabel = [[UILabel alloc] init];
+        tipLabel.frame = CGRectMake(29, 20, SCREEN_WIDTH-58, 45);
+        tipLabel.numberOfLines = 2;
+        tipLabel.lineBreakMode = NSLineBreakByWordWrapping;
+        tipLabel.font = [UIFont systemFontOfSize:16];
+        tipLabel.text = [NSString stringWithFormat:@"您还没有绑定手机号，重要的班级通知可能会发送到您的手机上"];
+        tipLabel.textColor = COMMENTCOLOR;
+        tipLabel.backgroundColor = [UIColor clearColor];
+        [phoneNumView addSubview:tipLabel];
+        
+        phoneNumTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(29, 75, SCREEN_WIDTH-58, 42)];
         phoneNumTextfield.delegate = self;
         phoneNumTextfield.keyboardType = UIKeyboardTypeNumberPad;
         phoneNumTextfield.clearButtonMode = UITextFieldViewModeWhileEditing;
@@ -377,7 +395,6 @@ UIActionSheetDelegate>
         phoneNumTextfield.numericFormatter = [AKNumericFormatter formatterWithMask:PHONE_FORMAT placeholderCharacter:'*'];
         [phoneNumView addSubview:phoneNumTextfield];
         
-        UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
         getCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
         getCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, phoneNumTextfield.frame.origin.y+5, 58, 32);
         [getCodeButton setBackgroundImage:btnImage forState:UIControlStateNormal];
@@ -408,10 +425,15 @@ UIActionSheetDelegate>
         [phoneNumView addSubview:checkCodeButton];
     }
     
-    UIImage *btnImage  =[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
+    
     studentButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [studentButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     [studentButton setTitle:@"提交" forState:UIControlStateNormal];
-    if (tipLabel.frame.size.height > 0)
+    studentButton.enabled = NO;
+    [phoneNumView addSubview:studentButton];
+
+
+    if ([Tools phone_num] > 0)
     {
         studentButton.frame = CGRectMake(38, tipLabel.frame.size.height + tipLabel.frame.origin.y+15, SCREEN_WIDTH-76, 40);
     }
@@ -419,19 +441,9 @@ UIActionSheetDelegate>
     {
         studentButton.frame = CGRectMake(38, codeTextField.frame.size.height + codeTextField.frame.origin.y+5, SCREEN_WIDTH-76, 40);
     }
-    if ([[Tools phone_num] length] > 0)
-    {
-        studentButton.enabled = YES;
-    }
-    phoneNumView.backgroundColor = self.bgView.backgroundColor;
-    studentButton.layer.cornerRadius = 2;
-    studentButton.clipsToBounds = YES;
     [studentButton addTarget:self action:@selector(applyJoinClass) forControlEvents:UIControlEventTouchUpInside];
     studentButton.tag = 1000;
-    studentButton.enabled = NO;
     studentButton.titleLabel.font = [UIFont systemFontOfSize:18];
-    [studentButton setBackgroundImage:btnImage forState:UIControlStateNormal];
-    [phoneNumView addSubview:studentButton];
     
     mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, phoneNumView.frame.size.height+phoneNumView.frame.origin.y + 80);
 }
@@ -446,7 +458,7 @@ UIActionSheetDelegate>
     student_num = @"";
     re_id = @"";
     mySearchBar.text = @"";
-    studentButton.enabled = NO;
+//    studentButton.enabled = NO;
     
     childView.frame = CGRectMake(mySearchBar.frame.origin.x, mySearchBar.frame.size.height+mySearchBar.frame.origin.y+20, mySearchBar.frame.size.width, 0);
     childInfoView.frame = CGRectMake(0, mySearchBar.frame.size.height+mySearchBar.frame.origin.y+20, SCREEN_WIDTH, 0);
@@ -626,10 +638,11 @@ UIActionSheetDelegate>
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 [Tools showTips:@"绑定成功" toView:self.bgView];
-                studentButton.enabled = YES;
+                tipLabel.hidden = YES;
+//                studentButton.enabled = YES;
                 [[NSUserDefaults standardUserDefaults] setObject:phoneNumTextfield.text forKey:PHONENUM];
                 [[NSUserDefaults standardUserDefaults] synchronize];
-                [studentButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+//                [studentButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
             }
             else
             {
@@ -944,12 +957,12 @@ UIActionSheetDelegate>
             cell.nameLabel.lineBreakMode = NSLineBreakByWordWrapping;
             if ([childArray count] > 0)
             {
-                cell.nameLabel.frame = CGRectMake(60, 5, 200, 45);
+                cell.nameLabel.frame = CGRectMake(60, 17, 200, 45);
                 cell.nameLabel.text = @"如果您孩子不在列表中，可点击输入孩子信息";
             }
             else
             {
-                cell.nameLabel.frame = CGRectMake(60, 5, 200, 40);
+                cell.nameLabel.frame = CGRectMake(60, 20, 200, 40);
                 cell.nameLabel.text = @"请输入孩子完整信息";
             }
             cell.numLabel.text = @"";
@@ -959,7 +972,7 @@ UIActionSheetDelegate>
             cell.button2.hidden = YES;
             cell.contactButton.hidden = YES;
             cell.headerImageView.backgroundColor = [UIColor whiteColor];;
-            cell.headerImageView.frame = CGRectMake(10, 5, 40, 40);
+            cell.headerImageView.frame = CGRectMake(10, 20, 40, 40);
             [cell.headerImageView setImage:[UIImage imageNamed:@"applyadd"]];
         }
         
@@ -1015,7 +1028,7 @@ UIActionSheetDelegate>
     childInfoView.frame = CGRectMake(0, mySearchBar.frame.size.height+mySearchBar.frame.origin.y+20, SCREEN_WIDTH, 50);
     childView.frame = CGRectMake(10, mySearchBar.frame.size.height+mySearchBar.frame.origin.y+20, SCREEN_WIDTH-20, 0);
     [self changeHeight];
-    studentButton.enabled = YES;
+//    studentButton.enabled = YES;
 }
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -1085,7 +1098,10 @@ UIActionSheetDelegate>
             [self changeHeight];
         }
     }
-    studentButton.enabled = YES;
+    if ([[Tools phone_num] length] > 0)
+    {
+//        studentButton.enabled = YES;
+    }
     childView.hidden = YES;
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
 }

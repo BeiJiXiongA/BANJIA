@@ -398,7 +398,6 @@ ChatVCDelegate>
     {
         lineImageView.frame = CGRectMake( 70, cellHeight-0.5, cell.frame.size.width, 0.5);
     }
-    
 //    NSDictionary *dict = [newMessageArray objectAtIndex:indexPath.row];
     NSString *otherid = [[[newMessageArray objectAtIndex:indexPath.row] allValues] firstObject];
     cell.headerImageView.frame = CGRectMake(10, 7, 46, 46);
@@ -547,7 +546,6 @@ ChatVCDelegate>
 -(void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSString *otherid = [[[newMessageArray objectAtIndex:indexPath.row] allValues] firstObject];
-//    DDLOG(@"dict == %@",dict);
     
     if ([db deleteRecordWithDict:@{@"userid":[Tools user_id],@"fid":otherid,@"direct":@"f"} andTableName:CHATTABLE] &&
         [db deleteRecordWithDict:@{@"userid":[Tools user_id],@"tid":otherid,@"direct":@"t"} andTableName:CHATTABLE])

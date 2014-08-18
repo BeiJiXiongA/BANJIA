@@ -10,9 +10,13 @@
 
 #import "NSString+Emojize.h"
 #import "Header.h"
+#import "ChatVoiceRecorderVC.h"
+#import "VoiceConverter.h"
+#import "MCSoundBoard.h"
+
 @protocol ReturnFunctionDelegate;
 
-@interface InputTableBar : UIView<UIScrollViewDelegate,UITextViewDelegate>
+@interface InputTableBar : UIView<UIScrollViewDelegate,UITextViewDelegate,VoiceRecorderBaseVCDelegate,RecordDelegate>
 {
     UIButton *inputButton;
     UIButton *addButton;
@@ -39,6 +43,7 @@
     UIButton *emoButton;
     UIButton *sendButton;
 }
+@property (nonatomic, strong) NSString *originWav;
 @property (nonatomic, strong) UITextView *inputTextView;
 @property (nonatomic, strong) UIView *inputBgView;
 @property (nonatomic, assign) BOOL face;
@@ -51,6 +56,9 @@
 @property (nonatomic, strong) UIButton *recordButton;
 @property (nonatomic, assign) id<ReturnFunctionDelegate> returnFunDel;
 @property (nonatomic, strong) NSMutableString *sendString;
+
+@property (nonatomic, strong) ChatVoiceRecorderVC *recorderVC;
+@property (nonatomic, strong) AVAudioPlayer *player;
 
 -(NSMutableString *)analyString:(NSString *)inputString;
 
@@ -69,5 +77,5 @@
 -(void)changeInputViewSize:(CGSize)size;
 @optional
 -(void)selectPic:(int)selectPicTag;
-
+-(void)recordFinished:(NSString *)filePath andFileName:(NSString *)fileName voiceLength:(int)length;
 @end

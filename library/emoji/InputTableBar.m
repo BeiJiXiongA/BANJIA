@@ -24,13 +24,18 @@ sendString,
 soundButton,
 moreButton,
 notOnlyFace,
-recordButton;
+recordButton,
+originWav,recorderVC,player;
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
     if (self) {
         // Initialization code
+        recorderVC = [[ChatVoiceRecorderVC alloc] init];
+        recorderVC.vrbDelegate = self;
+        recorderVC.recordDel = self;
         
+        player = [[AVAudioPlayer alloc]init];
     }
     return self;
 }
@@ -64,8 +69,8 @@ recordButton;
     //        soundButton.backgroundColor = [UIColor greenColor];
     //        [inputBgView addSubview:soundButton];
     
-    inputWidth = SCREEN_WIDTH-50;
-    inputTextView = [[UITextView alloc] initWithFrame:CGRectMake(5, INPUTBUTTONT,inputWidth, DEFAULTTEXTHEIGHT)];
+    inputWidth = SCREEN_WIDTH-140;
+    inputTextView = [[UITextView alloc] initWithFrame:CGRectMake(45, INPUTBUTTONT,inputWidth, DEFAULTTEXTHEIGHT)];
     inputTextView .backgroundColor = [UIColor whiteColor];
     inputTextView.returnKeyType = UIReturnKeySend;
     inputTextView.autoresizingMask = YES;
@@ -77,6 +82,7 @@ recordButton;
     inputTextView.autocapitalizationType = UITextAutocapitalizationTypeNone;
     inputTextView.font = [UIFont systemFontOfSize:16];
     [inputBgView addSubview:inputTextView];
+    
     
     inputButton = [UIButton buttonWithType:UIButtonTypeCustom];
     inputButton.frame = CGRectMake(SCREEN_WIDTH-40, INPUTBUTTONT, INPUTBUTTONH, INPUTBUTTONH);
@@ -92,13 +98,9 @@ recordButton;
         soundButton.backgroundColor = [UIColor clearColor];
         [soundButton setImage:[UIImage imageNamed:@"icon_sound"] forState:UIControlStateNormal];
         [soundButton addTarget:self action:@selector(soundButtonClick) forControlEvents:UIControlEventTouchUpInside];
-//        [inputBgView addSubview:soundButton];
+        [inputBgView addSubview:soundButton];
         
-        
-        
-        inputWidth = SCREEN_WIDTH-90;
-        
-        inputTextView.frame = CGRectMake(5, INPUTBUTTONT, inputWidth, DEFAULTTEXTHEIGHT);
+        inputTextView.frame = CGRectMake(45, INPUTBUTTONT, inputWidth, DEFAULTTEXTHEIGHT);
         
         recordButton = [UIButton buttonWithType:UIButtonTypeCustom];
         recordButton.frame = CGRectMake(45, INPUTBUTTONT, inputWidth, DEFAULTTEXTHEIGHT);
@@ -106,11 +108,13 @@ recordButton;
         [recordButton setTitleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
         [recordButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateHighlighted];
         [recordButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:@"btnbg"] andInsets:UIEdgeInsetsMake(15, 15, 15, 15)] forState:UIControlStateNormal];
+        
+        UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPress:)];
+        recordButton.userInteractionEnabled = YES;
+        [recordButton addGestureRecognizer:longPress];
         [recordButton setTitle:@"按下录音" forState:UIControlStateNormal];
         [recordButton setTitle:@"松开播放" forState:UIControlStateHighlighted];
         recordButton.hidden = YES;
-        [recordButton addTarget:self action:@selector(recordButtonDown) forControlEvents:UIControlEventTouchDown];
-//        [recordButton addTarget:self action:@selector(playRecord) forControlEvents:UIControlEventTouchUpOutside];
         [inputBgView addSubview:recordButton];
 
         
@@ -195,7 +199,6 @@ recordButton;
     photoLabel.textAlignment = NSTextAlignmentCenter;
     photoLabel.textColor = COMMENTCOLOR;
     [moreView addSubview:photoLabel];
-    
     
     faceDict = [NSString emojiAliases];
     
@@ -311,7 +314,6 @@ recordButton;
         }
         else
         {
-            DDLOG(@"%d--%@",i,[faceArray objectAtIndex:i-(i+1)/(colum*3)]);
             NSString *faceName = [NSString emojizedStringWithString:[NSString stringWithFormat:@":%@:",[faceArray objectAtIndex:i]]];
             
             UITapGestureRecognizer *faceTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(faceClick:)];
@@ -362,6 +364,30 @@ recordButton;
     
     self.backgroundColor = TITLE_COLOR;
 }
+
+-(void)longPress:(UILongPressGestureRecognizer *)longPress
+{
+    if (longPress.state == UIGestureRecognizerStateBegan)
+    {
+        DDLOG(@"录音开始");
+        [recordButton setTitle:@"录音开始" forState:UIControlStateNormal];
+        [recordButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:@"touchDown"] andInsets:UIEdgeInsetsMake(3, 3, 3, 3)] forState:UIControlStateNormal];
+        
+        self.originWav = [VoiceRecorderBaseVC getCurrentTimeString];
+        //开始录音
+        [recorderVC beginRecordByFileName:self.originWav];
+    }
+    else if (longPress.state == UIGestureRecognizerStateEnded ||
+             longPress.state == UIGestureRecognizerStateCancelled)
+    {
+        DDLOG(@"录音结束");
+        [recordButton setTitle:@"按下录音" forState:UIControlStateNormal];
+        [recordButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:@"btn"] andInsets:UIEdgeInsetsMake(3, 3, 3, 3)] forState:UIControlStateNormal];
+        [recorderVC.recorder stop];
+    }
+}
+
+
 
 -(void)delCharacter
 {
@@ -527,6 +553,10 @@ recordButton;
 {
     if (sound)
     {
+        CGSize size = inputTextView.contentSize;
+        inputTextViewSize = size;
+        [self inputChange];
+
         [soundButton setImage:[UIImage imageNamed:@"icon_sound"] forState:UIControlStateNormal];
         recordButton.hidden = YES;
         inputTextView.hidden = NO;
@@ -534,19 +564,15 @@ recordButton;
     else
     {
         //显示录音键
+        
+        inputTextViewSize = CGSizeMake(250, DEFAULTTEXTHEIGHT);
+        [self inputChange];
         [soundButton setImage:[UIImage imageNamed:@"keyboard"] forState:UIControlStateNormal];
         recordButton.hidden = NO;
         inputTextView.hidden = YES;
     }
     sound = !sound;
 }
-
--(void)recordButtonDown
-{
-    [[RecordTools defaultRecordTools].recorder stop];
-    [[RecordTools defaultRecordTools] record];
-}
-
 -(void)selectImage:(UIButton *)button
 {
     if ([self.returnFunDel respondsToSelector:@selector(selectPic:)])
@@ -644,7 +670,7 @@ recordButton;
             moreButton.frame = CGRectMake( SCREEN_WIDTH-40, inputTextViewSize.height-DEFAULTTEXTHEIGHT+INPUTBUTTONT, INPUTBUTTONH, INPUTBUTTONH);
             soundButton.frame = CGRectMake( 5, inputTextViewSize.height-DEFAULTTEXTHEIGHT+INPUTBUTTONT, INPUTBUTTONH, INPUTBUTTONH);
             inputBgView.frame = CGRectMake(0, 0, SCREEN_WIDTH, inputTextViewSize.height+10);
-            inputTextView.frame = CGRectMake( 5, INPUTBUTTONT, inputWidth , inputTextViewSize.height+2.5);
+            inputTextView.frame = CGRectMake( 45, INPUTBUTTONT, inputWidth , inputTextViewSize.height+2.5);
             
             
         }
@@ -652,7 +678,7 @@ recordButton;
         {
             inputButton.frame = CGRectMake(SCREEN_WIDTH-40, inputTextViewSize.height-DEFAULTTEXTHEIGHT+INPUTBUTTONT, INPUTBUTTONH, INPUTBUTTONH);
             inputBgView.frame = CGRectMake(0, 0, SCREEN_WIDTH, inputTextViewSize.height+10);
-            inputTextView.frame = CGRectMake( 5, INPUTBUTTONT, inputWidth , inputTextViewSize.height);
+            inputTextView.frame = CGRectMake( 45, INPUTBUTTONT, inputWidth , inputTextViewSize.height);
         }
         faceView.frame = CGRectMake(0, inputTextViewSize.height+8, SCREEN_WIDTH, FaceViewHeight-40);
         emoButton.frame = CGRectMake(0, faceView.frame.size.height+inputTextViewSize.height, 110, 49);
@@ -697,6 +723,18 @@ recordButton;
         }
     }
     return tmpStr;
+}
+-(void)recordFinished:(NSString *)filePath andFileName:(NSString *)fileName voiceLength:(int)length
+{
+    if ([self.returnFunDel respondsToSelector:@selector(recordFinished:andFileName:voiceLength:)])
+    {
+        [self.returnFunDel recordFinished:filePath andFileName:fileName voiceLength:length];
+    }
+}
+
+-(void)VoiceRecorderBaseVCRecordFinish:(NSString *)_filePath fileName:(NSString *)_fileName
+{
+    
 }
 
 @end

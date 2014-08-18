@@ -182,7 +182,6 @@
 		38800DF81959B3A50077E30B /* home_more@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38800DF71959B3A50077E30B /* home_more@2x.png */; };
 		3881A630195145C000DBA619 /* 640X960.png in Resources */ = {isa = PBXBuildFile; fileRef = 3881A62F195145C000DBA619 /* 640X960.png */; };
 		3881A632195145C900DBA619 /* 320X480.png in Resources */ = {isa = PBXBuildFile; fileRef = 3881A631195145C900DBA619 /* 320X480.png */; };
-		388207AA1978FF780033AAC0 /* RecordTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 388207A91978FF780033AAC0 /* RecordTools.m */; };
 		3885F5671994C95B00B4122A /* ScoreMemListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3885F5661994C95B00B4122A /* ScoreMemListViewController.m */; };
 		388665F31986150A00D8CDF2 /* CheckQRCodeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 388665F21986150A00D8CDF2 /* CheckQRCodeViewController.m */; };
 		3891064D1996554E009B73B0 /* qr_on@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3891064B1996554E009B73B0 /* qr_on@2x.png */; };
@@ -362,7 +361,6 @@
 		389E02C9190E2ACC00474FCC /* edit@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 389E02C7190E2ACC00474FCC /* edit@2x.png */; };
 		38A24C07197B3C8700C718BA /* SizeTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 38A24C06197B3C8700C718BA /* SizeTools.m */; };
 		38A24C0A197B44BE00C718BA /* ImageTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 38A24C09197B44BE00C718BA /* ImageTools.m */; };
-		38A24C0D197BE44E00C718BA /* PlayerTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 38A24C0C197BE44E00C718BA /* PlayerTools.m */; };
 		38A24C0F197BF15900C718BA /* btnbg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38A24C0E197BF15900C718BA /* btnbg@2x.png */; };
 		38A24C12197C030E00C718BA /* icon_album@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38A24C10197C030E00C718BA /* icon_album@2x.png */; };
 		38A24C13197C030E00C718BA /* icon_take_pic@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38A24C11197C030E00C718BA /* icon_take_pic@2x.png */; };
@@ -470,6 +468,19 @@
 		38BE46D718F3CCBE001D805C /* faceicon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38BE46D618F3CCBE001D805C /* faceicon@2x.png */; };
 		38BE46DA18F3E3D7001D805C /* addimage@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38BE46D918F3E3D7001D805C /* addimage@2x.png */; };
 		38BE46DD18F3EB64001D805C /* CreateSchoolViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 38BE46DC18F3EB64001D805C /* CreateSchoolViewController.m */; };
+		38C0449519A1C81500F500BA /* clearimage@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38C0449419A1C81500F500BA /* clearimage@2x.png */; };
+		38C044B619A1F47E00F500BA /* touchDown@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38C044B419A1F47E00F500BA /* touchDown@2x.png */; };
+		38C044B719A1F47E00F500BA /* btn.png in Resources */ = {isa = PBXBuildFile; fileRef = 38C044B519A1F47E00F500BA /* btn.png */; };
+		38C044D519A1F64E00F500BA /* ChatRecorderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 38C044B919A1F64E00F500BA /* ChatRecorderView.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		38C044D619A1F64E00F500BA /* ChatVoiceRecorderVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 38C044BB19A1F64E00F500BA /* ChatVoiceRecorderVC.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		38C044D819A1F64E00F500BA /* RecordViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 38C044BF19A1F64E00F500BA /* RecordViewController.m */; };
+		38C044D919A1F64E00F500BA /* UIView+Animation.m in Sources */ = {isa = PBXBuildFile; fileRef = 38C044C119A1F64E00F500BA /* UIView+Animation.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		38C044DA19A1F64E00F500BA /* amrFileCodec.mm in Sources */ = {isa = PBXBuildFile; fileRef = 38C044C519A1F64E00F500BA /* amrFileCodec.mm */; };
+		38C044DB19A1F64E00F500BA /* wav.mm in Sources */ = {isa = PBXBuildFile; fileRef = 38C044C719A1F64E00F500BA /* wav.mm */; };
+		38C044DC19A1F64E00F500BA /* libopencore-amrnb.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 38C044C919A1F64E00F500BA /* libopencore-amrnb.a */; };
+		38C044DD19A1F64E00F500BA /* libopencore-amrwb.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 38C044CA19A1F64E00F500BA /* libopencore-amrwb.a */; };
+		38C044DE19A1F64E00F500BA /* VoiceConverter.mm in Sources */ = {isa = PBXBuildFile; fileRef = 38C044D219A1F64E00F500BA /* VoiceConverter.mm */; };
+		38C044DF19A1F64E00F500BA /* VoiceRecorderBaseVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 38C044D419A1F64E00F500BA /* VoiceRecorderBaseVC.m */; };
 		38CDBD58199D993D00F5374C /* DealJiFen.m in Sources */ = {isa = PBXBuildFile; fileRef = 38CDBD57199D993D00F5374C /* DealJiFen.m */; };
 		38E8CAEE195004090075BDEC /* CommentCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 38E8CAED195004090075BDEC /* CommentCell.m */; };
 		38E8CAF5195031600075BDEC /* icon_bj.png in Resources */ = {isa = PBXBuildFile; fileRef = 38E8CAEF195031600075BDEC /* icon_bj.png */; };
@@ -764,8 +775,6 @@
 		38800DF71959B3A50077E30B /* home_more@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "home_more@2x.png"; sourceTree = "<group>"; };
 		3881A62F195145C000DBA619 /* 640X960.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 640X960.png; sourceTree = "<group>"; };
 		3881A631195145C900DBA619 /* 320X480.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 320X480.png; sourceTree = "<group>"; };
-		388207A81978FF780033AAC0 /* RecordTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RecordTools.h; sourceTree = "<group>"; };
-		388207A91978FF780033AAC0 /* RecordTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RecordTools.m; sourceTree = "<group>"; };
 		3885F5651994C95B00B4122A /* ScoreMemListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScoreMemListViewController.h; sourceTree = "<group>"; };
 		3885F5661994C95B00B4122A /* ScoreMemListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScoreMemListViewController.m; sourceTree = "<group>"; };
 		388665F11986150A00D8CDF2 /* CheckQRCodeViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CheckQRCodeViewController.h; sourceTree = "<group>"; };
@@ -1109,8 +1118,6 @@
 		38A24C06197B3C8700C718BA /* SizeTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SizeTools.m; sourceTree = "<group>"; };
 		38A24C08197B44BE00C718BA /* ImageTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageTools.h; sourceTree = "<group>"; };
 		38A24C09197B44BE00C718BA /* ImageTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageTools.m; sourceTree = "<group>"; };
-		38A24C0B197BE44E00C718BA /* PlayerTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayerTools.h; sourceTree = "<group>"; };
-		38A24C0C197BE44E00C718BA /* PlayerTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlayerTools.m; sourceTree = "<group>"; };
 		38A24C0E197BF15900C718BA /* btnbg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btnbg@2x.png"; sourceTree = "<group>"; };
 		38A24C10197C030E00C718BA /* icon_album@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_album@2x.png"; sourceTree = "<group>"; };
 		38A24C11197C030E00C718BA /* icon_take_pic@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_take_pic@2x.png"; sourceTree = "<group>"; };
@@ -1280,6 +1287,31 @@
 		38BE46D918F3E3D7001D805C /* addimage@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "addimage@2x.png"; sourceTree = "<group>"; };
 		38BE46DB18F3EB64001D805C /* CreateSchoolViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CreateSchoolViewController.h; sourceTree = "<group>"; };
 		38BE46DC18F3EB64001D805C /* CreateSchoolViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CreateSchoolViewController.m; sourceTree = "<group>"; };
+		38C0449419A1C81500F500BA /* clearimage@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "clearimage@2x.png"; sourceTree = "<group>"; };
+		38C044B419A1F47E00F500BA /* touchDown@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "touchDown@2x.png"; sourceTree = "<group>"; };
+		38C044B519A1F47E00F500BA /* btn.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn.png; sourceTree = "<group>"; };
+		38C044B819A1F64E00F500BA /* ChatRecorderView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatRecorderView.h; sourceTree = "<group>"; };
+		38C044B919A1F64E00F500BA /* ChatRecorderView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatRecorderView.m; sourceTree = "<group>"; };
+		38C044BA19A1F64E00F500BA /* ChatVoiceRecorderVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatVoiceRecorderVC.h; sourceTree = "<group>"; };
+		38C044BB19A1F64E00F500BA /* ChatVoiceRecorderVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatVoiceRecorderVC.m; sourceTree = "<group>"; };
+		38C044BE19A1F64E00F500BA /* RecordViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RecordViewController.h; sourceTree = "<group>"; };
+		38C044BF19A1F64E00F500BA /* RecordViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RecordViewController.m; sourceTree = "<group>"; };
+		38C044C019A1F64E00F500BA /* UIView+Animation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+Animation.h"; sourceTree = "<group>"; };
+		38C044C119A1F64E00F500BA /* UIView+Animation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+Animation.m"; sourceTree = "<group>"; };
+		38C044C419A1F64E00F500BA /* amrFileCodec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = amrFileCodec.h; sourceTree = "<group>"; };
+		38C044C519A1F64E00F500BA /* amrFileCodec.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = amrFileCodec.mm; sourceTree = "<group>"; };
+		38C044C619A1F64E00F500BA /* wav.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = wav.h; sourceTree = "<group>"; };
+		38C044C719A1F64E00F500BA /* wav.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = wav.mm; sourceTree = "<group>"; };
+		38C044C919A1F64E00F500BA /* libopencore-amrnb.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libopencore-amrnb.a"; sourceTree = "<group>"; };
+		38C044CA19A1F64E00F500BA /* libopencore-amrwb.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libopencore-amrwb.a"; sourceTree = "<group>"; };
+		38C044CC19A1F64E00F500BA /* interf_dec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = interf_dec.h; sourceTree = "<group>"; };
+		38C044CD19A1F64E00F500BA /* interf_enc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = interf_enc.h; sourceTree = "<group>"; };
+		38C044CF19A1F64E00F500BA /* dec_if.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dec_if.h; sourceTree = "<group>"; };
+		38C044D019A1F64E00F500BA /* if_rom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = if_rom.h; sourceTree = "<group>"; };
+		38C044D119A1F64E00F500BA /* VoiceConverter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VoiceConverter.h; sourceTree = "<group>"; };
+		38C044D219A1F64E00F500BA /* VoiceConverter.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = VoiceConverter.mm; sourceTree = "<group>"; };
+		38C044D319A1F64E00F500BA /* VoiceRecorderBaseVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VoiceRecorderBaseVC.h; sourceTree = "<group>"; };
+		38C044D419A1F64E00F500BA /* VoiceRecorderBaseVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VoiceRecorderBaseVC.m; sourceTree = "<group>"; };
 		38CDBD56199D993D00F5374C /* DealJiFen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DealJiFen.h; sourceTree = "<group>"; };
 		38CDBD57199D993D00F5374C /* DealJiFen.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DealJiFen.m; sourceTree = "<group>"; };
 		38E8CAEC195004090075BDEC /* CommentCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommentCell.h; sourceTree = "<group>"; };
@@ -1356,6 +1388,7 @@
 				38BD38BC190A43D900BC01F7 /* AVFoundation.framework in Frameworks */,
 				38695FA4199E036100646BC4 /* AGCommon.framework in Frameworks */,
 				3899BC09196CE7D90037C586 /* CoreVideo.framework in Frameworks */,
+				38C044DC19A1F64E00F500BA /* libopencore-amrnb.a in Frameworks */,
 				389C32E218EF8AB200DA05E8 /* Security.framework in Frameworks */,
 				38938FC818EEF0260014F169 /* CoreGraphics.framework in Frameworks */,
 				389C32E618EF8AC800DA05E8 /* CoreLocation.framework in Frameworks */,
@@ -1366,6 +1399,7 @@
 				389C32DA18EF889000DA05E8 /* QuartzCore.framework in Frameworks */,
 				38695FB6199E036100646BC4 /* ShareSDKiPadSimpleShareViewUI.framework in Frameworks */,
 				38695FB9199E036100646BC4 /* ShareSDKiPhoneDefaultShareViewUI.framework in Frameworks */,
+				38C044DD19A1F64E00F500BA /* libopencore-amrwb.a in Frameworks */,
 				38695FAF199E036100646BC4 /* libWeChatSDK.a in Frameworks */,
 				38695FA3199E036100646BC4 /* WeChatConnection.framework in Frameworks */,
 				38F366631904AB5C0024BD7E /* libMobClickLibrary_armv6.a in Frameworks */,
@@ -2028,10 +2062,6 @@
 			children = (
 				3893915E18EEF1A30014F169 /* InputTableBar.h */,
 				3893915F18EEF1A30014F169 /* InputTableBar.m */,
-				388207A81978FF780033AAC0 /* RecordTools.h */,
-				388207A91978FF780033AAC0 /* RecordTools.m */,
-				38A24C0B197BE44E00C718BA /* PlayerTools.h */,
-				38A24C0C197BE44E00C718BA /* PlayerTools.m */,
 			);
 			path = emoji;
 			sourceTree = "<group>";
@@ -2225,6 +2255,17 @@
 		3893934E18EEF55C0014F169 /* messages */ = {
 			isa = PBXGroup;
 			children = (
+				38C044B819A1F64E00F500BA /* ChatRecorderView.h */,
+				38C044B919A1F64E00F500BA /* ChatRecorderView.m */,
+				38C044BA19A1F64E00F500BA /* ChatVoiceRecorderVC.h */,
+				38C044BB19A1F64E00F500BA /* ChatVoiceRecorderVC.m */,
+				38C044BE19A1F64E00F500BA /* RecordViewController.h */,
+				38C044BF19A1F64E00F500BA /* RecordViewController.m */,
+				38C044C019A1F64E00F500BA /* UIView+Animation.h */,
+				38C044C119A1F64E00F500BA /* UIView+Animation.m */,
+				38C044C219A1F64E00F500BA /* VoiceConvert */,
+				38C044D319A1F64E00F500BA /* VoiceRecorderBaseVC.h */,
+				38C044D419A1F64E00F500BA /* VoiceRecorderBaseVC.m */,
 				3893934F18EEF55C0014F169 /* MessageViewController.h */,
 				3893935018EEF55C0014F169 /* MessageViewController.m */,
 			);
@@ -2525,6 +2566,9 @@
 		38AD6A6D18EF04050065A5F2 /* image */ = {
 			isa = PBXGroup;
 			children = (
+				38C044B419A1F47E00F500BA /* touchDown@2x.png */,
+				38C044B519A1F47E00F500BA /* btn.png */,
+				38C0449419A1C81500F500BA /* clearimage@2x.png */,
 				38FD3891199DD6740042097F /* applyadd@2x.png */,
 				38FD3892199DD6740042097F /* checked@2x.png */,
 				38FD3893199DD6740042097F /* unchecked1@2x.png */,
@@ -2809,6 +2853,57 @@
 			path = classdongtai;
 			sourceTree = "<group>";
 		};
+		38C044C219A1F64E00F500BA /* VoiceConvert */ = {
+			isa = PBXGroup;
+			children = (
+				38C044C319A1F64E00F500BA /* amrwapper */,
+				38C044C819A1F64E00F500BA /* lib */,
+				38C044CB19A1F64E00F500BA /* opencore-amrnb */,
+				38C044CE19A1F64E00F500BA /* opencore-amrwb */,
+				38C044D119A1F64E00F500BA /* VoiceConverter.h */,
+				38C044D219A1F64E00F500BA /* VoiceConverter.mm */,
+			);
+			path = VoiceConvert;
+			sourceTree = "<group>";
+		};
+		38C044C319A1F64E00F500BA /* amrwapper */ = {
+			isa = PBXGroup;
+			children = (
+				38C044C419A1F64E00F500BA /* amrFileCodec.h */,
+				38C044C519A1F64E00F500BA /* amrFileCodec.mm */,
+				38C044C619A1F64E00F500BA /* wav.h */,
+				38C044C719A1F64E00F500BA /* wav.mm */,
+			);
+			path = amrwapper;
+			sourceTree = "<group>";
+		};
+		38C044C819A1F64E00F500BA /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				38C044C919A1F64E00F500BA /* libopencore-amrnb.a */,
+				38C044CA19A1F64E00F500BA /* libopencore-amrwb.a */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
+		38C044CB19A1F64E00F500BA /* opencore-amrnb */ = {
+			isa = PBXGroup;
+			children = (
+				38C044CC19A1F64E00F500BA /* interf_dec.h */,
+				38C044CD19A1F64E00F500BA /* interf_enc.h */,
+			);
+			path = "opencore-amrnb";
+			sourceTree = "<group>";
+		};
+		38C044CE19A1F64E00F500BA /* opencore-amrwb */ = {
+			isa = PBXGroup;
+			children = (
+				38C044CF19A1F64E00F500BA /* dec_if.h */,
+				38C044D019A1F64E00F500BA /* if_rom.h */,
+			);
+			path = "opencore-amrwb";
+			sourceTree = "<group>";
+		};
 		38D38AF8195678F600D4CB8E /* home */ = {
 			isa = PBXGroup;
 			children = (
@@ -3021,6 +3116,7 @@
 				3852D099194066B6000437E6 /* PushConfig.plist in Resources */,
 				3899BC07196CE7900037C586 /* zbar-samples.png in Resources */,
 				38AD6CD018EF04050065A5F2 /* bg_bor_green.png in Resources */,
+				38C044B719A1F47E00F500BA /* btn.png in Resources */,
 				3855221A195D6E570052B3B5 /* unchecked@2x.png in Resources */,
 				38282D561988B9CE0087018A /* scorealbum@2x.png in Resources */,
 				38549769194ACBF600BBDA4F /* tips_bg@2x.png in Resources */,
@@ -3131,6 +3227,7 @@
 				38AD6CAE18EF04050065A5F2 /* input@2x.png in Resources */,
 				3855221B195D6E570052B3B5 /* weichat@2x.png in Resources */,
 				38AD6CEA18EF04060065A5F2 /* icon_sel@2x.png in Resources */,
+				38C0449519A1C81500F500BA /* clearimage@2x.png in Resources */,
 				38F69BDD195EE3D900C7D5CA /* invite_phone_on@2x.png in Resources */,
 				38549796194AEDBE00BBDA4F /* footer_box_bg@2x.png in Resources */,
 				38F69B8A195DB01C00C7D5CA /* newapplyheader@2x.png in Resources */,
@@ -3149,6 +3246,7 @@
 				38AD6CE818EF04060065A5F2 /* icon_peo@2x.png in Resources */,
 				386B28AA1961387900499F79 /* release_on@2x.png in Resources */,
 				3899BC04196CE7900037C586 /* zbar-back.png in Resources */,
+				38C044B619A1F47E00F500BA /* touchDown@2x.png in Resources */,
 				38282D4B198887AD0087018A /* exitgroupbtn.png in Resources */,
 				38549766194ACBF600BBDA4F /* icon_setup@2x.png in Resources */,
 				38F69BF3196008F800C7D5CA /* icon_school.png in Resources */,
@@ -3202,7 +3300,6 @@
 				3893939E18EEF5620014F169 /* ClassZoneViewController.m in Sources */,
 				3893929C18EEF1A40014F169 /* HanyuPinyinOutputFormat.m in Sources */,
 				3893934A18EEF5440014F169 /* FriendsCell.m in Sources */,
-				38A24C0D197BE44E00C718BA /* PlayerTools.m in Sources */,
 				38A24C07197B3C8700C718BA /* SizeTools.m in Sources */,
 				3806883219852B1E00529FE7 /* SDWebImageDecoder.m in Sources */,
 				3893933718EEF53D0014F169 /* ChooseClassInfoViewController.m in Sources */,
@@ -3216,20 +3313,22 @@
 				3893927118EEF1A40014F169 /* FMResultSet.m in Sources */,
 				3899BC25196CF1760037C586 /* qrencode.c in Sources */,
 				3893924918EEF1A30014F169 /* ASIDataCompressor.m in Sources */,
-				388207AA1978FF780033AAC0 /* RecordTools.m in Sources */,
 				3893924218EEF1A30014F169 /* ALAsset+AGIPC.m in Sources */,
 				3806883A19852B1E00529FE7 /* UIImage+MultiFormat.m in Sources */,
 				3846AAAF197FCF430061B6CA /* GroupInfoViewController.m in Sources */,
 				3893925A18EEF1A30014F169 /* ChineseToPinyin.m in Sources */,
 				38938FD818EEF0260014F169 /* AppDelegate.m in Sources */,
+				38C044D519A1F64E00F500BA /* ChatRecorderView.m in Sources */,
 				3893926118EEF1A30014F169 /* MCSoundBoard.m in Sources */,
 				38F69BE9195F9F3500C7D5CA /* AddObjectViewController.m in Sources */,
 				3893926E18EEF1A40014F169 /* FMDatabaseAdditions.m in Sources */,
 				3806882D19852B1E00529FE7 /* MJPhotoView.m in Sources */,
 				38B492AA192225D600C0098D /* SelectSchoolLevelViewController.m in Sources */,
 				38A24CA2197CE06400C718BA /* UIImage+Blur.m in Sources */,
+				38C044D819A1F64E00F500BA /* RecordViewController.m in Sources */,
 				38CDBD58199D993D00F5374C /* DealJiFen.m in Sources */,
 				3893925E18EEF1A30014F169 /* FooterCell.m in Sources */,
+				38C044D619A1F64E00F500BA /* ChatVoiceRecorderVC.m in Sources */,
 				38B1AEBC195C6101004C704F /* OtherLoginViewController.m in Sources */,
 				389393B518EEF5620014F169 /* ClassMoreCell.m in Sources */,
 				3899BC38196E75020037C586 /* DiaryTools.m in Sources */,
@@ -3248,6 +3347,7 @@
 				3806882B19852B1E00529FE7 /* MJPhotoProgressView.m in Sources */,
 				38B4929A1921AA5800C0098D /* ClassPlusAccountViewController.m in Sources */,
 				3893923E18EEF1A30014F169 /* AGIPCAssetsController.m in Sources */,
+				38C044DB19A1F64E00F500BA /* wav.mm in Sources */,
 				3893929F18EEF1A40014F169 /* PinyinHelper.m in Sources */,
 				3893939C18EEF5620014F169 /* AddDongTaiViewController.m in Sources */,
 				38B0F2CC192C581B00C0FC4B /* UserProtocolViewController.m in Sources */,
@@ -3292,6 +3392,7 @@
 				3893935118EEF55C0014F169 /* MessageViewController.m in Sources */,
 				3806882619852B1E00529FE7 /* MBProgressHUD.m in Sources */,
 				388665F31986150A00D8CDF2 /* CheckQRCodeViewController.m in Sources */,
+				38C044DA19A1F64E00F500BA /* amrFileCodec.mm in Sources */,
 				38A24CAE197D323100C718BA /* GroupChatViewController.m in Sources */,
 				389393B718EEF5620014F169 /* MyClassesViewController.m in Sources */,
 				3893923A18EEF1A30014F169 /* AGImagePickerController+Helper.m in Sources */,
@@ -3348,6 +3449,7 @@
 				3893926F18EEF1A40014F169 /* FMDatabasePool.m in Sources */,
 				3899BC10196CF0FC0037C586 /* ClassQRViewController.m in Sources */,
 				3893924B18EEF1A30014F169 /* ASIDownloadCache.m in Sources */,
+				38C044D919A1F64E00F500BA /* UIView+Animation.m in Sources */,
 				389393D518EEF56A0014F169 /* PersonalSettingViewController.m in Sources */,
 				38B711451924A0BB00AEB55D /* HeaderVIew.m in Sources */,
 				3893932418EEF2030014F169 /* School.m in Sources */,
@@ -3379,6 +3481,7 @@
 				38F69BD4195EDB1700C7D5CA /* PersonDetailViewController.m in Sources */,
 				389393B118EEF5620014F169 /* SettingRelateViewController.m in Sources */,
 				3893926218EEF1A30014F169 /* MyColor.m in Sources */,
+				38C044DF19A1F64E00F500BA /* VoiceRecorderBaseVC.m in Sources */,
 				3893932518EEF2030014F169 /* SettingPasswordViewController.m in Sources */,
 				389393BA18EEF5620014F169 /* NotificationDetailCell.m in Sources */,
 				38B775B519259A3800047FF8 /* SelectCityViewController.m in Sources */,
@@ -3386,6 +3489,7 @@
 				3893929E18EEF1A40014F169 /* PinyinFormatter.m in Sources */,
 				3852D068193D6077000437E6 /* ReportViewController.m in Sources */,
 				382DFDA41964811E001AAA1F /* EditNameViewController.m in Sources */,
+				38C044DE19A1F64E00F500BA /* VoiceConverter.mm in Sources */,
 				3893934918EEF5440014F169 /* ChatViewController.m in Sources */,
 				386939C719612D4E00B9AD62 /* SetImageTools.m in Sources */,
 				389392E318EEF1A40014F169 /* ViewController.m in Sources */,
@@ -3579,6 +3683,7 @@
 					2/Extend/TencentWeiboSDK,
 					"$(PROJECT_DIR)/library/ShareSDK",
 					2/Extend/WeChatSDK,
+					"$(PROJECT_DIR)/messages/VoiceConvert/lib",
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "-all_load";
@@ -3650,6 +3755,7 @@
 					2/Extend/TencentWeiboSDK,
 					"$(PROJECT_DIR)/library/ShareSDK",
 					2/Extend/WeChatSDK,
+					"$(PROJECT_DIR)/messages/VoiceConvert/lib",
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "-all_load";

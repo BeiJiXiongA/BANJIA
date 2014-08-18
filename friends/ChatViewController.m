@@ -414,17 +414,19 @@ updateGroupInfoDelegate>
                 self.titleLabel.text = [[responseDict objectForKey:@"data"] objectForKey:@"name"];
                 
                 NSString *fname = [[responseDict objectForKey:@"data"] objectForKey:@"name"];
-                NSRange range = [fname rangeOfString:@"("];
-                NSRange range1 = [fname rangeOfString:@"人"];
-                if ([fname length] > 8 && range.length > 0 && range1.length > 0)
+                if (![fname isEqual:[NSNull null]])
                 {
-                    self.titleLabel.text = [NSString stringWithFormat:@"%@...%@",[fname substringToIndex:4],[fname substringFromIndex:range.location]];
+                    NSRange range = [fname rangeOfString:@"("];
+                    NSRange range1 = [fname rangeOfString:@"人"];
+                    if ([fname length] > 8 && range.length > 0 && range1.length > 0)
+                    {
+                        self.titleLabel.text = [NSString stringWithFormat:@"%@...%@",[fname substringToIndex:4],[fname substringFromIndex:range.location]];
+                    }
+                    else
+                    {
+                        self.titleLabel.text = fname;
+                    }
                 }
-                else
-                {
-                    self.titleLabel.text = fname;
-                }
-
                 
                 for(NSDictionary *dict in users)
                 {
@@ -865,6 +867,46 @@ updateGroupInfoDelegate>
 }
 
 
+-(void)sendSound:(int)length andFilePath:(NSString *)filePath
+{
+    if ([Tools NetworkReachable])
+    {
+        NSData *soundData = [NSData dataWithContentsOfFile:filePath];
+        __weak ASIHTTPRequest *request = [Tools upLoadSoundFiles:[NSArray arrayWithObject:soundData]
+                                                      withSubURL:[NSString stringWithFormat:@"%@?time=%d",UPLOADCHATFILE,length]
+                                                     andParaDict:@{@"u_id":[Tools user_id],                                                                                                                                    @"token":[Tools client_token]}  timeLength:length];
+        [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"upload image responsedict %@",responseDict);
+            
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                [self sendMsgWithString:[[responseDict objectForKey:@"data"] objectForKey:@"files"]];
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools hideProgress:self.bgView];
+            
+        }];
+        [Tools showProgress:self.bgView];
+        [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
+}
+
+
 #pragma mark - tableview
 
 -(void)editTableView
@@ -1239,5 +1281,14 @@ updateGroupInfoDelegate>
     }
 }
 
-
+-(void)recordFinished:(NSString *)filePath andFileName:(NSString *)fileName voiceLength:(int)length
+{
+    NSString *fileExtetion = [filePath pathExtension];
+    NSRange range = [filePath rangeOfString:fileExtetion];
+    NSString *pathStr = [filePath substringToIndex:range.location-1];
+    [VoiceConverter wavToAmr:filePath amrSavePath:[NSString stringWithFormat:@"%@.amr",pathStr]];
+    [self sendSound:length andFilePath:[NSString stringWithFormat:@"%@.amr",pathStr]];
+    [MCSoundBoard addAudioAtPath:filePath forKey:fileName];
+    [MCSoundBoard playAudioForKey:fileName];
+}
 @end

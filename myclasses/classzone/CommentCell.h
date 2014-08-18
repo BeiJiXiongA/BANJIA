@@ -17,4 +17,5 @@
 @property (nonatomic, strong) UIButton *openPraiseButton;
 @property (nonatomic, strong) UIImageView *headerImageView;
 @property (nonatomic, strong) UILabel *timeLabel;
+@property (nonatomic, strong) UIImageView *lineImageView;
 @end

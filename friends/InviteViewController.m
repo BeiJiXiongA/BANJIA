@@ -89,6 +89,7 @@ UISearchBarDelegate>
     
     UIView *selectView;
     UIScrollView *selectScrollView;
+    UIButton *selectButton;
 }
 @end
 
@@ -258,14 +259,20 @@ UISearchBarDelegate>
     [bgScrollView addSubview:contactTableView];
     
     selectView = [[UIView alloc] init];
-    selectView.backgroundColor = [UIColor yellowColor];
+    selectView.backgroundColor = self.bgView.backgroundColor;
     selectView.frame = CGRectMake(0, bgScrollView.frame.size.height, SCREEN_WIDTH, 50);
     [bgScrollView addSubview:selectView];
     
     selectScrollView = [[UIScrollView alloc] init];
     selectScrollView.backgroundColor = self.bgView.backgroundColor;
-    selectScrollView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 50);
+    selectScrollView.frame = CGRectMake(0, 0, SCREEN_WIDTH-80, 50);
     [selectView addSubview:selectScrollView];
+    
+    selectButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    selectButton.frame = CGRectMake(SCREEN_WIDTH-75, 5, 70, 40);
+    [selectButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+    selectButton.titleLabel.font = [UIFont systemFontOfSize:16];
+    [selectView addSubview:selectButton];
     
     
     inviteTencentButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -281,8 +288,6 @@ UISearchBarDelegate>
     [inviteWeiXinButton setTitle:@"邀请微信好友" forState:UIControlStateNormal];
     [inviteWeiXinButton addTarget:self action:@selector(inviteWeiXin) forControlEvents:UIControlEventTouchUpInside];
     [bgScrollView addSubview:inviteWeiXinButton];
-    
-
     
     [self getLocalContacts];
 }
@@ -484,10 +489,12 @@ UISearchBarDelegate>
                 [selectScrollView addSubview:nameLabel];
             }
             selectScrollView.contentSize = CGSizeMake(10+40*[addedContactArray count], 50);
-            if ((10+40*[addedContactArray count]) > SCREEN_WIDTH)
+            if ((10+40*[addedContactArray count]) > SCREEN_WIDTH-80)
             {
-                selectScrollView.contentOffset = CGPointMake((10+40*[addedContactArray count])-SCREEN_WIDTH, 0);
+                selectScrollView.contentOffset = CGPointMake((10+40*[addedContactArray count])-SCREEN_WIDTH+80, 0);
             }
+            
+            [selectButton setTitle:[NSString stringWithFormat:@"邀请(%d)",[addedContactArray count]] forState:UIControlStateNormal];
             [inviteButton setTitle:[NSString stringWithFormat:@"邀请(%d)",[addedContactArray count]] forState:UIControlStateNormal];
         }
         else
