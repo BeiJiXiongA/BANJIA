@@ -21,7 +21,7 @@
 @property (nonatomic, strong) UIImageView *headerImageView;
 @property (nonatomic, strong) UITextView *messageTf;
 @property (nonatomic, strong) UIImageView *chatBg;
-@property (nonatomic, strong) UIButton *button;
+@property (nonatomic, strong) UIButton *soundButton;
 @property (nonatomic, strong) UILabel *timeLabel;
 
 @property (nonatomic, strong) NSString *fromImgIcon;
@@ -45,4 +45,5 @@
 
 -(void)toPersonDetail:(NSDictionary *)personDict;
 -(void)joinClassWithMsgContent:(NSString *)msgContent;
+-(void)soundTap:(NSString *)msgContent;
 @end

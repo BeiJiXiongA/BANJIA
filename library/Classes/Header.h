@@ -76,9 +76,9 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:a]
 
 #define NAV_RIGHT_BUTTON_HEIGHT   40
 
-//#define SCREEN_HEIGHT  (SYSVERSION > 7.0 ? ([[UIScreen mainScreen] bounds].size.height):([[UIScreen mainScreen] bounds].size.height-20))
+#define SCREEN_HEIGHT  (SYSVERSION > 7.0 ? ([[UIScreen mainScreen] bounds].size.height):([[UIScreen mainScreen] bounds].size.height-20))
 
-#define SCREEN_HEIGHT ([[UIScreen mainScreen] bounds].size.height)
+//#define SCREEN_HEIGHT ([[UIScreen mainScreen] bounds].size.height)
 
 #define Y_STARTPOINT (([[[UIDevice currentDevice] systemVersion] floatValue] < 7.0) ? 0.0f:64.0f)
 

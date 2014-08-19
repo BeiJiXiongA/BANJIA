@@ -21,7 +21,7 @@
 
 
 @implementation MessageCell
-@synthesize messageTf,chatBg,button,timeLabel,headerImageView,joinlable,msgImageView,msgDict,isGroup,nameLabel,fromImgIcon;
+@synthesize messageTf,chatBg,soundButton,timeLabel,headerImageView,joinlable,msgImageView,msgDict,isGroup,nameLabel,fromImgIcon;
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
@@ -39,9 +39,11 @@
         
         chatBg = [[UIImageView alloc] init];
         chatBg.hidden = YES;
-        button = [UIButton buttonWithType:UIButtonTypeCustom];
-        button.hidden = YES;
         [self.contentView addSubview:chatBg];
+        
+        soundButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        soundButton.hidden = YES;
+        [self.contentView addSubview:soundButton];
         
         joinlable = [[UILabel alloc] init];
         joinlable.textColor = RGB(0, 165, 195, 1);
@@ -92,13 +94,14 @@
     headerTapTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(headerImageViewTap:)];
     [self.headerImageView addGestureRecognizer:headerTapTgr];
     self.headerImageView.userInteractionEnabled = YES;
-    self.chatBg.hidden = NO;
+    self.chatBg.hidden = YES;
     
-    self.button.hidden = YES;
+    self.soundButton.hidden = YES;
     self.joinlable.hidden = YES;
     self.timeLabel.hidden = NO;
     self.messageTf.editable = NO;
     self.messageTf.hidden = NO;
+    self.messageTf.textColor = TITLE_COLOR;
     self.messageTf.backgroundColor = [UIColor clearColor];
     self.msgImageView.layer.cornerRadius = 3;
     self.msgImageView.clipsToBounds = YES;
@@ -106,7 +109,6 @@
 //    chatImageTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(chatimagetap:)];
 //    self.msgImageView.userInteractionEnabled = YES;
 //    [self.msgImageView addGestureRecognizer:chatImageTap];
-    
     
     if (SYSVERSION >= 7.0)
     {
@@ -121,6 +123,8 @@
         NSString *extension =  [msgContent pathExtension];
         if ([extension isEqualToString:@"png"] || [extension isEqualToString:@"jpg"])
         {
+            //图片
+            self.chatBg.hidden = NO;
             self.messageTf.hidden = YES;
             self.msgImageView.hidden = NO;
             self.timeLabel.frame = CGRectMake(SCREEN_WIDTH/2-50, 5, 100, 20);
@@ -169,8 +173,62 @@
                 }
             }
         }
+        else if([msgContent rangeOfString:@"amr"].length > 0)
+        {
+            //语音
+//             DDLOG(@"from == %@%@",MEDIAURL,msgContent);
+            self.chatBg.hidden = YES;
+            self.msgImageView.hidden = NO;
+            self.timeLabel.frame = CGRectMake(SCREEN_WIDTH/2-50, 5, 100, 20);
+            NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
+            self.timeLabel.text = timeStr;
+            
+            self.soundButton.hidden = NO;
+            self.soundButton.frame = CGRectMake(55, messageBgY, 60, 40);
+            [self.soundButton setBackgroundImage:[Tools getImageFromImage:fromImage andInsets:UIEdgeInsetsMake(10, 10, 10, 10)] forState:UIControlStateNormal];
+            [self.soundButton addTarget:self action:@selector(playSound) forControlEvents:UIControlEventTouchUpInside];
+            
+            self.msgImageView.frame = CGRectMake(self.soundButton.frame.origin.x+PhotoSpace+5, self.soundButton.frame.origin.y+PhotoSpace+1, 25, 25);
+            [self.msgImageView setImage:[UIImage imageNamed:@"icon_sound_f"]];
+            
+            self.messageTf.frame = CGRectMake(self.soundButton.frame.size.width+self.soundButton.frame.origin.x+10, self.soundButton.frame.origin.y+3, 40, 25);
+            NSRange range = [msgContent rangeOfString:@"time="];
+            self.messageTf.text = [NSString stringWithFormat:@"%@\"",[msgContent substringFromIndex:range.location+range.length]];
+            self.messageTf.textColor = COMMENTCOLOR;
+            
+            self.headerImageView.frame = CGRectMake(5, messageBgY, 40, 40);
+            if(isGroup)
+            {
+                OperatDB *db = [[OperatDB alloc] init];
+                NSString *by = [dict objectForKey:@"by"];
+                NSDictionary *userDict = [[db findSetWithDictionary:@{@"uid":by} andTableName:USERICONTABLE] firstObject];
+                NSString *img_icon = [userDict objectForKey:@"uicon"];
+                NSString *name = [userDict objectForKey:@"username"];
+                
+                self.nameLabel.hidden = NO;
+                self.nameLabel.frame = CGRectMake(self.headerImageView.frame.size.width+self.headerImageView.frame.origin.x+5, self.headerImageView.frame.origin.y, 100, 20);
+                self.nameLabel.text = name;
+                self.soundButton.frame = CGRectMake(55, messageBgY+20, 60, 40);
+                [self.soundButton setBackgroundImage:fromImage forState:UIControlStateNormal];
+                
+                self.msgImageView.frame = CGRectMake(self.soundButton.frame.origin.x+PhotoSpace+5, self.soundButton.frame.origin.y+PhotoSpace+1, 25, 25);
+                [self.msgImageView setImage:[UIImage imageNamed:@"icon_sound_f"]];
+                
+                [Tools fillImageView:self.headerImageView withImageFromURL:img_icon andDefault:HEADERICON];
+            }
+            else
+            {
+                NSDictionary *usericondict = [ImageTools iconDictWithUserID:[dict objectForKey:@"fid"]];
+                if (usericondict)
+                {
+                    [Tools fillImageView:self.headerImageView withImageFromURL:[usericondict objectForKey:@"uicon"] andDefault:HEADERICON];
+                }
+            }
+
+        }
         else
         {
+            self.chatBg.hidden = NO;
             self.messageTf.hidden = NO;
             self.msgImageView.hidden = YES;
             self.timeLabel.frame = CGRectMake(SCREEN_WIDTH/2-50, 5, 100, 20);
@@ -220,7 +278,7 @@
             }
             else
             {
-                self.button.hidden = YES;
+                self.soundButton.hidden = YES;
             }
             
             self.headerImageView.frame = CGRectMake(5, messageBgY, 40, 40);
@@ -255,6 +313,7 @@
         NSString *extension =  [msgContent pathExtension];
         if ([extension isEqualToString:@"png"] || [extension isEqualToString:@"jpg"])
         {
+            self.chatBg.hidden = NO;
             self.messageTf.hidden = YES;
             self.msgImageView.hidden = NO;
             self.timeLabel.frame = CGRectMake(SCREEN_WIDTH/2-50, 5, 100, 20);
@@ -274,8 +333,35 @@
             self.headerImageView.frame = CGRectMake(SCREEN_WIDTH - 60, messageBgY, 40, 40);
             [Tools fillImageView:self.headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERICON];
         }
+        else if([msgContent rangeOfString:@"amr"].length > 0)
+        {
+            //语音
+            self.chatBg.hidden = YES;
+            
+            self.headerImageView.frame = CGRectMake(SCREEN_WIDTH - 60, messageBgY, 40, 40);
+            [Tools fillImageView:self.headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERICON];
+            
+            self.soundButton.hidden = NO;
+            self.soundButton.frame = CGRectMake(SCREEN_WIDTH - 60-45-20, messageBgY, 60, 40);
+            
+            [self.soundButton setBackgroundImage:[Tools getImageFromImage:toImage andInsets:UIEdgeInsetsMake(10, 10, 10, 10)] forState:UIControlStateNormal];
+            [self.soundButton addTarget:self action:@selector(playSound) forControlEvents:UIControlEventTouchUpInside];
+            
+            self.msgImageView.hidden = NO;
+            self.msgImageView.frame = CGRectMake(self.soundButton.frame.origin.x + self.soundButton.frame.size.width-35, self.soundButton.frame.origin.y+7.5, 25, 25);
+            [self.msgImageView setImage:[UIImage imageNamed:@"icon_sound_t"]];
+            
+            self.messageTf.frame = CGRectMake(self.soundButton.frame.origin.x-30,self.soundButton.frame.origin.y+3 , 40, 25);
+            NSRange range = [msgContent rangeOfString:@"time="];
+            self.messageTf.text = [NSString stringWithFormat:@"%@\"",[msgContent substringFromIndex:range.location+range.length]];
+            self.messageTf.textColor = COMMENTCOLOR;
+            self.messageTf.editable = NO;
+            
+//            DDLOG(@"to===%@%@",MEDIAURL,msgContent);
+        }
         else
         {
+            self.chatBg.hidden = NO;
             self.msgImageView.hidden = YES;
             self.messageTf.hidden = NO;
             self.timeLabel.frame = CGRectMake(SCREEN_WIDTH/2-50, 5, 100, 20);
@@ -295,7 +381,7 @@
             self.messageTf.backgroundColor = [[UIColor grayColor] colorWithAlphaComponent:0];
             self.messageTf.text = [[dict objectForKey:@"content"] emojizedString];
             self.selectionStyle = UITableViewCellSelectionStyleNone;
-            self.button.hidden = YES;
+            self.soundButton.hidden = YES;
             
             if ([[dict objectForKey:@"content"] rangeOfString:@"$!#"].length >0)
             {
@@ -325,6 +411,55 @@
         DDLOG(@"msgdict %@",msgDict);
         [self.msgDelegate toPersonDetail:msgDict];
     }
+}
+
+-(void)playSound
+{
+    NSString *msgContent = [msgDict objectForKey:@"content"];
+    if ([self.msgDelegate respondsToSelector:@selector(soundTap:)])
+    {
+        if ([[msgDict objectForKey:DIRECT] isEqualToString:@"t"])
+        {
+            [self playToImages];
+        }
+        else if ([[msgDict objectForKey:DIRECT] isEqualToString:@"f"])
+        {
+            [self playFromImages];
+        }
+        
+        [self.msgDelegate soundTap:msgContent];
+    }
+
+}
+
+-(void)playFromImages
+{
+    DDLOG(@"msg %@",[msgDict objectForKey:@"content"]);
+    NSString *msgContent = [msgDict objectForKey:@"content"];
+    NSRange range = [msgContent rangeOfString:@"time="];
+    int time = [[msgContent substringFromIndex:range.location+range.length] intValue];
+    self.msgImageView.animationImages = [NSArray arrayWithObjects:
+                                         [UIImage imageNamed:@"icon_sound_f1"],
+                                         [UIImage imageNamed:@"icon_sound_f2"],
+                                         [UIImage imageNamed:@"icon_sound_f"],nil];
+    self.msgImageView.animationDuration = time;
+    self.msgImageView.animationRepeatCount =  50*time;
+    [self.msgImageView startAnimating];
+}
+
+-(void)playToImages
+{
+    DDLOG(@"msg %@",[msgDict objectForKey:@"content"]);
+    NSString *msgContent = [msgDict objectForKey:@"content"];
+    NSRange range = [msgContent rangeOfString:@"time="];
+    int time = [[msgContent substringFromIndex:range.location+range.length] intValue];
+    self.msgImageView.animationImages = [NSArray arrayWithObjects:
+                                         [UIImage imageNamed:@"icon_sound_t1"],
+                                         [UIImage imageNamed:@"icon_sound_t2"],
+                                         [UIImage imageNamed:@"icon_sound_t"],nil];
+    self.msgImageView.animationDuration = time;
+    self.msgImageView.animationRepeatCount = 50*time;
+    [self.msgImageView startAnimating];
 }
 
 -(void)joinClass:(UITapGestureRecognizer *)tap

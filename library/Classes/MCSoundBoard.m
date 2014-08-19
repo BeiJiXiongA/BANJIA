@@ -65,9 +65,13 @@
 
 - (void)addAudioAtPath:(NSString *)filePath forKey:(id)key
 {
-    NSURL* fileURL = [NSURL fileURLWithPath:filePath];
-    AVAudioPlayer *player = [[AVAudioPlayer alloc] initWithContentsOfURL:fileURL error:NULL];
-    [_audio setObject:player forKey:key];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath])
+    {
+        _audio = [[NSMutableDictionary alloc] initWithCapacity:0];
+        NSURL* fileURL = [NSURL fileURLWithPath:filePath];
+        AVAudioPlayer *player = [[AVAudioPlayer alloc] initWithContentsOfURL:fileURL error:NULL];
+        [_audio setObject:player forKey:key];
+    }
 }
 
 + (void)addAudioAtPath:(NSString *)filePath forKey:(id)key

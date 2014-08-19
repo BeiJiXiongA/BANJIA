@@ -251,7 +251,9 @@ UISearchBarDelegate>
         for (int i=0; i < [tmpArray count]; i++)
         {
             NSDictionary *dict  =[tmpArray objectAtIndex:i];
-            if(![[dict objectForKey:@"role"] isEqualToString:@"unin_students"] && ![[dict objectForKey:@"uid"] isEqualToString:[Tools user_id]])
+            if(![[dict objectForKey:@"role"] isEqualToString:@"unin_students"] &&
+               ![[dict objectForKey:@"uid"] isEqual:[NSNull null]] &&
+               ![[dict objectForKey:@"uid"] isEqualToString:[Tools user_id]])
             {
                 haveStudent = YES;
                 [allArray addObject:dict];

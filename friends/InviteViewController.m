@@ -272,6 +272,7 @@ UISearchBarDelegate>
     selectButton.frame = CGRectMake(SCREEN_WIDTH-75, 5, 70, 40);
     [selectButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
     selectButton.titleLabel.font = [UIFont systemFontOfSize:16];
+    [selectButton addTarget:self action:@selector(inviteClick) forControlEvents:UIControlEventTouchUpInside];
     [selectView addSubview:selectButton];
     
     

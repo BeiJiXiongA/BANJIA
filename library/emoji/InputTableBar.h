@@ -21,6 +21,7 @@
     UIButton *inputButton;
     UIButton *addButton;
     CGFloat inputLength;
+    CGFloat left;
     
     UIView *faceView;
     UIScrollView *faceScrollView;

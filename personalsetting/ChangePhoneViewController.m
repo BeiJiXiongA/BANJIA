@@ -107,6 +107,17 @@
     {
         return ;
     }
+    
+    if ([phoneNumTextfield.text length] == 0)
+    {
+        [Tools showAlertView:@"请输入手机号码！" delegateViewController:nil];
+        return ;
+    }
+    if (![Tools isPhoneNumber:phoneNumTextfield.text])
+    {
+        [Tools showAlertView:@"请输入正确的手机号码！" delegateViewController:nil];
+        return ;
+    }
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],

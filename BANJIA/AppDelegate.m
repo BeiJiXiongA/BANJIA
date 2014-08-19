@@ -62,6 +62,18 @@
     
     _db = [[OperatDB alloc] init];
     
+    
+    NSString *soundDir = [NSString stringWithFormat:@"%@/soundCache",[DirectyTools documents]];
+    BOOL isDir;
+    if (![[NSFileManager defaultManager] fileExistsAtPath:soundDir isDirectory:&isDir])
+    {
+        if ([[NSFileManager defaultManager] createDirectoryAtPath:soundDir withIntermediateDirectories:YES attributes:nil error:nil])
+        {
+            DDLOG(@"create sound cache success");
+        }
+    }
+
+    
 //    [self initialize];
     
     [self undateDatabase];
@@ -378,10 +390,10 @@
                     [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",[[responseDict objectForKey:@"data"] integerValue]] forKey:NewChatMsgNum];
                     [[NSUserDefaults standardUserDefaults] synchronize];
                     
-                    if ([self.chatDelegate respondsToSelector:@selector(dealNewChatMsg:)])
-                    {
-                        [self.chatDelegate dealNewChatMsg:nil];
-                    }
+//                    if ([self.chatDelegate respondsToSelector:@selector(dealNewChatMsg:)])
+//                    {
+//                        [self.chatDelegate dealNewChatMsg:nil];
+//                    }
                 }
                 else
                 {
@@ -457,6 +469,7 @@
     [[UIApplication sharedApplication] cancelAllLocalNotifications];
     [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
     DDLOG(@"push msg==%@",userInfo);
+    
     if ([Tools user_id])
     {
         [self getNewChat];
@@ -516,10 +529,10 @@
             {
                 if ([_db insertRecord:chatDict andTableName:CHATTABLE])
                 {
-                    if ([self.chatDelegate respondsToSelector:@selector(dealNewChatMsg:)])
-                    {
-                        [self.chatDelegate dealNewChatMsg:chatDict];
-                    }
+//                    if ([self.chatDelegate respondsToSelector:@selector(dealNewChatMsg:)])
+//                    {
+//                        [self.chatDelegate dealNewChatMsg:chatDict];
+//                    }
                 }
             }
             else if ([[_db findSetWithDictionary:@{@"userid":[Tools user_id],@"mid":[userInfo objectForKey:@"m_id"]} andTableName:CHATTABLE] count]==0)
@@ -527,10 +540,10 @@
                 if ([_db insertRecord:chatDict andTableName:CHATTABLE])
                 {
                     
-                    if ([self.chatDelegate respondsToSelector:@selector(dealNewChatMsg:)])
-                    {
-                        [self.chatDelegate dealNewChatMsg:chatDict];
-                    }
+//                    if ([self.chatDelegate respondsToSelector:@selector(dealNewChatMsg:)])
+//                    {
+//                        [self.chatDelegate dealNewChatMsg:chatDict];
+//                    }
                     DDLOG(@"======%@",[[NSUserDefaults standardUserDefaults] objectForKey:BECOMEACTIVE]);
                     if (!([[NSUserDefaults standardUserDefaults] objectForKey:@"viewtype"] &&
                           [[[NSUserDefaults standardUserDefaults] objectForKey:@"viewtype"] isEqualToString:@"chat"]))

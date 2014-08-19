@@ -83,6 +83,7 @@ UIActionSheetDelegate>
     
     UIButton *studentButton;
     UIButton *getCodeButton;
+    UIButton *checkCodeButton;
     
     NSString *schoolName;
     NSString *className;
@@ -344,6 +345,12 @@ UIActionSheetDelegate>
     childTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     [childView addSubview:childTableView];
     
+    
+    [self layoutPhoneView];
+}
+
+-(void)layoutPhoneView
+{
     phoneNumView = [[UIView alloc] init];
     phoneNumView.frame = CGRectMake(0, childView.frame.size.height+childView.frame.origin.y+10, SCREEN_WIDTH, 230);
     phoneNumView.backgroundColor = self.bgView.backgroundColor;
@@ -416,7 +423,7 @@ UIActionSheetDelegate>
         codeTextField.placeholder = @"验证码";
         [phoneNumView addSubview:codeTextField];
         
-        UIButton *checkCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        checkCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
         checkCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, codeTextField.frame.origin.y+5, 58, 32);
         [checkCodeButton setBackgroundImage:btnImage forState:UIControlStateNormal];
         [checkCodeButton setTitle:@"验证" forState:UIControlStateNormal];
@@ -424,15 +431,13 @@ UIActionSheetDelegate>
         [checkCodeButton addTarget:self action:@selector(verify) forControlEvents:UIControlEventTouchUpInside];
         [phoneNumView addSubview:checkCodeButton];
     }
-    
-    
     studentButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [studentButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     [studentButton setTitle:@"提交" forState:UIControlStateNormal];
     studentButton.enabled = NO;
     [phoneNumView addSubview:studentButton];
-
-
+    
+    
     if ([Tools phone_num] > 0)
     {
         studentButton.frame = CGRectMake(38, tipLabel.frame.size.height + tipLabel.frame.origin.y+15, SCREEN_WIDTH-76, 40);
@@ -517,6 +522,17 @@ UIActionSheetDelegate>
 
 -(void)getVerifyCode
 {
+    if ([phoneNumTextfield.text length] == 0)
+    {
+        [Tools showAlertView:@"请输入手机号码！" delegateViewController:nil];
+        return ;
+    }
+    if (![Tools isPhoneNumber:phoneNumTextfield.text])
+    {
+        [Tools showAlertView:@"请输入正确的手机号码！" delegateViewController:nil];
+        return ;
+    }
+
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
@@ -639,10 +655,16 @@ UIActionSheetDelegate>
             {
                 [Tools showTips:@"绑定成功" toView:self.bgView];
                 tipLabel.hidden = YES;
-//                studentButton.enabled = YES;
+                phoneNumTextfield.enabled = NO;
                 [[NSUserDefaults standardUserDefaults] setObject:phoneNumTextfield.text forKey:PHONENUM];
                 [[NSUserDefaults standardUserDefaults] synchronize];
-//                [studentButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+                
+                getCodeButton.hidden = YES;
+                checkCodeButton.hidden = YES;
+                
+                [phoneNumView removeFromSuperview];
+                
+                [self layoutPhoneView];
             }
             else
             {

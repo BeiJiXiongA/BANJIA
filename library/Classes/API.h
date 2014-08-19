@@ -22,6 +22,8 @@
 #define HOST_URL      @"http://mytest.banjiaedu.com"
 #define IMAGEURL       @"http://imgtest.banjiaedu.com"
 
+#define MEDIAURL      @"http://mediatest.banjiaedu.com"
+
 #pragma mark - userprotocol
 #define USER_PROTOCOL   @"/protocol.html"
 

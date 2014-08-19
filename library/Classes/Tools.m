@@ -287,12 +287,12 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 #pragma mark - 等待
 + (void)showProgress:(UIView *) view
 {
-//    [MBProgressHUD showHUDAddedTo:view animated:YES];
+    [MBProgressHUD showHUDAddedTo:view animated:YES];
 }
 
 + (void)hideProgress:(UIView *)view
 {
-//    [MBProgressHUD hideAllHUDsForView:view animated:YES];
+    [MBProgressHUD hideAllHUDsForView:view animated:YES];
 }
 + (void) showTips:(NSString *)text toView:(UIView *)view
 {
@@ -444,8 +444,9 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     
     for (int i=0; i<[filesArray count]; ++i)
     {
-        NSData *data = [filesArray objectAtIndex:i];
-        [request addData:data withFileName:[NSString stringWithFormat:@"%d.amr?time=%d",i+1,length] andContentType:@"file" forKey:[NSString stringWithFormat:@"file%@",i==0?@"":[NSString stringWithFormat:@"%d",i+1]]];
+        NSData *data = [NSData dataWithContentsOfFile:[filesArray objectAtIndex:i]];
+        DDLOG(@"%d",data.length);
+        [request addData:data withFileName:[NSString stringWithFormat:@"%d.amr",i+1] andContentType:@"media/amr" forKey:[NSString stringWithFormat:@"file%@",i==0?@"":[NSString stringWithFormat:@"%d",i+1]]];
     }
     return request;
 }
@@ -652,6 +653,11 @@ extern NSString *CTSettingCopyMyPhoneNumber();
         }
         [[NSNotificationCenter defaultCenter] postNotificationName:@"logout" object:nil];
         [Tools showAlertView:[[[errorDict objectForKey:@"message"] allValues] firstObject] delegateViewController:viewController];
+        return ;
+    }
+    else if([[[[errorDict objectForKey:@"message"] allKeys] firstObject] isEqualToString:@"PHONE_NUM_EXITS"])
+    {
+        [Tools showAlertView:@"该手机号已经注册" delegateViewController:viewController];
         return ;
     }
     [Tools showAlertView:[[[errorDict objectForKey:@"message"] allValues] firstObject] delegateViewController:viewController];

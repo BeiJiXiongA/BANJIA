@@ -17,4 +17,6 @@
     #import "Header.h"
     #import <ShareSDK/ShareSDK.h>
     #import "NSString+MD5.h"
+    #import "AFNetworking.h"
+    #import "DirectyTools.h"
 #endif
