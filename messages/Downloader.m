@@ -18,14 +18,17 @@ static Downloader *downloader = nil;
 
 +(Downloader *)defaultDownloader
 {
-    if(downloader == nil)
+    @synchronized (self)
     {
-        downloader = [[Downloader alloc] init];
+        if(downloader == nil)
+        {
+            downloader = [[Downloader alloc] init];
+        }
     }
     return downloader;
 }
 
-- (void)downloadWithUrl:(NSString *)fileUrl
+- (void)afDownloadWithUrl:(NSString *)fileUrl
 {
     NSURLSessionConfiguration *configration = [NSURLSessionConfiguration defaultSessionConfiguration];
     AFURLSessionManager *manager = [[AFURLSessionManager alloc]initWithSessionConfiguration:configration];
@@ -59,5 +62,35 @@ static Downloader *downloader = nil;
     
     
     [downloadTask resume];
+}
+
+-(void)adiDownloadWithUrl:(NSString *)fileUrl
+{
+    NSString *extention = [fileUrl pathExtension];
+    NSString *fileName = [[fileUrl lastPathComponent] substringToIndex:[[fileUrl lastPathComponent] rangeOfString:extention].location-1];
+    NSString *destinationPath = [NSString stringWithFormat:@"%@/%@.amr",[DirectyTools soundDir],fileName];
+    
+    NSURL *url = [NSURL URLWithString:fileUrl];
+    __weak ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
+    [request setDelegate:self];
+    [request setDownloadDestinationPath:destinationPath];
+    [request setCompletionBlock:^{
+        if ([[NSFileManager defaultManager] fileExistsAtPath:destinationPath])
+        {
+            NSString *fileSavePath = [NSString stringWithFormat:@"%@.wav",[destinationPath substringToIndex:[destinationPath rangeOfString:extention].location-1]];
+            if ([VoiceConverter amrToWav:destinationPath wavSavePath:fileSavePath])
+            {
+                if ([self.downloaderDel respondsToSelector:@selector(downloadDone:)])
+                {
+                    [self.downloaderDel downloadDone:fileSavePath];
+                }
+            }
+        }
+    }];
+    [request setFailedBlock:^{
+        NSError *error = [request error];
+        DDLOG(@"download error %@",error.description);
+    }];
+    [request startAsynchronous];
 }
 @end

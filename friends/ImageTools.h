@@ -19,4 +19,6 @@
 
 + (UIImage *)getQrImageWithString:(NSString *)qrString width:(CGFloat)width;
 
++ (void)convertViewToImage:(UIScrollView*)v inViewController:(XDContentViewController *)viewController;
+
 @end

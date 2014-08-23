@@ -94,7 +94,7 @@
     menuNamesArray = [NSArray arrayWithObjects:@"   首页",@"   我的班级",@"   我的好友",@"   聊天记录",@"   个人信息", nil];
     menuIconArray = [NSArray arrayWithObjects:@"icon_home",@"icon_class",@"icon_friends",@"icon_chat",@"icon_setup", nil];
     
-    buttonTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 166+YSTART, 180, [menuNamesArray count] * 40) style:UITableViewStylePlain];
+    buttonTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 183+YSTART, 180, [menuNamesArray count] * 40) style:UITableViewStylePlain];
     buttonTableView.delegate = self;
     buttonTableView.dataSource = self;
     buttonTableView.scrollEnabled = NO;
@@ -124,6 +124,9 @@
     }
     cell.headerImageView.frame = CGRectMake(10, 10, 20, 20);
     [cell.headerImageView setImage:[UIImage imageNamed:[menuIconArray objectAtIndex:indexPath.row]]];
+    cell.headerImageView.layer.contentsGravity = kCAGravityResizeAspect;
+    cell.headerImageView.clipsToBounds = YES;
+    
     cell.nameLabel.frame = CGRectMake(30, 5, 100, 30);
     cell.nameLabel.textColor = [UIColor whiteColor];
     cell.nameLabel.text = [menuNamesArray objectAtIndex:indexPath.row];
@@ -143,7 +146,7 @@
     cell.contentLable.layer.cornerRadius = 10;
     cell.contentLable.clipsToBounds = YES;
     cell.contentLable.layer.borderColor = [UIColor whiteColor].CGColor;
-    cell.contentLable.layer.borderWidth = 1;
+    cell.contentLable.layer.borderWidth = 0;
     cell.contentLable.textAlignment = NSTextAlignmentCenter;
     cell.contentLable.textColor = [UIColor whiteColor];
     cell.contentLable.hidden = YES;
@@ -255,12 +258,29 @@
 -(NSInteger)haveNewMsg
 {
     NSMutableArray *array = [db findSetWithDictionary:@{@"readed":@"0",@"userid":[Tools user_id]} andTableName:CHATTABLE];
-    return [array count];
+    if ([array count] > 0)
+    {
+        return [array count];
+    }
+    else if([[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue]>0)
+    {
+        return [[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue];
+    }
+    return 0;
 }
 -(NSInteger)haveNewNotice
 {
     NSMutableArray *array = [db findSetWithDictionary:@{@"readed":@"0",@"uid":[Tools user_id]} andTableName:NOTICETABLE];
-    return [array count];
+    
+    if ([array count] > 0)
+    {
+        return [array count];
+    }
+//    else if( [[[NSUserDefaults standardUserDefaults] objectForKey:NewClassNum] integerValue]>0)
+//    {
+//        return  [[[NSUserDefaults standardUserDefaults] objectForKey:NewClassNum] integerValue];
+//    }
+    return 0;
 }
 -(BOOL)haveNewFriendApply
 {

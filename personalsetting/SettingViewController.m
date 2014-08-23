@@ -170,10 +170,8 @@ MFMailComposeViewControllerDelegate>
         }
     }
     CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
-    UIImageView *lineImageView = [[UIImageView alloc] init];
-    lineImageView.frame = CGRectMake(0, cellHeight-0.3, cell.frame.size.width, 0.3);
-    lineImageView.image = [UIImage imageNamed:@"sepretorline"];
-    [cell.contentView addSubview:lineImageView];
+    cell.lineImageView.frame = CGRectMake(0, cellHeight-0.3, cell.frame.size.width, 0.3);
+    cell.lineImageView.image = [UIImage imageNamed:@"sepretorline"];
     
     cell.mySwitch.hidden = YES;
     cell.mySwitch.frame = CGRectMake( SCREEN_WIDTH-65, 7, 50, 30);
@@ -187,6 +185,7 @@ MFMailComposeViewControllerDelegate>
     cell.markLabel.frame = CGRectMake(SCREEN_WIDTH - 150, 6.5, 120, 30);
     if (indexPath.section == 0)
     {
+        cell.arrowImageView.hidden = YES;
         cell.contentLabel.text = [setArray1 objectAtIndex:indexPath.row];
         cell.mySwitch.hidden = NO;
         NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
@@ -306,7 +305,7 @@ MFMailComposeViewControllerDelegate>
         cell.mySwitch.hidden = YES;
         if (indexPath.row == [setArray3 count]-1)
         {
-            
+            cell.arrowImageView.hidden = YES;
             UIButton *loginOutButton = [UIButton buttonWithType:UIButtonTypeCustom];
             loginOutButton.frame = CGRectMake(38.5, 16.5, SCREEN_WIDTH-77, 40);
             [loginOutButton setBackgroundImage:[UIImage imageNamed:@"logout"] forState:UIControlStateNormal];
@@ -316,12 +315,13 @@ MFMailComposeViewControllerDelegate>
             cell.backgroundColor = self.bgView.backgroundColor;
             cell.contentView.backgroundColor = self.bgView.backgroundColor;
             cell.backgroundView = nil;
-            lineImageView.hidden = YES;
+            cell.lineImageView.hidden = YES;
         }
         else
         {
+            cell.arrowImageView.hidden = NO;
             cell.arrowImageView.frame = CGRectMake(SCREEN_WIDTH-25, 14, 10, 15);
-            [cell.arrowImageView setImage:[UIImage imageNamed:@"discovery_arrow"]];
+            [cell.arrowImageView setImage:[UIImage imageNamed:@"menu_arrow_right"]];
             cell.arrowImageView.backgroundColor = [UIColor whiteColor];
         }
     }

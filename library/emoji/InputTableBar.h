@@ -79,4 +79,7 @@
 @optional
 -(void)selectPic:(int)selectPicTag;
 -(void)recordFinished:(NSString *)filePath andFileName:(NSString *)fileName voiceLength:(int)length;
+
+-(void)showTips:(NSString *)tipString;
+
 @end

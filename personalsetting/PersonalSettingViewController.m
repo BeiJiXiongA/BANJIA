@@ -289,7 +289,7 @@ UIActionSheetDelegate>
             cell.nameLabel.font = [UIFont systemFontOfSize:18];
             cell.nameLabel.textColor = TITLE_COLOR;
             
-            cell.objectsLabel.frame = CGRectMake(95, 45, 100, 20);
+            cell.objectsLabel.frame = CGRectMake(90, 45, 100, 20);
             cell.objectsLabel.textColor = TITLE_COLOR;
             cell.objectsLabel.text = [NSString stringWithFormat:@"积分:%d",gf];
         
@@ -310,7 +310,7 @@ UIActionSheetDelegate>
             
             cell.arrowImageView.hidden = NO;
             [cell.arrowImageView setFrame:CGRectMake(SCREEN_WIDTH-20, 37.5, 10, 15)];
-            [cell.arrowImageView setImage:[UIImage imageNamed:@"discovery_arrow"]];
+            [cell.arrowImageView setImage:[UIImage imageNamed:@"menu_arrow_right"]];
             cell.selectionStyle = UITableViewCellSelectionStyleGray;
             cell.backgroundColor = [UIColor whiteColor];
             cell.contentView.backgroundColor = [UIColor whiteColor];
@@ -361,7 +361,7 @@ UIActionSheetDelegate>
             
             cell.arrowImageView.hidden = NO;
             [cell.arrowImageView setFrame:CGRectMake(SCREEN_WIDTH-20, 22.5, 10, 15)];
-            [cell.arrowImageView setImage:[UIImage imageNamed:@"discovery_arrow"]];
+            [cell.arrowImageView setImage:[UIImage imageNamed:@"menu_arrow_right"]];
             cell.selectionStyle = UITableViewCellSelectionStyleGray;
             cell.backgroundColor = [UIColor whiteColor];
             cell.contentView.backgroundColor = [UIColor whiteColor];

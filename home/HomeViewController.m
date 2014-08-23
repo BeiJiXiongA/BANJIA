@@ -57,9 +57,12 @@ NameButtonDel,
 ChatDelegate,
 MsgDelegate,
 DongTaiDetailAddCommentDelegate,
-ZBarReaderViewDelegate>
+ZBarReaderDelegate>
 {
     NSString *page;
+    
+    
+    UIButton *moreButton;
     
     CGFloat commentHeight;
     
@@ -105,7 +108,21 @@ ZBarReaderViewDelegate>
     UIButton *createClassButton;
     UILabel *tipLabel;
     
-    UIView *line;
+    UIImageView *line;
+    
+    UIImageView *tipImageView;
+    UIImageView *subImageView;
+    UIButton *tipJoinClassButton;
+    UIButton *tipCreateClassButton;
+    UIImageView *tapLabel;
+    UIView *buttonView;
+    
+    int num;
+    BOOL upOrdown;
+    NSTimer * timer;
+    ZBarReaderViewController * reader;
+    
+    BOOL haveClass;
 }
 @end
 
@@ -151,6 +168,8 @@ ZBarReaderViewDelegate>
     
     waitDiaryID = @"";
     
+    haveClass = NO;
+    
     self.backButton.hidden = YES;
     self.returnImageView.hidden = YES;
     self.titleLabel.text = @"首页";
@@ -177,7 +196,7 @@ ZBarReaderViewDelegate>
     [navButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [self.navigationBarView addSubview:navButton];
     
-    UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
     moreButton.frame = CGRectMake(5, self.backButton.frame.origin.y, 42, NAV_RIGHT_BUTTON_HEIGHT);
     [moreButton setImage:[UIImage imageNamed:@"icon_list"] forState:UIControlStateNormal];
     [moreButton addTarget:self action:@selector(moreOpen) forControlEvents:UIControlEventTouchUpInside];
@@ -212,7 +231,6 @@ ZBarReaderViewDelegate>
 //    addView.point = CGPointMake(90, 0);
 //    addView.wid = 2;
     addView.backgroundColor = [UIColor clearColor];
-    [self.bgView addSubview:addView];
     
     DDLOG(@"ShareContent  %@",[[NSUserDefaults standardUserDefaults] objectForKey:ShareContentKey]);
     
@@ -252,7 +270,7 @@ ZBarReaderViewDelegate>
     [qrCodeButton setBackgroundImage:[UIImage imageNamed:@"qr"] forState:UIControlStateNormal];
     [qrCodeButton setBackgroundImage:[UIImage imageNamed:@"qr_on"] forState:UIControlStateHighlighted];
     [addView addSubview:qrCodeButton];
-    [qrCodeButton addTarget:self action:@selector(toqrview) forControlEvents:UIControlEventTouchUpInside];
+    [qrCodeButton addTarget:self action:@selector(scanBtnAction) forControlEvents:UIControlEventTouchUpInside];
     
     
     addView.alpha = 0;
@@ -278,69 +296,188 @@ ZBarReaderViewDelegate>
     [inputTabBar setLayout];
     
     
-    tipView = [[UIView alloc] initWithFrame:CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT+90, SCREEN_WIDTH-20, 300)];
+    tipView = [[UIView alloc] initWithFrame:CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT+57, SCREEN_WIDTH-20, 300)];
     tipView.backgroundColor = self.bgView.backgroundColor;
     [self.bgView addSubview:tipView];
     
-    tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 0, SCREEN_WIDTH-40, 70)];
+    tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(21, 0, SCREEN_WIDTH-62, 70)];
     tipLabel.backgroundColor = self.bgView.backgroundColor;
     tipLabel.lineBreakMode = NSLineBreakByWordWrapping;
     tipLabel.numberOfLines = 3;
     tipLabel.textColor = CONTENTCOLOR;
     tipLabel.textAlignment = NSTextAlignmentCenter;
-    tipLabel.text = @"您还没有加入任何一个班级，快来加入一个班级或创建一个自己的班级吧！";
+    tipLabel.text = @"你可以在这里创建班级，也可以通过班号或二维码加入班级";
     [tipView addSubview:tipLabel];
     
     joinClassButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    joinClassButton.frame = CGRectMake(80, 80, 140, 40);
+    joinClassButton.frame = CGRectMake(22, 80, SCREEN_WIDTH-64, 36);
     [joinClassButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
     [joinClassButton addTarget:self action:@selector(joinClass) forControlEvents:UIControlEventTouchUpInside];
     [joinClassButton setTitle:@"加入班级" forState:UIControlStateNormal];
     [tipView addSubview:joinClassButton];
     
     createClassButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    createClassButton.frame = CGRectMake(80, 130, 140, 40);
+    createClassButton.frame = CGRectMake(22, 130, SCREEN_WIDTH-64, 35.5);
     [createClassButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
     [createClassButton addTarget:self action:@selector(createClass) forControlEvents:UIControlEventTouchUpInside];
     [createClassButton setTitle:@"创建班级" forState:UIControlStateNormal];
     [tipView addSubview:createClassButton];
     
-    tipView.hidden = YES;
+    [self.bgView addSubview:addView];
+    
+    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+    if (ShowTips == 1)
+    {
+        [ud removeObjectForKey:@"hometip1"];
+        [ud removeObjectForKey:@"hometip2"];
+        [ud synchronize];
+    }
+    
+    if (![ud objectForKey:@"hometip1"])
+    {
+        self.unReadLabel.hidden = YES;
+        
+        createClassButton.hidden = YES;
+        joinClassButton.hidden = YES;
+        tipImageView = [[UIImageView alloc] init];
+        tipImageView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 568);
+        if (SYSVERSION >= 7)
+        {
+            [tipImageView setImage:[UIImage imageNamed:@"hometip1"]];
+        }
+        else
+        {
+            [tipImageView setImage:[UIImage imageNamed:@"hometip16"]];
+        }
+        
+        tipImageView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0];
+        tipImageView.hidden = YES;
+        [self.bgView addSubview:tipImageView];
+        
+        buttonView = [[UIView alloc] init];
+        buttonView.backgroundColor = [UIColor whiteColor];
+        buttonView.layer.cornerRadius = 5;
+        buttonView.clipsToBounds = YES;
+        [tipImageView addSubview:buttonView];
+        
+        tipJoinClassButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        tipJoinClassButton.frame = CGRectMake(5, 5, SCREEN_WIDTH-72, 37);
+        [tipJoinClassButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+        [tipJoinClassButton setTitle:@"加入班级" forState:UIControlStateNormal];
+        [buttonView addSubview:tipJoinClassButton];
+        
+        tipCreateClassButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        tipCreateClassButton.frame = CGRectMake(5, 47, SCREEN_WIDTH-72, 37);
+        [tipCreateClassButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+        [tipCreateClassButton setTitle:@"创建班级" forState:UIControlStateNormal];
+        [buttonView addSubview:tipCreateClassButton];
+        
+        buttonView.frame = CGRectMake(31, 187.5, SCREEN_WIDTH-62, 89);
+        
+        subImageView = [[UIImageView alloc] init];
+        subImageView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
+        subImageView.frame = CGRectMake(0, tipImageView.frame.size.height+tipImageView.frame.origin.y, SCREEN_WIDTH, 200);
+        subImageView.hidden = YES;
+        [self.bgView addSubview:subImageView];
+        
+        UITapGestureRecognizer *outTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(outTap)];
+        tipImageView.userInteractionEnabled = YES;
+        [tipImageView addGestureRecognizer:outTap];
+        
+        tapLabel = [[UIImageView alloc] init];
+        tapLabel.frame = CGRectMake(30, 320, 260, 45);
+        tapLabel.backgroundColor = [UIColor clearColor];
+        [self.bgView addSubview:tapLabel];
+        
+        UITapGestureRecognizer *tipTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(checkTip)];
+        tapLabel.userInteractionEnabled = YES;
+        [tapLabel addGestureRecognizer:tipTap];
+    }
+}
 
+-(void)outTap
+{
+    
+}
+
+-(void)checkTip
+{
+    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+    if (![ud objectForKey:@"hometip1"])
+    {
+        if (SYSVERSION >= 7)
+        {
+            [tipImageView setImage:[UIImage imageNamed:@"hometip2"]];
+        }
+        else
+        {
+            [tipImageView setImage:[UIImage imageNamed:@"hometip26"]];
+        }
+        tapLabel.frame = CGRectMake(18, 100, 260, 45);
+        tipJoinClassButton.hidden = YES;
+        tipCreateClassButton.hidden = YES;
+        moreButton.hidden = YES;
+        createClassButton.hidden = NO;
+        joinClassButton.hidden = NO;
+        [buttonView removeFromSuperview];
+        UIButton *tipmoreButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        tipmoreButton.frame = CGRectMake(0, self.backButton.frame.origin.y+2, 42, NAV_RIGHT_BUTTON_HEIGHT);
+        [tipmoreButton setImage:[UIImage imageNamed:@"icon_list"] forState:UIControlStateNormal];
+        [tipImageView addSubview:tipmoreButton];
+        
+        tipView.hidden = NO;
+        
+        [[NSUserDefaults standardUserDefaults] setObject:@"1" forKey:@"hometip1"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+    }
+    else if((![ud objectForKey:@"hometip2"]))
+    {
+        [tapLabel removeFromSuperview];
+        [tipImageView removeFromSuperview];
+        tipView.hidden = NO;
+        moreButton.hidden = NO;
+        self.unReadLabel.hidden = NO;
+    }
 }
 
 #pragma mark - 扫一扫
 
--(void)toqrview
+-(void)scanBtnAction
 {
-    //扫一扫
-    ZBarReaderViewController *reader = [ZBarReaderViewController new];
+    num = 0;
+    upOrdown = NO;
+
+    [self closeAdd];
+    
+    reader = [ZBarReaderViewController new];
     reader.readerDelegate = self;
+    reader.readerView.torchMode = 0;
+    reader.readerView.frame = CGRectMake( 0, YSTART == 0?20:0, SCREEN_WIDTH, SCREEN_HEIGHT);
     reader.supportedOrientationsMask = ZBarOrientationMaskAll;
     reader.showsZBarControls = NO;
-    reader.readerView.torchMode = 0;
-    [self setOverlayPickerView:reader];
-    
-    ZBarImageScanner *scanner = reader.scanner;
-    [scanner setSymbology: ZBAR_I25
-                   config: ZBAR_CFG_ENABLE
-                       to: 0];
-    [self.navigationController presentViewController:reader animated:YES completion:nil];
-    if (addOpen)
-    {
-        addOpen = NO;
-        [self closeAdd];
-    }
+    [self setOverlayPickerView];
+    reader.scanCrop = CGRectMake(0.1, 0.2, 0.8, 0.8);//扫描的感应框
+    ZBarImageScanner * scanner = reader.scanner;
+    [scanner setSymbology:ZBAR_I25
+                   config:ZBAR_CFG_ENABLE
+                       to:0];
+    [self.navigationController pushViewController:reader animated:YES];
+//    [self presentViewController:reader animated:YES completion:^{
+//    
+//    }];
 }
 
-- (void)setOverlayPickerView:(ZBarReaderViewController *)reader
-
+- (void)setOverlayPickerView
 {
     
     //清除原有控件
     
     for (UIView *temp in [reader.view subviews])
     {
+        if (temp.frame.size.height == 54)
+        {
+            [temp removeFromSuperview];
+        }
         for (UIButton *button in [temp subviews])
         {
             if ([button isKindOfClass:[UIButton class]])
@@ -348,9 +485,10 @@ ZBarReaderViewDelegate>
                 [button removeFromSuperview];
             }
         }
-        
+
         for (UIToolbar *toolbar in [temp subviews])
         {
+            
             if ([toolbar isKindOfClass:[UIToolbar class]])
             {
                 [toolbar setHidden:YES];
@@ -360,126 +498,203 @@ ZBarReaderViewDelegate>
         }
     }
     
-    //    CGFloat width = 280.0f;
+    CGFloat height = SCREEN_WIDTH-100;
     
-    //画中间的基准线
-    
-    line = [[UIView alloc] init];
-    line.frame = CGRectMake(40, (SCREEN_HEIGHT+20)/2, 240, 1);
-    line.backgroundColor = [UIColor greenColor];
-    //    [reader.view addSubview:line];
-    
-    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
-    animation.fromValue = [NSValue valueWithCGPoint:CGPointMake(20, 80)];
-    animation.toValue = [NSValue valueWithCGPoint:CGPointMake(20, 220)];
-    animation.duration = 0.5;
-    animation.autoreverses = YES;
-    animation.repeatCount = INFINITY;
-    [line.layer addAnimation:animation forKey:@"123"];
+    UIColor *viewColor = [UIColor blackColor];
     
     //最上部view
     
-    UIView* upView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, (SCREEN_HEIGHT-240)/2)];
+    UIView* upView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, (SCREEN_HEIGHT-height)/2-40)];
     
     upView.alpha = 0.3;
     
-    upView.backgroundColor = [UIColor blackColor];
+    upView.backgroundColor = viewColor;
     
     [reader.view addSubview:upView];
     
-    //用于说明的label
+    //left,up
+    UIImageView *upLeftCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_1"]];
+    upLeftCorner.frame = CGRectMake(50, (SCREEN_HEIGHT-height)/2-40, 25, 25);
+    [reader.view addSubview:upLeftCorner];
     
-    UILabel * labIntroudction= [[UILabel alloc] init];
-    
-    labIntroudction.backgroundColor = [UIColor clearColor];
-    
-    labIntroudction.frame=CGRectMake(15, 20, 290, 50);
-    
-    labIntroudction.numberOfLines=2;
-    
-    labIntroudction.textColor=[UIColor whiteColor];
-    
-    labIntroudction.text=@"";
-    
-    [upView addSubview:labIntroudction];
+    //right,up
+    UIImageView *upRightCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_2"]];
+    upRightCorner.frame = CGRectMake(SCREEN_WIDTH-50-25, (SCREEN_HEIGHT-height)/2-40, 25, 25);
+    [reader.view addSubview:upRightCorner];
     
     
     //左侧的view
     
-    UIView *leftView = [[UIView alloc] initWithFrame:CGRectMake(0, (SCREEN_HEIGHT-240)/2, 20, 280)];
+    UIView *leftView = [[UIView alloc] initWithFrame:CGRectMake(0, (SCREEN_HEIGHT-height)/2-40, 50, height)];
     
     leftView.alpha = 0.3;
     
-    leftView.backgroundColor = [UIColor blackColor];
+    leftView.backgroundColor = viewColor;
     
     [reader.view addSubview:leftView];
     
     
     //右侧的view
     
-    UIView *rightView = [[UIView alloc] initWithFrame:CGRectMake(300, (SCREEN_HEIGHT-240)/2, 20, 280)];
+    UIView *rightView = [[UIView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH-50, (SCREEN_HEIGHT-height)/2-40, 50, height)];
     
     rightView.alpha = 0.3;
     
-    rightView.backgroundColor = [UIColor blackColor];
+    rightView.backgroundColor = viewColor;
     
     [reader.view addSubview:rightView];
+    
+    //left,down
+    UIImageView *downLeftCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_4"]];
+    downLeftCorner.frame = CGRectMake(50, (SCREEN_HEIGHT-height)/2+height-25-40, 25, 25);
+    [reader.view addSubview:downLeftCorner];
+    
+    //right,down
+    UIImageView *downRightCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_3"]];
+    downRightCorner.frame = CGRectMake(SCREEN_WIDTH-50-25, (SCREEN_HEIGHT-height)/2+height-25-40, 25, 25);
+    [reader.view addSubview:downRightCorner];
     
     
     //底部view
     
-    UIView * downView = [[UIView alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT-(SCREEN_HEIGHT-240)/2+40, 320, (SCREEN_HEIGHT-240)/2+20)];
+    UIView * downView = [[UIView alloc] initWithFrame:CGRectMake(0, height+(SCREEN_HEIGHT-height)/2-40, SCREEN_WIDTH, (SCREEN_HEIGHT-height)/2+80)];
     
     downView.alpha = 0.3;
     
-    downView.backgroundColor = [UIColor blackColor];
+    downView.backgroundColor = viewColor;
     
     [reader.view addSubview:downView];
     
-    UIImageView *upLeftCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_1"]];
-    upLeftCorner.frame = CGRectMake(20, (SCREEN_HEIGHT-240)/2, 30, 30);
-    [reader.view addSubview:upLeftCorner];
     
-    UIImageView *upRightCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_2"]];
-    upRightCorner.frame = CGRectMake(20+280-30, (SCREEN_HEIGHT-240)/2, 30, 30);
-    [reader.view addSubview:upRightCorner];
+    UILabel * label = [[UILabel alloc] initWithFrame:CGRectMake(70, (SCREEN_HEIGHT-height)/2+height+15-40, SCREEN_WIDTH-140, 50)];
+    label.text = @"请将班级二维码或群聊二维码置于方框内";
+    label.numberOfLines = 2;
+    label.lineBreakMode = NSLineBreakByCharWrapping;
+    label.textColor = [UIColor whiteColor];
+    label.textAlignment = 1;
+    label.backgroundColor = [UIColor clearColor];
+    [reader.view addSubview:label];
     
-    UIImageView *downLeftCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_4"]];
-    downLeftCorner.frame = CGRectMake(20, (SCREEN_HEIGHT+YSTART-240)/2+240, 30, 30);
-    [reader.view addSubview:downLeftCorner];
+    UIImageView * image = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@""]];
+    image.frame = CGRectMake(20, (SCREEN_HEIGHT-height)/2-40, height, height);
+    [reader.view addSubview:image];
     
-    UIImageView *downRightCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_3"]];
-    downRightCorner.frame = CGRectMake(300-30, (SCREEN_HEIGHT+YSTART-240)/2+240, 30, 30);
-    [reader.view addSubview:downRightCorner];
     
+    line = [[UIImageView alloc] initWithFrame:CGRectMake(30, 10, 220, 2)];
+    line.image = [UIImage imageNamed:@"qrline"];
+    [image addSubview:line];
+    //定时器，设定时间过1.5秒，
+    timer = [NSTimer scheduledTimerWithTimeInterval:.03 target:self selector:@selector(animation1) userInfo:nil repeats:YES];
+    
+    UIView *_navigationBarView = [[UIView alloc] initWithFrame:CGRectMake(0, 0,
+                                                                          UI_SCREEN_WIDTH,
+                                                                          UI_NAVIGATION_BAR_HEIGHT)];
+    _navigationBarView.backgroundColor = [UIColor yellowColor];
+    [reader.view addSubview:_navigationBarView];
+    
+    UIImageView * _navigationBarBg = [[UIImageView alloc] init];
+    _navigationBarBg.backgroundColor = UIColorFromRGB(0xffffff);
+    _navigationBarBg.frame = CGRectMake(0, 0, UI_SCREEN_WIDTH, UI_NAVIGATION_BAR_HEIGHT);
+    _navigationBarBg.image = [UIImage imageNamed:@"nav_bar_bg"];
+    [_navigationBarView addSubview:_navigationBarBg];
+    
+    UILabel * _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(self.view.frame.size.width/2-90, YSTART + 6, 180, 36)];
+    _titleLabel.font = [UIFont fontWithName:@"Courier" size:19];
+    _titleLabel.text = @"扫一扫";
+    _titleLabel.backgroundColor = [UIColor clearColor];
+    _titleLabel.textColor = UIColorFromRGB(0x666464);
+    _titleLabel.textAlignment = NSTextAlignmentCenter;
+    [_navigationBarView addSubview:_titleLabel];
+    
+    
+    UIImageView *returnImageView = [[UIImageView alloc] initWithFrame:CGRectMake(11, YSTART +13, 11, 18)];
+    [returnImageView setImage:[UIImage imageNamed:@"icon_return"]];
+    [_navigationBarView addSubview:returnImageView];
+    
+    UIButton *_backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, YSTART +2, 58 , NAV_RIGHT_BUTTON_HEIGHT)];
+    [_backButton setTitle:@"返回" forState:UIControlStateNormal];
+    [_backButton setBackgroundColor:[UIColor clearColor]];
+    [_backButton setTitleColor:UIColorFromRGB(0x727171) forState:UIControlStateNormal];
+    [_backButton addTarget:self action:@selector(unShowSelfViewController) forControlEvents:UIControlEventTouchUpInside];
+    _backButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentRight;
+    _backButton.titleLabel.font = [UIFont systemFontOfSize:16.5];
+    [_navigationBarView addSubview:_backButton];
     
     //用于取消操作的button
     
-    UIButton *cancelButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-    
+    UIButton *cancelButton = [UIButton buttonWithType:UIButtonTypeCustom];
     cancelButton.alpha = 0.4;
-    
-    [cancelButton setFrame:CGRectMake(20, SCREEN_HEIGHT-40, 40, 40)];
-    
-    [cancelButton setTitle:@"取消" forState:UIControlStateNormal];
-    
-    //    [cancelButton setImage:[UIImage imageNamed:@"outer_nav_backbtn_s"] forState:UIControlStateNormal];
-    
-    [cancelButton.titleLabel setFont:[UIFont boldSystemFontOfSize:20]];
-    
-    [cancelButton addTarget:self action:@selector(dismissOverlayView:)forControlEvents:UIControlEventTouchUpInside];
-    
+    cancelButton.backgroundColor = [UIColor blackColor];
+    [cancelButton setFrame:CGRectMake((SCREEN_WIDTH-100)/2, label.frame.size.height+label.frame.origin.y+20, 100, 40)];
+    cancelButton.layer.cornerRadius = 15;
+    cancelButton.layer.borderColor = [UIColor whiteColor].CGColor;
+    cancelButton.layer.borderWidth = 0.3;
+    cancelButton.clipsToBounds = YES;
+    [cancelButton setImage:[UIImage imageNamed:@"flash"] forState:UIControlStateNormal];
+//    [cancelButton setTitle:@"开灯" forState:UIControlStateNormal];
+    [cancelButton.titleLabel setFont:[UIFont systemFontOfSize:18]];
+    [cancelButton addTarget:self action:@selector(light)forControlEvents:UIControlEventTouchUpInside];
     [reader.view addSubview:cancelButton];
     
+    //用于取消操作的button
+    
+    UIButton *albumButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    
+    albumButton.alpha = 0.7;
+    
+    albumButton.backgroundColor = [UIColor blackColor];
+    
+    [albumButton setFrame:CGRectMake(SCREEN_WIDTH/2, SCREEN_HEIGHT-40, SCREEN_WIDTH/2, 40)];
+    
+    [albumButton setTitle:@"相册" forState:UIControlStateNormal];
+    
+    [albumButton.titleLabel setFont:[UIFont boldSystemFontOfSize:20]];
+    
+    //    [cancelButton addTarget:self action:@selector(dismissOverlayView:)forControlEvents:UIControlEventTouchUpInside];
+    
+//    [reader.view addSubview:albumButton];
 }
 
-//取消button方法
-
-- (void)dismissOverlayView:(id)sender
+-(void)unShowSelfViewController
 {
-    [self dismissViewControllerAnimated:YES completion:nil];
     [self.navigationController popViewControllerAnimated:YES];
 }
+
+-(void)light
+{
+    if (reader.readerView.torchMode == 0)
+    {
+        reader.readerView.torchMode = 1;
+    }
+    else
+    {
+        reader.readerView.torchMode = 0;
+    }
+}
+
+
+-(void)animation1
+{
+    if (upOrdown == NO) {
+        num ++;
+        line.frame = CGRectMake(30, 10+2*num, 220, 2);
+        if (2*num == SCREEN_WIDTH-120) {
+            upOrdown = YES;
+        }
+    }
+    else {
+        num --;
+        line.frame = CGRectMake(30, 10+2*num, 220, 2);
+        if (num == 0) {
+            upOrdown = NO;
+        }
+    }
+    
+    
+}
+
+
+//取消button方法
 
 - (void) imagePickerController: (UIImagePickerController*) picker
  didFinishPickingMediaWithInfo: (NSDictionary*) info
@@ -489,35 +704,33 @@ ZBarReaderViewDelegate>
     ZBarSymbol *symbol = nil;
     for(symbol in results)
         break;
-    [picker dismissViewControllerAnimated:YES completion:^{
-        //        [self.navigationController popViewControllerAnimated:YES];
-        DDLOG(@"%@",symbol.data);
-        NSString *resultStr = symbol.data;
-        if ([resultStr rangeOfString:@";"].length > 0)
+    
+    DDLOG(@"%@",symbol.data);
+    NSString *resultStr = symbol.data;
+    if ([resultStr rangeOfString:@";"].length > 0)
+    {
+        [self searchClass:[resultStr substringFromIndex:[resultStr rangeOfString:@";"].location+1]];
+    }
+    else
+    {
+        NSRange range1 = [resultStr rangeOfString:@"?"];
+        NSRange range2 = [resultStr rangeOfString:@"="];
+        if (range1.length > 0 && range2.length > 0)
         {
-            [self searchClass:[resultStr substringFromIndex:[resultStr rangeOfString:@";"].location+1]];
-        }
-        else
-        {
-            NSRange range1 = [resultStr rangeOfString:@"?"];
-            NSRange range2 = [resultStr rangeOfString:@"="];
-            if (range1.length > 0 && range2.length > 0)
+            NSString *key = [resultStr substringWithRange:NSMakeRange(range1.location+1, range2.location-range1.location-1)];
+            NSString *value = [resultStr substringWithRange:NSMakeRange(range2.location+1, [resultStr length]-range2.location-1)];
+            DDLOG(@"key = %@  value = %@",key,value);
+            if([key isEqualToString:@"groupid"])
             {
-                NSString *key = [resultStr substringWithRange:NSMakeRange(range1.location+1, range2.location-range1.location-1)];
-                NSString *value = [resultStr substringWithRange:NSMakeRange(range2.location+1, [resultStr length]-range2.location-1)];
-                DDLOG(@"key = %@  value = %@",key,value);
-                if([key isEqualToString:@"groupid"])
-                {
-                    [self joinGroupChat:value];
-                }
-                else if([key isEqualToString:@"classid"])
-                {
-                    [self searchClass:value];
-                }
+                [self joinGroupChat:value];
+            }
+            else if([key isEqualToString:@"classid"])
+            {
+                [self searchClass:value];
             }
         }
-    }];
-    
+    }
+    [self.navigationController popViewControllerAnimated:NO];
 }
 
 
@@ -663,7 +876,9 @@ ZBarReaderViewDelegate>
 {
     db = [[OperatDB alloc] init];
     NSMutableArray *array = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"readed":@"0"} andTableName:CHATTABLE];
-    if ([array count] > 0 || [[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue]>0)
+    if ([array count] > 0 ||
+        [[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue]>0 ||
+        [[[NSUserDefaults standardUserDefaults] objectForKey:NewClassNum] integerValue]>0)
     {
         self.unReadLabel.hidden = NO;
     }
@@ -671,7 +886,11 @@ ZBarReaderViewDelegate>
     {
         self.unReadLabel.hidden = YES;
     }
-    DDLOG(@"new chatmsg array=%d",[array count]);
+    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+    if (![ud objectForKey:@"hometip1"])
+    {
+        self.unReadLabel.hidden = YES;
+    }
 }
 
 -(void)dealNewMsg:(NSDictionary *)dict
@@ -683,6 +902,11 @@ ZBarReaderViewDelegate>
             self.unReadLabel.hidden = NO;
         }
     }
+    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+    if (![ud objectForKey:@"hometip1"])
+    {
+        self.unReadLabel.hidden = YES;
+    }
 }
 
 -(void)viewWillDisappear:(BOOL)animated
@@ -693,6 +917,8 @@ ZBarReaderViewDelegate>
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = self;
     [self backInput];
     [self dealNewChatMsg:nil];
     [self dealNewMsg:nil];
@@ -723,6 +949,7 @@ ZBarReaderViewDelegate>
             DDLOG(@"home responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
+                haveClass = YES;
                 if ([page integerValue] == 0)
                 {
                     NSString *requestUrlStr = [NSString stringWithFormat:@"%@=%@",HOMEDATA,[Tools user_id]];
@@ -757,10 +984,17 @@ ZBarReaderViewDelegate>
             }
             else
             {
+                [noticeArray removeAllObjects];
+                [diariesArray removeAllObjects];
+                [groupDiaries removeAllObjects];
+                [classTableView reloadData];
                 if ([[[[responseDict objectForKey:@"message"] allKeys] firstObject] isEqualToString:@"NO_CLASS"])
                 {
-                    tipView.hidden = NO;
                     addButton.hidden = YES;
+                    tipImageView.hidden = NO;
+                    subImageView.hidden = NO;
+                    tipView.hidden = NO;
+                    haveClass = NO;
                     return ;
                 }
                 [Tools dealRequestError:responseDict fromViewController:nil];
@@ -972,6 +1206,29 @@ ZBarReaderViewDelegate>
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
+    if ([noticeArray count] > 0 || [groupDiaries count] > 0)
+    {
+        joinClassButton.hidden = YES;
+        createClassButton.hidden = YES;
+        tipView.hidden = YES;
+    }
+    else
+    {
+        joinClassButton.hidden = NO;
+        createClassButton.hidden = NO;
+        tipView.hidden = NO;
+    }
+    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+    if (![ud objectForKey:@"hometip1"] && !haveClass)
+    {
+        joinClassButton.hidden = YES;
+        createClassButton.hidden = YES;
+    }
+    else if(!haveClass)
+    {
+        joinClassButton.hidden = NO;
+        createClassButton.hidden = NO;
+    }
     return [noticeArray count] + ([groupDiaries count]>0?([groupDiaries count]+1):0);
 }
 
@@ -981,18 +1238,18 @@ ZBarReaderViewDelegate>
     {
         if (section == [noticeArray count])
         {
-            return 40;
+            return 30;
         }
-        return 40;
+        return 30;
     }
     else
     {
         if (section == 0)
         {
-            return 40;
+            return 30;
         }
         else
-            return 40;
+            return 30;
     }
     return 0;
 }
@@ -1003,14 +1260,15 @@ ZBarReaderViewDelegate>
     headerView.backgroundColor = UIColorFromRGB(0xf1f0ec);
     
     UILabel *headerLabel = [[UILabel alloc] init];
-    headerLabel.font = [UIFont systemFontOfSize:16];
+    headerLabel.font = [UIFont systemFontOfSize:14];
     headerLabel.backgroundColor = UIColorFromRGB(0xf1f0ec);
-    headerLabel.textColor = TITLE_COLOR;
+    headerLabel.textColor = COMMENTCOLOR;
     if (section < [noticeArray count])
     {
         NSDictionary *noticeDict = [noticeArray objectAtIndex:section];
         headerLabel.text = [NSString stringWithFormat:@"    %@未读通知",[noticeDict objectForKey:@"name"]];
-        headerLabel.frame = CGRectMake(0, 5, SCREEN_WIDTH, 30);
+        headerLabel.frame = CGRectMake(0, 0, SCREEN_WIDTH, 30);
+        headerLabel.font = [UIFont systemFontOfSize:15.5];
     }
     else if (section == [noticeArray count])
     {
@@ -1022,16 +1280,16 @@ ZBarReaderViewDelegate>
         headerLabel.text = @"    班级空间";
         headerLabel.font = [UIFont boldSystemFontOfSize:15];
         headerLabel.textColor = [UIColor whiteColor];
-        headerLabel.frame = CGRectMake(0, 5, SCREEN_WIDTH, 30);
+        headerLabel.frame = CGRectMake(0, 0, SCREEN_WIDTH, 30);
     }
     else
     {
         
-        UIView *verticalLineView = [[UIView alloc] initWithFrame:CGRectMake(34.75, 0, 1.5, 40)];
+        UIView *verticalLineView = [[UIView alloc] initWithFrame:CGRectMake(34.75, 0, 1.5, 30)];
         verticalLineView.backgroundColor = UIColorFromRGB(0xe2e3e4);
         [headerView addSubview:verticalLineView];
         
-        UIView *dotView = [[UIView alloc] initWithFrame:CGRectMake(28, 12.5, 15, 15)];
+        UIView *dotView = [[UIView alloc] initWithFrame:CGRectMake(28, 7.5, 15, 15)];
         dotView.layer.cornerRadius = 7.5;
         dotView.clipsToBounds = YES;
         dotView.layer.borderColor = [UIColor whiteColor].CGColor;
@@ -1044,7 +1302,8 @@ ZBarReaderViewDelegate>
         headerLabel.text = [groupDict objectForKey:@"date"];
 //        headerLabel.font = [UIFont boldSystemFontOfSize:15];
 //        headerLabel.textColor = [UIColor whiteColor];
-        headerLabel.frame = CGRectMake(50, 5, SCREEN_WIDTH, 30);
+        headerLabel.font = [UIFont systemFontOfSize:15];
+        headerLabel.frame = CGRectMake(50, 0, SCREEN_WIDTH, 30);
         
     }
     [headerView addSubview:headerLabel];
@@ -1080,6 +1339,11 @@ ZBarReaderViewDelegate>
 {
     if (indexPath.section < [noticeArray count])
     {
+        NSArray *tmpArray = [[noticeArray objectAtIndex:indexPath.section] objectForKey:@"news"];
+        if (indexPath.row == [tmpArray count]-1)
+        {
+            return 88+4;
+        }
         return 88;
     }
     else if(indexPath.section > [noticeArray count])
@@ -1208,7 +1472,7 @@ ZBarReaderViewDelegate>
         
         cell.commentsTableView.frame = CGRectMake(0, 0, 0, 0);
         
-        cell.nameLabel.frame = CGRectMake(60, 5, [nameStr length]*18>170?170:([nameStr length]*18), 25);
+        cell.nameLabel.frame = CGRectMake(50, 8, [nameStr length]*18>170?170:([nameStr length]*18), 25);
         cell.nameLabel.text = nameStr;
         cell.nameLabel.font = NAMEFONT;
         cell.nameLabel.textColor = NAMECOLOR;
@@ -1225,7 +1489,7 @@ ZBarReaderViewDelegate>
         cell.headerImageView.backgroundColor = [UIColor clearColor];
         
         [Tools fillImageView:cell.headerImageView withImageFromURL:[[dict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERBG];
-        cell.locationLabel.frame = CGRectMake(60, cell.headerImageView.frame.origin.y+cell.headerImageView.frame.size.height-LOCATIONLABELHEI, SCREEN_WIDTH-90, LOCATIONLABELHEI);
+        cell.locationLabel.frame = CGRectMake(50, cell.headerImageView.frame.origin.y+cell.headerImageView.frame.size.height-LOCATIONLABELHEI+3, SCREEN_WIDTH-90, LOCATIONLABELHEI);
         cell.locationLabel.text = [NSString stringWithFormat:@"于%@在%@",timeStr,[[dict objectForKey:@"detail"] objectForKey:@"add"]];
         cell.locationLabel.numberOfLines = 1;
         cell.locationLabel.lineBreakMode = NSLineBreakByWordWrapping | NSLineBreakByTruncatingTail;
@@ -1242,7 +1506,7 @@ ZBarReaderViewDelegate>
                 [v removeFromSuperview];
             }
         }
-        if (![[[dict objectForKey:@"detail"] objectForKey:@"content"] length] <=0)
+        if ([[[dict objectForKey:@"detail"] objectForKey:@"content"] length] > 0)
         {
             CGFloat he = 0;
             if (SYSVERSION >= 7)
@@ -1312,7 +1576,7 @@ ZBarReaderViewDelegate>
                 }
                 cell.imagesView.frame = CGRectMake(12,
                                                    cell.contentLabel.frame.size.height +
-                                                   cell.contentLabel.frame.origin.y+7,
+                                                   cell.contentLabel.frame.origin.y,
                                                    SCREEN_WIDTH-44, (imageViewHeight+5) * row);
                 
                 for (int i=0; i<[imgsArray count]; ++i)
@@ -1449,7 +1713,8 @@ ZBarReaderViewDelegate>
         cell.bgView.clipsToBounds = YES;
         cell.bgView.backgroundColor = [UIColor whiteColor];
         
-        cell.verticalLineView.frame = CGRectMake(34.75, 0, 1.5, cell.bgView.frame.size.height+10);
+        CGRect cellFrame = [tableView rectForRowAtIndexPath:indexPath];
+        cell.verticalLineView.frame = CGRectMake(34.75, 0, 1.5, cellFrame.size.height);
         
         return cell;
     }
@@ -1584,7 +1849,7 @@ ZBarReaderViewDelegate>
             {
 //                NSMutableDictionary *newDict = [[NSMutableDictionary alloc] initWithDictionary:dict];
 //                DDLOG(@"newdict %@",newDict);
-                [Tools showTips:@"赞成功" toView:classTableView];
+//                [Tools showTips:@"赞成功" toView:classTableView];
                 [self getHomeData];
             }
             else
@@ -1704,15 +1969,11 @@ ZBarReaderViewDelegate>
             }
         }
     }
-//    if ([tmpArray count]>0)
-//    {
-//        noneDongTaiLabel.hidden = YES;
-//    }
-//    else
-//    {
-//        noneDongTaiLabel.hidden = NO;
-//    }
+
     [classTableView reloadData];
+    
+//    [ImageTools convertViewToImage:classTableView inViewController:self];
+    
     if (footerView)
     {
         [footerView removeFromSuperview];

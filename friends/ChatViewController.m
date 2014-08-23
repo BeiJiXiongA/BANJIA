@@ -19,6 +19,8 @@
 #import "GroupInfoViewController.h"
 #import "ScoreDetailViewController.h"
 #import "ScoreMemListViewController.h"
+#import "EGORefreshTableHeaderView.h"
+#import "Downloader.h"
 
 
 #define DIRECT  @"direct"
@@ -37,10 +39,13 @@ UITableViewDelegate,
 UITextFieldDelegate,
 UIActionSheetDelegate,
 UIAlertViewDelegate,
+AVAudioPlayerDelegate,
 ChatDelegate,
 ReturnFunctionDelegate,
 MessageDelegate,
-updateGroupInfoDelegate>
+DownloaderDelegate,
+updateGroupInfoDelegate,
+EGORefreshTableHeaderDelegate>
 {
     NSMutableArray *messageArray;
     UITableView *messageTableView;
@@ -80,11 +85,17 @@ updateGroupInfoDelegate>
     NSString *scoreid;
     
     CGFloat inputTabBarH;
+    
+    AVAudioPlayer *audioPlayer;
+    
+    EGORefreshTableHeaderView *pullRefreshView;
+    BOOL _reloading;
+    int page;
 }
 @end
 
 @implementation ChatViewController
-@synthesize name,toID,imageUrl,chatVcDel,fromClass,isGroup;
+@synthesize name,toID,imageUrl,chatVcDel,fromClass,isGroup,unreadCount;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -129,6 +140,8 @@ updateGroupInfoDelegate>
 	// Do any additional setup after loading the view.
     self.titleLabel.text = name;
     
+    
+    
     if (SYSVERSION > 7.0)
     {
         self.edgesForExtendedLayout =UIRectEdgeTop;
@@ -138,7 +151,7 @@ updateGroupInfoDelegate>
     
     currentSec = 0;
     iseditting = NO;
-    
+    page = 0;
     faceViewHeight = 0;
     
     
@@ -212,6 +225,10 @@ updateGroupInfoDelegate>
     messageTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     [self.bgView addSubview:messageTableView];
     
+    _reloading = NO;
+    pullRefreshView = [[EGORefreshTableHeaderView alloc] initWithScrollView:messageTableView orientation:EGOPullOrientationDown];
+    pullRefreshView.delegate = self;
+    
     if ([Tools NetworkReachable])
     {
         if(isGroup)
@@ -249,26 +266,21 @@ updateGroupInfoDelegate>
     messageTableView.frame = CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT-inputTabBarH);
     [self.bgView addSubview:inputTabBar];
     [inputTabBar setLayout];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(scrollViewDidEndDragging:willDecelerate:) name:UIKeyboardWillHideNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(startEditWord) name:UIKeyboardWillShowNotification object:nil];
+}
+
+-(void)startEditWord
+{
+    [inputTabBar.inputTextView becomeFirstResponder];
 }
 
 -(void)moreClick
 {
-//    if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fid":toID} andTableName:FRIENDSTABLE] count] > 0)
-//    {
-//        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"解除好友关系",@"举报此人", nil];
-//        ac.tag = MoreACTag;
-//        [ac showInView:self.bgView];
-//    }
-//    else
-//    {
-//        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"添加为好友",@"举报此人", nil];
-//        ac.tag = MoreACTag;
-//        [ac showInView:self.bgView];
-//    }
-    
-        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"举报此人", nil];
-        ac.tag = MoreACTag;
-        [ac showInView:self.bgView];
+    UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"举报此人", nil];
+    ac.tag = MoreACTag;
+    [ac showInView:self.bgView];
 }
 
 -(void)viewWillAppear:(BOOL)animated
@@ -277,6 +289,7 @@ updateGroupInfoDelegate>
     
     [[NSUserDefaults standardUserDefaults] setObject:@"chat" forKey:@"viewtype"];
     [[NSUserDefaults standardUserDefaults] synchronize];
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = self;
     
     [MobClick beginLogPageView:@"PageOne"];
     [self uploadLastViewTime];
@@ -289,10 +302,14 @@ updateGroupInfoDelegate>
     
     [[NSUserDefaults standardUserDefaults] setObject:@"notchat" forKey:@"viewtype"];
     [[NSUserDefaults standardUserDefaults] synchronize];
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillShowNotification object:nil];
 }
 
 -(void)dealloc
 {
+//    [[NSNotificationCenter defaultCenter] removeObserver:self name:RECEIVENEWMSG object:nil];
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
     inputTabBar.returnFunDel = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:inputTabBar];
@@ -308,6 +325,43 @@ updateGroupInfoDelegate>
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+#pragma mark - egodelegate
+-(void)egoRefreshTableHeaderDidTriggerRefresh:(EGORefreshTableHeaderView *)view
+{
+    if (unreadCount > 0)
+    {
+        page ++;
+        [self getChatLog];
+    }
+    //    [self dealNewChatMsg:nil];
+}
+
+- (BOOL)egoRefreshTableHeaderDataSourceIsLoading:(EGORefreshTableHeaderView*)view
+{
+    return _reloading;
+}
+
+- (NSDate*)egoRefreshTableHeaderDataSourceLastUpdated:(EGORefreshTableHeaderView*)view
+{
+    return [NSDate date];
+}
+
+-(void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    [pullRefreshView egoRefreshScrollViewDidScroll:messageTableView];
+}
+
+-(void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
+{
+    [pullRefreshView egoRefreshScrollViewDidEndDragging:messageTableView];
+    [inputTabBar backKeyBoard];
+    if (iseditting)
+    {
+        [self backInput];
+    }
+}
+
+
 
 #pragma mark - getchatlog
 -(void)getChatLog
@@ -320,6 +374,7 @@ updateGroupInfoDelegate>
             paraDict = @{@"u_id":[Tools user_id],
                          @"token":[Tools client_token],
                          @"g_id":toID,
+                         @"page":[NSString stringWithFormat:@"%d",page]
                          };
         }
         else
@@ -327,6 +382,7 @@ updateGroupInfoDelegate>
             paraDict = @{@"u_id":[Tools user_id],
                          @"token":[Tools client_token],
                          @"t_id":toID,
+                         @"page":[NSString stringWithFormat:@"%d",page]
                          };
         }
         
@@ -605,15 +661,6 @@ updateGroupInfoDelegate>
     }];
 }
 
--(void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
-{
-    [inputTabBar backKeyBoard];
-    if (iseditting)
-    {
-        [self backInput];
-    }
-    
-}
 -(void)backInput
 {
     [UIView animateWithDuration:0.2 animations:^{
@@ -661,22 +708,20 @@ updateGroupInfoDelegate>
         }
     }];
 }
+
+-(void)dealNewChatMsg
+{
+    [self dealNewChatMsg:nil];
+}
 #pragma mark - chatDelegate
 -(void)dealNewChatMsg:(NSDictionary *)dict
 {
     [messageArray removeAllObjects];
     [messageArray addObjectsFromArray:[db findChatLogWithUid:[Tools user_id] andOtherId:toID andTableName:CHATTABLE]];
-    if(dict)
+    if(dict && ([[dict objectForKey:@"content"] isEqualToString:@"给您发来一条新消息"]||
+                [[dict objectForKey:@"content"] isEqualToString:@"给您发来一条新邀请"] || isGroup))
     {
-        if ([[dict objectForKey:@"content"] isEqualToString:@"给您发来一条新消息"]||
-            [[dict objectForKey:@"content"] isEqualToString:@"给您发来一条新邀请"])
-        {
-            [self getChatLog];
-        }
-        else if(isGroup)
-        {
-            [self getChatLog];
-        }
+        [self getChatLog];
     }
     else
     {
@@ -871,9 +916,8 @@ updateGroupInfoDelegate>
 {
     if ([Tools NetworkReachable])
     {
-        NSData *soundData = [NSData dataWithContentsOfFile:filePath];
-        __weak ASIHTTPRequest *request = [Tools upLoadSoundFiles:[NSArray arrayWithObject:soundData]
-                                                      withSubURL:[NSString stringWithFormat:@"%@?time=%d",UPLOADCHATFILE,length]
+        __weak ASIHTTPRequest *request = [Tools upLoadSoundFiles:[NSArray arrayWithObject:filePath]
+                                                      withSubURL:[NSString stringWithFormat:@"%@",UPLOADCHATFILE]
                                                      andParaDict:@{@"u_id":[Tools user_id],                                                                                                                                    @"token":[Tools client_token]}  timeLength:length];
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
@@ -883,7 +927,8 @@ updateGroupInfoDelegate>
             
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                [self sendMsgWithString:[[responseDict objectForKey:@"data"] objectForKey:@"files"]];
+                NSString *filesUrl = [[responseDict objectForKey:@"data"] objectForKey:@"files"];
+                [self sendMsgWithString:[NSString stringWithFormat:@"%@?time=%d",filesUrl,length]];
             }
             else
             {
@@ -946,15 +991,12 @@ updateGroupInfoDelegate>
     }
     if ([[msgContent pathExtension] isEqualToString:@"png"] || [[msgContent pathExtension] isEqualToString:@"jpg"])
     {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            
-            NSString *imageUrlStr = [NSString stringWithFormat:@"%@/%@",IMAGEURL,msgContent];
-            UIImage *msgImage = [ImageTools imageWithUrl:imageUrlStr];
-            CGSize imageSize = [ImageTools getSizeFromImage:msgImage];
-            rowHeight = imageSize.height;
-        });
         
-        
+        rowHeight = 100;
+    }
+    else if ([msgContent rangeOfString:@"amr"].length > 0)
+    {
+        rowHeight = 35;
     }
     if (([[dict objectForKey:@"time"] integerValue] - currentSec) > 60*3  || indexPath.row == 0)
     {
@@ -1002,6 +1044,73 @@ updateGroupInfoDelegate>
     cell.backgroundColor = self.bgView.backgroundColor;
     return cell;
 }
+
+-(void)soundTap:(NSString *)msgContent andImageView:(UIImageView *)soundImageView
+{
+    NSRange range = [msgContent rangeOfString:@"?"];
+    NSString *subUrl = [msgContent substringToIndex:range.location];
+    NSString *extention = [subUrl pathExtension];
+    NSString *fileName = [[subUrl lastPathComponent] substringToIndex:[[subUrl lastPathComponent] rangeOfString:extention].location-1];
+    NSString *cacheFilePath = [NSString stringWithFormat:@"%@/%@.wav",[DirectyTools soundDir],fileName];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:cacheFilePath])
+    {
+        [self playRecordFile:cacheFilePath andImageView:soundImageView];
+    }
+    else
+    {
+        [[Downloader defaultDownloader] adiDownloadWithUrl:[NSString stringWithFormat:@"%@%@",MEDIAURL,subUrl]];
+        [Downloader defaultDownloader].downloaderDel = self;
+    }
+}
+
+-(void)stopPlay:(NSString *)soundPath
+{
+    [audioPlayer stop];
+}
+
+-(void)showTips:(NSString *)tipString
+{
+    [Tools showTips:tipString toView:self.bgView];
+}
+
+-(void)downloadDone:(NSString *)filePath
+{
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath])
+    {
+        [self playRecordFile:filePath andImageView:nil];
+    }
+}
+
+#pragma mark - 播放原wav
+- (void)playRecordFile:(NSString *)filePath andImageView:(UIImageView *)soundImageView
+{
+    if (filePath.length > 0)
+    {
+        if (audioPlayer)
+        {
+            [[NSNotificationCenter defaultCenter] postNotificationName:[[audioPlayer.url absoluteString] lastPathComponent] object:nil];
+        }
+        [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
+        audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL URLWithString:filePath] error:nil];
+        audioPlayer.delegate = self;
+        [audioPlayer prepareToPlay];
+        [audioPlayer play];
+    }
+}
+
+-(void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag
+{
+    if (flag)
+    {
+        [[NSNotificationCenter defaultCenter] postNotificationName:[[player.url absoluteString] lastPathComponent] object:nil];
+    }
+}
+
+-(void)audioPlayerBeginInterruption:(AVAudioPlayer *)player
+{
+    DDLOG_CURRENT_METHOD;
+}
+
 
 -(void)tapImage:(UITapGestureRecognizer *)tap
 {
@@ -1288,7 +1397,18 @@ updateGroupInfoDelegate>
     NSString *pathStr = [filePath substringToIndex:range.location-1];
     [VoiceConverter wavToAmr:filePath amrSavePath:[NSString stringWithFormat:@"%@.amr",pathStr]];
     [self sendSound:length andFilePath:[NSString stringWithFormat:@"%@.amr",pathStr]];
-    [MCSoundBoard addAudioAtPath:filePath forKey:fileName];
-    [MCSoundBoard playAudioForKey:fileName];
+    
+    if ([[NSFileManager defaultManager] removeItemAtPath:filePath error:nil])
+    {
+        DDLOG(@"删除wav源文件成功！");
+    }
+    
+    NSRange extentionRange = [filePath rangeOfString:[filePath pathExtension]];
+    NSString *amrPath = [NSString stringWithFormat:@"%@.amr",[filePath substringToIndex:extentionRange.location-1]];
+    if ([[NSFileManager defaultManager] removeItemAtPath:amrPath error:nil])
+    {
+        DDLOG(@"删除源amr文件成功！");
+    }
+    
 }
 @end

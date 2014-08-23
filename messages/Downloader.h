@@ -10,14 +10,14 @@
 
 @protocol DownloaderDelegate;
 
-@interface Downloader : NSObject
+@interface Downloader : NSObject<ASIHTTPRequestDelegate>
 
 +(Downloader *)defaultDownloader;
 
 @property (nonatomic, strong) id<DownloaderDelegate>  downloaderDel;
 
--(void)downloadWithUrl:(NSString *)fileUrl;
-
+-(void)afDownloadWithUrl:(NSString *)fileUrl;
+-(void)adiDownloadWithUrl:(NSString *)fileUrl;
 @end
 
 

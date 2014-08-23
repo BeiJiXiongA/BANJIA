@@ -121,6 +121,7 @@
     [self.sexButton setTitleColor:COMMENTCOLOR forState:UIControlStateNormal];
     self.sexButton.layer.cornerRadius = 5;
     self.sexButton.clipsToBounds = YES;
+    [self.sexButton setTitle:@" 男" forState:UIControlStateNormal];
     self.sexButton.titleLabel.textAlignment = NSTextAlignmentLeft;
     [self.sexButton setTitleColor:COMMENTCOLOR forState:UIControlStateNormal];
     self.sexLabel.textColor = COMMENTCOLOR;
@@ -442,11 +443,11 @@
         sex = [NSString stringWithFormat:@"%d",buttonIndex];
         if ([sex isEqualToString:@"1"])
         {
-            [self.sexButton setTitle:@"男" forState:UIControlStateNormal];
+            [self.sexButton setTitle:@" 男" forState:UIControlStateNormal];
         }
         else
         {
-            [self.sexButton setTitle:@"女" forState:UIControlStateNormal];
+            [self.sexButton setTitle:@" 女" forState:UIControlStateNormal];
         }
     }
 }

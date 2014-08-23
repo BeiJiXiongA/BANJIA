@@ -139,8 +139,6 @@
     roleLabel.shadowOffset = CGSizeMake(0.5, 0.5);
     [topicImageView addSubview:roleLabel];
     
-    [self getClassInfo];
-    
     NSArray *buttonNameArray = [NSArray arrayWithObjects:@"班级信息",@"群聊",@"成绩簿", nil];
     
     NSArray *buttonImageArray = [NSArray arrayWithObjects:@"classinfoicon",@"groupchaticon",@"scorealbum", nil];
@@ -168,6 +166,8 @@
         buttonLabel.textAlignment = NSTextAlignmentCenter;
         [self.bgView addSubview:buttonLabel];
     }
+    
+    [self getClassInfo];
 }
 
 -(void)changeClassInfo
@@ -275,7 +275,6 @@
                                                                       @"c_id":classID
                                                                       } API:CLASSINFO];
         [request setCompletionBlock:^{
-            [Tools hideProgress:self.bgView];
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
             DDLOG(@"classinfo responsedict %@",responseDict);
@@ -293,9 +292,7 @@
         [request setFailedBlock:^{
             NSError *error = [request error];
             DDLOG(@"error %@",error);
-            [Tools hideProgress:self.bgView];
         }];
-        [Tools showProgress:self.bgView];
         [request startAsynchronous];
     }
 }

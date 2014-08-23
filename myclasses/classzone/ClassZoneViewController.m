@@ -93,6 +93,11 @@ NameButtonDel>
     
     UITapGestureRecognizer *backTgr;
     NSString *settingCacheString;
+    
+    int diaryCount;
+    
+    UIImageView *tipImageView;
+    UIImageView *tapLabel;
 }
 @end
 
@@ -144,36 +149,21 @@ NameButtonDel>
     
     bgImageViewHeight = 150.0f;
     uncheckedCount = 0;
+    diaryCount = 0;
     
     
     tmpArray = [[NSMutableArray alloc] initWithCapacity:0];
     DongTaiArray = [[NSMutableArray alloc] initWithCapacity:0];
     
     addButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    addButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
+    addButton.frame = CGRectMake(SCREEN_WIDTH - 54, self.backButton.frame.origin.y-1, 50, NAV_RIGHT_BUTTON_HEIGHT);
     addButton.hidden = YES;
     [addButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [addButton setTitle:@"发布" forState:UIControlStateNormal];
     [addButton addTarget:self action:@selector(addDongTaiClick) forControlEvents:UIControlEventTouchUpInside];
+    addButton.hidden = YES;
+    [self.navigationBarView addSubview:addButton];
     
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"parents"])
-    {
-        if ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:ParentSendDiary] integerValue] == 1)
-        {
-            [self.navigationBarView addSubview:addButton];
-        }
-    }
-    else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"students"])
-    {
-        if ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:StudentSendDiary] integerValue] == 1)
-        {
-            [self.navigationBarView addSubview:addButton];
-        }
-    }
-    else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"teachers"])
-    {
-        [self.navigationBarView addSubview:addButton];
-    }
     
     
     noneDongTaiLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, bgImageViewHeight+76, SCREEN_WIDTH-40, 60)];
@@ -244,6 +234,59 @@ NameButtonDel>
     [inputTabBar setLayout];
     
     backTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(backInput)];
+    
+    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+    if (ShowTips == 1)
+    {
+        [ud removeObjectForKey:@"classzonetip"];
+        [ud synchronize];
+    }
+    if (![ud objectForKey:@"classzonetip"])
+    {
+        self.unReadLabel.hidden = YES;
+        
+        tipImageView = [[UIImageView alloc] init];
+        tipImageView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 568);
+        
+        if (SYSVERSION >= 7)
+        {
+            [tipImageView setImage:[UIImage imageNamed:@"classzonetip"]];
+        }
+        else
+        {
+            [tipImageView setImage:[UIImage imageNamed:@"classzonetip6"]];
+        }
+        tipImageView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0];
+        [[XDTabViewController sharedTabViewController].bgView addSubview:tipImageView];
+        
+        UITapGestureRecognizer *outTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(outTap)];
+        tipImageView.userInteractionEnabled = YES;
+        [tipImageView addGestureRecognizer:outTap];
+        
+        
+        tapLabel = [[UIImageView alloc] init];
+        tapLabel.frame = CGRectMake(15, 100, 290, 60);
+        tapLabel.backgroundColor = [UIColor clearColor];
+        [[XDTabViewController sharedTabViewController].bgView addSubview:tapLabel];
+        
+        UITapGestureRecognizer *tipTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(checkTip)];
+        tapLabel.userInteractionEnabled = YES;
+        [tapLabel addGestureRecognizer:tipTap];
+    }
+}
+
+-(void)outTap
+{
+    
+}
+
+-(void)checkTip
+{
+    [tapLabel removeFromSuperview];
+    [tipImageView removeFromSuperview];
+    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+    [ud setObject:@"1" forKey:@"classzonetip"];
+    [ud synchronize];
 }
 
 -(void)backInput
@@ -496,17 +539,29 @@ NameButtonDel>
 -(void)dealClassSetting:(NSDictionary *)responseDict
 {
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
-    [ud setObject:[[responseDict objectForKey:@"data"] objectForKey:@"set"] forKey:@"set"];
-    
-    [ud setObject:[[responseDict objectForKey:@"data"] objectForKey:@"role"] forKey:@"role"];
-    [ud setObject:[[responseDict objectForKey:@"data"] objectForKey:@"admin"] forKey:@"admin"];
-    if (![[[responseDict objectForKey:@"data"] objectForKey:@"opt"] isEqual:[NSNull null]])
+    NSString *role = @"";
+    if ([EmptyTools isEmpty:[responseDict objectForKey:@"data"] key:@"role"])
     {
-        if ([[[responseDict objectForKey:@"data"] objectForKey:@"opt"] count] > 0)
-        {
-            [ud setObject:[[responseDict objectForKey:@"data"] objectForKey:@"opt"] forKey:@"opt"];
-        }
+        role = [[responseDict objectForKey:@"data"] objectForKey:@"role"];
     }
+    NSString *admin = @"";
+    if ([EmptyTools isEmpty:[responseDict objectForKey:@"data"] key:@"admin"])
+    {
+        admin = [NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"] objectForKey:@"admin"] intValue]];
+    }
+    NSDictionary *set = nil;
+    if ([EmptyTools isEmpty:[responseDict objectForKey:@"data"] key:@"set"])
+    {
+        set = [[responseDict objectForKey:@"data"] objectForKey:@"set"];
+    }
+    NSDictionary *opt = nil;
+    if([[responseDict objectForKey:@"data"] objectForKey:@"opt"])
+    {
+        opt = [[responseDict objectForKey:@"data"] objectForKey:@"opt"];
+    }
+    [ud setObject:set forKey:@"set"];
+    [ud setObject:role forKey:@"role"];
+    [ud setObject:admin forKey:@"admin"];
     
     [ud synchronize];
     
@@ -558,9 +613,9 @@ NameButtonDel>
         headerView.backgroundColor = UIColorFromRGB(0xf1f0ec);
         
         UILabel *headerLabel = [[UILabel alloc] init];
-        headerLabel.font = [UIFont systemFontOfSize:16];
+        headerLabel.font = [UIFont systemFontOfSize:14];
         headerLabel.backgroundColor = UIColorFromRGB(0xf1f0ec);
-        headerLabel.textColor = TITLE_COLOR;
+        headerLabel.textColor = COMMENTCOLOR;
         
         UIView *verticalLineView = [[UIView alloc] initWithFrame:CGRectMake(34.75, 0, 1.5, 40)];
         verticalLineView.backgroundColor = UIColorFromRGB(0xe2e3e4);
@@ -612,7 +667,7 @@ NameButtonDel>
             
             NSDictionary *dict = [tmpArray objectAtIndex:section-1];
             NSArray *array = [dict objectForKey:@"diaries"];
-            return [array count];
+            return [array count] > 5 ? 5:[array count];
         }
     }
     else
@@ -692,13 +747,6 @@ NameButtonDel>
 
 -(void)nameButtonClick:(NSDictionary *)dict
 {
-//    DDLOG(@"person dict %@",dict);
-//    PersonDetailViewController *personDetailVC = [[PersonDetailViewController alloc] init];
-//    personDetailVC.personName = [[dict objectForKey:@"by"] objectForKey:@"name"];
-//    personDetailVC.personID = [[dict objectForKey:@"by"] objectForKey:@"_id"];
-//    [self.sideMenuController hideMenuAnimated:YES];
-//    [self.navigationController pushViewController:personDetailVC animated:YES];
-    
     DDLOG(@"home %@",dict);
     DongTaiDetailViewController *dongtaiDetailViewController = [[DongTaiDetailViewController alloc] init];
     dongtaiDetailViewController.dongtaiId = [dict objectForKey:@"_id"];
@@ -877,10 +925,10 @@ NameButtonDel>
         
         cell.commentsTableView.frame = CGRectMake(0, 0, 0, 0);
         
-        cell.nameLabel.frame = CGRectMake(60, 5, [nameStr length]*18>170?170:([nameStr length]*18), 25);
+        cell.nameLabel.frame = CGRectMake(50, 8, [nameStr length]*18>170?170:([nameStr length]*18), 25);
         cell.nameLabel.text = nameStr;
         cell.nameLabel.font = NAMEFONT;
-        cell.nameLabel.textColor = NAMECOLOR;
+        cell.nameLabel.textColor = TITLE_COLOR;
         
         NSString *timeStr = [Tools showTimeOfToday:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]];
         NSString *c_name = [dict objectForKey:@"c_name"];
@@ -899,7 +947,7 @@ NameButtonDel>
         [cell.headerImageView addGestureRecognizer:tap];
         
         [Tools fillImageView:cell.headerImageView withImageFromURL:[[dict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERBG];
-        cell.locationLabel.frame = CGRectMake(60, cell.headerImageView.frame.origin.y+cell.headerImageView.frame.size.height-LOCATIONLABELHEI, SCREEN_WIDTH-80, LOCATIONLABELHEI);
+        cell.locationLabel.frame = CGRectMake(50, cell.headerImageView.frame.origin.y+cell.headerImageView.frame.size.height-LOCATIONLABELHEI+3, SCREEN_WIDTH-80, LOCATIONLABELHEI);
         cell.locationLabel.text = [NSString stringWithFormat:@"于%@在%@",timeStr,[[dict objectForKey:@"detail"] objectForKey:@"add"]];
         cell.locationLabel.numberOfLines = 1;
         cell.locationLabel.lineBreakMode = NSLineBreakByWordWrapping | NSLineBreakByTruncatingTail;
@@ -1011,7 +1059,6 @@ NameButtonDel>
         CGFloat cellHeight = cell.headerImageView.frame.size.height+cell.contentLabel.frame.size.height+cell.imagesView.frame.size.height+18;
         
         CGFloat he = 0;
-        //            if (SYSVERSION >= 7.0)
         {
             he = 5;
         }
@@ -1118,8 +1165,10 @@ NameButtonDel>
         cell.bgView.clipsToBounds = YES;
         cell.bgView.backgroundColor = [UIColor whiteColor];
         
-        
-        cell.verticalLineView.frame = CGRectMake(34.75, 0, 1.5, cell.bgView.frame.size.height+10);
+        CGRect cellFrame = [tableView rectForRowAtIndexPath:indexPath];
+//        cell.bgView.frame = CGRectMake(9.5, 0, SCREEN_WIDTH-19,
+//                                       cellFrame.size.height);
+        cell.verticalLineView.frame = CGRectMake(34.75, 0, 1.5, cellFrame.size.height);
         
         return cell;
     }
@@ -2099,6 +2148,10 @@ NameButtonDel>
                         return NO;
                     }
                 }
+                else
+                {
+                    return YES;
+                }
             }
             else
             {
@@ -2119,7 +2172,10 @@ NameButtonDel>
                         return NO;
                     }
                 }
-
+                else
+                {
+                    return YES;
+                }
             }
         }
         else
@@ -2145,14 +2201,38 @@ NameButtonDel>
                     return NO;
                 }
             }
+            else
+            {
+                return YES;
+            }
         }
     }
+    else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"parents"] &&
+             [[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:ParentSendDiary] integerValue] == 1)
+    {
+        return YES;
+    }
+    else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"students"] &&
+             [[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:StudentSendDiary] integerValue] == 1)
+    {
+        return YES;
+    }
+    else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"teachers"])
+    {
+        return YES;
+    }
+
     else if(([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"visitor"]) && ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:VisitorAccess] integerValue] == 0))
     {
         [Tools showAlertView:@"游客不可以查看班级空间！" delegateViewController:nil];
         return NO;
     }
-    return YES;
+    if(([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"visitor"]) && ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:VisitorAccess] integerValue] == 1))
+    {
+        return YES;
+    }
+
+    return NO;
 }
 
 -(void)getCacheData

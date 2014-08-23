@@ -9,7 +9,7 @@
 #import "LimitCell.h"
 
 @implementation LimitCell
-@synthesize contentLabel,mySwitch,markLabel,arrowImageView;
+@synthesize contentLabel,mySwitch,markLabel,arrowImageView,lineImageView;
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
@@ -33,6 +33,9 @@
         
         arrowImageView = [[UIImageView alloc] init];
         [self.contentView addSubview:arrowImageView];
+        
+        lineImageView = [[UIImageView alloc] init];
+        [self.contentView addSubview:lineImageView];
     }
     return self;
 }

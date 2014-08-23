@@ -46,6 +46,7 @@
     UILabel *tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(left, UI_NAVIGATION_BAR_HEIGHT+30, SCREEN_WIDTH-left*2, 20)];
     tipLabel.font = [UIFont systemFontOfSize:18];
     tipLabel.textColor = TITLE_COLOR;
+    tipLabel.backgroundColor = self.bgView.backgroundColor;
     tipLabel.text = @"你可以给这次群聊起个名字";
     [self.bgView addSubview:tipLabel];
     
@@ -82,6 +83,7 @@
     UILabel *tipLabel2 = [[UILabel alloc] initWithFrame:CGRectMake(left, UI_NAVIGATION_BAR_HEIGHT+110, SCREEN_WIDTH-left*2, 20)];
     tipLabel2.font = [UIFont systemFontOfSize:18];
     tipLabel2.textColor = TITLE_COLOR;
+    tipLabel2.backgroundColor = self.bgView.backgroundColor;
     tipLabel2.text = [NSString stringWithFormat:@"您邀请了%d名班级成员",[selectArray count]];
     [self.bgView addSubview:tipLabel2];
     

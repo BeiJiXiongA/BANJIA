@@ -17,6 +17,10 @@
     UIImage *toImage;
     
     UITapGestureRecognizer *chatImageTap;
+    
+    NSTimer *timer;
+    
+    BOOL isPlaying;
 }
 @property (nonatomic, strong) UIImageView *headerImageView;
 @property (nonatomic, strong) UITextView *messageTf;
@@ -45,5 +49,6 @@
 
 -(void)toPersonDetail:(NSDictionary *)personDict;
 -(void)joinClassWithMsgContent:(NSString *)msgContent;
--(void)soundTap:(NSString *)msgContent;
+-(void)soundTap:(NSString *)msgContent andImageView:(UIImageView *)soundImageView;
+-(void)stopPlay:(NSString *)soundPath;
 @end

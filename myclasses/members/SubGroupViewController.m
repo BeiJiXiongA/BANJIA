@@ -102,7 +102,7 @@ updateGroupInfoDelegate>
 
         cell.unreadedMsgLabel.hidden = YES;
 
-        [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"ficon"] andDefault:HEADERDEFAULT];
+        [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"ficon"] andDefault:HEADERICON];
 
         cell.memNameLabel.frame = CGRectMake(70, 15, 150, 30);
         cell.memNameLabel.text = [dict objectForKey:@"fname"];

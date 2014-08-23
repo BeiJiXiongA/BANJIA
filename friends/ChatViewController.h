@@ -28,4 +28,7 @@
 @property (nonatomic, assign) BOOL isGroup;
 @property (nonatomic, strong) id<ChatVCDelegate> chatVcDel;
 @property (nonatomic, strong) id<FriendListDelegate> friendVcDel;
+
+@property (nonatomic, assign) int unreadCount;
+
 @end

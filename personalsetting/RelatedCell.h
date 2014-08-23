@@ -14,4 +14,5 @@
 @property (nonatomic, strong) MyTextField *nametf;
 @property (nonatomic, strong) UIButton *relateButton;
 @property (nonatomic, strong) UILabel *contentLabel;
+@property (nonatomic, strong) UIImageView *arrowImageView;
 @end

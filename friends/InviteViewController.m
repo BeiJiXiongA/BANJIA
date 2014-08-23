@@ -698,7 +698,7 @@ UISearchBarDelegate>
                 }
                 else
                 {
-                    [cell.inviteButton setTitle:@"已添加" forState:UIControlStateNormal];
+                    [cell.inviteButton setTitle:@"已申请" forState:UIControlStateNormal];
                 }
                 [cell.inviteButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
                 [cell.inviteButton setImage:nil forState:UIControlStateNormal];
@@ -1618,7 +1618,6 @@ UISearchBarDelegate>
                 }
                 
                 [Tools showAlertView:[NSString stringWithFormat:@"您已经成功邀请%@",[userInfo objectForKey:@"r_name"]] delegateViewController:nil];
-                [alreadyUsers removeObject:userInfo];
                 [contactTableView reloadData];
             }
             else

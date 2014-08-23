@@ -11,7 +11,7 @@
 
 @implementation ClassMoreCell
 
-@synthesize nameLabel,contentLabel,switchView,button;
+@synthesize nameLabel,contentLabel,switchView,button,lineImageView;
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
@@ -40,6 +40,9 @@
         button = [UIButton buttonWithType:UIButtonTypeCustom];
         button.backgroundColor = [UIColor clearColor];
         [self.contentView addSubview:button];
+        
+        lineImageView = [[UIImageView alloc] init];
+        [self.contentView addSubview:lineImageView];
     }
     return self;
 }

@@ -161,7 +161,7 @@ UITextFieldDelegate>
     
     UIButton *loginButton = [UIButton buttonWithType:UIButtonTypeCustom];
     loginButton.frame = CGRectMake(28, passwordTextfield.frame.size.height+passwordTextfield.frame.origin.y+space,SCREEN_WIDTH-56, 42);
-    [loginButton setTitle:@"登      录" forState:UIControlStateNormal];
+    [loginButton setTitle:@"手机号登录" forState:UIControlStateNormal];
     [loginButton addTarget:self action:@selector(login) forControlEvents:UIControlEventTouchUpInside];
     loginButton.titleLabel.textAlignment = NSTextAlignmentLeft;
     [loginButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];

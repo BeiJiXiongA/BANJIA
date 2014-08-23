@@ -316,7 +316,14 @@ SetClassInfoDel>
             
             cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-left, 10, 180, 27);
             NSString *schoollevel = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoollevel"];
-            cell.objectsLabel.text = [NSString stringWithFormat:@"%@",[schoolLevelArray objectAtIndex:[schoollevel integerValue]]];
+            if ([schoollevel isKindOfClass:[NSString class]] && [schoollevel isEqualToString:@"未指定学校"])
+            {
+                cell.objectsLabel.text = @"未指定学校";
+            }
+            else
+            {
+                 cell.objectsLabel.text = [NSString stringWithFormat:@"%@",[schoolLevelArray objectAtIndex:[schoollevel integerValue]]];
+            }
         }
         
         else if(indexPath.row == 4)
@@ -334,7 +341,7 @@ SetClassInfoDel>
             cell.objectsLabel.text = regionStr;
             if ([regionStr length] == 0)
             {
-                cell.objectsLabel.text = @"未设置学校";
+                cell.objectsLabel.text = @"未指定学校";
             }
         }
     }
@@ -369,7 +376,7 @@ SetClassInfoDel>
         {
             markView.hidden = NO;
             markView.frame = CGRectMake(SCREEN_WIDTH-20, 17, 8, 12);
-            [markView setImage:[UIImage imageNamed:@"discovery_arrow"]];
+            [markView setImage:[UIImage imageNamed:@"menu_arrow_right"]];
             [cell.contentView addSubview:markView];
         }
     }
@@ -666,6 +673,8 @@ SetClassInfoDel>
                 {
                     regionStr = [[[[responseDict objectForKey:@"data"] objectForKey:@"school"] objectForKey:@"region"] objectForKey:@"name"] ;
                     schoolName = [[[responseDict objectForKey:@"data"] objectForKey:@"school"] objectForKey:@"name"];
+                    [[NSUserDefaults standardUserDefaults] setObject:[[[responseDict objectForKey:@"data"] objectForKey:@"school"] objectForKey:@"level"] forKey:@"schoollevel"];
+                    [[NSUserDefaults standardUserDefaults] synchronize];
                 }
                 
                 if ([[responseDict objectForKey:@"data"]objectForKey:@"number"] &&

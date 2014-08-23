@@ -24,6 +24,7 @@
 #import "MJPhoto.h"
 #import "MJPhotoBrowser.h"
 #import "DealJiFen.h"
+#import "EmptyTools.h"
 
 #define FaceViewHeight  200
 
@@ -138,7 +139,7 @@ return shared##className; \
 #define CornerMore   @"corner_more"
 #define CORNERMORERIGHT  50
 
-#define NAMEFONT   [UIFont boldSystemFontOfSize:16]
+#define NAMEFONT   [UIFont systemFontOfSize:16]
 #define NAMECOLOR  RGB(51, 51, 51, 1)
 
 #define USERID    @"u_id"
@@ -250,11 +251,15 @@ return shared##className; \
 
 #pragma mark - aboutpushnotification
 #define BECOMEACTIVE  @"becomeactive"
-#define FROMBACKGROUD  @"frombackgroud"
-#define FROMFORGROUD  @"fromforgroud"
+#define ENTER_BACKGROUD  @"frombackgroud"
+#define ENTER_FORGROUD  @"fromforgroud"
 
 #pragma mark - base64
 #define QQBASE64   @"cXE="
 #define RRBASE64   @"cnI="
 #define WXBASE64   @"d3g="
 #define SWBASE64   @"c3c="
+
+#define MAX_SOUND_LENGTH   60
+
+#define ShowTips 0

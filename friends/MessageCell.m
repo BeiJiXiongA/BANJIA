@@ -183,18 +183,44 @@
             NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
             self.timeLabel.text = timeStr;
             
+            NSRange range = [msgContent rangeOfString:@"time="];
+            NSString *timelength = @"";
+            if (range.length > 0)
+            {
+                timelength = [NSString stringWithFormat:@"%@\"",[msgContent substringFromIndex:range.location+range.length]];
+                self.messageTf.text = timelength;
+            }
+            
+            self.messageTf.textColor = COMMENTCOLOR;
+            
+            CGFloat soundLength = 0;
+            if ([timelength integerValue] * 10 > 120)
+            {
+                soundLength = 120;
+            }
+            else if([timelength integerValue] * 10 < 80)
+            {
+                soundLength = 80;
+            }
+            else
+            {
+                soundLength = [timelength integerValue] * 10;
+            }
+
             self.soundButton.hidden = NO;
-            self.soundButton.frame = CGRectMake(55, messageBgY, 60, 40);
-            [self.soundButton setBackgroundImage:[Tools getImageFromImage:fromImage andInsets:UIEdgeInsetsMake(10, 10, 10, 10)] forState:UIControlStateNormal];
+            self.soundButton.frame = CGRectMake(55, messageBgY, soundLength, 40);
+            [self.soundButton setBackgroundImage:[Tools getImageFromImage:fromImage andInsets:UIEdgeInsetsMake(35, 25, 17, 20)] forState:UIControlStateNormal];
             [self.soundButton addTarget:self action:@selector(playSound) forControlEvents:UIControlEventTouchUpInside];
+            
+            self.messageTf.frame = CGRectMake(self.soundButton.frame.size.width+self.soundButton.frame.origin.x+10, self.soundButton.frame.origin.y+3, 40, 25);
             
             self.msgImageView.frame = CGRectMake(self.soundButton.frame.origin.x+PhotoSpace+5, self.soundButton.frame.origin.y+PhotoSpace+1, 25, 25);
             [self.msgImageView setImage:[UIImage imageNamed:@"icon_sound_f"]];
             
-            self.messageTf.frame = CGRectMake(self.soundButton.frame.size.width+self.soundButton.frame.origin.x+10, self.soundButton.frame.origin.y+3, 40, 25);
-            NSRange range = [msgContent rangeOfString:@"time="];
-            self.messageTf.text = [NSString stringWithFormat:@"%@\"",[msgContent substringFromIndex:range.location+range.length]];
-            self.messageTf.textColor = COMMENTCOLOR;
+            UITapGestureRecognizer *playTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(playSound)];
+            self.soundButton.userInteractionEnabled = YES;
+            [self.soundButton addGestureRecognizer:playTgr];
+            
             
             self.headerImageView.frame = CGRectMake(5, messageBgY, 40, 40);
             if(isGroup)
@@ -208,8 +234,8 @@
                 self.nameLabel.hidden = NO;
                 self.nameLabel.frame = CGRectMake(self.headerImageView.frame.size.width+self.headerImageView.frame.origin.x+5, self.headerImageView.frame.origin.y, 100, 20);
                 self.nameLabel.text = name;
-                self.soundButton.frame = CGRectMake(55, messageBgY+20, 60, 40);
-                [self.soundButton setBackgroundImage:fromImage forState:UIControlStateNormal];
+                self.soundButton.frame = CGRectMake(55, messageBgY+20, soundLength, 40);
+                [self.soundButton setBackgroundImage:[Tools getImageFromImage:fromImage andInsets:UIEdgeInsetsMake(35, 25, 17, 20)] forState:UIControlStateNormal];
                 
                 self.msgImageView.frame = CGRectMake(self.soundButton.frame.origin.x+PhotoSpace+5, self.soundButton.frame.origin.y+PhotoSpace+1, 25, 25);
                 [self.msgImageView setImage:[UIImage imageNamed:@"icon_sound_f"]];
@@ -282,6 +308,7 @@
             }
             
             self.headerImageView.frame = CGRectMake(5, messageBgY, 40, 40);
+            
             if(isGroup)
             {
                 OperatDB *db = [[OperatDB alloc] init];
@@ -325,7 +352,6 @@
             {
                 x=0;
             }
-            
             self.chatBg.frame = CGRectMake(SCREEN_WIDTH - 10- 100- 30-45, messageBgY, 100+PhotoSpace*2+5, 100+PhotoSpace*2);
             [self.chatBg setImage:toImage];
             self.msgImageView.frame = CGRectMake(self.chatBg.frame.origin.x+PhotoSpace, self.chatBg.frame.origin.y+PhotoSpace, 102, 100);
@@ -341,19 +367,48 @@
             self.headerImageView.frame = CGRectMake(SCREEN_WIDTH - 60, messageBgY, 40, 40);
             [Tools fillImageView:self.headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERICON];
             
+            NSRange range = [msgContent rangeOfString:@"time="];
+            NSString *timelength = @"";
+            if (range.length > 0)
+            {
+                timelength = [NSString stringWithFormat:@"%@\"",[msgContent substringFromIndex:range.location+range.length]];
+                self.messageTf.text = timelength;
+            }
+            
+            self.messageTf.textColor = COMMENTCOLOR;
+            
+            CGFloat soundLength = 0;
+            if ([timelength integerValue] * 10 > 120)
+            {
+                soundLength = 120;
+            }
+            else if([timelength integerValue] *10 < 80)
+            {
+                soundLength = 80;
+            }
+            else
+            {
+                soundLength = [timelength integerValue] * 10;
+            }
+
             self.soundButton.hidden = NO;
-            self.soundButton.frame = CGRectMake(SCREEN_WIDTH - 60-45-20, messageBgY, 60, 40);
+            self.soundButton.frame = CGRectMake(SCREEN_WIDTH - soundLength-45-20, messageBgY, soundLength, 40);
             
             [self.soundButton setBackgroundImage:[Tools getImageFromImage:toImage andInsets:UIEdgeInsetsMake(10, 10, 10, 10)] forState:UIControlStateNormal];
             [self.soundButton addTarget:self action:@selector(playSound) forControlEvents:UIControlEventTouchUpInside];
+            
+            
             
             self.msgImageView.hidden = NO;
             self.msgImageView.frame = CGRectMake(self.soundButton.frame.origin.x + self.soundButton.frame.size.width-35, self.soundButton.frame.origin.y+7.5, 25, 25);
             [self.msgImageView setImage:[UIImage imageNamed:@"icon_sound_t"]];
             
+            UITapGestureRecognizer *playTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(playSound)];
+            self.soundButton.userInteractionEnabled = YES;
+            [self.soundButton addGestureRecognizer:playTgr];
+            
             self.messageTf.frame = CGRectMake(self.soundButton.frame.origin.x-30,self.soundButton.frame.origin.y+3 , 40, 25);
-            NSRange range = [msgContent rangeOfString:@"time="];
-            self.messageTf.text = [NSString stringWithFormat:@"%@\"",[msgContent substringFromIndex:range.location+range.length]];
+
             self.messageTf.textColor = COMMENTCOLOR;
             self.messageTf.editable = NO;
             
@@ -416,49 +471,115 @@
 -(void)playSound
 {
     NSString *msgContent = [msgDict objectForKey:@"content"];
-    if ([self.msgDelegate respondsToSelector:@selector(soundTap:)])
+    NSString *lastcom = [msgContent lastPathComponent];
+    NSRange range = [lastcom rangeOfString:@"time="];
+    NSString *filename = [lastcom substringToIndex:range.location-1];
+    NSString *fileExtention = [filename pathExtension];
+    NSRange extentionRange = [filename rangeOfString:fileExtention];
+    NSString *notificationName = [NSString stringWithFormat:@"%@.wav",[filename substringToIndex:extentionRange.location-1]];
+    if (isPlaying)
     {
-        if ([[msgDict objectForKey:DIRECT] isEqualToString:@"t"])
+        [self stopImage];
+        isPlaying = NO;
+        if ([self.msgDelegate respondsToSelector:@selector(stopPlay:)])
         {
-            [self playToImages];
+            [self.msgDelegate stopPlay:[NSString stringWithFormat:@"%@/%@",[DirectyTools soundDir],filename]];
         }
-        else if ([[msgDict objectForKey:DIRECT] isEqualToString:@"f"])
-        {
-            [self playFromImages];
-        }
-        
-        [self.msgDelegate soundTap:msgContent];
     }
+    else
+    {
+        if ([self.msgDelegate respondsToSelector:@selector(soundTap:andImageView:)])
+        {
+            isPlaying = YES;
+            if ([[msgDict objectForKey:DIRECT] isEqualToString:@"t"])
+            {
+                [self playToImages];
+            }
+            else if ([[msgDict objectForKey:DIRECT] isEqualToString:@"f"])
+            {
+                [self playFromImages];
+            }
+            
+            [self.msgDelegate soundTap:msgContent andImageView:self.msgImageView];
+            
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stopImage) name:notificationName object:nil];
+        }
+    }
+}
 
+-(void)stopImage
+{
+//    [timer invalidate];
+    [self.msgImageView stopAnimating];
+    NSString *msgContent = [msgDict objectForKey:@"content"];
+    NSString *lastcom = [msgContent lastPathComponent];
+    NSRange range = [lastcom rangeOfString:@"time="];
+    NSString *filename = [lastcom substringToIndex:range.location-1];
+    NSString *fileExtention = [filename pathExtension];
+    NSRange extentionRange = [filename rangeOfString:fileExtention];
+    NSString *notificationName = [NSString stringWithFormat:@"%@.wav",[filename substringToIndex:extentionRange.location-1]];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:notificationName object:nil];
+}
+
+-(void)playImages
+{
+    NSArray *images = nil;
+    if ([[msgDict objectForKey:DIRECT] isEqualToString:@"t"])
+    {
+        images = [NSArray arrayWithObjects:
+                  [UIImage imageNamed:@"icon_sound_t1"],
+                  [UIImage imageNamed:@"icon_sound_t2"],
+                  [UIImage imageNamed:@"icon_sound_t"],nil];
+    }
+    else if ([[msgDict objectForKey:DIRECT] isEqualToString:@"f"])
+    {
+        images = [NSArray arrayWithObjects:
+                  [UIImage imageNamed:@"icon_sound_f1"],
+                  [UIImage imageNamed:@"icon_sound_f2"],
+                  [UIImage imageNamed:@"icon_sound_f"],nil];
+    }
+    for (int i=0; [timer isValid] && (i<[images count]) ; i++)
+    {
+        [self.msgImageView setImage:[images objectAtIndex:i]];
+        if (i == [images count]-1)
+        {
+            i = 0;
+        }
+    }
 }
 
 -(void)playFromImages
 {
-    DDLOG(@"msg %@",[msgDict objectForKey:@"content"]);
     NSString *msgContent = [msgDict objectForKey:@"content"];
     NSRange range = [msgContent rangeOfString:@"time="];
-    int time = [[msgContent substringFromIndex:range.location+range.length] intValue];
+    int time = 0;
+    if (range.length> 0)
+    {
+        time = [[msgContent substringFromIndex:range.location+range.length] intValue];
+    }
+    
     self.msgImageView.animationImages = [NSArray arrayWithObjects:
                                          [UIImage imageNamed:@"icon_sound_f1"],
                                          [UIImage imageNamed:@"icon_sound_f2"],
                                          [UIImage imageNamed:@"icon_sound_f"],nil];
-    self.msgImageView.animationDuration = time;
-    self.msgImageView.animationRepeatCount =  50*time;
+    self.msgImageView.animationDuration = 0.8;
     [self.msgImageView startAnimating];
 }
 
 -(void)playToImages
 {
-    DDLOG(@"msg %@",[msgDict objectForKey:@"content"]);
     NSString *msgContent = [msgDict objectForKey:@"content"];
     NSRange range = [msgContent rangeOfString:@"time="];
-    int time = [[msgContent substringFromIndex:range.location+range.length] intValue];
+    int time = 0;
+    if (range.length> 0)
+    {
+        time = [[msgContent substringFromIndex:range.location+range.length] intValue];
+    }
     self.msgImageView.animationImages = [NSArray arrayWithObjects:
                                          [UIImage imageNamed:@"icon_sound_t1"],
                                          [UIImage imageNamed:@"icon_sound_t2"],
                                          [UIImage imageNamed:@"icon_sound_t"],nil];
-    self.msgImageView.animationDuration = time;
-    self.msgImageView.animationRepeatCount = 50*time;
+    self.msgImageView.animationDuration = 0.8;
     [self.msgImageView startAnimating];
 }
 

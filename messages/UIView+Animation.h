@@ -22,7 +22,7 @@ typedef enum AnimateType{       //动画类型
 @interface UIView (Animation)
 
 #pragma mark - 获取顶部View
-+ (UIView *)getTopView;
+//+ (UIView *)getTopView;
 
 #pragma mark - 顶层maskView触摸
 + (void)setTopMaskViewCanTouch:(BOOL)_canTouch;

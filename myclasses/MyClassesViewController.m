@@ -37,6 +37,8 @@
 
 #define ADDACTIONSHEETTAG   3000
 
+#define ClassSpace  6.5
+
 @interface MyClassesViewController ()<UITableViewDataSource,
 UITableViewDelegate,
 EGORefreshTableHeaderDelegate,
@@ -66,6 +68,13 @@ UIActionSheetDelegate>
     
 //    UIView *headerView;
 //    UILabel *headerLabel;
+    
+    UIImageView *tipImageView;
+    UIImageView *tapLabel;
+    
+    UIButton *moreButton;
+    
+    UIButton *addButton;
 }
 @end
 
@@ -96,7 +105,7 @@ UIActionSheetDelegate>
     
     schoolLevelArray = SCHOOLLEVELARRAY;
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeClassInfo) name:@"changeClassInfo" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeClassInfo) name:CHANGECLASSINFO object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getClassesByUser) name:UPDATECLASSMEMBERLIST object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getClassesByUser) name:CHANGECLASSINFO object:nil];
     
@@ -110,7 +119,7 @@ UIActionSheetDelegate>
     tmpArray = [[NSMutableArray alloc] initWithCapacity:0];
     
     
-    UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
     moreButton.frame = CGRectMake(5, self.backButton.frame.origin.y, 42, NAV_RIGHT_BUTTON_HEIGHT);
     [moreButton setImage:[UIImage imageNamed:@"icon_list"] forState:UIControlStateNormal];
     [moreButton addTarget:self action:@selector(moreOpen) forControlEvents:UIControlEventTouchUpInside];
@@ -118,10 +127,10 @@ UIActionSheetDelegate>
     
 //    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"navbtn"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
     
-    UIButton *addButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [addButton setTitle:@"添加" forState:UIControlStateNormal];
+    addButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    addButton = [UIButton buttonWithType:UIButtonTypeCustom];
     addButton.backgroundColor = [UIColor clearColor];
-    [addButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+    [addButton setImage:[UIImage imageNamed:@"icon_add"] forState:UIControlStateNormal];
     addButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [addButton addTarget:self action:@selector(addButtonClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:addButton];
@@ -130,24 +139,24 @@ UIActionSheetDelegate>
     tipView.backgroundColor = self.bgView.backgroundColor;
     [self.bgView addSubview:tipView];
     
-    tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 0, SCREEN_WIDTH-40, 70)];
+    tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(21, 0, SCREEN_WIDTH-62, 70)];
     tipLabel.backgroundColor = self.bgView.backgroundColor;
     tipLabel.lineBreakMode = NSLineBreakByWordWrapping;
     tipLabel.numberOfLines = 3;
     tipLabel.textColor = CONTENTCOLOR;
     tipLabel.textAlignment = NSTextAlignmentCenter;
-    tipLabel.text = @"您还没有加入任何一个班级，快来加入一个班级或创建一个自己的班级吧！";
+    tipLabel.text = @"你可以在这里创建班级，也可以通过班号或二维码加入班级";
     [tipView addSubview:tipLabel];
     
     joinClassButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    joinClassButton.frame = CGRectMake(80, 80, 140, 40);
+    joinClassButton.frame = CGRectMake(21, 80, SCREEN_WIDTH-62, 40);
     [joinClassButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
     [joinClassButton addTarget:self action:@selector(joinClass) forControlEvents:UIControlEventTouchUpInside];
     [joinClassButton setTitle:@"加入班级" forState:UIControlStateNormal];
     [tipView addSubview:joinClassButton];
     
     createClassButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    createClassButton.frame = CGRectMake(80, 130, 140, 40);
+    createClassButton.frame = CGRectMake(21, 130, SCREEN_WIDTH-62, 40);
     [createClassButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
     [createClassButton addTarget:self action:@selector(createClass) forControlEvents:UIControlEventTouchUpInside];
     [createClassButton setTitle:@"创建班级" forState:UIControlStateNormal];
@@ -166,13 +175,72 @@ UIActionSheetDelegate>
     pullRefreshView.delegate = self;
     
     
+    
+    
     [self getCacheData];
     
     if ([Tools NetworkReachable])
     {
         [self getClassesByUser];
     }
+    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+    if (ShowTips == 1)
+    {
+        [ud removeObjectForKey:@"myclasstip"];
+        [ud synchronize];
+    }
+    if (![ud objectForKey:@"myclasstip"])
+    {
+        self.unReadLabel.hidden = YES;
+       
+        tipView.hidden = YES;
+        tipImageView = [[UIImageView alloc] init];
+        tipImageView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 568);
+        if (SYSVERSION >= 7)
+        {
+            [tipImageView setImage:[UIImage imageNamed:@"myclasstip"]];
+        }
+        else
+        {
+            [tipImageView setImage:[UIImage imageNamed:@"myclasstip6"]];
+        }
+        tipImageView.hidden = YES;
+        [self.bgView addSubview:tipImageView];
+        
+        UITapGestureRecognizer *outTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(outTap)];
+        tipImageView.userInteractionEnabled = YES;
+        [tipImageView addGestureRecognizer:outTap];
+        
+        tapLabel = [[UIImageView alloc] init];
+        tapLabel.frame = CGRectMake(15, 220, 290, 75);
+        tapLabel.backgroundColor = [UIColor clearColor];
+        [self.bgView addSubview:tapLabel];
+        
+        UITapGestureRecognizer *tipTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(checkTip)];
+        tapLabel.userInteractionEnabled = YES;
+        [tapLabel addGestureRecognizer:tipTap];
+    }
+    
 }
+
+-(void)outTap
+{
+    
+}
+
+-(void)checkTip
+{
+    [tapLabel removeFromSuperview];
+    [tipImageView removeFromSuperview];
+    
+    classTableView.userInteractionEnabled = YES;
+    addButton.userInteractionEnabled = YES;
+    moreButton.userInteractionEnabled = YES;
+    
+    [[NSUserDefaults standardUserDefaults] setObject:@"1" forKey:@"myclasstip"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
 -(void)changeClassInfo
 {
     [self getClassesByUser];
@@ -584,10 +652,12 @@ UIActionSheetDelegate>
 {
     if ([tmpArray count] == 0)
     {
+        tipImageView.hidden = YES;
         tipView.hidden = NO;
     }
     else if([tmpArray count] > 0)
     {
+        tipImageView.hidden = NO;
         tipView.hidden = YES;
     }
     return [tmpArray count];
@@ -602,7 +672,17 @@ UIActionSheetDelegate>
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return 83;
+    NSArray *classArray = [[tmpArray objectAtIndex:indexPath.section] objectForKey:@"classes"];
+    if (indexPath.row == 0 && [classArray count] == 1)
+    {
+        return 70+4*ClassSpace;
+    }
+    else if (indexPath.row == 0 || [classArray count]-1 == indexPath.row)
+    {
+        return 70+3*ClassSpace;
+    }
+    
+    return 70+2*ClassSpace;
 }
 
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
@@ -703,7 +783,8 @@ UIActionSheetDelegate>
         }
     }
     
-    cell.contentLable.backgroundColor = [UIColor redColor];
+    cell.contentLable.backgroundColor = RGB(242, 87, 87, 1);
+    cell.contentLable.clipsToBounds = YES;
     cell.contentLable.textColor = [UIColor whiteColor];
     cell.contentLable.textAlignment = NSTextAlignmentCenter;
     cell.contentLable.font = [UIFont systemFontOfSize:10];
@@ -752,10 +833,18 @@ UIActionSheetDelegate>
     cell.timeLabel2.font = [UIFont systemFontOfSize:16];
     [cell.timeLabel2 cnv_setUIlabelTextColor:TIMECOLOR andKeyWordColor:RGB(51, 204, 102, 0.8)];
     
-    cell.bgView.frame = CGRectMake(10, 6.5, SCREEN_WIDTH-20, 70);
+    if (indexPath.row == 0)
+    {
+        cell.bgView.frame = CGRectMake(10, ClassSpace*2, SCREEN_WIDTH-20, 70);
+    }
+    else
+    {
+        cell.bgView.frame = CGRectMake(10, ClassSpace, SCREEN_WIDTH-20, 70);
+    }
+    
     
     cell.arrowImageView.frame = CGRectMake(cell.bgView.frame.size.width-20, 27.5, 10, 15);
-    [cell.arrowImageView setImage:[UIImage imageNamed:@"discovery_arrow"]];
+    [cell.arrowImageView setImage:[UIImage imageNamed:@"menu_arrow_right"]];
     cell.arrowImageView.backgroundColor = [UIColor whiteColor];
     
     cell.bgView.backgroundColor = [UIColor whiteColor];

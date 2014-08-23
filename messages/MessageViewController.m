@@ -55,6 +55,8 @@ ChatVCDelegate>
     
     UIButton *editButton;
     BOOL edittingTableView;
+    
+    NSMutableDictionary *unreadCountDict;
 }
 @end
 
@@ -73,6 +75,9 @@ ChatVCDelegate>
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
+    
+    [[NSUserDefaults standardUserDefaults] setObject:@"0" forKey:NewChatMsgNum];
+    [[NSUserDefaults standardUserDefaults] synchronize];
     
     self.titleLabel.text = @"聊天记录";
     [[self.bgView layer] setShadowOffset:CGSizeMake(-5.0f, 5.0f)];
@@ -99,6 +104,7 @@ ChatVCDelegate>
     
     newMessageArray = [[NSMutableArray alloc] initWithCapacity:0];
     chatFriendArray = [[NSMutableArray alloc] initWithCapacity:0];
+    unreadCountDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     
     UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
     moreButton.frame = CGRectMake(5, self.backButton.frame.origin.y, 42, NAV_RIGHT_BUTTON_HEIGHT);
@@ -133,8 +139,6 @@ ChatVCDelegate>
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).ChatDelegate = self;
-    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = self;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dealNewChatMsg:) name:RECEIVENEWMSG object:nil];
     
     [self dealNewChatMsg:nil];
@@ -142,10 +146,13 @@ ChatVCDelegate>
 
 }
 
+-(void)viewWillDisappear:(BOOL)animated
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:RECEIVENEWMSG object:nil];
+}
+
 -(void)dealloc
 {
-    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).ChatDelegate = nil;
-    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self name:RECEIVENEWMSG object:nil];
 }
 
@@ -175,8 +182,10 @@ ChatVCDelegate>
                     
                     NSArray *tmpArray = [[responseDict objectForKey:@"data"] allValues];
                     NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithCapacity:0];
-                    for (NSDictionary *dict in tmpArray)
+                    for (int i=0;i<[tmpArray count];i++)
                     {
+                        NSDictionary *dict = [tmpArray objectAtIndex:i];
+                        [unreadCountDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"new"] intValue]] forKey:[dict objectForKey:@"tid"]];
                         [tmpDict setObject:[dict objectForKey:@"tid"] forKey:@"fid"];
                         [tmpDict setObject:[dict objectForKey:@"r_name"] forKey:@"fname"];
                         [tmpDict setObject:[Tools user_id] forKey:@"tid"];
@@ -268,7 +277,6 @@ ChatVCDelegate>
     [newMessageArray removeAllObjects];
     [newMessageArray addObjectsFromArray:[db findChatUseridWithTableName:CHATTABLE]];
     [friendsListTableView reloadData];
-    DDLOG(@"new msg array %@",newMessageArray);
     if ([newMessageArray count] > 0)
     {
         editButton.hidden = NO;
@@ -294,6 +302,10 @@ ChatVCDelegate>
 
 -(int)findCountOfUserId:(NSString *)fid
 {
+    if ([unreadCountDict objectForKey:fid] && [[unreadCountDict objectForKey:fid] intValue] > 0)
+    {
+        return [[unreadCountDict objectForKey:fid] intValue];
+    }
     NSMutableArray *array = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"fid":fid,@"readed":@"0"} andTableName:CHATTABLE];
     return [array count];
 }
@@ -433,6 +445,22 @@ ChatVCDelegate>
         [Tools fillImageView:cell.headerImageView withImageFromURL:[userIconDIct objectForKey:@"uicon"] andDefault:HEADERICON];
         cell.memNameLabel.text = [userIconDIct objectForKey:@"username"];
         
+        NSString *fname = [userIconDIct objectForKey:@"username"];
+        if (![fname isEqual:[NSNull null]])
+        {
+            NSRange range = [fname rangeOfString:@"("];
+            NSRange range1 = [fname rangeOfString:@"人"];
+            if ([fname length] > 8 && range.length > 0 && range1.length > 0)
+            {
+                cell.memNameLabel.text = [NSString stringWithFormat:@"%@...%@",[fname substringToIndex:4],[fname substringFromIndex:range.location]];
+            }
+            else
+            {
+                cell.memNameLabel.text = fname;
+            }
+        }
+
+        
         if (lastMsgDict)
         {
             cell.contentLabel.hidden = NO;
@@ -454,7 +482,11 @@ ChatVCDelegate>
                 NSString *msgContent = [[lastMsgDict objectForKey:@"content"] emojizedString];
                 if ([[msgContent pathExtension] isEqualToString:@"png"] || [[msgContent pathExtension] isEqualToString:@"jpg"])
                 {
-                    cell.contentLabel.text = [NSString stringWithFormat:@"%@:%@",byName,@"图片"];
+                    cell.contentLabel.text = [NSString stringWithFormat:@"%@:%@",byName,@"[图片]"];
+                }
+                else if([msgContent rangeOfString:@"amr"].length > 0)
+                {
+                    cell.contentLabel.text = [NSString stringWithFormat:@"%@:%@",byName,@"[语音]"];
                 }
                 else
                 {
@@ -466,7 +498,11 @@ ChatVCDelegate>
                 NSString *msgContent = [[lastMsgDict objectForKey:@"content"] emojizedString];
                 if ([[msgContent pathExtension] isEqualToString:@"png"] || [[msgContent pathExtension] isEqualToString:@"jpg"])
                 {
-                    cell.contentLabel.text = [NSString stringWithFormat:@"%@",@"一张图片"];
+                    cell.contentLabel.text = [NSString stringWithFormat:@"%@",@"[图片]"];
+                }
+                else if([msgContent rangeOfString:@"amr"].length > 0)
+                {
+                    cell.contentLabel.text = [NSString stringWithFormat:@"%@",@"[语音]"];
                 }
                 else
                 {
@@ -517,7 +553,7 @@ ChatVCDelegate>
         chat.name = [userIconDIct objectForKey:@"username"];
         chat.imageUrl = [userIconDIct objectForKey:@"uicon"];
     }
-    
+    [unreadCountDict setObject:@"0" forKey:otherid];
     [self.navigationController pushViewController:chat animated:YES];
 }
 

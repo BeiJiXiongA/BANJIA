@@ -88,7 +88,7 @@
         }
         
     }
-    return 60 + imgsHeight+contentHtight + 50 + tmpcommentHeight + 6;
+    return 50 + imgsHeight+contentHtight + 55 + tmpcommentHeight + 6;
 }
 
 @end

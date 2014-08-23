@@ -112,38 +112,6 @@ UITableViewDelegate>
     cell.nameLabel.frame = CGRectMake(70, 12.5, SCREEN_WIDTH-95, 25);
     cell.nameLabel.text = [classDict objectForKey:@"name"];
     cell.nameLabel.backgroundColor = [UIColor clearColor];
-    int num = 0;
-    
-    if ([[classDict objectForKey:@"notice"] integerValue] > 0)
-    {
-        num+=[[classDict objectForKey:@"notice"] integerValue];
-    }
-    
-    cell.contentLable.backgroundColor = [UIColor redColor];
-    cell.contentLable.textColor = [UIColor whiteColor];
-    cell.contentLable.textAlignment = NSTextAlignmentCenter;
-    cell.contentLable.font = [UIFont systemFontOfSize:10];
-    if (num >0)
-    {
-        cell.contentLable.frame = CGRectMake(SCREEN_WIDTH-70 , 25, 20, 20);
-        cell.contentLable.layer.cornerRadius = 10;
-        cell.contentLable.clipsToBounds = YES;
-        cell.contentLable.hidden = NO;
-        cell.contentLable.text = [NSString stringWithFormat:@"%d",num];
-    }
-    else if(([classDict objectForKey:UCDIARY] && [[classDict objectForKey:UCDIARY] integerValue] > 0)
-            || ([classDict objectForKey:DIARY] && [[classDict objectForKey:DIARY] integerValue] > 0))
-    {
-        cell.contentLable.frame = CGRectMake(SCREEN_WIDTH-60, 30, 10, 10);
-        cell.contentLable.layer.cornerRadius = 5;
-        cell.contentLable.clipsToBounds = YES;
-        cell.contentLable.hidden = NO;
-    }
-    else
-    {
-        cell.contentLable.hidden = YES;
-    }
-    
     
     int studentNum = 0;
     if(![[classDict objectForKey:@"students_num"] isEqual:[NSNull null]])

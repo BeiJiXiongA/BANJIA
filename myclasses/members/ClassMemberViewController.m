@@ -65,6 +65,9 @@ MsgDelegate>
     
     UITapGestureRecognizer *tapTgr;
     NSString *classID;
+    
+    UIImageView *tipImageView;
+    UIImageView *tapLabel;
 }
 @end
 
@@ -113,18 +116,9 @@ MsgDelegate>
     [inviteButton setTitle:@"邀请" forState:UIControlStateNormal];
     [inviteButton setBackgroundColor:[UIColor clearColor]];
     [inviteButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
-    inviteButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
+    inviteButton.frame = CGRectMake(SCREEN_WIDTH - 53, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [inviteButton addTarget:self action:@selector(inviteClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:inviteButton];
-    
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"parents"] && [[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:ParentInviteMem] integerValue] == 0)
-    {
-        inviteButton.hidden = YES;
-    }
-    else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"students"] && [[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:StudentInviteMem] integerValue] == 0)
-    {
-        inviteButton.hidden = YES;
-    }
     
     mySearchBar = [[UISearchBar alloc] initWithFrame:
                    CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH-0, 40)];
@@ -211,6 +205,68 @@ MsgDelegate>
     {
         [self getAdminCache];
     }
+    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+    if (ShowTips == 1)
+    {
+        [ud removeObjectForKey:@"classmembertip"];
+        [ud synchronize];
+    }
+    if (![ud objectForKey:@"classmembertip"])
+    {
+        self.unReadLabel.hidden = YES;
+        
+        tipImageView = [[UIImageView alloc] init];
+        tipImageView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 568);
+        if (SYSVERSION >= 7)
+        {
+            [tipImageView setImage:[UIImage imageNamed:@"classmembertip"]];
+        }
+        else
+        {
+            [tipImageView setImage:[UIImage imageNamed:@"classmembertip6"]];
+        }
+        tipImageView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0];
+        [[XDTabViewController sharedTabViewController].bgView addSubview:tipImageView];
+        
+        
+        UITapGestureRecognizer *outTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(outTap)];
+        tipImageView.userInteractionEnabled = YES;
+        [tipImageView addGestureRecognizer:outTap];
+        
+        
+        tapLabel = [[UIImageView alloc] init];
+        tapLabel.frame = CGRectMake(15, 100, 290, 60);
+        tapLabel.backgroundColor = [UIColor clearColor];
+        [[XDTabViewController sharedTabViewController].bgView addSubview:tapLabel];
+        
+        UITapGestureRecognizer *tipTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(checkTip)];
+        tapLabel.userInteractionEnabled = YES;
+        [tapLabel addGestureRecognizer:tipTap];
+    }
+    
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"parents"] && [[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:ParentInviteMem] integerValue] == 0)
+    {
+        inviteButton.hidden = YES;
+        tipImageView.hidden = YES;
+    }
+    else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"students"] && [[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:StudentInviteMem] integerValue] == 0)
+    {
+        inviteButton.hidden = YES;
+        tipImageView.hidden = YES;
+    }
+}
+
+-(void)checkTip
+{
+    [tipImageView removeFromSuperview];
+    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+    [ud setObject:@"1" forKey:@"classmembertip"];
+    [ud synchronize];
+}
+
+-(void)outTap
+{
+    
 }
 
 -(void)dealloc
@@ -1060,6 +1116,7 @@ MsgDelegate>
             cell.headerImageView.layer.cornerRadius = 3;
             cell.headerImageView.clipsToBounds = YES;
             cell.remarkLabel.hidden = NO;
+            cell.remarkLabel.frame = CGRectMake(SCREEN_WIDTH-200, 15, 190, 30);
             if (![[dict objectForKey:@"title"] isEqual:[NSNull null]])
             {
                 cell.remarkLabel.text = [dict objectForKey:@"title"];
@@ -1114,10 +1171,11 @@ MsgDelegate>
                 cell.button2.tag = (indexPath.section-2) * 3333 +indexPath.row;
                 [cell.button2 addTarget:self action:@selector(inviteButtonClick:) forControlEvents:UIControlEventTouchUpInside];
                 [cell.button2 setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+                cell.remarkLabel.frame = CGRectMake(SCREEN_WIDTH-cell.memNameLabel.frame.origin.x-cell.memNameLabel.frame.size.width, 20, 50, 20);
             }
             else
             {
-                cell.remarkLabel.frame = CGRectMake(SCREEN_WIDTH-120, 20, 100, 20);
+                cell.remarkLabel.frame = CGRectMake(SCREEN_WIDTH-200, 15, 190, 30);
                 cell.remarkLabel.textAlignment = NSTextAlignmentRight;
             }
             

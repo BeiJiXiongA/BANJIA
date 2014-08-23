@@ -138,4 +138,52 @@
     return qrimage;
 }
 
++ (void)convertViewToImage:(UIScrollView*)v inViewController:(XDContentViewController *)viewController
+{
+    
+    //支持retian高分辨率
+    
+    UIGraphicsBeginImageContextWithOptions(viewController.view.frame.size, YES, 0.0);
+    
+    float curH = v.contentSize.height;
+    float cha = viewController.view.frame.size.height;
+    
+    UIImageView *allView = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, 320, curH)];
+    
+    for (float f = 0; f < curH; f+=cha)
+        
+    {
+        v.contentOffset = CGPointMake(0, f);
+        
+        [viewController.view.layer renderInContext:UIGraphicsGetCurrentContext()];
+        
+        UIImageView *imgV = [[UIImageView alloc]initWithImage:UIGraphicsGetImageFromCurrentImageContext()];
+        
+        imgV.frame = CGRectMake(0, f, 320, cha);
+        
+        [allView addSubview:imgV];
+    }
+    
+    UIGraphicsEndImageContext();
+    
+    //保存图片
+    
+    UIGraphicsBeginImageContextWithOptions(allView.frame.size, YES, 0.0);
+    
+    [allView.layer renderInContext:UIGraphicsGetCurrentContext()];
+    
+    UIImage *img = UIGraphicsGetImageFromCurrentImageContext();
+    
+    UIGraphicsEndImageContext();
+    v.contentOffset = CGPointMake(0, 0);
+    
+    //save phone album
+    UIImageWriteToSavedPhotosAlbum(img, nil, nil,nil);
+    //save to desktop
+//    [UIImagePNGRepresentation(img) writeToFile:@"/users/test/desktop/saveview.png" atomically:YES];
+    
+//    return img;
+}
+
+
 @end

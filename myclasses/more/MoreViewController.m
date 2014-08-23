@@ -130,7 +130,8 @@ UIActionSheetDelegate>
     sectionArray = @[@{@"count":@"4",@"name":@"家长权限"},
                     @{@"count":@"4",@"name":@"学生权限"},
                      @{@"count":@"3",@"name":@"管理员权限"},
-                     @{@"count": @"1",@"name":@"访客权限"}];
+                     @{@"count": @"1",@"name":@"访客权限"},
+                     @{@"count": @"1",@"name":@""}];
     
     rowsArray = @[@"允许家长评论",
                   @"允许家长加老师为好友",
@@ -171,6 +172,8 @@ UIActionSheetDelegate>
     classSettingTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT - UI_NAVIGATION_BAR_HEIGHT-5) style:UITableViewStylePlain];
     classSettingTableView.delegate = self;
     classSettingTableView.dataSource = self;
+    classSettingTableView.backgroundColor = self.bgView.backgroundColor;
+    classSettingTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     [self.bgView addSubview:classSettingTableView];
     
     selectTimeView = [[UIView alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT, SCREEN_WIDTH, 220)];
@@ -309,13 +312,22 @@ UIActionSheetDelegate>
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
-    return 30.0f;
+    if (section < [sectionArray count] -1)
+    {
+        return 30;
+    }
+    return 10;
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 42;
 }
 
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
     UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, 30)];
-    headerView.backgroundColor = RGB(234, 234, 234, 1);
+    headerView.backgroundColor = self.bgView.backgroundColor;
     
     UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 5, SCREEN_WIDTH, 20)];
     headerLabel.backgroundColor = [UIColor clearColor];
@@ -344,6 +356,11 @@ UIActionSheetDelegate>
     }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     
+    CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+    cell.lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+    cell.lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+    cell.contentView.backgroundColor = [UIColor whiteColor];
+    
     cell.switchView.hidden = YES;
     cell.contentLabel.hidden = YES;
     cell.button.hidden = YES;
@@ -351,7 +368,11 @@ UIActionSheetDelegate>
     
     cell.nameLabel.frame = CGRectMake(10, 7, 200, 30);
     cell.nameLabel.textColor = TITLE_COLOR;
-    cell.nameLabel.text = [rowsArray objectAtIndex:indexPath.row+row];
+    if (indexPath.row+row < [rowsArray count])
+    {
+        cell.nameLabel.text = [rowsArray objectAtIndex:indexPath.row+row];
+    }
+    
     
     cell.switchView.tag = indexPath.row + row;
     cell.switchView.frame = CGRectMake( SCREEN_WIDTH-60, 7, 50, 30);
@@ -364,30 +385,18 @@ UIActionSheetDelegate>
     cell.contentLabel.font = [UIFont systemFontOfSize:14];
     if ([settingDict count] > 0)
     {
-        if ([[[NSUserDefaults standardUserDefaults]objectForKey:@"admin"] intValue] < 2)
-        {
-            cell.contentLabel.frame = CGRectMake(SCREEN_WIDTH - 60, 7, 30, 30);
-            cell.contentLabel.textColor = LIGHT_BLUE_COLOR;
-            cell.contentLabel.hidden = NO;
-            cell.switchView.hidden = YES;
-            cell.nameLabel.hidden = NO;
-        }
-        else
-        {
-            cell.contentLabel.hidden = YES;
-            cell.switchView.hidden = NO;
-            cell.nameLabel.hidden = NO;
-        }
+        cell.lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+        cell.switchView.hidden = NO;
+        cell.contentLabel.hidden = YES;
+        cell.nameLabel.hidden = NO;
         if (indexPath.row+row == 0)
         {
             if ([[settingDict objectForKey:ParentComment] intValue] == 0)
             {
-                cell.contentLabel.text = @"关";
                 [cell.switchView isOn:NO];
             }
             else if([[settingDict objectForKey:ParentComment] intValue] == 1)
             {
-                cell.contentLabel.text = @"开";
                 [cell.switchView isOn:YES];
             }
         }
@@ -395,12 +404,10 @@ UIActionSheetDelegate>
         {
             if ([[settingDict objectForKey:ParentTeacherFriend] intValue] == 0)
             {
-                 cell.contentLabel.text = @"关";
                 [cell.switchView isOn:NO];
             }
             else if([[settingDict objectForKey:ParentTeacherFriend] intValue] == 1)
             {
-                cell.contentLabel.text = @"开";
                 [cell.switchView isOn:YES];
             }
         }
@@ -408,12 +415,10 @@ UIActionSheetDelegate>
         {
             if ([[settingDict objectForKey:ParentInviteMem] intValue] == 0)
             {
-                cell.contentLabel.text = @"关";
                 [cell.switchView isOn:NO];
             }
             else if([[settingDict objectForKey:ParentInviteMem] intValue] == 1)
             {
-                cell.contentLabel.text = @"开";
                 [cell.switchView isOn:YES];
             }
         }
@@ -421,12 +426,10 @@ UIActionSheetDelegate>
         {
             if ([[settingDict objectForKey:StudentTeacherFriend] intValue] == 0)
             {
-                cell.contentLabel.text = @"关";
                 [cell.switchView isOn:NO];
             }
             else if([[settingDict objectForKey:StudentTeacherFriend] intValue] == 1)
             {
-                cell.contentLabel.text = @"开";
                 [cell.switchView isOn:YES];
             }
         }
@@ -434,12 +437,10 @@ UIActionSheetDelegate>
         {
             if ([[settingDict objectForKey:StudentInviteMem] intValue] == 0)
             {
-                cell.contentLabel.text = @"关";
                 [cell.switchView isOn:NO];
             }
             else if([[settingDict objectForKey:StudentInviteMem] intValue] == 1)
             {
-                cell.contentLabel.text = @"开";
                 [cell.switchView isOn:YES];
             }
         }
@@ -447,12 +448,10 @@ UIActionSheetDelegate>
         {
             if ([[settingDict objectForKey:AdminInviteMem] intValue] == 0)
             {
-                cell.contentLabel.text = @"关";
                 [cell.switchView isOn:NO];
             }
             else if([[settingDict objectForKey:AdminInviteMem] intValue] == 1)
             {
-                cell.contentLabel.text = @"开";
                 [cell.switchView isOn:YES];
             }
         }
@@ -460,12 +459,10 @@ UIActionSheetDelegate>
         {
             if ([[settingDict objectForKey:AdminCheckApply] intValue] == 0)
             {
-                 cell.contentLabel.text = @"关";
                 [cell.switchView isOn:NO];
             }
             else if([[settingDict objectForKey:AdminCheckApply] intValue] == 1)
             {
-                cell.contentLabel.text = @"开";
                 [cell.switchView isOn:YES];
             }
         }
@@ -473,12 +470,10 @@ UIActionSheetDelegate>
         {
             if ([[settingDict objectForKey:AdminSendNotice] intValue] == 0)
             {
-                cell.contentLabel.text = @"关";
                 [cell.switchView isOn:NO];
             }
             else if([[settingDict objectForKey:AdminSendNotice] intValue] == 1)
             {
-                cell.contentLabel.text = @"开";
                 [cell.switchView isOn:YES];
             }
             first = NO;
@@ -555,10 +550,14 @@ UIActionSheetDelegate>
                 cell.contentLabel.hidden = YES;
                 cell.nameLabel.hidden = YES;
                 
-                cell.button.frame = CGRectMake(40, 5, SCREEN_WIDTH-80, 34);
-                [cell.button setTitle:@"退出班级" forState:UIControlStateNormal];
+                cell.button.frame = CGRectMake(40, 0, SCREEN_WIDTH-80, 42);
+                [cell.button setTitle:@"解散班级" forState:UIControlStateNormal];
                 [cell.button setBackgroundImage:[UIImage imageNamed:@"logout"] forState:UIControlStateNormal];
                 [cell.button addTarget:self action:@selector(signOut) forControlEvents:UIControlEventTouchUpInside];
+                cell.backgroundColor = self.bgView.backgroundColor;
+                cell.contentView.backgroundColor = self.bgView.backgroundColor;
+                
+                cell.lineImageView.frame = CGRectMake(0, 0, 0, 0);
             }
         }
     }
@@ -621,9 +620,51 @@ UIActionSheetDelegate>
 
 -(void)signOut
 {
-    UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"确定要退出这个班级吗？" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
+    UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"确定要解散这个班级吗？" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
     al.tag = 2222;
     [al show];
+}
+
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (alertView.tag == 2222)
+    {
+        if (buttonIndex == 1)
+        {
+            if ([Tools NetworkReachable])
+            {
+                __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                              @"token":[Tools client_token],
+                                                                              @"c_id":classID
+                                                                              } API:DELCLASS];
+                [request setCompletionBlock:^{
+                    [Tools hideProgress:self.bgView];
+                    NSString *responseString = [request responseString];
+                    NSDictionary *responseDict = [Tools JSonFromString:responseString];
+                    DDLOG(@"del class responsedict %@",responseString);
+                    if ([[responseDict objectForKey:@"code"] intValue]== 1)
+                    {
+                        [[NSNotificationCenter defaultCenter] postNotificationName:CHANGECLASSINFO object:nil];
+                        [[XDTabViewController sharedTabViewController] dismissViewControllerAnimated:YES completion:^{
+                            
+                        }];
+                    }
+                    else
+                    {
+                        [Tools dealRequestError:responseDict fromViewController:nil];
+                    }
+                }];
+                
+                [request setFailedBlock:^{
+                    NSError *error = [request error];
+                    DDLOG(@"error %@",error);
+                    [Tools hideProgress:self.bgView];
+                }];
+                [Tools showProgress:self.bgView];
+                [request startAsynchronous];
+            }
+        }
+    }
 }
 
 -(void)settingValue:(NSString *)value forKay:(NSString *)key

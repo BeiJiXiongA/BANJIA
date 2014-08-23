@@ -120,7 +120,7 @@
 {
     if (recorder.isRecording){
     
-//        //更新峰值
+        //更新峰值
 //        [recorder updateMeters];
 //        [recorderView updateMetersByAvgPower:[recorder averagePowerForChannel:0]];
 ////        NSLog(@"峰值:%f",[recorder averagePowerForChannel:0]);
@@ -134,6 +134,15 @@
 //            [self touchEnded:curTouchPoint];
 //        }
         curCount += 1;
+        
+        if (curCount == MAX_SOUND_LENGTH)
+        {
+            [recorder stop];
+        }
+//        if (curCount <= 1)
+//        {
+//            
+//        }
     }
 }
 
@@ -162,7 +171,7 @@
 //        }
 //    }
 //}
-//传递触点
+////传递触点
 //- (void)transferTouch:(UITouch*)_touch{
 //    CGPoint point = [_touch locationInView:nil];
 //    switch (_touch.phase) {
@@ -221,10 +230,11 @@
 //        }
 //    }];
 //}
-//
+
 
 #pragma mark - AVAudioRecorder Delegate Methods
-- (void)audioRecorderDidFinishRecording:(AVAudioRecorder *)recorder successfully:(BOOL)flag{
+- (void)audioRecorderDidFinishRecording:(AVAudioRecorder *)recorder successfully:(BOOL)flag
+{
     
     [self stopTimer];
     if ([self.recordDel respondsToSelector:@selector(recordFinished:andFileName:voiceLength:)])

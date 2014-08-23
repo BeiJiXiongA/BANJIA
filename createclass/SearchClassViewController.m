@@ -19,7 +19,13 @@ UITextFieldDelegate,
 ZBarReaderDelegate>
 {
     UITableView *searchClassTableView;
-    UIView* line;
+    UIImageView *line;
+    
+    int num;
+    BOOL upOrdown;
+    NSTimer * timer;
+    
+    ZBarReaderViewController *reader;
 }
 @end
 
@@ -168,31 +174,34 @@ ZBarReaderDelegate>
     else if(indexPath.row == 5)
     {
         //扫一扫
-        ZBarReaderViewController *reader = [ZBarReaderViewController new];
+        num = 0;
+        upOrdown = NO;
+        reader = [ZBarReaderViewController new];
         reader.readerDelegate = self;
+        reader.readerView.frame = CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        reader.readerView.torchMode = 0;
         reader.supportedOrientationsMask = ZBarOrientationMaskAll;
         reader.showsZBarControls = NO;
-        reader.readerView.torchMode = 0;
-        [self setOverlayPickerView:reader];
-        
+        [self setOverlayPickerView];
         ZBarImageScanner *scanner = reader.scanner;
-        
         [scanner setSymbology: ZBAR_I25
                        config: ZBAR_CFG_ENABLE
                            to: 0];
-        [self.navigationController presentViewController:reader animated:YES completion:nil];
+        [self.navigationController pushViewController:reader animated:YES];
     }
 }
 
 
-- (void)setOverlayPickerView:(ZBarReaderViewController *)reader
+- (void)setOverlayPickerView
 
 {
     
-    //清除原有控件
-    
     for (UIView *temp in [reader.view subviews])
     {
+        if (temp.frame.size.height == 54)
+        {
+            [temp removeFromSuperview];
+        }
         for (UIButton *button in [temp subviews])
         {
             if ([button isKindOfClass:[UIButton class]])
@@ -203,6 +212,7 @@ ZBarReaderDelegate>
         
         for (UIToolbar *toolbar in [temp subviews])
         {
+            
             if ([toolbar isKindOfClass:[UIToolbar class]])
             {
                 [toolbar setHidden:YES];
@@ -212,118 +222,176 @@ ZBarReaderDelegate>
         }
     }
     
-//    CGFloat width = 280.0f;
     
-    //画中间的基准线
+    CGFloat height = SCREEN_WIDTH-100;
     
-    line = [[UIView alloc] init];
-    line.frame = CGRectMake(40, (SCREEN_HEIGHT+20)/2, 240, 1);
-    line.backgroundColor = [UIColor greenColor];
-//    [reader.view addSubview:line];
-    
-    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
-    animation.fromValue = [NSValue valueWithCGPoint:CGPointMake(20, 80)];
-    animation.toValue = [NSValue valueWithCGPoint:CGPointMake(20, 220)];
-    animation.duration = 0.5;
-    animation.autoreverses = YES;
-    animation.repeatCount = INFINITY;
-    [line.layer addAnimation:animation forKey:@"123"];
+    UIColor *viewColor = [UIColor blackColor];
     
     //最上部view
     
-    UIView* upView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, (SCREEN_HEIGHT-240)/2)];
+    UIView* upView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, (SCREEN_HEIGHT-height)/2-40)];
     
     upView.alpha = 0.3;
     
-    upView.backgroundColor = [UIColor blackColor];
+    upView.backgroundColor = viewColor;
     
     [reader.view addSubview:upView];
     
-    //用于说明的label
+    //left,up
+    UIImageView *upLeftCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_1"]];
+    upLeftCorner.frame = CGRectMake(50, (SCREEN_HEIGHT-height)/2-40, 25, 25);
+    [reader.view addSubview:upLeftCorner];
     
-    UILabel * labIntroudction= [[UILabel alloc] init];
-    
-    labIntroudction.backgroundColor = [UIColor clearColor];
-    
-    labIntroudction.frame=CGRectMake(15, 20, 290, 50);
-    
-    labIntroudction.numberOfLines=2;
-    
-    labIntroudction.textColor=[UIColor whiteColor];
-    
-    labIntroudction.text=@"";
-    
-    [upView addSubview:labIntroudction];
+    //right,up
+    UIImageView *upRightCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_2"]];
+    upRightCorner.frame = CGRectMake(SCREEN_WIDTH-50-25, (SCREEN_HEIGHT-height)/2-40, 25, 25);
+    [reader.view addSubview:upRightCorner];
     
     
     //左侧的view
     
-    UIView *leftView = [[UIView alloc] initWithFrame:CGRectMake(0, (SCREEN_HEIGHT-240)/2, 20, 280)];
+    UIView *leftView = [[UIView alloc] initWithFrame:CGRectMake(0, (SCREEN_HEIGHT-height)/2-40, 50, height)];
     
     leftView.alpha = 0.3;
     
-    leftView.backgroundColor = [UIColor blackColor];
+    leftView.backgroundColor = viewColor;
     
     [reader.view addSubview:leftView];
     
     
     //右侧的view
     
-    UIView *rightView = [[UIView alloc] initWithFrame:CGRectMake(300, (SCREEN_HEIGHT-240)/2, 20, 280)];
+    UIView *rightView = [[UIView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH-50, (SCREEN_HEIGHT-height)/2-40, 50, height)];
     
     rightView.alpha = 0.3;
     
-    rightView.backgroundColor = [UIColor blackColor];
+    rightView.backgroundColor = viewColor;
     
     [reader.view addSubview:rightView];
+    
+    //left,down
+    UIImageView *downLeftCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_4"]];
+    downLeftCorner.frame = CGRectMake(50, (SCREEN_HEIGHT-height)/2+height-25-40, 25, 25);
+    [reader.view addSubview:downLeftCorner];
+    
+    //right,down
+    UIImageView *downRightCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_3"]];
+    downRightCorner.frame = CGRectMake(SCREEN_WIDTH-50-25, (SCREEN_HEIGHT-height)/2+height-25-40, 25, 25);
+    [reader.view addSubview:downRightCorner];
     
     
     //底部view
     
-    UIView * downView = [[UIView alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT-(SCREEN_HEIGHT-240)/2+40, 320, (SCREEN_HEIGHT-240)/2+20)];
+    UIView * downView = [[UIView alloc] initWithFrame:CGRectMake(0, height+(SCREEN_HEIGHT-height)/2-40, SCREEN_WIDTH, (SCREEN_HEIGHT-height)/2+80)];
     
     downView.alpha = 0.3;
     
-    downView.backgroundColor = [UIColor blackColor];
+    downView.backgroundColor = viewColor;
     
     [reader.view addSubview:downView];
     
-    UIImageView *upLeftCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_1"]];
-    upLeftCorner.frame = CGRectMake(20, (SCREEN_HEIGHT-240)/2, 30, 30);
-    [reader.view addSubview:upLeftCorner];
     
-    UIImageView *upRightCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_2"]];
-    upRightCorner.frame = CGRectMake(20+280-30, (SCREEN_HEIGHT-240)/2, 30, 30);
-    [reader.view addSubview:upRightCorner];
+    UILabel * label = [[UILabel alloc] initWithFrame:CGRectMake(20, (SCREEN_HEIGHT-height)/2+height+15-40, 280, 50)];
+    label.text = @"请将班级二维码置于方框内";
+    label.textColor = [UIColor whiteColor];
+    label.textAlignment = 1;
+    label.lineBreakMode = 0;
+    label.numberOfLines = 2;
+    label.backgroundColor = [UIColor clearColor];
+    [reader.view addSubview:label];
     
-    UIImageView *downLeftCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_4"]];
-    downLeftCorner.frame = CGRectMake(20, (SCREEN_HEIGHT+YSTART-240)/2+240, 30, 30);
-    [reader.view addSubview:downLeftCorner];
-    
-    UIImageView *downRightCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_3"]];
-    downRightCorner.frame = CGRectMake(300-30, (SCREEN_HEIGHT+YSTART-240)/2+240, 30, 30);
-    [reader.view addSubview:downRightCorner];
+    UIImageView * image = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@""]];
+    image.frame = CGRectMake(20, (SCREEN_HEIGHT-height)/2-40, height, height);
+    [reader.view addSubview:image];
     
     
-    //用于取消操作的button
+    line = [[UIImageView alloc] initWithFrame:CGRectMake(30, 10, 220, 2)];
+    line.image = [UIImage imageNamed:@"qrline"];
+    [image addSubview:line];
+    //定时器，设定时间过1.5秒，
+    timer = [NSTimer scheduledTimerWithTimeInterval:.03 target:self selector:@selector(animation1) userInfo:nil repeats:YES];
     
-    UIButton *cancelButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    UIView *_navigationBarView = [[UIView alloc] initWithFrame:CGRectMake(0, 0,
+                                                                          UI_SCREEN_WIDTH,
+                                                                          UI_NAVIGATION_BAR_HEIGHT)];
+    _navigationBarView.backgroundColor = [UIColor yellowColor];
+    [reader.view addSubview:_navigationBarView];
     
+    UIImageView * _navigationBarBg = [[UIImageView alloc] init];
+    _navigationBarBg.backgroundColor = UIColorFromRGB(0xffffff);
+    _navigationBarBg.frame = CGRectMake(0, 0, UI_SCREEN_WIDTH, UI_NAVIGATION_BAR_HEIGHT);
+    _navigationBarBg.image = [UIImage imageNamed:@"nav_bar_bg"];
+    [_navigationBarView addSubview:_navigationBarBg];
+    
+    UILabel * _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(self.view.frame.size.width/2-90, YSTART + 6, 180, 36)];
+    _titleLabel.font = [UIFont fontWithName:@"Courier" size:19];
+    _titleLabel.text = @"扫一扫";
+    _titleLabel.backgroundColor = [UIColor clearColor];
+    _titleLabel.textColor = UIColorFromRGB(0x666464);
+    _titleLabel.textAlignment = NSTextAlignmentCenter;
+    [_navigationBarView addSubview:_titleLabel];
+    
+    
+    UIImageView *returnImageView = [[UIImageView alloc] initWithFrame:CGRectMake(11, YSTART +13, 11, 18)];
+    [returnImageView setImage:[UIImage imageNamed:@"icon_return"]];
+    [_navigationBarView addSubview:returnImageView];
+    
+    UIButton *_backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, YSTART +2, 58 , NAV_RIGHT_BUTTON_HEIGHT)];
+    [_backButton setTitle:@"返回" forState:UIControlStateNormal];
+    [_backButton setBackgroundColor:[UIColor clearColor]];
+    [_backButton setTitleColor:UIColorFromRGB(0x727171) forState:UIControlStateNormal];
+    [_backButton addTarget:self action:@selector(unShowSelfViewController) forControlEvents:UIControlEventTouchUpInside];
+    _backButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentRight;
+    _backButton.titleLabel.font = [UIFont systemFontOfSize:16.5];
+    [_navigationBarView addSubview:_backButton];
+    
+    UIButton *cancelButton = [UIButton buttonWithType:UIButtonTypeCustom];
     cancelButton.alpha = 0.4;
+    cancelButton.backgroundColor = [UIColor blackColor];
+    [cancelButton setFrame:CGRectMake((SCREEN_WIDTH-100)/2, label.frame.size.height+label.frame.origin.y+20, 100, 40)];
+    cancelButton.layer.cornerRadius = 15;
+    cancelButton.layer.borderColor = [UIColor whiteColor].CGColor;
+    cancelButton.layer.borderWidth = 0.3;
+    cancelButton.clipsToBounds = YES;
+    [cancelButton setImage:[UIImage imageNamed:@"flash"] forState:UIControlStateNormal];
+//    [cancelButton setTitle:@"开灯" forState:UIControlStateNormal];
+    [cancelButton.titleLabel setFont:[UIFont systemFontOfSize:18]];
+    [cancelButton addTarget:self action:@selector(light)forControlEvents:UIControlEventTouchUpInside];
+    [reader.view addSubview:cancelButton];
     
-    [cancelButton setFrame:CGRectMake(20, SCREEN_HEIGHT-40, 40, 40)];
+}
+
+
+-(void)light
+{
+    if (reader.readerView.torchMode == 0)
+    {
+        reader.readerView.torchMode = 1;
+    }
+    else
+    {
+        reader.readerView.torchMode = 0;
+    }
+}
+-(void)animation1
+{
+    if (upOrdown == NO) {
+        num ++;
+        line.frame = CGRectMake(30, 10+2*num, 220, 2);
+        if (2*num == SCREEN_WIDTH-120) {
+            upOrdown = YES;
+        }
+    }
+    else {
+        num --;
+        line.frame = CGRectMake(30, 10+2*num, 220, 2);
+        if (num == 0) {
+            upOrdown = NO;
+        }
+    }
     
-    [cancelButton setTitle:@"取消" forState:UIControlStateNormal];
     
-//    [cancelButton setImage:[UIImage imageNamed:@"outer_nav_backbtn_s"] forState:UIControlStateNormal];
-    
-    [cancelButton.titleLabel setFont:[UIFont boldSystemFontOfSize:20]];
-    
-    [cancelButton addTarget:self action:@selector(dismissOverlayView:)forControlEvents:UIControlEventTouchUpInside];
-    
-    [reader.view addSubview:cancelButton];  
-    
-}  
+}
 
 //取消button方法  
 
@@ -341,12 +409,12 @@ ZBarReaderDelegate>
     ZBarSymbol *symbol = nil;
     for(symbol in results)
         break;
-    [picker dismissViewControllerAnimated:YES completion:^{
-        DDLOG(@"%@",symbol.data);
-        NSString *classNum = [symbol.data substringFromIndex:[symbol.data rangeOfString:@";"].location+1];
-        [self searchClass:classNum];
-    }];
     
+    DDLOG(@"%@",symbol.data);
+    NSString *classNum = [symbol.data substringFromIndex:[symbol.data rangeOfString:@";"].location+1];
+    [self searchClass:classNum];
+    
+    [self.navigationController popViewControllerAnimated:NO];
 }
 
 -(void)unShowSelfViewController

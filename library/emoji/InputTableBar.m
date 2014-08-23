@@ -11,7 +11,7 @@
 #define FaceViewTag  1000
 #define INPUTBUTTONH 35
 #define INPUTBUTTONT 2.5
-#define DEFAULTTEXTHEIGHT  35
+#define DEFAULTTEXTHEIGHT  33
 
 @implementation InputTableBar
 @synthesize inputTextView,
@@ -114,15 +114,14 @@ originWav,recorderVC,player;
         recordButton.clipsToBounds = YES;
 //        [recordButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:@"btnbg"] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateHighlighted];
 //        [recordButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
-        
+        [recordButton setTitle:@"按下录音" forState:UIControlStateNormal];
         [recordButton setBackgroundImage:[UIImage imageNamed:@"recordBtn"] forState:UIControlStateNormal];
 
         
         UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPress:)];
+        longPress.minimumPressDuration = 0.2;
         recordButton.userInteractionEnabled = YES;
         [recordButton addGestureRecognizer:longPress];
-        [recordButton setTitle:@"按下录音" forState:UIControlStateNormal];
-        [recordButton setTitle:@"松开播放" forState:UIControlStateHighlighted];
         recordButton.hidden = YES;
         [inputBgView addSubview:recordButton];
 
@@ -562,23 +561,28 @@ originWav,recorderVC,player;
 {
     if (sound)
     {
-        CGSize size = inputTextView.contentSize;
-        inputTextViewSize = size;
+        inputTextViewSize = CGSizeMake(250, DEFAULTTEXTHEIGHT);
+        if (inputTextView.text.length > 0)
+        {
+            inputTextViewSize = inputTextView.contentSize;
+        }
         [self inputChange];
 
         [soundButton setImage:[UIImage imageNamed:@"icon_sound"] forState:UIControlStateNormal];
         recordButton.hidden = YES;
         inputTextView.hidden = NO;
+        [[NSNotificationCenter defaultCenter] postNotificationName:UIKeyboardWillShowNotification object:nil];
     }
     else
     {
         //显示录音键
-        
         inputTextViewSize = CGSizeMake(250, DEFAULTTEXTHEIGHT);
         [self inputChange];
         [soundButton setImage:[UIImage imageNamed:@"keyboard"] forState:UIControlStateNormal];
         recordButton.hidden = NO;
         inputTextView.hidden = YES;
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:UIKeyboardWillHideNotification object:nil];
     }
     sound = !sound;
 }
@@ -680,8 +684,6 @@ originWav,recorderVC,player;
             soundButton.frame = CGRectMake( 5, inputTextViewSize.height-DEFAULTTEXTHEIGHT+INPUTBUTTONT, INPUTBUTTONH, INPUTBUTTONH);
             inputBgView.frame = CGRectMake(0, 0, SCREEN_WIDTH, inputTextViewSize.height+10);
             inputTextView.frame = CGRectMake( left, INPUTBUTTONT, inputWidth , inputTextViewSize.height+2.5);
-            
-            
         }
         else
         {
@@ -735,10 +737,28 @@ originWav,recorderVC,player;
 }
 -(void)recordFinished:(NSString *)filePath andFileName:(NSString *)fileName voiceLength:(int)length
 {
-    if ([self.returnFunDel respondsToSelector:@selector(recordFinished:andFileName:voiceLength:)])
+    if ([self.returnFunDel respondsToSelector:@selector(recordFinished:andFileName:voiceLength:)] && length >= 1)
     {
         [self.returnFunDel recordFinished:filePath andFileName:fileName voiceLength:length];
     }
+    else if(length < 1)
+    {
+        if ([self.returnFunDel respondsToSelector:@selector(showTips:)])
+        {
+            [self.returnFunDel showTips:@"录音时间不能少于1秒"];
+        }
+        if ([[NSFileManager defaultManager] removeItemAtPath:filePath error:nil])
+        {
+            DDLOG(@"delete <s sound!");
+        }
+    }
+//    if(length >= MAX_SOUND_LENGTH)
+//    {
+//        if ([self.returnFunDel respondsToSelector:@selector(showTips:)])
+//        {
+//            [self.returnFunDel showTips:[NSString stringWithFormat:@"录音时间不能多于%d秒",MAX_SOUND_LENGTH]];
+//        }
+//    }
 }
 
 -(void)VoiceRecorderBaseVCRecordFinish:(NSString *)_filePath fileName:(NSString *)_fileName

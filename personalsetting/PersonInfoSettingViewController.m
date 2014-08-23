@@ -172,6 +172,7 @@ EditNameDone>
 
 -(void)unShowSelfViewController
 {
+    DDLOG(@"birth %@",birth);
     if ( bgImage || headerImage || ![userName isEqualToString:[Tools user_name]] || (![birth isEqualToString:[Tools user_birth]] && ![birth isEqualToString:@"请设置生日"]) || ![sex isEqualToString:[Tools user_sex]])
     {
         UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"" message:@"你要放弃以上更改么？" delegate:self cancelButtonTitle:@"放弃" otherButtonTitles:@"保存", nil];
@@ -210,11 +211,6 @@ EditNameDone>
 
 -(void)submitChange
 {
-//    if (![((UITextField *)[personInfoTableView viewWithTag:4]).text isEqualToString:@"请选择"] && ![[((UITextField *)[personInfoTableView viewWithTag:4]).text isEqualToString:[Tools user_birth]])
-//    {
-//        [self dateDone];
-//    }
-    
     if (!bgImage && !headerImage && [((UITextField *)[personInfoTableView viewWithTag:4]).text isEqualToString:[Tools user_birth]] && [userName isEqualToString:[Tools user_name]])
     {
         [Tools showAlertView:@"没做任何更改哦！" delegateViewController:nil];
@@ -415,7 +411,17 @@ EditNameDone>
     
     if (indexPath.row < 4)
     {
-        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+        cell.arrowImageView.hidden = NO;
+        if (indexPath.row == 0)
+        {
+            [cell.arrowImageView setFrame:CGRectMake(SCREEN_WIDTH-20, 19.5, 10, 15)];
+        }
+        else
+        {
+            [cell.arrowImageView setFrame:CGRectMake(SCREEN_WIDTH-20, 16.5, 10, 15)];
+        }
+        
+        [cell.arrowImageView setImage:[UIImage imageNamed:@"menu_arrow_right"]];
     }
     
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
@@ -491,19 +497,9 @@ EditNameDone>
 
 -(void)editInfo1:(NSInteger)tag
 {
-    DDLOG(@"buttontag==%d",(int)tag-333);
-    if (tag-333<1)
-    {
-//        ((UITextField *)[personInfoTableView viewWithTag:tag-330]).backgroundColor = [[UIColor whiteColor]colorWithAlphaComponent:0.5];
-//        ((UITextField *)[personInfoTableView viewWithTag:tag-330]).enabled = YES;
-//        [((UITextField *)[personInfoTableView viewWithTag:tag-330]) becomeFirstResponder];
-    }
-    else
-    {
-        [UIView animateWithDuration:0.2 animations:^{
-            dateView.frame = CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT);
-        }];
-    }
+    [UIView animateWithDuration:0.2 animations:^{
+        dateView.frame = CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT);
+    }];
 }
 -(void)dateDone
 {

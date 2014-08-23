@@ -63,7 +63,7 @@ verticalLineView;
         [self.bgView addSubview:topImageView];
         
         headerImageView = [[UIImageView alloc] init];
-        headerImageView.frame = CGRectMake(12, 12, 43, 43);
+        headerImageView.frame = CGRectMake(12, 12, 32, 32);
         headerImageView.hidden = YES;
         headerImageView.clipsToBounds = YES;
         headerImageView.layer.contentsGravity = kCAGravityResizeAspectFill;
@@ -260,7 +260,7 @@ verticalLineView;
                 NSString *content = [[commentDict objectForKey:@"content"] emojizedString];
                 NSString *contentString = [NSString stringWithFormat:@"%@:%@",name,content];
                 CGSize s = [Tools getSizeWithString:contentString andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
-                return s.height+chaHeight+25;
+                return s.height+chaHeight+33;
             }
         }
     }
@@ -289,7 +289,7 @@ verticalLineView;
             NSString *content = [[commentDict objectForKey:@"content"] emojizedString];
             NSString *contentString = [NSString stringWithFormat:@"%@:%@",name,content];
             CGSize s = [Tools getSizeWithString:contentString andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
-            return s.height+chaHeight+25;
+            return s.height+chaHeight+33;
         }
     }
     else if(praiseArray && !commentsArray)
@@ -324,7 +324,7 @@ verticalLineView;
 //    cell.nameButton.hidden = YES;
 //    CGFloat c_width = 15;
     CGFloat minCellHei = 35;
-    CGFloat hei = 8;
+    CGFloat hei = 12;
     CGFloat originalY = 0;
     CGFloat topSpace = 5;
     cell.openPraiseButton.hidden = YES;
@@ -413,11 +413,11 @@ verticalLineView;
                     cell.commentContentLabel.topSpace = 0;
                 }
                 cell.headerImageView.hidden = NO;
-                cell.headerImageView.frame = CGRectMake(7, 7, 35, 35);
+                cell.headerImageView.frame = CGRectMake(12, 10, PraiseW, PraiseW);
                 cell.headerImageView.backgroundColor = [UIColor yellowColor];
                 [Tools fillImageView:cell.headerImageView withImageFromURL:[[commitDict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERICON];
                 cell.headerImageView.tag = [commentsArray count]-indexPath.row;
-                cell.headerImageView.layer.cornerRadius = 3;
+                cell.headerImageView.layer.cornerRadius = 2;
                 cell.headerImageView.clipsToBounds = YES;
                 
                 UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showDetail:)];
@@ -429,7 +429,7 @@ verticalLineView;
                 cell.nameButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
                 [cell.nameButton setTitle:name forState:UIControlStateNormal];
                 
-                cell.commentContentLabel.frame = CGRectMake(48, 25, MaxCommentWidth-30, s.height+hei);
+                cell.commentContentLabel.frame = CGRectMake(48, 29, MaxCommentWidth-30, s.height+hei);
                 cell.commentContentLabel.text = content;
                 [cell.commentContentLabel cnv_setUILabelText:[NSString stringWithFormat:@"%@",content] andKeyWord:name];
                 [cell.commentContentLabel cnv_setUIlabelTextColor:COMMENTCOLOR andKeyWordColor:RGB(64, 196, 110, 1)];
@@ -459,11 +459,11 @@ verticalLineView;
             
             
             cell.headerImageView.hidden = NO;
-            cell.headerImageView.frame = CGRectMake(7, 7, 35, 35);
+            cell.headerImageView.frame = CGRectMake(12, 10, PraiseW, PraiseW);
             cell.headerImageView.backgroundColor = [UIColor yellowColor];
             [Tools fillImageView:cell.headerImageView withImageFromURL:[[commitDict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERICON];
             cell.headerImageView.tag = [commentsArray count]-indexPath.row;
-            cell.headerImageView.layer.cornerRadius = 3;
+            cell.headerImageView.layer.cornerRadius = 2;
             cell.headerImageView.clipsToBounds = YES;
             
             UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showDetail:)];
@@ -476,7 +476,7 @@ verticalLineView;
             [cell.nameButton setTitle:name forState:UIControlStateNormal];
             cell.nameButton.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"clearimage"]];
             
-            cell.commentContentLabel.frame = CGRectMake(48, 25, MaxCommentWidth-30, s.height+hei);
+            cell.commentContentLabel.frame = CGRectMake(48, 29, MaxCommentWidth-30, s.height+hei);
             cell.commentContentLabel.text = content;
             [cell.commentContentLabel cnv_setUILabelText:[NSString stringWithFormat:@"%@",content] andKeyWord:name];
             [cell.commentContentLabel cnv_setUIlabelTextColor:COMMENTCOLOR andKeyWordColor:RGB(64, 196, 110, 1)];

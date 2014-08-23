@@ -289,6 +289,7 @@
         {
             [cell setSeparatorInset:UIEdgeInsetsZero];
         }
+        cell.contentView.backgroundColor = [UIColor whiteColor];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         return cell;
     }
@@ -318,7 +319,7 @@
         {
             [cell setSeparatorInset:UIEdgeInsetsZero];
         }
-        
+        cell.contentView.backgroundColor = [UIColor whiteColor];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         return cell;
     }
@@ -403,7 +404,8 @@
             [cell.mySwitch isOn:NO];
         }
     }
-    
+    cell.contentView.backgroundColor = [UIColor whiteColor];
+    cell.backgroundColor = [UIColor whiteColor];
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
 }

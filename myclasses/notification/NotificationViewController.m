@@ -38,6 +38,9 @@ EGORefreshTableDelegate>
     UILabel *tipLabel;
     
     NSString *classID;
+    
+    UIImageView *tipImageView;
+    UIImageView *tapLabel;
 }
 @end
 
@@ -77,24 +80,10 @@ EGORefreshTableDelegate>
     unreadedArray = [[NSMutableArray alloc] initWithCapacity:0];
     
     UIButton *addButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    addButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
+    addButton.frame = CGRectMake(SCREEN_WIDTH - 52, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [addButton addTarget:self action:@selector(addClick) forControlEvents:UIControlEventTouchUpInside];
     [addButton setImage:[UIImage imageNamed:@"icon_add"] forState:UIControlStateNormal];
     
-    
-    NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
-    NSInteger userAdmin = [[dict objectForKey:@"admin"] integerValue];
-    if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
-    {
-        [self.navigationBarView addSubview:addButton];
-    }
-    else if([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:AdminSendNotice] integerValue] == 1)
-    {
-        if (userAdmin ==1)
-        {
-            [self.navigationBarView addSubview:addButton];
-        }
-    }
     notificationTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT - UI_NAVIGATION_BAR_HEIGHT-UI_TAB_BAR_HEIGHT) style:UITableViewStylePlain];
     notificationTableView.delegate = self;
     notificationTableView.dataSource = self;
@@ -117,6 +106,104 @@ EGORefreshTableDelegate>
     tipLabel.text = @"班级目前还没有任何公告！";
     tipLabel.hidden = YES;
     [notificationTableView addSubview:tipLabel];
+    
+    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+    if (ShowTips == 1)
+    {
+        [ud removeObjectForKey:@"classnoticetip1"];
+        [ud removeObjectForKey:@"classnoticetip2"];
+        [ud synchronize];
+    }
+    if (![ud objectForKey:@"classnoticetip1"])
+    {
+        self.unReadLabel.hidden = YES;
+        
+        tipImageView = [[UIImageView alloc] init];
+        tipImageView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 568);
+        if (SYSVERSION >= 7)
+        {
+            [tipImageView setImage:[UIImage imageNamed:@"classnoticetip1"]];
+        }
+        else
+        {
+            [tipImageView setImage:[UIImage imageNamed:@"classnoticetip16"]];
+        }
+        tipImageView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0];
+        [[XDTabViewController sharedTabViewController].bgView addSubview:tipImageView];
+        tipImageView.hidden = YES;
+        
+        
+        UITapGestureRecognizer *outTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(outTap)];
+        tipImageView.userInteractionEnabled = YES;
+        [tipImageView addGestureRecognizer:outTap];
+        
+        
+        tapLabel = [[UIImageView alloc] init];
+        tapLabel.frame = CGRectMake(15, 100, 290, 60);
+        tapLabel.backgroundColor = [UIColor clearColor];
+        [[XDTabViewController sharedTabViewController].bgView addSubview:tapLabel];
+
+        
+        UITapGestureRecognizer *tipTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(checkTip)];
+        tapLabel.userInteractionEnabled = YES;
+        [tapLabel addGestureRecognizer:tipTap];
+    }
+    
+    NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
+    NSInteger userAdmin = [[dict objectForKey:@"admin"] integerValue];
+    if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
+    {
+        [self.navigationBarView addSubview:addButton];
+        tipImageView.hidden = NO;
+    }
+    else if([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:AdminSendNotice] integerValue] == 1)
+    {
+        if (userAdmin ==1)
+        {
+            [self.navigationBarView addSubview:addButton];
+            tipImageView.hidden = NO;
+        }
+    }
+
+}
+
+-(void)outTap
+{
+    
+}
+
+-(void)checkTip
+{
+    NSString *schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
+    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+    if (![ud objectForKey:@"classnoticetip1"] && [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] intValue] == 2 && ([schoolName isEqualToString:@"未指定学校"] || [schoolName isEqualToString:@"未设置学校"]))
+    {
+        tapLabel.frame = CGRectMake(15, 160, 290, 70);
+        if (SYSVERSION >= 7)
+        {
+            [tipImageView setImage:[UIImage imageNamed:@"classnoticetip2"]];
+        }
+        else
+        {
+            [tipImageView setImage:[UIImage imageNamed:@"classnoticetip26"]];
+        }
+        NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+        [ud setObject:@"1" forKey:@"classnoticetip1"];
+        [ud synchronize];
+    }
+    else if(![ud objectForKey:@"classnoticetip2"])
+    {
+        [tapLabel removeFromSuperview];
+        [tipImageView removeFromSuperview];
+        NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+        [ud setObject:@"1" forKey:@"classnoticetip2"];
+        [ud synchronize];
+    }
+    else
+    {
+        [tapLabel removeFromSuperview];
+        [tipImageView removeFromSuperview];
+    }
 }
 
 - (void)didReceiveMemoryWarning
@@ -377,6 +464,7 @@ EGORefreshTableDelegate>
                 cell.contentLabel.hidden = YES;
                 cell.nameLabel.hidden = YES;
         }
+        cell.selectionStyle = UITableViewCellSeparatorStyleNone;
         return cell;
     }
     else

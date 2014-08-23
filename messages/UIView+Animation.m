@@ -57,9 +57,10 @@ static NSMutableArray   *displayViewAry;//已显示的页面数组
 + (AppDelegate *)getAppDelegate {
     return (AppDelegate *)[[UIApplication sharedApplication] delegate];
 }
-+ (UIView *)getTopView{
-    return [[[UIView getAppDelegate] viewController] view];
-}
+//+ (UIView *)getTopView{
+//    return ((UIApplication *)[[UIApplication sharedApplication] delegate]).keyWindow.rootViewController.view;
+////    [UIScreen mainScreen];
+//}
 
 #pragma mark - 顶层maskView触摸
 + (void)setTopMaskViewCanTouch:(BOOL)_canTouch{

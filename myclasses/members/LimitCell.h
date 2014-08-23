@@ -15,4 +15,5 @@
 @property (nonatomic, strong) KLSwitch *mySwitch;
 @property (nonatomic, strong) UILabel *markLabel;
 @property (nonatomic, strong) UIImageView *arrowImageView;
+@property (nonatomic, strong) UIImageView *lineImageView;
 @end

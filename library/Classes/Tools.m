@@ -431,9 +431,14 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 
 + (ASIFormDataRequest *)upLoadSoundFiles:(NSArray *)filesArray withSubURL:(NSString *)subUrl andParaDict:(NSDictionary *)pareDict timeLength:(int)length
 {
+    
+    NSMutableDictionary *headerDict = [[NSMutableDictionary alloc] initWithCapacity:0];
+    [headerDict setObject:@"audio/amr" forKey:@"Content-Type"];
+    
     ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:
                                                                       [NSString stringWithFormat:@"%@%@",HOST_URL,subUrl]]];
     [request setRequestMethod:@"POST"];
+    
     [request setTimeOutSeconds:12];
     DDLOG(@"url=%@",request.url);
     for (NSString *key in pareDict.allKeys)
@@ -446,7 +451,8 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     {
         NSData *data = [NSData dataWithContentsOfFile:[filesArray objectAtIndex:i]];
         DDLOG(@"%d",data.length);
-        [request addData:data withFileName:[NSString stringWithFormat:@"%d.amr",i+1] andContentType:@"media/amr" forKey:[NSString stringWithFormat:@"file%@",i==0?@"":[NSString stringWithFormat:@"%d",i+1]]];
+//        [request addData:data forKey:[NSString stringWithFormat:@"file%@",i==0?@"":[NSString stringWithFormat:@"%d",i+1]]];
+        [request addData:data withFileName:[NSString stringWithFormat:@"%d.amr",i+1] andContentType:@"audio/amr" forKey:[NSString stringWithFormat:@"file%@",i==0?@"":[NSString stringWithFormat:@"%d",i+1]]];
     }
     return request;
 }

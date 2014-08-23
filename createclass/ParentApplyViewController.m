@@ -463,7 +463,7 @@ UIActionSheetDelegate>
     student_num = @"";
     re_id = @"";
     mySearchBar.text = @"";
-//    studentButton.enabled = NO;
+    studentButton.enabled = NO;
     
     childView.frame = CGRectMake(mySearchBar.frame.origin.x, mySearchBar.frame.size.height+mySearchBar.frame.origin.y+20, mySearchBar.frame.size.width, 0);
     childInfoView.frame = CGRectMake(0, mySearchBar.frame.size.height+mySearchBar.frame.origin.y+20, SCREEN_WIDTH, 0);
@@ -1050,7 +1050,11 @@ UIActionSheetDelegate>
     childInfoView.frame = CGRectMake(0, mySearchBar.frame.size.height+mySearchBar.frame.origin.y+20, SCREEN_WIDTH, 50);
     childView.frame = CGRectMake(10, mySearchBar.frame.size.height+mySearchBar.frame.origin.y+20, SCREEN_WIDTH-20, 0);
     [self changeHeight];
-//    studentButton.enabled = YES;
+    if ([[Tools phone_num] length] > 0)
+    {
+        studentButton.enabled = YES;
+    }
+    studentButton.enabled = YES;
 }
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -1122,7 +1126,7 @@ UIActionSheetDelegate>
     }
     if ([[Tools phone_num] length] > 0)
     {
-//        studentButton.enabled = YES;
+        studentButton.enabled = YES;
     }
     childView.hidden = YES;
     [tableView deselectRowAtIndexPath:indexPath animated:NO];

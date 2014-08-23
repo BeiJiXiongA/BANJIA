@@ -10,7 +10,7 @@
 #import "Header.h"
 
 @implementation RelatedCell
-@synthesize iconImageView,nametf,relateButton,bgImageView,contentLabel;
+@synthesize iconImageView,nametf,relateButton,bgImageView,contentLabel,arrowImageView;
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
@@ -37,6 +37,10 @@
         [relateButton setTitle:@"关联" forState:UIControlStateNormal];
         [relateButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
         [self.contentView addSubview:relateButton];
+        
+        arrowImageView = [[UIImageView alloc] init];
+        arrowImageView.hidden = YES;
+        [self.contentView addSubview:arrowImageView];
         
         contentLabel = [[UILabel alloc] init];
         contentLabel.textColor = CONTENTCOLOR;

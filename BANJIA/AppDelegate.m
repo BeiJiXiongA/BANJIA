@@ -49,12 +49,9 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for cupstomization after application launch.
     
-//    [[NSUserDefaults standardUserDefaults] setObject:@"0006" forKey:@"currentVersion"];
-    [[NSUserDefaults standardUserDefaults] setObject:@"0020" forKey:@"currentVersion"];
+    [[NSUserDefaults standardUserDefaults] setObject:@"0007" forKey:@"currentVersion"];
+//    [[NSUserDefaults standardUserDefaults] setObject:@"0020" forKey:@"currentVersion"];
     [[NSUserDefaults standardUserDefaults] setObject:SCHEMERELEASE forKey:SCHEMETYPE];
-    
-    [[NSUserDefaults standardUserDefaults] setObject:FROMBACKGROUD forKey:BECOMEACTIVE];
-    [[NSUserDefaults standardUserDefaults] synchronize];
     
     [[NSUserDefaults standardUserDefaults] synchronize];
     
@@ -340,44 +337,50 @@
 
 -(void)getNewClass
 {
-    if ([Tools NetworkReachable])
+    if ([[Tools user_id] length] > 0)
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
-                                                                      @"token":[Tools client_token]
-                                                                      } API:MB_NEWCLASS];
-        [request setCompletionBlock:^{
-            NSString *responseString = [request responseString];
-            NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"newclass responsedict %@",responseDict);
-            if ([[responseDict objectForKey:@"code"] intValue]== 1)
-            {
-                if ([[[responseDict objectForKey:@"data"] objectForKey:@"count"] integerValue] > 0)
+        if ([Tools NetworkReachable])
+        {
+            __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                          @"token":[Tools client_token]
+                                                                          } API:MB_NEWCLASS];
+            [request setCompletionBlock:^{
+                NSString *responseString = [request responseString];
+                NSDictionary *responseDict = [Tools JSonFromString:responseString];
+                DDLOG(@"newclass responsedict %@",responseDict);
+                if ([[responseDict objectForKey:@"code"] intValue]== 1)
                 {
-                    [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"]objectForKey:@"count"] integerValue]] forKey:NewClassNum];
-                    [[NSUserDefaults standardUserDefaults] synchronize];
-                    
-                    if ([self.msgDelegate respondsToSelector:@selector(dealNewMsg:)])
+                    if ([[[responseDict objectForKey:@"data"] objectForKey:@"count"] integerValue] > 0)
                     {
-                        [self.msgDelegate dealNewMsg:nil];
+                        [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"]objectForKey:@"count"] integerValue]] forKey:NewClassNum];
+                        [[NSUserDefaults standardUserDefaults] synchronize];
+                        
+                        if ([self.msgDelegate respondsToSelector:@selector(dealNewMsg:)])
+                        {
+                            [self.msgDelegate dealNewMsg:nil];
+                        }
                     }
                 }
-            }
-            else
-            {
-                [Tools dealRequestError:responseDict fromViewController:nil];
-            }
-        }];
-        
-        [request setFailedBlock:^{
-        }];
-        [request startAsynchronous];
+                else
+                {
+                    [Tools dealRequestError:responseDict fromViewController:nil];
+                }
+            }];
+            
+            [request setFailedBlock:^{
+            }];
+            [request startAsynchronous];
+        }
+
     }
 }
 
 -(void)getNewChat
 {
-    if ([Tools NetworkReachable])
+    if ([[Tools user_id] length] > 0)
     {
+        if ([Tools NetworkReachable])
+        {
             __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                           @"token":[Tools client_token]
                                                                           } API:MB_NEWCHAT];
@@ -390,10 +393,13 @@
                     [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",[[responseDict objectForKey:@"data"] integerValue]] forKey:NewChatMsgNum];
                     [[NSUserDefaults standardUserDefaults] synchronize];
                     
-//                    if ([self.chatDelegate respondsToSelector:@selector(dealNewChatMsg:)])
-//                    {
-//                        [self.chatDelegate dealNewChatMsg:nil];
-//                    }
+                    if ([self.chatDelegate respondsToSelector:@selector(dealNewChatMsg:)])
+                    {
+                        [self.chatDelegate dealNewChatMsg:nil];
+                    }
+                    
+                    [[NSUserDefaults standardUserDefaults] setObject:ENTER_FORGROUD forKey:BECOMEACTIVE];
+                    [[NSUserDefaults standardUserDefaults] synchronize];
                 }
                 else
                 {
@@ -404,6 +410,8 @@
             [request setFailedBlock:^{
             }];
             [request startAsynchronous];
+        }
+
     }
 }
 
@@ -529,10 +537,10 @@
             {
                 if ([_db insertRecord:chatDict andTableName:CHATTABLE])
                 {
-//                    if ([self.chatDelegate respondsToSelector:@selector(dealNewChatMsg:)])
-//                    {
-//                        [self.chatDelegate dealNewChatMsg:chatDict];
-//                    }
+                    if ([self.chatDelegate respondsToSelector:@selector(dealNewChatMsg:)])
+                    {
+                        [self.chatDelegate dealNewChatMsg:chatDict];
+                    }
                 }
             }
             else if ([[_db findSetWithDictionary:@{@"userid":[Tools user_id],@"mid":[userInfo objectForKey:@"m_id"]} andTableName:CHATTABLE] count]==0)
@@ -540,15 +548,14 @@
                 if ([_db insertRecord:chatDict andTableName:CHATTABLE])
                 {
                     
-//                    if ([self.chatDelegate respondsToSelector:@selector(dealNewChatMsg:)])
-//                    {
-//                        [self.chatDelegate dealNewChatMsg:chatDict];
-//                    }
-                    DDLOG(@"======%@",[[NSUserDefaults standardUserDefaults] objectForKey:BECOMEACTIVE]);
+                    if ([self.chatDelegate respondsToSelector:@selector(dealNewChatMsg:)])
+                    {
+                        [self.chatDelegate dealNewChatMsg:chatDict];
+                    }
                     if (!([[NSUserDefaults standardUserDefaults] objectForKey:@"viewtype"] &&
                           [[[NSUserDefaults standardUserDefaults] objectForKey:@"viewtype"] isEqualToString:@"chat"]))
                     {
-                        if ([[[NSUserDefaults standardUserDefaults]objectForKey:BECOMEACTIVE] isEqualToString:FROMBACKGROUD])
+                        if ([[[NSUserDefaults standardUserDefaults]objectForKey:BECOMEACTIVE] isEqualToString:ENTER_BACKGROUD])
                         {
                             SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
                             MessageViewController *msgViewController = [[MessageViewController alloc] init];
@@ -557,7 +564,7 @@
                             JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:msgNav menuController:sideMenuViewController];
                             self.window.rootViewController = sideMenu;
                             
-                            [[NSUserDefaults standardUserDefaults] setObject:FROMFORGROUD forKey:BECOMEACTIVE];
+                            [[NSUserDefaults standardUserDefaults] setObject:ENTER_FORGROUD forKey:BECOMEACTIVE];
                             [[NSUserDefaults standardUserDefaults] synchronize];
                         }
                     }
@@ -657,6 +664,7 @@
             {
                 [self.msgDelegate dealNewMsg:userInfo];
             }
+            [[NSNotificationCenter defaultCenter] postNotificationName:CHANGECLASSINFO object:nil];
         }
         else if([[userInfo objectForKey:@"type"] isEqualToString:@"logout"])
         {
@@ -766,6 +774,8 @@
 {
     // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later. 
     // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+    [[NSUserDefaults standardUserDefaults] setObject:ENTER_BACKGROUD forKey:BECOMEACTIVE];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application
@@ -775,8 +785,8 @@
     {
         [self getNewChat];
         [self getNewClass];
-        [[NSUserDefaults standardUserDefaults] setObject:FROMBACKGROUD forKey:BECOMEACTIVE];
-        [[NSUserDefaults standardUserDefaults] synchronize];
+//        [[NSUserDefaults standardUserDefaults] setObject:ENTER_FORGROUD forKey:BECOMEACTIVE];
+//        [[NSUserDefaults standardUserDefaults] synchronize];
     }
 }
 
@@ -792,6 +802,9 @@
 {
     // Saves changes in the application's managed object context before the application terminates.
     [self saveContext];
+    
+    [[NSUserDefaults standardUserDefaults] setObject:ENTER_BACKGROUD forKey:BECOMEACTIVE];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 - (void)saveContext

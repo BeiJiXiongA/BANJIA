@@ -27,7 +27,7 @@
         commentContentLabel.backgroundColor = [UIColor clearColor];
         commentContentLabel.font = [UIFont systemFontOfSize:14];
         commentContentLabel.numberOfLines = 100;
-        commentContentLabel.lineBreakMode = NSLineBreakByWordWrapping;
+        commentContentLabel.lineBreakMode = NSLineBreakByCharWrapping;
         [self.contentView addSubview:commentContentLabel];
         commentContentLabel.textColor = COMMENTCOLOR;
         
@@ -46,7 +46,8 @@
         [self.contentView addSubview:timeLabel];
         
         lineImageView = [[UIImageView alloc] init];
-        [lineImageView setImage:[UIImage imageNamed:@"sepretorline"]];
+        [lineImageView setImage:[UIImage imageNamed:@""]];
+        lineImageView.backgroundColor = RGB(233, 233, 231, 1);
         [self.contentView addSubview:lineImageView];
         
         self.backgroundColor = RGB(252, 252, 252, 1);
@@ -67,11 +68,5 @@
     // Configure the view for the selected state
 }
 
--(void)drawRect:(CGRect)rect
-{
-//    DDLOG(@"commentDict == %@",commentDict);
-//    NSString *name = [[commentDict objectForKey:@"by"] objectForKey:@"name"];
-//    NSString *
-}
 
 @end
