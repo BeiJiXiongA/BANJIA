@@ -178,9 +178,9 @@
     v.contentOffset = CGPointMake(0, 0);
     
     //save phone album
-    UIImageWriteToSavedPhotosAlbum(img, nil, nil,nil);
+//    UIImageWriteToSavedPhotosAlbum(img, nil, nil,nil);
     //save to desktop
-//    [UIImagePNGRepresentation(img) writeToFile:@"/users/test/desktop/saveview.png" atomically:YES];
+    [UIImagePNGRepresentation(img) writeToFile:@"/users/test/desktop/saveview.png" atomically:YES];
     
 //    return img;
 }

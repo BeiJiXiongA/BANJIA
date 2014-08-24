@@ -187,22 +187,27 @@ UIActionSheetDelegate,NameButtonDel>
 
 -(void)myReturnFunction
 {
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"parents"])
+    DDLOG(@"opt===%@",[[NSUserDefaults standardUserDefaults] objectForKey:@"opt"]);
+    if ([[NSUserDefaults standardUserDefaults] objectForKey:@"opt"])
     {
-        if ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:ParentComment] integerValue] == 0)
+        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"parents"] &&
+            [[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:ParentComment] integerValue] == 0)
         {
-            [Tools showAlertView:@"本班日志不允许家长发表评论" delegateViewController:nil];
+            
+                [Tools showAlertView:@"本班日志不允许家长发表评论" delegateViewController:nil];
+                return ;
+        }
+        else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"opt"] objectForKey:UserSendComment] == 0)
+        {
+            [Tools showAlertView:@"您没有评论日志的权限" delegateViewController:nil];
             return ;
         }
         else
         {
             [self commentdiary];
         }
-    }
-    else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"opt"] objectForKey:UserSendComment] == 0)
-    {
-        [Tools showAlertView:@"您没有评论日志的权限" delegateViewController:nil];
-        return ;
+        
+
     }
     else
     {

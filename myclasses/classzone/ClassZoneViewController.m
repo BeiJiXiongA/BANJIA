@@ -562,7 +562,7 @@ NameButtonDel>
     [ud setObject:set forKey:@"set"];
     [ud setObject:role forKey:@"role"];
     [ud setObject:admin forKey:@"admin"];
-    
+    [ud setObject:opt forKey:@"opt"];
     [ud synchronize];
     
     if ([self isInAccessTime])

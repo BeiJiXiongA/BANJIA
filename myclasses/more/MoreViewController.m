@@ -74,22 +74,22 @@ UIActionSheetDelegate>
     {
         if (buttonIndex == 0)
         {
-            [self settingValue:@"2" forKay:ParentSendDiary];
+            [self settingValue:@"1" forKay:ParentSendDiary];
         }
         else if(buttonIndex == 1)
         {
-            [self settingValue:@"1" forKay:ParentSendDiary];
+            [self settingValue:@"2" forKay:ParentSendDiary];
         }
     }
     else if(actionSheet.tag == StudentSendDiaryTag)
     {
         if (buttonIndex == 0)
         {
-            [self settingValue:@"2" forKay:StudentSendDiary];
+            [self settingValue:@"1" forKay:StudentSendDiary];
         }
         else if(buttonIndex == 1)
         {
-            [self settingValue:@"1" forKay:StudentSendDiary];
+            [self settingValue:@"2" forKay:StudentSendDiary];
         }
     }
     else if (actionSheet.tag == StudentAccessTimeTag)
@@ -166,7 +166,7 @@ UIActionSheetDelegate>
     
     parentsPublish = @"直接发布";
     studentsPublish = @"需要审核";
-    accessClassZone = @"前10条可查看";
+    accessClassZone = @"前5条可查看";
     accessTime = @"全时段";
     
     classSettingTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT - UI_NAVIGATION_BAR_HEIGHT-5) style:UITableViewStylePlain];
@@ -490,11 +490,11 @@ UIActionSheetDelegate>
                 cell.nameLabel.hidden = NO;
                 if([[settingDict objectForKey:ParentSendDiary] intValue] == 2)
                 {
-                    parentsPublish = @"直接发布";
+                    parentsPublish = @"不可发布";
                 }
                 else if([[settingDict objectForKey:ParentSendDiary] intValue] == 1)
                 {
-                    parentsPublish = @"不可发布";
+                    parentsPublish = @"直接发布";
                 }
                 cell.contentLabel.text = parentsPublish;
             }
@@ -504,11 +504,11 @@ UIActionSheetDelegate>
                 cell.nameLabel.hidden = NO;
                 if([[settingDict objectForKey:StudentSendDiary] intValue] == 2)
                 {
-                    studentsPublish = @"直接发布";
+                    studentsPublish = @"不可发布";
                 }
                 else if([[settingDict objectForKey:StudentSendDiary] intValue] == 1)
                 {
-                    studentsPublish = @"不可发布";
+                    studentsPublish = @"直接发布";
                 }
                 cell.contentLabel.text = studentsPublish;
             }
@@ -536,7 +536,7 @@ UIActionSheetDelegate>
                 cell.nameLabel.hidden = NO;
                 if ([[settingDict objectForKey:VisitorAccess] intValue] == 1)
                 {
-                    accessClassZone = @"可查看前10条";
+                    accessClassZone = @"可查看前5条";
                 }
                 else if([[settingDict objectForKey:VisitorAccess] intValue] == 0)
                 {
@@ -611,7 +611,7 @@ UIActionSheetDelegate>
     {
         if (indexPath.row == 0)
         {
-            UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"访客查看班级空间" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"不可查看",@"可查看10条", nil];
+            UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"访客查看班级空间" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"不可查看",@"可查看5条", nil];
             ac.tag = VisitorAccessTimeTag;
             [ac showInView:classSettingTableView];
         }
@@ -684,10 +684,11 @@ UIActionSheetDelegate>
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 [settingDict setObject:value forKey:key];
-                [classSettingTableView reloadData];
                 
                 [[NSUserDefaults standardUserDefaults] setObject:settingDict forKey:@"set"];
                 [[NSUserDefaults standardUserDefaults] synchronize];
+                
+                [classSettingTableView reloadData];
                 
                 [Tools showTips:@"设置成功" toView:self.bgView];
             }
