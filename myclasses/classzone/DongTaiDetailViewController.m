@@ -353,7 +353,7 @@ UIActionSheetDelegate,NameButtonDel>
         nameStr = name;
     }
     
-    cell.nameLabel.frame = CGRectMake(50, 5, [nameStr length]*25>170?170:([nameStr length]*18), 30);
+    cell.nameLabel.frame = CGRectMake(50, cell.headerImageView.frame.origin.y-3, [nameStr length]*25>170?170:([nameStr length]*18), 20);
     cell.nameLabel.text = nameStr;
     cell.nameLabel.font = [UIFont systemFontOfSize:15];
     cell.nameLabel.textColor = NAMECOLOR;
@@ -365,7 +365,7 @@ UIActionSheetDelegate,NameButtonDel>
     cell.nameLabel.text = nameStr;
     cell.timeLabel.text = [Tools showTime:[NSString stringWithFormat:@"%d",[[[diaryDetailDict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]];
     
-    cell.locationLabel.frame = CGRectMake(50, cell.headerImageView.frame.origin.y+cell.headerImageView.frame.size.height-20, SCREEN_WIDTH-80, 20);
+    cell.locationLabel.frame = CGRectMake(50, cell.headerImageView.frame.origin.y+cell.headerImageView.frame.size.height-16, SCREEN_WIDTH-80, 20);
     
     cell.locationLabel.text = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"add"];
     cell.locationLabel.numberOfLines = 2;

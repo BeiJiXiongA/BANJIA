@@ -12,6 +12,10 @@
 #import <ImageIO/ImageIO.h>
 
 @interface SDWebImageDownloaderOperation ()
+{
+    size_t width, height;
+    BOOL responseFromCached;
+}
 
 @property (copy, nonatomic) SDWebImageDownloaderProgressBlock progressBlock;
 @property (copy, nonatomic) MJWebImageDealedBlock dealedBlock;
@@ -27,10 +31,7 @@
 @end
 
 @implementation SDWebImageDownloaderOperation
-{
-    size_t width, height;
-    BOOL responseFromCached;
-}
+@synthesize executing,finished;
 
 - (id)initWithRequest:(NSURLRequest *)request options:(SDWebImageDownloaderOptions)options progress:(void (^)(NSUInteger, long long))progressBlock completed:(void (^)(UIImage *, NSData *, NSError *, BOOL))completedBlock cancelled:(void (^)())cancelBlock
 {
@@ -47,8 +48,8 @@
         _completedBlock = [completedBlock copy];
         _cancelBlock = [cancelBlock copy];
         _dealedBlock = [dealedBlock copy];
-        _executing = NO;
-        _finished = NO;
+        executing = NO;
+        finished = NO;
         _expectedSize = 0;
         responseFromCached = YES; // Initially wrong until `connection:willCacheResponse:` is called or not called
     }
@@ -132,17 +133,17 @@
     self.imageData = nil;
 }
 
-- (void)setFinished:(BOOL)finished
+- (void)setFinished:(BOOL)finished1
 {
     [self willChangeValueForKey:@"isFinished"];
-    _finished = finished;
+    finished = finished1;
     [self didChangeValueForKey:@"isFinished"];
 }
 
-- (void)setExecuting:(BOOL)executing
+- (void)setExecuting:(BOOL)executing1
 {
     [self willChangeValueForKey:@"isExecuting"];
-    _executing = executing;
+    executing = executing1;
     [self didChangeValueForKey:@"isExecuting"];
 }
 
@@ -299,7 +300,6 @@
             }
             else
             {
-                #warning 图片处理
                 if (_dealedBlock) {
                     self.imageData = _dealedBlock(image, self.imageData);
                     image = [UIImage imageWithData:self.imageData];

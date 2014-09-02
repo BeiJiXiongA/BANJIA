@@ -11,4 +11,6 @@
 @interface SideMenuViewController : XDContentViewController
 @property (nonatomic, strong) UIImageView *imageView;
 @property (nonatomic, strong) UITableView *buttonTableView;
+
+-(void)statusTipTapWithDataDict:(NSDictionary *)dataDict;
 @end

@@ -104,23 +104,31 @@
         if ([j_id length] > 10)
         {
             DDLOG(@"database dict %@",applyDict);
-            if (![[applyDict objectForKey:@"phone"] isEqual:[NSNull null]])
+            if (![EmptyTools isEmpty:applyDict key:@"phone"])
             {
                 phoneNum = [applyDict objectForKey:@"phone"];
             }
-            if (![[applyDict objectForKey:@"img_icon"] isEqual:[NSNull null]])
+            else
+            {
+                phoneNum = @"";
+            }
+            if (![EmptyTools isEmpty:applyDict key:@"img_icon"])
             {
                 headerImg = [applyDict objectForKey:@"img_icon"];
             }
-            if (![[applyDict objectForKey:@"birth"] isEqual:[NSNull null]])
+            else
             {
-                birth = [applyDict objectForKey:@"birth"];
+                headerImg = @"";
             }
             if ([applyDict objectForKey:@"sn"] && ![[applyDict objectForKey:@"sn"] isEqual:[NSNull null]])
             {
                 studentNum = [applyDict objectForKey:@"sn"];
             }
-            if ([applyDict objectForKey:@"re_sn"] && ![[applyDict objectForKey:@"re_sn"] isEqual:[NSNull null]])
+            else
+            {
+                studentNum = @"";
+            }
+            if (![EmptyTools isEmpty:applyDict key:@"re_sn"])
             {
                 re_sn = [applyDict objectForKey:@"re_sn"];
             }
@@ -128,7 +136,8 @@
             {
                 re_sn = @"";
             }
-            if (![[applyDict objectForKey:@"sex"] isEqual:[NSNull null]] && [[applyDict objectForKey:@"sex"] length] > 0)
+//            if (![EmptyTools isEmpty:applyDict key:@"sex"])
+            if ([applyDict objectForKey:@"sex"] && ![[applyDict objectForKey:@"sex"] isEqual:[NSNull null]])
             {
                 if ([[applyDict objectForKey:@"sex"] intValue] == 1)
                 {
@@ -142,7 +151,7 @@
                 }
             }
             
-            if ([applyDict objectForKey:@"cb_id"] && ![[applyDict objectForKey:@"cb_id"] isEqual:[NSNull null]])
+            if (![EmptyTools isEmpty:applyDict key:@"cb_id"])
             {
                 otherId = [applyDict objectForKey:@"cb_id"];
             }

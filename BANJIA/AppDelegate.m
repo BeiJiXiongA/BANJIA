@@ -11,9 +11,10 @@
 #import "WelcomeViewController.h"
 //#import "FillInfoViewController.h"
 #import "FillInfo2ViewController.h"
-#import "SideMenuViewController.h"
+
 #import "MyClassesViewController.h"
 #import "HomeViewController.h"
+#import "MessageViewController.h"
 #import "MCSoundBoard.h"
 #import "KKNavigationController.h"
 
@@ -22,7 +23,7 @@
 #import "NSString+Emojize.h"
 
 #import "ApplyInfoViewController.h"
-#import "MessageViewController.h"
+
 
 #import <ShareSDK/ShareSDK.h>
 #import <RennSDK/RennSDK.h>
@@ -49,16 +50,18 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for cupstomization after application launch.
     
-//    [[NSUserDefaults standardUserDefaults] setObject:@"0007" forKey:@"currentVersion"];
+//    [[NSUserDefaults standardUserDefaults] setObject:@"0008" forKey:@"currentVersion"];
     [[NSUserDefaults standardUserDefaults] setObject:@"0020" forKey:@"currentVersion"];
     [[NSUserDefaults standardUserDefaults] setObject:SCHEMERELEASE forKey:SCHEMETYPE];
+    
+    [[NSUserDefaults standardUserDefaults]  setObject:@"1" forKey:@"showad"];
     
     [[NSUserDefaults standardUserDefaults] synchronize];
     
     [application setStatusBarHidden:NO withAnimation:UIStatusBarAnimationFade];
     
     _db = [[OperatDB alloc] init];
-    
+    [[StatusBarTips shareTipsWindow] hideTips];
     
     NSString *soundDir = [NSString stringWithFormat:@"%@/soundCache",[DirectyTools documents]];
     BOOL isDir;
@@ -69,11 +72,13 @@
             DDLOG(@"create sound cache success");
         }
     }
-
+    
+    [[NSUserDefaults standardUserDefaults] setObject:@"notchat" forKey:@"viewtype"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
     
 //    [self initialize];
     
-    [self undateDatabase];
+    [self updateDatabase];
     
     [APService setAlias:[APService registrionID] callbackSelector:nil object:nil];
     
@@ -134,7 +139,7 @@
         {
             [self getNewChat];
             [self getNewVersion];
-            SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
+            sideMenuViewController = [[SideMenuViewController alloc] init];
             HomeViewController *homeViewController = [[HomeViewController alloc] init];
             KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:homeViewController];
             [sideMenuViewController.buttonTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:2 inSection:0] animated:YES scrollPosition:UITableViewScrollPositionNone];
@@ -186,7 +191,7 @@
 //}
 
 
--(void)undateDatabase
+-(void)updateDatabase
 {
     NSArray *array = [_db findSetWithDictionary:@{} andTableName:CLASSMEMBERTABLE];
     NSDictionary *dict = [array firstObject];
@@ -250,11 +255,18 @@
     {
         [_db alterTableAdd:@"byname" charLength:8 defaultValue:@"" andTableName:CHATTABLE];
     }
+    
     NSArray *array10 = [_db findSetWithDictionary:@{} andTableName:CLASSMEMBERTABLE];
     NSDictionary *dict10 = [array10 firstObject];
     if (![[dict10 allKeys] containsObject:@"re_sn"])
     {
         [_db alterTableAdd:@"re_sn" charLength:8 defaultValue:@"" andTableName:CLASSMEMBERTABLE];
+    }
+    NSArray *array11 = [_db findSetWithDictionary:@{} andTableName:CLASSMEMBERTABLE];
+    NSDictionary *dict11 = [array11 firstObject];
+    if (![[dict11 allKeys] containsObject:@"def"])
+    {
+        [_db alterTableAdd:@"def" charLength:8 defaultValue:@"" andTableName:CLASSMEMBERTABLE];
     }
 }
 
@@ -478,6 +490,8 @@
     [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
     DDLOG(@"push msg==%@",userInfo);
     
+    OperatDB *db = [[OperatDB alloc] init];
+    
     if ([Tools user_id])
     {
         [self getNewChat];
@@ -557,7 +571,7 @@
                     {
                         if ([[[NSUserDefaults standardUserDefaults]objectForKey:BECOMEACTIVE] isEqualToString:ENTER_BACKGROUD])
                         {
-                            SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
+                            sideMenuViewController = [[SideMenuViewController alloc] init];
                             MessageViewController *msgViewController = [[MessageViewController alloc] init];
                             KKNavigationController *msgNav = [[KKNavigationController alloc] initWithRootViewController:msgViewController];
                             [sideMenuViewController.buttonTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:2 inSection:0] animated:YES scrollPosition:UITableViewScrollPositionNone];
@@ -567,6 +581,25 @@
                             [[NSUserDefaults standardUserDefaults] setObject:ENTER_FORGROUD forKey:BECOMEACTIVE];
                             [[NSUserDefaults standardUserDefaults] synchronize];
                         }
+                        
+                        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"viewtype"] rangeOfString:[userInfo  objectForKey:@"f_id"]].length == 0)
+                        {
+                            [[StatusBarTips shareTipsWindow] hideTips];
+                            NSMutableString *showname = [[NSMutableString alloc] initWithString:fname];
+                            NSRange range = [showname rangeOfString:@"["];
+                            if (range.length > 0)
+                            {
+                                [showname deleteCharactersInRange:range];
+                            }
+                            range = [showname rangeOfString:@"]"];
+                            if (range.length > 0)
+                            {
+                                [showname deleteCharactersInRange:range];
+                            }
+                            NSArray *unreadArray = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"readed":@"0",@"fid":[userInfo  objectForKey:@"f_id"]} andTableName:CHATTABLE];
+                            [[StatusBarTips shareTipsWindow] showTipsWithImage:[UIImage imageNamed:@"icon_chat"] message:[NSString stringWithFormat:@"%@(%d)",showname,[unreadArray count]] messageType:@"chat" tipDelegate:self];
+                            [StatusBarTips shareTipsWindow].dataDict = userInfo;
+                        }
                     }
                     
                     [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVENEWMSG object:nil];
@@ -575,8 +608,6 @@
         }
         else if ([[userInfo objectForKey:@"type"] isEqualToString:@"c_apply"])
         {
-            UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:[[userInfo objectForKey:@"aps"] objectForKey:@"alert"] delegate:self cancelButtonTitle:@"知道了" otherButtonTitles: nil];
-            [al show];
             NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithCapacity:0];
             [dict setObject:@"" forKey:@"role"];
             [dict setObject:@"" forKey:@"img_icon"];
@@ -598,6 +629,9 @@
                 }
             }
             
+            NSArray *unreadArray = [db findSetWithDictionary:@{@"classid":[userInfo objectForKey:@"tag"],@"checked":@"0",} andTableName:CLASSMEMBERTABLE];
+            [[StatusBarTips shareTipsWindow] showTipsWithImage:[UIImage imageNamed:@""] message:[NSString stringWithFormat:@"班级新申请(%d)",[unreadArray count]] messageType:@"c_apply" tipDelegate:self];
+            [StatusBarTips shareTipsWindow].dataDict = userInfo;
             [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
         }
         else if ([[userInfo objectForKey:@"type"] isEqualToString:@"notice"])
@@ -621,9 +655,11 @@
                     AudioServicesPlaySystemSound (soundID);
                 }
             }
+            [[StatusBarTips shareTipsWindow] hideTips];
+            [[StatusBarTips shareTipsWindow] showTipsWithImage:[UIImage imageNamed:@"icon_chat"] message:[NSString stringWithFormat:@"班级通知"] messageType:@"chat" tipDelegate:self];
+            [StatusBarTips shareTipsWindow].dataDict = userInfo;
             
             [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVENEWNOTICE object:nil];
-            [Tools showAlertView:[[userInfo objectForKey:@"aps"] objectForKey:@"alert"] delegateViewController:nil];
             //            [self getClassInfo:userInfo];
         }
         else if([[userInfo objectForKey:@"type"] isEqualToString:@"f_apply"])
@@ -673,6 +709,12 @@
             [Tools showAlertView:[[userInfo objectForKey:@"aps"] objectForKey:@"alert"] delegateViewController:nil];
         }
     }
+}
+
+#pragma mark - tapstip
+-(void)tapTipsWithData:(NSDictionary *)dataDict
+{
+    [sideMenuViewController statusTipTapWithDataDict:dataDict];
 }
 
 -(void)getClassInfo:(NSDictionary  *)classDict
@@ -781,6 +823,7 @@
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
     // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
+    [[StatusBarTips shareTipsWindow] hideTips];
     if ([[Tools user_id] length] > 0 && [[Tools client_token] length] > 0)
     {
         [self getNewChat];

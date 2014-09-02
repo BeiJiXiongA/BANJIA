@@ -9,5 +9,5 @@
 #import "XDContentViewController.h"
 
 @interface MessageViewController : XDContentViewController
-
+-(void)getChatList;
 @end

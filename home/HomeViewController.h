@@ -9,5 +9,5 @@
 #import "XDContentViewController.h"
 
 @interface HomeViewController : XDContentViewController<UINavigationControllerDelegate>
-
+-(void)getData;
 @end

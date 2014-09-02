@@ -32,12 +32,21 @@
 
 #import "ChatViewController.h"
 
+#import "AdHeaderCell.h"
+
+#import "UIImageView+WebCache.h"
+
+#import "TOWebViewController.h"
+
 #define ImageViewTag  9999
 #define HeaderImageTag  7777
 #define CellButtonTag   33333
 
 #define SectionTag  999999
 #define RowTag     3333
+
+#define AdScrollViewTag 22222
+#define AdPageControlTag   55555
 
 #define ImageHeight  65.5f
 
@@ -57,7 +66,8 @@ NameButtonDel,
 ChatDelegate,
 MsgDelegate,
 DongTaiDetailAddCommentDelegate,
-ZBarReaderDelegate>
+ZBarReaderDelegate,
+headerDelegate>
 {
     NSString *page;
     
@@ -117,12 +127,20 @@ ZBarReaderDelegate>
     UIImageView *tapLabel;
     UIView *buttonView;
     
+    NSTimer *adTimer;
+    
     int num;
     BOOL upOrdown;
     NSTimer * timer;
     ZBarReaderViewController * reader;
     
     BOOL haveClass;
+    
+    NSMutableArray *adArray;
+    
+    int headerNewsIndex;
+    
+    CGFloat HeaderCellHeight;
 }
 @end
 
@@ -188,6 +206,7 @@ ZBarReaderDelegate>
     noticeArray = [[NSMutableArray alloc] initWithCapacity:0];
     diariesArray = [[NSMutableArray alloc] initWithCapacity:0];
     groupDiaries = [[NSMutableArray alloc] initWithCapacity:0];
+    adArray = [[NSMutableArray alloc] initWithCapacity:0];
     
     UIButton *navButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [navButton setTitle:@"首页" forState:UIControlStateNormal];
@@ -277,16 +296,6 @@ ZBarReaderDelegate>
     addNoticeButton.alpha = 0;
     addDiaryButton.alpha = 0;
     
-    if ([Tools NetworkReachable])
-    {
-        [self getHomeCache];
-        [self getHomeData];
-    }
-    else
-    {
-        [self getHomeCache];
-    }
-    
     inputTabBar = [[InputTableBar alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT, SCREEN_WIDTH, 40)];
     inputTabBar.backgroundColor = [UIColor grayColor];
     inputTabBar.returnFunDel = self;
@@ -296,7 +305,7 @@ ZBarReaderDelegate>
     [inputTabBar setLayout];
     
     
-    tipView = [[UIView alloc] initWithFrame:CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT+57, SCREEN_WIDTH-20, 300)];
+    tipView = [[UIView alloc] initWithFrame:CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT+60, SCREEN_WIDTH-20, 300)];
     tipView.backgroundColor = self.bgView.backgroundColor;
     [self.bgView addSubview:tipView];
     
@@ -393,6 +402,7 @@ ZBarReaderDelegate>
         tapLabel.userInteractionEnabled = YES;
         [tapLabel addGestureRecognizer:tipTap];
     }
+    [self getData];
 }
 
 -(void)outTap
@@ -653,6 +663,8 @@ ZBarReaderDelegate>
     //    [cancelButton addTarget:self action:@selector(dismissOverlayView:)forControlEvents:UIControlEventTouchUpInside];
     
 //    [reader.view addSubview:albumButton];
+    
+    [self getData];
 }
 
 -(void)unShowSelfViewController
@@ -912,6 +924,7 @@ ZBarReaderDelegate>
 -(void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
+    inputTabBar.returnFunDel = nil;
     [self backInput];
 }
 -(void)viewWillAppear:(BOOL)animated
@@ -919,9 +932,25 @@ ZBarReaderDelegate>
     [super viewWillAppear:animated];
     
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = self;
+    
+    inputTabBar.returnFunDel = self;
     [self backInput];
     [self dealNewChatMsg:nil];
     [self dealNewMsg:nil];
+}
+
+-(void)getData
+{
+    if ([Tools NetworkReachable])
+    {
+        [self getHomeCache];
+        [self getHomeData];
+        [self getHomeAd];
+    }
+    else
+    {
+        [self getHomeCache];
+    }
 }
 
 -(void)getHomeData
@@ -1034,6 +1063,48 @@ ZBarReaderDelegate>
         [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
     }
 
+}
+-(void)getHomeAd
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token]
+                                                                      } API:HOME_AD];
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"home ad responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                if ([[[responseDict objectForKey:@"data"] objectForKey:@"ad"] isKindOfClass:[NSArray class]])
+                {
+                    [adArray removeAllObjects];
+                    [adArray addObjectsFromArray:[[responseDict objectForKey:@"data"] objectForKey:@"ad"]];
+                    HeaderCellHeight = SCREEN_WIDTH * [[[responseDict objectForKey:@"data"] objectForKey:@"scale"] floatValue];
+                    if(adTimer)
+                    {
+                        [adTimer invalidate];
+                    }
+                    if ([adArray count] > 1)
+                    {
+                        adTimer = [NSTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(switchAd) userInfo:nil repeats:YES];
+                    }
+                    [classTableView reloadData];
+                }
+            }
+            else
+            {
+//                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+        }];
+        [request startAsynchronous];
+    }
 }
 
 -(void)getHomeCache
@@ -1229,27 +1300,22 @@ ZBarReaderDelegate>
         joinClassButton.hidden = NO;
         createClassButton.hidden = NO;
     }
-    return [noticeArray count] + ([groupDiaries count]>0?([groupDiaries count]+1):0);
+    return [noticeArray count] + [groupDiaries count] + 2;
 }
 
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
-    if([noticeArray count] > 0)
+    if(section == 0)
     {
-        if (section == [noticeArray count])
-        {
-            return 30;
-        }
+        return 0;
+    }
+    else if(section -1 == [noticeArray count] && [noticeArray count] > 0)
+    {
         return 30;
     }
     else
     {
-        if (section == 0)
-        {
-            return 30;
-        }
-        else
-            return 30;
+        return 30;
     }
     return 0;
 }
@@ -1263,14 +1329,14 @@ ZBarReaderDelegate>
     headerLabel.font = [UIFont systemFontOfSize:14];
     headerLabel.backgroundColor = UIColorFromRGB(0xf1f0ec);
     headerLabel.textColor = COMMENTCOLOR;
-    if (section < [noticeArray count])
+    if ((section-1 < [noticeArray count]) && section > 0 && [noticeArray count] > 0)
     {
-        NSDictionary *noticeDict = [noticeArray objectAtIndex:section];
+        NSDictionary *noticeDict = [noticeArray objectAtIndex:section-1];
         headerLabel.text = [NSString stringWithFormat:@"    %@未读通知",[noticeDict objectForKey:@"name"]];
         headerLabel.frame = CGRectMake(0, 0, SCREEN_WIDTH, 30);
         headerLabel.font = [UIFont systemFontOfSize:15.5];
     }
-    else if (section == [noticeArray count])
+    else if ((section-1 == [noticeArray count]))
     {
         UIView *verticalLineView = [[UIView alloc] initWithFrame:CGRectMake(34.75, 10, 1.5, 30)];
         verticalLineView.backgroundColor = UIColorFromRGB(0xe2e3e4);
@@ -1282,7 +1348,7 @@ ZBarReaderDelegate>
         headerLabel.textColor = [UIColor whiteColor];
         headerLabel.frame = CGRectMake(0, 0, SCREEN_WIDTH, 30);
     }
-    else
+    else if(section-1 > [noticeArray count])
     {
         
         UIView *verticalLineView = [[UIView alloc] initWithFrame:CGRectMake(34.75, 0, 1.5, 30)];
@@ -1297,7 +1363,7 @@ ZBarReaderDelegate>
         dotView.backgroundColor = RGB(64, 196, 110, 1);
         [headerView addSubview:dotView];
 //        int cha = [noticeArray count]>0?([noticeArray count]+1):0;
-        NSDictionary *groupDict = [groupDiaries objectAtIndex:section-[noticeArray count]-1];
+        NSDictionary *groupDict = [groupDiaries objectAtIndex:section-[noticeArray count]-2];
 //        headerLabel.backgroundColor = RGB(64, 196, 110, 1);
         headerLabel.text = [groupDict objectForKey:@"date"];
 //        headerLabel.font = [UIFont boldSystemFontOfSize:15];
@@ -1307,57 +1373,58 @@ ZBarReaderDelegate>
         
     }
     [headerView addSubview:headerLabel];
-    return headerView;
+    if (section == 0)
+    {
+        return nil;
+    }
+    else
+        return headerView;
 }
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    if (section < [noticeArray count])
+    if (section == 0)
     {
-        NSArray *tmpArray = [[noticeArray objectAtIndex:section] objectForKey:@"news"];
+        return 1;
+    }
+    else if (section > 0 && (section-1 < [noticeArray count]) && [noticeArray count] > 0)
+    {
+        NSArray *tmpArray = [[noticeArray objectAtIndex:section-1] objectForKey:@"news"];
         return [tmpArray count];
     }
-    else if(section > [noticeArray count])
+    else if (section-1 > [noticeArray count] && [groupDiaries count] > 0)
     {
-        if ([noticeArray count] > 0)
-        {
-            int cha = (int)([noticeArray count]>0?([noticeArray count]+1):0);
-            NSDictionary *groupDict = [groupDiaries objectAtIndex:section-cha];
-            NSArray *tmpArray = [groupDict objectForKey:@"diaries"];
-            return [tmpArray count];
-        }
-        else
-        {
-            NSDictionary *groupDict = [groupDiaries objectAtIndex:section-1];
-            NSArray *tmpArray = [groupDict objectForKey:@"diaries"];
-            return [tmpArray count];
-        }
+        NSDictionary *groupDict = [groupDiaries objectAtIndex:section-[noticeArray count]-2];
+        NSArray *tmpArray = [groupDict objectForKey:@"diaries"];
+        return [tmpArray count];
     }
     return 0;
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.section < [noticeArray count])
+    if (indexPath.section == 0)
     {
-        NSArray *tmpArray = [[noticeArray objectAtIndex:indexPath.section] objectForKey:@"news"];
+        if ([adArray count] > 0 &&
+            [[NSUserDefaults standardUserDefaults] objectForKey:@"showad"] &&
+            [[[NSUserDefaults standardUserDefaults] objectForKey:@"showad"] intValue] == 1)
+        {
+            return HeaderCellHeight;
+        }
+        else
+            return 0;
+    }
+    else if (indexPath.section-1 < [noticeArray count] && [noticeArray count]> 0)
+    {
+        NSArray *tmpArray = [[noticeArray objectAtIndex:indexPath.section-1] objectForKey:@"news"];
         if (indexPath.row == [tmpArray count]-1)
         {
             return 88+4;
         }
         return 88;
     }
-    else if(indexPath.section > [noticeArray count])
+    else if(indexPath.section > 0 && [groupDiaries count] > 0)
     {
-        int cha = (int)([noticeArray count]>0?([noticeArray count]+1):0);
-        NSDictionary *groupDict;
-        if ([noticeArray count] > 0)
-        {
-            groupDict = [groupDiaries objectAtIndex:indexPath.section-cha];
-        }
-        else
-        {
-            groupDict = [groupDiaries objectAtIndex:indexPath.section-1];
-        }
+        NSDictionary *groupDict = [groupDiaries objectAtIndex:indexPath.section-[noticeArray count]-2];
         
         NSArray *tmpArray = [groupDict objectForKey:@"diaries"];
         NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
@@ -1366,9 +1433,91 @@ ZBarReaderDelegate>
     return 0;
 }
 
+-(void)switchAd
+{
+    if ([adArray count] > 1)
+    {
+        DDLOG(@"ad scrollview offset %@",NSStringFromCGPoint(((UIScrollView *)[classTableView viewWithTag:AdScrollViewTag]).contentOffset));
+        [UIView animateWithDuration:0.2 animations:^{
+            if (((UIScrollView *)[classTableView viewWithTag:AdScrollViewTag]).contentOffset.x == (SCREEN_WIDTH * ([adArray count]-1)))
+            {
+                ((UIScrollView *)[classTableView viewWithTag:AdScrollViewTag]).contentOffset = CGPointZero;
+            }
+            else
+            {
+                CGPoint currentOffset = ((UIScrollView *)[classTableView viewWithTag:AdScrollViewTag]).contentOffset;
+                ((UIScrollView *)[classTableView viewWithTag:AdScrollViewTag]).contentOffset = CGPointMake(currentOffset.x+SCREEN_WIDTH, 0);
+            }
+            ((UIPageControl *)[classTableView viewWithTag:AdPageControlTag]).currentPage = ((UIScrollView *)[classTableView viewWithTag:AdScrollViewTag]).contentOffset.x/SCREEN_WIDTH;
+        }];
+    }
+}
+
+-(void)closeAd
+{
+    [[NSUserDefaults standardUserDefaults] setObject:@"0" forKey:@"showad"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    [adTimer invalidate];
+    [classTableView reloadData];
+}
+
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.section < [noticeArray count])
+    if (indexPath.section == 0)
+    {
+        ADHeaderCell *cell = [[ADHeaderCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"adheadercell"];
+        
+        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"showad"] intValue] == 0 || [adArray count] == 0)
+        {
+            return cell;
+        }
+        
+        cell.headerDel = self;
+        cell.headerScrollView.frame = CGRectMake(0, 0, SCREEN_WIDTH,HeaderCellHeight);
+        
+        cell.headerScrollView.backgroundColor = [UIColor grayColor];
+        cell.headerScrollView.pagingEnabled = YES;
+        cell.headerScrollView.bounces = NO;
+        cell.headerScrollView.showsHorizontalScrollIndicator = NO;
+        cell.headerScrollView.tag = AdScrollViewTag;
+        cell.headerScrollView.contentSize = CGSizeMake(SCREEN_WIDTH*[adArray count], HeaderCellHeight);
+        cell.headerScrollView.hidden = NO;
+        
+        for (int i=0; i<[adArray count]; i++)
+        {
+            NSDictionary *dict = [adArray objectAtIndex:i];
+            UIImageView *headImageView = [[UIImageView alloc] initWithFrame:CGRectMake(self.view.frame.size.width*i, 0, SCREEN_WIDTH, HeaderCellHeight)];
+            
+            [headImageView setImageWithURL:[dict objectForKey:@"img"] placeholderImage:[UIImage imageNamed:@"3100"]];
+            
+//            [Tools fillImageView:headImageView withImageFromURL:@"" imageWidth:SCREEN_WIDTH andDefault:@"3100"];
+            
+            UITapGestureRecognizer *headerTapTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(headerImageClick)];
+            headImageView.userInteractionEnabled = YES;
+            [headImageView addGestureRecognizer:headerTapTgr];
+            [cell.headerScrollView addSubview:headImageView];
+        }
+        
+        cell.closeAd.frame = CGRectMake(SCREEN_WIDTH-30, 10, 20, 20);
+        [cell.closeAd addTarget:self action:@selector(closeAd) forControlEvents:UIControlEventTouchUpInside];
+        cell.closeAd.layer.cornerRadius = 10;
+        cell.closeAd.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
+        cell.closeAd.clipsToBounds = YES;
+        cell.closeAd.hidden = NO;
+        
+        cell.headerPageControl.frame = CGRectMake(0, cell.headerScrollView.frame.size.height-30, SCREEN_WIDTH, 30);
+        cell.headerPageControl.numberOfPages = [adArray count];
+        cell.headerPageControl.tag = AdPageControlTag;
+        cell.headerPageControl.backgroundColor = [UIColor clearColor];
+        cell.headerPageControl.currentPageIndicatorTintColor = [UIColor redColor];
+        if([adArray count] > 0)
+        {
+            cell.headerPageControl.hidden = NO;
+        }
+        
+        return cell;
+    }
+    else if (indexPath.section-1 < [noticeArray count] && [noticeArray count] > 0)
     {
         static NSString *notiCell = @"homenotiCell";
         NotificationCell *cell = [tableView dequeueReusableCellWithIdentifier:notiCell];
@@ -1377,7 +1526,7 @@ ZBarReaderDelegate>
             cell = [[NotificationCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:notiCell];
         }
         
-        NSDictionary *noticeDict = [noticeArray objectAtIndex:indexPath.section];
+        NSDictionary *noticeDict = [noticeArray objectAtIndex:indexPath.section-1];
         NSArray *tmpArray = [noticeDict objectForKey:@"news"];
         
         NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
@@ -1436,7 +1585,7 @@ ZBarReaderDelegate>
         cell.backgroundColor = [UIColor clearColor];
         return cell;
     }
-    else if(indexPath.section > [noticeArray count])
+    else if(indexPath.section > 0 && [groupDiaries count] > 0)
     {
         static NSString *topImageView = @"hometrendcell";
         TrendsCell *cell = [tableView dequeueReusableCellWithIdentifier:topImageView];
@@ -1444,11 +1593,10 @@ ZBarReaderDelegate>
         {
             cell = [[TrendsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:topImageView];
         }
-        
         CGFloat left = 9.5;
         cell.showAllComments = NO;
         cell.nameButtonDel = self;
-        NSDictionary *groupDict = [groupDiaries objectAtIndex:indexPath.section-[noticeArray count]-1];
+        NSDictionary *groupDict = [groupDiaries objectAtIndex:indexPath.section-[noticeArray count]-2];
         NSArray *tmpArray = [groupDict objectForKey:@"diaries"];
         NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
         cell.diaryDetailDict = dict;
@@ -1495,7 +1643,7 @@ ZBarReaderDelegate>
         cell.locationLabel.lineBreakMode = NSLineBreakByWordWrapping | NSLineBreakByTruncatingTail;
         
         cell.contentLabel.hidden = YES;
-        cell.contentLabel.backgroundColor = [UIColor clearColor];
+        cell.contentLabel.backgroundColor = [UIColor whiteColor];
         
         int cha = [noticeArray count]+1;
         
@@ -1513,6 +1661,7 @@ ZBarReaderDelegate>
             {
                 he = 5;
             }
+            cell.contentLabel.frame = CGRectMake(10, 55, SCREEN_WIDTH-30, 45);
             //有文字
             NSString *content = [[[dict objectForKey:@"detail"] objectForKey:@"content"] emojizedString];
             cell.contentLabel.hidden = NO;
@@ -1526,7 +1675,6 @@ ZBarReaderDelegate>
             {
                 cell.contentLabel.text = content;
             }
-            cell.contentLabel.frame = CGRectMake(10, 55, SCREEN_WIDTH-20, 45);
         }
         else
         {
@@ -1551,7 +1699,7 @@ ZBarReaderDelegate>
                 UIImageView *imageView = [[UIImageView alloc] init];
                 imageView.frame = CGRectMake(0, 0, 100, 100);
                 imageView.userInteractionEnabled = YES;
-                imageView.tag = (indexPath.section-[noticeArray count]-1)*SectionTag+indexPath.row*RowTag+333;
+                imageView.tag = (indexPath.section-[noticeArray count]-2)*SectionTag+indexPath.row*RowTag+333;
                 
                 imageView.userInteractionEnabled = YES;
                 [imageView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapImage:)]];
@@ -1575,8 +1723,7 @@ ZBarReaderDelegate>
                     row = (imageCount/ImageCountPerRow) > 3 ? 3:(imageCount / ImageCountPerRow);
                 }
                 cell.imagesView.frame = CGRectMake(12,
-                                                   cell.contentLabel.frame.size.height +
-                                                   cell.contentLabel.frame.origin.y,
+                                                   cell.contentLabel.frame.size.height + cell.contentLabel.frame.origin.y,
                                                    SCREEN_WIDTH-44, (imageViewHeight+5) * row);
                 
                 for (int i=0; i<[imgsArray count]; ++i)
@@ -1584,7 +1731,7 @@ ZBarReaderDelegate>
                     UIImageView *imageView = [[UIImageView alloc] init];
                     imageView.frame = CGRectMake((i%(NSInteger)ImageCountPerRow)*(imageViewWidth+5), (imageViewWidth+5)*(i/(NSInteger)ImageCountPerRow), imageViewWidth, imageViewHeight);
                     imageView.userInteractionEnabled = YES;
-                    imageView.tag = (indexPath.section-[noticeArray count]-1)*SectionTag+indexPath.row*RowTag+i+333;
+                    imageView.tag = (indexPath.section-[noticeArray count]-2)*SectionTag+indexPath.row*RowTag+i+333;
                     
                     imageView.userInteractionEnabled = YES;
                     [imageView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapImage:)]];
@@ -1593,10 +1740,8 @@ ZBarReaderDelegate>
                     imageView.clipsToBounds = YES;
                     imageView.contentMode = UIViewContentModeScaleAspectFill;
                     [Tools fillImageView:imageView withImageFromURL:[imgsArray objectAtIndex:i] imageWidth:100.0f andDefault:@"3100"];
-//                    [Tools fillImageView:imageView withImageFromURL:[imgsArray objectAtIndex:i] andDefault:@"3100"];
                     [cell.imagesView addSubview:imageView];
                 }
-                
             }
         }
         else
@@ -1619,7 +1764,7 @@ ZBarReaderDelegate>
         cell.transmitButton.frame = CGRectMake(0, cellHeight+13, (SCREEN_WIDTH-left*2)/3, buttonHeight);
         [cell.transmitButton setTitle:@"   转发" forState:UIControlStateNormal];
         cell.transmitButton.iconImageView.image = [UIImage imageNamed:@"icon_forwarding"];
-        cell.transmitButton.tag = (indexPath.section-cha)*SectionTag+indexPath.row;
+        cell.transmitButton.tag = (indexPath.section-cha-1)*SectionTag+indexPath.row;
         [cell.transmitButton addTarget:self action:@selector(transmitDiary:) forControlEvents:UIControlEventTouchUpInside];
         cell.transmitButton.iconImageView.frame = CGRectMake(18, iconTop+1, iconH, iconH);
         cell.transmitButton.backgroundColor = UIColorFromRGB(0xfcfcfc);
@@ -1645,7 +1790,7 @@ ZBarReaderDelegate>
         }
         
         [cell.praiseButton addTarget:self action:@selector(praiseDiary:) forControlEvents:UIControlEventTouchUpInside];
-        cell.praiseButton.tag = (indexPath.section-cha)*SectionTag+indexPath.row;
+        cell.praiseButton.tag = (indexPath.section-cha-1)*SectionTag+indexPath.row;
         cell.praiseButton.frame = CGRectMake((SCREEN_WIDTH-left*2)/3, cellHeight+13, (SCREEN_WIDTH-left*2)/3, buttonHeight);
         cell.praiseButton.backgroundColor = UIColorFromRGB(0xfcfcfc);
         
@@ -1663,7 +1808,7 @@ ZBarReaderDelegate>
         cell.commentButton.frame = CGRectMake((SCREEN_WIDTH-left*2)/3*2, cellHeight+13, (SCREEN_WIDTH-left*2)/3, buttonHeight);
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         cell.commentButton.backgroundColor = UIColorFromRGB(0xfcfcfc);
-        cell.commentButton.tag = (indexPath.section-cha)*SectionTag+indexPath.row;
+        cell.commentButton.tag = (indexPath.section-cha-1)*SectionTag+indexPath.row;
         [cell.commentButton addTarget:self action:@selector(commentDiary:) forControlEvents:UIControlEventTouchUpInside];
         
         cell.geduan1.hidden = NO;
@@ -1721,6 +1866,19 @@ ZBarReaderDelegate>
     return nil;
 }
 
+#pragma mark - 点击幻灯片
+-(void)headerImageClick
+{
+    NSDictionary *dict = [adArray objectAtIndex:((UIScrollView *)[classTableView viewWithTag:AdScrollViewTag]).contentOffset.x/SCREEN_WIDTH];
+    NSURL *url = [NSURL URLWithString:[dict objectForKey:@"href"]];
+    TOWebViewController *webViewController = [[TOWebViewController alloc] initWithURL:url];
+    [self.navigationController pushViewController:webViewController animated:YES];
+}
+-(void)getHeaderIndex:(ADHeaderCell *)cell andIndex:(int)headerIndex
+{
+    headerNewsIndex = headerIndex;
+}
+
 -(void)headerImageViewClicked:(UITapGestureRecognizer *)tap
 {
     int section = ((tap.view.tag)/SectionTag-1)-[noticeArray count];
@@ -1728,7 +1886,6 @@ ZBarReaderDelegate>
     NSDictionary *groupDict = [groupDiaries objectAtIndex:section];
     NSArray *tmpArray = [groupDict objectForKey:@"diaries"];
     NSDictionary *dict = [tmpArray objectAtIndex:row];
-    DDLOG(@"diary dict %@",dict);
     PersonDetailViewController *personDetail = [[PersonDetailViewController alloc] init];
     personDetail.personID = [[dict objectForKey:@"by"] objectForKey:@"_id"];
     personDetail.personName = [[dict objectForKey:@"by"] objectForKey:@"name"];
@@ -1753,9 +1910,9 @@ ZBarReaderDelegate>
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.section < [noticeArray count])
+    if (indexPath.section > 0 && indexPath.section-1 < [noticeArray count])
     {
-        NSDictionary *dict = [[[noticeArray objectAtIndex:indexPath.section] objectForKey:@"news"] objectAtIndex:indexPath.row];
+        NSDictionary *dict = [[[noticeArray objectAtIndex:indexPath.section-1] objectForKey:@"news"] objectAtIndex:indexPath.row];
         DDLOG(@"home notice dict %@",dict);
         NotificationDetailViewController *notificationDetailViewController = [[NotificationDetailViewController alloc] init];
         notificationDetailViewController.noticeID = [dict objectForKey:@"_id"];
@@ -1770,7 +1927,7 @@ ZBarReaderDelegate>
     }
     else
     {
-        NSDictionary *groupDict = [groupDiaries objectAtIndex:indexPath.section-[noticeArray count]-1];
+        NSDictionary *groupDict = [groupDiaries objectAtIndex:indexPath.section-[noticeArray count]-2];
         NSArray *tmpArray = [groupDict objectForKey:@"diaries"];
         NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
         DongTaiDetailViewController *dongtaiDetailViewController = [[DongTaiDetailViewController alloc] init];
@@ -1833,7 +1990,7 @@ ZBarReaderDelegate>
     NSDictionary *groupDict = [groupDiaries objectAtIndex:button.tag/SectionTag];
     NSArray *tmpArray = [groupDict objectForKey:@"diaries"];
     NSDictionary *dict = [tmpArray objectAtIndex:button.tag%SectionTag];
-    DDLOG(@"home diary %@",[[dict objectForKey:@"detail"] objectForKey:@"content"]);
+    DDLOG(@"%d home diary %@",button.tag/SectionTag,[[dict objectForKey:@"detail"] objectForKey:@"content"]);
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
@@ -1864,7 +2021,6 @@ ZBarReaderDelegate>
         }];
         [request startAsynchronous];
     }
-    
 }
 
 -(void)addComment:(BOOL)add

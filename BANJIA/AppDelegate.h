@@ -10,16 +10,17 @@
 #import "OperatDB.h"
 #import "BMapKit.h"
 #import "APService.h"
-
-
+#import "StatusBarTips.h"
+#import "SideMenuViewController.h"
 
 @protocol ChatDelegate;
 @protocol MsgDelegate;
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate,UIAlertViewDelegate>
+@interface AppDelegate : UIResponder <UIApplicationDelegate,UIAlertViewDelegate,TipsDelegate>
 {
     NSString *updateUrl;
     BMKMapManager* _mapManager;
+    SideMenuViewController *sideMenuViewController;
 }
 @property (strong, nonatomic) UIWindow *window;
 

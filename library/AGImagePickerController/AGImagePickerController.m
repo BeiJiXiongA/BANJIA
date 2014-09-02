@@ -178,6 +178,7 @@ andShouldShowSavedPhotosOnTop:(BOOL)shouldShowSavedPhotosOnTop
 	if (_pickerFlags.delegateDidFinishPickingMediaWithInfo)
     {
 		[self.delegate performSelector:@selector(agImagePickerController:didFinishPickingMediaWithInfo:) withObject:self withObject:selectedAssets];
+        
 	}
 }
 -(void)resetNumberOfSelections

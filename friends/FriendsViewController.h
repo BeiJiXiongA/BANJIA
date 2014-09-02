@@ -9,5 +9,5 @@
 #import "XDContentViewController.h"
 
 @interface FriendsViewController : XDContentViewController
-
+-(void)getData;
 @end

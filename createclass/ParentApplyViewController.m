@@ -633,11 +633,24 @@ UIActionSheetDelegate>
 
 -(void)verify
 {
+    if ([phoneNumTextfield.text length] == 0)
+    {
+        [Tools showAlertView:@"请输入手机号码！" delegateViewController:nil];
+        return ;
+    }
+    if (![Tools isPhoneNumber:phoneNumTextfield.text])
+    {
+        [Tools showAlertView:@"请输入正确的手机号码！" delegateViewController:nil];
+        return ;
+    }
+    
     if ([codeTextField.text length] == 0)
     {
         [Tools showAlertView:@"请您填写验证码" delegateViewController:nil];
         return ;
     }
+    
+    
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
@@ -993,8 +1006,8 @@ UIActionSheetDelegate>
             cell.nameLabel.font = [UIFont systemFontOfSize:16];
             cell.button2.hidden = YES;
             cell.contactButton.hidden = YES;
-            cell.headerImageView.backgroundColor = [UIColor whiteColor];;
-            cell.headerImageView.frame = CGRectMake(10, 20, 40, 40);
+            cell.headerImageView.backgroundColor = [UIColor whiteColor];
+            cell.headerImageView.frame = CGRectMake(10, 27.5, 25, 25);
             [cell.headerImageView setImage:[UIImage imageNamed:@"applyadd"]];
         }
         

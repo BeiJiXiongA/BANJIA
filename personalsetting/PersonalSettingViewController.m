@@ -116,15 +116,20 @@ UIActionSheetDelegate>
     }
     [self.bgView addSubview:personalSettiongTableView];
     
-    [self getAccount];
-    [self getUserInfo];
-    
     UIButton *shareButton = [UIButton buttonWithType:UIButtonTypeCustom];
     shareButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [shareButton setTitle:@"分享" forState:UIControlStateNormal];
     [shareButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [shareButton addTarget:self action:@selector(shareAPP:) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:shareButton];
+    
+    [self getData];
+}
+
+-(void)getData
+{
+    [self getAccount];
+    [self getUserInfo];
 }
 
 -(void)changeIcon
@@ -141,6 +146,7 @@ UIActionSheetDelegate>
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    
     if ([self haveNewMsg] || [self haveNewNotice])
     {
         self.unReadLabel.hidden = NO;
@@ -229,6 +235,10 @@ UIActionSheetDelegate>
     if (section == 1 || section == 2)
     {
         return 25;
+    }
+    else if(section == 0)
+    {
+        return 20;
     }
     return 0;
 }

@@ -13,6 +13,7 @@
 #import "FriendsViewController.h"
 #import "PersonalSettingViewController.h"
 #import "XDContentViewController+JDSideMenu.h"
+#import "ChatViewController.h"
 #import "Header.h"
 #import "MyButton.h"
 
@@ -38,6 +39,17 @@
     
     NSInteger selectIndex;
     UILabel *nameLabel;
+    
+    HomeViewController *home;
+    KKNavigationController *homeNav;
+    MyClassesViewController *myClasses;
+    KKNavigationController *myClassesNav;
+    FriendsViewController *friends;
+    KKNavigationController *friendsNav;
+    MessageViewController *message;
+    KKNavigationController *messageNav;
+    PersonalSettingViewController *personalSetting;
+    KKNavigationController *personSettingNav;
 }
 @end
 
@@ -69,7 +81,7 @@
     
     self.bgView.backgroundColor = RGB(49, 54, 58, 1);
     
-    self.imageView = [[UIImageView alloc] initWithFrame:CGRectMake(150/2-43, YSTART+30, 86, 86)];
+    self.imageView = [[UIImageView alloc] initWithFrame:CGRectMake(180/2-43, YSTART+30, 86, 86)];
     self.imageView.backgroundColor = [UIColor whiteColor];
     self.imageView.layer.borderColor = [UIColor whiteColor].CGColor;
     self.imageView.layer.borderWidth = 2;
@@ -84,7 +96,7 @@
     [self.imageView addGestureRecognizer:headerTap];
     
     
-    nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, self.imageView.frame.size.height+self.imageView.frame.origin.y+2, 150, 30)];
+    nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, self.imageView.frame.size.height+self.imageView.frame.origin.y+2, 180, 30)];
     nameLabel.font = [UIFont systemFontOfSize:17];
     nameLabel.backgroundColor = [UIColor clearColor];
     nameLabel.textColor = [UIColor whiteColor];
@@ -105,6 +117,17 @@
     {
         [buttonTableView setSeparatorInset:UIEdgeInsetsZero];
     }
+    
+    home = [[HomeViewController alloc] init];
+    homeNav = [[KKNavigationController alloc] initWithRootViewController:home];
+    myClasses = [[MyClassesViewController alloc] init];
+    myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClasses];
+    friends = [[FriendsViewController alloc] init];
+    friendsNav = [[KKNavigationController alloc] initWithRootViewController:friends];
+    message = [[MessageViewController alloc] init];
+    messageNav = [[KKNavigationController alloc] initWithRootViewController:message];
+    personalSetting = [[PersonalSettingViewController alloc] init];
+    personSettingNav = [[KKNavigationController alloc] initWithRootViewController:personalSetting];
 }
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
@@ -176,6 +199,11 @@
         }
     }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    
+    CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+    cell.lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+    cell.lineImageView.backgroundColor = UIColorFromRGB(0x394043);
+    //394043
     return cell;
 }
 
@@ -184,57 +212,123 @@
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     selectIndex = indexPath.row;
+    NSString *classStr = NSStringFromClass([[(KKNavigationController *)[self.sideMenuController contentController] topViewController] class]);
+    
     if (indexPath.row == HOMETAG-2000)
     {
-        HomeViewController *home = [[HomeViewController alloc] init];
-        KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:home];
-        [self.sideMenuController setContentController:homeNav animted:NO];
+        if (![classStr isEqualToString:@"HomeViewController"])
+        {
+            [self.sideMenuController setContentController:homeNav animted:NO];
+        }
+        else
+        {
+            [home viewWillAppear:NO];
+        }
+        [home getData];
     }
     else if(indexPath.row == MYCLASSTAG-2000)
     {
-        MyClassesViewController *myClasses = [[MyClassesViewController alloc] init];
-        KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClasses];
-        [self.sideMenuController setContentController:myClassesNav animted:NO];
+        if (![classStr isEqualToString:@"MyClassesViewController"])
+        {
+            [self.sideMenuController setContentController:myClassesNav animted:NO];
+        }
+        else
+        {
+            [myClasses viewWillAppear:NO];
+        }
+        [myClasses getData];
     }
     else if(indexPath.row == FRIENDSTAG-2000)
     {
-        FriendsViewController *friends = [[FriendsViewController alloc] init];
-        KKNavigationController *friendsNav = [[KKNavigationController alloc] initWithRootViewController:friends];
-        [self.sideMenuController setContentController:friendsNav animted:NO];
-
+        if (![classStr isEqualToString:@"FriendsViewController"])
+        {
+            [self.sideMenuController setContentController:friendsNav animted:NO];
+        }
+        else
+        {
+            [friends viewWillAppear:NO];
+        }
+        [friends getData];
     }
     else if(indexPath.row == MESSAGETAG-2000)
     {
-        MessageViewController *message = [[MessageViewController alloc] init];
-        KKNavigationController *messageNav = [[KKNavigationController alloc] initWithRootViewController:message];
-        [self.sideMenuController setContentController:messageNav animted:NO];
+        if (![classStr isEqualToString:@"MessageViewController"])
+        {
+            [self.sideMenuController setContentController:messageNav animted:NO];
+        }
+        else
+        {
+            [message viewWillAppear:NO];
+        }
+        [message getChatList];
     }
     else if(indexPath.row == PERSONTAG-2000)
     {
-        PersonalSettingViewController *personalSetting = [[PersonalSettingViewController alloc] init];
-        KKNavigationController *personSettingNav = [[KKNavigationController alloc] initWithRootViewController:personalSetting];
-        [self.sideMenuController setContentController:personSettingNav animted:NO];
+        if (![classStr isEqualToString:@"PersonalSettingViewController"])
+        {
+            [self.sideMenuController setContentController:personSettingNav animted:NO];
+        }
+        else
+        {
+            [personalSetting viewWillAppear:NO];
+        }
+        [personalSetting getData];
     }
+    [self.sideMenuController hideMenuAnimated:NO];
     [tableView reloadData];
 }
 
 -(void)headerTap
 {
-    PersonalSettingViewController *personalSetting = [[PersonalSettingViewController alloc] init];
-    KKNavigationController *personSettingNav = [[KKNavigationController alloc] initWithRootViewController:personalSetting];
-    [self.sideMenuController setContentController:personSettingNav animted:YES];
-    for(int i=1000;i<1000+[menuNamesArray count];++i)
+    [homeNav popToRootViewControllerAnimated:NO];
+    [homeNav dismissViewControllerAnimated:NO completion:nil];
+    
+    [myClassesNav popToRootViewControllerAnimated:NO];
+    [myClassesNav dismissViewControllerAnimated:NO completion:nil];
+    
+    [friendsNav popToRootViewControllerAnimated:NO];
+    [friendsNav dismissViewControllerAnimated:NO completion:nil];
+    
+    [messageNav popToRootViewControllerAnimated:NO];
+    [messageNav dismissViewControllerAnimated:NO completion:nil];
+    
+    [personSettingNav popToRootViewControllerAnimated:NO];
+    [personSettingNav dismissViewControllerAnimated:NO completion:nil];
+    
+    NSString *classStr = NSStringFromClass([[(KKNavigationController *)[self.sideMenuController contentController] topViewController] class]);
+    if (![classStr isEqualToString:@"PersonalSettingViewController"])
     {
-        if (i==1000+[menuNamesArray count]-1)
-        {
-            [((UIButton *)[self.bgView viewWithTag:i]) setTitleColor:RGB(255, 108, 0, 1) forState:UIControlStateNormal];
-        }
-        else
-        {
-            [((UIButton *)[self.bgView viewWithTag:i]) setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        }
+        [self.sideMenuController setContentController:personSettingNav animted:NO];
     }
+    else
+    {
+        [self.sideMenuController hideMenuAnimated:NO];
+        [personalSetting viewWillAppear:NO];
+    }
+    [personalSetting getData];
+    [buttonTableView reloadData];
+}
 
+-(void)statusTipTapWithDataDict:(NSDictionary *)dataDict
+{
+    DDLOG(@"current class %@",NSStringFromClass([[(KKNavigationController *)[self.sideMenuController contentController] visibleViewController] class]));
+    DDLOG(@"datadict %@",dataDict);
+    NSString *type = [dataDict objectForKey:@"type"];
+    
+    if ([type isEqualToString:@"chat"])
+    {
+        ChatViewController *chat = [[ChatViewController alloc] init];
+        chat.toID = [dataDict objectForKey:@"f_id"];
+        
+        NSDictionary *userIconDIct = [ImageTools iconDictWithUserID:[dataDict objectForKey:@"f_id"]];
+        if(userIconDIct)
+        {
+            chat.name = [userIconDIct objectForKey:@"username"];
+            chat.imageUrl = [userIconDIct objectForKey:@"uicon"];
+        }
+        [[(KKNavigationController *)[self.sideMenuController contentController] visibleViewController].navigationController pushViewController:chat animated:YES];
+    }
+    [buttonTableView reloadData];
 }
 
 -(void)changeIcon
@@ -293,54 +387,6 @@
     
     NSArray *ucfriends = [db findSetWithDictionary:@{@"uid":[Tools user_id],@"checked":@"0"} andTableName:FRIENDSTABLE];
     return [ucfriends count];
-}
-
--(void)buttonClick:(UIButton *)button
-{
-    if (button.tag == 1000)
-    {
-        HomeViewController *home = [[HomeViewController alloc] init];
-        KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:home];
-        [self.sideMenuController setContentController:homeNav animted:NO];
-    }
-    else if (button.tag == 1001)
-    {
-        MyClassesViewController *myClasses = [[MyClassesViewController alloc] init];
-        KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClasses];
-        [self.sideMenuController setContentController:myClassesNav animted:NO];
-    }
-    else if(button.tag == 1002)
-    {
-        FriendsViewController *friends = [[FriendsViewController alloc] init];
-        KKNavigationController *friendsNav = [[KKNavigationController alloc] initWithRootViewController:friends];
-        [self.sideMenuController setContentController:friendsNav animted:NO];
-        
-    }
-    else if(button.tag == 1003)
-    {
-        MessageViewController *message = [[MessageViewController alloc] init];
-        KKNavigationController *messageNav = [[KKNavigationController alloc] initWithRootViewController:message];
-        [self.sideMenuController setContentController:messageNav animted:NO];
-    }
-    else if(button.tag == 1004)
-    {
-        PersonalSettingViewController *personalSetting = [[PersonalSettingViewController alloc] init];
-        KKNavigationController *personSettingNav = [[KKNavigationController alloc] initWithRootViewController:personalSetting];
-        [self.sideMenuController setContentController:personSettingNav animted:NO];
-    }
-    
-    
-    for(int i=1000;i<1000+[menuNamesArray count];++i)
-    {
-        if (i==button.tag)
-        {
-            [((UIButton *)[self.bgView viewWithTag:i]) setTitleColor:RGB(255, 108, 0, 1) forState:UIControlStateNormal];
-        }
-        else
-        {
-            [((UIButton *)[self.bgView viewWithTag:i]) setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        }
-    }
 }
 
 @end

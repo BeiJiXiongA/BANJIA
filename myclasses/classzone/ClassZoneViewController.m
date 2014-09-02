@@ -161,7 +161,6 @@ NameButtonDel>
     [addButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [addButton setTitle:@"发布" forState:UIControlStateNormal];
     [addButton addTarget:self action:@selector(addDongTaiClick) forControlEvents:UIControlEventTouchUpInside];
-    addButton.hidden = YES;
     [self.navigationBarView addSubview:addButton];
     
     
@@ -196,17 +195,13 @@ NameButtonDel>
     
     [classZoneTableView addSubview:noneDongTaiLabel];
     
-    if (!isApply)
-    {
-        addButton.hidden = NO;
-    }
     if(([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"students"]) &&
-       ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:StudentSendDiary] integerValue]== 2))
+       ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:StudentSendDiary] integerValue] != 1))
     {
         addButton.hidden = YES;
     }
     else if(([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"parents"]) &&
-            ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:ParentSendDiary] integerValue]== 2))
+            ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:ParentSendDiary] integerValue] != 1))
     {
         addButton.hidden = YES;
     }
@@ -501,11 +496,12 @@ NameButtonDel>
                 NSString *requestUrlStr = [NSString stringWithFormat:@"%@=%@=%@",GETSETTING,[Tools user_id],classID];
                 NSString *key = [requestUrlStr MD5Hash];
                 [FTWCache setObject:[responseString dataUsingEncoding:NSUTF8StringEncoding] forKey:key];
-                [self dealClassSetting:responseDict];
                 if ([[[responseDict objectForKey:@"data"] objectForKey:@"admin"] integerValue] == 2)
                 {
                     addButton.hidden = NO;
                 }
+                [self dealClassSetting:responseDict];
+                
             }
             else
             {
@@ -815,9 +811,10 @@ NameButtonDel>
             cell.headerImageView.userInteractionEnabled = YES;
             [cell.headerImageView addGestureRecognizer:tap];
             
+            CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
             UIView *verticalLineView = [[UIView alloc] init];
             verticalLineView.backgroundColor = UIColorFromRGB(0xe2e3e4);
-            verticalLineView.frame = CGRectMake(34.75, cell.headerImageView.frame.size.height+cell.headerImageView.frame.origin.y, 1.5, 12.5);
+            verticalLineView.frame = CGRectMake(34.75, cell.headerImageView.frame.size.height+cell.headerImageView.frame.origin.y, 1.5, cellHeight-cell.headerImageView.frame.size.height-cell.headerImageView.frame.origin.y);
             [cell.bgView addSubview:verticalLineView];
             
             
@@ -830,7 +827,6 @@ NameButtonDel>
             {
                 [cell.headerImageView setImage:[UIImage imageNamed:@"headpic.jpg"]];
             }
-            
             
             cell.locationLabel.frame = CGRectMake(cell.headerImageView.frame.size.width+cell.headerImageView.frame.origin.x+7, cell.headerImageView.frame.origin.y+5, 190, 20);
             cell.locationLabel.font = [UIFont systemFontOfSize:18];
@@ -862,7 +858,7 @@ NameButtonDel>
             if (isApply)
             {
                 cell.praiseButton.hidden = NO;
-                cell.praiseButton.frame = CGRectMake(35, bgImageViewHeight+18, SCREEN_WIDTH-70, 42);
+                cell.praiseButton.frame = CGRectMake(37, bgImageViewHeight+18, SCREEN_WIDTH-74, 42);
                 [cell.praiseButton setTitle:@"申请加入" forState:UIControlStateNormal];
                 [cell.praiseButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
                 [cell.praiseButton addTarget:self action:@selector(applyJoin) forControlEvents:UIControlEventTouchUpInside];
@@ -870,8 +866,11 @@ NameButtonDel>
                 [cell.praiseButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
                 cell.bgView.frame = CGRectMake(0, 0, SCREEN_WIDTH, bgImageViewHeight+72.5);
             }
+            cell.bgView.backgroundColor = self.bgView.backgroundColor;
+            cell.bgView.layer.borderWidth = 0;
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
             cell.backgroundColor = [UIColor clearColor];
+            cell.contentView.backgroundColor = self.bgView.backgroundColor;
             return cell;
         }
         else if (indexPath.row == 1)
@@ -982,7 +981,7 @@ NameButtonDel>
             {
                 cell.contentLabel.text = content;
             }
-            cell.contentLabel.frame = CGRectMake(10, 55, SCREEN_WIDTH-20, 45);
+            cell.contentLabel.frame = CGRectMake(10, 55, SCREEN_WIDTH - 30, 45);
         }
         else
         {
@@ -1953,7 +1952,7 @@ NameButtonDel>
         }
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:paraDict API:GETDIARIESLIST];
         [request setCompletionBlock:^{
-            [Tools hideProgress:classZoneTableView];
+            [Tools hideProgress:self.bgView];
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
             DDLOG(@"diaries list responsedict %@",responseDict);
@@ -2003,14 +2002,14 @@ NameButtonDel>
         }];
         
         [request setFailedBlock:^{
-            [Tools hideProgress:classZoneTableView];
+            [Tools hideProgress:self.bgView];
             [Tools showAlertView:@"连接错误" delegateViewController:nil];
             _reloading = NO;
             [pullRefreshView egoRefreshScrollViewDataSourceDidFinishedLoading:classZoneTableView];
             NSError *error = [request error];
             DDLOG(@"error %@",error);
         }];
-        [Tools showProgress:classZoneTableView];
+        [Tools showProgress:self.bgView];
         [request startAsynchronous];
     }
     else

@@ -13,6 +13,11 @@
 #import "KKNavigationController.h"
 #import "UIImageView+WebCache.h"
 #import "MBProgressHUD.h"
+#import <sys/socket.h>
+#import <sys/sysctl.h>
+#import <net/if.h>
+#import <net/if_dl.h>
+#import "dlfcn.h"
 
 extern NSString *CTSettingCopyMyPhoneNumber();
 
@@ -235,10 +240,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     return deviceOS;
 }
 
-#import <sys/socket.h>
-#import <sys/sysctl.h>
-#import <net/if.h>
-#import <net/if_dl.h>
+
 +(NSString *)device_uid
 {
     NSString *userStr = @"simulator";
@@ -411,7 +413,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:
                                                                       [NSString stringWithFormat:@"%@%@",HOST_URL,subUrl]]];
     [request setRequestMethod:@"POST"];
-    [request setTimeOutSeconds:12];
+    [request setTimeOutSeconds:20];
     DDLOG(@"url=%@",request.url);
     for (NSString *key in pareDict.allKeys)
     {
@@ -742,7 +744,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 {
     return [image resizableImageWithCapInsets:insets];
 }
-#import "dlfcn.h"
+
 #pragma mark - getLableSize
 
 +(CGSize)getSizeWithString:(NSString *)content andWidth:(CGFloat)width andFont:(UIFont *)font

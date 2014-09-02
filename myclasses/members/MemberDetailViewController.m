@@ -54,6 +54,7 @@ UIActionSheetDelegate>
     NSString *qqnum;
     NSString *sexureimage;
     NSString *birth;
+    NSString *banjiaNum;
 }
 @end
 
@@ -80,6 +81,7 @@ UIActionSheetDelegate>
     
     qqnum = @"未绑定";
     birth = @"";
+    banjiaNum = @"";
     
     self.titleLabel.text = @"个人信息";
     
@@ -201,7 +203,7 @@ UIActionSheetDelegate>
     }
     else if(section == 1)
     {
-        return 3;
+        return 4;
     }
     return 0;
 }
@@ -231,13 +233,17 @@ UIActionSheetDelegate>
     }
     else if (indexPath.section == 1)
     {
-        if (indexPath.row < 2)
+        if (indexPath.row < 3)
         {
             if (indexPath.row == 0 && [phoneNum length] > 0)
             {
                 return 40;
             }
             if (indexPath.row == 1 && [birth length] > 0)
+            {
+                return 40;
+            }
+            if (indexPath.row == 2 && [banjiaNum length] > 0)
             {
                 return 40;
             }
@@ -306,7 +312,7 @@ UIActionSheetDelegate>
     }
     else if (indexPath.section == 1)
     {
-        if (indexPath.row < 2)
+        if (indexPath.row < 3)
         {
             cell.nameLabel.frame = CGRectMake(15, 5, 100, 30);
             cell.nameLabel.textColor = TITLE_COLOR;
@@ -337,6 +343,19 @@ UIActionSheetDelegate>
                     cell.nameLabel.text = @"";
                 }
             }
+            else if (indexPath.row == 2)
+            {
+                if ([banjiaNum length] > 0)
+                {
+                    cell.nameLabel.text = @"班家号";
+                    cell.contentLabel.text = banjiaNum;
+                }
+                else
+                {
+                    cell.nameLabel.text = @"";
+                }
+            }
+            
             CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
             UIImageView *lineImageView = [[UIImageView alloc] init];
             lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
@@ -746,7 +765,15 @@ UIActionSheetDelegate>
                             headerImageUrl = HEADERICON;
                         }
                     }
-
+                    
+                    if (![EmptyTools isEmpty:dict key:@"number"])
+                    {
+                        banjiaNum = [NSString stringWithFormat:@"%d",[[dict objectForKey:@"number"] intValue]];
+                        if ([banjiaNum length] < 7)
+                        {
+                            banjiaNum = @"";
+                        }
+                    }
                 }
                 [infoView reloadData];
             }

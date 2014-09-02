@@ -112,6 +112,11 @@ UISearchBarDelegate>
     self.titleLabel.text = @"好友";
         
     schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
+    if ([schoolName isEqualToString:@"未指定学校"] ||
+        [schoolName isEqualToString:@"位甚至学校"])
+    {
+        schoolName = @"";
+    }
     className = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
@@ -1502,8 +1507,17 @@ UISearchBarDelegate>
         {
             NSMutableString *inviteBody = [[NSMutableString alloc] initWithString:InviteClassMember];
             
+            NSString *classNum = [[NSUserDefaults standardUserDefaults] objectForKey:@"classnum"];
+            
            [inviteBody replaceOccurrencesOfString:@"#school" withString:schoolName options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
-            [inviteBody replaceOccurrencesOfString:@"#class" withString:className options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+            if ([classNum length] > 0)
+            {
+                [inviteBody replaceOccurrencesOfString:@"#class" withString:[NSString stringWithFormat:@"%@(班号:%@)",className,classNum] options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+            }
+            else
+            {
+                [inviteBody replaceOccurrencesOfString:@"#class" withString:className options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+            }
             
             msgBody = inviteBody;
         }

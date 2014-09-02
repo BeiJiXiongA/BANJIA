@@ -138,8 +138,13 @@ ChatVCDelegate>
 
 -(void)viewWillAppear:(BOOL)animated
 {
+    [[StatusBarTips shareTipsWindow] hideTips];
     [super viewWillAppear:animated];
+    [[NSUserDefaults standardUserDefaults] setObject:@"chat" forKey:@"viewtype"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dealNewChatMsg:) name:RECEIVENEWMSG object:nil];
+    
+    
     
     [self dealNewChatMsg:nil];
     [self dealNewMsg:nil];
@@ -149,6 +154,8 @@ ChatVCDelegate>
 -(void)viewWillDisappear:(BOOL)animated
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self name:RECEIVENEWMSG object:nil];
+    [[NSUserDefaults standardUserDefaults] setObject:@"notchat" forKey:@"viewtype"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 -(void)dealloc
@@ -276,6 +283,28 @@ ChatVCDelegate>
     
     [newMessageArray removeAllObjects];
     [newMessageArray addObjectsFromArray:[db findChatUseridWithTableName:CHATTABLE]];
+    DDLOG(@"new message array %@",newMessageArray);
+    if ([newMessageArray count] > 0)
+    {
+        for(int i = 0; i < [newMessageArray count]-1; i++)
+        {
+            NSString *tid = [[[newMessageArray objectAtIndex:i] allValues] firstObject];
+            NSDictionary *messageDict = [self findLastMsgWithUser:tid];
+            int msgTime = [[messageDict objectForKey:@"time"] intValue];
+            for (int j= 0; j<[newMessageArray count]-i; j++)
+            {
+                NSString *tmpTid = [[[newMessageArray objectAtIndex:j] allValues] firstObject];
+                NSDictionary *tmpMessageDict = [self findLastMsgWithUser:tmpTid];
+                int tmpMsgTime = [[tmpMessageDict objectForKey:@"time"] intValue];
+                if (msgTime > tmpMsgTime)
+                {
+                    [newMessageArray exchangeObjectAtIndex:i withObjectAtIndex:j];
+                }
+            }
+        }
+
+    }
+    DDLOG(@"new message sorted array %@",newMessageArray);
     [friendsListTableView reloadData];
     if ([newMessageArray count] > 0)
     {
@@ -542,14 +571,6 @@ ChatVCDelegate>
     NSDictionary *userIconDIct = [ImageTools iconDictWithUserID:otherid];
     if(userIconDIct)
     {
-        if ([[userIconDIct objectForKey:@"username"] rangeOfString:@"人)"].length == 0)
-        {
-            chat.isGroup = NO;
-        }
-        else if([[userIconDIct objectForKey:@"username"] rangeOfString:@"人)"].length > 0)
-        {
-            chat.isGroup = YES;
-        }
         chat.name = [userIconDIct objectForKey:@"username"];
         chat.imageUrl = [userIconDIct objectForKey:@"uicon"];
     }

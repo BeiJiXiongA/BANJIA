@@ -179,10 +179,7 @@ UIActionSheetDelegate>
     
     [self getCacheData];
     
-    if ([Tools NetworkReachable])
-    {
-        [self getClassesByUser];
-    }
+    
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     if (ShowTips == 1)
     {
@@ -220,7 +217,15 @@ UIActionSheetDelegate>
         tapLabel.userInteractionEnabled = YES;
         [tapLabel addGestureRecognizer:tipTap];
     }
-    
+    [self getData];
+}
+
+-(void)getData
+{
+    if ([Tools NetworkReachable])
+    {
+        [self getClassesByUser];
+    }
 }
 
 -(void)outTap
@@ -924,6 +929,15 @@ UIActionSheetDelegate>
     else
     {
         [ud setObject:@"" forKey:@"classiconimage"];
+    }
+    
+    if ([classDict objectForKey:@"number"])
+    {
+        [ud setObject:[NSString stringWithFormat:@"%d",[[classDict objectForKey:@"number"] intValue]] forKey:@"classnum"];
+    }
+    else
+    {
+        [ud setObject:@"" forKey:@"classnum"];
     }
 
     [ud synchronize];

@@ -104,11 +104,11 @@ UITextFieldDelegate>
     headerView.backgroundColor = RGB(59, 189, 100, 1);
     [self.bgView addSubview:headerView];
     
-    UIImage *logoImage = [UIImage imageNamed:@"logo"];
+    UIImage *logoImage = [UIImage imageNamed:@"slogan"];
     UIImageView *logoImageView = [[UIImageView alloc] init];
     logoImageView.image = logoImage;
-    logoImageView.frame = CGRectMake((SCREEN_WIDTH-logoImage.size.width)/2+10,(logoImageHeight-logoImage.size.height)/2
-                                     +20, logoImage.size.width, logoImage.size.height);
+    logoImageView.frame = CGRectMake((SCREEN_WIDTH-148)/2+10,(logoImageHeight-138)/2
+                                     +20, 148, 138);
     logoImageView.backgroundColor = [UIColor clearColor];
     [headerView addSubview:logoImageView];
     

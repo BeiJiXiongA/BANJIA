@@ -591,6 +591,8 @@ MsgDelegate>
                     }
                     [memDict setObject:sn forKey:@"sn"];
                     
+                    
+                    
                     if (![dict objectForKey:@"_id"])
                     {
                         continue ;
@@ -725,6 +727,16 @@ MsgDelegate>
                     {
                         [memDict setObject:@"" forKey:@"cb_id"];
                     }
+                    
+                    if ([dict objectForKey:@"def"] && ![[dict objectForKey:@"def"] isEqual:[NSNull null]])
+                    {
+                        [memDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"def"] intValue]] forKey:@"def"];
+                    }
+                    else
+                    {
+                        [memDict setObject:@"" forKey:@"def"];
+                    }
+//                    [memDict setObject:@"" forKey:@"birth"];
                     
                     if ([_db insertRecord:memDict andTableName:CLASSMEMBERTABLE])
                     {

@@ -88,13 +88,13 @@ verticalLineView;
         [bgView addSubview:locationLabel];
         
         contentLabel = [[UITextView alloc] init];
-        contentLabel.frame = CGRectMake(10, 60, SCREEN_WIDTH-20, 35);
         contentLabel.scrollEnabled = NO;
         contentLabel.showsVerticalScrollIndicator = NO;
         contentLabel.editable = NO;
         contentLabel.hidden = YES;
         contentLabel.textColor = CONTENTCOLOR;
         contentLabel.font = [UIFont systemFontOfSize:15];
+        contentLabel.backgroundColor = [UIColor whiteColor];
         [bgView addSubview:contentLabel];
         
         imagesScrollView = [[UIScrollView alloc] init];

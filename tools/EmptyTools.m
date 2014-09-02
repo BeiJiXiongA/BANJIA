@@ -14,6 +14,11 @@
     if ([dict objectForKey:key] &&
         ![[dict objectForKey:key] isEqual:[NSNull null]])
     {
+        if ([[dict objectForKey:key] isKindOfClass:[NSString class]] &&
+            ![[dict objectForKey:key] isEqualToString:@"(null)"])
+        {
+            return YES;
+        }
         return YES;
     }
     return NO;

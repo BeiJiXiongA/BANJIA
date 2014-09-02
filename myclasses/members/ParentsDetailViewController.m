@@ -55,6 +55,9 @@ UIActionSheetDelegate>
     NSString *qqnum;
     NSString *sexureimage;
     NSString *birth;
+    NSString *def;
+    
+    int defnum;
     
     NSDictionary *parentDict;
 }
@@ -82,6 +85,8 @@ UIActionSheetDelegate>
     
     qqnum = @"未绑定";
     birth = @"";
+    def = @"";
+    defnum = 0;
     
     
     dataDict  = [[NSMutableDictionary alloc] initWithCapacity:0];
@@ -111,6 +116,15 @@ UIActionSheetDelegate>
         {
             phoneNum = [parentDict objectForKey:@"phone"];
         }
+        
+        if ([parentDict objectForKey:@"def"] && ![[parentDict objectForKey:@"def"] isEqual:[NSNull null]])
+        {
+            def = [parentDict objectForKey:@"def"];
+            if ([def intValue] == 1)
+            {
+                defnum = 1;
+            }
+        }
         if (![[parentDict objectForKey:@"img_icon"] isEqual:[NSNull null]])
         {
             headerImageUrl = [parentDict objectForKey:@"img_icon"];
@@ -132,6 +146,11 @@ UIActionSheetDelegate>
                 sexureimage = @"female";
             }
         }
+    }
+    
+    if ([def intValue] == 0)
+    {
+        moreButton.hidden = NO;
     }
     
     if([Tools NetworkReachable])
@@ -481,6 +500,43 @@ UIActionSheetDelegate>
     
 }
 
+-(void)setDefaultParents
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"c_id":classID,
+                                                                      @"o_id":parentID
+                                                                      } API:SETDEFPARENT];
+        [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"set default parent responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                [Tools showTips:@"设置成功！" toView:self.bgView];
+                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
+                [self.navigationController popToRootViewControllerAnimated:YES];
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools hideProgress:self.bgView];
+        }];
+        [Tools showProgress:self.bgView];
+        [request startAsynchronous];
+    }
+}
+
+
 
 -(void)addFriend
 {
@@ -517,24 +573,74 @@ UIActionSheetDelegate>
 
 -(void)moreClick
 {
+    if ([parentID isEqualToString:[Tools user_id]] && [def intValue] == 0)
+    {
+        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:
+                             @"设置为默认家长",nil];
+        ac.tag = 3333;
+        [ac showInView:self.bgView];
+        return ;
+    }
+    
     NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
     int userAdmin = [[dict objectForKey:@"admin"] intValue];
     if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
     {
-        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"设置家长学生关系",@"设置发言权限",@"踢出班级",@"举报此人", nil];
-        ac.tag = 3333;
-        [ac showInView:self.bgView];
+        if ([def intValue] == 0)
+        {
+            UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:
+                                 @"设置家长学生关系",
+                                 @"设置为默认家长",
+                                 @"设置发言权限",
+                                 @"踢出班级",
+                                 @"举报此人", nil];
+            ac.tag = 3333;
+            [ac showInView:self.bgView];
+        }
+        else
+        {
+            UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:
+                                 @"设置家长学生关系",
+                                 @"设置发言权限",
+                                 @"踢出班级",
+                                 @"举报此人", nil];
+            ac.tag = 3333;
+            [ac showInView:self.bgView];
+        }
     }
     else
     {
-        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"举报此人", nil];
-        ac.tag = 3333;
-        [ac showInView:self.bgView];
+        
+        if ([role isEqualToString:@"parents"] &&
+            [def intValue] != 1 &&
+            [[parentDict objectForKey:@"re_id"] isEqualToString:[dict objectForKey:@"re_id"]])
+        {
+            UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:
+                                 @"设置为默认家长",
+                                 @"举报此人", nil];
+            ac.tag = 3333;
+            [ac showInView:self.bgView];
+        }
+        else
+        {
+            UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:
+                                 @"举报此人", nil];
+            ac.tag = 3333;
+            [ac showInView:self.bgView];
+        }
     }
 }
 
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
+    if ([parentID isEqualToString:[Tools user_id]] && [def intValue] == 0)
+    {
+        if (buttonIndex == 0)
+        {
+            [self setDefaultParents];
+        }
+        return ;
+    }
     if (actionSheet.tag == 3333)
     {
         NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
@@ -552,7 +658,7 @@ UIActionSheetDelegate>
                 settingRelate.classID = classID;
                 [self.navigationController pushViewController:settingRelate animated:YES];
             }
-            else if (buttonIndex == 1)
+            else if (buttonIndex == 2-defnum)
             {
                 //设置发言权限
                 SettingStateLimitViewController *settingLimit = [[SettingStateLimitViewController alloc] init];
@@ -561,7 +667,7 @@ UIActionSheetDelegate>
                 settingLimit.role = role;
                 [self.navigationController pushViewController:settingLimit animated:YES];
             }
-            else if (buttonIndex == 2)
+            else if (buttonIndex == 3-defnum)
             {
                 //踢出班级
                 NSString *msg = [NSString stringWithFormat:@"您确定把%@踢出班级吗？",parentName];
@@ -569,7 +675,27 @@ UIActionSheetDelegate>
                 al.tag = KICKALTAG;
                 [al show];
             }
-            else if (buttonIndex == 3)
+            else if (buttonIndex == 4-defnum)
+            {
+                ReportViewController *reportVC = [[ReportViewController alloc] init];
+                reportVC.reportType = @"people";
+                reportVC.reportUserid = parentID;
+                reportVC.reportContentID = @"";
+                [self.navigationController pushViewController:reportVC animated:YES];
+            }
+            else if(buttonIndex == 1)
+            {
+                //设置默认家长
+                [self setDefaultParents];
+            }
+        }
+        else if(buttonIndex == 0)
+        {
+            if ([def intValue] == 0)
+            {
+                [self setDefaultParents];
+            }
+            else
             {
                 ReportViewController *reportVC = [[ReportViewController alloc] init];
                 reportVC.reportType = @"people";
@@ -578,14 +704,19 @@ UIActionSheetDelegate>
                 [self.navigationController pushViewController:reportVC animated:YES];
             }
         }
-        else if(buttonIndex == 0)
+        else if (buttonIndex == 1)
         {
-            ReportViewController *reportVC = [[ReportViewController alloc] init];
-            reportVC.reportType = @"people";
-            reportVC.reportUserid = parentID;
-            reportVC.reportContentID = @"";
-            [self.navigationController pushViewController:reportVC animated:YES];
-
+            if ([def intValue] > 0)
+            {
+                if(buttonIndex == 0)
+                {
+                    ReportViewController *reportVC = [[ReportViewController alloc] init];
+                    reportVC.reportType = @"people";
+                    reportVC.reportUserid = parentID;
+                    reportVC.reportContentID = @"";
+                    [self.navigationController pushViewController:reportVC animated:YES];
+                }
+            }
         }
     }
     else if(actionSheet.tag == ContaceACTag)

@@ -9,5 +9,5 @@
 #import "XDContentViewController.h"
 
 @interface PersonalSettingViewController : XDContentViewController
-
+-(void)getData;
 @end

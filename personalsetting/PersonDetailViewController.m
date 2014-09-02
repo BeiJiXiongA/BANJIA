@@ -101,7 +101,7 @@ MFMailComposeViewControllerDelegate>
     {
         moreButton.hidden = YES;
     }
-    if ([personID isEqualToString:OurTeamID])
+    if ([personID isEqualToString:OurTeamID] || [personID isEqualToString:AssistantID])
     {
         moreButton.hidden = YES;
     }
@@ -350,7 +350,7 @@ MFMailComposeViewControllerDelegate>
             cell.button2.iconImageView.frame = CGRectMake(CLEFT, CTOP, ADDFRIW, ADDFRIH);
             [cell.button2.iconImageView setImage:[UIImage imageNamed:@"chatto"]];
             
-            if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fname":personName,@"checked":@"1"} andTableName:FRIENDSTABLE] count] > 0)
+            if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fid":personID,@"checked":@"1"} andTableName:FRIENDSTABLE] count] > 0)
             {
                 cell.button1.hidden = YES;
                 cell.button2.frame = CGRectMake((SCREEN_WIDTH-150)/2, 10, 145, 43.5);
@@ -428,9 +428,16 @@ MFMailComposeViewControllerDelegate>
                 al.tag = 3333;
                 [al show];
             }
-
+            else if (buttonIndex == 1)
+            {
+                ReportViewController *reportVC = [[ReportViewController alloc] init];
+                reportVC.reportType = @"people";
+                reportVC.reportUserid = personID;
+                reportVC.reportContentID = @"";
+                [self.navigationController pushViewController:reportVC animated:YES];
+            }
         }
-        else if (buttonIndex == 0)
+        else if(buttonIndex == 0)
         {
             ReportViewController *reportVC = [[ReportViewController alloc] init];
             reportVC.reportType = @"people";
@@ -438,6 +445,7 @@ MFMailComposeViewControllerDelegate>
             reportVC.reportContentID = @"";
             [self.navigationController pushViewController:reportVC animated:YES];
         }
+        
     }
     else if(actionSheet.tag == ContaceACTag)
     {

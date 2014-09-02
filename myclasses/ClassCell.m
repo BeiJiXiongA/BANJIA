@@ -17,7 +17,8 @@ timeLabel,
 timeLabel2,
 unReadImageView,
 bgView,
-arrowImageView;
+arrowImageView,
+lineImageView;
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
@@ -52,6 +53,9 @@ arrowImageView;
         
         arrowImageView = [[UIImageView alloc] init];
         [bgView addSubview:arrowImageView];
+        
+        lineImageView = [[UIImageView alloc] init];
+        [bgView addSubview:lineImageView];
         
         self.contentView.backgroundColor = [UIColor clearColor];
     }

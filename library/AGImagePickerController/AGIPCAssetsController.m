@@ -16,10 +16,11 @@
 #import "AGIPCGridCell.h"
 #import "AGIPCToolbarItem.h"
 
+static NSMutableArray *_assets;
 @interface AGIPCAssetsController ()
 {
     ALAssetsGroup *_assetsGroup;
-    NSMutableArray *_assets;
+    
     AGImagePickerController *_imagePickerController;
 }
 

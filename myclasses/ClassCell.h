@@ -17,4 +17,5 @@
 @property (nonatomic, strong) UIImageView *unReadImageView;
 @property (nonatomic, strong) UIView *bgView;
 @property (nonatomic, strong) UIImageView *arrowImageView;
+@property (nonatomic, strong) UIImageView *lineImageView;
 @end

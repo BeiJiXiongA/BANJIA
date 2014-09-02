@@ -663,9 +663,9 @@
         if (SQLITE_OK != rc) {
             
             if (_logsErrors) {
-                NSLog(@"DB Error: %d \"%@\"", [self lastErrorCode], [self lastErrorMessage]);
-                NSLog(@"DB Query: %@", sql);
-                NSLog(@"DB Path: %@", _databasePath);
+//                NSLog(@"DB Error: %d \"%@\"", [self lastErrorCode], [self lastErrorMessage]);
+//                NSLog(@"DB Query: %@", sql);
+//                NSLog(@"DB Path: %@", _databasePath);
 #ifndef NS_BLOCK_ASSERTIONS
                 if (_crashOnErrors) {
                     abort();
@@ -836,9 +836,9 @@
         if (SQLITE_OK != rc) {
             
             if (_logsErrors) {
-                NSLog(@"DB Error: %d \"%@\"", [self lastErrorCode], [self lastErrorMessage]);
-                NSLog(@"DB Query: %@", sql);
-                NSLog(@"DB Path: %@", _databasePath);
+//                NSLog(@"DB Error: %d \"%@\"", [self lastErrorCode], [self lastErrorMessage]);
+//                NSLog(@"DB Query: %@", sql);
+//                NSLog(@"DB Path: %@", _databasePath);
 #ifndef NS_BLOCK_ASSERTIONS
                 if (_crashOnErrors) {
                     abort();

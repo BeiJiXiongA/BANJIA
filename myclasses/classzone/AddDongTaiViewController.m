@@ -59,6 +59,7 @@ UIImagePickerControllerDelegate
     NSMutableArray *selectPhotosArray;
     NSMutableArray *normalPhotosArray;
     NSMutableArray *thunImageArray;
+    NSMutableArray *alreadySelectAssets;
     
     UIButton *imageTipLabel;
     
@@ -87,6 +88,7 @@ UIImagePickerControllerDelegate
     CLLocation *nowLocation;
     UIButton *locationButton;
     BOOL locationEditing;
+    UIView *locationBgView;
     MyTextField *locationTextView;
     CLLocationDegrees latitude;
     CLLocationDegrees longitude;
@@ -131,6 +133,7 @@ int count = 0;
         latelyImageNumArray = [[NSMutableArray alloc] initWithCapacity:0];
         normalPhotosArray = [[NSMutableArray alloc] initWithCapacity:0];
         originalLatelyImageArray = [[NSMutableArray alloc] initWithCapacity:0];
+        alreadySelectAssets = [[NSMutableArray alloc] initWithCapacity:0];
     }
     return self;
 }
@@ -267,14 +270,12 @@ int count = 0;
     mainScrollView.userInteractionEnabled = YES;
     [mainScrollView addGestureRecognizer:scTap];
     
-//    inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(10, 2, 10, 2)];
     contentImageView = [[UIImageView alloc] init];
     contentImageView.frame = CGRectMake(9.5, 8, SCREEN_WIDTH - 19,71);
     contentImageView.layer.cornerRadius = 8;
     contentImageView.backgroundColor = [UIColor whiteColor];
     contentImageView.layer.borderColor = TIMECOLOR.CGColor;
     contentImageView.layer.borderWidth = 0.3;
-//    [contentImageView setImage:inputImage];
     [mainScrollView addSubview:contentImageView];
     
     placeHolderLabel = [[UITextView alloc] init];
@@ -298,6 +299,7 @@ int count = 0;
     imageScrollView.layer.borderColor = TIMECOLOR.CGColor;
     imageScrollView.layer.borderWidth = 0.3;
     imageScrollView.clipsToBounds = YES;
+    imageScrollView.scrollEnabled = NO;
     imageScrollView.layer.cornerRadius = 8;
     imageScrollView.contentSize = CGSizeMake(SCREEN_WIDTH-8, 80);
     [mainScrollView addSubview:imageScrollView];
@@ -344,26 +346,29 @@ int count = 0;
     
 //    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
     
+    locationBgView = [[UIView alloc] init];
+    locationBgView.frame = CGRectMake(lateImageView.frame.origin.x, lateImageView.frame.origin.y+lateImageView.frame.size.height+9.5, lateImageView.frame.size.width, 45);
+    locationBgView.backgroundColor = [UIColor whiteColor];
+    locationBgView.layer.cornerRadius = 3;
+    locationBgView.clipsToBounds = YES;
+    [mainScrollView addSubview:locationBgView];
+    
     //位置
     locationEditing = NO;
     locationButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    locationButton.frame = CGRectMake(lateImageView.frame.origin.x, lateImageView.frame.origin.y+lateImageView.frame.size.height+9.5, 30, 30);
-//    [locationButton setBackgroundImage:btnImage forState:UIControlStateNormal];
+    locationButton.frame = CGRectMake(3, 7.5, 30, 30);
     [locationButton addTarget:self action:@selector(switchLocation) forControlEvents:UIControlEventTouchUpInside];
     [locationButton setImage:[UIImage imageNamed:@"icon_location"] forState:UIControlStateNormal];
-    [mainScrollView addSubview:locationButton];
+    [locationBgView addSubview:locationButton];
     
     locationTextView = [[MyTextField alloc] init];
     locationTextView.frame = CGRectMake(locationButton.frame.size.width+locationButton.frame.origin.x, locationButton.frame.origin.y, 0,45);
     locationTextView.font = [UIFont systemFontOfSize:14];
-    locationTextView.backgroundColor = [UIColor whiteColor];
-    locationTextView.layer.cornerRadius = 3;
-    locationTextView.clipsToBounds = YES;
     locationTextView.background = nil;
     locationTextView.delegate = self;
     locationTextView.clearButtonMode = UITextFieldViewModeAlways;
     locationTextView.tag = LocationTextViewTag;
-    [mainScrollView addSubview:locationTextView];
+    [locationBgView addSubview:locationTextView];
     
     //提交
     emitButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -521,7 +526,7 @@ int count = 0;
         ALAssetsLibraryAccessFailureBlock failureblock = ^(NSError *myerror){
             NSLog(@"相册访问失败 =%@", [myerror localizedDescription]);
             if ([myerror.localizedDescription rangeOfString:@"Global denied access"].location!=NSNotFound) {
-                NSLog(@"无法访问相册.请在'设置->定位服务'设置为打开状态.");
+                NSLog(@"无法访问相册.请在'设置->隐私->照片'设置为打开状态.");
             }else{
                 NSLog(@"相册访问失败.");
             }
@@ -732,10 +737,9 @@ int count = 0;
         lateImageView.frame = CGRectMake(9.5, imageScrollView.frame.size.height+imageScrollView.frame.origin.y+10.5, SCREEN_WIDTH-19, 125.5);
         latelyLabel.frame = CGRectMake(lateImageView.frame.origin.x+10, lateImageView.frame.origin.y+6, 17*[latelyLabel.text length], 20);
         
-        locationButton.frame = CGRectMake(locationButton.frame.origin.x, lateImageView.frame.origin.y+lateImageView.frame.size.height+9.5, 40, 40);
-        locationTextView.frame = CGRectMake(locationButton.frame.size.width+locationButton.frame.origin.x, locationButton.frame.origin.y, locationTextView.frame.size.width, 35);
+        locationBgView.frame = CGRectMake(lateImageView.frame.origin.x, lateImageView.frame.origin.y+lateImageView.frame.size.height+9.5, lateImageView.frame.size.width , 45);
         
-        mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, lateImageView.frame.size.height+lateImageView.frame.origin.y+20);
+        mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, locationBgView.frame.size.height+locationBgView.frame.origin.y+20);
     }];
     
 }
@@ -986,7 +990,6 @@ int count = 0;
 //            keyBoardHeight = ABS(height + (mainScrollView.contentSize.height - mainScrollView.frame.size.height))-YSTART;
 //        }
 //    }
-    mainScrollView.scrollEnabled = NO;
 }
 
 
@@ -1007,7 +1010,6 @@ int count = 0;
 
 - (void)openAction:(id)sender
 {
-    DDLOG(@"count in openaction %d",count);
     if (count >= 12)
     {
         [Tools showAlertView:@"图片不能多于12张,请删除后重新添加" delegateViewController:nil];
@@ -1017,6 +1019,10 @@ int count = 0;
     imagePickerController.shouldShowSavedPhotosOnTop = NO;
     imagePickerController.shouldChangeStatusBarStyle = YES;
     imagePickerController.toolbarItemsForManagingTheSelection = @[];
+    if ([alreadySelectAssets count] > 0)
+    {
+        imagePickerController.selection = alreadySelectAssets;
+    }
     imagePickerController.maximumNumberOfPhotosToBeSelected = 12 - [normalPhotosArray count];
     isSelectPhoto = YES;
     [self presentViewController:imagePickerController animated:YES completion:^{
@@ -1055,6 +1061,8 @@ int count = 0;
     [self dismissViewControllerAnimated:YES completion:^{
     
     }];
+    [alreadySelectAssets addObjectsFromArray:info];
+    
     isSelectPhoto = NO;
     if ([info count]+[selectPhotosArray count] > 12)
     {

@@ -10,4 +10,5 @@
 
 @interface MyClassesViewController : XDContentViewController
 @property (nonatomic, strong) NSString *headerIcon;
+-(void)getData;
 @end

@@ -430,7 +430,7 @@
                                                    @"checked":@"1",
                                                    @"role":@"students",
                                                    @"re_type":@"",
-                                                   @"birth":[applyDict objectForKey:@"birth"],
+                                                   @"birth":[EmptyTools isEmpty:applyDict key:@"birth"]?@"":[applyDict objectForKey:@"birth"],
                                                    @"admin":@"0",
                                                    @"sn":[applyDict objectForKey:@"sn"],
                                                    @"re_sn":@""};

@@ -106,6 +106,21 @@ OperateFriends>
     [inviteButton addTarget:self action:@selector(inviteClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:inviteButton];
     
+    
+    tipLabel = [[UILabel alloc] init];
+    tipLabel.frame = CGRectMake(40, CENTER_POINT.y-80, SCREEN_WIDTH-80, 80);
+    tipLabel.backgroundColor = [UIColor clearColor];
+    tipLabel.textColor = TITLE_COLOR;
+    tipLabel.textAlignment = NSTextAlignmentCenter;
+    tipLabel.text = @"您还没有好友";
+    tipLabel.hidden = YES;
+    [friendsListTableView addSubview:tipLabel];
+    
+    [self getData];
+}
+
+-(void)getData
+{
     if([Tools NetworkReachable])
     {
         NSArray *array = [db findSetWithDictionary:@{@"uid":[Tools user_id]} andTableName:FRIENDSTABLE];
@@ -116,14 +131,6 @@ OperateFriends>
     {
         [self operateFriendsList:[db findSetWithDictionary:@{@"uid":[Tools user_id]} andTableName:FRIENDSTABLE] andDataType:@"database"];
     }
-    tipLabel = [[UILabel alloc] init];
-    tipLabel.frame = CGRectMake(40, CENTER_POINT.y-80, SCREEN_WIDTH-80, 80);
-    tipLabel.backgroundColor = [UIColor clearColor];
-    tipLabel.textColor = TITLE_COLOR;
-    tipLabel.textAlignment = NSTextAlignmentCenter;
-    tipLabel.text = @"您还没有好友";
-    tipLabel.hidden = YES;
-    [friendsListTableView addSubview:tipLabel];
 }
 
 -(void)viewWillAppear:(BOOL)animated

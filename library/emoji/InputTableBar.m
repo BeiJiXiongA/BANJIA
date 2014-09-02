@@ -561,6 +561,7 @@ originWav,recorderVC,player;
 {
     if (sound)
     {
+        //显示键盘
         inputTextViewSize = CGSizeMake(250, DEFAULTTEXTHEIGHT);
         if (inputTextView.text.length > 0)
         {

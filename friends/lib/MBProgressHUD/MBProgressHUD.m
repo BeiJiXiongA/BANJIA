@@ -197,7 +197,7 @@ static const CGFloat kDetailsLabelFontSize = 12.f;
 }
 
 - (id)initWithView:(UIView *)view {
-	NSAssert(view, @"View must not be nil.");
+//	NSAssert(view, @"View must not be nil.");
 	return [self initWithFrame:view.bounds];
 }
 

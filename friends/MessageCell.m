@@ -101,6 +101,7 @@
     self.timeLabel.hidden = NO;
     self.messageTf.editable = NO;
     self.messageTf.hidden = NO;
+    self.messageTf.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     self.messageTf.textColor = TITLE_COLOR;
     self.messageTf.backgroundColor = [UIColor clearColor];
     self.msgImageView.layer.cornerRadius = 3;

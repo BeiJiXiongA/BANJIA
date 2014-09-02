@@ -201,6 +201,9 @@ EGORefreshTableDelegate>
     }
     else
     {
+        NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+        [ud setObject:@"1" forKey:@"classnoticetip1"];
+        [ud synchronize];
         [tapLabel removeFromSuperview];
         [tipImageView removeFromSuperview];
     }
@@ -333,7 +336,7 @@ EGORefreshTableDelegate>
     UILabel *headerLabel = [[UILabel alloc] init];
     headerLabel.backgroundColor = UIColorFromRGB(0xf1f0ec);
     headerLabel.font = [UIFont systemFontOfSize:18];
-    headerLabel.textColor = TITLE_COLOR;
+    headerLabel.textColor = COMMENTCOLOR;
     [headerView addSubview:headerLabel];
     if (section == 1)
     {
@@ -520,7 +523,6 @@ EGORefreshTableDelegate>
         cell.contentLabel.font = [UIFont systemFontOfSize:16];
         cell.contentLabel.textColor = CONTENTCOLOR;
         cell.contentLabel.contentMode = UIViewContentModeTop;
-        
         
         if (indexPath.section == 1)
         {

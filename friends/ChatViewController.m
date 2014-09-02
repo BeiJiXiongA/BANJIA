@@ -91,6 +91,8 @@ EGORefreshTableHeaderDelegate>
     EGORefreshTableHeaderView *pullRefreshView;
     BOOL _reloading;
     int page;
+    
+    UIButton *moreButton;
 }
 @end
 
@@ -170,18 +172,8 @@ EGORefreshTableHeaderDelegate>
     }
     
     
-    UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
     moreButton.frame = CGRectMake(SCREEN_WIDTH-CORNERMORERIGHT, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
-    if (isGroup)
-    {
-        [moreButton setImage:[UIImage imageNamed:@"newapplyheader"] forState:UIControlStateNormal];
-        [moreButton addTarget:self action:@selector(groupInfo) forControlEvents:UIControlEventTouchUpInside];
-    }
-    else
-    {
-        [moreButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
-        [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
-    }
     if (![toID isEqualToString:OurTeamID])
     {
         [self.navigationBarView addSubview:moreButton];
@@ -231,14 +223,7 @@ EGORefreshTableHeaderDelegate>
     
     if ([Tools NetworkReachable])
     {
-        if(isGroup)
-        {
-            [self getGroupInfo];
-        }
-        else
-        {
-            [self getChatLog];
-        }
+        [self getGroupInfo];
     }
     else
     {
@@ -267,8 +252,7 @@ EGORefreshTableHeaderDelegate>
     [self.bgView addSubview:inputTabBar];
     [inputTabBar setLayout];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(scrollViewDidEndDragging:willDecelerate:) name:UIKeyboardWillHideNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(startEditWord) name:UIKeyboardWillShowNotification object:nil];
+    
 }
 
 -(void)startEditWord
@@ -287,9 +271,12 @@ EGORefreshTableHeaderDelegate>
 {
     [super viewWillAppear:animated];
     
-    [[NSUserDefaults standardUserDefaults] setObject:@"chat" forKey:@"viewtype"];
+    [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"chat-%@",toID] forKey:@"viewtype"];
     [[NSUserDefaults standardUserDefaults] synchronize];
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = self;
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(scrollViewDidEndDragging:willDecelerate:) name:UIKeyboardWillHideNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(startEditWord) name:UIKeyboardWillShowNotification object:nil];
     
     [MobClick beginLogPageView:@"PageOne"];
     [self uploadLastViewTime];
@@ -299,6 +286,7 @@ EGORefreshTableHeaderDelegate>
     [super viewWillDisappear:animated];
     [MobClick endLogPageView:@"PageOne"];
     [self uploadLastViewTime];
+    [[NSNotificationCenter defaultCenter]  postNotificationName:UIKeyboardWillHideNotification object:nil];
     
     [[NSUserDefaults standardUserDefaults] setObject:@"notchat" forKey:@"viewtype"];
     [[NSUserDefaults standardUserDefaults] synchronize];
@@ -366,6 +354,16 @@ EGORefreshTableHeaderDelegate>
 #pragma mark - getchatlog
 -(void)getChatLog
 {
+    if (isGroup)
+    {
+        [moreButton setImage:[UIImage imageNamed:@"newapplyheader"] forState:UIControlStateNormal];
+        [moreButton addTarget:self action:@selector(groupInfo) forControlEvents:UIControlEventTouchUpInside];
+    }
+    else
+    {
+        [moreButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
+        [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
+    }
     if ([Tools NetworkReachable])
     {
         NSDictionary *paraDict;
@@ -466,8 +464,16 @@ EGORefreshTableHeaderDelegate>
             DDLOG(@"get froup info responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
+                if ([[[responseDict objectForKey:@"data"] objectForKey:@"builder"] isEqual:[NSNull null]])
+                {
+                    isGroup = NO;
+                    [self getChatLog];
+                    return ;
+                }
+                isGroup = YES;
                 users = [[responseDict objectForKey:@"data"] objectForKey:@"users"];
                 self.titleLabel.text = [[responseDict objectForKey:@"data"] objectForKey:@"name"];
+
                 
                 NSString *fname = [[responseDict objectForKey:@"data"] objectForKey:@"name"];
                 if (![fname isEqual:[NSNull null]])
