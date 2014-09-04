@@ -422,6 +422,14 @@ ZBarReaderDelegate>
     [self.navigationController popViewControllerAnimated:YES];
 }
 
+-(void)textFieldDidBeginEditing:(UITextField *)textField
+{
+    if (!textField.window.isKeyWindow)
+    {
+        [textField.window makeKeyAndVisible];
+    }
+}
+
 -(BOOL)textFieldShouldReturn:(UITextField *)textField
 {
     DDLOG(@"class number %@",textField.text);

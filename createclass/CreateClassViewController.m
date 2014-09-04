@@ -556,6 +556,11 @@ UITableViewDelegate>
     [UIView animateWithDuration:0.2 animations:^{
         self.bgView.center = CGPointMake(SCREEN_WIDTH/2, SCREEN_HEIGHT/2-70);
     }];
+    if (!textField.window.isKeyWindow)
+    {
+        [textField.window makeKeyAndVisible];
+    }
+
 }
 
 - (void)keyBoardWillHide:(NSNotification *)aNotification

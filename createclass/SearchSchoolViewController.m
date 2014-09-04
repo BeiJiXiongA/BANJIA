@@ -429,6 +429,15 @@ SelectAreaDelegate>
     NearbySchoolListViewController *nearbySchool = [[NearbySchoolListViewController alloc] init];
     [self.navigationController pushViewController:nearbySchool animated:YES];
 }
+
+-(void)textFieldDidBeginEditing:(UITextField *)textField
+{
+    if (!textField.window.isKeyWindow)
+    {
+        [textField.window makeKeyAndVisible];
+    }
+}
+
 -(void)searchSchool
 {
     [((MyTextField *)[searchSchoolTableView viewWithTag:3333]) resignFirstResponder];
@@ -564,14 +573,11 @@ SelectAreaDelegate>
     
 }
 
-
 -(BOOL)textFieldShouldReturn:(UITextField *)textField
 {
     [((MyTextField *)[searchSchoolTableView viewWithTag:3333]) resignFirstResponder];
     return YES;
 }
-
-
 
 /*
 #pragma mark - Navigation

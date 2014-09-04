@@ -153,7 +153,7 @@ SelectClasses>
     UIButton *sendButton1 = [UIButton buttonWithType:UIButtonTypeCustom];
     sendButton1.backgroundColor = [UIColor clearColor];
     [sendButton1 setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
-    sendButton1.frame = CGRectMake((SCREEN_WIDTH-300)/2, inputImageView.frame.size.height+inputImageView.frame.origin.y+10, 300, 42);
+    sendButton1.frame = CGRectMake((SCREEN_WIDTH-300)/2, contentTextView.frame.size.height+contentTextView.frame.origin.y+13, 300, 42);
     [sendButton1 setTitle:@"发布" forState:UIControlStateNormal];
     [sendButton1 addTarget:self action:@selector(sendnotice) forControlEvents:UIControlEventTouchUpInside];
     [self.bgView addSubview:sendButton1];
@@ -363,6 +363,14 @@ SelectClasses>
 
 
 #pragma mark - textview
+
+-(void)textViewDidBeginEditing:(UITextView *)textView
+{
+    if (!textView.window.isKeyWindow)
+    {
+        [textView.window makeKeyAndVisible];
+    }
+}
 -(void)textViewDidChange:(UITextView *)textView
 {
     if ([textView.text length] > 0)

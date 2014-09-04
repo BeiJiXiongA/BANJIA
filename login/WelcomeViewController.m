@@ -404,6 +404,13 @@ UITextFieldDelegate>
     }completion:^(BOOL finished) {
     }];
 }
+-(void)textFieldDidBeginEditing:(UITextField *)textField
+{
+    if (!textField.window.isKeyWindow)
+    {
+        [textField.window makeKeyAndVisible];
+    }
+}
 
 - (void)keyboardWillShow:(NSNotification *)aNotification
 {

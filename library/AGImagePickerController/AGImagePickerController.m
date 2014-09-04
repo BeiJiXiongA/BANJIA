@@ -97,9 +97,10 @@
     return [self initWithDelegate:nil failureBlock:nil successBlock:nil maximumNumberOfPhotosToBeSelected:0 shouldChangeStatusBarStyle:SHOULD_CHANGE_STATUS_BAR_STYLE toolbarItemsForManagingTheSelection:nil andShouldShowSavedPhotosOnTop:SHOULD_SHOW_SAVED_PHOTOS_ON_TOP];
 }
 
-- (id)initWithDelegate:(id)delegate
+- (id)initWithDelegate:(id)delegate andAlreadySelect:(NSArray *)alreadySelected
 {
-    return [self initWithDelegate:delegate failureBlock:nil successBlock:nil maximumNumberOfPhotosToBeSelected:0 shouldChangeStatusBarStyle:SHOULD_CHANGE_STATUS_BAR_STYLE toolbarItemsForManagingTheSelection:nil andShouldShowSavedPhotosOnTop:SHOULD_SHOW_SAVED_PHOTOS_ON_TOP];
+    return [self initWithDelegate:delegate failureBlock:nil successBlock:nil maximumNumberOfPhotosToBeSelected:0 shouldChangeStatusBarStyle:SHOULD_CHANGE_STATUS_BAR_STYLE toolbarItemsForManagingTheSelection:nil andShouldShowSavedPhotosOnTop:SHOULD_SHOW_SAVED_PHOTOS_ON_TOP
+            andAlreadySelect:alreadySelected];
 }
 
 - (id)initWithFailureBlock:(AGIPCDidFail)failureBlock
@@ -115,6 +116,7 @@ maximumNumberOfPhotosToBeSelected:(NSUInteger)maximumNumberOfPhotosToBeSelected
 shouldChangeStatusBarStyle:(BOOL)shouldChangeStatusBarStyle
 toolbarItemsForManagingTheSelection:(NSArray *)toolbarItemsForManagingTheSelection
 andShouldShowSavedPhotosOnTop:(BOOL)shouldShowSavedPhotosOnTop
+andAlreadySelect:(NSArray *)alreadySelected
 {
     self = [super init];
     if (self)
@@ -150,7 +152,8 @@ andShouldShowSavedPhotosOnTop:(BOOL)shouldShowSavedPhotosOnTop
         self.didFailBlock = failureBlock;
         self.didFinishBlock = successBlock;
         
-        self.viewControllers = @[[[AGIPCAlbumsController alloc] initWithImagePickerController:self]];
+        
+        self.viewControllers = @[[[AGIPCAlbumsController alloc] initWithImagePickerController:self andAlreadySelect:alreadySelected]];
     }
     
     return self;

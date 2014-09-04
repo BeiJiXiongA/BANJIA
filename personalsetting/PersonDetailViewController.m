@@ -288,15 +288,15 @@ MFMailComposeViewControllerDelegate>
             cell.contentLabel.textAlignment = NSTextAlignmentRight;
             if (indexPath.row == 0)
             {
-                if (![personID isEqualToString:OurTeamID])
+                if (![personID isEqualToString:OurTeamID] && ![personID isEqualToString:AssistantID])
                 {
                     cell.nameLabel.text = @"手机号";
                     cell.contentLabel.text = phoneNum;
                 }
                 else
                 {
-                    cell.nameLabel.text = @"邮箱";
-                    cell.contentLabel.text = phoneNum;
+                    cell.nameLabel.text = @"邮件地址";
+                    cell.contentLabel.text = email;
                 }
             }
             else if(indexPath.row == 1)
@@ -357,6 +357,10 @@ MFMailComposeViewControllerDelegate>
             }
             
             [cell.button2 addTarget:self action:@selector(toChat) forControlEvents:UIControlEventTouchUpInside];
+            if([personID isEqualToString:AssistantID])
+            {
+                cell.button2.hidden = YES;
+            }
         }
     }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
@@ -369,7 +373,7 @@ MFMailComposeViewControllerDelegate>
     {
         if (indexPath.row == 0)
         {
-            if ([personID isEqualToString:OurTeamID])
+            if ([personID isEqualToString:OurTeamID] || [personID isEqualToString:AssistantID])
             {
                 UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"发送邮件", nil];
                 ac.tag = ContaceACTag;
@@ -449,9 +453,12 @@ MFMailComposeViewControllerDelegate>
     }
     else if(actionSheet.tag == ContaceACTag)
     {
-        if([personID isEqualToString:OurTeamID])
+        if([personID isEqualToString:OurTeamID] || [personID isEqualToString:AssistantID])
         {
-            [self displayMailPicker];
+            if (buttonIndex == 0)
+            {
+                [self displayMailPicker];
+            }
         }
         else
         {

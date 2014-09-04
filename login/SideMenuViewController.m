@@ -280,20 +280,20 @@
 
 -(void)headerTap
 {
-    [homeNav popToRootViewControllerAnimated:NO];
-    [homeNav dismissViewControllerAnimated:NO completion:nil];
-    
-    [myClassesNav popToRootViewControllerAnimated:NO];
-    [myClassesNav dismissViewControllerAnimated:NO completion:nil];
-    
-    [friendsNav popToRootViewControllerAnimated:NO];
-    [friendsNav dismissViewControllerAnimated:NO completion:nil];
-    
-    [messageNav popToRootViewControllerAnimated:NO];
-    [messageNav dismissViewControllerAnimated:NO completion:nil];
-    
-    [personSettingNav popToRootViewControllerAnimated:NO];
-    [personSettingNav dismissViewControllerAnimated:NO completion:nil];
+//    [homeNav popToRootViewControllerAnimated:NO];
+//    [homeNav dismissViewControllerAnimated:NO completion:nil];
+//    
+//    [myClassesNav popToRootViewControllerAnimated:NO];
+//    [myClassesNav dismissViewControllerAnimated:NO completion:nil];
+//    
+//    [friendsNav popToRootViewControllerAnimated:NO];
+//    [friendsNav dismissViewControllerAnimated:NO completion:nil];
+//    
+//    [messageNav popToRootViewControllerAnimated:NO];
+//    [messageNav dismissViewControllerAnimated:NO completion:nil];
+//    
+//    [personSettingNav popToRootViewControllerAnimated:NO];
+//    [personSettingNav dismissViewControllerAnimated:NO completion:nil];
     
     NSString *classStr = NSStringFromClass([[(KKNavigationController *)[self.sideMenuController contentController] topViewController] class]);
     if (![classStr isEqualToString:@"PersonalSettingViewController"])
@@ -303,7 +303,6 @@
     else
     {
         [self.sideMenuController hideMenuAnimated:NO];
-        [personalSetting viewWillAppear:NO];
     }
     [personalSetting getData];
     [buttonTableView reloadData];

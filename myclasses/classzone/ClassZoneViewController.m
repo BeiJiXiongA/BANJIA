@@ -814,7 +814,18 @@ NameButtonDel>
             CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
             UIView *verticalLineView = [[UIView alloc] init];
             verticalLineView.backgroundColor = UIColorFromRGB(0xe2e3e4);
-            verticalLineView.frame = CGRectMake(34.75, cell.headerImageView.frame.size.height+cell.headerImageView.frame.origin.y, 1.5, cellHeight-cell.headerImageView.frame.size.height-cell.headerImageView.frame.origin.y);
+            
+            CGFloat verticalLineHeight = 0;
+            if ([tmpArray count] == 0 || (([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"visitor"]) && ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:VisitorAccess] integerValue] == 0)))
+            {
+                verticalLineHeight = 13;
+            }
+            else
+            {
+                verticalLineHeight = cellHeight-cell.headerImageView.frame.size.height-cell.headerImageView.frame.origin.y;
+            }
+            
+            verticalLineView.frame = CGRectMake(34.75, cell.headerImageView.frame.size.height+cell.headerImageView.frame.origin.y, 1.5, verticalLineHeight);
             [cell.bgView addSubview:verticalLineView];
             
             

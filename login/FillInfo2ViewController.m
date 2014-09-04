@@ -168,6 +168,13 @@
     [self.bgView addSubview:self.startButton];
 }
 
+-(void)textFieldDidBeginEditing:(UITextField *)textField
+{
+    if (!textField.window.isKeyWindow)
+    {
+        [textField.window makeKeyAndVisible];
+    }
+}
 -(void)loginOutClick
 {
     UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"确定要退出吗？" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确认退出", nil];

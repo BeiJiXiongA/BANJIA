@@ -15,6 +15,8 @@
 #import "PersonalSettingCell.h"
 #import "ClassCell.h"
 
+#define ParentsAlterTag  44444
+
 #define TIPSLABEL_TAG 10086
 
 #define BUFFER_SIZE 1024 * 100
@@ -22,7 +24,12 @@
 #define InviteWayTag 22222
 #define ParentTableViewtag 33333
 
-@interface InviteStuPareViewController ()<UITableViewDataSource,UITableViewDelegate,UITextFieldDelegate,MFMessageComposeViewControllerDelegate>
+@interface InviteStuPareViewController ()<
+UITableViewDataSource,
+UITableViewDelegate,
+UITextFieldDelegate,
+MFMessageComposeViewControllerDelegate,
+UIAlertViewDelegate>
 {
     UITableView *parentsTableView;
     NSArray *parentArray;
@@ -73,20 +80,16 @@
     
     self.titleLabel.text = @"邀请学生家长";
     
-    NSString *tipStr = [NSString stringWithFormat:@"您邀请%@的",name];
-    tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(27, UI_NAVIGATION_BAR_HEIGHT+20, 140, 30)];
+    NSString *tipStr = [NSString stringWithFormat:@"您邀请%@的:",name];
+    tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(27, UI_NAVIGATION_BAR_HEIGHT+40, 120, 30)];
     tipLabel.text = tipStr;
     tipLabel.textColor = CONTENTCOLOR;
     tipLabel.backgroundColor = self.bgView.backgroundColor;
     [self.bgView addSubview:tipLabel];
     
-    UIButton *parentButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    parentButton.frame = CGRectMake(tipLabel.frame.origin.x, tipLabel.frame.size.height+tipLabel.frame.origin.y+20, 140, 42);
-//    parentButton.backgroundColor = [UIColor clearColor];
-//    [parentButton addTarget:self action:@selector(opentableview) forControlEvents:UIControlEventTouchUpInside];
-
     
-    parentLabel = [[UILabel alloc] initWithFrame:CGRectMake(tipLabel.frame.origin.x, tipLabel.frame.size.height+tipLabel.frame.origin.y+20, 140, 42)];
+    parentLabel = [[UILabel alloc] init];
+    parentLabel.frame = CGRectMake(tipLabel.frame.origin.x+tipLabel.frame.size.width-5, tipLabel.frame.origin.y-5, 140, 42);
     parentLabel.backgroundColor = [UIColor whiteColor];
     parentLabel.textColor = CONTENTCOLOR;
     parentLabel.text = @"    爸爸";
@@ -106,7 +109,7 @@
     parentLabel.userInteractionEnabled = YES;
     [parentLabel addGestureRecognizer:openTgr];
     
-    parentsTableView = [[UITableView alloc] initWithFrame:CGRectMake(27, parentLabel.frame.size.height+parentLabel.frame.origin.y+10, tipLabel.frame.size.width, 0) style:UITableViewStylePlain];
+    parentsTableView = [[UITableView alloc] initWithFrame:CGRectMake(parentLabel.frame.origin.x, parentLabel.frame.size.height+parentLabel.frame.origin.y+10, parentLabel.frame.size.width, 0) style:UITableViewStylePlain];
     parentsTableView.delegate = self;
     parentsTableView.dataSource = self;
     parentsTableView.tag = ParentTableViewtag;
@@ -118,22 +121,7 @@
     
 //    [self.bgView addSubview:parentButton];
 
-    parentArray = [[NSArray alloc] initWithObjects:@"爸爸",@"妈妈",@"爷爷",@"奶奶",@"其他", nil];
-    
-    parentTextField = [[UITextField alloc] initWithFrame:CGRectMake(parentButton.frame.size.width+parentButton.frame.origin.x+20 , parentButton.frame.origin.y, 100, 42)];
-    parentTextField.enabled = NO;
-    parentTextField.hidden = YES;
-    parentTextField.textColor = TITLE_COLOR;
-    parentTextField.placeholder = @"输入";
-    parentTextField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
-    parentTextField.delegate = self;
-    parentTextField.backgroundColor = [UIColor whiteColor];
-    parentTextField.textAlignment = NSTextAlignmentCenter;
-    parentTextField.font = [UIFont systemFontOfSize:16];
-    [self.bgView addSubview:parentTextField];
-    parentTextField.clipsToBounds = YES;
-    parentTextField.layer.cornerRadius = 5;
-    
+    parentArray = [[NSArray alloc] initWithObjects:@"爸爸",@"妈妈",@"爷爷",@"奶奶",@"姥爷",@"姥姥",@"其他", nil];
     
     UITapGestureRecognizer *tgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(opentableview)];
     parentTextField.userInteractionEnabled = YES;
@@ -142,7 +130,7 @@
     waynames = [[NSArray alloc] initWithObjects:@"微信",@"QQ好友",@"手机短信",@"邀请好友", nil];
     iconsArray = @[@"weichat",@"QQicon",@"mesginviteicon",@"invitefriendicon"];
     
-    inviteWayTableview = [[UITableView alloc] initWithFrame:CGRectMake(0, parentTextField.frame.size.height+parentTextField.frame.origin.y, SCREEN_WIDTH, 200) style:UITableViewStylePlain];
+    inviteWayTableview = [[UITableView alloc] initWithFrame:CGRectMake(0, parentLabel.frame.size.height+parentLabel.frame.origin.y, SCREEN_WIDTH, 200) style:UITableViewStylePlain];
     inviteWayTableview.tag = InviteWayTag;
     inviteWayTableview.delegate = self;
     inviteWayTableview.dataSource = self;
@@ -169,14 +157,14 @@
     {
         
         [UIView animateWithDuration:0.2 animations:^{
-            parentsTableView.frame = CGRectMake(27, parentsTableView.frame.origin.y, tipLabel.frame.size.width, [parentArray count]*42);
+            parentsTableView.frame = CGRectMake(parentLabel.frame.origin.x, parentsTableView.frame.origin.y, parentLabel.frame.size.width, [parentArray count]*42);
             [arrowImageView setImage:[UIImage imageNamed:@"arrow_up"]];
         }];
     }
     else
     {
         [UIView animateWithDuration:0.2 animations:^{
-            parentsTableView.frame = CGRectMake(27, parentsTableView.frame.origin.y, tipLabel.frame.size.width, 0);
+            parentsTableView.frame = CGRectMake(parentLabel.frame.origin.x, parentsTableView.frame.origin.y, parentLabel.frame.size.width, 0);
             [arrowImageView setImage:[UIImage imageNamed:@"arrow_down"]];
         }];
     }
@@ -299,16 +287,14 @@
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    [parentTextField resignFirstResponder];
     if (tableView.tag == ParentTableViewtag)
     {
         if (indexPath.row == [parentArray count]-1)
         {
-            parentLabel.text = [NSString stringWithFormat:@"    %@",[parentArray objectAtIndex:indexPath.row]];
-            parentTextField.enabled = YES;
-            parentTextField.hidden = NO;
-            [parentTextField becomeFirstResponder];
-            [tableView deselectRowAtIndexPath:indexPath animated:YES];
+            UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"" message:@"请输入家长关系名称：" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
+            al.alertViewStyle = UIAlertViewStylePlainTextInput;
+            al.tag = ParentsAlterTag;
+            [al show];
             [self opentableview];
         }
         else
@@ -341,6 +327,17 @@
         }
     }
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
+}
+
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (alertView.tag == ParentsAlterTag)
+    {
+        if (buttonIndex == 1)
+        {
+            parentLabel.text = [NSString stringWithFormat:@"    %@",[alertView textFieldAtIndex:0].text];
+        }
+    }
 }
 
 #pragma  mark - showmsg

@@ -134,6 +134,8 @@ headerDelegate>
     NSTimer * timer;
     ZBarReaderViewController * reader;
     
+    BOOL shoudShowTipView;
+    BOOL haveHomeAd;
     BOOL haveClass;
     
     NSMutableArray *adArray;
@@ -186,6 +188,7 @@ headerDelegate>
     
     waitDiaryID = @"";
     
+    shoudShowTipView = NO;
     haveClass = NO;
     
     self.backButton.hidden = YES;
@@ -447,6 +450,7 @@ headerDelegate>
         tipView.hidden = NO;
         moreButton.hidden = NO;
         self.unReadLabel.hidden = NO;
+        [classTableView reloadData];
     }
 }
 
@@ -944,8 +948,9 @@ headerDelegate>
     if ([Tools NetworkReachable])
     {
         [self getHomeCache];
-        [self getHomeData];
         [self getHomeAd];
+        [self getHomeData];
+        
     }
     else
     {
@@ -994,6 +999,7 @@ headerDelegate>
                 
                 if ([noticeArray count] == 0 && [diariesArray count] == 0)
                 {
+                    shoudShowTipView = YES;
                     tipLabel.text = @"你所在班级还没有人发布过空间和班级通知";
                     [joinClassButton setTitle:@"发表空间" forState:UIControlStateNormal];
                     [joinClassButton removeTarget:self action:@selector(joinClass) forControlEvents:UIControlEventTouchUpInside];
@@ -1002,11 +1008,12 @@ headerDelegate>
                     [createClassButton setTitle:@"发布通知" forState:UIControlStateNormal];
                     [createClassButton removeTarget:self action:@selector(createClass) forControlEvents:UIControlEventTouchUpInside];
                     [createClassButton addTarget:self action:@selector(addNotice) forControlEvents:UIControlEventTouchUpInside];
-                    tipView.hidden = NO;
+//                    tipView.hidden = NO;
                 }
                 else
                 {
-                    tipView.hidden = YES;
+                    shoudShowTipView = NO;
+//                    tipView.hidden = YES;
                 }
                 
                 [self groupByTime:diariesArray];
@@ -1016,14 +1023,14 @@ headerDelegate>
                 [noticeArray removeAllObjects];
                 [diariesArray removeAllObjects];
                 [groupDiaries removeAllObjects];
-                [classTableView reloadData];
+                
                 if ([[[[responseDict objectForKey:@"message"] allKeys] firstObject] isEqualToString:@"NO_CLASS"])
                 {
-                    addButton.hidden = YES;
                     tipImageView.hidden = NO;
                     subImageView.hidden = NO;
-                    tipView.hidden = NO;
                     haveClass = NO;
+                    shoudShowTipView = YES;
+                    [classTableView reloadData];
                     return ;
                 }
                 [Tools dealRequestError:responseDict fromViewController:nil];
@@ -1118,16 +1125,17 @@ headerDelegate>
         NSDictionary *responseDict = [Tools JSonFromString:responseString];
         if ([[responseDict objectForKey:@"code"] intValue]== 1)
         {
+            haveClass = YES;
             [noticeArray addObjectsFromArray:[[responseDict objectForKey:@"data"] objectForKey:@"notices"]];
             [diariesArray addObjectsFromArray:[[responseDict objectForKey:@"data"] objectForKey:@"diaries"]];
             [self groupByTime:diariesArray];
-            //                [classTableView reloadData];
         }
         else
         {
             if ([[[[responseDict objectForKey:@"message"] allKeys] firstObject] isEqualToString:@"NO_CLASS"])
             {
                 tipView.hidden = NO;
+                haveClass = NO;
                 return ;
             }
             [Tools dealRequestError:responseDict fromViewController:nil];
@@ -1192,6 +1200,7 @@ headerDelegate>
 {
     page = @"0";
     [self getHomeData];
+    [self getHomeAd];
 }
 
 -(void)egoRefreshTableDidTriggerRefresh:(EGORefreshPos)aRefreshPos
@@ -1277,35 +1286,57 @@ headerDelegate>
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    if ([noticeArray count] > 0 || [groupDiaries count] > 0)
-    {
-        joinClassButton.hidden = YES;
-        createClassButton.hidden = YES;
-        tipView.hidden = YES;
-    }
-    else
+    if (shoudShowTipView)
     {
         joinClassButton.hidden = NO;
         createClassButton.hidden = NO;
         tipView.hidden = NO;
+        classTableView.scrollEnabled = NO;
+    }
+    else
+    {
+        joinClassButton.hidden = YES;
+        createClassButton.hidden = YES;
+        tipView.hidden = YES;
+        classTableView.scrollEnabled = YES;
     }
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     if (![ud objectForKey:@"hometip1"] && !haveClass)
     {
+        classTableView.hidden = YES;
         joinClassButton.hidden = YES;
         createClassButton.hidden = YES;
     }
-    else if(!haveClass)
+    else if(shoudShowTipView)
     {
+        classTableView.hidden = NO;
         joinClassButton.hidden = NO;
         createClassButton.hidden = NO;
+        if (HeaderCellHeight > 0)
+        {
+            tipView.frame = CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT+HeaderCellHeight, SCREEN_WIDTH-20, 300);
+        }
+        else
+        {
+            tipView.frame = CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT+60, SCREEN_WIDTH-20, 300);
+        }
+        
+    }
+    else
+    {
+        classTableView.hidden = NO;
+        
     }
     return [noticeArray count] + [groupDiaries count] + 2;
 }
 
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
-    if(section == 0)
+    if(shoudShowTipView)
+    {
+        return 0;
+    }
+    else if(section == 0)
     {
         return 0;
     }
@@ -1362,18 +1393,18 @@ headerDelegate>
         dotView.layer.borderWidth = 1.5;
         dotView.backgroundColor = RGB(64, 196, 110, 1);
         [headerView addSubview:dotView];
-//        int cha = [noticeArray count]>0?([noticeArray count]+1):0;
         NSDictionary *groupDict = [groupDiaries objectAtIndex:section-[noticeArray count]-2];
-//        headerLabel.backgroundColor = RGB(64, 196, 110, 1);
         headerLabel.text = [groupDict objectForKey:@"date"];
-//        headerLabel.font = [UIFont boldSystemFontOfSize:15];
-//        headerLabel.textColor = [UIColor whiteColor];
         headerLabel.font = [UIFont systemFontOfSize:15];
         headerLabel.frame = CGRectMake(50, 0, SCREEN_WIDTH, 30);
         
     }
     [headerView addSubview:headerLabel];
-    if (section == 0)
+    if (shoudShowTipView)
+    {
+        return nil;
+    }
+    else if (section == 0)
     {
         return nil;
     }
@@ -1488,9 +1519,9 @@ headerDelegate>
             NSDictionary *dict = [adArray objectAtIndex:i];
             UIImageView *headImageView = [[UIImageView alloc] initWithFrame:CGRectMake(self.view.frame.size.width*i, 0, SCREEN_WIDTH, HeaderCellHeight)];
             
-            [headImageView setImageWithURL:[dict objectForKey:@"img"] placeholderImage:[UIImage imageNamed:@"3100"]];
+//            [headImageView setImageWithURL:[dict objectForKey:@"img"] placeholderImage:[UIImage imageNamed:@"3100"]];
             
-//            [Tools fillImageView:headImageView withImageFromURL:@"" imageWidth:SCREEN_WIDTH andDefault:@"3100"];
+            [Tools fillImageView:headImageView withImageFromURL:[dict objectForKey:@"img"] imageWidth:SCREEN_WIDTH andDefault:@"3100"];
             
             UITapGestureRecognizer *headerTapTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(headerImageClick)];
             headImageView.userInteractionEnabled = YES;
@@ -1498,10 +1529,11 @@ headerDelegate>
             [cell.headerScrollView addSubview:headImageView];
         }
         
-        cell.closeAd.frame = CGRectMake(SCREEN_WIDTH-30, 10, 20, 20);
+        cell.closeAd.frame = CGRectMake(SCREEN_WIDTH-35, HeaderCellHeight-35, 35, 35);
         [cell.closeAd addTarget:self action:@selector(closeAd) forControlEvents:UIControlEventTouchUpInside];
         cell.closeAd.layer.cornerRadius = 10;
-        cell.closeAd.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
+        [cell.closeAd setImage:[UIImage imageNamed:@"ad_pause_close"] forState:UIControlStateNormal];
+        cell.closeAd.backgroundColor = [UIColor clearColor];
         cell.closeAd.clipsToBounds = YES;
         cell.closeAd.hidden = NO;
         
@@ -1510,6 +1542,7 @@ headerDelegate>
         cell.headerPageControl.tag = AdPageControlTag;
         cell.headerPageControl.backgroundColor = [UIColor clearColor];
         cell.headerPageControl.currentPageIndicatorTintColor = [UIColor redColor];
+        cell.headerPageControl.pageIndicatorTintColor = TITLE_COLOR;
         if([adArray count] > 0)
         {
             cell.headerPageControl.hidden = NO;

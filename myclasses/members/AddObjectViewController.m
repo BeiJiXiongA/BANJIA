@@ -104,6 +104,13 @@
         [self.navigationController popViewControllerAnimated:YES];
     }
 }
+-(void)textFieldDidBeginEditing:(UITextField *)textField
+{
+    if (!textField.window.isKeyWindow)
+    {
+        [textField.window makeKeyAndVisible];
+    }
+}
 
 /*
 #pragma mark - Navigation

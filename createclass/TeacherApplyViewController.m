@@ -482,7 +482,12 @@ UIScrollViewDelegate>
             self.bgView.center = CGPointMake(CENTER_POINT.x, CENTER_POINT.y-170);
         }];
     }
+    if (!textField.window.isKeyWindow)
+    {
+        [textField.window makeKeyAndVisible];
+    }
 }
+
 - (void)keyBoardWillHide:(NSNotification *)aNotification
 {
     [UIView animateWithDuration:0.25 animations:^{

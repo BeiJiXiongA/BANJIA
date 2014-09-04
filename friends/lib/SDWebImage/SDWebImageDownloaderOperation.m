@@ -67,9 +67,7 @@
 
     self.executing = YES;
     self.connection = [NSURLConnection.alloc initWithRequest:self.request delegate:self startImmediately:NO];
-
     [self.connection start];
-
     if (self.connection)
     {
         if (self.progressBlock)

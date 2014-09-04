@@ -351,8 +351,11 @@ UIActionSheetDelegate>
 
 -(void)layoutPhoneView
 {
+    
+    childInfoView.frame = CGRectMake(0, mySearchBar.frame.size.height+mySearchBar.frame.origin.y+20, SCREEN_WIDTH, 100);
+    
     phoneNumView = [[UIView alloc] init];
-    phoneNumView.frame = CGRectMake(0, childView.frame.size.height+childView.frame.origin.y+10, SCREEN_WIDTH, 230);
+    phoneNumView.frame = CGRectMake(0, childInfoView.frame.size.height + childInfoView.frame.origin.y+10, SCREEN_WIDTH, 230);
     phoneNumView.backgroundColor = self.bgView.backgroundColor;
     [mainScrollView addSubview:phoneNumView];
     
@@ -434,9 +437,7 @@ UIActionSheetDelegate>
     studentButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [studentButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     [studentButton setTitle:@"提交" forState:UIControlStateNormal];
-    studentButton.enabled = NO;
     [phoneNumView addSubview:studentButton];
-    
     
     if ([Tools phone_num] > 0)
     {
@@ -445,6 +446,14 @@ UIActionSheetDelegate>
     else
     {
         studentButton.frame = CGRectMake(38, codeTextField.frame.size.height + codeTextField.frame.origin.y+5, SCREEN_WIDTH-76, 40);
+    }
+    if ([selectStuNameLabel.text length] > 0)
+    {
+        studentButton.enabled = YES;
+    }
+    else
+    {
+        studentButton.enabled = NO;
     }
     [studentButton addTarget:self action:@selector(applyJoinClass) forControlEvents:UIControlEventTouchUpInside];
     studentButton.tag = 1000;
@@ -776,6 +785,7 @@ UIActionSheetDelegate>
     [textField resignFirstResponder];
     return YES;
 }
+
 
 - (void)didReceiveMemoryWarning
 {
@@ -1355,6 +1365,10 @@ UIActionSheetDelegate>
         [UIView animateWithDuration:0.2 animations:^{
             self.bgView.center = CGPointMake(CENTER_POINT.x, CENTER_POINT.y-220);
         }];
+    }
+    if (!textField.window.isKeyWindow)
+    {
+        [textField.window makeKeyAndVisible];
     }
 }
 

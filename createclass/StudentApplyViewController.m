@@ -182,6 +182,13 @@ UITableViewDelegate>
     [studentNumField resignFirstResponder];
 }
 
+-(void)textFieldDidBeginEditing:(UITextField *)textField
+{
+    if (!textField.window.isKeyWindow)
+    {
+        [textField.window makeKeyAndVisible];
+    }
+}
 
 - (void)didReceiveMemoryWarning
 {

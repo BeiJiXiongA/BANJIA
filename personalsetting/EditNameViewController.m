@@ -8,7 +8,7 @@
 
 #import "EditNameViewController.h"
 
-@interface EditNameViewController ()
+@interface EditNameViewController ()<UITextFieldDelegate>
 {
     MyTextField *nameTextField;
 }
@@ -42,10 +42,18 @@
     nameTextField.layer.cornerRadius = 5;
     nameTextField.clipsToBounds = YES;
     nameTextField.text = name;
+    nameTextField.delegate = self;
     nameTextField.backgroundColor = [UIColor whiteColor];
     nameTextField.textColor = COMMENTCOLOR;
     nameTextField.font = [UIFont systemFontOfSize:16];
     [self.bgView addSubview:nameTextField];
+}
+-(void)textFieldDidBeginEditing:(UITextField *)textField
+{
+    if (!textField.window.isKeyWindow)
+    {
+        [textField.window makeKeyAndVisible];
+    }
 }
 
 -(void)editDone

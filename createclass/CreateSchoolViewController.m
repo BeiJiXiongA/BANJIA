@@ -236,7 +236,6 @@ UITextFieldDelegate>
 }
 
 #pragma mark - tableView
-#pragma mark - tableView
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     return 2;
@@ -414,6 +413,14 @@ UITextFieldDelegate>
         {
             //搜索学校
         }
+    }
+}
+
+-(void)textFieldDidBeginEditing:(UITextField *)textField
+{
+    if (!textField.window.isKeyWindow)
+    {
+        [textField.window makeKeyAndVisible];
     }
 }
 

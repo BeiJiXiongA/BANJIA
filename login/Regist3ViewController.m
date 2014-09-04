@@ -265,7 +265,13 @@
     }completion:^(BOOL finished) {
         
     }];
+    if (!textField.window.isKeyWindow)
+    {
+        [textField.window makeKeyAndVisible];
+    }
 }
+
+
 -(BOOL)textFieldShouldClear:(UITextField *)textField
 {
     return YES;

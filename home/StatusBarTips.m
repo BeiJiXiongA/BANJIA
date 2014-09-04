@@ -146,7 +146,11 @@ static StatusBarTips *tipsWindows = nil;
     tipLabel.frame = CGRectMake(tipIcon.frame.size.width+tipIcon.frame.origin.x+3, 0, size.width, ICON_HEIGHT);
     tipLabel.text = message;
     
-    [self makeKeyAndVisible];
+    if (SYSVERSION >= 7)
+    {
+        [self makeKeyAndVisible];
+    }
+    
 }
 
 -(void)showTipsWithImage:(UIImage *)tipsImage message:(NSString *)message hideAfterDelay:(NSInteger)seconds

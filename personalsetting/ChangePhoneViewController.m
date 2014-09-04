@@ -97,6 +97,14 @@
     // Dispose of any resources that can be recreated.
 }
 
+-(void)textFieldDidBeginEditing:(UITextField *)textField
+{
+    if (!textField.window.isKeyWindow)
+    {
+        [textField.window makeKeyAndVisible];
+    }
+}
+
 -(void)unShowSelfViewController
 {
     [self.navigationController popViewControllerAnimated:YES];
@@ -236,7 +244,7 @@
             DDLOG(@"verify responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                [Tools showTips:@"绑定成功" toView:self.bgView];
+                [Tools showTips:@"绑定成功,密码为手机号后6位，请牢记。" toView:self.bgView];
                 [[NSUserDefaults standardUserDefaults] setObject:phoneNumTextfield.text forKey:PHONENUM];
                 [[NSUserDefaults standardUserDefaults] synchronize];
                 if ([self.changePhoneDel respondsToSelector:@selector(changePhoneNum:)])

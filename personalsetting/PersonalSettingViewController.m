@@ -532,9 +532,21 @@ UIActionSheetDelegate>
                         cell.objectsLabel.font = [UIFont systemFontOfSize:14];
                     }
                 }
+                else
+                {
+                    cell.objectsLabel.text = @"";
+                }
+                cell.arrowImageView.frame = CGRectMake(SCREEN_WIDTH-20, 16, 10, 15);
+                [cell.arrowImageView setImage:[UIImage imageNamed:@"menu_arrow_right"]];
+                cell.arrowImageView.backgroundColor = [UIColor whiteColor];
+                cell.arrowImageView.hidden = NO;
             }
             else
+            {
                 cell.nameLabel.hidden = YES;
+                cell.arrowImageView.hidden = YES;
+            }
+            
             
             CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
             UIImageView *lineImageView = [[UIImageView alloc] init];
@@ -568,6 +580,13 @@ UIActionSheetDelegate>
             lineImageView.image = [UIImage imageNamed:@"sepretorline"];
             [cell.contentView addSubview:lineImageView];
             cell.contentView.backgroundColor = [UIColor whiteColor];
+            
+            UIImageView *arrowImageView = [[UIImageView alloc] init];
+            arrowImageView.frame = CGRectMake(SCREEN_WIDTH-20, 16, 10, 15);
+            [arrowImageView setImage:[UIImage imageNamed:@"menu_arrow_right"]];
+            arrowImageView.backgroundColor = [UIColor whiteColor];
+            [cell.contentView addSubview:arrowImageView];
+            
             return cell;
         }
     }

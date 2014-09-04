@@ -289,7 +289,6 @@ UIActionSheetDelegate>
     {
         self.unReadLabel.hidden = YES;
     }
-    DDLOG(@"new chatmsg array=%d",[array count]);
 }
 #pragma mark - moredelegate
 -(void)signOutClass:(BOOL)signOut

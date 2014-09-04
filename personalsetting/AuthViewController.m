@@ -139,6 +139,14 @@
     [self.navigationController popViewControllerAnimated:YES];
 }
 
+-(void)textFieldDidBeginEditing:(UITextField *)textField
+{
+    if (!textField.window.isKeyWindow)
+    {
+        [textField.window makeKeyAndVisible];
+    }
+}
+
 -(void)submit
 {
     if (idImage && componentImage)

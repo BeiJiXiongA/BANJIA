@@ -83,7 +83,8 @@ shouldShowToolbarForManagingTheSelectionInSelectionMode:(AGImagePickerController
 
 + (ALAssetsLibrary *)defaultAssetsLibrary;
 
-- (id)initWithDelegate:(id)delegate;
+- (id)initWithDelegate:(id)delegate andAlreadySelect:(NSArray *)alreadySelected;
+
 - (id)initWithFailureBlock:(AGIPCDidFail)failureBlock
            andSuccessBlock:(AGIPCDidFinish)successBlock;
 - (id)initWithDelegate:(id)delegate

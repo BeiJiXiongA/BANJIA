@@ -362,6 +362,10 @@ MsgDelegate>
         searchBar.showsCancelButton = YES;
     }];
     
+    if (!mySearchBar.window.isKeyWindow)
+    {
+        [mySearchBar.window makeKeyAndVisible];
+    }
 }
 
 -(void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText

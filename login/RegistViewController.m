@@ -355,12 +355,12 @@
 #pragma mark - textfield
 -(void)textFieldDidBeginEditing:(UITextField *)textField
 {
-    [UIView animateWithDuration:0.25 animations:^{
-        
-    }completion:^(BOOL finished) {
-        
-    }];
+    if (!textField.window.isKeyWindow)
+    {
+        [textField.window makeKeyAndVisible];
+    }
 }
+
 -(BOOL)textFieldShouldClear:(UITextField *)textField
 {
     return YES;

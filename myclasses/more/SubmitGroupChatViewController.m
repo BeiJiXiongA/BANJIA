@@ -111,6 +111,14 @@
     return YES;
 }
 
+-(void)textFieldDidBeginEditing:(UITextField *)textField
+{
+    if (!textField.window.isKeyWindow)
+    {
+        [textField.window makeKeyAndVisible];
+    }
+}
+
 -(void)createClick
 {
     if ([nameTextField.text length] == 0)

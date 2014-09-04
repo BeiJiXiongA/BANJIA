@@ -329,6 +329,15 @@
         sec = 60;
     }
 }
+
+-(void)textFieldDidBeginEditing:(UITextField *)textField
+{
+    if (!textField.window.isKeyWindow)
+    {
+        [textField.window makeKeyAndVisible];
+    }
+}
+
 -(void)getVerifyCode
 {
     if ([Tools NetworkReachable])

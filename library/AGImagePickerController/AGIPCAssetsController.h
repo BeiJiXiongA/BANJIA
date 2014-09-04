@@ -16,12 +16,23 @@
 #import "AGImagePickerController.h"
 #import "AGIPCGridItem.h"
 
+@protocol SelectAssetsDone;
+
 @interface AGIPCAssetsController : UITableViewController<UITableViewDataSource, UITableViewDelegate, AGIPCGridItemDelegate>
 
 @property (strong) ALAssetsGroup *assetsGroup;
-@property (ag_weak, readonly) NSArray *selectedAssets;
+@property (nonatomic, strong) NSMutableArray *selectedAssetsVar;
 @property (strong) AGImagePickerController *imagePickerController;
+@property (nonatomic, assign) id<SelectAssetsDone> selectAssetsDoneDel;
 
-- (id)initWithImagePickerController:(AGImagePickerController *)imagePickerController andAssetsGroup:(ALAssetsGroup *)assetsGroup;
+- (id)initWithImagePickerController:(AGImagePickerController *)imagePickerController andAssetsGroup:(ALAssetsGroup *)assetsGroup andAlreadyAssets:(NSArray *)alreadySssets;
+
+@end
+
+@protocol SelectAssetsDone <NSObject>
+
+-(void)selectedAssets:(NSArray *)alreadySelectAssets;
+
+-(void)selectedChanged:(ALAsset *)alasset selected:(BOOL)isSelected;
 
 @end

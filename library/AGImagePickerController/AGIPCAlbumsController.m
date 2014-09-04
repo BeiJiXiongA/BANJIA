@@ -13,8 +13,10 @@
 
 #import "AGImagePickerController.h"
 #import "AGIPCAssetsController.h"
+#import "ALAsset+AGIPC.h"
+#import "AGIPCGridItem.h"
 
-@interface AGIPCAlbumsController ()
+@interface AGIPCAlbumsController ()<SelectAssetsDone>
 {
     NSMutableArray *_assetsGroups;
     AGImagePickerController *_imagePickerController;
@@ -43,7 +45,7 @@
 #pragma mark - Properties
 
 @synthesize imagePickerController = _imagePickerController;
-
+@synthesize alreadySelectedAssets;
 - (NSMutableArray *)assetsGroups
 {
     if (_assetsGroups == nil)
@@ -57,12 +59,14 @@
 
 #pragma mark - Object Lifecycle
 
-- (id)initWithImagePickerController:(AGImagePickerController *)imagePickerController
+- (id)initWithImagePickerController:(AGImagePickerController *)imagePickerController andAlreadySelect:(NSArray *)alreadySelected
 {
     self = [super initWithStyle:UITableViewStylePlain];
     if (self)
     {
         self.imagePickerController = imagePickerController;
+        self.alreadySelectedAssets = [[NSMutableArray alloc] initWithArray:alreadySelected];
+        [self selectedAssets:alreadySelected];
     }
     
     return self;
@@ -89,6 +93,7 @@
 {
     [super viewDidLoad];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(selectedChanged:) name:@"selectedchanged" object:nil];
     // Fullscreen
     if (self.imagePickerController.shouldChangeStatusBarStyle) {
         self.wantsFullScreenLayout = YES;
@@ -100,6 +105,42 @@
     // Navigation Bar Items
     UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(cancelAction:)];
 	self.navigationItem.leftBarButtonItem = cancelButton;
+}
+
+-(void)selectedChanged:(NSNotification *)notification
+{
+    DDLOG(@"selectedChanged %@",notification.object);
+    AGIPCGridItem *item = [notification object];
+    if (item.selected)
+    {
+        if (![self.alreadySelectedAssets containsObject:item.asset])
+        {
+            [self.alreadySelectedAssets addObject:item.asset];
+        }
+    }
+    else
+    {
+        if ([self.alreadySelectedAssets containsObject:item.asset])
+        {
+            [self.alreadySelectedAssets removeObject:item.asset];
+        }
+    }
+    
+    if (0 == [self.alreadySelectedAssets count] )
+    {
+        self.navigationController.navigationBar.topItem.prompt = nil;
+    }
+    else
+    {
+        //self.navigationController.navigationBar.topItem.prompt = [NSString stringWithFormat:@"(%d/%d)", [AGIPCGridItem numberOfSelections], self.assets.count];
+        // Display supports up to select several photos at the same time, springox(20131220)
+        NSInteger maxNumber = _imagePickerController.maximumNumberOfPhotosToBeSelected;
+        if (0 < maxNumber)
+        {
+            self.navigationController.navigationBar.topItem.prompt = [NSString stringWithFormat:@"(%d/%d)", [self.alreadySelectedAssets count], maxNumber];
+        }
+    }
+
 }
 
 - (void)viewDidUnload
@@ -155,13 +196,81 @@
 {
     [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
     
-	AGIPCAssetsController *controller = [[AGIPCAssetsController alloc] initWithImagePickerController:self.imagePickerController andAssetsGroup:self.assetsGroups[indexPath.row]];
+	AGIPCAssetsController *controller = [[AGIPCAssetsController alloc] initWithImagePickerController:self.imagePickerController andAssetsGroup:self.assetsGroups[indexPath.row] andAlreadyAssets:self.alreadySelectedAssets];
+    controller.selectAssetsDoneDel = self;
+    DDLOG(@"self.alreadySelectedAssets %d",[self.alreadySelectedAssets count]);
 	[self.navigationController pushViewController:controller animated:YES];
 }
+
+
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {	
 	return 57;
+}
+
+-(BOOL)containThisAsset:(ALAsset *)alasset
+{
+    for (int i=0; i<[self.alreadySelectedAssets count]; i++)
+    {
+        ALAsset *asset = [self.alreadySelectedAssets objectAtIndex:i];
+        if ([asset isEqual:alasset])
+        {
+            return YES;
+        }
+    }
+    return NO;
+}
+
+-(void)selectedAssets:(NSArray *)alreadySelectAssets
+{
+    if (0 == [self.alreadySelectedAssets count] )
+    {
+        self.navigationController.navigationBar.topItem.prompt = nil;
+    }
+    else
+    {
+        //self.navigationController.navigationBar.topItem.prompt = [NSString stringWithFormat:@"(%d/%d)", [AGIPCGridItem numberOfSelections], self.assets.count];
+        // Display supports up to select several photos at the same time, springox(20131220)
+        NSInteger maxNumber = _imagePickerController.maximumNumberOfPhotosToBeSelected;
+        if (0 < maxNumber)
+        {
+            self.navigationController.navigationBar.topItem.prompt = [NSString stringWithFormat:@"(%d/%d)", [self.alreadySelectedAssets count], maxNumber];
+        }
+    }
+}
+
+-(void)selectedChanged:(ALAsset *)alasset selected:(BOOL)isSelected
+{
+    if (isSelected)
+    {
+        if (![self.alreadySelectedAssets containsObject:alasset])
+        {
+            [self.alreadySelectedAssets addObject:alasset];
+        }
+    }
+    else
+    {
+        if ([self.alreadySelectedAssets containsObject:alasset])
+        {
+            [self.alreadySelectedAssets removeObject:alasset];
+        }
+    }
+    
+    if (0 == [self.alreadySelectedAssets count] )
+    {
+        self.navigationController.navigationBar.topItem.prompt = nil;
+    }
+    else
+    {
+        //self.navigationController.navigationBar.topItem.prompt = [NSString stringWithFormat:@"(%d/%d)", [AGIPCGridItem numberOfSelections], self.assets.count];
+        // Display supports up to select several photos at the same time, springox(20131220)
+        NSInteger maxNumber = _imagePickerController.maximumNumberOfPhotosToBeSelected;
+        if (0 < maxNumber)
+        {
+            self.navigationController.navigationBar.topItem.prompt = [NSString stringWithFormat:@"(%d/%d)", [self.alreadySelectedAssets count], maxNumber];
+        }
+    }
 }
 
 #pragma mark - Private
@@ -178,7 +287,7 @@
             
             void (^assetGroupEnumerator)(ALAssetsGroup *, BOOL *) = ^(ALAssetsGroup *group, BOOL *stop) 
             {
-                if (group == nil) 
+                if (group == nil || group.numberOfAssets == 0)
                 {
                     return;
                 }
@@ -227,6 +336,7 @@
 
 - (void)cancelAction:(id)sender
 {
+    [self.alreadySelectedAssets removeAllObjects];
     [self.imagePickerController performSelector:@selector(didCancelPickingAssets)];
 }
 

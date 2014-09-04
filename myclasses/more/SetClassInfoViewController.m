@@ -141,6 +141,14 @@
     }
 }
 
+-(void)textFieldDidBeginEditing:(UITextField *)textField
+{
+    if (!textField.window.isKeyWindow)
+    {
+        [textField.window makeKeyAndVisible];
+    }
+}
+
 -(void)setClassInfo
 {
     if ([Tools NetworkReachable])

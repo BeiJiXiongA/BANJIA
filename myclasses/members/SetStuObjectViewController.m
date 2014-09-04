@@ -421,6 +421,14 @@ AddObjectDel>
     [addObjectTextField resignFirstResponder];
 }
 
+-(void)textFieldDidBeginEditing:(UITextField *)textField
+{
+    if (!textField.window.isKeyWindow)
+    {
+        [textField.window makeKeyAndVisible];
+    }
+}
+
 @end
 
 //
