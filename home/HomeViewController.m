@@ -1073,7 +1073,6 @@ headerDelegate>
 }
 -(void)getHomeAd
 {
-    return ;
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
@@ -1532,7 +1531,7 @@ headerDelegate>
         
         cell.closeAd.frame = CGRectMake(SCREEN_WIDTH-35, HeaderCellHeight-35, 35, 35);
         [cell.closeAd addTarget:self action:@selector(closeAd) forControlEvents:UIControlEventTouchUpInside];
-        cell.closeAd.layer.cornerRadius = 10;
+//        cell.closeAd.layer.cornerRadius = 10;
         [cell.closeAd setImage:[UIImage imageNamed:@"ad_pause_close"] forState:UIControlStateNormal];
         cell.closeAd.backgroundColor = [UIColor clearColor];
         cell.closeAd.clipsToBounds = YES;
@@ -1927,9 +1926,9 @@ headerDelegate>
     [self.navigationController pushViewController:personDetail animated:YES];
 }
 
--(BOOL)havePraisedThisDiary:(NSDictionary *)diaryDict
+-(BOOL)havePraisedThisDiary:(NSDictionary *)diaryDict1
 {
-    NSArray *praiseArray = [[diaryDict objectForKey:@"detail"] objectForKey:@"likes"];
+    NSArray *praiseArray = [[diaryDict1 objectForKey:@"detail"] objectForKey:@"likes"];
     for (int i = 0; i < [praiseArray count]; i++)
     {
         NSDictionary *dict = [praiseArray objectAtIndex:i];
@@ -1946,7 +1945,7 @@ headerDelegate>
 {
     if (indexPath.section > 0 && indexPath.section-1 < [noticeArray count])
     {
-        NSDictionary *classNoticeDict = [noticeArray objectAtIndex:indexPath.section];
+        NSDictionary *classNoticeDict = [noticeArray objectAtIndex:indexPath.section-1];
         [[NSUserDefaults standardUserDefaults] setObject:[classNoticeDict objectForKey:@"_id"] forKey:@"classid"];
         [[NSUserDefaults standardUserDefaults] synchronize];
         NSDictionary *dict = [[[noticeArray objectAtIndex:indexPath.section-1] objectForKey:@"news"] objectAtIndex:indexPath.row];

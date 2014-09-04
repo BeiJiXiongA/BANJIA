@@ -12,14 +12,14 @@
 #pragma mark - 接口网址
 
 //正式服务器
-#define HOST_URL       @"http://api.banjiaedu.com"
-#define IMAGEURL       @"http://img.banjiaedu.com"
-#define MEDIAURL      @"http://media.banjiaedu.com"
+//#define HOST_URL       @"http://api.banjiaedu.com"
+//#define IMAGEURL       @"http://img.banjiaedu.com"
+//#define MEDIAURL      @"http://media.banjiaedu.com"
 
 //测试服务器
-//#define HOST_URL       @"http://mytest.banjiaedu.com"
-//#define IMAGEURL       @"http://imgtest.banjiaedu.com"
-//#define MEDIAURL       @"http://mediatest.banjiaedu.com"
+#define HOST_URL       @"http://mytest.banjiaedu.com"
+#define IMAGEURL       @"http://imgtest.banjiaedu.com"
+#define MEDIAURL       @"http://mediatest.banjiaedu.com"
 
 //头像地址 人(host)\ur\(uid)\(img_icon||img_bk).(你想要啥格式就写啥)
 

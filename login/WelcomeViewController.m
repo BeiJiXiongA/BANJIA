@@ -104,7 +104,7 @@ UITextFieldDelegate>
     headerView.backgroundColor = RGB(59, 189, 100, 1);
     [self.bgView addSubview:headerView];
     
-    UIImage *logoImage = [UIImage imageNamed:@"slogan"];
+    UIImage *logoImage = [UIImage imageNamed:@"bigslogan"];
     UIImageView *logoImageView = [[UIImageView alloc] init];
     logoImageView.image = logoImage;
     logoImageView.frame = CGRectMake((SCREEN_WIDTH-148)/2+10,(logoImageHeight-138)/2
@@ -118,8 +118,6 @@ UITextFieldDelegate>
     bancaImageView.frame = CGRectMake(SCREEN_WIDTH-80, logoImageHeight-bancaImage.size.height, bancaImage.size.width,bancaImage.size.height);
     bancaImageView.backgroundColor = [UIColor clearColor];
     [headerView addSubview:bancaImageView];
-    
-    
     
 //    UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
     
@@ -213,6 +211,7 @@ UITextFieldDelegate>
 
 -(void)viewWillDisappear:(BOOL)animated
 {
+    [[NSNotificationCenter defaultCenter] postNotificationName:UIKeyboardWillHideNotification object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification  object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillShowNotification object:nil];
 }

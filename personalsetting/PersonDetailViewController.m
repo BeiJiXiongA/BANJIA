@@ -359,7 +359,7 @@ MFMailComposeViewControllerDelegate>
             [cell.button2 addTarget:self action:@selector(toChat) forControlEvents:UIControlEventTouchUpInside];
             if([personID isEqualToString:AssistantID])
             {
-                cell.button2.hidden = YES;
+                [cell.button2 setTitle:@"      查看消息" forState:UIControlStateNormal];
             }
         }
     }
