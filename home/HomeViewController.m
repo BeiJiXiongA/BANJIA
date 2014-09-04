@@ -1073,6 +1073,7 @@ headerDelegate>
 }
 -(void)getHomeAd
 {
+    return ;
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
@@ -1945,8 +1946,10 @@ headerDelegate>
 {
     if (indexPath.section > 0 && indexPath.section-1 < [noticeArray count])
     {
+        NSDictionary *classNoticeDict = [noticeArray objectAtIndex:indexPath.section];
+        [[NSUserDefaults standardUserDefaults] setObject:[classNoticeDict objectForKey:@"_id"] forKey:@"classid"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
         NSDictionary *dict = [[[noticeArray objectAtIndex:indexPath.section-1] objectForKey:@"news"] objectAtIndex:indexPath.row];
-        DDLOG(@"home notice dict %@",dict);
         NotificationDetailViewController *notificationDetailViewController = [[NotificationDetailViewController alloc] init];
         notificationDetailViewController.noticeID = [dict objectForKey:@"_id"];
         notificationDetailViewController.noticeContent = [dict objectForKey:@"content"];
