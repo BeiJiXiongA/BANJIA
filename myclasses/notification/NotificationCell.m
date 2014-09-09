@@ -31,7 +31,7 @@
         
         contentLabel = [[MyLabel alloc] init];
         contentLabel.backgroundColor = [UIColor clearColor];
-        contentLabel.font = [UIFont systemFontOfSize:14];
+//        contentLabel.font = DongTaiContentFont;
         contentLabel.numberOfLines = 2;
         contentLabel.contentMode = UIViewContentModeTop;
         contentLabel.lineBreakMode = NSLineBreakByWordWrapping|NSLineBreakByTruncatingTail;

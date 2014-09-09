@@ -33,13 +33,13 @@
     
     if (fromCreate)
     {
-        schoolLevelArray = [NSArray arrayWithObjects:@"幼儿园",@"小学",@"中学",@"中专技校",@"培训机构",@"其它", nil];
-        valueArray = [NSArray arrayWithObjects:@"0",@"1",@"2",@"3",@"4",@"5", nil];
+        schoolLevelArray = SCHOOLLEVELARRAY;
+        valueArray = [NSArray arrayWithObjects:@"0",@"1",@"2",@"3",@"4",@"5",@"6", nil];
     }
     else
     {
-        schoolLevelArray = [NSArray arrayWithObjects:@"全部",@"幼儿园",@"小学",@"中学",@"中专技校",@"培训机构",@"其它", nil];
-        valueArray = [NSArray arrayWithObjects:@"-1",@"0",@"1",@"2",@"3",@"4",@"5", nil];
+        schoolLevelArray = [NSArray arrayWithObjects:@"全部",@"小学",@"中学",@"夏令营",@"社团",@"职业学校",@"幼儿园",@"其他", nil];
+        valueArray = [NSArray arrayWithObjects:@"-1",@"0",@"1",@"2",@"3",@"4",@"5",@"6", nil];
     }
     
     

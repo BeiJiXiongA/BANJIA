@@ -356,7 +356,7 @@ UIActionSheetDelegate,NameButtonDel>
     cell.nameLabel.frame = CGRectMake(50, cell.headerImageView.frame.origin.y-3, [nameStr length]*25>170?170:([nameStr length]*18), 20);
     cell.nameLabel.text = nameStr;
     cell.nameLabel.font = [UIFont systemFontOfSize:15];
-    cell.nameLabel.textColor = NAMECOLOR;
+    cell.nameLabel.textColor = DongTaiNameColor;
     cell.timeLabel.frame = CGRectMake(cell.nameLabel.frame.size.width+cell.nameLabel.frame.origin.x, 5, SCREEN_WIDTH-cell.nameLabel.frame.origin.x-cell.nameLabel.frame.size.width-20, 30);
     cell.timeLabel.textAlignment = NSTextAlignmentRight;
     cell.timeLabel.numberOfLines = 1;
@@ -372,6 +372,8 @@ UIActionSheetDelegate,NameButtonDel>
     cell.locationLabel.lineBreakMode = NSLineBreakByWordWrapping;
     cell.headerImageView.layer.cornerRadius = 0;
     cell.headerImageView.clipsToBounds = YES;
+    cell.headerImageView.frame = CGRectMake(12, 12, 32, 32);
+    
     
     UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(headerImageViewClicked:)];
     cell.headerImageView.userInteractionEnabled = YES;
@@ -383,35 +385,34 @@ UIActionSheetDelegate,NameButtonDel>
     
     cell.headerImageView.hidden = NO;
     cell.contentLabel.hidden = YES;
-    cell.imagesScrollView.hidden = YES;
     cell.nameLabel.hidden = NO;
     cell.locationLabel.hidden = NO;
     cell.timeLabel.hidden = NO;
     cell.praiseButton.hidden = NO;
     cell.commentButton.hidden = NO;
     
-    for(UIView *v in cell.imagesScrollView.subviews)
+    for(UIView *v in cell.imagesView.subviews)
     {
         [v removeFromSuperview];
     }
-    if (!([[[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"] length] <= 0))
+    if (([[[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"] length] > 0))
     {
-        CGFloat he = 0;
-        if (SYSVERSION >= 7)
-        {
-            he = 10;
-        }
         //有文字
-        cell.contentLabel.hidden = NO;
+        cell.contentTextField.hidden = NO;
+        
         NSString *content = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"];
-        CGSize contentSize = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-50 andFont:[UIFont systemFontOfSize:16]];
-        cell.contentLabel.text = [[[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"] emojizedString];
-        cell.contentLabel.textColor = [UIColor blackColor];
-        cell.contentLabel.frame = CGRectMake(15, 60, SCREEN_WIDTH-30, contentSize.height+8+he);
+        
+        CGSize contentSize = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-30 andFont:[UIFont systemFontOfSize:15]];
+        
+        cell.contentTextField.text = [[[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"] emojizedString];
+        
+        cell.contentTextField.textColor = CONTENTCOLOR;
+        
+        cell.contentTextField.frame = CGRectMake(6, cell.headerImageView.frame.size.height+cell.headerImageView.frame.origin.y, SCREEN_WIDTH-30, contentSize.height+18);
     }
     else
     {
-        cell.contentLabel.frame = CGRectMake(10, 60, 0, 0);
+        cell.contentTextField.frame = CGRectMake(6, cell.headerImageView.frame.size.height+cell.headerImageView.frame.origin.y+DongTaiSpace, 0, 0);
     }
     
     CGFloat imageViewHeight = 67.5f;
@@ -419,7 +420,6 @@ UIActionSheetDelegate,NameButtonDel>
     if ([[[diaryDetailDict objectForKey:@"detail"] objectForKey:@"img"] count] > 0)
     {
         //有图片
-        cell.imagesScrollView.hidden = NO;
         
         NSArray *imgsArray = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"img"];
         NSInteger imageCount = [imgsArray count];
@@ -433,8 +433,8 @@ UIActionSheetDelegate,NameButtonDel>
             row = (imageCount/ImageCountPerRow) > 3 ? 3:(imageCount / ImageCountPerRow);
         }
         cell.imagesView.frame = CGRectMake(12,
-                                           cell.contentLabel.frame.size.height +
-                                           cell.contentLabel.frame.origin.y,
+                                           cell.contentTextField.frame.size.height +
+                                           cell.contentTextField.frame.origin.y,
                                            SCREEN_WIDTH-20, (imageViewHeight+5) * row);
         
         for (int i=0; i<[imgsArray count]; ++i)
@@ -456,7 +456,7 @@ UIActionSheetDelegate,NameButtonDel>
     }
     else
     {
-        cell.imagesView.frame = CGRectMake(5, cell.contentLabel.frame.size.height+cell.contentLabel.frame.origin.y, SCREEN_WIDTH-10, 0);
+        cell.imagesView.frame = CGRectMake(5, cell.contentTextField.frame.size.height+cell.contentTextField.frame.origin.y, SCREEN_WIDTH-10, 0);
     }
     
     CGFloat buttonHeight = 37;
@@ -464,30 +464,30 @@ UIActionSheetDelegate,NameButtonDel>
     CGFloat iconTop = 9;
 
     cell.transmitButton.hidden = NO;
-    [cell.transmitButton setTitle:@"   转发" forState:UIControlStateNormal];
+    [cell.transmitButton setTitle:@"      转发" forState:UIControlStateNormal];
     cell.transmitButton.frame = CGRectMake(0, cell.imagesView.frame.size.height+cell.imagesView.frame.origin.y+16, (SCREEN_WIDTH-10)/3, buttonHeight);
     [cell.transmitButton addTarget:self action:@selector(shareAPP) forControlEvents:UIControlEventTouchUpInside];
-    cell.transmitButton.iconImageView.frame = CGRectMake(18, iconTop+1, iconH, iconH);
+    cell.transmitButton.iconImageView.frame = CGRectMake(24, iconTop+1, iconH, iconH);
     cell.transmitButton.backgroundColor = UIColorFromRGB(0xfcfcfc);
     
     cell.praiseButton.frame = CGRectMake((SCREEN_WIDTH-10)/3, cell.imagesView.frame.size.height+cell.imagesView.frame.origin.y+16, (SCREEN_WIDTH-10)/3, buttonHeight);
     if ([[diaryDetailDict objectForKey:@"likes_num"] integerValue] > 0)
     {
-        [cell.praiseButton setTitle:[NSString stringWithFormat:@"   %d",[[diaryDetailDict objectForKey:@"likes_num"] integerValue]] forState:UIControlStateNormal];
+        [cell.praiseButton setTitle:[NSString stringWithFormat:@"      %d",[[diaryDetailDict objectForKey:@"likes_num"] integerValue]] forState:UIControlStateNormal];
     }
     else
     {
-        [cell.praiseButton setTitle:@"   赞" forState:UIControlStateNormal];
+        [cell.praiseButton setTitle:@"     赞" forState:UIControlStateNormal];
     }
     if ([self havePraisedThisDiary:diaryDetailDict])
     {
         cell.praiseButton.iconImageView.image = [UIImage imageNamed:@"praised"];
-        cell.praiseButton.iconImageView.frame = CGRectMake(27, iconTop, iconH, iconH);
+        cell.praiseButton.iconImageView.frame = CGRectMake(34, iconTop+1, iconH, iconH);
     }
     else
     {
         cell.praiseButton.iconImageView.image = [UIImage imageNamed:@"icon_heart"];
-        cell.praiseButton.iconImageView.frame = CGRectMake(25, iconTop, iconH, iconH);
+        cell.praiseButton.iconImageView.frame = CGRectMake(33, iconTop+1, iconH, iconH);
     }
     cell.praiseButton.backgroundColor = UIColorFromRGB(0xfcfcfc);
     
@@ -495,13 +495,13 @@ UIActionSheetDelegate,NameButtonDel>
      cell.commentButton.frame = CGRectMake((SCREEN_WIDTH-10)/3*2, cell.imagesView.frame.size.height+cell.imagesView.frame.origin.y+16, (SCREEN_WIDTH-10)/3, buttonHeight);
     if ([[diaryDetailDict objectForKey:@"comments_num"] integerValue] > 0)
     {
-        [cell.commentButton setTitle:[NSString stringWithFormat:@"   %d",[[diaryDetailDict objectForKey:@"comments_num"] integerValue]] forState:UIControlStateNormal];
-        cell.commentButton.iconImageView.frame = CGRectMake(25, iconTop, iconH, iconH);
+        [cell.commentButton setTitle:[NSString stringWithFormat:@"      %d",[[diaryDetailDict objectForKey:@"comments_num"] integerValue]] forState:UIControlStateNormal];
+        cell.commentButton.iconImageView.frame = CGRectMake(31, iconTop, iconH, iconH);
     }
     else
     {
-        [cell.commentButton setTitle:@"  评论" forState:UIControlStateNormal];
-        cell.commentButton.iconImageView.frame = CGRectMake(18, iconTop, iconH, iconH);
+        [cell.commentButton setTitle:@"     评论" forState:UIControlStateNormal];
+        cell.commentButton.iconImageView.frame = CGRectMake(25, iconTop, iconH, iconH);
     }
     cell.commentButton.backgroundColor = UIColorFromRGB(0xfcfcfc);
 

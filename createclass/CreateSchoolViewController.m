@@ -65,8 +65,8 @@ UITextFieldDelegate>
     
     cellNameArray = [[NSArray alloc] initWithObjects:@"城市",@"地区",@"学校类别",@"学校名称", nil];
     
-    schoolLevelArray = [NSArray arrayWithObjects:@"幼儿园",@"小学",@"中学",@"中专技校",@"培训机构",@"其他", nil];
-    valueArray = [NSArray arrayWithObjects:@"0",@"1",@"2",@"3",@"4",@"5", nil];
+    schoolLevelArray = SCHOOLLEVELARRAY;
+    valueArray = [NSArray arrayWithObjects:@"0",@"1",@"2",@"3",@"4",@"5",@"6", nil];
     if ([schoolLevel integerValue] >=0)
     {
         levelStr = [schoolLevelArray objectAtIndex:[schoolLevel integerValue]];
@@ -302,7 +302,7 @@ UITextFieldDelegate>
     [cell.praiseButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     cell.praiseButton.frame = CGRectMake(0, 0, SCREEN_WIDTH-40, 40);
     cell.praiseButton.titleLabel.textAlignment = NSTextAlignmentCenter;
-    cell.contentLabel.textColor = TITLE_COLOR;
+    cell.contentLabel.textColor = CONTENTCOLOR;
     
     if(indexPath.section == 0)
     {
@@ -327,14 +327,14 @@ UITextFieldDelegate>
         {
             cell.bgView.frame = CGRectMake(0, 0, 80, 40);
             cell.bgView.layer.borderWidth = 0;
-            cell.nameTextField.frame = CGRectMake(100, 5, 180, 30);
+            cell.nameTextField.frame = CGRectMake(90, 5, 180, 30);
             cell.nameTextField.hidden = NO;
             cell.nameTextField.background = nil;
             cell.nameTextField.backgroundColor = [UIColor whiteColor];
             cell.nameTextField.placeholder = @"请输入学校名称";
             cell.nameTextField.tag = 3333;
             cell.nameTextField.delegate = self;
-            cell.nameTextField.textColor = TITLE_COLOR;
+            cell.nameTextField.textColor = CONTENTCOLOR;
             cell.nameTextField.returnKeyType = UIReturnKeyDone;
             cell.contentLabel.frame = CGRectMake(0, 0, 0, 0);
             cell.nameTextField.text = schoolName;

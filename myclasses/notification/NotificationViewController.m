@@ -520,7 +520,7 @@ EGORefreshTableDelegate>
         }
         
         cell.contentLabel.text = noticeContent;
-        cell.contentLabel.font = [UIFont systemFontOfSize:16];
+//        cell.contentLabel.font = DongTaiContentFont;
         cell.contentLabel.textColor = CONTENTCOLOR;
         cell.contentLabel.contentMode = UIViewContentModeTop;
         

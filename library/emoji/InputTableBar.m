@@ -25,7 +25,7 @@ soundButton,
 moreButton,
 notOnlyFace,
 recordButton,
-originWav,recorderVC,player;
+originWav,recorderVC,player,hideSoundButton;
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
@@ -103,6 +103,13 @@ originWav,recorderVC,player;
         [soundButton setImage:[UIImage imageNamed:@"icon_sound"] forState:UIControlStateNormal];
         [soundButton addTarget:self action:@selector(soundButtonClick) forControlEvents:UIControlEventTouchUpInside];
         [inputBgView addSubview:soundButton];
+        
+        if (hideSoundButton)
+        {
+            inputWidth = SCREEN_WIDTH - 100;
+            left = 10;
+            soundButton.hidden = YES;
+        }
         
         inputTextView.frame = CGRectMake(left, INPUTBUTTONT, inputWidth, DEFAULTTEXTHEIGHT);
         

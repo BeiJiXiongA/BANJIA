@@ -29,8 +29,8 @@
     if (self) {
         // Initialization code
         
-        fromImage = [Tools getImageFromImage:[UIImage imageNamed:@"f"] andInsets:UIEdgeInsetsMake(40, 40, 17, 40)];
-        toImage = [Tools getImageFromImage:[UIImage imageNamed:@"t2"] andInsets:UIEdgeInsetsMake(35, 40, 17, 40)];
+        fromImage = [Tools getImageFromImage:[UIImage imageNamed:@"f"] andInsets:UIEdgeInsetsMake(30, 30, 20, 30)];
+        toImage = [Tools getImageFromImage:[UIImage imageNamed:@"t2"] andInsets:UIEdgeInsetsMake(30, 30, 20, 30)];
         
         headerImageView = [[UIImageView alloc] init];
         headerImageView.clipsToBounds = YES;
@@ -57,7 +57,6 @@
         messageTf.backgroundColor = [UIColor clearColor];
         messageTf.hidden = YES;
         messageTf.userInteractionEnabled = YES;
-        messageTf.font = [UIFont systemFontOfSize:13];
         [self.contentView addSubview:messageTf];
         
         timeLabel = [[UILabel alloc] init];
@@ -88,9 +87,9 @@
     msgDict = dict;
     self.timeLabel.backgroundColor = RGB(203, 203, 203, 1);
     CGFloat messageBgY = 30;
-    CGFloat messageTfY = 5;
+    CGFloat messageTfY = 0;
     NSString *msgContent = [dict objectForKey:@"content"];
-    CGSize size = [SizeTools getSizeWithString:[msgContent emojizedString] andWidth:SCREEN_WIDTH/2+20 andFont:[UIFont systemFontOfSize:14]];
+    CGSize size = [SizeTools getSizeWithString:[msgContent emojizedString] andWidth:SCREEN_WIDTH/2+20 andFont:MessageTextFont];
     headerTapTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(headerImageViewTap:)];
     [self.headerImageView addGestureRecognizer:headerTapTgr];
     self.headerImageView.userInteractionEnabled = YES;
@@ -107,18 +106,8 @@
     self.msgImageView.layer.cornerRadius = 3;
     self.msgImageView.clipsToBounds = YES;
     
-//    chatImageTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(chatimagetap:)];
-//    self.msgImageView.userInteractionEnabled = YES;
-//    [self.msgImageView addGestureRecognizer:chatImageTap];
+    self.messageTf.font = MessageTextFont;
     
-    if (SYSVERSION >= 7.0)
-    {
-        self.messageTf.font = [UIFont systemFontOfSize:16];
-    }
-    else
-    {
-        self.messageTf.font = [UIFont systemFontOfSize:14];
-    }
     if ([[dict objectForKey:DIRECT] isEqualToString:@"f"])
     {
         NSString *extension =  [msgContent pathExtension];
@@ -135,7 +124,7 @@
             self.chatBg.frame = CGRectMake(55, messageBgY, 100+PhotoSpace*2+5, 100+PhotoSpace*2);
             [self.chatBg setImage:fromImage];
             
-            self.msgImageView.frame = CGRectMake(self.chatBg.frame.origin.x+PhotoSpace+5, self.chatBg.frame.origin.y+PhotoSpace+1, 100, 100);
+            self.msgImageView.frame = CGRectMake(self.chatBg.frame.origin.x+PhotoSpace+8, self.chatBg.frame.origin.y+PhotoSpace+1, 97, 97);
             self.msgImageView.layer.cornerRadius = 3;
             self.msgImageView.clipsToBounds = YES;
             
@@ -143,11 +132,6 @@
             
             self.headerImageView.frame = CGRectMake(5, messageBgY, 40, 40);
             
-            CGFloat he = 0;
-            if (SYSVERSION >= 7)
-            {
-                he = 3;
-            }
             if(isGroup)
             {
                 OperatDB *db = [[OperatDB alloc] init];
@@ -162,7 +146,7 @@
                 self.chatBg.frame = CGRectMake(55, messageBgY+20, 100+PhotoSpace*2+5, 100+PhotoSpace*2);
                 [self.chatBg setImage:fromImage];
                 
-                self.msgImageView.frame = CGRectMake(self.chatBg.frame.origin.x+PhotoSpace+7, self.chatBg.frame.origin.y+PhotoSpace+2, 98, 98);
+                self.msgImageView.frame = CGRectMake(self.chatBg.frame.origin.x+PhotoSpace+8, self.chatBg.frame.origin.y+PhotoSpace+1, 97, 97);
                 [Tools fillImageView:self.headerImageView withImageFromURL:img_icon andDefault:HEADERICON];
             }
             else
@@ -213,7 +197,9 @@
             [self.soundButton setBackgroundImage:[Tools getImageFromImage:fromImage andInsets:UIEdgeInsetsMake(35, 25, 17, 20)] forState:UIControlStateNormal];
             [self.soundButton addTarget:self action:@selector(playSound) forControlEvents:UIControlEventTouchUpInside];
             
-            self.messageTf.frame = CGRectMake(self.soundButton.frame.size.width+self.soundButton.frame.origin.x+10, self.soundButton.frame.origin.y+3, 40, 25);
+            self.soundButton.backgroundColor = [UIColor clearColor];
+            
+            self.messageTf.frame = CGRectMake(self.soundButton.frame.size.width+self.soundButton.frame.origin.x+7, self.soundButton.frame.origin.y+4, 40, 25);
             
             self.msgImageView.frame = CGRectMake(self.soundButton.frame.origin.x+PhotoSpace+5, self.soundButton.frame.origin.y+PhotoSpace+1, 25, 25);
             [self.msgImageView setImage:[UIImage imageNamed:@"icon_sound_f"]];
@@ -236,8 +222,8 @@
                 self.nameLabel.frame = CGRectMake(self.headerImageView.frame.size.width+self.headerImageView.frame.origin.x+5, self.headerImageView.frame.origin.y, 100, 20);
                 self.nameLabel.text = name;
                 self.soundButton.frame = CGRectMake(55, messageBgY+20, soundLength, 40);
-                [self.soundButton setBackgroundImage:[Tools getImageFromImage:fromImage andInsets:UIEdgeInsetsMake(35, 25, 17, 20)] forState:UIControlStateNormal];
-                
+                [self.soundButton setBackgroundImage:fromImage forState:UIControlStateNormal];
+                self.messageTf.frame = CGRectMake(self.soundButton.frame.size.width+self.soundButton.frame.origin.x+7, self.soundButton.frame.origin.y+4, 40, 25);
                 self.msgImageView.frame = CGRectMake(self.soundButton.frame.origin.x+PhotoSpace+5, self.soundButton.frame.origin.y+PhotoSpace+1, 25, 25);
                 [self.msgImageView setImage:[UIImage imageNamed:@"icon_sound_f"]];
                 
@@ -255,6 +241,8 @@
         }
         else
         {
+            
+            CGFloat fromTextCha = 14;
             self.chatBg.hidden = NO;
             self.messageTf.hidden = NO;
             self.msgImageView.hidden = YES;
@@ -265,14 +253,13 @@
             self.chatBg.frame = CGRectMake(55, messageBgY, size.width+20, size.height+20);
             [self.chatBg setImage:fromImage];
             
-            CGFloat he = 0;
-            if (SYSVERSION >= 7)
+            CGFloat cha = 12;
+            if (SYSVERSION < 7)
             {
-                he = 3;
+                cha = 15;
             }
             
-            self.messageTf.frame = CGRectMake(self.chatBg.frame.origin.x + 10,self.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+20+he);
-            self.messageTf.backgroundColor = [[UIColor grayColor] colorWithAlphaComponent:0];
+            self.messageTf.frame = CGRectMake(self.chatBg.frame.origin.x + 10,self.chatBg.frame.origin.y + messageTfY, size.width+cha, size.height+fromTextCha);
             self.messageTf.text = [[dict objectForKey:@"content"] emojizedString];
             self.selectionStyle = UITableViewCellSelectionStyleNone;
             
@@ -281,9 +268,9 @@
             {
                 self.messageTf.text = [msgContent substringFromIndex:range.location+range.length];
                 
-                size = [SizeTools getSizeWithString:[[msgContent substringFromIndex:range.location+range.length] emojizedString] andWidth:SCREEN_WIDTH/2+20 andFont:[UIFont systemFontOfSize:14]];
+                size = [SizeTools getSizeWithString:[[msgContent substringFromIndex:range.location+range.length] emojizedString] andWidth:SCREEN_WIDTH/2+20 andFont:MessageTextFont];
                 
-                self.messageTf.frame = CGRectMake(self.chatBg.frame.origin.x + 10,self.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+10+he);
+                self.messageTf.frame = CGRectMake(self.chatBg.frame.origin.x + 10,self.chatBg.frame.origin.y + messageTfY, size.width+cha, size.height+fromTextCha);
                 self.messageTf.editable = NO;
                 
                 UITapGestureRecognizer *msgTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(joinClass:)];
@@ -291,7 +278,6 @@
                 [self.chatBg addGestureRecognizer:msgTap];
                 self.chatBg.backgroundColor = [UIColor clearColor];
                 
-                self.messageTf.backgroundColor = [UIColor clearColor];
                 self.messageTf.userInteractionEnabled = YES;
                 
                 self.joinlable.frame = CGRectMake(15, size.height+15, size.width, 30);
@@ -322,7 +308,7 @@
                 self.nameLabel.frame = CGRectMake(self.headerImageView.frame.size.width+self.headerImageView.frame.origin.x+5, self.headerImageView.frame.origin.y, 100, 20);
                 self.nameLabel.text = name;
                 self.chatBg.frame = CGRectMake(55, messageBgY+20, size.width+20, size.height+20);
-                self.messageTf.frame = CGRectMake(self.chatBg.frame.origin.x + 10,self.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+20+he);
+                self.messageTf.frame = CGRectMake(self.chatBg.frame.origin.x + 10,self.chatBg.frame.origin.y + messageTfY, size.width+cha, size.height+fromTextCha);
                 [Tools fillImageView:self.headerImageView withImageFromURL:img_icon andDefault:HEADERICON];
             }
             else
@@ -353,9 +339,9 @@
             {
                 x=0;
             }
-            self.chatBg.frame = CGRectMake(SCREEN_WIDTH - 10- 100- 30-45, messageBgY, 100+PhotoSpace*2+5, 100+PhotoSpace*2);
+            self.chatBg.frame = CGRectMake(SCREEN_WIDTH - 10- 100- 30-45, messageBgY, 100+PhotoSpace*2+5, 100+PhotoSpace*2-2);
             [self.chatBg setImage:toImage];
-            self.msgImageView.frame = CGRectMake(self.chatBg.frame.origin.x+PhotoSpace, self.chatBg.frame.origin.y+PhotoSpace, 102, 100);
+            self.msgImageView.frame = CGRectMake(self.chatBg.frame.origin.x+PhotoSpace, self.chatBg.frame.origin.y+PhotoSpace, 97, 97);
             [Tools fillImageView:self.msgImageView withImageFromURL:msgContent imageWidth:200 andDefault:@"3100"];
             self.headerImageView.frame = CGRectMake(SCREEN_WIDTH - 60, messageBgY, 40, 40);
             [Tools fillImageView:self.headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERICON];
@@ -395,7 +381,7 @@
             self.soundButton.hidden = NO;
             self.soundButton.frame = CGRectMake(SCREEN_WIDTH - soundLength-45-20, messageBgY, soundLength, 40);
             
-            [self.soundButton setBackgroundImage:[Tools getImageFromImage:toImage andInsets:UIEdgeInsetsMake(10, 10, 10, 10)] forState:UIControlStateNormal];
+            [self.soundButton setBackgroundImage:toImage forState:UIControlStateNormal];
             [self.soundButton addTarget:self action:@selector(playSound) forControlEvents:UIControlEventTouchUpInside];
             
             
@@ -417,6 +403,8 @@
         }
         else
         {
+            CGFloat totextcha = 14;
+            
             self.chatBg.hidden = NO;
             self.msgImageView.hidden = YES;
             self.messageTf.hidden = NO;
@@ -424,18 +412,21 @@
             NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
             self.timeLabel.text = timeStr;
             
-            CGFloat x=7;
-            if([[Tools device_version] integerValue] >= 7.0)
-            {
-                x=0;
-            }
             
-            self.chatBg.frame = CGRectMake(SCREEN_WIDTH - 10-size.width-30-45, messageBgY, size.width+20, size.height+20);
+            self.chatBg.frame = CGRectMake(SCREEN_WIDTH -size.width-82, messageBgY, size.width+20, size.height+15);
             [self.chatBg setImage:toImage];
             
-            self.messageTf.frame = CGRectMake(self.chatBg.frame.origin.x+ 5-x,self.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+20);
-            self.messageTf.backgroundColor = [[UIColor grayColor] colorWithAlphaComponent:0];
+            CGFloat cha = 10;
+            if (SYSVERSION < 7)
+            {
+                cha = 13;
+            }
+            
+            self.messageTf.frame = CGRectMake(self.chatBg.frame.origin.x + 5,self.chatBg.frame.origin.y, size.width+cha, size.height+totextcha);
             self.messageTf.text = [[dict objectForKey:@"content"] emojizedString];
+            
+            DDLOG(@"%@==%@",[[dict objectForKey:@"content"] emojizedString],NSStringFromCGSize(size));
+            
             self.selectionStyle = UITableViewCellSelectionStyleNone;
             self.soundButton.hidden = YES;
             
@@ -444,9 +435,9 @@
                 NSString *msgContent = [dict objectForKey:@"content"];
                 NSRange range = [msgContent rangeOfString:@"$!#"];
                 self.messageTf.text = [msgContent substringFromIndex:range.location+range.length];
-                size = [SizeTools getSizeWithString:[[msgContent substringFromIndex:range.location+range.length] emojizedString] andWidth:SCREEN_WIDTH/2+20 andFont:[UIFont systemFontOfSize:14]];
-                self.chatBg.frame = CGRectMake(SCREEN_WIDTH - 10-size.width-30-45, messageBgY, size.width+20, size.height+20);
-                self.messageTf.frame = CGRectMake(self.chatBg.frame.origin.x+ 10-x,self.chatBg.frame.origin.y + messageTfY, size.width+12, size.height+30);
+                size = [SizeTools getSizeWithString:[[msgContent substringFromIndex:range.location+range.length] emojizedString] andWidth:SCREEN_WIDTH/2+20 andFont:MessageTextFont];
+                self.chatBg.frame = CGRectMake(SCREEN_WIDTH -size.width-82, messageBgY, size.width+20, size.height+20);
+                self.messageTf.frame = CGRectMake(self.chatBg.frame.origin.x + 5,self.chatBg.frame.origin.y , size.width+cha, size.height+totextcha);
             }
             self.headerImageView.frame = CGRectMake(SCREEN_WIDTH - 60, messageBgY, 40, 40);
             
@@ -515,11 +506,14 @@
     NSString *msgContent = [msgDict objectForKey:@"content"];
     NSString *lastcom = [msgContent lastPathComponent];
     NSRange range = [lastcom rangeOfString:@"time="];
-    NSString *filename = [lastcom substringToIndex:range.location-1];
-    NSString *fileExtention = [filename pathExtension];
-    NSRange extentionRange = [filename rangeOfString:fileExtention];
-    NSString *notificationName = [NSString stringWithFormat:@"%@.wav",[filename substringToIndex:extentionRange.location-1]];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:notificationName object:nil];
+    if (range.length > 0)
+    {
+        NSString *filename = [lastcom substringToIndex:range.location-1];
+        NSString *fileExtention = [filename pathExtension];
+        NSRange extentionRange = [filename rangeOfString:fileExtention];
+        NSString *notificationName = [NSString stringWithFormat:@"%@.wav",[filename substringToIndex:extentionRange.location-1]];
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:notificationName object:nil];
+    }
 }
 
 -(void)playImages

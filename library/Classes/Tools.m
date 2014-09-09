@@ -749,7 +749,6 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 
 +(CGSize)getSizeWithString:(NSString *)content andWidth:(CGFloat)width andFont:(UIFont *)font
 {
-    
     CGSize maxSize=CGSizeMake(width, 99999);
     CGSize  strSize=[content sizeWithFont:font constrainedToSize:maxSize lineBreakMode:NSLineBreakByWordWrapping];
     return strSize;

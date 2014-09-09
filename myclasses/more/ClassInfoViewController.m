@@ -305,9 +305,16 @@ SetClassInfoDel>
             
             cell.objectsLabel.text = classNumber;
             
-            cell.authenticationSign.hidden = NO;
-            cell.authenticationSign.frame = CGRectMake(SCREEN_WIDTH-60, 8.5, 30, 30);
-            [cell.authenticationSign setImage:[UIImage imageNamed:@"icon_qr"]];
+            if ([classNumber integerValue] > 0)
+            {
+                cell.authenticationSign.hidden = NO;
+                cell.authenticationSign.frame = CGRectMake(SCREEN_WIDTH-60, 8.5, 30, 30);
+                [cell.authenticationSign setImage:[UIImage imageNamed:@"icon_qr"]];
+            }
+            else
+            {
+                cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-left, 10, 180, 27);
+            }
         }
         else if(indexPath.row == 3)
         {
@@ -350,22 +357,24 @@ SetClassInfoDel>
         CGSize size = [Tools getSizeWithString:classInfo andWidth:SCREEN_WIDTH-150 andFont:[UIFont systemFontOfSize:16]];
         cell.nameLabel.frame = CGRectMake(10, 10, 80, 27);
         cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-left, 10, 180, size.height>27?size.height:27);
-        cell.objectsLabel.textAlignment = NSTextAlignmentLeft;
+        
         cell.nameLabel.text = @"班级介绍";
         if ([classInfo length] > 0)
         {
             cell.objectsLabel.text = classInfo;
             cell.objectsLabel.numberOfLines = 10;
+            cell.objectsLabel.textAlignment = NSTextAlignmentLeft;
         }
         else
         {
             cell.objectsLabel.text = @"请填写班级介绍";
+            cell.objectsLabel.textAlignment = NSTextAlignmentRight;
         }
     }
     UIImageView *bgImageBG = [[UIImageView alloc] init];
     bgImageBG.image = [UIImage imageNamed:@"cell_bg2"];
     cell.backgroundView = bgImageBG;
-    if (indexPath.row == 1 || indexPath.row == 4 || indexPath.row == 6 || indexPath.row == 3 || indexPath.row == 2)
+    if (indexPath.row == 1 || indexPath.row == 4 || indexPath.row == 6 || indexPath.row == 2)
     {
         UIImageView *markView = [[UIImageView alloc] init];
         markView.hidden = YES;
@@ -404,9 +413,12 @@ SetClassInfoDel>
     }
     else if(indexPath.row == 2)
     {
-        ClassQRViewController *classQRVC = [[ClassQRViewController alloc] init];
-        classQRVC.classNumber = classNumber;
-        [self.navigationController pushViewController:classQRVC animated:YES];
+        if ([classNumber integerValue] > 0)
+        {
+            ClassQRViewController *classQRVC = [[ClassQRViewController alloc] init];
+            classQRVC.classNumber = classNumber;
+            [self.navigationController pushViewController:classQRVC animated:YES];
+        }
     }
     else if(indexPath.row == 6)
     {

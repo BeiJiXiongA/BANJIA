@@ -315,7 +315,7 @@ SelectAreaDelegate>
         
         cell.contentLabel.frame = CGRectMake(110, 0, 200, 40);
         cell.contentLabel.hidden = NO;
-        cell.contentLabel.textColor = COMMENTCOLOR;
+        cell.contentLabel.textColor = CONTENTCOLOR;
         cell.contentLabel.font = [UIFont systemFontOfSize:18];
         if (indexPath.row == 0)
         {
@@ -336,14 +336,14 @@ SelectAreaDelegate>
         {
             cell.bgView.frame = CGRectMake(0, 0, 80, 40);
             cell.bgView.layer.borderWidth = 0;
-            cell.nameTextField.frame = CGRectMake(100, 5, 180, 30);
+            cell.nameTextField.frame = CGRectMake(90, 5, 180, 30);
             cell.nameTextField.hidden = NO;
             cell.nameTextField.background = nil;
             cell.nameTextField.backgroundColor = [UIColor whiteColor];
             cell.nameTextField.placeholder = @"请输入关键字";
             cell.nameTextField.tag = 3333;
             cell.nameTextField.delegate = self;
-            cell.nameTextField.textColor = TITLE_COLOR;
+            cell.nameTextField.textColor = CONTENTCOLOR;
             cell.nameTextField.returnKeyType = UIReturnKeyDone;
             cell.contentLabel.frame = CGRectMake(0, 0, 0, 0);
         }

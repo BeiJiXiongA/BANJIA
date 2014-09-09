@@ -516,7 +516,7 @@ UIActionSheetDelegate>
             cell.nameLabel.text = [dict objectForKey:@"name"];
         }
         cell.nameLabel.backgroundColor = [UIColor clearColor];
-        cell.nameLabel.textColor = NAMECOLOR;
+        cell.nameLabel.textColor = DongTaiNameColor;
         cell.contactButton.hidden = YES;
         [cell.contactButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
         [cell.contactButton setImage:[UIImage imageNamed:@"telephone1"] forState:UIControlStateNormal];
@@ -562,7 +562,7 @@ UIActionSheetDelegate>
         }
         cell.nameLabel.frame = CGRectMake(60, 8.75, 200, 30);
         cell.nameLabel.backgroundColor = [UIColor clearColor];
-        cell.nameLabel.textColor = NAMECOLOR;
+        cell.nameLabel.textColor = DongTaiNameColor;
         cell.contactButton.hidden = NO;
         [cell.contactButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
         [cell.contactButton setImage:[UIImage imageNamed:@"telephone1"] forState:UIControlStateNormal];

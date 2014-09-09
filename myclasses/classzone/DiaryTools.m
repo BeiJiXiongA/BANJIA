@@ -45,26 +45,37 @@
         NSArray *array = [[dict objectForKey:@"detail"] objectForKey:@"comments"];
         if (showAll)
         {
+            //动态详情
             for (int i=0; i < [array count]; ++i)
             {
                 NSDictionary *dict = [array objectAtIndex:i];
-                NSString *name = [[dict objectForKey:@"by"] objectForKey:@"name"];
                 NSString *content = [[dict objectForKey:@"content"] emojizedString];
-                NSString *contentString = [NSString stringWithFormat:@"%@:%@",name,content];
+                NSString *contentString = [NSString stringWithFormat:@"%@",content];
                 CGSize s = [Tools getSizeWithString:contentString andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
-                tmpcommentHeight += (s.height+46);
+                tmpcommentHeight += (s.height+CommentSpace*2+25-5);
             }
         }
         else
         {
+            //动态列表
             for (int i=0; i<([array count] > 6 ? 6:[array count]); ++i)
             {
                 NSDictionary *dict = [array objectAtIndex:i];
+                
                 NSString *name = [[dict objectForKey:@"by"] objectForKey:@"name"];
+                CGSize nameSize;
+                if (SYSVERSION >= 7)
+                {
+                    nameSize = [name sizeWithAttributes:[NSDictionary dictionaryWithObjectsAndKeys:CommentFont, NSFontAttributeName, nil]];
+                }
+                else
+                {
+                    nameSize = [Tools getSizeWithString:name andWidth:100 andFont:CommentFont];
+                }
+                
                 NSString *content = [[dict objectForKey:@"content"] emojizedString];
-                NSString *contentString = [NSString stringWithFormat:@"%@:%@",name,content];
-                CGSize s = [Tools getSizeWithString:contentString andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
-                tmpcommentHeight += (s.height+10);
+                CGSize commentSize = [Tools getSizeWithString:content andWidth:MaxCommentWidth-nameSize.width andFont:CommentFont];
+                 tmpcommentHeight += commentSize.height+CommentSpace*2;
             }
             if ([array count] > 6)
             {

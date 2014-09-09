@@ -355,6 +355,11 @@ MFMailComposeViewControllerDelegate>
                 cell.button1.hidden = YES;
                 cell.button2.frame = CGRectMake((SCREEN_WIDTH-150)/2, 10, 145, 43.5);
             }
+            if([personID isEqualToString:OurTeamID])
+            {
+                cell.button1.hidden = YES;
+                cell.button2.frame = CGRectMake((SCREEN_WIDTH-150)/2, 10, 145, 43.5);
+            }
             
             [cell.button2 addTarget:self action:@selector(toChat) forControlEvents:UIControlEventTouchUpInside];
             if([personID isEqualToString:AssistantID])

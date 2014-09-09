@@ -9,6 +9,9 @@
 
 #import <QuartzCore/QuartzCore.h>
 
+#import "Color.h"
+#import "Font.h"
+
 
 #define FaceViewHeight  200
 
@@ -43,11 +46,6 @@ blue:((float)(rgbValue & 0xFF))/255.0 alpha:a]
 
 #define LIGHT_BLUE_COLOR  RGB(74, 188, 194, 1)
 #define LIGHT_GREEN_COLOR RGB(113, 192, 159, 1)
-
-#define TITLE_COLOR   UIColorFromRGB(0x555555)
-#define CONTENTCOLOR  UIColorFromRGB(0x666666)
-#define COMMENTCOLOR  UIColorFromRGB(0x999999)
-#define TIMECOLOR     UIColorFromRGB(0xcccccc)
 
 #pragma mark - aboutCoordinate
 
@@ -124,7 +122,6 @@ return shared##className; \
 #define CORNERMORERIGHT  50
 
 #define NAMEFONT   [UIFont systemFontOfSize:16]
-#define NAMECOLOR  RGB(51, 51, 51, 1)
 
 #define USERID    @"u_id"
 #define PHONENUM  @"phone_num"
@@ -247,3 +244,7 @@ return shared##className; \
 #define MAX_SOUND_LENGTH   60
 
 #define ShowTips 0
+
+#define DongTaiSpace  7
+
+#define CommentSpace 10

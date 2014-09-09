@@ -291,6 +291,8 @@ UITextFieldDelegate>
 
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
+                [[UIApplication sharedApplication] cancelAllLocalNotifications];
+                [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
                 NSDictionary *dict = [responseDict objectForKey:@"data"];
                 NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
                 [ud setObject:[dict objectForKey:@"u_id"] forKey:USERID];
@@ -331,6 +333,9 @@ UITextFieldDelegate>
                     [ud setObject:[dict objectForKey:@"r_name"] forKey:USERNAME];
                 }
                 
+                [self getNewChat];
+                [self getNewClass];
+                
                 SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
                 HomeViewController *homeViewController = [[HomeViewController alloc] init];
                 KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:homeViewController];
@@ -366,6 +371,74 @@ UITextFieldDelegate>
         [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
     }
 }
+
+-(void)getNewClass
+{
+    if ([[Tools user_id] length] > 0)
+    {
+        if ([Tools NetworkReachable])
+        {
+            __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                          @"token":[Tools client_token]
+                                                                          } API:MB_NEWCLASS];
+            [request setCompletionBlock:^{
+                NSString *responseString = [request responseString];
+                NSDictionary *responseDict = [Tools JSonFromString:responseString];
+                DDLOG(@"newclass responsedict %@",responseDict);
+                if ([[responseDict objectForKey:@"code"] intValue]== 1)
+                {
+                    if ([[[responseDict objectForKey:@"data"] objectForKey:@"count"] integerValue] > 0)
+                    {
+                        [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"]objectForKey:@"count"] integerValue]] forKey:NewClassNum];
+                        [[NSUserDefaults standardUserDefaults] synchronize];
+                    }
+                }
+                else
+                {
+                    [Tools dealRequestError:responseDict fromViewController:nil];
+                }
+            }];
+            
+            [request setFailedBlock:^{
+            }];
+            [request startAsynchronous];
+        }
+        
+    }
+}
+
+-(void)getNewChat
+{
+    if ([[Tools user_id] length] > 0)
+    {
+        if ([Tools NetworkReachable])
+        {
+            __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                          @"token":[Tools client_token]
+                                                                          } API:MB_NEWCHAT];
+            [request setCompletionBlock:^{
+                NSString *responseString = [request responseString];
+                NSDictionary *responseDict = [Tools JSonFromString:responseString];
+                DDLOG(@"newchat responsedict %@",responseDict);
+                if ([[responseDict objectForKey:@"code"] intValue] == 1)
+                {
+                    [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",[[responseDict objectForKey:@"data"] integerValue]] forKey:NewChatMsgNum];
+                    [[NSUserDefaults standardUserDefaults] synchronize];
+                }
+                else
+                {
+                    [Tools dealRequestError:responseDict fromViewController:nil];
+                }
+            }];
+            
+            [request setFailedBlock:^{
+            }];
+            [request startAsynchronous];
+        }
+        
+    }
+}
+
 
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {

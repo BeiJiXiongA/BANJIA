@@ -21,6 +21,8 @@
     NSString *updateUrl;
     BMKMapManager* _mapManager;
     SideMenuViewController *sideMenuViewController;
+    
+    NSString *newVersionUrl;
 }
 @property (strong, nonatomic) UIWindow *window;
 

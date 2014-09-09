@@ -24,6 +24,8 @@
 #define InviteWayTag 22222
 #define ParentTableViewtag 33333
 
+#define RelateButtonWidth  120
+
 @interface InviteStuPareViewController ()<
 UITableViewDataSource,
 UITableViewDelegate,
@@ -34,6 +36,8 @@ UIAlertViewDelegate>
     UITableView *parentsTableView;
     NSArray *parentArray;
     UITextField *parentTextField;
+    
+    UIView *parentView;
     UILabel *parentLabel;
     
     NSString *relateString;
@@ -87,29 +91,31 @@ UIAlertViewDelegate>
     tipLabel.backgroundColor = self.bgView.backgroundColor;
     [self.bgView addSubview:tipLabel];
     
+    parentView = [[UIView alloc] initWithFrame:CGRectMake(tipLabel.frame.origin.x+tipLabel.frame.size.width-5, tipLabel.frame.origin.y-5, RelateButtonWidth, 42)];
+    parentView.backgroundColor = [UIColor whiteColor];
+    parentView.layer.cornerRadius = 8;
+    parentView.clipsToBounds = YES;
+    [self.bgView addSubview:parentView];
     
     parentLabel = [[UILabel alloc] init];
-    parentLabel.frame = CGRectMake(tipLabel.frame.origin.x+tipLabel.frame.size.width-5, tipLabel.frame.origin.y-5, 140, 42);
-    parentLabel.backgroundColor = [UIColor whiteColor];
+    parentLabel.frame = CGRectMake(2, 0, RelateButtonWidth-25, 42);
     parentLabel.textColor = CONTENTCOLOR;
     parentLabel.text = @"    爸爸";
-    parentLabel.layer.cornerRadius = 8;
-    parentLabel.clipsToBounds = YES;
     parentLabel.font = [UIFont systemFontOfSize:16];
-    [self.bgView addSubview:parentLabel];
+    [parentView addSubview:parentLabel];
     
     arrowImageView = [[UIImageView alloc] init];
-    arrowImageView.frame = CGRectMake(parentLabel.frame.origin.x + parentLabel.frame.size.width- 30, parentLabel.frame.origin.y+16, 18, 10);
+    arrowImageView.frame = CGRectMake(parentView.frame.size.width- 30, parentLabel.frame.origin.y+16, 18, 10);
     arrowImageView.backgroundColor = [UIColor whiteColor];
     [arrowImageView setImage:[UIImage imageNamed:@"arrow_down"]];
-    [self.bgView addSubview:arrowImageView];
+    [parentView addSubview:arrowImageView];
     
     
     UITapGestureRecognizer *openTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(opentableview)];
     parentLabel.userInteractionEnabled = YES;
     [parentLabel addGestureRecognizer:openTgr];
     
-    parentsTableView = [[UITableView alloc] initWithFrame:CGRectMake(parentLabel.frame.origin.x, parentLabel.frame.size.height+parentLabel.frame.origin.y+10, parentLabel.frame.size.width, 0) style:UITableViewStylePlain];
+    parentsTableView = [[UITableView alloc] initWithFrame:CGRectMake(parentView.frame.origin.x, parentView.frame.size.height+parentView.frame.origin.y+10, parentView.frame.size.width, 0) style:UITableViewStylePlain];
     parentsTableView.delegate = self;
     parentsTableView.dataSource = self;
     parentsTableView.tag = ParentTableViewtag;
@@ -121,7 +127,7 @@ UIAlertViewDelegate>
     
 //    [self.bgView addSubview:parentButton];
 
-    parentArray = [[NSArray alloc] initWithObjects:@"爸爸",@"妈妈",@"爷爷",@"奶奶",@"姥爷",@"姥姥",@"其他", nil];
+    parentArray = [[NSArray alloc] initWithObjects:@"爸爸",@"妈妈",@"爷爷",@"奶奶",@"其他", nil];
     
     UITapGestureRecognizer *tgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(opentableview)];
     parentTextField.userInteractionEnabled = YES;
@@ -130,7 +136,7 @@ UIAlertViewDelegate>
     waynames = [[NSArray alloc] initWithObjects:@"微信",@"QQ好友",@"手机短信",@"邀请好友", nil];
     iconsArray = @[@"weichat",@"QQicon",@"mesginviteicon",@"invitefriendicon"];
     
-    inviteWayTableview = [[UITableView alloc] initWithFrame:CGRectMake(0, parentLabel.frame.size.height+parentLabel.frame.origin.y, SCREEN_WIDTH, 200) style:UITableViewStylePlain];
+    inviteWayTableview = [[UITableView alloc] initWithFrame:CGRectMake(0, parentView.frame.size.height + parentView.frame.origin.y, SCREEN_WIDTH, 200) style:UITableViewStylePlain];
     inviteWayTableview.tag = InviteWayTag;
     inviteWayTableview.delegate = self;
     inviteWayTableview.dataSource = self;
@@ -157,14 +163,14 @@ UIAlertViewDelegate>
     {
         
         [UIView animateWithDuration:0.2 animations:^{
-            parentsTableView.frame = CGRectMake(parentLabel.frame.origin.x, parentsTableView.frame.origin.y, parentLabel.frame.size.width, [parentArray count]*42);
+            parentsTableView.frame = CGRectMake(parentView.frame.origin.x, parentsTableView.frame.origin.y, parentView.frame.size.width, [parentArray count]*42);
             [arrowImageView setImage:[UIImage imageNamed:@"arrow_up"]];
         }];
     }
     else
     {
         [UIView animateWithDuration:0.2 animations:^{
-            parentsTableView.frame = CGRectMake(parentLabel.frame.origin.x, parentsTableView.frame.origin.y, parentLabel.frame.size.width, 0);
+            parentsTableView.frame = CGRectMake(parentView.frame.origin.x, parentsTableView.frame.origin.y, parentView.frame.size.width, 0);
             [arrowImageView setImage:[UIImage imageNamed:@"arrow_down"]];
         }];
     }

@@ -23,8 +23,8 @@
 @property (nonatomic, strong) UILabel *nameLabel;
 @property (nonatomic, strong) UILabel *timeLabel;
 @property (nonatomic, strong) UILabel *locationLabel;
-@property (nonatomic, strong) UITextView *contentLabel;
-@property (nonatomic, strong) UIScrollView *imagesScrollView;
+@property (nonatomic, strong) UITextView *contentTextField;
+@property (nonatomic, strong) UILabel *contentLabel;
 @property (nonatomic, strong) UIView *imagesView;
 @property (nonatomic, strong) MyButton *transmitButton;
 @property (nonatomic, strong) MyButton *praiseButton;

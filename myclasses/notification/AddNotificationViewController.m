@@ -146,7 +146,7 @@ SelectClasses>
     sendButton.backgroundColor = [UIColor clearColor];
     sendButton.frame = CGRectMake(SCREEN_WIDTH-60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [sendButton setTitle:@"发布" forState:UIControlStateNormal];
-    [sendButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+    [sendButton setTitleColor:RightCornerTitleColor forState:UIControlStateNormal];
     [sendButton addTarget:self action:@selector(sendnotice) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:sendButton];
     

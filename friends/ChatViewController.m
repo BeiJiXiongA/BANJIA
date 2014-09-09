@@ -223,7 +223,14 @@ EGORefreshTableHeaderDelegate>
     
     if ([Tools NetworkReachable])
     {
-        [self getGroupInfo];
+        if (isGroup)
+        {
+            [self getGroupInfo];
+        }
+        else
+        {
+            [self getChatLog];
+        }
     }
     else
     {
@@ -247,6 +254,10 @@ EGORefreshTableHeaderDelegate>
     inputTabBar.backgroundColor = [UIColor whiteColor];
     inputTabBar.returnFunDel = self;
     inputTabBar.notOnlyFace = YES;
+    if ([toID isEqualToString:OurTeamID])
+    {
+        inputTabBar.hideSoundButton = YES;
+    }
     inputTabBar.layer.anchorPoint = CGPointMake(0.5, 1);
     messageTableView.frame = CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT-inputTabBarH);
     [self.bgView addSubview:inputTabBar];
@@ -466,11 +477,19 @@ EGORefreshTableHeaderDelegate>
             {
                 if ([[[responseDict objectForKey:@"data"] objectForKey:@"builder"] isEqual:[NSNull null]])
                 {
-                    isGroup = NO;
-                    [self getChatLog];
+                    
+                    UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"该群聊已经被群主解散了！" delegate:self cancelButtonTitle:@"知道了" otherButtonTitles: nil];
+                    al.tag = 77777;
+                    [al show];
+                    
+                    if ([db deleteRecordWithDict:@{@"userid":[Tools user_id],@"fid":toID,@"direct":@"f"} andTableName:CHATTABLE] &&
+                        [db deleteRecordWithDict:@{@"userid":[Tools user_id],@"tid":toID,@"direct":@"t"} andTableName:CHATTABLE])
+                    {
+                        DDLOG(@"delete chat log  success");
+                    }
+                    
                     return ;
                 }
-                isGroup = YES;
                 users = [[responseDict objectForKey:@"data"] objectForKey:@"users"];
                 self.titleLabel.text = [[responseDict objectForKey:@"data"] objectForKey:@"name"];
 
@@ -625,6 +644,7 @@ EGORefreshTableHeaderDelegate>
         else
         {
             UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"" message:@"相机不可用！" delegate:self cancelButtonTitle:@"确定" otherButtonTitles: nil];
+            al.tag = 9999;
             [al show];
         }
         [self presentViewController:imagePickerController animated:YES completion:^{
@@ -791,6 +811,10 @@ EGORefreshTableHeaderDelegate>
         {
             [self releaseFriend];
         }
+    }
+    else if(alertView.tag == 77777)
+    {
+        [self.navigationController popViewControllerAnimated:YES];
     }
 }
 
@@ -982,7 +1006,7 @@ EGORefreshTableHeaderDelegate>
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    __block CGFloat rowHeight = 0;
+    CGFloat rowHeight = 0;
     NSDictionary *dict = [messageArray objectAtIndex:indexPath.row];
     NSString *msgContent = [[messageArray objectAtIndex:indexPath.row] objectForKey:@"content"];
     CGSize size = [SizeTools getSizeWithString:[msgContent emojizedString] andWidth:SCREEN_WIDTH/2+20 andFont:[UIFont systemFontOfSize:14]];
@@ -998,7 +1022,7 @@ EGORefreshTableHeaderDelegate>
     if ([[msgContent pathExtension] isEqualToString:@"png"] || [[msgContent pathExtension] isEqualToString:@"jpg"])
     {
         
-        rowHeight = 100;
+        rowHeight = 100+PhotoSpace;
     }
     else if ([msgContent rangeOfString:@"amr"].length > 0)
     {

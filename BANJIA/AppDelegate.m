@@ -36,6 +36,7 @@
 
 //Õı»
 #define NewVersionTag  1000
+#define NEWVERSION  2222
 
 #import "FiistLaunchViewController.h"
 
@@ -62,6 +63,20 @@
     
     _db = [[OperatDB alloc] init];
     [[StatusBarTips shareTipsWindow] hideTips];
+    
+    NSDate *localDate = [NSDate date];
+    NSTimeInterval localTimeInterVal = [localDate timeIntervalSince1970];
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc]init];
+    [dateFormatter setDateFormat:@"YYYY年MM月dd日"];
+    NSDate *datetimeDate = [NSDate dateWithTimeIntervalSince1970:localTimeInterVal];
+    NSString *resultStr = [dateFormatter stringFromDate:datetimeDate];
+    NSString *lastUpdateDate = [[NSUserDefaults standardUserDefaults] objectForKey:@"lastupdate"];
+    
+    if (!lastUpdateDate || (lastUpdateDate && ![lastUpdateDate isEqualToString:resultStr]))
+    {
+        [self updateNewVersionWithDate:resultStr];
+    }
+    
     
     NSString *soundDir = [NSString stringWithFormat:@"%@/soundCache",[DirectyTools documents]];
     BOOL isDir;
@@ -174,6 +189,65 @@
     [self.window makeKeyAndVisible];
     return YES;
 }
+
+#pragma mark - 版本更新
+#pragma mark - updateNewVersion
+-(void)updateNewVersionWithDate:(NSString *)updateDate
+{
+    if ([Tools NetworkReachable])
+    {
+        NSString *appleID = @"862315597";
+        NSString *urlStr = [NSString stringWithFormat:@"http://itunes.apple.com/lookup?id=%@",appleID];
+        __weak ASIHTTPRequest *request = [Tools getRequestWithDict:@{} andHostUrl:urlStr];
+        
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"newViewsion== responsedict %@",responseDict);
+            int resultCount = [[responseDict objectForKey:@"resultCount"] intValue];
+            if (resultCount >= 1)
+            {
+                
+                [[NSUserDefaults standardUserDefaults] setObject:updateDate forKey:@"lastupdate"];
+                [[NSUserDefaults standardUserDefaults] synchronize];
+                
+                NSMutableArray *results = [responseDict objectForKey:@"results"];
+                NSDictionary *releaseInfo = [results objectAtIndex:0];
+                
+                NSString *latestVersion = [releaseInfo objectForKey:@"version"];
+                newVersionUrl = [releaseInfo objectForKey:@"trackViewUrl"];
+                NSString *trackName = [releaseInfo objectForKey:@"trackName"];
+                
+                
+                NSDictionary *infoDict = [[NSBundle mainBundle] infoDictionary];
+                NSString *currentVersion = [infoDict objectForKey:@"CFBundleShortVersionString"];
+                
+                if ([currentVersion compare:latestVersion] < 0) {
+                    
+                    UIAlertView *alert;
+                    alert = [[UIAlertView alloc] initWithTitle:trackName
+                                                       message:@"有新版本哦，快去更新吧，加了好多功能的！"
+                                                      delegate: self
+                                             cancelButtonTitle:@"取消"
+                                             otherButtonTitles: @"升级", nil];
+                    alert.tag = NEWVERSION;
+                    [alert show];
+                }
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+        }];
+        [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
+}
+
 
 -(void)initialize
 {
@@ -343,6 +417,13 @@
         {
             NSString *url = [[NSUserDefaults standardUserDefaults] objectForKey:@"iOS_url"];
             [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
+        }
+    }
+    else if(alertView.tag == NEWVERSION)
+    {
+        if (buttonIndex == 1)
+        {
+            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@",newVersionUrl]]];
         }
     }
 }

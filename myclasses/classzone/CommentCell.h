@@ -7,11 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "cnvUILabel.h"
 
 @interface CommentCell : UITableViewCell
 @property (nonatomic, strong) UIButton *nameButton;
-@property (nonatomic, strong) cnvUILabel *commentContentLabel;
+@property (nonatomic, strong) UILabel *nameLable;
+@property (nonatomic, strong) UILabel *commentContentLabel;
 @property (nonatomic, strong) NSDictionary *commentDict;
 @property (nonatomic, strong) UIView *praiseView;
 @property (nonatomic, strong) UIButton *openPraiseButton;

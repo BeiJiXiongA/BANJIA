@@ -14,13 +14,15 @@
 
 #import "PersonDetailViewController.h"
 
+#define CommentNameColor UIColorFromRGB(0x40c46d)
+
 @implementation TrendsCell
 @synthesize headerImageView,
 nameLabel,
 timeLabel,
 locationLabel,
+contentTextField,
 contentLabel,
-imagesScrollView,
 imagesView,
 transmitButton,
 praiseButton,
@@ -54,7 +56,7 @@ verticalLineView;
         
         bgView = [[UIView alloc] init];
         bgView.backgroundColor = [UIColor whiteColor];
-        bgView.layer.borderColor = [[UIColor lightGrayColor] colorWithAlphaComponent:0.3].CGColor;
+        bgView.layer.borderColor = DongtaiBorderColor.CGColor;
         bgView.layer.borderWidth = 0.5;
         [self.contentView addSubview:bgView];
         
@@ -76,32 +78,40 @@ verticalLineView;
         [bgView addSubview:nameLabel];
         
         timeLabel = [[UILabel alloc] init];
-        timeLabel.textColor = TIMECOLOR;
+        timeLabel.textColor = COMMENTCOLOR;
         timeLabel.font = [UIFont systemFontOfSize:12];
         timeLabel.hidden = YES;
+        timeLabel.backgroundColor = [UIColor clearColor];
         [bgView addSubview:timeLabel];
         
         locationLabel = [[UILabel alloc] initWithFrame:CGRectMake(160, 35, SCREEN_WIDTH-170, 20)];
-        locationLabel.textColor = TIMECOLOR;
+        locationLabel.textColor = LocationColor;
         locationLabel.hidden = YES;
+        locationLabel.backgroundColor = [UIColor clearColor];
         locationLabel.font = [UIFont systemFontOfSize:12];
         [bgView addSubview:locationLabel];
         
-        contentLabel = [[UITextView alloc] init];
-        contentLabel.scrollEnabled = NO;
-        contentLabel.showsVerticalScrollIndicator = NO;
-        contentLabel.editable = NO;
+        contentLabel = [[UILabel alloc] init];
         contentLabel.hidden = YES;
+        contentLabel.numberOfLines = 2;
+        contentLabel.lineBreakMode = NSLineBreakByCharWrapping;
         contentLabel.textColor = CONTENTCOLOR;
         contentLabel.font = [UIFont systemFontOfSize:15];
-        contentLabel.backgroundColor = [UIColor whiteColor];
+        contentLabel.backgroundColor = [UIColor clearColor];
         [bgView addSubview:contentLabel];
         
-        imagesScrollView = [[UIScrollView alloc] init];
-        imagesScrollView.frame = CGRectMake(5, contentLabel.frame.size.height+contentLabel.frame.origin.y, SCREEN_WIDTH-10, 120);
-//        [bgView addSubview:imagesScrollView];
+        contentTextField = [[UITextView alloc] init];
+        contentTextField.scrollEnabled = NO;
+        contentTextField.showsVerticalScrollIndicator = NO;
+        contentTextField.editable = NO;
+        contentTextField.hidden = YES;
+        contentTextField.textColor = CONTENTCOLOR;
+        contentTextField.font = [UIFont systemFontOfSize:15];
+        contentTextField.backgroundColor = [UIColor clearColor];
+        [bgView addSubview:contentTextField];
         
         imagesView = [[UIView alloc] init];
+        imagesView.backgroundColor = [UIColor clearColor];
         imagesView.frame = CGRectMake(5, contentLabel.frame.size.height+contentLabel.frame.origin.y, SCREEN_WIDTH-10, 120);
         [bgView addSubview:imagesView];
         
@@ -118,7 +128,6 @@ verticalLineView;
         
         
         praiseButton = [MyButton buttonWithType:UIButtonTypeCustom];
-        praiseButton.frame = CGRectMake(10, imagesScrollView.frame.size.height+imagesScrollView.frame.origin.y, (SCREEN_WIDTH-20)/2, 30);
         praiseButton.titleLabel.font = [UIFont systemFontOfSize:14];
         [praiseButton setTitleColor:[UIColor lightGrayColor] forState:UIControlStateNormal];
         praiseButton.layer.borderColor = RGB(234, 234, 234, 1).CGColor;
@@ -129,7 +138,6 @@ verticalLineView;
         praiseButton.iconImageView.frame = CGRectMake(11, 10, 15, 15);
         
         commentButton = [MyButton buttonWithType:UIButtonTypeCustom];
-        commentButton.frame = CGRectMake((SCREEN_WIDTH - 20)/2, imagesScrollView.frame.size.height+imagesScrollView.frame.origin.y, (SCREEN_WIDTH-20)/2, 30);
         commentButton.titleLabel.font = [UIFont systemFontOfSize:14];
         [commentButton setTitleColor:[UIColor lightGrayColor] forState:UIControlStateNormal];
         commentButton.layer.borderColor = RGB(234, 234, 234, 1).CGColor;
@@ -158,11 +166,10 @@ verticalLineView;
         commentsTableView.delegate = self;
         commentsTableView.dataSource = self;
         commentsTableView.scrollEnabled = NO;
-        commentsTableView.layer.borderColor =UIColorFromRGB(0xe4e4e2).CGColor;
+        commentsTableView.layer.borderColor =DongtaiBorderColor.CGColor;
         commentsTableView.layer.borderWidth = 0.5;
         commentsTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-//        commentsTableView.separatorColor = UIColorFromRGB(0xe4e4e2);
-        commentsTableView.backgroundColor = UIColorFromRGB(0xfcfcfc);
+        commentsTableView.backgroundColor = CommentBgColor;
         if ([commentsTableView respondsToSelector:@selector(setSeparatorInset:)])
         {
             [commentsTableView setSeparatorInset:UIEdgeInsetsZero];
@@ -219,23 +226,31 @@ verticalLineView;
 {
     DDLOG(@"index path row %d height for row",indexPath.row);
     
-    CGFloat chaHeight = 10;
+    UIFont *font = [UIFont systemFontOfSize:14];
     if (commentsArray && praiseArray)
     {
         if (!showAllComments)
         {
             if (indexPath.row == 0)
             {
-                return PraiseCellHeight;
+                return PraiseCellHeight+CommentSpace;
             }
             else if(indexPath.row < 7)
             {
                 NSDictionary *commentDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row];
                 NSString *name = [[commentDict objectForKey:@"by"] objectForKey:@"name"];
+                CGSize nameSize;
+                if (SYSVERSION >= 7)
+                {
+                    nameSize = [name sizeWithAttributes:[NSDictionary dictionaryWithObjectsAndKeys:CommentFont, NSFontAttributeName, nil]];
+                }
+                else
+                {
+                    nameSize = [Tools getSizeWithString:name andWidth:100 andFont:CommentFont];
+                }
                 NSString *content = [[commentDict objectForKey:@"content"] emojizedString];
-                NSString *contentString = [NSString stringWithFormat:@"%@:%@",name,content];
-                CGSize s = [Tools getSizeWithString:contentString andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
-                return s.height+chaHeight;
+                CGSize commentSize = [Tools getSizeWithString:content andWidth:MaxCommentWidth-nameSize.width andFont:font];
+                return commentSize.height+CommentSpace*2;
             }
             else if(indexPath.row == 7)
             {
@@ -246,21 +261,16 @@ verticalLineView;
         {
             if (indexPath.row == 0)
             {
-                if (openPraise)
-                {
-                    int row = [praiseArray count]%ColumnPerRow == 0 ? ([praiseArray count]/ColumnPerRow):([praiseArray count]/ColumnPerRow+1);
-                    return (PraiseH+5)*row+PraiseCellHeight;
-                }
-                return PraiseCellHeight;
+                int row = [praiseArray count]%ColumnPerRow == 0 ? ([praiseArray count]/ColumnPerRow):([praiseArray count]/ColumnPerRow+1);
+                return (PraiseH+5)*row+PraiseCellHeight+CommentSpace*3/2;
             }
             else
             {
                 NSDictionary *commentDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row];
-                NSString *name = [[commentDict objectForKey:@"by"] objectForKey:@"name"];
                 NSString *content = [[commentDict objectForKey:@"content"] emojizedString];
-                NSString *contentString = [NSString stringWithFormat:@"%@:%@",name,content];
+                NSString *contentString = [NSString stringWithFormat:@"%@",content];
                 CGSize s = [Tools getSizeWithString:contentString andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
-                return s.height+chaHeight+33;
+                return s.height+CommentSpace*2+25-5;
             }
         }
     }
@@ -272,10 +282,18 @@ verticalLineView;
             {
                 NSDictionary *commentDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row-1];
                 NSString *name = [[commentDict objectForKey:@"by"] objectForKey:@"name"];
+                CGSize nameSize;
+                if (SYSVERSION >= 7)
+                {
+                    nameSize = [name sizeWithAttributes:[NSDictionary dictionaryWithObjectsAndKeys:CommentFont, NSFontAttributeName, nil]];
+                }
+                else
+                {
+                    nameSize = [Tools getSizeWithString:name andWidth:100 andFont:CommentFont];
+                }
                 NSString *content = [[commentDict objectForKey:@"content"] emojizedString];
-                NSString *contentString = [NSString stringWithFormat:@"%@:%@",name,content];
-                CGSize s = [Tools getSizeWithString:contentString andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
-                return s.height+chaHeight;
+                CGSize commentSize = [Tools getSizeWithString:content andWidth:MaxCommentWidth-nameSize.width andFont:font];
+                return commentSize.height+CommentSpace*2;
             }
             else if(indexPath.row == 6)
             {
@@ -289,7 +307,7 @@ verticalLineView;
             NSString *content = [[commentDict objectForKey:@"content"] emojizedString];
             NSString *contentString = [NSString stringWithFormat:@"%@:%@",name,content];
             CGSize s = [Tools getSizeWithString:contentString andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
-            return s.height+chaHeight+33;
+            return s.height+CommentSpace*2+25-5;
         }
     }
     else if(praiseArray && !commentsArray)
@@ -301,11 +319,11 @@ verticalLineView;
                 if (openPraise)
                 {
                     int row = [praiseArray count]%ColumnPerRow == 0 ? ([praiseArray count]/ColumnPerRow):([praiseArray count]/ColumnPerRow+1);
-                    return (PraiseH+5)*row+PraiseCellHeight;
+                    return (PraiseH+5)*row+PraiseCellHeight+CommentSpace;
                 }
 
             }
-            return PraiseCellHeight;
+            return PraiseCellHeight+CommentSpace;
         }
     }
     return 0;
@@ -323,20 +341,17 @@ verticalLineView;
     }
 //    cell.nameButton.hidden = YES;
 //    CGFloat c_width = 15;
-    CGFloat minCellHei = 35;
     CGFloat hei = 12;
-    CGFloat originalY = 0;
-    CGFloat topSpace = 5;
+    CGFloat originalY = CommentSpace;
     cell.openPraiseButton.hidden = YES;
     [cell.nameButton setTitle:@"" forState:UIControlStateNormal];
     [cell.nameButton setImage:nil forState:UIControlStateNormal];
     CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
     
-    
+    cell.lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+    cell.lineImageView.hidden = NO;
     if (showAllComments)
     {
-        cell.lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-        cell.lineImageView.hidden = NO;
         if (praiseArray && commentsArray)
         {
             if (indexPath.row == 0)
@@ -346,16 +361,11 @@ verticalLineView;
                 [cell.nameButton setTitle:@"" forState:UIControlStateNormal];
                 cell.headerImageView.hidden = YES;
                 
-                
-                cell.nameButton.frame = CGRectMake(12, 6, 18, 18);
+                cell.nameButton.frame = CGRectMake(12, CommentSpace, 18, 18);
 //                [cell.nameButton setImage:[UIImage imageNamed:@"praised"] forState:UIControlStateNormal];
                 cell.nameButton.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"praised"]];
-                
-                cell.commentContentLabel.topSpace = 0;
+                cell.commentContentLabel.textColor = COMMENTCOLOR;
                 cell.commentContentLabel.frame = CGRectMake(35, cell.nameButton.frame.origin.y, SCREEN_WIDTH-50, 18);
-                [cell.commentContentLabel cnv_setUILabelText:[NSString stringWithFormat:@"%d人觉得很赞",[praiseArray count]] andKeyWord:@""];
-                [cell.commentContentLabel cnv_setUIlabelTextColor:COMMENTCOLOR andKeyWordColor:nil];
-                
                 cell.commentContentLabel.text = [NSString stringWithFormat:@"%d人觉得很赞",[praiseArray count]];
                 cell.selectionStyle = UITableViewCellSelectionStyleNone;
                 
@@ -391,7 +401,7 @@ verticalLineView;
                     [cell.praiseView addSubview:headerButton];
                 }
                 int row = [praiseArray count]%ColumnPerRow == 0 ? ([praiseArray count]/ColumnPerRow):([praiseArray count]/ColumnPerRow+1);
-                cell.praiseView.frame = CGRectMake(12, 30, SCREEN_WIDTH-24, (PraiseH+9)*row);
+                cell.praiseView.frame = CGRectMake(12, cell.commentContentLabel.frame.size.height+cell.commentContentLabel.frame.origin.y+CommentSpace, SCREEN_WIDTH-24, (PraiseH+9)*row);
                 
                 return cell;
             }
@@ -404,17 +414,9 @@ verticalLineView;
                 NSString *name = [NSString stringWithFormat:@"%@",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
                 NSString *content = [[commitDict objectForKey:@"content"] emojizedString];
                 CGSize s = [Tools getSizeWithString:content andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
-                if (s.height > minCellHei)
-                {
-                    cell.commentContentLabel.topSpace = topSpace;
-                }
-                else
-                {
-                    cell.commentContentLabel.topSpace = 0;
-                }
                 cell.headerImageView.hidden = NO;
                 cell.headerImageView.frame = CGRectMake(12, 10, PraiseW, PraiseW);
-                cell.headerImageView.backgroundColor = [UIColor yellowColor];
+                cell.headerImageView.backgroundColor = [UIColor clearColor];
                 [Tools fillImageView:cell.headerImageView withImageFromURL:[[commitDict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERICON];
                 cell.headerImageView.tag = [commentsArray count]-indexPath.row;
                 cell.headerImageView.layer.cornerRadius = 2;
@@ -426,14 +428,12 @@ verticalLineView;
                 
                 cell.nameButton.hidden = NO;
                 cell.nameButton.frame = CGRectMake(48, 7, 100, 20);
+                cell.nameButton.backgroundColor = [UIColor clearColor];
                 cell.nameButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
                 [cell.nameButton setTitle:name forState:UIControlStateNormal];
                 
-                cell.commentContentLabel.frame = CGRectMake(48, 29, MaxCommentWidth-30, s.height+hei);
+                cell.commentContentLabel.frame = CGRectMake(48, cell.nameButton.frame.size.height+cell.nameButton.frame.origin.y-3, MaxCommentWidth-30, s.height+hei);
                 cell.commentContentLabel.text = content;
-                [cell.commentContentLabel cnv_setUILabelText:[NSString stringWithFormat:@"%@",content] andKeyWord:name];
-                [cell.commentContentLabel cnv_setUIlabelTextColor:COMMENTCOLOR andKeyWordColor:RGB(64, 196, 110, 1)];
-//                cell.commentContentLabel.text = [NSString stringWithFormat:@"%@%@",name,content];
                 
                 cell.timeLabel.frame = CGRectMake(150, 7, 150, 20);
                 cell.timeLabel.text = [Tools showTime:[[commitDict objectForKey:@"created"] objectForKey:@"sec"]];
@@ -460,9 +460,9 @@ verticalLineView;
             
             cell.headerImageView.hidden = NO;
             cell.headerImageView.frame = CGRectMake(12, 10, PraiseW, PraiseW);
-            cell.headerImageView.backgroundColor = [UIColor yellowColor];
+            cell.headerImageView.backgroundColor = [UIColor clearColor];
             [Tools fillImageView:cell.headerImageView withImageFromURL:[[commitDict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERICON];
-            cell.headerImageView.tag = [commentsArray count]-indexPath.row;
+            cell.headerImageView.tag = [commentsArray count]-indexPath.row-1;
             cell.headerImageView.layer.cornerRadius = 2;
             cell.headerImageView.clipsToBounds = YES;
             
@@ -476,11 +476,8 @@ verticalLineView;
             [cell.nameButton setTitle:name forState:UIControlStateNormal];
             cell.nameButton.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"clearimage"]];
             
-            cell.commentContentLabel.frame = CGRectMake(48, 29, MaxCommentWidth-30, s.height+hei);
+            cell.commentContentLabel.frame = CGRectMake(48, cell.nameButton.frame.size.height+cell.nameButton.frame.origin.y-3, MaxCommentWidth-30, s.height+hei);
             cell.commentContentLabel.text = content;
-            [cell.commentContentLabel cnv_setUILabelText:[NSString stringWithFormat:@"%@",content] andKeyWord:name];
-            [cell.commentContentLabel cnv_setUIlabelTextColor:COMMENTCOLOR andKeyWordColor:RGB(64, 196, 110, 1)];
-            //                cell.commentContentLabel.text = [NSString stringWithFormat:@"%@%@",name,content];
             
             cell.timeLabel.frame = CGRectMake(150, 7, 150, 20);
             cell.timeLabel.text = [Tools showTime:[[commitDict objectForKey:@"created"] objectForKey:@"sec"]];
@@ -496,15 +493,12 @@ verticalLineView;
             cell.praiseView.hidden = NO;
             [cell.nameButton setTitle:@"" forState:UIControlStateNormal];
             
-            cell.nameButton.frame = CGRectMake(12, 6, 18, 18);
+            cell.nameButton.frame = CGRectMake(12, CommentSpace, 18, 18);
 //            [cell.nameButton setImage:[UIImage imageNamed:@"praised"] forState:UIControlStateNormal];
             cell.nameButton.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"praised"]];
-            
-            cell.commentContentLabel.topSpace = 0;
             cell.commentContentLabel.frame = CGRectMake(35, cell.nameButton.frame.origin.y, SCREEN_WIDTH-50, 18);
-            [cell.commentContentLabel cnv_setUILabelText:[NSString stringWithFormat:@"%d人觉得很赞",[praiseArray count]] andKeyWord:@""];
-            [cell.commentContentLabel cnv_setUIlabelTextColor:COMMENTCOLOR andKeyWordColor:nil];
-//            cell.commentContentLabel.text = [NSString stringWithFormat:@"%d人觉得很赞",[praiseArray count]];
+            cell.commentContentLabel.text = [NSString stringWithFormat:@"%d人觉得很赞",[praiseArray count]];
+            cell.commentContentLabel.textColor = COMMENTCOLOR;
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
             
             cell.openPraiseButton.frame = CGRectMake(SCREEN_WIDTH-70, 3, 30, 30);
@@ -539,16 +533,14 @@ verticalLineView;
                     [cell.praiseView addSubview:headerButton];
                 }
             }
-            
             int row = [praiseArray count] % ColumnPerRow == 0 ? ([praiseArray count]/ColumnPerRow):([praiseArray count]/ColumnPerRow+1);
-            cell.praiseView.frame = CGRectMake(12, 30, SCREEN_WIDTH-24, 40*row);
+            cell.praiseView.frame = CGRectMake(12, cell.commentContentLabel.frame.size.height+cell.commentContentLabel.frame.origin.y+CommentSpace, SCREEN_WIDTH-24, 40*row);
 
             return cell;
         }
     }
     else
     {
-        cell.lineImageView.hidden = YES;
         if (praiseArray && commentsArray)
         {
             if (indexPath.row == 0)
@@ -557,13 +549,13 @@ verticalLineView;
                 [cell.nameButton setTitle:@"" forState:UIControlStateNormal];
                 cell.praiseView.hidden = YES;
                 
-                cell.nameButton.frame = CGRectMake(12, 6, 18, 18);
+                cell.nameLable.hidden = YES;
+                
+                cell.nameButton.frame = CGRectMake(12, CommentSpace, 18, 18);
                 [cell.nameButton setImage:[UIImage imageNamed:@"praised"] forState:UIControlStateNormal];
                 
-                cell.commentContentLabel.topSpace = 0;
+                cell.commentContentLabel.text = [NSString stringWithFormat:@"%d人觉得很赞",[praiseArray count]];
                 cell.commentContentLabel.frame = CGRectMake(35, cell.nameButton.frame.origin.y, SCREEN_WIDTH-50, 18);
-                [cell.commentContentLabel cnv_setUILabelText:[NSString stringWithFormat:@"%d人觉得很赞",[praiseArray count]] andKeyWord:@""];
-                [cell.commentContentLabel cnv_setUIlabelTextColor:COMMENTCOLOR andKeyWordColor:nil];
                 cell.selectionStyle = UITableViewCellSelectionStyleNone;
                 return cell;
             }
@@ -574,21 +566,29 @@ verticalLineView;
                 
                 NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row];
                 NSString *name = [NSString stringWithFormat:@"%@:",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
-                NSString *content = [[commitDict objectForKey:@"content"] emojizedString];
-                CGSize s = [Tools getSizeWithString:content andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
                 
-                if (s.height > minCellHei)
+                UIFont *nameFont = [UIFont systemFontOfSize:14];
+                CGSize nameSize;
+                if (SYSVERSION >= 7)
                 {
-                    cell.commentContentLabel.topSpace = topSpace;
+                    nameSize = [name sizeWithAttributes:[NSDictionary dictionaryWithObjectsAndKeys:CommentFont, NSFontAttributeName, nil]];
                 }
                 else
                 {
-                    cell.commentContentLabel.topSpace = 0;
+                    nameSize = [Tools getSizeWithString:name andWidth:100 andFont:CommentFont];
                 }
+                cell.nameLable.hidden = NO;
+                cell.nameLable.text = name;
+                cell.nameLable.frame = CGRectMake(12, originalY, nameSize.width, nameSize.height);
                 
-                cell.commentContentLabel.frame = CGRectMake(12, originalY, MaxCommentWidth, s.height+hei);
-                [cell.commentContentLabel cnv_setUILabelText:[NSString stringWithFormat:@"%@%@",name,content] andKeyWord:name];
-                [cell.commentContentLabel cnv_setUIlabelTextColor:COMMENTCOLOR andKeyWordColor:RGB(64, 196, 110, 1)];
+                NSString *content = [[commitDict objectForKey:@"content"] emojizedString];
+                
+                DDLOG(@"Max - nameWid = %f",MaxCommentWidth-cell.nameLable.frame.size.width);
+                CGSize commentSize = [Tools getSizeWithString:content andWidth:MaxCommentWidth-cell.nameLable.frame.size.width andFont:nameFont];
+                cell.commentContentLabel.text = content;
+                cell.commentContentLabel.lineBreakMode = NSLineBreakByCharWrapping;
+                cell.commentContentLabel.numberOfLines = 1000;
+                cell.commentContentLabel.frame = CGRectMake(cell.nameLable.frame.size.width+12, originalY, MaxCommentWidth-cell.nameLable.frame.size.width, commentSize.height);
                 return cell;
             }
             else
@@ -609,33 +609,31 @@ verticalLineView;
                 cell.nameButton.hidden = YES;
                 NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row-1];
                 NSString *name = [NSString stringWithFormat:@"%@:",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
-                NSString *content = [[commitDict objectForKey:@"content"] emojizedString];
-                CGSize s = [Tools getSizeWithString:content andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
-                if (indexPath.row == 0)
+                
+                UIFont *nameFont = [UIFont systemFontOfSize:14];
+                CGSize nameSize;
+                if (SYSVERSION >= 7)
                 {
-                    cell.commentContentLabel.topSpace = topSpace;
+                    nameSize = [name sizeWithAttributes:[NSDictionary dictionaryWithObjectsAndKeys:CommentFont, NSFontAttributeName, nil]];
                 }
                 else
                 {
-                    if (s.height > minCellHei)
-                    {
-                        cell.commentContentLabel.topSpace = topSpace;
-                    }
-                    else
-                    {
-                        cell.commentContentLabel.topSpace = 0;
-                    }
+                    nameSize = [Tools getSizeWithString:name andWidth:100 andFont:CommentFont];
                 }
                 
-                cell.commentContentLabel.frame = CGRectMake(12, originalY, MaxCommentWidth, s.height+hei);
-                [cell.commentContentLabel cnv_setUILabelText:[NSString stringWithFormat:@"%@%@",name,content] andKeyWord:name];
-                [cell.commentContentLabel cnv_setUIlabelTextColor:COMMENTCOLOR andKeyWordColor:RGB(64, 196, 110, 1)];
-//                cell.commentContentLabel.text = [NSString stringWithFormat:@"%@%@",name,content];
+                cell.nameLable.hidden = NO;
+                cell.nameLable.text = name;
+                cell.nameLable.frame = CGRectMake(12, originalY, nameSize.width, nameSize.height);
+                
+                NSString *content = [[commitDict objectForKey:@"content"] emojizedString];
+                CGSize commentSize = [Tools getSizeWithString:content andWidth:MaxCommentWidth-nameSize.width andFont:nameFont];
+                cell.commentContentLabel.text = content;
+                cell.commentContentLabel.frame = CGRectMake(cell.nameLable.frame.size.width+12, originalY, MaxCommentWidth-cell.nameLable.frame.size.width, commentSize.height);
+                
                 return cell;
             }
             else
             {
-                cell.nameButton.hidden = YES;
                 [cell.nameButton setImage:[UIImage imageNamed:@"home_more"] forState:UIControlStateNormal];
                 cell.nameButton.frame = CGRectMake(0, 0, SCREEN_WIDTH, MinCommentHeight);
                 [cell.nameButton setTitle:@"查看更多" forState:UIControlStateNormal];
@@ -647,17 +645,13 @@ verticalLineView;
         else if(!commentsArray && praiseArray)
         {
             cell.nameButton.hidden = NO;
-            cell.nameButton.frame = CGRectMake(12, 6, 18, 18);
-//            [cell.nameButton setImage:[UIImage imageNamed:@"praised"] forState:UIControlStateNormal];
+            cell.nameButton.frame = CGRectMake(12, CommentSpace, 18, 18);
             cell.nameButton.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"praised"]];
-            
+            cell.commentContentLabel.frame = CGRectMake(35, cell.nameButton.frame.origin.y, SCREEN_WIDTH-50, 18);
             [cell.nameButton setTitle:@"" forState:UIControlStateNormal];
             
-            cell.commentContentLabel.topSpace = 0;
-            cell.commentContentLabel.frame = CGRectMake(35, cell.nameButton.frame.origin.y, SCREEN_WIDTH-50, 18);
-            [cell.commentContentLabel cnv_setUILabelText:[NSString stringWithFormat:@"%d人觉得很赞",[praiseArray count]] andKeyWord:@""];
-            [cell.commentContentLabel cnv_setUIlabelTextColor:COMMENTCOLOR andKeyWordColor:nil];
-//            cell.commentContentLabel.text = [NSString stringWithFormat:@"%d人觉得很赞",[praiseArray count]];
+            cell.nameLable.hidden = YES;
+            cell.commentContentLabel.text = [NSString stringWithFormat:@"%d人觉得很赞",[praiseArray count]];
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
             return cell;
         }
@@ -732,6 +726,8 @@ verticalLineView;
 
 -(void)showDetail:(UITapGestureRecognizer *)tap
 {
+    DDLOG(@"comments array %@===%d",commentsArray,tap.view.tag);
+    
     NSDictionary *dict = [commentsArray  objectAtIndex:tap.view.tag];
     if ([self.nameButtonDel respondsToSelector:@selector(showPersonDetail:)])
     {

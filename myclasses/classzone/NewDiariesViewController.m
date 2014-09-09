@@ -242,8 +242,6 @@
         
         NSArray *imgsArray = [dict objectForKey:@"img"];
         
-        cell.imagesScrollView.frame = CGRectMake(5, cell.contentLabel.frame.size.height+cell.contentLabel.frame.origin.y, SCREEN_WIDTH-10, imageViewHeight);
-        cell.imagesScrollView.contentSize = CGSizeMake((imageViewWidth+5)*[imgsArray count], imageViewHeight);
         cell.imagesView.tag = 10000*indexPath.row;
         UIImage *placeholder = [UIImage imageNamed:@"0.jpg"];
         for (int i=0; i<[imgsArray count]; ++i)
@@ -263,25 +261,19 @@
             imageView.clipsToBounds = YES;
             imageView.contentMode = UIViewContentModeScaleAspectFill;
             [Tools fillImageView:imageView withImageFromURL:[imgsArray objectAtIndex:i] andDefault:@"0.jpg"];
-            [cell.imagesScrollView addSubview:imageView];
         }
     }
     else
     {
-        cell.imagesScrollView.frame = CGRectMake(5, cell.contentLabel.frame.size.height+cell.contentLabel.frame.origin.y, SCREEN_WIDTH-10, 0);
     }
-    cell.transmitButton.frame = CGRectMake(5,cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+10, 40, 30);
     [cell.transmitButton setTitle:@"转发" forState:UIControlStateNormal];
     [cell.praiseButton setTitle:@"同意" forState:UIControlStateNormal];
     [cell.praiseButton addTarget:self action:@selector(allow:) forControlEvents:UIControlEventTouchUpInside];
     cell.praiseButton.tag = indexPath.row*GIARYTAG;
-    cell.praiseButton.frame = CGRectMake(10, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+10, (SCREEN_WIDTH-20)/2, 30);
     [cell.commentButton setTitle:@"忽略" forState:UIControlStateNormal];
-    cell.commentButton.frame = CGRectMake((SCREEN_WIDTH-20)/2, cell.imagesScrollView.frame.size.height+cell.imagesScrollView.frame.origin.y+10, (SCREEN_WIDTH-20)/2, 30);
     cell.commentButton.tag = indexPath.row*GIARYTAG;
     [cell.commentButton addTarget:self action:@selector(ignore:) forControlEvents:UIControlEventTouchUpInside];
     
-    cell.bgView.frame = CGRectMake(3, 1.5, SCREEN_WIDTH-6, cell.headerImageView.frame.size.height+cell.contentLabel.frame.size.height+cell.imagesScrollView.frame.size.height+cell.praiseButton.frame.size.height+30);
     cell.bgView.backgroundColor = [UIColor whiteColor];
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;

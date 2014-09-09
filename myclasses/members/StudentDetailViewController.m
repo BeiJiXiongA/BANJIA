@@ -266,7 +266,7 @@ UIActionSheetDelegate>
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return 3;
+    return 4;
 }
 
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
@@ -276,7 +276,7 @@ UIActionSheetDelegate>
     headerLabel.font = [UIFont systemFontOfSize:16];
     headerLabel.backgroundColor = [UIColor clearColor];
     headerLabel.textColor = TITLE_COLOR;
-    if (section == 1)
+    if (section == 2)
     {
         if ([pArray count] > 0)
         {
@@ -286,14 +286,21 @@ UIActionSheetDelegate>
         else
             return nil;
     }
-    else
-        headerLabel.text = @"   个人信息";
-        return headerLabel;
+    else if(section == 1)
+    {
+        if([phoneNum length] > 0 || [birth length] > 0 || [studentNum length] > 0)
+        {
+            headerLabel.text = @"   个人信息";
+            return headerLabel;
+            
+        }
+    }
+    return nil;
 }
 
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
-    if (section == 1)
+    if (section == 2)
     {
         if ([pArray count] > 0)
         {
@@ -302,9 +309,9 @@ UIActionSheetDelegate>
         else
             return 0;
     }
-    else if(section == 2)
+    else if(section == 1)
     {
-        if ([studentID length] > 10)
+        if([phoneNum length] > 0 || [birth length] > 0 || [studentNum length] > 0)
         {
             return 35;
         }
@@ -319,7 +326,7 @@ UIActionSheetDelegate>
     {
         return BGIMAGEHEIGHT;
     }
-    else if(indexPath.section == 1)
+    else if(indexPath.section == 2)
     {
         if ([pArray count] > 0)
         {
@@ -327,7 +334,7 @@ UIActionSheetDelegate>
         }
         return 0;
     }
-    else if (indexPath.section == 2)
+    else if (indexPath.section == 1)
     {
         if ([studentID length] > 10)
         {
@@ -355,10 +362,13 @@ UIActionSheetDelegate>
                     }
                 }
             }
-            else if(![role isEqualToString:@"unin_students"])
-            {
-                return 60;
-            }
+        }
+    }
+    else if(indexPath.section == 3)
+    {
+        if(![role isEqualToString:@"unin_students"])
+        {
+            return 60;
         }
     }
     return 0;
@@ -370,16 +380,17 @@ UIActionSheetDelegate>
     {
         return 1;
     }
-    else if(section == 1)
+    else if(section == 2)
     {
         return [pArray count];
     }
-    else if(section == 2)
+    else if(section == 1)
     {
-        if ([studentID length] > 10)
-        {
-            return 4;
-        }
+        return 3;
+    }
+    else if(section == 3)
+    {
+        return 1;
     }
     return 0;
 }
@@ -439,7 +450,7 @@ UIActionSheetDelegate>
         cell.contentLabel.font = [UIFont boldSystemFontOfSize:14];
         cell.backgroundColor = [UIColor whiteColor];
     }
-    else if (indexPath.section == 1)
+    else if (indexPath.section == 2)
     {
         if ([pArray count] > 0)
         {
@@ -467,7 +478,7 @@ UIActionSheetDelegate>
         cell.contentView.backgroundColor = [UIColor whiteColor];
     }
     
-    else if(indexPath.section == 2)
+    else if(indexPath.section == 1)
     {
         if ([studentID length] < 10)
         {
@@ -526,49 +537,49 @@ UIActionSheetDelegate>
             [cell.contentView addSubview:lineImageView];
             cell.contentView.backgroundColor = [UIColor whiteColor];
         }
-        else
+    }
+    else if(indexPath.section == 3)
+    {
+        cell.nameLabel.hidden = YES;
+        cell.contentLabel.hidden = YES;
+        if (![studentID isEqualToString:[Tools user_id]] && ![role isEqualToString:@"unin_students"])
         {
-            cell.nameLabel.hidden = YES;
-            cell.contentLabel.hidden = YES;
-            if (![studentID isEqualToString:[Tools user_id]] && ![role isEqualToString:@"unin_students"])
-            {
-                cell.button1.hidden = NO;
-                cell.button2.hidden = NO;
-            }
-            
-            cell.button1.frame = CGRectMake(10, 10, 145, 43.5);
-            [cell.button1 setTitle:ADDFRIEND forState:UIControlStateNormal];
-            [cell.button1 setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
-            
-            [cell.button1 addTarget:self action:@selector(addFriend) forControlEvents:UIControlEventTouchUpInside];
-            
-            cell.button2.frame = CGRectMake(165, 10, 145, 43.5);
-            [cell.button2 setTitle:CHATTO forState:UIControlStateNormal];
-            [cell.button2 setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
-            
-            cell.button1.iconImageView.frame = CGRectMake(ALEFT, ATOP, CHATW, CHATH);
-            [cell.button1.iconImageView setImage:[UIImage imageNamed:@"add_friend"]];
-            
-            cell.button2.iconImageView.frame = CGRectMake(CLEFT, CTOP, ADDFRIW, ADDFRIH);
-            [cell.button2.iconImageView setImage:[UIImage imageNamed:@"chatto"]];
-
-            
-            if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fname":studentName,@"checked":@"1"} andTableName:FRIENDSTABLE] count] > 0)
-            {
-                cell.button1.hidden = YES;
-                cell.button2.frame = CGRectMake((SCREEN_WIDTH-150)/2, 10, 145, 43.5);
-            }
-            
-            [cell.button2 addTarget:self action:@selector(toChat) forControlEvents:UIControlEventTouchUpInside];
-            cell.selectionStyle = UITableViewCellSelectionStyleNone;
+            cell.button1.hidden = NO;
+            cell.button2.hidden = NO;
         }
+        
+        cell.button1.frame = CGRectMake(10, 10, 145, 43.5);
+        [cell.button1 setTitle:ADDFRIEND forState:UIControlStateNormal];
+        [cell.button1 setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+        
+        [cell.button1 addTarget:self action:@selector(addFriend) forControlEvents:UIControlEventTouchUpInside];
+        
+        cell.button2.frame = CGRectMake(165, 10, 145, 43.5);
+        [cell.button2 setTitle:CHATTO forState:UIControlStateNormal];
+        [cell.button2 setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+        
+        cell.button1.iconImageView.frame = CGRectMake(ALEFT, ATOP, CHATW, CHATH);
+        [cell.button1.iconImageView setImage:[UIImage imageNamed:@"add_friend"]];
+        
+        cell.button2.iconImageView.frame = CGRectMake(CLEFT, CTOP, ADDFRIW, ADDFRIH);
+        [cell.button2.iconImageView setImage:[UIImage imageNamed:@"chatto"]];
+        
+        
+        if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fname":studentName,@"checked":@"1"} andTableName:FRIENDSTABLE] count] > 0)
+        {
+            cell.button1.hidden = YES;
+            cell.button2.frame = CGRectMake((SCREEN_WIDTH-150)/2, 10, 145, 43.5);
+        }
+        
+        [cell.button2 addTarget:self action:@selector(toChat) forControlEvents:UIControlEventTouchUpInside];
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
     }
     
     return cell;
 }
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.section == 1)
+    if (indexPath.section == 2)
     {
         NSDictionary *dict = [pArray objectAtIndex:indexPath.row];
         if (![studentID isEqual:[NSNull null]])
@@ -594,7 +605,7 @@ UIActionSheetDelegate>
             [self.navigationController pushViewController:parentDetail animated:YES];
         }
     }
-    else if(indexPath.section == 2)
+    else if(indexPath.section == 1)
     {
         if (indexPath.row == 0)
         {
@@ -618,82 +629,6 @@ UIActionSheetDelegate>
         if ([self.memDel respondsToSelector:@selector(updateListWith:)])
         {
             [self.memDel updateListWith:YES];
-        }
-    }
-}
-
--(void)callToParents:(UIButton *)button
-{
-    NSDictionary *dict = [pArray objectAtIndex:button.tag - 100];
-    if (![[dict objectForKey:@"phone"] isEqual:[NSNull null]])
-    {
-        if ([[dict objectForKey:@"phone"] length] > 8)
-        {
-            [Tools dialPhoneNumber:[dict objectForKey:@"phone"] inView:self.bgView];
-        }
-    }
-    else
-    {
-        NSDictionary *dict = [pArray objectAtIndex:button.tag - 100];
-        if ([studentID length] > 0)
-        {
-            ParentsDetailViewController *parentDetail = [[ParentsDetailViewController alloc] init];
-            parentDetail.parentID = [dict objectForKey:@"uid"];
-            parentDetail.parentName = [dict objectForKey:@"name"];
-            parentDetail.title = [dict objectForKey:@"title"];
-            parentDetail.headerImg = [dict objectForKey:@"img_icon"];
-            parentDetail.admin = NO;
-            parentDetail.role = [dict objectForKey:@"role"];
-            [self.navigationController pushViewController:parentDetail animated:YES];
-        }
-        else
-        {
-            ParentsDetailViewController *parentDetail = [[ParentsDetailViewController alloc] init];
-            parentDetail.parentID = [dict objectForKey:@"uid"];
-            parentDetail.parentName = [dict objectForKey:@"name"];
-            parentDetail.title = [dict objectForKey:@"title"];
-            parentDetail.headerImg = [dict objectForKey:@"img_icon"];
-            parentDetail.admin = NO;
-            parentDetail.role = [dict objectForKey:@"role"];
-            [self.navigationController pushViewController:parentDetail animated:YES];
-        }
-
-    }
-}
--(void)msgToParents:(UIButton *)button
-{
-    NSDictionary *dict = [pArray objectAtIndex:button.tag - 100];
-    if (![[dict objectForKey:@"phone"] isEqual:[NSNull null]])
-    {
-        if ([[dict objectForKey:@"phone"] length] > 8)
-        {
-            [self showMessageView:[dict objectForKey:@"phone"]];
-        }
-    }
-    else
-    {
-        NSDictionary *dict = [pArray objectAtIndex:button.tag - 100];
-        if ([studentID length] > 0)
-        {
-            ParentsDetailViewController *parentDetail = [[ParentsDetailViewController alloc] init];
-            parentDetail.parentID = [dict objectForKey:@"uid"];
-            parentDetail.parentName = [dict objectForKey:@"name"];
-            parentDetail.title = [dict objectForKey:@"title"];
-            parentDetail.headerImg = [dict objectForKey:@"img_icon"];
-            parentDetail.admin = NO;
-            parentDetail.role = [dict objectForKey:@"role"];
-            [self.navigationController pushViewController:parentDetail animated:YES];
-        }
-        else
-        {
-            ParentsDetailViewController *parentDetail = [[ParentsDetailViewController alloc] init];
-            parentDetail.parentID = [dict objectForKey:@"uid"];
-            parentDetail.parentName = [dict objectForKey:@"name"];
-            parentDetail.title = [dict objectForKey:@"title"];
-            parentDetail.headerImg = [dict objectForKey:@"img_icon"];
-            parentDetail.admin = NO;
-            parentDetail.role = [dict objectForKey:@"role"];
-            [self.navigationController pushViewController:parentDetail animated:YES];
         }
     }
 }

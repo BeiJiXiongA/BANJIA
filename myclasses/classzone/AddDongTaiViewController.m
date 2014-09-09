@@ -380,7 +380,7 @@ int count = 0;
     emitButton = [UIButton buttonWithType:UIButtonTypeCustom];
     emitButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     emitButton.backgroundColor = [UIColor clearColor];
-    [emitButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+    [emitButton setTitleColor:RightCornerTitleColor forState:UIControlStateNormal];
     [emitButton addTarget:self action:@selector(emitClick) forControlEvents:UIControlEventTouchUpInside];
     [emitButton setTitle:@"发布" forState:UIControlStateNormal];
     [self.navigationBarView addSubview:emitButton];

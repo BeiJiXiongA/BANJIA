@@ -96,7 +96,7 @@ UIActionSheetDelegate>
     [self.backButton setHidden:YES];
     
     UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    moreButton.frame = CGRectMake(5, self.backButton.frame.origin.y, 42, 34);
+    moreButton.frame = CGRectMake(5, self.backButton.frame.origin.y, 42, NAV_RIGHT_BUTTON_HEIGHT);;
     [moreButton setImage:[UIImage imageNamed:@"icon_list"] forState:UIControlStateNormal];
     [moreButton addTarget:self action:@selector(moreOpen) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:moreButton];
@@ -119,7 +119,7 @@ UIActionSheetDelegate>
     UIButton *shareButton = [UIButton buttonWithType:UIButtonTypeCustom];
     shareButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [shareButton setTitle:@"分享" forState:UIControlStateNormal];
-    [shareButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+    [shareButton setTitleColor:RightCornerTitleColor forState:UIControlStateNormal];
     [shareButton addTarget:self action:@selector(shareAPP:) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:shareButton];
     
@@ -348,7 +348,7 @@ UIActionSheetDelegate>
             cell.nameLabel.font = [UIFont systemFontOfSize:18];
             cell.nameLabel.textAlignment = NSTextAlignmentLeft;
             cell.nameLabel.frame = CGRectMake(60, 15, 100, 30);
-            cell.nameLabel.textColor = TITLE_COLOR;
+            cell.nameLabel.textColor = CONTENTCOLOR;
             
             cell.headerImageView.frame = CGRectMake(10, 10, 40, 40);
             cell.headerImageView.layer.cornerRadius = 3;

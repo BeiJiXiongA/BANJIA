@@ -111,7 +111,7 @@
     cell.nameLabel.clipsToBounds = YES;
     cell.nameLabel.textColor = COMMENTCOLOR;
     
-    cell.objectsLabel.textColor = COMMENTCOLOR;
+    cell.objectsLabel.textColor = CONTENTCOLOR;
     cell.objectsLabel.frame = CGRectMake(100, 10, SCREEN_WIDTH-150, 20);
     cell.objectsLabel.backgroundColor = [UIColor whiteColor];
     cell.objectsLabel.textAlignment = NSTextAlignmentRight;

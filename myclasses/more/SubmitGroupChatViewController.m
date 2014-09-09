@@ -55,7 +55,7 @@
     {
         NSDictionary *dict = [selectArray objectAtIndex:i];
         [nameStr insertString:[dict objectForKey:@"name"] atIndex:[nameStr length]];
-        [nameStr insertString:@"、" atIndex:[nameStr length]];
+        [nameStr insertString:@"," atIndex:[nameStr length]];
         if (i == 2)
         {
             break;

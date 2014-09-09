@@ -102,7 +102,7 @@ EditNameDone>
     
     UIButton *inviteButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [inviteButton setTitle:@"保存" forState:UIControlStateNormal];
-    [inviteButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+    [inviteButton setTitleColor:RightCornerTitleColor forState:UIControlStateNormal];
     inviteButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [inviteButton addTarget:self action:@selector(submitChange) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:inviteButton];

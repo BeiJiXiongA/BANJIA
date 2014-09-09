@@ -52,6 +52,7 @@
 @property (nonatomic, assign) BOOL sound;
 @property (nonatomic, assign) BOOL recording;
 @property (nonatomic, assign) BOOL notOnlyFace;
+@property (nonatomic ,assign) BOOL hideSoundButton;
 @property (nonatomic, strong) UIButton *soundButton;
 @property (nonatomic, strong) UIButton *moreButton;
 @property (nonatomic, strong) UIButton *recordButton;

@@ -36,6 +36,8 @@ UITableViewDelegate>
     // Do any additional setup after loading the view.
     classArray = [[NSMutableArray alloc] initWithCapacity:0];
     
+    self.titleLabel.text = @"发布到班级";
+    
     selectedClassids = [[NSMutableArray alloc] initWithCapacity:0];
     
     UIButton *doneButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -43,7 +45,7 @@ UITableViewDelegate>
     doneButton.backgroundColor = [UIColor clearColor];
     [doneButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [doneButton addTarget:self action:@selector(doneClick) forControlEvents:UIControlEventTouchUpInside];
-    [doneButton setTitle:@"发布" forState:UIControlStateNormal];
+    [doneButton setTitle:@"确认" forState:UIControlStateNormal];
     [self.navigationBarView addSubview:doneButton];
     
     classesTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
@@ -128,13 +130,13 @@ UITableViewDelegate>
                             andKeyWord:[NSString stringWithFormat:@"%d",studentNum]];
     cell.timeLabel.frame = CGRectMake(cell.nameLabel.frame.origin.x, cell.nameLabel.frame.origin.y+cell.nameLabel.frame.size.height+3, [cell.timeLabel.text lengthOfBytesUsingEncoding:NSUTF8StringEncoding]*6.5, 20);
     cell.timeLabel.font = [UIFont systemFontOfSize:16];
-    [cell.timeLabel cnv_setUIlabelTextColor:TIMECOLOR andKeyWordColor:RGB(51, 204, 102, 0.8)];
+    [cell.timeLabel cnv_setUIlabelTextColor:COMMENTCOLOR andKeyWordColor:RGB(51, 204, 102, 0.8)];
     
     cell.timeLabel2.frame = CGRectMake(cell.timeLabel.frame.origin.x+cell.timeLabel.frame.size.width, cell.nameLabel.frame.origin.y+cell.nameLabel.frame.size.height+3, 110, 20);
     [cell.timeLabel2 cnv_setUILabelText:[NSString stringWithFormat:@"%d名家长已加入",parentNum]
                              andKeyWord:[NSString stringWithFormat:@"%d",parentNum]];
     cell.timeLabel2.font = [UIFont systemFontOfSize:16];
-    [cell.timeLabel2 cnv_setUIlabelTextColor:TIMECOLOR andKeyWordColor:RGB(51, 204, 102, 0.8)];
+    [cell.timeLabel2 cnv_setUIlabelTextColor:COMMENTCOLOR andKeyWordColor:RGB(51, 204, 102, 0.8)];
     
     cell.bgView.frame = CGRectMake(10, 6.5, SCREEN_WIDTH-20, 70);
     
@@ -197,6 +199,9 @@ UITableViewDelegate>
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 [classArray addObjectsFromArray:[[responseDict objectForKey:@"data"] objectForKey:@"classes"]];
+                
+                [selectedClassids addObject:[[classArray firstObject] objectForKey:@"_id"]];
+                
                 [classesTableView reloadData];
             }
             else

@@ -94,14 +94,14 @@ OperateFriends>
     pullRefreshView.delegate = self;
     
     UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    moreButton.frame = CGRectMake(5, self.backButton.frame.origin.y, 42, NAV_RIGHT_BUTTON_HEIGHT);
+    moreButton.frame = CGRectMake(5, self.backButton.frame.origin.y, 42, NAV_RIGHT_BUTTON_HEIGHT);;
     [moreButton setImage:[UIImage imageNamed:@"icon_list"] forState:UIControlStateNormal];
     [moreButton addTarget:self action:@selector(moreOpen) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:moreButton];
     
     UIButton *inviteButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [inviteButton setTitle:@"邀请" forState:UIControlStateNormal];
-    [inviteButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+    [inviteButton setTitleColor:RightCornerTitleColor forState:UIControlStateNormal];
     inviteButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [inviteButton addTarget:self action:@selector(inviteClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:inviteButton];

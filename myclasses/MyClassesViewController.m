@@ -97,7 +97,6 @@ UIActionSheetDelegate>
 //    [self getcities];
     
     self.titleLabel.text = @"我的班级";
-    self.titleLabel.font = [UIFont systemFontOfSize:19];
     [self.backButton setHidden:YES];
     self.returnImageView .hidden = YES;
     
@@ -696,11 +695,11 @@ UIActionSheetDelegate>
 //    headerView.backgroundColor = UIColorFromRGB(0xf1f0ec);
     if (section % 2 == 0)
     {
-        headerView.backgroundColor = RGB(64, 196, 110, 1);
+        headerView.backgroundColor = UIColorFromRGB(0x40c46e);
     }
     else
     {
-        headerView.backgroundColor = RGB(65, 196, 182, 1);
+        headerView.backgroundColor = UIColorFromRGB(0x41c4b6);
     }
     UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, headerView.frame.size.width, 30)];
     headerLabel.backgroundColor = [UIColor clearColor];
@@ -829,13 +828,13 @@ UIActionSheetDelegate>
                             andKeyWord:[NSString stringWithFormat:@"%d",studentNum]];
     cell.timeLabel.frame = CGRectMake(cell.nameLabel.frame.origin.x, cell.nameLabel.frame.origin.y+cell.nameLabel.frame.size.height+3, [cell.timeLabel.text lengthOfBytesUsingEncoding:NSUTF8StringEncoding]*6.5, 20);
     cell.timeLabel.font = [UIFont systemFontOfSize:16];
-    [cell.timeLabel cnv_setUIlabelTextColor:TIMECOLOR andKeyWordColor:RGB(51, 204, 102, 0.8)];
+    [cell.timeLabel cnv_setUIlabelTextColor:COMMENTCOLOR andKeyWordColor:RGB(51, 204, 102, 0.8)];
     
     cell.timeLabel2.frame = CGRectMake(cell.timeLabel.frame.origin.x+cell.timeLabel.frame.size.width, cell.nameLabel.frame.origin.y+cell.nameLabel.frame.size.height+3, 110, 20);
     [cell.timeLabel2 cnv_setUILabelText:[NSString stringWithFormat:@"%d名家长已加入",parentNum]
                             andKeyWord:[NSString stringWithFormat:@"%d",parentNum]];
     cell.timeLabel2.font = [UIFont systemFontOfSize:16];
-    [cell.timeLabel2 cnv_setUIlabelTextColor:TIMECOLOR andKeyWordColor:RGB(51, 204, 102, 0.8)];
+    [cell.timeLabel2 cnv_setUIlabelTextColor:COMMENTCOLOR andKeyWordColor:RGB(51, 204, 102, 0.8)];
     
     if (indexPath.row == 0)
     {
@@ -930,7 +929,7 @@ UIActionSheetDelegate>
         [ud setObject:@"" forKey:@"classiconimage"];
     }
     
-    if ([classDict objectForKey:@"number"])
+    if ([classDict objectForKey:@"number"] && ![[classDict objectForKey:@"number"] isEqual:[NSNull null]] && [[classDict objectForKey:@"number"] integerValue] > 0)
     {
         [ud setObject:[NSString stringWithFormat:@"%d",[[classDict objectForKey:@"number"] intValue]] forKey:@"classnum"];
     }

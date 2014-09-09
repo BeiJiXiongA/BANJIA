@@ -96,7 +96,7 @@ ChatVCDelegate>
     editButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [editButton setTitle:@"编辑" forState:UIControlStateNormal];
     editButton.backgroundColor = [UIColor clearColor];
-    [editButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+    [editButton setTitleColor:RightCornerTitleColor forState:UIControlStateNormal];
     [editButton addTarget:self action:@selector(editTableView) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:editButton];
     
@@ -562,7 +562,7 @@ ChatVCDelegate>
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     NSString *otherid = [[[newMessageArray objectAtIndex:indexPath.row] allValues] firstObject];
-   
+    
     ChatViewController *chat = [[ChatViewController alloc] init];
     chat.toID = otherid;
     chat.chatVcDel = self;
@@ -571,7 +571,17 @@ ChatVCDelegate>
     NSDictionary *userIconDIct = [ImageTools iconDictWithUserID:otherid];
     if(userIconDIct)
     {
-        chat.name = [userIconDIct objectForKey:@"username"];
+        NSString *name = [userIconDIct objectForKey:@"username"];
+        chat.name = name;
+        
+        if ([name rangeOfString:@"人)"].length > 0)
+        {
+            chat.isGroup = YES;
+        }
+        else
+        {
+            chat.isGroup = NO;
+        }
         chat.imageUrl = [userIconDIct objectForKey:@"uicon"];
     }
     [unreadCountDict setObject:@"0" forKey:otherid];

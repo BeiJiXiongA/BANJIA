@@ -86,18 +86,17 @@
     
 
     _navigationBarBg = [[UIImageView alloc] init];
-    _navigationBarBg.backgroundColor = UIColorFromRGB(0xffffff);
+    _navigationBarBg.backgroundColor = NavigationBgColor;
     _navigationBarBg.frame = CGRectMake(0, 0, UI_SCREEN_WIDTH, UI_NAVIGATION_BAR_HEIGHT);
     _navigationBarBg.image = [UIImage imageNamed:@"nav_bar_bg"];
     [_navigationBarView addSubview:_navigationBarBg];
     
-    _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(self.view.frame.size.width/2-90, YSTART + 6, 180, 36)];
-    _titleLabel.font = [UIFont fontWithName:@"Courier" size:19];
+    _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(self.view.frame.size.width/2-90, YSTART + 3, 180, 36)];
+    _titleLabel.font = Title_Font;
     _titleLabel.backgroundColor = [UIColor clearColor];
-    _titleLabel.textColor = UIColorFromRGB(0x666464);
+    _titleLabel.textColor = TITLE_COLOR;
     _titleLabel.textAlignment = NSTextAlignmentCenter;
     [_navigationBarView addSubview:_titleLabel];
-    
     
     returnImageView = [[UIImageView alloc] initWithFrame:CGRectMake(11, YSTART +13, 11, 18)];
     [returnImageView setImage:[UIImage imageNamed:@"icon_return"]];
@@ -106,7 +105,7 @@
     _backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, YSTART +2, 58 , NAV_RIGHT_BUTTON_HEIGHT)];
     [_backButton setTitle:@"返回" forState:UIControlStateNormal];
     [_backButton setBackgroundColor:[UIColor clearColor]];
-    [_backButton setTitleColor:UIColorFromRGB(0x727171) forState:UIControlStateNormal];
+    [_backButton setTitleColor:BackButtonTitleColor forState:UIControlStateNormal];
     [_backButton addTarget:self action:@selector(unShowSelfViewController) forControlEvents:UIControlEventTouchUpInside];
     _backButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentRight;
     _backButton.titleLabel.font = [UIFont systemFontOfSize:16.5];
@@ -121,7 +120,7 @@
     [self.navigationBarView addSubview:unReadLabel];
 
     [_navigationBarView addSubview:_backButton];
-    _bgView.backgroundColor = UIColorFromRGB(0xf1f0ec);
+    _bgView.backgroundColor = BgViewColor;
     [self.view addSubview:_bgView];
     
 }

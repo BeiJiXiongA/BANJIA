@@ -115,7 +115,7 @@ MsgDelegate>
     UIButton *inviteButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [inviteButton setTitle:@"邀请" forState:UIControlStateNormal];
     [inviteButton setBackgroundColor:[UIColor clearColor]];
-    [inviteButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+    [inviteButton setTitleColor:RightCornerTitleColor forState:UIControlStateNormal];
     inviteButton.frame = CGRectMake(SCREEN_WIDTH - 53, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [inviteButton addTarget:self action:@selector(inviteClick) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:inviteButton];
@@ -1062,6 +1062,7 @@ MsgDelegate>
             {
                 UIImage *image = [Tools getImageFromImage:[UIImage imageNamed:@"teachers_icon"] andInsets:UIEdgeInsetsMake(0.2, 0, 0.2, 0)];
                 cell.markView.hidden = NO;
+                cell.contentLabel.hidden = YES;
                 [cell.markView setImage:image];
                 cell.memNameLabel.text = @"老师";
                 cell.remarkLabel.text = [NSString stringWithFormat:@"%d人",(int)[teachersArray count]];

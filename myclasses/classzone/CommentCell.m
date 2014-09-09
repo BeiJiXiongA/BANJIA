@@ -10,7 +10,7 @@
 #import "PopView.h"
 
 @implementation CommentCell
-@synthesize nameButton,commentContentLabel,commentDict,praiseView,openPraiseButton,headerImageView,timeLabel,lineImageView;
+@synthesize nameButton,commentContentLabel,commentDict,praiseView,openPraiseButton,headerImageView,timeLabel,lineImageView,nameLable;
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
@@ -19,10 +19,16 @@
         nameButton = [UIButton buttonWithType:UIButtonTypeCustom];
         nameButton.titleLabel.font = [UIFont systemFontOfSize:14];
         nameButton.backgroundColor = RGB(252, 252, 252, 1);;
-        [nameButton setTitleColor:RGB(64, 196, 110, 1) forState:UIControlStateNormal];
+        [nameButton setTitleColor:DongTaiCommentName forState:UIControlStateNormal];
         [self.contentView addSubview:nameButton];
         
-        commentContentLabel = [[cnvUILabel alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
+        nameLable = [[UILabel alloc] init];
+        nameLable.textColor = DongTaiCommentName;
+        nameLable.font = [UIFont systemFontOfSize:14];
+        nameLable.backgroundColor = [UIColor clearColor];
+        [self.contentView addSubview:nameLable];
+        
+        commentContentLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
 //        commentContentLabel.backgroundColor = RGB(252, 252, 252, 1);
         commentContentLabel.backgroundColor = [UIColor clearColor];
         commentContentLabel.font = [UIFont systemFontOfSize:14];
@@ -47,7 +53,7 @@
         
         lineImageView = [[UIImageView alloc] init];
         [lineImageView setImage:[UIImage imageNamed:@""]];
-        lineImageView.backgroundColor = RGB(233, 233, 231, 1);
+        lineImageView.backgroundColor = CommentLineColor;
         [self.contentView addSubview:lineImageView];
         
         self.backgroundColor = RGB(252, 252, 252, 1);

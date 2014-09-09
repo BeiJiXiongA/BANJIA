@@ -61,6 +61,10 @@
 	<string>1.2.2</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>STKAITI.TTF</string>
+	</array>
 	<key>UIFileSharingEnabled</key>
 	<false/>
 	<key>UIPrerenderedIcon</key>
