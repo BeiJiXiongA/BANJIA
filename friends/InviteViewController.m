@@ -201,13 +201,7 @@ UISearchBarDelegate>
     mySearchBar.backgroundColor = [UIColor whiteColor];
     [bgScrollView addSubview:mySearchBar];
     
-    if (SYSVERSION >= 7.0)
-    {
-//        mySearchBar.searchBarStyle = UISearchBarStyleMinimal;
-//        [mySearchBar setSearchFieldBackgroundImage:[UIImage imageNamed:@""] forState:UIControlStateNormal];
-//        [mySearchBar setImage:[UIImage imageNamed:@""] forSearchBarIcon:UISearchBarIconSearch state:UIControlStateNormal];
-    }
-    else
+    if (SYSVERSION <7.0)
     {
         UITextField* searchField = nil;
         for (UIView* subview in mySearchBar.subviews)
@@ -217,10 +211,8 @@ UISearchBarDelegate>
                 searchField = (UITextField*)subview;
                 searchField.leftView=nil;
                 [searchField setBackground:nil];
-                searchField.layer.cornerRadius = 3;
-                searchField.clipsToBounds = YES;
                 [searchField setBackgroundColor:[UIColor whiteColor]];
-                searchField.background = [Tools getImageFromImage:[UIImage imageNamed:@""] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
+                searchField.background = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
                 break;
             }
         }
@@ -229,13 +221,13 @@ UISearchBarDelegate>
         {
             if ([subview isKindOfClass:NSClassFromString(@"UISearchBarBackground")])
             {
-                subview.backgroundColor = TIMECOLOR;
+                subview.backgroundColor = [UIColor clearColor];
+                [subview removeFromSuperview];
                 break;
             }
         }
-        [mySearchBar setBackgroundImage:[UIImage imageNamed:@"searchbarbg1"]];
-    }
 
+    }
 
     
     searchView = [[UIView alloc] init];
@@ -389,7 +381,6 @@ UISearchBarDelegate>
 }
 -(void)searchWithText:(NSString *)searchContent
 {
-    DDLOG(@"contact array %@",contactArray);
     [searchResultArray removeAllObjects];
     for(NSDictionary *dict in contactArray)
     {
@@ -541,8 +532,9 @@ UISearchBarDelegate>
         {
             [UIView animateWithDuration:0.2 animations:^{
                 searchTableView.frame = CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - YSTART-mySearchBar.frame.size.height);
+                [searchView addGestureRecognizer:tapTgr];
             }];
-            [searchView addGestureRecognizer:tapTgr];
+            
         }
         return [searchResultArray count];
     }
@@ -749,7 +741,7 @@ UISearchBarDelegate>
                 
                 NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
                 cell.nameLabel.text = [dict objectForKey:@"name"];
-                cell.inviteButton.frame = CGRectMake(SCREEN_WIDTH-50, 12.5, 25, 25);
+                cell.inviteButton.frame = CGRectMake(SCREEN_WIDTH-50, 12.5, 27, 27);
                 cell.inviteButton.backgroundColor = [UIColor clearColor];
                 [cell.inviteButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
                 cell.inviteButton.tag = indexPath.row+(ContactTableViewTag%tableViewTagBase)*tableViewTagBase+(indexPath.section-1)*10000;

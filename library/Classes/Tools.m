@@ -531,7 +531,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     
     // Tell the old image to draw in this new context, with the desired
     // new size
-    [image drawInRect:CGRectMake(0, 0, asize.width, asize.height)];
+    [image drawInRect:CGRectMake(0, 0, asize.width+2, asize.height+2)];
     
     // Get the new image from the context
     UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
@@ -540,9 +540,9 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     UIGraphicsEndImageContext();
     
     // Return the new image.
-    NSData *imageData = UIImageJPEGRepresentation(newImage, 0.8);
-    
-    newImage = [UIImage imageWithData:imageData];
+//    NSData *imageData = UIImageJPEGRepresentation(newImage, 0.8);
+//    
+//    newImage = [UIImage imageWithData:imageData];
     
     return newImage;
 }

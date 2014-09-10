@@ -149,30 +149,33 @@ MsgDelegate>
     searchView.userInteractionEnabled = YES;
     [searchView addGestureRecognizer:tapTgr];
     
-    UITextField* searchField = nil;
-    for (UIView* subview in mySearchBar.subviews)
+    if (SYSVERSION < 7.0)
     {
-        if ([subview isKindOfClass:[UITextField class]])
+        UITextField* searchField = nil;
+        for (UIView* subview in mySearchBar.subviews)
         {
-            searchField = (UITextField*)subview;
-            searchField.leftView=nil;
-            [searchField setBackground:nil];
-            [searchField setBackgroundColor:[UIColor whiteColor]];
-            searchField.background = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
-            break;
+            if ([subview isKindOfClass:[UITextField class]])
+            {
+                searchField = (UITextField*)subview;
+                searchField.leftView=nil;
+                [searchField setBackground:nil];
+                [searchField setBackgroundColor:[UIColor whiteColor]];
+                searchField.background = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
+                break;
+            }
         }
-    }
-    
-    for (UIView *subview in mySearchBar.subviews)
-    {
-        if ([subview isKindOfClass:NSClassFromString(@"UISearchBarBackground")])
+        
+        for (UIView *subview in mySearchBar.subviews)
         {
-            subview.backgroundColor = [UIColor clearColor];
-            [subview removeFromSuperview];
-            break;
+            if ([subview isKindOfClass:NSClassFromString(@"UISearchBarBackground")])
+            {
+                subview.backgroundColor = [UIColor clearColor];
+                [subview removeFromSuperview];
+                break;
+            }
         }
+
     }
-    
     searchTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 40, SCREEN_WIDTH, 0) style:UITableViewStylePlain];
     searchTableView.delegate = self;
     searchTableView.dataSource = self;

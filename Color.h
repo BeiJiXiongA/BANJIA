@@ -10,7 +10,7 @@
 #define BANJIA_Color_h
 
 #define BgViewColor  UIColorFromRGB(0xf0f1f0)
-#define NavigationBgColor UIColorFromRGB(0xffffff)
+#define NavigationBgColor UIColorFromRGB(0xf7f7f7)
 
 #pragma mark - 导航栏
 #define RightCornerTitleColor  UIColorFromRGB(0x898989)

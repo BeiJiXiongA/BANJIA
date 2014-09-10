@@ -560,6 +560,7 @@ NSString *FindLetter(int nCode) {
 		case 7886:
 		case 8585:
 		case 8684:
+        case 0x5C4C:
 			strValue = @"DIAO";
 			break;
 		case 5976:

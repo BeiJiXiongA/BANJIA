@@ -357,7 +357,7 @@ UIActionSheetDelegate,NameButtonDel>
     cell.nameLabel.text = nameStr;
     cell.nameLabel.font = [UIFont systemFontOfSize:15];
     cell.nameLabel.textColor = DongTaiNameColor;
-    cell.timeLabel.frame = CGRectMake(cell.nameLabel.frame.size.width+cell.nameLabel.frame.origin.x, 5, SCREEN_WIDTH-cell.nameLabel.frame.origin.x-cell.nameLabel.frame.size.width-20, 30);
+    cell.timeLabel.frame = CGRectMake(cell.nameLabel.frame.size.width+cell.nameLabel.frame.origin.x, 5, SCREEN_WIDTH-cell.nameLabel.frame.origin.x-cell.nameLabel.frame.size.width-10, 30);
     cell.timeLabel.textAlignment = NSTextAlignmentRight;
     cell.timeLabel.numberOfLines = 1;
     cell.timeLabel.lineBreakMode = NSLineBreakByWordWrapping | NSLineBreakByTruncatingTail;

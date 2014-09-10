@@ -20,6 +20,8 @@
 #import "UIImageView+WebCache.h"
 #import "ClassesListViewController.h"
 
+#import "KLSwitch.h"
+
 #define NormalImageScale  2
 #define BigImageScale    2
 
@@ -113,6 +115,11 @@ UIAlertViewDelegate
     
     CGFloat lateImageHeight;
     CGFloat spaceHeight;
+    
+    UIView *isBlogView;
+    UILabel *isBlogLabel;
+    KLSwitch *isBolgSwitch;
+    NSString *isBlog;
 }
 @end
 
@@ -256,6 +263,8 @@ int count = 0;
     
     isSelectPhoto = NO;
     
+    isBlog = @"1";
+    
     sysImagePickerController = [[UIImagePickerController alloc] init];
     sysImagePickerController.delegate = self;
     
@@ -387,12 +396,38 @@ int count = 0;
     
     mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, lateImageView.frame.size.height+lateImageView.frame.origin.y+20);
     
+    isBlogView = [[UIView alloc] init];
+    isBlogView.frame = CGRectMake(locationBgView.frame.origin.x, locationBgView.frame.origin.y+locationBgView.frame.size.height+10, locationBgView.frame.size.width, locationBgView.frame.size.height);
+    [mainScrollView addSubview:isBlogView];
+    
+    isBlogLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 7.5, 230, 30)];
+    isBlogLabel.textColor = COMMENTCOLOR;
+    isBlogLabel.backgroundColor = [UIColor clearColor];
+    isBlogLabel.font = [UIFont systemFontOfSize:18];
+    isBlogLabel.text = @"是否提供给学校进行展示";
+    [isBlogView addSubview:isBlogLabel];
+        
+    isBolgSwitch = [[KLSwitch alloc] initWithFrame:CGRectMake(isBlogView.frame.size.width-60, 7.5, 60, 30)];
+    [isBolgSwitch addTarget:self action:@selector(isBlogChange:) forControlEvents:UIControlEventValueChanged];
+    [isBolgSwitch setOn:YES];
+    [isBlogView addSubview:isBolgSwitch];
 }
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+-(void)isBlogChange:(KLSwitch *)klSwitch
+{
+    if ([klSwitch isOn])
+    {
+        isBlog = @"1";
+    }
+    else
+    {
+        isBlog = @"0";
+    }
 }
 
 -(void)dealloc
@@ -849,6 +884,7 @@ int count = 0;
         [request setPostValue:[Tools user_id] forKey:@"u_id"];
         [request setPostValue:classid forKey:@"c_id"];
         [request setPostValue:contentTextView.text forKey:@"content"];
+        [request setPostValue:isBlog forKey:@"isblog"];
         [request setTimeOutSeconds:60];
         
         if ([locationTextView.text length]>0)

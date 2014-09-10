@@ -76,7 +76,6 @@ UIAlertViewDelegate>
     open = YES;
     
     relateString = @"";
-
     
     className = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
     schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
@@ -85,7 +84,7 @@ UIAlertViewDelegate>
     self.titleLabel.text = @"邀请学生家长";
     
     NSString *tipStr = [NSString stringWithFormat:@"您邀请%@的:",name];
-    tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(27, UI_NAVIGATION_BAR_HEIGHT+40, 120, 30)];
+    tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(27, UI_NAVIGATION_BAR_HEIGHT+40, 140, 30)];
     tipLabel.text = tipStr;
     tipLabel.textColor = CONTENTCOLOR;
     tipLabel.backgroundColor = self.bgView.backgroundColor;
@@ -398,18 +397,20 @@ UIAlertViewDelegate>
     switch ( result ) {
             
         case MessageComposeResultCancelled:
-            
+        {
             [self alertWithTitle:@"提示信息" msg:@"发送取消"];
             break;
+        }
         case MessageComposeResultFailed:// send failed
         {
-            [self alertWithTitle:@"提示信息" msg:@"发送成功"];
-            
+            [self alertWithTitle:@"提示信息" msg:@"发送失败"];
             break;
         }
         case MessageComposeResultSent:
-            [self alertWithTitle:@"提示信息" msg:@"发送失败"];
+        {
+            [self alertWithTitle:@"提示信息" msg:@"发送成功"];
             break;
+        }
         default:
             break;
     }

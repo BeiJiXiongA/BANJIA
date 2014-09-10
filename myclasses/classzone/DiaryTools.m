@@ -38,7 +38,27 @@
     }
     
     CGFloat imgsHeight = row * (imageViewHeight+5);
-    CGFloat contentHtight = [content length]>0?(45+he):5;
+
+    CGSize size = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-30 andFont:[UIFont systemFontOfSize:15]];
+    
+    CGFloat contentHeight = 0;
+    if (showAll)
+    {
+        contentHeight = size.height+10;
+    }
+    else
+    {
+        if (size.height > 45)
+        {
+            contentHeight = 45;
+        }
+        else
+        {
+            contentHeight = size.height+10;
+        }
+    }
+    
+    CGFloat contentHtight = [content length] > 0 ? (contentHeight) : 10;
     CGFloat tmpcommentHeight = 0;
     if ([[dict objectForKey:@"comments_num"] integerValue] > 0)
     {

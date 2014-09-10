@@ -120,6 +120,7 @@ UITableViewDelegate>
     studentNumField = [[MyTextField alloc] initWithFrame:CGRectMake(60, studentNumLabel.frame.origin.y-6, SCREEN_WIDTH-80, 42)];
     studentNumField.background = nil;
     studentNumField.tag = 2000;
+    studentNumField.keyboardType = UIKeyboardTypeNumberPad;
     studentNumField.placeholder = @"如果有学号，记得写学号哦";
     studentNumField.delegate = self;
     studentNumField.layer.cornerRadius = 5;
@@ -213,6 +214,7 @@ UITableViewDelegate>
             {
                 UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"" message:@"请输入学号加以区分" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
                 al.alertViewStyle = UIAlertViewStylePlainTextInput;
+                ((UITextField *)[al textFieldAtIndex:0]).keyboardType= UIKeyboardTypeNumberPad;
                 al.tag = RestudentNumTag;
                 [al show];
                 return ;

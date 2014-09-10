@@ -88,7 +88,8 @@
     _navigationBarBg = [[UIImageView alloc] init];
     _navigationBarBg.backgroundColor = NavigationBgColor;
     _navigationBarBg.frame = CGRectMake(0, 0, UI_SCREEN_WIDTH, UI_NAVIGATION_BAR_HEIGHT);
-    _navigationBarBg.image = [UIImage imageNamed:@"nav_bar_bg"];
+//    _navigationBarBg.image = [UIImage imageNamed:@"nav_bar_bg"];
+    
     [_navigationBarView addSubview:_navigationBarBg];
     
     _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(self.view.frame.size.width/2-90, YSTART + 3, 180, 36)];

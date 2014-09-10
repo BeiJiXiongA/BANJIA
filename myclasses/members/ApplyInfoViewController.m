@@ -605,6 +605,7 @@
                     {
                         UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"" message:@"班级中已存在同名同学号学生，请输入学号加以区分" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
                         al.alertViewStyle = UIAlertViewStylePlainTextInput;
+                        ((UITextField *)[al textFieldAtIndex:0]).keyboardType = UIKeyboardTypeNumberPad;
                         al.tag = RepeatStuTag;
                         [al show];
                         return ;

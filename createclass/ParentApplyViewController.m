@@ -281,6 +281,7 @@ UIActionSheetDelegate>
     studentNumField.tag = StudentNumTftag;
     studentNumField.placeholder = @"选填";
     studentNumField.delegate = self;
+    studentNumField.keyboardType = UIKeyboardTypeNumberPad;
     studentNumField.layer.cornerRadius = 5;
     studentNumField.clipsToBounds = YES;
     studentNumField.backgroundColor = [UIColor whiteColor];
@@ -1252,6 +1253,7 @@ UIActionSheetDelegate>
             {
                 UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"" message:@"请输入学号加以区分" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
                 al.alertViewStyle = UIAlertViewStylePlainTextInput;
+                ((UITextField *)[al textFieldAtIndex:0]).keyboardType = UIKeyboardTypeNumberPad;
                 al.tag = RestudentNumTag;
                 [al show];
                 return ;

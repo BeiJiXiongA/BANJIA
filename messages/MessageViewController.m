@@ -468,8 +468,10 @@ ChatVCDelegate>
     NSDictionary *lastMsgDict = [self findLastMsgWithUser:otherid];
     
     NSDictionary *userIconDIct = [ImageTools iconDictWithUserID:otherid];
-    DDLOG(@"%@==%@",otherid,[userIconDIct objectForKey:@"username"]);
-    if(userIconDIct)
+    DDLOG(@"%@==%@==%@",otherid,[userIconDIct objectForKey:@"username"],userIconDIct);
+   
+    
+    if(userIconDIct && ![[userIconDIct objectForKey:@"username"] isEqual:[NSNull null]])
     {
         [Tools fillImageView:cell.headerImageView withImageFromURL:[userIconDIct objectForKey:@"uicon"] andDefault:HEADERICON];
         cell.memNameLabel.text = [userIconDIct objectForKey:@"username"];
@@ -488,13 +490,11 @@ ChatVCDelegate>
                 cell.memNameLabel.text = fname;
             }
         }
-
-        
         if (lastMsgDict)
         {
             cell.contentLabel.hidden = NO;
             cell.contentLabel.font = [UIFont systemFontOfSize:14];
-            if (![[userIconDIct objectForKey:@"username"] isEqual:[NSNull null]] && [[userIconDIct objectForKey:@"username"] length] > 0  && [[userIconDIct objectForKey:@"username"] rangeOfString:@"人)"].length > 0)
+            if (![fname isEqual:[NSNull null]] && [fname length] > 0 && [fname rangeOfString:@"人)"].length > 0)
             {
                 NSDictionary *userIconDict = [ImageTools iconDictWithUserID:[lastMsgDict objectForKey:@"by"]];
                 NSString *byName;

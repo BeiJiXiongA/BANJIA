@@ -153,7 +153,7 @@
         else
         {
             [self getNewChat];
-            [self getNewVersion];
+            [self getNewClass];
             sideMenuViewController = [[SideMenuViewController alloc] init];
             HomeViewController *homeViewController = [[HomeViewController alloc] init];
             KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:homeViewController];
@@ -255,15 +255,6 @@
     [[NSUserDefaults standardUserDefaults] registerDefaults:dictionnary];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
-
-//typedef void 空;
-//typedef NSString 字符串;
-//-(空)你哈
-//{
-//    字符串 *好哈 = @"=============就安静安静";
-//    DDLOG(@"%@",好哈);
-//}
-
 
 -(void)updateDatabase
 {
