@@ -237,7 +237,7 @@
     CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
     UIImageView *lineImageView = [[UIImageView alloc] init];
     lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-    lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+    lineImageView.backgroundColor = LineBackGroudColor;
     [cell.contentView addSubview:lineImageView];
     cell.contentView.backgroundColor = [UIColor whiteColor];
     

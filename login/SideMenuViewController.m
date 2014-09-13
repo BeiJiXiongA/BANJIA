@@ -369,10 +369,10 @@
     {
         return [array count];
     }
-//    else if( [[[NSUserDefaults standardUserDefaults] objectForKey:NewClassNum] integerValue]>0)
-//    {
-//        return  [[[NSUserDefaults standardUserDefaults] objectForKey:NewClassNum] integerValue];
-//    }
+    else if( [[[NSUserDefaults standardUserDefaults] objectForKey:NewClassNum] integerValue]>0)
+    {
+        return  [[[NSUserDefaults standardUserDefaults] objectForKey:NewClassNum] integerValue];
+    }
     return 0;
 }
 -(BOOL)haveNewFriendApply

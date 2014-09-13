@@ -171,7 +171,7 @@ MFMailComposeViewControllerDelegate>
     }
     CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
     cell.lineImageView.frame = CGRectMake(0, cellHeight-0.3, cell.frame.size.width, 0.3);
-    cell.lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+    cell.lineImageView.backgroundColor = LineBackGroudColor;
     
     cell.mySwitch.hidden = YES;
     cell.mySwitch.frame = CGRectMake( SCREEN_WIDTH-65, 7, 50, 30);

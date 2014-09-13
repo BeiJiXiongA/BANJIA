@@ -498,7 +498,7 @@ UIActionSheetDelegate>
        
         NSDictionary *dict = [readArray objectAtIndex:indexPath.row];
         [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERICON];
-        cell.headerImageView.frame = CGRectMake(14, 3.75, 40, 40);
+        cell.headerImageView.frame = CGRectMake(14, 6.5, 34, 34);
         cell.nameLabel.frame = CGRectMake(60, 8.75, 200, 30);
         
         if ([[dict objectForKey:@"role"] isEqualToString:@"parents"])
@@ -529,7 +529,7 @@ UIActionSheetDelegate>
         CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
         UIImageView *lineImageView = [[UIImageView alloc] init];
         lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+        lineImageView.backgroundColor = LineBackGroudColor;
         [cell.contentView addSubview:lineImageView];
         cell.contentView.backgroundColor = [UIColor whiteColor];
         return cell;
@@ -543,7 +543,7 @@ UIActionSheetDelegate>
             cell = [[NotificationDetailCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:notificationDetailCell];
         }
         NSDictionary *dict = [unreaderArray objectAtIndex:indexPath.row];
-        cell.headerImageView.frame = CGRectMake(14, 3.75, 40, 40);
+        cell.headerImageView.frame = CGRectMake(14, 6.5, 34, 34);
         [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERICON];
         
         if ([[dict objectForKey:@"role"] isEqualToString:@"parents"])
@@ -575,7 +575,7 @@ UIActionSheetDelegate>
         CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
         UIImageView *lineImageView = [[UIImageView alloc] init];
         lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+        lineImageView.backgroundColor = LineBackGroudColor;
         [cell.contentView addSubview:lineImageView];
         cell.contentView.backgroundColor = [UIColor whiteColor];
         return cell;

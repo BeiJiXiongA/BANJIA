@@ -245,6 +245,8 @@ return shared##className; \
 
 #define ShowTips 0
 
-#define DongTaiSpace  7
+#define DongTaiSpace  5
 
 #define CommentSpace 10
+
+#define DongTaiHorizantolSpace  6.5

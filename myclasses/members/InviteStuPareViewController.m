@@ -84,7 +84,7 @@ UIAlertViewDelegate>
     self.titleLabel.text = @"邀请学生家长";
     
     NSString *tipStr = [NSString stringWithFormat:@"您邀请%@的:",name];
-    tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(27, UI_NAVIGATION_BAR_HEIGHT+40, 140, 30)];
+    tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(27, UI_NAVIGATION_BAR_HEIGHT+40, 147, 30)];
     tipLabel.text = tipStr;
     tipLabel.textColor = CONTENTCOLOR;
     tipLabel.backgroundColor = self.bgView.backgroundColor;
@@ -235,7 +235,7 @@ UIAlertViewDelegate>
         CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
         UIImageView *lineImageView = [[UIImageView alloc] init];
         lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+        lineImageView.backgroundColor = LineBackGroudColor;
         [cell.contentView addSubview:lineImageView];
         cell.contentView.backgroundColor = [UIColor whiteColor];
         
@@ -276,7 +276,7 @@ UIAlertViewDelegate>
         CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
         UIImageView *lineImageView = [[UIImageView alloc] init];
         lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+        lineImageView.backgroundColor = LineBackGroudColor;
         [cell.contentView addSubview:lineImageView];
         cell.contentView.backgroundColor = [UIColor whiteColor];
         

@@ -59,6 +59,15 @@ UIActionSheetDelegate>
     NSString *birth;
     
     CGFloat bgImageHeight;
+    
+    UIView *tipBgView;
+    UIImageView *tipImageView;
+    UIButton *defaultParentButtonOnTip;
+    
+    CGFloat defaultParentY;
+    
+    BOOL shouldAdd;
+    BOOL haveDefaultParent;
 }
 @end
 
@@ -94,6 +103,10 @@ UIActionSheetDelegate>
     
     qqnum = @"";
     birth = @"";
+    
+    defaultParentY = 0;
+    shouldAdd = YES;
+    haveDefaultParent = NO;
     
     self.titleLabel.text = @"个人信息";
     
@@ -187,6 +200,8 @@ UIActionSheetDelegate>
             }
         }
     }
+    
+
 }
 
 -(void)viewWillDisappear:(BOOL)animated
@@ -196,6 +211,74 @@ UIActionSheetDelegate>
 -(void)dealloc
 {
     self.memDel = nil;
+}
+
+-(void)reloadTip
+{
+    if (haveDefaultParent && [self shouldShowDefaultParentTip])
+    {
+        [tipBgView removeFromSuperview];
+        
+        NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+        if (ShowTips == 1)
+        {
+            [ud removeObjectForKey:@"defaultparentstip"];
+            [ud synchronize];
+        }
+        if (![ud objectForKey:@"defaultparentstip"])
+        {
+            tipBgView = [[UIView alloc] init];
+            tipBgView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
+            tipBgView.frame = CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+            [self.bgView addSubview:tipBgView];
+            
+            tipImageView = [[UIImageView alloc] init];
+            [tipImageView setImage:[UIImage imageNamed:@"defaultparenttip"]];
+            [tipBgView addSubview:tipImageView];
+            
+            UITapGestureRecognizer *tipTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(checkTip)];
+            tipImageView.userInteractionEnabled = YES;
+            [tipImageView addGestureRecognizer:tipTap];
+            
+            defaultParentButtonOnTip = [UIButton buttonWithType:UIButtonTypeCustom];
+            defaultParentButtonOnTip.backgroundColor = [UIColor whiteColor];
+            [defaultParentButtonOnTip setTitle:@"默认家长" forState:UIControlStateNormal];
+            [defaultParentButtonOnTip setTitleColor:COMMENTCOLOR forState:UIControlStateNormal];
+            defaultParentButtonOnTip.titleLabel.font = [UIFont systemFontOfSize:16];
+            defaultParentButtonOnTip.layer.cornerRadius = 3;
+            defaultParentButtonOnTip.clipsToBounds = YES;
+            [tipBgView addSubview:defaultParentButtonOnTip];
+            
+            UIImage *tipImage = [UIImage imageNamed:@"defaultparenttip"];
+            tipBgView.hidden = NO;
+            tipImageView.frame = CGRectMake((SCREEN_WIDTH-tipImage.size.width)/2-2, defaultParentY-tipImage.size.height+10, SCREEN_WIDTH-10, tipImage.size.height);
+            defaultParentButtonOnTip.frame = CGRectMake(143, defaultParentY+17, 80, 35);
+        }
+    }
+    else
+    {
+        [tipBgView removeFromSuperview];
+    }
+}
+
+-(void)checkTip
+{
+    [tipBgView removeFromSuperview];
+    [[NSUserDefaults standardUserDefaults] setObject:@"1" forKey:@"defaultparentstip"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+-(BOOL)shouldShowDefaultParentTip
+{
+    NSDictionary *selfDict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
+    if (([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"parents"] &&
+         [selfDict objectForKey:@"re_id"] &&
+         [[selfDict objectForKey:@"re_id"] isEqualToString:studentID]) ||
+        [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] intValue] == 2)
+    {
+        return YES;
+    }
+    return NO;
 }
 
 -(void)unShowSelfViewController
@@ -276,6 +359,7 @@ UIActionSheetDelegate>
     headerLabel.font = [UIFont systemFontOfSize:16];
     headerLabel.backgroundColor = [UIColor clearColor];
     headerLabel.textColor = TITLE_COLOR;
+    
     if (section == 2)
     {
         if ([pArray count] > 0)
@@ -460,7 +544,11 @@ UIActionSheetDelegate>
             cell.headerImageView.layer.cornerRadius = 3;
             cell.headerImageView.clipsToBounds = YES;
             [Tools fillImageView:cell.headerImageView withImageFromURL:[parentDict objectForKey:@"img_icon"] andDefault:HEADERICON];
-            cell.nameLabel.frame = CGRectMake(70, 15, 100, 30);
+            cell.nameLabel.frame = CGRectMake(70, 15, 75, 30);
+            cell.nameLabel.backgroundColor = [UIColor clearColor];
+            
+//            NSString *name = [parentDict objectForKey:@"name"];
+            
             cell.nameLabel.text = [parentDict objectForKey:@"name"];
             cell.nameLabel.font = [UIFont systemFontOfSize:17];
             cell.nameLabel.textColor = TITLE_COLOR;
@@ -469,11 +557,34 @@ UIActionSheetDelegate>
             cell.contentLabel.textAlignment = NSTextAlignmentRight;
             cell.contentLabel.textColor = TITLE_COLOR;
             cell.contentLabel.text = [[parentDict objectForKey:@"title"] substringFromIndex:[[parentDict objectForKey:@"title"] rangeOfString:@"."].location+1];
+            
+            if ([[parentDict objectForKey:@"def"] intValue] == 1)
+            {
+                
+                cell.button1.hidden = NO;
+                [cell.button1 setTitle:@"默认家长" forState:UIControlStateNormal];
+                [cell.button1 setTitleColor:COMMENTCOLOR forState:UIControlStateNormal];
+                cell.button1.titleLabel.textAlignment = NSTextAlignmentLeft;
+                cell.button1.titleLabel.font = [UIFont systemFontOfSize:14];
+                cell.button1.frame = CGRectMake(145, 17, 65, 26);
+                cell.button1.backgroundColor = [UIColor clearColor];
+                haveDefaultParent = YES;
+                defaultParentY = 0;
+                for (int i=0; i<=indexPath.section; i++)
+                {
+                    defaultParentY += [tableView  rectForHeaderInSection:i].size.height;
+                    for (int j=0; j<indexPath.section?(j<[tableView numberOfRowsInSection:i]):(j<indexPath.row); j++)
+                    {
+                        defaultParentY += [tableView rectForRowAtIndexPath:[NSIndexPath indexPathForRow:j inSection:i]].size.height;
+                    }
+                }
+                [self reloadTip];
+            }
         }
         CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
         UIImageView *lineImageView = [[UIImageView alloc] init];
         lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+        lineImageView.backgroundColor = LineBackGroudColor;
         [cell.contentView addSubview:lineImageView];
         cell.contentView.backgroundColor = [UIColor whiteColor];
     }
@@ -533,7 +644,7 @@ UIActionSheetDelegate>
             CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
             UIImageView *lineImageView = [[UIImageView alloc] init];
             lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            lineImageView.backgroundColor = LineBackGroudColor;
             [cell.contentView addSubview:lineImageView];
             cell.contentView.backgroundColor = [UIColor whiteColor];
         }
@@ -574,7 +685,6 @@ UIActionSheetDelegate>
         [cell.button2 addTarget:self action:@selector(toChat) forControlEvents:UIControlEventTouchUpInside];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
     }
-    
     return cell;
 }
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath

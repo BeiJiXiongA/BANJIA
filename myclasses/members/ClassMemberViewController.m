@@ -247,12 +247,21 @@ MsgDelegate>
         [tapLabel addGestureRecognizer:tipTap];
     }
     
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"parents"] && [[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:ParentInviteMem] integerValue] == 0)
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"parents"] &&
+        [[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:ParentInviteMem] integerValue] == 0)
     {
         inviteButton.hidden = YES;
         tipImageView.hidden = YES;
     }
-    else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"students"] && [[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:StudentInviteMem] integerValue] == 0)
+    else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"students"] &&
+             [[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:StudentInviteMem] integerValue] == 0)
+    {
+        inviteButton.hidden = YES;
+        tipImageView.hidden = YES;
+    }
+    
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] intValue] == 1 &&
+        [[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:AdminInviteMem] intValue] == 0)
     {
         inviteButton.hidden = YES;
         tipImageView.hidden = YES;
@@ -312,6 +321,10 @@ MsgDelegate>
 #pragma mark - msgDel
 -(void)dealNewMsg:(NSDictionary *)dict
 {
+    if ([[Tools user_id] length] == 0)
+    {
+        return ;
+    }
     [self manageClassMember];
     [[XDTabViewController sharedTabViewController] viewWillAppear:NO];
 }
@@ -932,7 +945,7 @@ MsgDelegate>
                 }
             }
         }
-        return 60.0f;
+        return 50.0f;
     }
     else if(tableView.tag == SearchTableViewTag)
     {
@@ -968,7 +981,7 @@ MsgDelegate>
         {
             UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 0, SCREEN_WIDTH-15, 27)];
             headerLabel.text = @"    班干部";
-            headerLabel.backgroundColor = RGB(53, 188, 100, 1);
+            headerLabel.backgroundColor = HEADER_GREEN;
             headerLabel.font = [UIFont systemFontOfSize:16];
             headerLabel.textColor = [UIColor whiteColor];
             return headerLabel;
@@ -1002,7 +1015,7 @@ MsgDelegate>
             CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
             UIImageView *lineImageView = [[UIImageView alloc] init];
             lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            lineImageView.backgroundColor = LineBackGroudColor;
             [cell.contentView addSubview:lineImageView];
             
             UIImageView *markView = [[UIImageView alloc] init];
@@ -1019,9 +1032,9 @@ MsgDelegate>
             cell.button2.hidden = YES;
             cell.memNameLabel.text = nil;
             cell.remarkLabel.text = nil;
-            cell.memNameLabel.frame = CGRectMake(60, 15, 130, 30);
+            cell.memNameLabel.frame = CGRectMake(60, 10, 130, 30);
             
-            cell.markView.frame = CGRectMake(10, 10, 40, 40);
+            cell.markView.frame = CGRectMake(10, 5, 40, 40);
             cell.markView.layer.cornerRadius = 3;
             cell.markView.clipsToBounds = YES;
             
@@ -1030,23 +1043,23 @@ MsgDelegate>
                 if ([newAppleArray count] > 0)
                 {
                     cell.headerImageView.hidden = NO;
-                    cell.headerImageView.frame = CGRectMake(87, 20, 22, 20);
+                    cell.headerImageView.frame = CGRectMake(87, 15, 22, 20);
                     [cell.headerImageView setImage:[UIImage imageNamed:@"newapplyheader"]];
                     
-                    cell.contentLabel.frame = CGRectMake(75, 8.5, 178, 47);
+                    cell.contentLabel.frame = CGRectMake(75, 1.5, 178, 47);
                     cell.contentLabel.layer.cornerRadius = 8;
                     cell.contentLabel.clipsToBounds = YES;
                     cell.contentLabel.hidden = NO;
-                    cell.contentLabel.backgroundColor = [UIColor whiteColor];
+                    cell.contentLabel.backgroundColor = [UIColor clearColor];
                     cell.contentLabel.layer.borderColor = TIMECOLOR.CGColor;
                     cell.contentLabel.layer.borderWidth = 0.3;
                     
                     cell.memNameLabel.hidden = NO;
                     cell.memNameLabel.textColor = CONTENTCOLOR;
-                    cell.memNameLabel.frame = CGRectMake(120, 16, 105, 30);
+                    cell.memNameLabel.frame = CGRectMake(120, 10, 105, 30);
                     cell.memNameLabel.text = [NSString stringWithFormat:@"%d个新申请",(int)[newAppleArray count]];
                     
-                    cell.markView.frame = CGRectMake(226, 25, 8, 12);
+                    cell.markView.frame = CGRectMake(226, 19, 8, 12);
                     [cell.markView setImage:[UIImage imageNamed:@"discovery_arrow"]];
                     cell.markView.hidden = NO;
                     cell.backgroundColor = self.bgView.backgroundColor;
@@ -1070,7 +1083,7 @@ MsgDelegate>
                 cell.memNameLabel.text = @"老师";
                 cell.remarkLabel.text = [NSString stringWithFormat:@"%d人",(int)[teachersArray count]];
                 markView.hidden = NO;
-                markView.frame = CGRectMake(SCREEN_WIDTH-20, 24, 8, 12);
+                markView.frame = CGRectMake(SCREEN_WIDTH-20, 19, 8, 12);
                 [markView setImage:[UIImage imageNamed:@"discovery_arrow"]];
                 [cell.contentView addSubview:markView];
                 cell.selectionStyle = UITableViewCellSelectionStyleGray;
@@ -1083,7 +1096,7 @@ MsgDelegate>
                 cell.memNameLabel.text = @"管理员";
                 cell.remarkLabel.text = [NSString stringWithFormat:@"%d人",(int)[adminArray count]];
                 markView.hidden = NO;
-                markView.frame = CGRectMake(SCREEN_WIDTH-20, 24, 8, 12);
+                markView.frame = CGRectMake(SCREEN_WIDTH-20, 19, 8, 12);
                 [markView setImage:[UIImage imageNamed:@"discovery_arrow"]];
                 [cell.contentView addSubview:markView];
                 cell.selectionStyle = UITableViewCellSelectionStyleGray;
@@ -1096,7 +1109,7 @@ MsgDelegate>
                 cell.memNameLabel.text = @"应添加家长的学生";
                 cell.remarkLabel.text = [NSString stringWithFormat:@"%d人",(int)[withoutParentStuArray count]];
                 markView.hidden = NO;
-                markView.frame = CGRectMake(SCREEN_WIDTH-20, 24, 8, 12);
+                markView.frame = CGRectMake(SCREEN_WIDTH-20, 19, 8, 12);
                 [markView setImage:[UIImage imageNamed:@"discovery_arrow"]];
                 [cell.contentView addSubview:markView];
                 cell.selectionStyle = UITableViewCellSelectionStyleGray;
@@ -1114,7 +1127,7 @@ MsgDelegate>
             CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
             UIImageView *lineImageView = [[UIImageView alloc] init];
             lineImageView.frame = CGRectMake(60, cellHeight-0.5, cell.frame.size.width, 0.5);
-            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            lineImageView.backgroundColor = LineBackGroudColor;
             [cell.contentView addSubview:lineImageView];
             cell.contentView.backgroundColor = [UIColor whiteColor];
             if (indexPath.row < [memberTableView numberOfRowsInSection:indexPath.section]-1)
@@ -1136,7 +1149,7 @@ MsgDelegate>
             cell.headerImageView.layer.cornerRadius = 3;
             cell.headerImageView.clipsToBounds = YES;
             cell.remarkLabel.hidden = NO;
-            cell.remarkLabel.frame = CGRectMake(SCREEN_WIDTH-200, 15, 190, 30);
+            cell.remarkLabel.frame = CGRectMake(SCREEN_WIDTH-200, 10, 190, 30);
             if (![[dict objectForKey:@"title"] isEqual:[NSNull null]])
             {
                 cell.remarkLabel.text = [dict objectForKey:@"title"];
@@ -1154,7 +1167,7 @@ MsgDelegate>
             CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
             UIImageView *lineImageView = [[UIImageView alloc] init];
             lineImageView.frame = CGRectMake(60, cellHeight-0.5, cell.frame.size.width, 0.5);
-            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            lineImageView.backgroundColor = LineBackGroudColor;
             [cell.contentView addSubview:lineImageView];
             cell.contentView.backgroundColor = [UIColor whiteColor];
             
@@ -1165,7 +1178,7 @@ MsgDelegate>
             }
 
             NSDictionary *dict = [[[membersArray objectAtIndex:indexPath.section-2] objectForKey:@"array"] objectAtIndex:indexPath.row];
-            cell.memNameLabel.frame = CGRectMake(60, 20, 100, 20);
+            cell.memNameLabel.frame = CGRectMake(60, 15, 100, 20);
             cell.headerImageView.layer.cornerRadius = 3;
             cell.headerImageView.clipsToBounds = YES;
 
@@ -1186,7 +1199,7 @@ MsgDelegate>
                 cell.button2.hidden = NO;
                 [cell.button2 setTitle:@"邀请家长" forState:UIControlStateNormal];
                 cell.button2.titleLabel.font = [UIFont systemFontOfSize:14];
-                cell.button2.frame = CGRectMake(SCREEN_WIDTH-90, 12.5, 70, 35);
+                cell.button2.frame = CGRectMake(SCREEN_WIDTH-90, 7.5, 70, 35);
                 [cell.button2 setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
                 cell.button2.tag = (indexPath.section-2) * 3333 +indexPath.row;
                 [cell.button2 addTarget:self action:@selector(inviteButtonClick:) forControlEvents:UIControlEventTouchUpInside];
@@ -1195,7 +1208,7 @@ MsgDelegate>
             }
             else
             {
-                cell.remarkLabel.frame = CGRectMake(SCREEN_WIDTH-200, 15, 190, 30);
+                cell.remarkLabel.frame = CGRectMake(SCREEN_WIDTH-200, 10, 190, 30);
                 cell.remarkLabel.textAlignment = NSTextAlignmentRight;
             }
             
@@ -1214,7 +1227,7 @@ MsgDelegate>
         CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
         UIImageView *lineImageView = [[UIImageView alloc] init];
         lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+        lineImageView.backgroundColor = LineBackGroudColor;
         [cell.contentView addSubview:lineImageView];
         cell.contentView.backgroundColor = [UIColor whiteColor];
         if (indexPath.row < [tableView numberOfRowsInSection:indexPath.section]-1)
@@ -1225,7 +1238,7 @@ MsgDelegate>
         NSDictionary *dict = [searchResultArray objectAtIndex:indexPath.row];
         
         [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERICON];
-        cell.headerImageView.frame = CGRectMake(5, 4, 35, 35);
+        cell.headerImageView.frame = CGRectMake(5, 7.5, 35, 35);
         cell.headerImageView.layer.cornerRadius = 5;
         cell.headerImageView.clipsToBounds = YES;
         if (![[dict objectForKey:@"title"] isEqual:[NSNull null]] && [[dict objectForKey:@"title"] length] > 0)

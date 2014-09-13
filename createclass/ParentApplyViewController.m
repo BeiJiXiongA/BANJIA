@@ -167,7 +167,7 @@ UIActionSheetDelegate>
     
     UIImageView *lineImageView = [[UIImageView alloc] init];
     lineImageView.frame = CGRectMake( 0, schoolInfoLabel.frame.size.height+schoolInfoLabel.frame.origin.y+20, SCREEN_WIDTH, 0.5);
-    lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+    lineImageView.backgroundColor = LineBackGroudColor;
     [mainScrollView addSubview:lineImageView];
     
     CGFloat lableL = 110;
@@ -362,7 +362,7 @@ UIActionSheetDelegate>
     
     UIImageView *lineImageView1 = [[UIImageView alloc] init];
     lineImageView1.frame = CGRectMake( 0, 0, SCREEN_WIDTH, 0.5);
-    lineImageView1.image = [UIImage imageNamed:@"sepretorline"];
+    lineImageView1.backgroundColor = LineBackGroudColor;
     [phoneNumView addSubview:lineImageView1];
     
     UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
@@ -917,7 +917,7 @@ UIActionSheetDelegate>
         CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
         UIImageView *lineImageView = [[UIImageView alloc] init];
         lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+        lineImageView.backgroundColor = LineBackGroudColor;
         [cell.contentView addSubview:lineImageView];
         cell.contentView.backgroundColor = [UIColor whiteColor];
         return  cell;
@@ -939,7 +939,7 @@ UIActionSheetDelegate>
         cell.nameLabel.frame = CGRectMake(60, 5, 200, 30);
         CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
         UIImageView *lineImageView = [[UIImageView alloc] init];
-        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+        lineImageView.backgroundColor = LineBackGroudColor;
         [cell.contentView addSubview:lineImageView];
         cell.contentView.backgroundColor = [UIColor whiteColor];
         lineImageView.frame = CGRectMake(0, cellHeight-0.5, 0, 0);

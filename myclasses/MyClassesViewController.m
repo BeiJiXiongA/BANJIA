@@ -37,7 +37,7 @@
 
 #define ADDACTIONSHEETTAG   3000
 
-#define ClassSpace  6.5
+#define ClassSpace  4.25
 
 @interface MyClassesViewController ()<UITableViewDataSource,
 UITableViewDelegate,
@@ -278,6 +278,10 @@ UIActionSheetDelegate>
 #pragma mark - chatdelegate
 -(void)dealNewChatMsg:(NSDictionary *)dict
 {
+    if ([[Tools user_id] length] == 0)
+    {
+        return ;
+    }
     db = [[OperatDB alloc] init];
     NSMutableArray *array = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"readed":@"0"} andTableName:@"chatMsg"];
     if ([array count] > 0 || [[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue]>0)
@@ -302,6 +306,10 @@ UIActionSheetDelegate>
 
 -(void)dealNewMsg:(NSDictionary *)dict
 {
+    if ([[Tools user_id] length] == 0)
+    {
+        return ;
+    }
     if ([[dict objectForKey:@"type"] isEqualToString:@"c_apply"] ||
         [[dict objectForKey:@"type"] isEqualToString:@"notice"] ||
         [[dict objectForKey:@"type"] isEqualToString:@"c_allow"]||
@@ -695,11 +703,11 @@ UIActionSheetDelegate>
 //    headerView.backgroundColor = UIColorFromRGB(0xf1f0ec);
     if (section % 2 == 0)
     {
-        headerView.backgroundColor = UIColorFromRGB(0x40c46e);
+        headerView.backgroundColor = HEADER_GREEN;
     }
     else
     {
-        headerView.backgroundColor = UIColorFromRGB(0x41c4b6);
+        headerView.backgroundColor = HEADER_BLUER;
     }
     UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, headerView.frame.size.width, 30)];
     headerLabel.backgroundColor = [UIColor clearColor];
@@ -845,7 +853,6 @@ UIActionSheetDelegate>
         cell.bgView.frame = CGRectMake(10, ClassSpace, SCREEN_WIDTH-20, 70);
     }
     
-    
     cell.arrowImageView.frame = CGRectMake(cell.bgView.frame.size.width-20, 27.5, 10, 15);
     [cell.arrowImageView setImage:[UIImage imageNamed:@"menu_arrow_right"]];
     cell.arrowImageView.backgroundColor = [UIColor whiteColor];
@@ -853,7 +860,9 @@ UIActionSheetDelegate>
     cell.bgView.backgroundColor = [UIColor whiteColor];
     cell.bgView.layer.cornerRadius = 5;
     cell.bgView.clipsToBounds = YES;
-    cell.selectionStyle = UITableViewCellSelectionStyleGray;
+    cell.bgView.layer.borderWidth = 0.5;
+    cell.bgView.layer.borderColor = UIColorFromRGB(0xdddddd).CGColor;
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
     cell.backgroundColor = self.bgView.backgroundColor;
     return cell;
 }
@@ -861,7 +870,6 @@ UIActionSheetDelegate>
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSDictionary *dict = [tmpArray objectAtIndex:indexPath.section];
-    DDLOG(@"class %@",dict);
     NSDictionary *classDict = [[dict objectForKey:@"classes"] objectAtIndex:indexPath.row];
     NSString *classID = [classDict objectForKey:@"_id"];
     

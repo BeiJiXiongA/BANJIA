@@ -22,7 +22,7 @@
         [self.contentView addSubview:headerImageView];
         
         nameLabel = [[UILabel alloc] init];
-        nameLabel.textColor = TITLE_COLOR;
+        nameLabel.textColor = UIColorFromRGB(0x666464);
         nameLabel.backgroundColor = [UIColor clearColor];
         [self.contentView addSubview:nameLabel];
         

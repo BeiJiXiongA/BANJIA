@@ -29,7 +29,7 @@
         unreadedMsgLabel.hidden = YES;
         [self.contentView addSubview:unreadedMsgLabel];
         
-        contentLabel = [[UILabel alloc] initWithFrame:CGRectMake(70, 30, 150, 30)];
+        contentLabel = [[UILabel alloc] initWithFrame:CGRectMake(55, 26, 210, 20)];
         contentLabel.textColor = [UIColor grayColor];
         contentLabel.backgroundColor = [UIColor clearColor];
         contentLabel.hidden = YES;
@@ -38,11 +38,11 @@
         
         memNameLabel = [[UILabel alloc] initWithFrame:CGRectMake(60, 10, 150, 30)];
         memNameLabel.backgroundColor = [UIColor clearColor];
-        memNameLabel.font = [UIFont systemFontOfSize:17];
-        memNameLabel.textColor = TITLE_COLOR;
+        memNameLabel.font = [UIFont systemFontOfSize:15];
+        memNameLabel.textColor = USER_NAME_COLOR;
         [self.contentView addSubview:memNameLabel];
         
-        headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 10, 40, 40)];
+        headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 7, 34, 34)];
         headerImageView.backgroundColor = [UIColor whiteColor];
         headerImageView.clipsToBounds = YES;
         headerImageView.layer.contentsGravity = kCAGravityResizeAspectFill;
@@ -55,7 +55,7 @@
         remarkLabel = [[UILabel alloc] initWithFrame:CGRectMake(SCREEN_WIDTH - 140, 15, 100, 30)];
         remarkLabel.backgroundColor = [UIColor clearColor];
         remarkLabel.font =[UIFont systemFontOfSize:14];
-        remarkLabel.textColor = CONTENTCOLOR;
+        remarkLabel.textColor = MARK_COLOR;
         remarkLabel.textAlignment = NSTextAlignmentRight;
         remarkLabel.hidden = YES;
         [self.contentView addSubview:remarkLabel];

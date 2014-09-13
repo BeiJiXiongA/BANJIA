@@ -165,6 +165,10 @@ ChatVCDelegate>
 
 -(void)dealNewMsg:(NSDictionary *)dict
 {
+    if ([[Tools user_id] length] == 0)
+    {
+        return ;
+    }
     if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"checked":@"0"} andTableName:FRIENDSTABLE] count] > 0)
     {
         self.unReadLabel.hidden = NO;
@@ -261,6 +265,10 @@ ChatVCDelegate>
 #pragma mark -chatDelegate
 -(void)dealNewChatMsg:(NSDictionary *)dict
 {
+    if ([[Tools user_id] length] == 0)
+    {
+        return ;
+    }
     if(dict)
     {
         if ([Tools NetworkReachable])
@@ -418,7 +426,7 @@ ChatVCDelegate>
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return 60;
+    return 50;
 }
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -432,22 +440,21 @@ ChatVCDelegate>
     CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
     UIImageView *lineImageView = [[UIImageView alloc] init];
     lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-    lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+    lineImageView.backgroundColor = LineBackGroudColor;
     [cell.contentView addSubview:lineImageView];
     cell.contentView.backgroundColor = [UIColor whiteColor];
     if (indexPath.row < [tableView numberOfRowsInSection:indexPath.section]-1)
     {
-        lineImageView.frame = CGRectMake( 70, cellHeight-0.5, cell.frame.size.width, 0.5);
+        lineImageView.frame = CGRectMake( 55, cellHeight-0.5, cell.frame.size.width, 0.5);
     }
-//    NSDictionary *dict = [newMessageArray objectAtIndex:indexPath.row];
     NSString *otherid = [[[newMessageArray objectAtIndex:indexPath.row] allValues] firstObject];
-    cell.headerImageView.frame = CGRectMake(10, 7, 46, 46);
+    cell.headerImageView.frame = CGRectMake(14, 8, 34, 34);
     cell.headerImageView.layer.cornerRadius = 5;
     cell.headerImageView.clipsToBounds = YES;
     
-    cell.memNameLabel.frame = CGRectMake(70, 7, 190, 20);
-    cell.memNameLabel.textColor = TITLE_COLOR;
-    cell.memNameLabel.font = [UIFont systemFontOfSize:16];
+    cell.memNameLabel.frame = CGRectMake(55, 5, 190, 20);
+    cell.memNameLabel.textColor = [UIColor blackColor];
+    cell.memNameLabel.font = [UIFont systemFontOfSize:15];
     cell.unreadedMsgLabel.hidden = YES;
     
    
@@ -468,7 +475,6 @@ ChatVCDelegate>
     NSDictionary *lastMsgDict = [self findLastMsgWithUser:otherid];
     
     NSDictionary *userIconDIct = [ImageTools iconDictWithUserID:otherid];
-    DDLOG(@"%@==%@==%@",otherid,[userIconDIct objectForKey:@"username"],userIconDIct);
    
     
     if(userIconDIct && ![[userIconDIct objectForKey:@"username"] isEqual:[NSNull null]])
@@ -493,7 +499,6 @@ ChatVCDelegate>
         if (lastMsgDict)
         {
             cell.contentLabel.hidden = NO;
-            cell.contentLabel.font = [UIFont systemFontOfSize:14];
             if (![fname isEqual:[NSNull null]] && [fname length] > 0 && [fname rangeOfString:@"人)"].length > 0)
             {
                 NSDictionary *userIconDict = [ImageTools iconDictWithUserID:[lastMsgDict objectForKey:@"by"]];

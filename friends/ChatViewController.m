@@ -582,6 +582,10 @@ EGORefreshTableHeaderDelegate>
 #pragma mark - lastViewTime
 -(void)uploadLastViewTime
 {
+    if ([[Tools user_id] length] == 0)
+    {
+        return ;
+    }
     if ([Tools NetworkReachable])
     {
         
@@ -742,6 +746,10 @@ EGORefreshTableHeaderDelegate>
 #pragma mark - chatDelegate
 -(void)dealNewChatMsg:(NSDictionary *)dict
 {
+    if ([[Tools user_id] length] == 0)
+    {
+        return ;
+    }
     [messageArray removeAllObjects];
     [messageArray addObjectsFromArray:[db findChatLogWithUid:[Tools user_id] andOtherId:toID andTableName:CHATTABLE]];
     if(dict && ([[dict objectForKey:@"content"] isEqualToString:@"给您发来一条新消息"]||

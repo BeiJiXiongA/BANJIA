@@ -149,7 +149,11 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     {
         [ShareSDK cancelAuthWithType:ShareTypeRenren];
     }
-
+    
+    //去除应用通知角标，通知栏内容
+    [[UIApplication sharedApplication] cancelAllLocalNotifications];
+    [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
+    
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     [ud removeObjectForKey:USERID];
     [ud removeObjectForKey:CLIENT_TOKEN];
@@ -169,7 +173,12 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 {
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     NSString *user_id = [ud objectForKey:USERID];
-    return user_id;
+    if (user_id && [user_id length] > 0)
+    {
+        return user_id;
+    }
+    
+    return @"";
 }
 
 +(NSString *)user_name
@@ -655,12 +664,12 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 {
     if ([[[[errorDict objectForKey:@"message"] allKeys] firstObject] isEqualToString:@"NO_AUTH"])
     {
-        if (![self user_id])
+        if ([self user_id] == 0)
         {
             return ;
         }
         [[NSNotificationCenter defaultCenter] postNotificationName:@"logout" object:nil];
-        [Tools showAlertView:[[[errorDict objectForKey:@"message"] allValues] firstObject] delegateViewController:viewController];
+//        [Tools showAlertView:[[[errorDict objectForKey:@"message"] allValues] firstObject] delegateViewController:viewController];
         return ;
     }
     else if([[[[errorDict objectForKey:@"message"] allKeys] firstObject] isEqualToString:@"PHONE_NUM_EXITS"])

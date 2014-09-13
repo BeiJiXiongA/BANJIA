@@ -85,9 +85,13 @@
 - (void)pushViewController:(UIViewController *)viewController animated:(BOOL)animated
 {
     [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleDefault;
-    [self.screenShotsList addObject:[self capture]];
     
-    [self.view addGestureRecognizer:recognizer];
+//    if (SYSVERSION <= 7)
+    {
+        [self.screenShotsList addObject:[self capture]];
+        [self.view addGestureRecognizer:recognizer];
+    }
+    
     [super pushViewController:viewController animated:animated];
 }
 
@@ -106,7 +110,7 @@
     UIBezierPath *p = [UIBezierPath bezierPathWithRect:CGRectMake(0, YSTART, SCREEN_WIDTH, SCREEN_HEIGHT-YSTART)];
     CGContextRef con = UIGraphicsGetCurrentContext();
     CGContextAddPath(con, p.CGPath);
-    [self.view.layer renderInContext:con];
+    [self.view.layer renderInContext:con]; // this has problem
     
     UIImage * img = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();

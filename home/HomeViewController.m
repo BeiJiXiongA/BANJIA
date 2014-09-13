@@ -213,13 +213,6 @@ headerDelegate>
     groupDiaries = [[NSMutableArray alloc] initWithCapacity:0];
     adArray = [[NSMutableArray alloc] initWithCapacity:0];
     
-//    UIButton *navButton = [UIButton buttonWithType:UIButtonTypeCustom];
-//    [navButton setTitle:@"首页" forState:UIControlStateNormal];
-//    navButton.frame = CGRectMake((SCREEN_WIDTH - [self.titleLabel.text length]*20)/2, self.titleLabel.frame.origin.y, [self.titleLabel.text length]*20, 30);
-//    navButton.titleLabel.font = [UIFont systemFontOfSize:20];
-//    [navButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
-//    [self.navigationBarView addSubview:navButton];
-    
     moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
     moreButton.frame = CGRectMake(5, self.backButton.frame.origin.y, 42, NAV_RIGHT_BUTTON_HEIGHT);
     [moreButton setImage:[UIImage imageNamed:@"icon_list"] forState:UIControlStateNormal];
@@ -252,11 +245,7 @@ headerDelegate>
     footerView.delegate = self;
     
     addView = [[UIView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH-147, UI_NAVIGATION_BAR_HEIGHT-10, 129, 135)];
-//    addView.point = CGPointMake(90, 0);
-//    addView.wid = 2;
     addView.backgroundColor = [UIColor clearColor];
-    
-    DDLOG(@"ShareContent  %@",[[NSUserDefaults standardUserDefaults] objectForKey:ShareContentKey]);
     
     
     UIImageView *addBg = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, addView.frame.size.width, addView.frame.size.height)];
@@ -269,7 +258,6 @@ headerDelegate>
     addNoticeButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.5];
     addNoticeButton.alpha = 0;
     [addNoticeButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
-//    [addNoticeButton setTitle:@"      添加通知" forState:UIControlStateNormal];
     [addNoticeButton setBackgroundImage:[UIImage imageNamed:@"release"] forState:UIControlStateNormal];
     [addNoticeButton setBackgroundImage:[UIImage imageNamed:@"release_on"] forState:UIControlStateHighlighted];
     [addView addSubview:addNoticeButton];
@@ -280,7 +268,6 @@ headerDelegate>
     addDiaryButton.alpha = 0;
     [addDiaryButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     addDiaryButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.5];
-//    [addDiaryButton setTitle:@"      添加空间" forState:UIControlStateNormal];
     [addView addSubview:addDiaryButton];
     [addDiaryButton setBackgroundImage:[UIImage imageNamed:@"publish"] forState:UIControlStateNormal];
     [addDiaryButton setBackgroundImage:[UIImage imageNamed:@"publish_on"] forState:UIControlStateHighlighted];
@@ -406,6 +393,7 @@ headerDelegate>
         UITapGestureRecognizer *tipTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(checkTip)];
         tapLabel.userInteractionEnabled = YES;
         [tapLabel addGestureRecognizer:tipTap];
+        
     }
     [self getData];
 }
@@ -892,6 +880,10 @@ headerDelegate>
 
 -(void)dealNewChatMsg:(NSDictionary *)dict
 {
+    if ([[Tools user_id] length] == 0)
+    {
+        return ;
+    }
     db = [[OperatDB alloc] init];
     NSMutableArray *array = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"readed":@"0"} andTableName:CHATTABLE];
     if ([array count] > 0 ||
@@ -913,6 +905,10 @@ headerDelegate>
 
 -(void)dealNewMsg:(NSDictionary *)dict
 {
+    if ([[Tools user_id] length] == 0)
+    {
+        return ;
+    }
     if([[dict objectForKey:@"type"]isEqualToString:@"f_apply"])
     {
         if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"checked":@"0"} andTableName:FRIENDSTABLE] count] > 0)
@@ -932,10 +928,13 @@ headerDelegate>
     [super viewWillDisappear:animated];
     inputTabBar.returnFunDel = nil;
     [self backInput];
+    [adTimer invalidate];
 }
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    
+    [adTimer fire];
     
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = self;
     
@@ -1472,7 +1471,6 @@ headerDelegate>
 {
     if ([adArray count] > 1)
     {
-        DDLOG(@"ad scrollview offset %@",NSStringFromCGPoint(((UIScrollView *)[classTableView viewWithTag:AdScrollViewTag]).contentOffset));
         [UIView animateWithDuration:0.2 animations:^{
             if (((UIScrollView *)[classTableView viewWithTag:AdScrollViewTag]).contentOffset.x == (SCREEN_WIDTH * ([adArray count]-1)))
             {
@@ -1630,7 +1628,6 @@ headerDelegate>
         {
             cell = [[TrendsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:topImageView];
         }
-        CGFloat left = 9.5;
         cell.showAllComments = NO;
         cell.nameButtonDel = self;
         NSDictionary *groupDict = [groupDiaries objectAtIndex:indexPath.section-[noticeArray count]-2];
@@ -1667,7 +1664,7 @@ headerDelegate>
         NSString *timeStr = [Tools showTimeOfToday:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]];
         NSString *c_name = [dict objectForKey:@"c_name"];
         cell.timeLabel.text = c_name;
-        cell.timeLabel.frame = CGRectMake(SCREEN_WIDTH-[c_name length]*18-30, 2, [c_name length]*18, 35);
+        cell.timeLabel.frame = CGRectMake(SCREEN_WIDTH-200-25, 2, 200, 35);
         cell.timeLabel.textAlignment = NSTextAlignmentRight;
         cell.timeLabel.numberOfLines = 2;
         cell.timeLabel.lineBreakMode = NSLineBreakByWordWrapping;
@@ -1677,7 +1674,16 @@ headerDelegate>
         
         [Tools fillImageView:cell.headerImageView withImageFromURL:[[dict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERBG];
         cell.locationLabel.frame = CGRectMake(50, cell.headerImageView.frame.origin.y+cell.headerImageView.frame.size.height-LOCATIONLABELHEI+3, SCREEN_WIDTH-90, LOCATIONLABELHEI);
-        cell.locationLabel.text = [NSString stringWithFormat:@"于%@在%@",timeStr,[[dict objectForKey:@"detail"] objectForKey:@"add"]];
+        if ([[dict objectForKey:@"detail"] objectForKey:@"add"] &&
+            [[[dict objectForKey:@"detail"] objectForKey:@"add"] length] > 0)
+        {
+            cell.locationLabel.text = [NSString stringWithFormat:@"于%@在%@",timeStr,[[dict objectForKey:@"detail"] objectForKey:@"add"]];
+        }
+        else
+        {
+            cell.locationLabel.text = [NSString stringWithFormat:@"%@",timeStr];
+        }
+        
         cell.locationLabel.numberOfLines = 1;
         cell.locationLabel.lineBreakMode = NSLineBreakByWordWrapping | NSLineBreakByTruncatingTail;
         
@@ -1698,18 +1704,16 @@ headerDelegate>
             //有文字
             NSString *content = [[[dict objectForKey:@"detail"] objectForKey:@"content"] emojizedString];
             
-            CGSize contentSize = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-30 andFont:[UIFont systemFontOfSize:15]];
+            CGSize contentSize = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-DongTaiHorizantolSpace*2-16 andFont:[UIFont systemFontOfSize:14]];
             
             if (contentSize.height > 45)
             {
-                cell.contentLabel.frame = CGRectMake(11, cell.headerImageView.frame.size.height+cell.headerImageView.frame.origin.y, SCREEN_WIDTH-30, 45);
+                cell.contentLabel.frame = CGRectMake(11, cell.headerImageView.frame.size.height+cell.headerImageView.frame.origin.y + DongTaiSpace, SCREEN_WIDTH-DongTaiHorizantolSpace*2-16, 45);
             }
             else
             {
-                cell.contentLabel.frame = CGRectMake(11, cell.headerImageView.frame.size.height+cell.headerImageView.frame.origin.y, SCREEN_WIDTH-30, contentSize.height+10);
+                cell.contentLabel.frame = CGRectMake(11, cell.headerImageView.frame.size.height+cell.headerImageView.frame.origin.y + DongTaiSpace, SCREEN_WIDTH-DongTaiHorizantolSpace*2-16, contentSize.height+10);
             }
-            
-            DDLOG(@"%@==%@",content,NSStringFromCGRect(cell.contentLabel.frame));
             
             UITapGestureRecognizer *contentLabelTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(toDetail:)];
             cell.contentLabel.userInteractionEnabled = YES;
@@ -1751,9 +1755,19 @@ headerDelegate>
             {
                 row = (imageCount/ImageCountPerRow) > 3 ? 3:(imageCount / ImageCountPerRow);
             }
-            cell.imagesView.frame = CGRectMake(12,
-                                               cell.contentLabel.frame.size.height + cell.contentLabel.frame.origin.y+DongTaiSpace,
-                                               SCREEN_WIDTH-44, (imageViewHeight+5) * row);
+            if ([[[dict objectForKey:@"detail"] objectForKey:@"content"] length] > 0)
+            {
+                cell.imagesView.frame = CGRectMake(12,
+                                                   cell.contentLabel.frame.size.height + cell.contentLabel.frame.origin.y+DongTaiSpace,
+                                                   SCREEN_WIDTH-44, (imageViewHeight+5) * row);
+            }
+            else
+            {
+                cell.imagesView.frame = CGRectMake(12,
+                                                   cell.headerImageView.frame.size.height + cell.headerImageView.frame.origin.y+DongTaiSpace,
+                                                   SCREEN_WIDTH-44, (imageViewHeight+5) * row);
+            }
+            
             
             for (int i=0; i<[imgsArray count]; ++i)
             {
@@ -1777,12 +1791,16 @@ headerDelegate>
             cell.imagesView.frame = CGRectMake(5, cell.contentLabel.frame.size.height+cell.contentLabel.frame.origin.y, SCREEN_WIDTH-10, 0);
         }
         
-        CGFloat cellHeight = cell.headerImageView.frame.size.height+cell.contentLabel.frame.size.height+cell.imagesView.frame.size.height+18;
+        CGFloat cellHeight = 0 ;
         
-        CGFloat he = 0;
-        //            if (SYSVERSION >= 7.0)
+        if ([[[dict objectForKey:@"detail"] objectForKey:@"content"] length] > 0 &&
+            [tmpArray1 count] == 0)
         {
-            he = 5;
+            cellHeight = cell.contentLabel.frame.size.height + cell.contentLabel.frame.origin.y + DongTaiSpace;
+        }
+        else
+        {
+             cellHeight = cell.imagesView.frame.size.height + cell.imagesView.frame.origin.y + DongTaiSpace;
         }
         
         //评论,赞，转发
@@ -1791,7 +1809,7 @@ headerDelegate>
         CGFloat iconTop = 9;
         
         
-        cell.transmitButton.frame = CGRectMake(0, cellHeight+13, (SCREEN_WIDTH-left*2)/3, buttonHeight);
+        cell.transmitButton.frame = CGRectMake(0, cellHeight, (SCREEN_WIDTH-DongTaiHorizantolSpace*2)/3, buttonHeight);
         [cell.transmitButton setTitle:@"      转发" forState:UIControlStateNormal];
         cell.transmitButton.iconImageView.image = [UIImage imageNamed:@"icon_forwarding"];
         cell.transmitButton.tag = (indexPath.section-cha-1)*SectionTag+indexPath.row;
@@ -1820,7 +1838,7 @@ headerDelegate>
         
         [cell.praiseButton addTarget:self action:@selector(praiseDiary:) forControlEvents:UIControlEventTouchUpInside];
         cell.praiseButton.tag = (indexPath.section-cha-1)*SectionTag+indexPath.row;
-        cell.praiseButton.frame = CGRectMake((SCREEN_WIDTH-left*2)/3, cellHeight+13, (SCREEN_WIDTH-left*2)/3, buttonHeight);
+        cell.praiseButton.frame = CGRectMake((SCREEN_WIDTH-DongTaiHorizantolSpace*2)/3, cellHeight, (SCREEN_WIDTH-DongTaiHorizantolSpace*2)/3, buttonHeight);
         cell.praiseButton.backgroundColor = UIColorFromRGB(0xfcfcfc);
         
         
@@ -1834,7 +1852,7 @@ headerDelegate>
             [cell.commentButton setTitle:@"     评论" forState:UIControlStateNormal];
             cell.commentButton.iconImageView.frame = CGRectMake(25, iconTop, iconH, iconH);
         }
-        cell.commentButton.frame = CGRectMake((SCREEN_WIDTH-left*2)/3*2, cellHeight+13, (SCREEN_WIDTH-left*2)/3, buttonHeight);
+        cell.commentButton.frame = CGRectMake((SCREEN_WIDTH-DongTaiHorizantolSpace*2)/3*2, cellHeight, (SCREEN_WIDTH-DongTaiHorizantolSpace*2)/3, buttonHeight);
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         cell.commentButton.backgroundColor = UIColorFromRGB(0xfcfcfc);
         cell.commentButton.tag = (indexPath.section-cha-1)*SectionTag+indexPath.row;
@@ -1870,7 +1888,7 @@ headerDelegate>
             }
             [cell.commentsTableView reloadData];
             cell.commentsTableView.frame = CGRectMake(0, cell.praiseButton.frame.size.height+cell.praiseButton.frame.origin.y, SCREEN_WIDTH, cell.commentsTableView.contentSize.height);
-            cell.bgView.frame = CGRectMake(left, 0, SCREEN_WIDTH-left*2,
+            cell.bgView.frame = CGRectMake(DongTaiHorizantolSpace, 0, SCREEN_WIDTH-DongTaiHorizantolSpace*2,
                                            cell.commentsTableView.frame.size.height+
                                            cell.commentsTableView.frame.origin.y);
         }
@@ -1879,10 +1897,11 @@ headerDelegate>
             cell.commentsArray = nil;
             cell.praiseArray = nil;
             [cell.commentsTableView reloadData];
-            cell.bgView.frame = CGRectMake(left, 0, SCREEN_WIDTH-left*2,
+            cell.bgView.frame = CGRectMake(DongTaiHorizantolSpace, 0, SCREEN_WIDTH-DongTaiHorizantolSpace*2,
                                            cell.praiseButton.frame.size.height+
                                            cell.praiseButton.frame.origin.y);
         }
+        
         cell.bgView.layer.cornerRadius = 5;
         cell.bgView.clipsToBounds = YES;
         CGRect cellFrame = [tableView rectForRowAtIndexPath:indexPath];
@@ -1945,7 +1964,6 @@ headerDelegate>
     for (int i = 0; i < [praiseArray count]; i++)
     {
         NSDictionary *dict = [praiseArray objectAtIndex:i];
-        DDLOG(@"praise dict %@",dict);
         if ([[[dict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]])
         {
             return YES;
@@ -2004,7 +2022,6 @@ headerDelegate>
         [inputTabBar backKeyBoard];
     }
     
-    DDLOG(@"tap imageview frame %@",NSStringFromCGRect(tap.view.frame));
     NSDictionary *groupDict = [groupDiaries objectAtIndex:(tap.view.tag-333)/SectionTag];
     NSArray *array = [groupDict objectForKey:@"diaries"];
     NSDictionary *dict = [array objectAtIndex:(tap.view.tag-333)%SectionTag/RowTag];
@@ -2038,7 +2055,6 @@ headerDelegate>
     NSDictionary *groupDict = [groupDiaries objectAtIndex:button.tag/SectionTag];
     NSArray *tmpArray = [groupDict objectForKey:@"diaries"];
     NSDictionary *dict = [tmpArray objectAtIndex:button.tag%SectionTag];
-    DDLOG(@"%d home diary %@",button.tag/SectionTag,[[dict objectForKey:@"detail"] objectForKey:@"content"]);
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],

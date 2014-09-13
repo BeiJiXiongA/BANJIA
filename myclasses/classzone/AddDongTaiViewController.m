@@ -743,8 +743,8 @@ int count = 0;
                     latelyLabel.frame = CGRectMake(lateImageView.frame.origin.x+10, lateImageView.frame.origin.y+6, 17*[latelyLabel.text length], 20);
                     
                     locationBgView.frame = CGRectMake(lateImageView.frame.origin.x, imageScrollView.frame.origin.y+imageScrollView.frame.size.height+spaceHeight, lateImageView.frame.size.width , 45);
-                    
-                    mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, locationBgView.frame.size.height+locationBgView.frame.origin.y+20);
+                    isBlogView.frame = CGRectMake(locationBgView.frame.origin.x, locationBgView.frame.origin.y+locationBgView.frame.size.height+10, locationBgView.frame.size.width, locationBgView.frame.size.height);
+                    mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, isBlogView.frame.size.height+isBlogView.frame.origin.y+20);
 //                });
 //            });
         }

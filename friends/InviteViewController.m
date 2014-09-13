@@ -157,7 +157,7 @@ UISearchBarDelegate>
     [self.navigationBarView addSubview:inviteButton];
     
     buttonScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, 70)];
-    buttonScrollView.backgroundColor = [UIColor clearColor];
+    buttonScrollView.backgroundColor = UIColorFromRGB(0xf0f1ec);
     buttonScrollView.showsHorizontalScrollIndicator = NO;
     [self.bgView addSubview:buttonScrollView];
     
@@ -167,7 +167,7 @@ UISearchBarDelegate>
     for (int i=0; i<[iconOnArray count]; i++)
     {
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-        button.frame = CGRectMake(35+103*i, 12.5, 45, 45);
+        button.frame = CGRectMake(35+103*i, 10, 50, 50);
         button.backgroundColor = [UIColor clearColor];
         button.tag = tableViewTagBase+i;
         [button addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
@@ -197,11 +197,16 @@ UISearchBarDelegate>
                    CGRectMake((ContactTableViewTag%tableViewTagBase)*SCREEN_WIDTH, 0, SCREEN_WIDTH-0, 40)];
     mySearchBar.delegate = self;
     mySearchBar.placeholder = @"输入联系人姓名";
+    
+    UIImage *searchBarBgImage = [Tools getImageFromImage:[UIImage imageNamed:@"searchBG"] andInsets:UIEdgeInsetsMake(10, 10, 10, 10)];
+    [mySearchBar setBackgroundImage:searchBarBgImage];
+    
     mySearchBar.contentMode = UIControlContentHorizontalAlignmentLeft;
-    mySearchBar.backgroundColor = [UIColor whiteColor];
+//    mySearchBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"searchBG"]];
+    mySearchBar.backgroundColor = UIColorFromRGB(0xcbc7cc);
     [bgScrollView addSubview:mySearchBar];
     
-    if (SYSVERSION <7.0)
+    if (SYSVERSION < 7.0)
     {
         UITextField* searchField = nil;
         for (UIView* subview in mySearchBar.subviews)
@@ -212,7 +217,8 @@ UISearchBarDelegate>
                 searchField.leftView=nil;
                 [searchField setBackground:nil];
                 [searchField setBackgroundColor:[UIColor whiteColor]];
-                searchField.background = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
+                searchField.layer.cornerRadius = 5;
+                searchField.clipsToBounds = YES;
                 break;
             }
         }
@@ -221,7 +227,7 @@ UISearchBarDelegate>
         {
             if ([subview isKindOfClass:NSClassFromString(@"UISearchBarBackground")])
             {
-                subview.backgroundColor = [UIColor clearColor];
+                [subview setBackgroundColor:UIColorFromRGB(0xcbc7cc)];
                 [subview removeFromSuperview];
                 break;
             }
@@ -598,7 +604,7 @@ UISearchBarDelegate>
                 
                 UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 0, SCREEN_WIDTH-15, 27)];
                 headerLabel.text = @"    已注册班家的联系人";
-                headerLabel.backgroundColor = RGB(54, 188, 59, 1);
+                headerLabel.backgroundColor = UIColorFromRGB(0x3dc46e);
                 headerLabel.font = [UIFont systemFontOfSize:14];
                 headerLabel.textColor = [UIColor whiteColor];
                 return headerLabel;
@@ -611,7 +617,7 @@ UISearchBarDelegate>
                 NSDictionary *groupDict = [groupContactArray objectAtIndex:section-1];
                 UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 0, SCREEN_WIDTH-15, 27)];
                 headerLabel.text = [NSString stringWithFormat:@"   %@",[groupDict objectForKey:@"key"]];
-                headerLabel.backgroundColor = RGB(238, 239, 233, 1);
+                headerLabel.backgroundColor = UIColorFromRGB(0xf0f1ec);
                 headerLabel.font = [UIFont systemFontOfSize:14];
                 headerLabel.textColor = COMMENTCOLOR;
                 return headerLabel;
@@ -655,7 +661,8 @@ UISearchBarDelegate>
             CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
             UIImageView *lineImageView = [[UIImageView alloc] init];
             lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            lineImageView.backgroundColor = LineBackGroudColor;
+            
             [cell.contentView addSubview:lineImageView];
             cell.contentView.backgroundColor = [UIColor whiteColor];
             if (indexPath.row < [tableView numberOfRowsInSection:indexPath.section]-1)
@@ -668,7 +675,7 @@ UISearchBarDelegate>
             
             NSDictionary *dict = [alreadyUsers objectAtIndex:indexPath.row];
             
-            cell.headerImageView.frame = CGRectMake(5, 5, 40, 40);
+            cell.headerImageView.frame = CGRectMake(5, 7.5, 34, 34);
             cell.headerImageView.layer.cornerRadius = 5;
             cell.headerImageView.clipsToBounds = YES;
             [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERICON];
@@ -697,7 +704,7 @@ UISearchBarDelegate>
                 {
                     [cell.inviteButton setTitle:@"已申请" forState:UIControlStateNormal];
                 }
-                [cell.inviteButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
+                [cell.inviteButton setTitleColor:UIColorFromRGB(0x676768) forState:UIControlStateNormal];
                 [cell.inviteButton setImage:nil forState:UIControlStateNormal];
             }
             else
@@ -761,7 +768,7 @@ UISearchBarDelegate>
                 CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
                 UIImageView *lineImageView = [[UIImageView alloc] init];
                 lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-                lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+                lineImageView.backgroundColor = LineBackGroudColor;
                 [cell.contentView addSubview:lineImageView];
                 cell.contentView.backgroundColor = [UIColor whiteColor];
             }
@@ -802,8 +809,8 @@ UISearchBarDelegate>
         CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
         UIImageView *lineImageView = [[UIImageView alloc] init];
         lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
         [cell.contentView addSubview:lineImageView];
+        lineImageView.backgroundColor = LineBackGroudColor;
         cell.contentView.backgroundColor = [UIColor whiteColor];
         return cell;
     }

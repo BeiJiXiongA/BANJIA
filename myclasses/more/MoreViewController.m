@@ -358,7 +358,7 @@ UIActionSheetDelegate>
     
     CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
     cell.lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-    cell.lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+    cell.lineImageView.backgroundColor = LineBackGroudColor;
     cell.contentView.backgroundColor = [UIColor whiteColor];
     
     cell.switchView.hidden = YES;

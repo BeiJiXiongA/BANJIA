@@ -359,7 +359,7 @@ UIActionSheetDelegate>
             CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
             UIImageView *lineImageView = [[UIImageView alloc] init];
             lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            lineImageView.backgroundColor = LineBackGroudColor;
             [cell.contentView addSubview:lineImageView];
             cell.contentView.backgroundColor = [UIColor whiteColor];
         }
@@ -389,10 +389,17 @@ UIActionSheetDelegate>
             cell.button2.iconImageView.frame = CGRectMake(CLEFT, CTOP, ADDFRIW, ADDFRIH);
             [cell.button2.iconImageView setImage:[UIImage imageNamed:@"chatto"]];
             
-            if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fname":teacherName,@"checked":@"1"} andTableName:FRIENDSTABLE] count] > 0)
+            if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fname":teacherName,@"checked":@"1"} andTableName:FRIENDSTABLE] count] > 0 || ![self canAddFriendTeacher])
             {
                 cell.button1.hidden = YES;
                 cell.button2.frame = CGRectMake((SCREEN_WIDTH-150)/2, 10, 145, 43.5);
+            }
+            
+            if ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"opt"] objectForKey:UserChatTeacher] intValue] == 0 &&
+                [[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"parents"])
+            {
+                cell.button2.hidden = YES;
+                cell.button1.frame = CGRectMake((SCREEN_WIDTH-150)/2, 10, 145, 43.5);
             }
             
             [cell.button2 addTarget:self action:@selector(toChat) forControlEvents:UIControlEventTouchUpInside];
@@ -402,6 +409,19 @@ UIActionSheetDelegate>
     }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
+}
+
+-(BOOL)canAddFriendTeacher
+{
+    NSDictionary *setDict = [[NSUserDefaults standardUserDefaults] objectForKey:@"set"];
+    if (([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"students"] &&
+         [[setDict objectForKey:StudentTeacherFriend] intValue] == 0) ||
+        ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"parents"] &&
+         [[setDict objectForKey:ParentTeacherFriend] intValue] == 0))
+    {
+        return NO;
+    }
+    return YES;
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath

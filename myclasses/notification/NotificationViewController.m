@@ -456,11 +456,12 @@ EGORefreshTableDelegate>
                 cell.contentLabel.hidden = NO;
                 cell.nameLabel.hidden = NO;
                 cell.contentLabel.frame = CGRectMake(0, 0, SCREEN_WIDTH, 32);
-                cell.contentLabel.backgroundColor = RGB(56, 186, 98, 1);
+                cell.contentLabel.backgroundColor = HEADER_GREEN;
                 cell.contentLabel.font = [UIFont systemFontOfSize:18];
                 cell.contentLabel.textColor = [UIColor whiteColor];
                 NSString *classname = [NSString stringWithFormat:@"   %@",[[NSUserDefaults standardUserDefaults] objectForKey:@"classname"]];
                 cell.contentLabel.text = classname;
+                cell.iconImageView.hidden = YES;
             }
             else
             
@@ -519,13 +520,14 @@ EGORefreshTableDelegate>
             noticeContent = [noticeContent substringFromIndex:range.location+range.length];
         }
         
-        cell.contentLabel.text = noticeContent;
+        cell.contentLabel.text = [noticeContent stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 //        cell.contentLabel.font = DongTaiContentFont;
         cell.contentLabel.textColor = CONTENTCOLOR;
         cell.contentLabel.contentMode = UIViewContentModeTop;
         
         if (indexPath.section == 1)
         {
+            cell.iconImageView.hidden = NO;
             cell.iconImageView.frame = CGRectMake(20, 17, 12, 12);
             //        [cell.iconImageView setImage:[UIImage imageNamed:@"unreadicon"]];
             cell.iconImageView.layer.cornerRadius = 6;
@@ -554,6 +556,7 @@ EGORefreshTableDelegate>
         cell.timeLabel.text = [NSString stringWithFormat:@"%@发布于%@",byName,[Tools showTime:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] intValue]]]];
         cell.timeLabel.textColor = COMMENTCOLOR;
         
+        DDLOG(@"%@===%@",noticeContent,NSStringFromCGRect(cell.contentLabel.frame));
         
         cell.statusLabel.text =[NSString stringWithFormat:@"%d人已读 %d人未读",[[dict objectForKey:@"read_num"] intValue],[[dict objectForKey:@"unread_num"] intValue]];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;

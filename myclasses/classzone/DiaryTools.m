@@ -14,20 +14,44 @@
 #define PraiseW   31
 #define ColumnPerRow  8
 
+#define PraiseCellHeight  30
+
 @implementation DiaryTools
 + (CGFloat)heightWithDiaryDict:(NSDictionary *)dict andShowAll:(BOOL)showAll
 {
-    CGFloat he=0;
-    if (SYSVERSION>=7)
-    {
-        he = 5;
-    }
-    //                CGFloat imageWidth = 60;
-    CGFloat imageViewHeight = ImageHeight;
+    //头像
+    CGFloat headerHeight = 44;
+    
+    //文字
     NSString *content = [[[dict objectForKey:@"detail"] objectForKey:@"content"] emojizedString];
+    
+    CGSize size = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-30 andFont:[UIFont systemFontOfSize:15]];
+    
+    CGFloat contentHeight = 0;
+    if ([content length] > 0)
+    {
+        if (showAll)
+        {
+            contentHeight = size.height+10;
+        }
+        else
+        {
+            if (size.height > 45)
+            {
+                contentHeight = 45 + DongTaiSpace*2;
+            }
+            else
+            {
+                contentHeight = size.height + 10 + DongTaiSpace*2;
+            }
+        }
+    }
+    
+    //图片
     NSArray *imgsArray = [[[dict objectForKey:@"detail"] objectForKey:@"img"] count]>0?[[dict objectForKey:@"detail"] objectForKey:@"img"]:nil;
     NSInteger imageCount = [imgsArray count];
     NSInteger row = 0;
+    CGFloat imageViewHeight = ImageHeight;
     if (imageCount % ImageCountPerRow > 0)
     {
         row = (imageCount/ImageCountPerRow+1) > 3 ? 3:(imageCount / ImageCountPerRow + 1);
@@ -37,28 +61,26 @@
         row = (imageCount/ImageCountPerRow) > 3 ? 3:(imageCount / ImageCountPerRow);
     }
     
-    CGFloat imgsHeight = row * (imageViewHeight+5);
-
-    CGSize size = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-30 andFont:[UIFont systemFontOfSize:15]];
-    
-    CGFloat contentHeight = 0;
-    if (showAll)
+    CGFloat imgsHeight = 0;
+    if (row > 0)
     {
-        contentHeight = size.height+10;
-    }
-    else
-    {
-        if (size.height > 45)
+        if ([content length] > 0)
         {
-            contentHeight = 45;
+            imgsHeight = row * (imageViewHeight+5) + DongTaiSpace*2;
         }
         else
         {
-            contentHeight = size.height+10;
+            imgsHeight = row * (imageViewHeight+5) + DongTaiSpace * 3;
         }
     }
+    else
+    {
+        imgsHeight = DongTaiSpace;
+    }
+    //评论,赞，转发
+    CGFloat buttonHeight = 37;
     
-    CGFloat contentHtight = [content length] > 0 ? (contentHeight) : 10;
+    //评论
     CGFloat tmpcommentHeight = 0;
     if ([[dict objectForKey:@"comments_num"] integerValue] > 0)
     {
@@ -72,14 +94,15 @@
                 NSString *content = [[dict objectForKey:@"content"] emojizedString];
                 NSString *contentString = [NSString stringWithFormat:@"%@",content];
                 CGSize s = [Tools getSizeWithString:contentString andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
-                tmpcommentHeight += (s.height+CommentSpace*2+25-5);
+                tmpcommentHeight += (s.height+CommentSpace*1+32);
             }
         }
         else
         {
             //动态列表
-            for (int i=0; i<([array count] > 6 ? 6:[array count]); ++i)
-            {
+            int commentCount = [array count] > 6 ? ([array count] - 7) : -1;
+            int i = [array count]-1;
+            do {
                 NSDictionary *dict = [array objectAtIndex:i];
                 
                 NSString *name = [[dict objectForKey:@"by"] objectForKey:@"name"];
@@ -94,32 +117,37 @@
                 }
                 
                 NSString *content = [[dict objectForKey:@"content"] emojizedString];
+                
                 CGSize commentSize = [Tools getSizeWithString:content andWidth:MaxCommentWidth-nameSize.width andFont:CommentFont];
-                 tmpcommentHeight += commentSize.height+CommentSpace*2;
-            }
-            if ([array count] > 6)
+                tmpcommentHeight += (commentSize.height + CommentSpace * 2);
+                
+                --i;
+            }while (i > commentCount);
+            
+            if ([array count] >= 7)
             {
                 tmpcommentHeight += MinCommentHeight;
             }
         }
     }
+    //赞
     if ([[dict objectForKey:@"likes_num"] integerValue] > 0)
     {
         
         if (showAll)
         {
             int likes_num = [[dict objectForKey:@"likes_num"] integerValue];
-            
             int row = likes_num % ColumnPerRow == 0 ? (likes_num/ColumnPerRow):(likes_num/ColumnPerRow+1);
-            tmpcommentHeight+=(36+(PraiseW+5)*row);
+            tmpcommentHeight += ((30+(PraiseW+5)*row) + DongTaiSpace*3);
         }
         else
         {
-            tmpcommentHeight += 36;
+            tmpcommentHeight += (PraiseCellHeight+CommentSpace);
         }
         
     }
-    return 50 + imgsHeight+contentHtight + 55 + tmpcommentHeight + 6;
+    DDLOG(@"tmpcommentHeight == %f",tmpcommentHeight);
+    return headerHeight + imgsHeight + contentHeight + buttonHeight + tmpcommentHeight + 6; //6为动态与动态之间距离一半
 }
 
 @end

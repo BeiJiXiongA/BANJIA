@@ -187,12 +187,20 @@ OperateFriends>
 #pragma mark - msgDelegate
 -(void)dealNewMsg:(NSDictionary *)dict
 {
+    if ([[Tools user_id] length] == 0)
+    {
+        return ;
+    }
     [self getFriendList];
 }
 
 #pragma mark -chatDelegate
 -(void)dealNewChatMsg:(NSDictionary *)dict
 {
+    if ([[Tools user_id] length] == 0)
+    {
+        return ;
+    }
     [self viewWillAppear:YES];
 }
 
@@ -318,15 +326,15 @@ OperateFriends>
     {
         if (indexPath.row == 0 && [newFriendsApply count] > 0)
         {
-            return 62;
+            return 52;
         }
         else if (indexPath.row == 1 && [groupChatArray count] > 0)
         {
-            return 62;
+            return 52;
         }
         return 0;
     }
-    return 60;
+    return 50;
 }
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -350,15 +358,14 @@ OperateFriends>
             
             CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
             UIImageView *lineImageView = [[UIImageView alloc] init];
-            lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0);
+            lineImageView.backgroundColor = LineBackGroudColor;
             [cell.contentView addSubview:lineImageView];
             
-            UIImageView *markView = [[UIImageView alloc] init];
             cell.contentView.backgroundColor = [UIColor whiteColor];
             if (indexPath.row < [friendsListTableView numberOfRowsInSection:indexPath.section]-1)
             {
-                lineImageView.frame = CGRectMake( 60, cellHeight-0.5, cell.frame.size.width, 0.5);
+                lineImageView.frame = CGRectMake( 60, cellHeight-0.5, cell.frame.size.width, 0);
             }
             
             cell.headerImageView.hidden = YES;
@@ -391,7 +398,7 @@ OperateFriends>
                     cell.contentLabel.layer.borderWidth = 0.3;
                     
                     cell.memNameLabel.hidden = NO;
-                    cell.memNameLabel.textColor = CONTENTCOLOR;
+                    cell.memNameLabel.textColor = COMMENTCOLOR;
                     cell.memNameLabel.frame = CGRectMake(120, 16, 105, 30);
                     cell.memNameLabel.text = [NSString stringWithFormat:@"%d个新申请",(int)[newFriendsApply count]];
                     
@@ -410,45 +417,25 @@ OperateFriends>
                 }
                 cell.selectionStyle = UITableViewCellSelectionStyleGray;
                 return cell;
-            
-//            cell.headerImageView.hidden = NO;
-//            cell.headerImageView.frame = CGRectMake(10, 8, 46, 46);
-//            [cell.headerImageView setImage:[UIImage imageNamed:@"newfriendheader"]];
-//            
-//            cell.contentLabel.frame = CGRectMake(75, 7.5, 178, 47);
-//            cell.contentLabel.hidden = NO;
-//            cell.contentLabel.backgroundColor = [UIColor whiteColor];
-//            
-//            cell.memNameLabel.frame = CGRectMake(70, 16, 115, 30);
-//            cell.memNameLabel.hidden = NO;
-//            cell.memNameLabel.text = [NSString stringWithFormat:@"您有%d个新好友",[newFriendsApply count]];
-//            cell.memNameLabel.font = [UIFont systemFontOfSize:17];
-//            
-//            cell.markView.frame = CGRectMake(SCREEN_WIDTH-20, 25, 8, 12);
-//            [cell.markView setImage:[UIImage imageNamed:@"discovery_arrow"]];
-//            cell.markView.hidden = NO;
-//            cell.backgroundColor = self.bgView.backgroundColor;
-//            
-//            cell.selectionStyle = UITableViewCellSelectionStyleGray;
             }
         }
         
         else  if(indexPath.row == 1 && [groupChatArray count] > 0)
         {
             cell.headerImageView.hidden = NO;
-            cell.headerImageView.frame = CGRectMake(10, 8, 46, 46);
+            cell.headerImageView.frame = CGRectMake(10, 9, 34, 34);
             [cell.headerImageView setImage:[UIImage imageNamed:@"groupchatheader"]];
             
-            cell.contentLabel.frame = CGRectMake(75, 7.5, 178, 47);
+            cell.contentLabel.frame = CGRectMake(60, 1.5, 178, 47);
             cell.contentLabel.hidden = NO;
             cell.contentLabel.backgroundColor = [UIColor whiteColor];
             
-            cell.memNameLabel.frame = CGRectMake(70, 16, 115, 30);
+            cell.memNameLabel.frame = CGRectMake(60, 11, 115, 30);
             cell.memNameLabel.hidden = NO;
             cell.memNameLabel.text = [NSString stringWithFormat:@"群聊(%d)",[groupChatArray count]];
             cell.memNameLabel.font = [UIFont systemFontOfSize:17];
             
-            cell.markView.frame = CGRectMake(SCREEN_WIDTH-20, 25, 8, 12);
+            cell.markView.frame = CGRectMake(SCREEN_WIDTH-20, 19, 8, 12);
             [cell.markView setImage:[UIImage imageNamed:@"discovery_arrow"]];
             cell.markView.hidden = NO;
         }
@@ -461,8 +448,8 @@ OperateFriends>
         }
         CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
         UIImageView *lineImageView = [[UIImageView alloc] init];
-        lineImageView.frame = CGRectMake(70, cellHeight-0.5, cell.frame.size.width, 0.5);
-        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+        lineImageView.frame = CGRectMake(60, cellHeight-0.5, cell.frame.size.width, 0.5);
+        lineImageView.backgroundColor = LineBackGroudColor;
         [cell.contentView addSubview:lineImageView];
         cell.contentView.backgroundColor = [UIColor whiteColor];
         
@@ -480,8 +467,8 @@ OperateFriends>
         
         CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
         UIImageView *lineImageView = [[UIImageView alloc] init];
-        lineImageView.frame = CGRectMake(70, cellHeight-0.5, cell.frame.size.width, 0.5);
-        lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+        lineImageView.frame = CGRectMake(60, cellHeight-0.5, cell.frame.size.width, 0.5);
+        lineImageView.backgroundColor = LineBackGroudColor;
         [cell.contentView addSubview:lineImageView];
         cell.contentView.backgroundColor = [UIColor whiteColor];
         if (indexPath.row == [tableView numberOfRowsInSection:indexPath.section]-1 && [tmpListArray count] > MinSortCount)
@@ -492,14 +479,14 @@ OperateFriends>
         NSArray *array = [groupDict objectForKey:@"array"];
         NSDictionary *friendDict = [array objectAtIndex:indexPath.row];
         
-        cell.headerImageView.frame = CGRectMake(10, 7, 46, 46);
+        cell.headerImageView.frame = CGRectMake(14, 7, 34, 34);
         cell.headerImageView.layer.cornerRadius = 5;
         cell.headerImageView.clipsToBounds = YES;
         
         cell.unreadedMsgLabel.hidden = YES;
         [Tools fillImageView:cell.headerImageView withImageFromURL:[friendDict objectForKey:@"ficon"] andDefault:HEADERICON];
         
-        cell.memNameLabel.frame = CGRectMake(70, 15, 150, 30);
+        cell.memNameLabel.frame = CGRectMake(60, 10, 150, 30);
         cell.memNameLabel.text = [friendDict objectForKey:@"fname"];
         return cell;
     }

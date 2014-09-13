@@ -168,6 +168,10 @@ UIActionSheetDelegate>
 #pragma mark - chatdelegate
 -(void)dealNewChatMsg:(NSDictionary *)dict
 {
+    if ([[Tools user_id] length] == 0)
+    {
+        return ;
+    }
     if ([self haveNewMsg] || [self haveNewNotice])
     {
         self.unReadLabel.hidden = NO;
@@ -297,7 +301,7 @@ UIActionSheetDelegate>
             cell.nameLabel.frame = CGRectMake(90, 20, 18*[[Tools user_name] length], 20);
             cell.nameLabel.text = [Tools user_name];
             cell.nameLabel.font = [UIFont systemFontOfSize:18];
-            cell.nameLabel.textColor = TITLE_COLOR;
+            cell.nameLabel.textColor = USER_NAME_COLOR;
             
             cell.objectsLabel.frame = CGRectMake(90, 45, 100, 20);
             cell.objectsLabel.textColor = TITLE_COLOR;
@@ -328,7 +332,7 @@ UIActionSheetDelegate>
             CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
             UIImageView *lineImageView = [[UIImageView alloc] init];
             lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            lineImageView.backgroundColor = LineBackGroudColor;
             [cell.contentView addSubview:lineImageView];
             cell.contentView.backgroundColor = [UIColor whiteColor];
             
@@ -379,7 +383,7 @@ UIActionSheetDelegate>
             CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
             UIImageView *lineImageView = [[UIImageView alloc] init];
             lineImageView.frame = CGRectMake(60, cellHeight-0.5, cell.frame.size.width, 0.5);
-            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            lineImageView.backgroundColor = LineBackGroudColor;
             [cell.contentView addSubview:lineImageView];
             cell.contentView.backgroundColor = [UIColor whiteColor];
             
@@ -405,7 +409,7 @@ UIActionSheetDelegate>
             CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
             UIImageView *lineImageView = [[UIImageView alloc] init];
             lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            lineImageView.backgroundColor = LineBackGroudColor;
             [cell.contentView addSubview:lineImageView];
             
             if (indexPath.row == 1)
@@ -507,6 +511,7 @@ UIActionSheetDelegate>
             {
                 cell.nameLabel.hidden = NO;
                 cell.nameLabel.text = @"您尚未进行教师认证";
+                cell.nameLabel.textColor = USER_NAME_COLOR;
                 cell.nameLabel.frame = CGRectMake(20, 13, 200, 20);
                 if (!([Tools phone_num] && [[Tools phone_num] length] > 0))
                 {
@@ -551,7 +556,7 @@ UIActionSheetDelegate>
             CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
             UIImageView *lineImageView = [[UIImageView alloc] init];
             lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            lineImageView.backgroundColor = LineBackGroudColor;
             [cell.contentView addSubview:lineImageView];
             cell.contentView.backgroundColor = [UIColor whiteColor];
             
@@ -569,7 +574,7 @@ UIActionSheetDelegate>
             }
             cell.textLabel.font = [UIFont systemFontOfSize:18];
             cell.textLabel.text = @" 个人设置";
-            cell.textLabel.textColor = TITLE_COLOR;
+            cell.textLabel.textColor = USER_NAME_COLOR;
             
             cell.selectionStyle = UITableViewCellSelectionStyleGray;
             cell.contentView.backgroundColor = [UIColor whiteColor];
@@ -577,7 +582,7 @@ UIActionSheetDelegate>
             CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
             UIImageView *lineImageView = [[UIImageView alloc] init];
             lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            lineImageView.backgroundColor = LineBackGroudColor;
             [cell.contentView addSubview:lineImageView];
             cell.contentView.backgroundColor = [UIColor whiteColor];
             

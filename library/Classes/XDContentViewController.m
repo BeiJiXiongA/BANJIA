@@ -52,8 +52,8 @@
 
 -(void)postlogOut
 {
-    
     [Tools exit];
+    
     WelcomeViewController *login = [[WelcomeViewController alloc] init];
     KKNavigationController *loginNav = [[KKNavigationController alloc] initWithRootViewController:login];
     [self.navigationController presentViewController:loginNav animated:YES completion:nil];
