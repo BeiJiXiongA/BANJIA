@@ -59,6 +59,8 @@
     
     [[NSUserDefaults standardUserDefaults] synchronize];
     
+    [self getNewVersion];
+    
     [application setStatusBarHidden:NO withAnimation:UIStatusBarAnimationFade];
     
     _db = [[OperatDB alloc] init];
@@ -776,8 +778,10 @@
         }
         else if([[userInfo objectForKey:@"type"] isEqualToString:@"logout"])
         {
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"logout" object:userInfo];
-            
+            if ([[Tools user_id] length] > 0)
+            {
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"logout" object:userInfo];
+            }
             [Tools showAlertView:[[userInfo objectForKey:@"aps"] objectForKey:@"alert"] delegateViewController:nil];
         }
     }

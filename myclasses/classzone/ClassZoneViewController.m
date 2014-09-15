@@ -824,7 +824,7 @@ NameButtonDel>
             verticalLineView.backgroundColor = UIColorFromRGB(0xe2e3e4);
             
             CGFloat verticalLineHeight = 0;
-            if ([tmpArray count] == 0 || (([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"visitor"]) && ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:VisitorAccess] integerValue] == 0)))
+            if ([DongTaiArray count] == 0 || (([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"visitor"]) && ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:VisitorAccess] integerValue] == 0)))
             {
                 verticalLineHeight = 13;
             }

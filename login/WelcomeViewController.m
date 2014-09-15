@@ -71,6 +71,7 @@ UITextFieldDelegate>
     self.backButton.hidden = YES;
     self.navigationBarView.hidden = YES;
     
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"logout" object:nil];
     
     CGFloat logoImageHeight = 0;
     if (FOURS)

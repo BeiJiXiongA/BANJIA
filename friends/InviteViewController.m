@@ -18,7 +18,9 @@
 
 #define tableViewTagBase   77777777
 
-#define ContactTableViewTag  tableViewTagBase
+#define BanJiaFriendsTableViewTag tableViewTagBase
+
+#define ContactTableViewTag  tableViewTagBase+1
 
 #define TencentTableViewTag     (tableViewTagBase+1)
 #define WeiXinTag             (tableViewTagBase+2)
@@ -54,6 +56,11 @@ UISearchBarDelegate>
     NSMutableArray *addedContactArray;
     
     NSMutableArray *allContacts;
+    
+    //班家好友
+    NSMutableArray *thisClassFriednsArray;
+    NSMutableArray *friendsArry;
+    UITableView *friendsTableView;
     
     UIView *phoneBgView;
     NSString *_userName;
@@ -126,7 +133,9 @@ UISearchBarDelegate>
     
     db = [[OperatDB alloc] init];
     
-    
+    //班家好友
+    thisClassFriednsArray = [[NSMutableArray alloc] initWithCapacity:0];
+    friendsArry = [[NSMutableArray alloc] initWithCapacity:0];
     
     //手机联系人
     contactArray = [[NSMutableArray alloc]initWithCapacity:0];
@@ -161,8 +170,8 @@ UISearchBarDelegate>
     buttonScrollView.showsHorizontalScrollIndicator = NO;
     [self.bgView addSubview:buttonScrollView];
     
-    iconOnArray = @[@"invite_phone_on",@"invite_QQ_on",@"invite_weichat_on"];
-    iconArray = @[@"invite_phone",@"invite_QQ",@"invite_weichat"];
+    iconOnArray = @[@"Invite_banjia_friend",@"invite_phone_on",@"invite_QQ_on",@"invite_weichat_on"];
+    iconArray = @[@"Invite_banjia_friend",@"invite_phone",@"invite_QQ",@"invite_weichat"];
     
     for (int i=0; i<[iconOnArray count]; i++)
     {
@@ -190,8 +199,15 @@ UISearchBarDelegate>
     bgScrollView.pagingEnabled = YES;
     bgScrollView.showsHorizontalScrollIndicator = NO;
     bgScrollView.scrollEnabled = NO;
-    bgScrollView.contentSize = CGSizeMake(SCREEN_WIDTH*3, bgScrollView.frame.size.height);
+    bgScrollView.contentSize = CGSizeMake(SCREEN_WIDTH*4, bgScrollView.frame.size.height);
     [self.bgView addSubview:bgScrollView];
+    
+    
+    friendsTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, bgScrollView.frame.size.height) style:UITableViewStylePlain];
+    friendsTableView.delegate = self;
+    friendsTableView.dataSource = self;
+    friendsTableView.tag = BanJiaFriendsTableViewTag;
+    [bgScrollView addSubview:friendsTableView];
     
     mySearchBar = [[UISearchBar alloc] initWithFrame:
                    CGRectMake((ContactTableViewTag%tableViewTagBase)*SCREEN_WIDTH, 0, SCREEN_WIDTH-0, 40)];
@@ -232,7 +248,6 @@ UISearchBarDelegate>
                 break;
             }
         }
-
     }
 
     
@@ -457,7 +472,11 @@ UISearchBarDelegate>
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    if (tableView.tag == ContactTableViewTag)
+    if (tableView.tag == BanJiaFriendsTableViewTag)
+    {
+        return 2;
+    }
+    else if (tableView.tag == ContactTableViewTag+1)
     {
         return [groupContactArray count]+1;
     }
@@ -466,7 +485,11 @@ UISearchBarDelegate>
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    if(tableView.tag == ContactTableViewTag)
+    if (tableView.tag == BanJiaFriendsTableViewTag)
+    {
+//        static NSString *
+    }
+    else if(tableView.tag == ContactTableViewTag)
     {
         for(UIView *v in selectScrollView.subviews)
         {

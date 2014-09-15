@@ -10,6 +10,8 @@
 	<string>BANJIA</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
+		<key>671dc06b-d518-8248-8207-5643baf02e27++9191</key>
+		<string>https://192.168.60.200/svn/iHome_controller/trunk/IOS/iHome/iHome/View/EGORefresh.bundle</string>
 		<key>C432500CD9226E6BBCEBA029DAF848477FECF7C4</key>
 		<string>https://github.com/BeiJiXiongA/BANJIA.git</string>
 	</dict>
@@ -17,8 +19,15 @@
 	<string>BANJIA.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
+		<key>671dc06b-d518-8248-8207-5643baf02e27++9191</key>
+		<string>../../library/refresh/EGORefresh.bundle/</string>
 		<key>C432500CD9226E6BBCEBA029DAF848477FECF7C4</key>
 		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectRepositoryRootDictionary</key>
+	<dict>
+		<key>671dc06b-d518-8248-8207-5643baf02e27++9191</key>
+		<string>https://192.168.60.200/svn/iHome_controller</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
 	<string>https://github.com/BeiJiXiongA/BANJIA.git</string>
@@ -35,6 +44,14 @@
 			<string>C432500CD9226E6BBCEBA029DAF848477FECF7C4</string>
 			<key>IDESourceControlWCCName</key>
 			<string>BANJIA</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.subversion</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>671dc06b-d518-8248-8207-5643baf02e27++9191</string>
+			<key>IDESourceControlWCCName</key>
+			<string>EGORefresh.bundle</string>
 		</dict>
 	</array>
 </dict>

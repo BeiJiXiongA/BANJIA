@@ -562,7 +562,7 @@ verticalLineView;
                 [cell.nameButton setTitleColor:RGB(64, 196, 110, 1) forState:UIControlStateNormal];
                 
                 NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row];
-                NSString *name = [NSString stringWithFormat:@"%@：",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
+                NSString *name = [NSString stringWithFormat:@"%@ : ",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
                 
                 UIFont *nameFont = CommentFont;
                 CGSize nameSize;
@@ -604,7 +604,7 @@ verticalLineView;
             {
                 cell.nameButton.hidden = YES;
                 NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row-1];
-                NSString *name = [NSString stringWithFormat:@"%@：",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
+                NSString *name = [NSString stringWithFormat:@"%@ : ",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
                 
                 UIFont *nameFont = CommentFont;
                 CGSize nameSize;

@@ -273,7 +273,7 @@
             int charactorCount = 0;
             if (SYSVERSION >= 7)
             {
-                charactorCount = 3;
+                charactorCount = 4;
             }
             else
             {
@@ -282,6 +282,17 @@
             if ([msgContent length] < charactorCount)
             {
                 x = charactorCount - [msgContent length];
+            }
+            else
+            {
+                if (SYSVERSION >= 7)
+                {
+                    x = -1.5;
+                }
+                else
+                {
+                    x = 1.5;
+                }
             }
             
             self.messageTf.frame = CGRectMake(self.chatBg.frame.origin.x + chatBgSpace-x, self.chatBg.frame.origin.y + messageTfY, size.width+cha, size.height+fromTextCha);
@@ -333,7 +344,7 @@
                 self.nameLabel.frame = CGRectMake(self.headerImageView.frame.size.width+self.headerImageView.frame.origin.x+5, self.headerImageView.frame.origin.y, 100, 20);
                 self.nameLabel.text = name;
                 self.chatBg.frame = CGRectMake(chatBgX, messageBgY+20, size.width+20, size.height+20);
-                self.messageTf.frame = CGRectMake(self.chatBg.frame.origin.x + chatBgSpace-x,self.chatBg.frame.origin.y + messageTfY, size.width+cha, size.height+fromTextCha);
+                self.messageTf.frame = CGRectMake(self.chatBg.frame.origin.x + chatBgSpace - x,self.chatBg.frame.origin.y + messageTfY, size.width+cha, size.height+fromTextCha);
                 [Tools fillImageView:self.headerImageView withImageFromURL:img_icon andDefault:HEADERICON];
             }
             else
@@ -453,7 +464,7 @@
             int charactorCount = 0;
             if (SYSVERSION >= 7)
             {
-                charactorCount = 3;
+                charactorCount = 4;
             }
             else
             {
@@ -463,7 +474,7 @@
             {
                 x = charactorCount - [msgContent length];
             }
-            self.messageTf.frame = CGRectMake(self.chatBg.frame.origin.x + 5 - x,self.chatBg.frame.origin.y, size.width+cha, size.height+totextcha);
+            self.messageTf.frame = CGRectMake(self.chatBg.frame.origin.x + 6.5 - x,self.chatBg.frame.origin.y, size.width+cha, size.height+totextcha);
             self.messageTf.text = [[dict objectForKey:@"content"] emojizedString];
             
             self.selectionStyle = UITableViewCellSelectionStyleNone;

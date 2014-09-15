@@ -384,10 +384,9 @@ originWav,recorderVC,player,hideSoundButton;
 {
     if (longPress.state == UIGestureRecognizerStateBegan)
     {
-        DDLOG(@"录音开始");
+        [[NSNotificationCenter defaultCenter] postNotificationName:STARTRECORD object:nil];
         [recordButton setTitle:@"录音开始" forState:UIControlStateNormal];
         [recordButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:@"touchDown"] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
-        
         self.originWav = [VoiceRecorderBaseVC getCurrentTimeString];
         //开始录音
         [recorderVC beginRecordByFileName:self.originWav];
@@ -395,7 +394,7 @@ originWav,recorderVC,player,hideSoundButton;
     else if (longPress.state == UIGestureRecognizerStateEnded ||
              longPress.state == UIGestureRecognizerStateCancelled)
     {
-        DDLOG(@"录音结束");
+        [[NSNotificationCenter defaultCenter] postNotificationName:STOPRECORD object:nil];
         [recordButton setTitle:@"按下录音" forState:UIControlStateNormal];
         [recordButton setBackgroundImage:[UIImage imageNamed:@"recordBtn"] forState:UIControlStateNormal];
         [recorderVC.recorder stop];

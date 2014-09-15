@@ -93,6 +93,10 @@ EGORefreshTableHeaderDelegate>
     int page;
     
     UIButton *moreButton;
+    
+    UIView *recordingIndicatorView;
+    UIImageView *recordingImageView;
+    UILabel *recordingLabel;
 }
 @end
 
@@ -142,7 +146,8 @@ EGORefreshTableHeaderDelegate>
 	// Do any additional setup after loading the view.
     self.titleLabel.text = name;
     
-    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(startRecord) name:STARTRECORD object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(stopRecord) name:STOPRECORD object:nil];
     
     if (SYSVERSION > 7.0)
     {
@@ -1117,6 +1122,21 @@ EGORefreshTableHeaderDelegate>
     {
         [self playRecordFile:filePath andImageView:nil];
     }
+}
+
+#pragma mark - 录音相关
+-(void)startRecord
+{
+//    recordingIndicatorView = [[UIView alloc] init];
+//    recordingIndicatorView.frame = CGRectMake((SCREEN_WIDTH-150)/2, (SCREEN_HEIGHT-40-UI_NAVIGATION_BAR_HEIGHT-200)/2, 150, 200);
+//    recordingIndicatorView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
+//    recordingIndicatorView.layer.cornerRadius = 5;
+//    recordingIndicatorView.clipsToBounds = YES;
+//    [self.bgView addSubview:recordingIndicatorView];
+}
+-(void)stopRecord
+{
+    [recordingIndicatorView removeFromSuperview];
 }
 
 #pragma mark - 播放原wav

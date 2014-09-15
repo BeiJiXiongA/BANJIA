@@ -357,7 +357,7 @@ UIActionSheetDelegate,NameButtonDel>
     cell.nameLabel.text = nameStr;
     cell.nameLabel.font = [UIFont systemFontOfSize:15];
     cell.nameLabel.textColor = DongTaiNameColor;
-    cell.timeLabel.frame = CGRectMake(cell.nameLabel.frame.size.width+cell.nameLabel.frame.origin.x, 5, SCREEN_WIDTH-cell.nameLabel.frame.origin.x-cell.nameLabel.frame.size.width-15, 30);
+    cell.timeLabel.frame = CGRectMake(SCREEN_WIDTH-200-24, 5, 200, 30);
     cell.timeLabel.textAlignment = NSTextAlignmentRight;
     cell.timeLabel.numberOfLines = 1;
     cell.timeLabel.lineBreakMode = NSLineBreakByWordWrapping | NSLineBreakByTruncatingTail;
@@ -402,13 +402,13 @@ UIActionSheetDelegate,NameButtonDel>
         
         NSString *content = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"];
         
-        CGSize contentSize = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-30 andFont:[UIFont systemFontOfSize:15]];
+        CGSize contentSize = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-15 andFont:[UIFont systemFontOfSize:15]];
         
         cell.contentTextField.text = [[[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"] emojizedString];
         
         cell.contentTextField.textColor = CONTENTCOLOR;
         
-        cell.contentTextField.frame = CGRectMake(6, cell.headerImageView.frame.size.height+cell.headerImageView.frame.origin.y+DongTaiSpace, SCREEN_WIDTH-30, contentSize.height+18);
+        cell.contentTextField.frame = CGRectMake(6, cell.headerImageView.frame.size.height+cell.headerImageView.frame.origin.y+DongTaiSpace, SCREEN_WIDTH-15, contentSize.height+18);
     }
     else
     {

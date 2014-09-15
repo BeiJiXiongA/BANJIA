@@ -208,6 +208,8 @@ return shared##className; \
 #define RECEIVENEWMSG     @"receivenewmsg"
 #define RECEIVENEWMSGNOTATCHATVIEW   @"receivenewmsgnotatchatview"
 #define RECEIVENEWNOTICE   @"receivenewnotice"
+#define STARTRECORD   @"startrecord"
+#define STOPRECORD    @"stoprecord"
 
 #define UPDATEGROUPCHATLIST   @"updategroupchatlist"
 
