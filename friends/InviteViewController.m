@@ -20,11 +20,11 @@
 
 #define BanJiaFriendsTableViewTag tableViewTagBase
 
-#define ContactTableViewTag  tableViewTagBase+1
+#define ContactTableViewTag  (tableViewTagBase+1)
 
-#define TencentTableViewTag     (tableViewTagBase+1)
-#define WeiXinTag             (tableViewTagBase+2)
-#define SearchTableViewTag (tableViewTagBase+3)
+#define TencentTableViewTag     (tableViewTagBase+2)
+#define WeiXinTag             (tableViewTagBase+3)
+#define SearchTableViewTag (tableViewTagBase+4)
 
 #define TIPSLABEL_TAG 10086
 
@@ -61,6 +61,7 @@ UISearchBarDelegate>
     NSMutableArray *thisClassFriednsArray;
     NSMutableArray *friendsArry;
     UITableView *friendsTableView;
+    NSMutableArray *alreadyInviteFriendsArray;
     
     UIView *phoneBgView;
     NSString *_userName;
@@ -97,6 +98,8 @@ UISearchBarDelegate>
     UIView *selectView;
     UIScrollView *selectScrollView;
     UIButton *selectButton;
+    
+    int fromClassTableViewIndex;
 }
 @end
 
@@ -137,6 +140,8 @@ UISearchBarDelegate>
     thisClassFriednsArray = [[NSMutableArray alloc] initWithCapacity:0];
     friendsArry = [[NSMutableArray alloc] initWithCapacity:0];
     
+    alreadyInviteFriendsArray = [[NSMutableArray alloc] initWithCapacity:0];
+    
     //手机联系人
     contactArray = [[NSMutableArray alloc]initWithCapacity:0];
     //已经选择的手机号数组 
@@ -156,13 +161,22 @@ UISearchBarDelegate>
     
     tapTgr = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(cancelSearch)];
     
+    fromClassTableViewIndex = 1;
     
+    if (fromClass)
+    {
+        fromClassTableViewIndex = 0;
+    }
     
     inviteButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [inviteButton setTitle:@"邀请" forState:UIControlStateNormal];
     [inviteButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     inviteButton.frame = CGRectMake(SCREEN_WIDTH - 80, self.backButton.frame.origin.y, 70, NAV_RIGHT_BUTTON_HEIGHT);
     [inviteButton addTarget:self action:@selector(inviteClick) forControlEvents:UIControlEventTouchUpInside];
+    if (fromClass)
+    {
+        inviteButton.hidden = YES;
+    }
     [self.navigationBarView addSubview:inviteButton];
     
     buttonScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, 70)];
@@ -170,8 +184,17 @@ UISearchBarDelegate>
     buttonScrollView.showsHorizontalScrollIndicator = NO;
     [self.bgView addSubview:buttonScrollView];
     
-    iconOnArray = @[@"Invite_banjia_friend",@"invite_phone_on",@"invite_QQ_on",@"invite_weichat_on"];
-    iconArray = @[@"Invite_banjia_friend",@"invite_phone",@"invite_QQ",@"invite_weichat"];
+    
+    if (fromClass)
+    {
+        iconOnArray = @[@"Invite_banjia_friend",@"invite_phone_on",@"invite_QQ_on",@"invite_weichat_on"];
+        iconArray = @[@"Invite_banjia_friend",@"invite_phone",@"invite_QQ",@"invite_weichat"];
+    }
+    else
+    {
+        iconOnArray = @[@"invite_phone_on",@"invite_QQ_on",@"invite_weichat_on"];
+        iconArray = @[@"invite_phone",@"invite_QQ",@"invite_weichat"];
+    }
     
     for (int i=0; i<[iconOnArray count]; i++)
     {
@@ -199,18 +222,24 @@ UISearchBarDelegate>
     bgScrollView.pagingEnabled = YES;
     bgScrollView.showsHorizontalScrollIndicator = NO;
     bgScrollView.scrollEnabled = NO;
-    bgScrollView.contentSize = CGSizeMake(SCREEN_WIDTH*4, bgScrollView.frame.size.height);
+    bgScrollView.contentSize = CGSizeMake(SCREEN_WIDTH*(4-fromClassTableViewIndex), bgScrollView.frame.size.height);
     [self.bgView addSubview:bgScrollView];
     
     
-    friendsTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, bgScrollView.frame.size.height) style:UITableViewStylePlain];
-    friendsTableView.delegate = self;
-    friendsTableView.dataSource = self;
-    friendsTableView.tag = BanJiaFriendsTableViewTag;
-    [bgScrollView addSubview:friendsTableView];
+    if (fromClass)
+    {
+        friendsTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, bgScrollView.frame.size.height) style:UITableViewStylePlain];
+        friendsTableView.delegate = self;
+        friendsTableView.dataSource = self;
+        friendsTableView.tag = BanJiaFriendsTableViewTag;
+        friendsTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+        [bgScrollView addSubview:friendsTableView];
+    }
+    
+    
     
     mySearchBar = [[UISearchBar alloc] initWithFrame:
-                   CGRectMake((ContactTableViewTag%tableViewTagBase)*SCREEN_WIDTH, 0, SCREEN_WIDTH-0, 40)];
+                   CGRectMake(((ContactTableViewTag-fromClassTableViewIndex)%tableViewTagBase)*SCREEN_WIDTH, 0, SCREEN_WIDTH-0, 40)];
     mySearchBar.delegate = self;
     mySearchBar.placeholder = @"输入联系人姓名";
     
@@ -263,7 +292,7 @@ UISearchBarDelegate>
     searchTableView.tag = SearchTableViewTag;
     [searchView addSubview:searchTableView];
     
-    contactTableView = [[UITableView alloc]initWithFrame:CGRectMake((ContactTableViewTag%tableViewTagBase)*SCREEN_WIDTH, 40, bgScrollView.frame.size.width, bgScrollView.frame.size.height-mySearchBar.frame.size.height) style:UITableViewStylePlain];
+    contactTableView = [[UITableView alloc]initWithFrame:CGRectMake(((ContactTableViewTag-fromClassTableViewIndex)%tableViewTagBase)*SCREEN_WIDTH, 40, bgScrollView.frame.size.width, bgScrollView.frame.size.height-mySearchBar.frame.size.height) style:UITableViewStylePlain];
     contactTableView.delegate = self;
     contactTableView.dataSource = self;
     contactTableView.tag = ContactTableViewTag;
@@ -296,18 +325,22 @@ UISearchBarDelegate>
     
     inviteTencentButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [inviteTencentButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
-    inviteTencentButton.frame = CGRectMake(CENTER_POINT.x-80+SCREEN_WIDTH*(TencentTableViewTag%tableViewTagBase), bgScrollView.frame.size.height/2-35, 160, 42);
+    inviteTencentButton.frame = CGRectMake(CENTER_POINT.x-80+SCREEN_WIDTH*((TencentTableViewTag-fromClassTableViewIndex)%tableViewTagBase), bgScrollView.frame.size.height/2-35, 160, 42);
     [inviteTencentButton setTitle:@"邀请QQ好友" forState:UIControlStateNormal];
     [inviteTencentButton addTarget:self action:@selector(shareToQQFriendClickHandler:) forControlEvents:UIControlEventTouchUpInside];
     [bgScrollView addSubview:inviteTencentButton];
     
     UIButton *inviteWeiXinButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [inviteWeiXinButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
-    inviteWeiXinButton.frame = CGRectMake(CENTER_POINT.x-80+SCREEN_WIDTH*(WeiXinTag%tableViewTagBase), bgScrollView.frame.size.height/2-35, 160, 42);
+    inviteWeiXinButton.frame = CGRectMake(CENTER_POINT.x-80+SCREEN_WIDTH*((WeiXinTag-fromClassTableViewIndex)%tableViewTagBase), bgScrollView.frame.size.height/2-35, 160, 42);
     [inviteWeiXinButton setTitle:@"邀请微信好友" forState:UIControlStateNormal];
     [inviteWeiXinButton addTarget:self action:@selector(inviteWeiXin) forControlEvents:UIControlEventTouchUpInside];
     [bgScrollView addSubview:inviteWeiXinButton];
     
+    if (fromClass)
+    {
+        [self getFriendList];
+    }
     [self getLocalContacts];
 }
 
@@ -331,6 +364,7 @@ UISearchBarDelegate>
 -(void)cancelSearch
 {
     [searchResultArray removeAllObjects];
+    [searchTableView reloadData];
     mySearchBar.text = nil;
     [UIView animateWithDuration:0.2 animations:^{
         [bgScrollView sendSubviewToBack:searchView];
@@ -338,7 +372,14 @@ UISearchBarDelegate>
         [searchView removeGestureRecognizer:tapTgr];
         mySearchBar.showsCancelButton = NO;
         bgScrollView.frame = CGRectMake(0, buttonScrollView.frame.size.height+buttonScrollView.frame.origin.y, SCREEN_WIDTH, SCREEN_HEIGHT - buttonScrollView.frame.origin.y-buttonScrollView.frame.size.height);
-        selectView.frame = CGRectMake(0, bgScrollView.frame.size.height-50, SCREEN_WIDTH, 50);
+        if ([addedContactArray count] > 0)
+        {
+            selectView.frame = CGRectMake(((ContactTableViewTag-fromClassTableViewIndex)%tableViewTagBase)*SCREEN_WIDTH, bgScrollView.frame.size.height-50, SCREEN_WIDTH, 50);
+        }
+        else
+        {
+            selectView.frame = CGRectMake(((ContactTableViewTag-fromClassTableViewIndex)%tableViewTagBase)*SCREEN_WIDTH, bgScrollView.frame.size.height, SCREEN_WIDTH, 0);
+        }
     }];
     
     [mySearchBar resignFirstResponder];
@@ -364,11 +405,11 @@ UISearchBarDelegate>
         
         [searchView addGestureRecognizer:tapTgr];
         bgScrollView.frame = CGRectMake(0, YSTART, SCREEN_WIDTH, SCREEN_HEIGHT-YSTART);
-        mySearchBar.frame = CGRectMake(0, 0, SCREEN_WIDTH, 40);
+        mySearchBar.frame = CGRectMake(((ContactTableViewTag-fromClassTableViewIndex)%tableViewTagBase)*SCREEN_WIDTH, 0, SCREEN_WIDTH, 40);
         searchView.alpha = 1;
         [bgScrollView bringSubviewToFront:searchView];
 //        searchTableView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 0);
-        searchView.frame = CGRectMake(0, 40, SCREEN_WIDTH, SCREEN_HEIGHT-40-YSTART);
+        searchView.frame = CGRectMake(((ContactTableViewTag-fromClassTableViewIndex)%tableViewTagBase)*SCREEN_WIDTH, 40, SCREEN_WIDTH, SCREEN_HEIGHT-40-YSTART);
         contactTableView.hidden = YES;
     }];
     
@@ -476,7 +517,7 @@ UISearchBarDelegate>
     {
         return 2;
     }
-    else if (tableView.tag == ContactTableViewTag+1)
+    else if (tableView.tag == ContactTableViewTag)
     {
         return [groupContactArray count]+1;
     }
@@ -487,7 +528,14 @@ UISearchBarDelegate>
 {
     if (tableView.tag == BanJiaFriendsTableViewTag)
     {
-//        static NSString *
+        if (section == 0)
+        {
+            return [friendsArry count];
+        }
+        else if(section == 1)
+        {
+            return [thisClassFriednsArray count];
+        }
     }
     else if(tableView.tag == ContactTableViewTag)
     {
@@ -498,8 +546,8 @@ UISearchBarDelegate>
         if ([addedContactArray count] > 0)
         {
             [UIView animateWithDuration:0.2 animations:^{
-                contactTableView.frame = CGRectMake(0, mySearchBar.frame.size.height, SCREEN_WIDTH,bgScrollView.frame.size.height-mySearchBar.frame.size.height-50);
-                selectView.frame = CGRectMake(0, bgScrollView.frame.size.height-50, SCREEN_WIDTH, 50);
+                contactTableView.frame = CGRectMake(((ContactTableViewTag-fromClassTableViewIndex)%tableViewTagBase)*SCREEN_WIDTH, mySearchBar.frame.size.height, SCREEN_WIDTH,bgScrollView.frame.size.height-mySearchBar.frame.size.height-50);
+                selectView.frame = CGRectMake(((ContactTableViewTag-fromClassTableViewIndex)%tableViewTagBase)*SCREEN_WIDTH, bgScrollView.frame.size.height-50, SCREEN_WIDTH, 50);
             }];
             for(int i = 0 ; i< [addedContactArray count] ; i++)
             {
@@ -526,8 +574,8 @@ UISearchBarDelegate>
         else
         {
             [UIView animateWithDuration:0.2 animations:^{
-                contactTableView.frame = CGRectMake(0, mySearchBar.frame.size.height, SCREEN_WIDTH,bgScrollView.frame.size.height-mySearchBar.frame.size.height);
-                selectView.frame = CGRectMake(0, bgScrollView.frame.size.height, SCREEN_WIDTH, 50);
+                contactTableView.frame = CGRectMake(((ContactTableViewTag-fromClassTableViewIndex)%tableViewTagBase)*SCREEN_WIDTH, mySearchBar.frame.size.height, SCREEN_WIDTH,bgScrollView.frame.size.height-mySearchBar.frame.size.height);
+                selectView.frame = CGRectMake(((ContactTableViewTag-fromClassTableViewIndex)%tableViewTagBase)*SCREEN_WIDTH, bgScrollView.frame.size.height, SCREEN_WIDTH, 50);
                 
             }];
             [inviteButton setTitle:@"邀请" forState:UIControlStateNormal];
@@ -596,6 +644,17 @@ UISearchBarDelegate>
 
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
+    if (tableView.tag == BanJiaFriendsTableViewTag)
+    {
+        if (section == 0 && [friendsArry count] > 0)
+        {
+            return 30;
+        }
+        else if(section == 1 && [thisClassFriednsArray count] > 0)
+        {
+            return 30;
+        }
+    }
     if (tableView.tag == ContactTableViewTag)
     {
         if(section == 0)
@@ -618,7 +677,28 @@ UISearchBarDelegate>
 
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
-     if (tableView.tag == ContactTableViewTag)
+    if (tableView.tag == BanJiaFriendsTableViewTag)
+    {
+        if (section == 0 && [friendsArry count] > 0)
+        {
+            UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 0, SCREEN_WIDTH-15, 27)];
+            headerLabel.text = @"    未加入班级的好友";
+            headerLabel.backgroundColor = UIColorFromRGB(0x3dc46e);
+            headerLabel.font = [UIFont systemFontOfSize:14];
+            headerLabel.textColor = [UIColor whiteColor];
+            return headerLabel;
+        }
+        else if(section == 1 && [thisClassFriednsArray count])
+        {
+            UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 0, SCREEN_WIDTH-15, 27)];
+            headerLabel.text = @"    已加入班级的好友";
+            headerLabel.backgroundColor = UIColorFromRGB(0xf0f1ec);
+            headerLabel.font = [UIFont systemFontOfSize:14];
+            headerLabel.textColor = COMMENTCOLOR;
+            return headerLabel;
+        }
+    }
+    else if (tableView.tag == ContactTableViewTag)
     {
         if (section == 0)
         {
@@ -670,7 +750,68 @@ UISearchBarDelegate>
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (tableView.tag == ContactTableViewTag)
+    if (tableView.tag == BanJiaFriendsTableViewTag)
+    {
+        static NSString *inviteFriend = @"inviteFriend";
+        FriendsCell *cell = [tableView dequeueReusableCellWithIdentifier:inviteFriend];
+        if (cell == nil)
+        {
+            cell = [[FriendsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:inviteFriend];
+        }
+        NSDictionary *friendDict;
+        if (indexPath.section == 0)
+        {
+            friendDict = [friendsArry objectAtIndex:indexPath.row];
+        }
+        else if(indexPath.section == 1)
+        {
+            friendDict = [thisClassFriednsArray objectAtIndex:indexPath.row];
+        }
+        cell.nameLabel.frame = CGRectMake(45, 10, SCREEN_WIDTH - 80, 30);
+        cell.nameLabel.font = [UIFont systemFontOfSize:16];
+        cell.nameLabel.text = [friendDict objectForKey:@"name"];
+        
+        cell.headerImageView.frame = CGRectMake(5, 7.5, 34, 34);
+        cell.headerImageView.layer.cornerRadius = 5;
+        cell.headerImageView.clipsToBounds = YES;
+        [Tools fillImageView:cell.headerImageView withImageFromURL:[friendDict objectForKey:@"img_icon"] andDefault:HEADERICON];
+        
+        if (indexPath.section == 0)
+        {
+            cell.inviteButton.hidden = NO;
+            cell.inviteButton.frame = CGRectMake(SCREEN_WIDTH-50, 12.5, 25, 25);
+            if ([alreadyInviteFriendsArray containsObject:friendDict])
+            {
+                [cell.inviteButton setTitle:@"已邀请" forState:UIControlStateNormal];
+                [cell.inviteButton setImage:[UIImage imageNamed:@""] forState:UIControlStateNormal];
+                cell.inviteButton.enabled = NO;
+                cell.inviteButton.frame = CGRectMake(SCREEN_WIDTH-80, 12.5, 60, 25);
+                cell.inviteButton.titleLabel.font = [UIFont systemFontOfSize:14];
+                [cell.inviteButton setTitleColor:UIColorFromRGB(0x676768) forState:UIControlStateNormal];
+            }
+            else
+            {
+                [cell.inviteButton setTitle:@"" forState:UIControlStateNormal];
+                [cell.inviteButton setImage:[UIImage imageNamed:@"roundadd"] forState:UIControlStateNormal];
+                cell.inviteButton.tag = indexPath.row;
+                [cell.inviteButton addTarget:self action:@selector(inviteFriendJoinClass:) forControlEvents:UIControlEventTouchUpInside];
+                cell.inviteButton.enabled = YES;
+            }
+        }
+        else if(indexPath.section == 1)
+        {
+            cell.inviteButton.hidden = YES;
+        }
+        
+        CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+        UIImageView *lineImageView = [[UIImageView alloc] init];
+        lineImageView.frame = CGRectMake(45, cellHeight-0.5, cell.frame.size.width, 0.5);
+        lineImageView.backgroundColor = LineBackGroudColor;
+        [cell.contentView addSubview:lineImageView];
+        cell.contentView.backgroundColor = [UIColor whiteColor];
+        return cell;
+    }
+    else if (tableView.tag == ContactTableViewTag)
     {
         if (indexPath.section == 0)
         {
@@ -690,10 +831,10 @@ UISearchBarDelegate>
             cell.contentView.backgroundColor = [UIColor whiteColor];
             if (indexPath.row < [tableView numberOfRowsInSection:indexPath.section]-1)
             {
-                lineImageView.frame = CGRectMake( 55, cellHeight-0.5, cell.frame.size.width, 0.5);
+                lineImageView.frame = CGRectMake( 45, cellHeight-0.5, cell.frame.size.width, 0.5);
             }
             
-            cell.nameLabel.frame = CGRectMake(60, 10, SCREEN_WIDTH - 80, 30);
+            cell.nameLabel.frame = CGRectMake(45, 10, SCREEN_WIDTH - 80, 30);
             cell.nameLabel.font = [UIFont systemFontOfSize:16];
             
             NSDictionary *dict = [alreadyUsers objectAtIndex:indexPath.row];
@@ -840,9 +981,43 @@ UISearchBarDelegate>
     return nil;
 }
 
+-(void)inviteFriendJoinClass:(UIButton *)button
+{
+    NSDictionary *dict = [friendsArry objectAtIndex:button.tag];
+    if (fromClass)
+    {
+        NSString *sendMsg;
+//        if (![schoolName isEqualToString:@"未设置学校"] && [schoolName length] > 0)
+//        {
+            sendMsg = [NSString stringWithFormat:@"%@$!#我是%@,我在[%@—%@],你也一起加入吧！",classID,[Tools user_name],schoolName,className];
+//        }
+//        else
+//        {
+//            sendMsg = [NSString stringWithFormat:@"%@$!#我是%@,我在[%@],你也一起加入吧！",classID,[Tools user_name],className];
+//        }
+        [self sendMsgWithString:sendMsg andUserID:[dict objectForKey:@"_id"] andUserInfo:dict userType:@"friend"];
+    }
+}
+
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (tableView.tag == ContactTableViewTag)
+    DDLOG(@"table view tag %d== %d",ContactTableViewTag-fromClassTableViewIndex,tableView.tag);
+    if (tableView.tag == BanJiaFriendsTableViewTag)
+    {
+        if (indexPath.section == 0)
+        {
+            NSDictionary *dict = [friendsArry objectAtIndex:indexPath.row];
+            if (![alreadyInviteFriendsArray containsObject:dict])
+            {
+                if (fromClass)
+                {
+                    NSString *sendMsg = [NSString stringWithFormat:@"%@$!#我是%@,我在[%@—%@],你也一起加入吧！",classID,[Tools user_name],schoolName,className];
+                    [self sendMsgWithString:sendMsg andUserID:[dict objectForKey:@"_id"] andUserInfo:dict userType:@"friend"];
+                }
+            }
+        }
+    }
+    else if (tableView.tag == ContactTableViewTag)
     {
         if (indexPath.section > 0)
         {
@@ -880,7 +1055,7 @@ UISearchBarDelegate>
                 if (fromClass)
                 {
                     NSString *sendMsg = [NSString stringWithFormat:@"%@$!#我是%@,我在[%@—%@],你也一起加入吧！",classID,[Tools user_name],schoolName,className];
-                    [self sendMsgWithString:sendMsg andUserID:[dict objectForKey:@"_id"] andUserInfo:dict];
+                    [self sendMsgWithString:sendMsg andUserID:[dict objectForKey:@"_id"] andUserInfo:dict userType:@"contact"];
                 }
                 else
                 {
@@ -936,22 +1111,29 @@ UISearchBarDelegate>
 
 -(void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
 {
-    inviteButton.hidden = NO;
-    if (scrollView.tag == 5000)
+    if (!fromClass)
     {
-        [UIView animateWithDuration:0.2 animations:^{
-            
-            if(scrollView.contentOffset.x/SCREEN_WIDTH == ContactTableViewTag%tableViewTagBase)
-            {
-                 inviteButton.hidden = NO;
-                 [self getLocalContacts];
-            }
-            else if(scrollView.contentOffset.x/SCREEN_WIDTH == WeiXinTag%tableViewTagBase)
-            {
-                inviteButton.hidden = YES;
-            }
-            
-        }];
+        inviteButton.hidden = NO;
+    }
+    
+    if (!fromClass)
+    {
+        if (scrollView.tag == 5000)
+        {
+            [UIView animateWithDuration:0.2 animations:^{
+                
+                if(scrollView.contentOffset.x/SCREEN_WIDTH == ContactTableViewTag%tableViewTagBase)
+                {
+                    inviteButton.hidden = NO;
+                    [self getLocalContacts];
+                }
+                else if(scrollView.contentOffset.x/SCREEN_WIDTH == WeiXinTag%tableViewTagBase)
+                {
+                    inviteButton.hidden = YES;
+                }
+                
+            }];
+        }
     }
 }
 
@@ -1050,7 +1232,7 @@ UISearchBarDelegate>
     [UIView animateWithDuration:0.2 animations:^{
         
     }];
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < (4- fromClassTableViewIndex); i++)
     {
         if (i == button.tag - tableViewTagBase)
         {
@@ -1063,7 +1245,7 @@ UISearchBarDelegate>
     }
     
     [contactInviteArray removeAllObjects];
-    if(button.tag == ContactTableViewTag)
+    if(button.tag == ContactTableViewTag-fromClassTableViewIndex)
     {
         inviteButton.hidden = NO;
         if (!([contactArray count] > 0 || [alreadyUsers count] >0))
@@ -1076,8 +1258,20 @@ UISearchBarDelegate>
         inviteButton.hidden = YES;
     }
     [UIView animateWithDuration:0.2 animations:^{
+        if (fromClass)
+        {
+            if (button.tag == tableViewTagBase+1)
+            {
+                buttonScrollView.contentOffset = CGPointMake(0, 0);
+            }
+            else if(button.tag == tableViewTagBase + 2)
+            {
+                buttonScrollView.contentOffset = CGPointMake(100, 0);
+            }
+        }
         bgScrollView.contentOffset = CGPointMake((button.tag%tableViewTagBase)*SCREEN_WIDTH, 0);
     }];
+    
 }
 
 -(void)getLocalContacts
@@ -1368,8 +1562,17 @@ UISearchBarDelegate>
     {
         NSMutableString *inviteBody = [[NSMutableString alloc] initWithString:InviteClassMember];
         
-        [inviteBody replaceOccurrencesOfString:@"#school" withString:schoolName options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
-        [inviteBody replaceOccurrencesOfString:@"#class" withString:className options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+        NSString *classNum = [[NSUserDefaults standardUserDefaults] objectForKey:@"classnum"];
+        [inviteBody replaceOccurrencesOfString:@"#school-" withString:[schoolName length] > 0?[NSString stringWithFormat:@"%@-",schoolName]:@"" options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+        if ([classNum length] > 0)
+        {
+            [inviteBody replaceOccurrencesOfString:@"#class" withString:[NSString stringWithFormat:@"%@(班号:%@)",className,classNum] options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+        }
+        else
+        {
+            [inviteBody replaceOccurrencesOfString:@"#class" withString:className options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+        }
+
         
         msgBody = inviteBody;
     }
@@ -1444,9 +1647,16 @@ UISearchBarDelegate>
     if (fromClass)
     {
         inviteBody = [[NSMutableString alloc] initWithString:InviteClassMember];
-        [inviteBody replaceOccurrencesOfString:@"班" withString:@"" options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
-        [inviteBody replaceOccurrencesOfString:@"#school" withString:schoolName options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
-        [inviteBody replaceOccurrencesOfString:@"#class" withString:className options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+        [inviteBody replaceOccurrencesOfString:@"#school-" withString:[schoolName length] > 0?[NSString stringWithFormat:@"%@-",schoolName]:@"" options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+        NSString *classNum = [[NSUserDefaults standardUserDefaults] objectForKey:@"classnum"];
+        if ([classNum length] > 0)
+        {
+            [inviteBody replaceOccurrencesOfString:@"#class" withString:[NSString stringWithFormat:@"%@(班号:%@)",className,classNum] options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+        }
+        else
+        {
+            [inviteBody replaceOccurrencesOfString:@"#class" withString:className options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+        }
         
     }
     else
@@ -1529,9 +1739,10 @@ UISearchBarDelegate>
         {
             NSMutableString *inviteBody = [[NSMutableString alloc] initWithString:InviteClassMember];
             
+            DDLOG(@"InviteClassMember==%@",inviteBody);
             NSString *classNum = [[NSUserDefaults standardUserDefaults] objectForKey:@"classnum"];
             
-           [inviteBody replaceOccurrencesOfString:@"#school" withString:schoolName options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+            [inviteBody replaceOccurrencesOfString:@"#school-" withString:[schoolName length] > 0?[NSString stringWithFormat:@"%@-",schoolName]:@"" options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
             if ([classNum length] > 0)
             {
                 [inviteBody replaceOccurrencesOfString:@"#class" withString:[NSString stringWithFormat:@"%@(班号:%@)",className,classNum] options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
@@ -1597,7 +1808,7 @@ UISearchBarDelegate>
 #pragma mark - inviteClick
 -(void)inviteClick
 {
-    if (bgScrollView.contentOffset.x/SCREEN_WIDTH == ContactTableViewTag%tableViewTagBase)
+    if (bgScrollView.contentOffset.x/SCREEN_WIDTH == (ContactTableViewTag-fromClassTableViewIndex)%tableViewTagBase)
     {
         [self showMessageView];
     }
@@ -1610,7 +1821,7 @@ UISearchBarDelegate>
     if (![selectedUsers containsObject:dict])
     {
         NSString *sendMsg = [NSString stringWithFormat:@"%@$!#我是%@,我在[%@—%@],你也一起加入吧！",classID,[Tools user_name],schoolName,className];
-        [self sendMsgWithString:sendMsg andUserID:[dict objectForKey:@"_id"] andUserInfo:dict];
+        [self sendMsgWithString:sendMsg andUserID:[dict objectForKey:@"_id"] andUserInfo:dict userType:@"contact"];
         [selectedUsers addObject:dict];
         [contactTableView reloadData];
     }
@@ -1618,7 +1829,7 @@ UISearchBarDelegate>
 
 
 #pragma mark - sendmsg
--(void)sendMsgWithString:(NSString *)msgContent andUserID:(NSString *)uid andUserInfo:(NSDictionary *)userInfo
+-(void)sendMsgWithString:(NSString *)msgContent andUserID:(NSString *)uid andUserInfo:(NSDictionary *)userInfo userType:(NSString *)userType
 {
     if ([Tools NetworkReachable])
     {
@@ -1653,8 +1864,20 @@ UISearchBarDelegate>
                     [db insertRecord:chatDict andTableName:@"chatMsg"];
                 }
                 
-                [Tools showAlertView:[NSString stringWithFormat:@"您已经成功邀请%@",[userInfo objectForKey:@"r_name"]] delegateViewController:nil];
-                [contactTableView reloadData];
+                
+                if ([userType isEqualToString:@"friend"])
+                {
+                    [Tools showAlertView:[NSString stringWithFormat:@"您已经成功邀请%@",[userInfo objectForKey:@"name"]] delegateViewController:nil];
+                    [alreadyInviteFriendsArray addObject:userInfo];
+                    [friendsTableView reloadData];
+                }
+                else
+                {
+                    [Tools showAlertView:[NSString stringWithFormat:@"您已经成功邀请%@",[userInfo objectForKey:@"r_name"]] delegateViewController:nil];
+                    [alreadyInviteFriendsArray addObject:userInfo];
+                    [contactTableView reloadData];
+                }
+                
             }
             else
             {
@@ -1671,6 +1894,8 @@ UISearchBarDelegate>
         [request startAsynchronous];
     }
 }
+
+
 
 -(void)addFriendWithID:(UIButton *)button
 {
@@ -1715,5 +1940,56 @@ UISearchBarDelegate>
     }
 }
 
-
+#pragma mark - getFriendList
+-(void)getFriendList
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token]                                                                     } API:MB_FRIENDLIST];
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"friendsList responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                if (![[responseDict objectForKey:@"data"] isEqual:[NSNull null]])
+                {
+                    if (fromClass)
+                    {
+                        NSArray *tmpArray = [responseDict objectForKey:@"data"];
+                        for (NSDictionary *dict in tmpArray)
+                        {
+                            if ([[db findSetWithDictionary:@{@"classid":classID,@"uid":[dict objectForKey:@"_id"]} andTableName:CLASSMEMBERTABLE] count] > 0)
+                            {
+                                [thisClassFriednsArray addObject:dict];
+                            }
+                            else
+                            {
+                                if (![[dict objectForKey:@"_id"] isEqualToString:OurTeamID] && ![[dict objectForKey:@"_id"] isEqualToString:AssistantID])
+                                {
+                                    [friendsArry addObject:dict];
+                                }
+                            }
+                        }
+                        [friendsTableView reloadData];
+                    }
+                }
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        }];
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+        }];
+        [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
+}
 @end

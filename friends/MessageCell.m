@@ -104,7 +104,7 @@
     self.messageTf.editable = NO;
     self.messageTf.hidden = NO;
     self.messageTf.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-    self.messageTf.textColor = TITLE_COLOR;
+    self.messageTf.textColor = [UIColor blackColor];
     self.messageTf.backgroundColor = [UIColor clearColor];
     self.msgImageView.layer.cornerRadius = 3;
     self.msgImageView.clipsToBounds = YES;

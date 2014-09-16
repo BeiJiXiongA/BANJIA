@@ -298,20 +298,18 @@ UIActionSheetDelegate>
             {
                 cell = [[PersonalSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:firstCell];
             }
-            cell.nameLabel.frame = CGRectMake(90, 20, 18*[[Tools user_name] length], 20);
+            cell.nameLabel.frame = CGRectMake(90, 35, 18*[[Tools user_name] length], 20);
             cell.nameLabel.text = [Tools user_name];
             cell.nameLabel.font = [UIFont systemFontOfSize:18];
             cell.nameLabel.textColor = USER_NAME_COLOR;
             
-            cell.objectsLabel.frame = CGRectMake(90, 45, 100, 20);
-            cell.objectsLabel.textColor = TITLE_COLOR;
-            cell.objectsLabel.text = [NSString stringWithFormat:@"积分:%d",gf];
+//            cell.objectsLabel.frame = CGRectMake(90, 45, 100, 20);
+//            cell.objectsLabel.textColor = TITLE_COLOR;
+//            cell.objectsLabel.text = [NSString stringWithFormat:@"积分:%d",gf];
         
             cell.headerImageView.layer.cornerRadius = 5;
             cell.headerImageView.clipsToBounds = YES;
             cell.headerImageView.frame = CGRectMake(15, 15, 60, 60);
-            
-            
             
             [Tools fillImageView:cell.headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERICON];
             

@@ -411,9 +411,16 @@ ZBarReaderDelegate>
         break;
     
     DDLOG(@"%@",symbol.data);
-    NSString *classNum = [symbol.data substringFromIndex:[symbol.data rangeOfString:@";"].location+1];
-    [self searchClass:classNum];
-    
+    if ([symbol.data rangeOfString:@";"].length > 0)
+    {
+        NSString *classNum = [symbol.data substringFromIndex:[symbol.data rangeOfString:@";"].location+1];
+        [self searchClass:classNum];
+    }
+    else
+    {
+        [Tools showAlertView:@"二维码不被识别" delegateViewController:nil];
+        return ;
+    }
     [self.navigationController popViewControllerAnimated:NO];
 }
 

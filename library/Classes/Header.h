@@ -223,7 +223,7 @@ return shared##className; \
 #define InviteClassMember [[NSUserDefaults standardUserDefaults] objectForKey:InviteClassMemberKey]
 #define InviteParent [[NSUserDefaults standardUserDefaults] objectForKey:InviteParentKey]
 
-#define ShareUrl @"https://itunes.apple.com/cn/app/ban-jia/id862315597?mt=8&uo=4"
+#define ShareUrl @"http://banjiaedu.com/welcome/mobile"
 #pragma mark - aboutimagesize
 #define MAXHEIGHT     640
 #define MAXWIDTH      640

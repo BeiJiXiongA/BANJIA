@@ -371,11 +371,19 @@ UIAlertViewDelegate>
         NSString *msgBody;
         NSMutableString *inviteBody = [[NSMutableString alloc] initWithString:InviteParent];
         
-        NSString *parentString = [NSString stringWithFormat:@"%@的%@",name,relateString];
+        NSString *parentString = [NSString stringWithFormat:@"%@的%@",name,[relateString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
         [inviteBody replaceOccurrencesOfString:@"#parent" withString:parentString options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
         
-        [inviteBody replaceOccurrencesOfString:@"#school" withString:schoolName options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
-        [inviteBody replaceOccurrencesOfString:@"#class" withString:className options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+        [inviteBody replaceOccurrencesOfString:@"#school-" withString:(([schoolName length] > 0 && ![schoolName isEqualToString:@"未指定学校"]) > 0)?[NSString stringWithFormat:@"%@-",schoolName]:@"" options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+        NSString *classNum = [[NSUserDefaults standardUserDefaults] objectForKey:@"classnum"];
+        if ([classNum length] > 0)
+        {
+            [inviteBody replaceOccurrencesOfString:@"#class" withString:[NSString stringWithFormat:@"%@(班号:%@)",className,classNum] options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+        }
+        else
+        {
+            [inviteBody replaceOccurrencesOfString:@"#class" withString:className options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+        }
         [inviteBody replaceOccurrencesOfString:@"#name" withString:[Tools user_name] options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
         [inviteBody insertString:HOST_URL atIndex:[inviteBody length]];
         msgBody = inviteBody;
@@ -456,23 +464,33 @@ UIAlertViewDelegate>
     NSString *msgBody;
     NSMutableString *inviteBody = [[NSMutableString alloc] initWithString:InviteParent];;
     
-    NSString *parentString = [NSString stringWithFormat:@"%@的%@",name,relateString];
+    NSString *parentString = [NSString stringWithFormat:@"%@的%@",name,[relateString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
     [inviteBody replaceOccurrencesOfString:@"#parent" withString:parentString options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
     
-    [inviteBody replaceOccurrencesOfString:@"#school" withString:schoolName options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
-    [inviteBody replaceOccurrencesOfString:@"#class" withString:className options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+    [inviteBody replaceOccurrencesOfString:@"#school-" withString:([schoolName length] > 0 && ![schoolName isEqualToString:@"未指定学校"])?[NSString stringWithFormat:@"%@-",schoolName]:@"" options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+    NSString *classNum = [[NSUserDefaults standardUserDefaults] objectForKey:@"classnum"];
+    if ([classNum length] > 0)
+    {
+        [inviteBody replaceOccurrencesOfString:@"#class" withString:[NSString stringWithFormat:@"%@(班号:%@)",className,classNum] options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+    }
+    else
+    {
+        [inviteBody replaceOccurrencesOfString:@"#class" withString:className options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+    }
     [inviteBody replaceOccurrencesOfString:@"#name" withString:[Tools user_name] options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
     
     msgBody = inviteBody;
     
 //    NSString *imagePath = [[NSBundle mainBundle] pathForResource:IMAGE_NAME ofType:IMAGE_EXT];
+    
     id<ISSContent> publishContent = [ShareSDK content:msgBody
-                                       defaultContent:@""
-                                                image:nil
-                                                title:@"班家"
-                                                  url:ShareUrl
-                                          description:nil
-                                            mediaType:SSPublishContentMediaTypeNews];
+                                       defaultContent:msgBody
+                                         image:[ShareSDK jpegImageWithImage:[UIImage imageNamed:@"logo120"] quality:1]
+                                         title:NSLocalizedString(@"班家", @"这是App消息")
+                                           url:ShareUrl
+                                   description:msgBody
+                                     mediaType:SSPublishContentMediaTypeNews];
+
     
     id<ISSAuthOptions> authOptions = [ShareSDK authOptionsWithAutoAuth:YES
                                                          allowCallback:YES
@@ -541,20 +559,29 @@ UIAlertViewDelegate>
     
     NSMutableString *inviteBody = [[NSMutableString alloc] initWithString:InviteParent];;
     
-    NSString *parentString = [NSString stringWithFormat:@"%@的%@",name,relateString];
+    NSString *parentString = [NSString stringWithFormat:@"%@的%@",name,[relateString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
     [inviteBody replaceOccurrencesOfString:@"#parent" withString:parentString options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
     
-    [inviteBody replaceOccurrencesOfString:@"#school" withString:schoolName options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
-    [inviteBody replaceOccurrencesOfString:@"#class" withString:className options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+    [inviteBody replaceOccurrencesOfString:@"#school-" withString:([schoolName length] > 0 && ![schoolName isEqualToString:@"未指定学校"])?[NSString stringWithFormat:@"%@-",schoolName]:@"" options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+    NSString *classNum = [[NSUserDefaults standardUserDefaults] objectForKey:@"classnum"];
+    if ([classNum length] > 0)
+    {
+        [inviteBody replaceOccurrencesOfString:@"#class" withString:[NSString stringWithFormat:@"%@(班号:%@)",className,classNum] options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+    }
+    else
+    {
+        [inviteBody replaceOccurrencesOfString:@"#class" withString:className options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
+    }
     [inviteBody replaceOccurrencesOfString:@"#name" withString:[Tools user_name] options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
     
     id<ISSContent> content = [ShareSDK content:inviteBody
-                                defaultContent:nil
-                                         image:nil
-                                         title:NSLocalizedString(@"班家", @"这是App消息")
-                                           url:ShareUrl
-                                   description:inviteBody
-                                     mediaType:SSPublishContentMediaTypeApp];
+                                       defaultContent:inviteBody
+                                                image:[ShareSDK jpegImageWithImage:[UIImage imageNamed:@"logo120"] quality:1]
+                                                title:NSLocalizedString(@"班家", @"这是App消息")
+                                                  url:ShareUrl
+                                          description:inviteBody
+                                            mediaType:SSPublishContentMediaTypeNews];
+    
     [content addWeixinSessionUnitWithType:INHERIT_VALUE
                                   content:inviteBody
                                     title:INHERIT_VALUE

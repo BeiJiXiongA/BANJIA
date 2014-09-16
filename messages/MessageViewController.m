@@ -291,13 +291,14 @@ ChatVCDelegate>
     
     [newMessageArray removeAllObjects];
     [newMessageArray addObjectsFromArray:[db findChatUseridWithTableName:CHATTABLE]];
-    DDLOG(@"new message array %@",newMessageArray);
     if ([newMessageArray count] > 0)
     {
         for(int i = 0; i < [newMessageArray count]-1; i++)
         {
             NSString *tid = [[[newMessageArray objectAtIndex:i] allValues] firstObject];
+            NSDictionary *userIconDIct = [ImageTools iconDictWithUserID:tid];
             NSDictionary *messageDict = [self findLastMsgWithUser:tid];
+            DDLOG(@"tid==%@,usericon==%@,lastmsg==%@",tid,userIconDIct,messageDict);
             int msgTime = [[messageDict objectForKey:@"time"] intValue];
             for (int j= 0; j<[newMessageArray count]-i; j++)
             {
@@ -310,9 +311,17 @@ ChatVCDelegate>
                 }
             }
         }
-
     }
-    DDLOG(@"new message sorted array %@",newMessageArray);
+    
+    for (int i=0; i<[newMessageArray count]; i++)
+    {
+        NSString *tid = [[[newMessageArray objectAtIndex:i] allValues] firstObject];
+        NSDictionary *userIconDIct = [ImageTools iconDictWithUserID:tid];
+        if (!userIconDIct)
+        {
+            [newMessageArray removeObjectAtIndex:i];
+        }
+    }
     [friendsListTableView reloadData];
     if ([newMessageArray count] > 0)
     {
@@ -477,7 +486,7 @@ ChatVCDelegate>
     NSDictionary *userIconDIct = [ImageTools iconDictWithUserID:otherid];
    
     
-    if(userIconDIct && ![[userIconDIct objectForKey:@"username"] isEqual:[NSNull null]])
+    if(userIconDIct && ![[userIconDIct objectForKey:@"username"] isEqual:[NSNull null]]) //NTNjMzg0OWUzNGRhYjVmMTY2OGI0NmNj
     {
         [Tools fillImageView:cell.headerImageView withImageFromURL:[userIconDIct objectForKey:@"uicon"] andDefault:HEADERICON];
         cell.memNameLabel.text = [userIconDIct objectForKey:@"username"];

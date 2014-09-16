@@ -507,6 +507,7 @@ UIScrollViewDelegate>
             objectsTableView.frame = CGRectMake(showObjectButton.frame.origin.x, showObjectButton.frame.size.height+showObjectButton.frame.origin.y, showObjectButton.frame.size.width, [objectArray count]*40);
             [arrowImageView setImage:[UIImage imageNamed:@"arrow_up"]];
         }];
+        [nameTextField resignFirstResponder];
         [mainScrollView removeGestureRecognizer:tapTgr];
     }
     else

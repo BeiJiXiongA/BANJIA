@@ -45,10 +45,16 @@
     }
     else if([role isEqualToString:@"students"])
     {
-        limitArray = [[NSArray alloc] initWithObjects:@"赞",@"评论",@"接受班级动态", nil];
+        limitArray = [[NSArray alloc] initWithObjects:@"赞",@"评论", nil];
     }
 
-    limitTableView = [[UITableView alloc] initWithFrame:CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT+20, SCREEN_WIDTH-20, 150) style:UITableViewStylePlain];
+    CGFloat tableViewHeight = 150;
+    if ([role isEqualToString:@"students"])
+    {
+        tableViewHeight = 100;
+    }
+    
+    limitTableView = [[UITableView alloc] initWithFrame:CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT+20, SCREEN_WIDTH-20, tableViewHeight) style:UITableViewStylePlain];
     limitTableView.delegate = self;
     limitTableView.dataSource = self;
     limitTableView.layer.cornerRadius = 5;

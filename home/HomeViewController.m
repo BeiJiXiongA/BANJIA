@@ -161,12 +161,10 @@ headerDelegate>
 
 -(void)joinClass
 {
-
     SearchClassViewController *searchclassVC = [[SearchClassViewController alloc] init];
     [[NSUserDefaults standardUserDefaults] setObject:CREATENEWCLASS forKey:SEARCHSCHOOLTYPE];
     [[NSUserDefaults standardUserDefaults] synchronize];
     [self.navigationController pushViewController:searchclassVC animated:YES];
-
 }
 -(void)createClass
 {
@@ -305,7 +303,7 @@ headerDelegate>
     tipLabel.backgroundColor = self.bgView.backgroundColor;
     tipLabel.lineBreakMode = NSLineBreakByWordWrapping;
     tipLabel.numberOfLines = 3;
-    tipLabel.textColor = CONTENTCOLOR;
+    tipLabel.textColor = COMMENTCOLOR;
     tipLabel.textAlignment = NSTextAlignmentCenter;
     tipLabel.text = @"你可以在这里创建班级，也可以通过班号或二维码加入班级";
     [tipView addSubview:tipLabel];
@@ -940,6 +938,7 @@ headerDelegate>
     
     inputTabBar.returnFunDel = self;
     [self backInput];
+    
     
     [self dealNewChatMsg:nil];
     [self dealNewMsg:nil];

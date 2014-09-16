@@ -146,7 +146,6 @@
         }
         
     }
-    DDLOG(@"tmpcommentHeight == %f",tmpcommentHeight);
     return headerHeight + imgsHeight + contentHeight + buttonHeight + tmpcommentHeight + 6; //6为动态与动态之间距离一半
 }
 

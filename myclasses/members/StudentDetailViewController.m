@@ -227,6 +227,10 @@ UIActionSheetDelegate>
         }
         if (![ud objectForKey:@"defaultparentstip"])
         {
+            if (SYSVERSION < 7)
+            {
+                defaultParentY -= 20;
+            }
             tipBgView = [[UIView alloc] init];
             tipBgView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
             tipBgView.frame = CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);

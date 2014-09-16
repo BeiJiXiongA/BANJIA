@@ -54,12 +54,10 @@
 //    [[NSUserDefaults standardUserDefaults] setObject:@"0008" forKey:@"currentVersion"];
     [[NSUserDefaults standardUserDefaults] setObject:@"0020" forKey:@"currentVersion"];
     [[NSUserDefaults standardUserDefaults] setObject:SCHEMERELEASE forKey:SCHEMETYPE];
-    
     [[NSUserDefaults standardUserDefaults]  setObject:@"1" forKey:@"showad"];
-    
     [[NSUserDefaults standardUserDefaults] synchronize];
     
-    [self getNewVersion];
+    
     
     [application setStatusBarHidden:NO withAnimation:UIStatusBarAnimationFade];
     
@@ -156,6 +154,7 @@
         {
             [self getNewChat];
             [self getNewClass];
+            [self getNewVersion];
             sideMenuViewController = [[SideMenuViewController alloc] init];
             HomeViewController *homeViewController = [[HomeViewController alloc] init];
             KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:homeViewController];

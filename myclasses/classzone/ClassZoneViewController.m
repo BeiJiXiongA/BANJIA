@@ -1244,6 +1244,12 @@ NameButtonDel>
 
 - (void)tapImage:(UITapGestureRecognizer *)tap
 {
+    if (isApply)
+    {
+        [Tools showAlertView:@"请您先申请加入班级！" delegateViewController:nil];
+        return ;
+    }
+    
     if ([inputTabBar.inputTextView isFirstResponder])
     {
         [self backInput];

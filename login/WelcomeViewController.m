@@ -336,6 +336,10 @@ UITextFieldDelegate>
                 
                 [self getNewChat];
                 [self getNewClass];
+                [self getNewVersion];
+                
+                [phoneNumTextfield resignFirstResponder];
+                [passwordTextfield resignFirstResponder];
                 
                 SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
                 HomeViewController *homeViewController = [[HomeViewController alloc] init];
@@ -372,6 +376,62 @@ UITextFieldDelegate>
         [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
     }
 }
+
+-(void)getNewVersion
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"type":@"iOS",
+                                                                      @"build":[[NSUserDefaults standardUserDefaults] objectForKey:@"currentVersion"]
+                                                                      } API:MB_NEWVERSION];
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"newversion responsedict %@",responseString);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                if ([[responseDict objectForKey:@"data"] isKindOfClass:[NSDictionary class]])
+                {
+                    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+                    NSDictionary *template = [[responseDict objectForKey:@"data"] objectForKey:@"template"];
+                    NSString *item1 = [template objectForKey:@"tem1"];
+                    
+                    if (![[ud objectForKey:InviteClassMemberKey] isEqualToString:item1])
+                    {
+                        [ud setObject:item1 forKey:ShareContentKey];
+                        [ud synchronize];
+                    }
+                    
+                    NSString *item2 = [template objectForKey:@"tem2"];
+                    if (![[ud objectForKey:InviteClassMemberKey] isEqualToString:item2])
+                    {
+                        [ud setObject:item2 forKey:InviteClassMemberKey];
+                        [ud synchronize];
+                    }
+                    
+                    NSString *item3 = [template objectForKey:@"tem3"];
+                    if (![[ud objectForKey:InviteParentKey] isEqualToString:item3])
+                    {
+                        [ud setObject:item3 forKey:InviteParentKey];
+                        [ud synchronize];
+                    }
+                }
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+        }];
+        [request startAsynchronous];
+    }
+    
+}
+
 
 -(void)getNewClass
 {

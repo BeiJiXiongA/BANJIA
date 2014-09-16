@@ -13,6 +13,7 @@
 #import "NotificationDetailViewController.h"
 #import "EGORefreshTableHeaderView.h"
 #import "FooterView.h"
+#import "SearchSchoolViewController.h"
 
 @interface NotificationViewController ()<
 UITableViewDataSource,
@@ -441,6 +442,10 @@ EGORefreshTableDelegate>
                 cell.contentLabel.lineBreakMode = NSLineBreakByWordWrapping;
                 cell.contentLabel.text = @"您的班级未设置学校，设置班级后成员可以通过短信接收班级通知。";
                 cell.contentLabel.textColor = RGB(255, 102, 0, 1);
+                
+                UITapGestureRecognizer *setSchoolTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(setSchool)];
+                cell.contentLabel.userInteractionEnabled = YES;
+                [cell.contentLabel addGestureRecognizer:setSchoolTap];
             }
             else
             {
@@ -773,5 +778,13 @@ EGORefreshTableDelegate>
     {
         tipLabel.hidden = NO;
     }
+}
+
+-(void)setSchool
+{
+    SearchSchoolViewController  *searchSchoolInfoViewController = [[SearchSchoolViewController alloc] init];
+    [[NSUserDefaults standardUserDefaults] setObject:BINDCLASSTOSCHOOL forKey:SEARCHSCHOOLTYPE];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    [[XDTabViewController sharedTabViewController].navigationController pushViewController:searchSchoolInfoViewController animated:YES];
 }
 @end

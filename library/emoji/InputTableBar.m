@@ -476,6 +476,9 @@ originWav,recorderVC,player,hideSoundButton;
             faceScrollView.contentSize = CGSizeMake(SCREEN_WIDTH*page, FaceViewHeight-77);
             pageControl.frame = CGRectMake(SCREEN_WIDTH/2-70, faceView.frame.size.height-35, 140, 30);
             pageControl.hidden = NO;
+            recordButton.hidden = YES;
+            inputTextView.hidden = NO;
+            [soundButton setImage:[UIImage imageNamed:@"icon_sound"] forState:UIControlStateNormal];
             [inputButton setImage:[UIImage imageNamed:@"keyboard"] forState:UIControlStateNormal];
             if ([self.returnFunDel respondsToSelector:@selector(changeInputType:)])
             {
@@ -486,18 +489,7 @@ originWav,recorderVC,player,hideSoundButton;
     else
     {
         //切换到键盘
-        [inputTextView becomeFirstResponder];
-        [UIView animateWithDuration:0.2 animations:^{
-            self.frame = CGRectMake(0,SCREEN_HEIGHT - keyBoardHeight-inputTextViewSize.height-8, SCREEN_WIDTH, inputTextViewSize.height);
-            faceView.frame = CGRectMake(0, FaceViewHeight+inputTextViewSize.height+10, SCREEN_WIDTH, 0);
-            pageControl.frame = CGRectMake(SCREEN_WIDTH/2-70, faceView.frame.size.height+faceView.frame.origin.y-pageControlHei, 140, 0);
-            pageControl.hidden = YES;
-            [inputButton setImage:[UIImage imageNamed:@"face"] forState:UIControlStateNormal];
-            if ([self.returnFunDel respondsToSelector:@selector(changeInputType:)])
-            {
-                [self.returnFunDel changeInputType:@"keyboard"];
-            }
-        }];
+        [self changeToKeyBoardFrom:@"face"];
     }
     face = !face;
 }
@@ -525,19 +517,61 @@ originWav,recorderVC,player,hideSoundButton;
     else
     {
         //切换到键盘
+        [self changeToKeyBoardFrom:@"more"];
+    }
+    
+    more = !more;
+}
+
+-(void)changeToKeyBoardFrom:(NSString *)fromeType
+{
+    if ([fromeType isEqualToString:@"face"])
+    {
         [inputTextView becomeFirstResponder];
         [UIView animateWithDuration:0.2 animations:^{
-            self.frame = CGRectMake(0,SCREEN_HEIGHT - keyBoardHeight-inputTextViewSize.height-10, SCREEN_WIDTH, inputTextViewSize.height);
-            moreView.frame = CGRectMake(0, FaceViewHeight+inputTextViewSize.height+10, SCREEN_WIDTH, 0);
-            [moreButton setImage:[UIImage imageNamed:@"moreinchat"] forState:UIControlStateNormal];
+            self.frame = CGRectMake(0,SCREEN_HEIGHT - keyBoardHeight-inputTextViewSize.height-8, SCREEN_WIDTH, inputTextViewSize.height);
+            faceView.frame = CGRectMake(0, FaceViewHeight+inputTextViewSize.height+10, SCREEN_WIDTH, 0);
+            pageControl.frame = CGRectMake(SCREEN_WIDTH/2-70, faceView.frame.size.height+faceView.frame.origin.y-pageControlHei, 140, 0);
+            pageControl.hidden = YES;
+            recordButton.hidden = YES;
+            inputTextView.hidden = NO;
+            [inputButton setImage:[UIImage imageNamed:@"face"] forState:UIControlStateNormal];
             if ([self.returnFunDel respondsToSelector:@selector(changeInputType:)])
             {
                 [self.returnFunDel changeInputType:@"keyboard"];
             }
         }];
     }
-    
-    more = !more;
+    else if([fromeType isEqualToString:@"more"])
+    {
+        [inputTextView becomeFirstResponder];
+        [UIView animateWithDuration:0.2 animations:^{
+            self.frame = CGRectMake(0,SCREEN_HEIGHT - keyBoardHeight-inputTextViewSize.height-10, SCREEN_WIDTH, inputTextViewSize.height);
+            moreView.frame = CGRectMake(0, FaceViewHeight+inputTextViewSize.height+10, SCREEN_WIDTH, 0);
+            [moreButton setImage:[UIImage imageNamed:@"moreinchat"] forState:UIControlStateNormal];
+            recordButton.hidden = YES;
+            inputTextView.hidden = NO;
+            if ([self.returnFunDel respondsToSelector:@selector(changeInputType:)])
+            {
+                [self.returnFunDel changeInputType:@"keyboard"];
+            }
+        }];
+    }
+    else if([fromeType isEqualToString:@"sound"])
+    {
+        //显示键盘
+        [inputTextView becomeFirstResponder];
+        [UIView animateWithDuration:0.2 animations:^{
+            self.frame = CGRectMake(0,SCREEN_HEIGHT - keyBoardHeight-inputTextViewSize.height-10, SCREEN_WIDTH, inputTextViewSize.height);
+            [soundButton setImage:[UIImage imageNamed:@"icon_sound"] forState:UIControlStateNormal];
+            recordButton.hidden = YES;
+            inputTextView.hidden = NO;
+            if ([self.returnFunDel respondsToSelector:@selector(changeInputType:)])
+            {
+                [self.returnFunDel changeInputType:@"keyboard"];
+            }
+        }];
+    }
 }
 
 
@@ -567,18 +601,7 @@ originWav,recorderVC,player,hideSoundButton;
 {
     if (sound)
     {
-        //显示键盘
-        inputTextViewSize = CGSizeMake(250, DEFAULTTEXTHEIGHT);
-        if (inputTextView.text.length > 0)
-        {
-            inputTextViewSize = inputTextView.contentSize;
-        }
-        [self inputChange];
-
-        [soundButton setImage:[UIImage imageNamed:@"icon_sound"] forState:UIControlStateNormal];
-        recordButton.hidden = YES;
-        inputTextView.hidden = NO;
-        [[NSNotificationCenter defaultCenter] postNotificationName:UIKeyboardWillShowNotification object:nil];
+        [self changeToKeyBoardFrom:@"sound"];
     }
     else
     {

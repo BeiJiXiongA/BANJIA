@@ -165,7 +165,7 @@ EGORefreshTableHeaderDelegate>
     if (toID && name)
     {
         NSDictionary *userDict = [[NSDictionary alloc] initWithObjectsAndKeys:toID,@"uid",name,@"username",imageUrl,@"uicon", nil];
-        if ([[db findSetWithDictionary:@{toID:@"uid"} andTableName:USERICONTABLE] count] == 0)
+        if ([[db findSetWithDictionary:userDict andTableName:USERICONTABLE] count] == 0)
         {
             [db insertRecord:userDict andTableName:USERICONTABLE];
         }
@@ -720,9 +720,16 @@ EGORefreshTableHeaderDelegate>
         tmpheight = FaceViewHeight;
         inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10-tmpheight, SCREEN_WIDTH, inputSize.height+10 + tmpheight);
     }
-    else if([changeType isEqualToString:@"key"])
+    else if([changeType isEqualToString:@"keyboard"])
     {
-        tmpheight = inputSize.height;
+        if(keyboardHeight > 0)
+        {
+            tmpheight = keyboardHeight;
+        }
+        else
+        {
+            tmpheight = inputSize.height;
+        }
         inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10-tmpheight, SCREEN_WIDTH, inputSize.height+10 + tmpheight);
     }
     iseditting = YES;
@@ -1276,13 +1283,13 @@ EGORefreshTableHeaderDelegate>
         }
 
         NSString *schoolName;
-        if (range2.length >0 && range4.length > 0)
+        if (range2.length >0 && range4.length > 0 && range3.length > 0)
         {
             schoolName = [msgContent substringWithRange:NSMakeRange(range2.location+1,range4.location-range2.location-1)];
         }
 
         NSString *className;
-        if (range3.length>0 && range4.length>0)
+        if (range3.length >0 && range4.length>0)
         {
             className = [msgContent substringWithRange:NSMakeRange(range3.location+1, range4.location-range3.location-1)];
         }

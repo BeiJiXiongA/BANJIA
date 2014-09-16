@@ -142,7 +142,7 @@ UIActionSheetDelegate>
     tipLabel.backgroundColor = self.bgView.backgroundColor;
     tipLabel.lineBreakMode = NSLineBreakByWordWrapping;
     tipLabel.numberOfLines = 3;
-    tipLabel.textColor = CONTENTCOLOR;
+    tipLabel.textColor = COMMENTCOLOR;
     tipLabel.textAlignment = NSTextAlignmentCenter;
     tipLabel.text = @"你可以在这里创建班级，也可以通过班号或二维码加入班级";
     [tipView addSubview:tipLabel];
