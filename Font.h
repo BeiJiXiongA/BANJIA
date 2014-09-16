@@ -15,9 +15,6 @@
 
 #define CommentFont  [UIFont systemFontOfSize:14]
 
-#define MessageTextFont [UIFont systemFontOfSize:16]
-
-
-
+#define MessageTextFont [UIFont systemFontOfSize:16.8]
 
 #endif

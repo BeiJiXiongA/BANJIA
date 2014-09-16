@@ -23,7 +23,7 @@
     BOOL isPlaying;
 }
 @property (nonatomic, strong) UIImageView *headerImageView;
-@property (nonatomic, strong) UITextView *messageTf;
+@property (nonatomic, strong) UILabel *messageContentLabel;
 @property (nonatomic, strong) UIImageView *chatBg;
 @property (nonatomic, strong) UIButton *soundButton;
 @property (nonatomic, strong) UILabel *timeLabel;

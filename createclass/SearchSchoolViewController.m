@@ -282,30 +282,6 @@ SelectAreaDelegate>
     
     cell.contentLabel.textColor = TITLE_COLOR;
     
-//    if (indexPath.section == 0)
-//    {
-//        if (indexPath.row == 0)
-//        {
-//            cell.praiseButton.hidden = NO;
-//            [cell.praiseButton setTitle:@"附近的学校" forState:UIControlStateNormal];
-//            [cell.praiseButton addTarget:self action:@selector(getNearbySchool) forControlEvents:UIControlEventTouchUpInside];
-//            cell.backgroundColor = [UIColor clearColor];
-////            [cell.praiseButton setBackgroundColor:RGB(234, 94, 58, 1)];
-////            cell.praiseButton.layer.cornerRadius = 5;
-////            cell.praiseButton.clipsToBounds = YES;
-//            
-//            cell.headerImageView.hidden = NO;
-//            cell.headerImageView.frame = CGRectMake(65, 7, 15, 23);
-//            cell.headerImageView.backgroundColor = [UIColor clearColor];
-//            [cell.headerImageView setImage:[UIImage imageNamed:@"location"]];
-//            
-//            cell.bgView.frame = cell.praiseButton.frame;
-//            cell.bgView.layer.cornerRadius = 5;
-//            cell.bgView.clipsToBounds = YES;
-//            cell.bgView.backgroundColor = RGB(234, 94, 58, 1);
-//        }
-//    }
-//    else
     if(indexPath.section == 0)
     {
         cell.nameLabel.frame  = CGRectMake(10, 5, 80, 30);
