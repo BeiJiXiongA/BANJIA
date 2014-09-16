@@ -2396,9 +2396,10 @@ headerDelegate>
     
     //创建分享内容
     //    NSString *imagePath = [[NSBundle mainBundle] pathForResource:IMAGE_NAME ofType:IMAGE_EXT];
+    NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
     id<ISSContent> publishContent = [ShareSDK content:content
                                        defaultContent:ShareContent
-                                                image:[ShareSDK imageWithUrl:imagePath]
+                                                image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:@"班家"
                                                   url:ShareUrl
                                           description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
@@ -2477,10 +2478,11 @@ headerDelegate>
         }
     }
     
+    NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
     //创建分享内容[ShareSDK imageWithUrl:imagePath]
     id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                        defaultContent:ShareContent
-                                                image:[ShareSDK imageWithUrl:imagePath]
+                                                image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:@"班家"
                                                   url:ShareUrl
                                           description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
@@ -2560,9 +2562,10 @@ headerDelegate>
         }
     }
     //创建分享内容
+    NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
     id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
                                        defaultContent:ShareContent
-                                                image:[ShareSDK imageWithUrl:imagePath]
+                                                image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:@"班家"
                                                   url:ShareUrl
                                           description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
@@ -2641,9 +2644,10 @@ headerDelegate>
     }
     //创建分享内容
     //创建分享内容
+    NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
     id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                        defaultContent:@""
-                                                image:[ShareSDK imageWithUrl:imagePath]
+                                                image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:@"班家"
                                                   url:ShareUrl
                                           description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
@@ -2797,9 +2801,11 @@ headerDelegate>
         }
     }
     //创建分享内容
+    NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
+    
     id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
                                        defaultContent:@""
-                                                image:[ShareSDK imageWithUrl:imagePath]
+                                                image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:@"班家"
                                                   url:ShareUrl
                                           description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent

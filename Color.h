@@ -48,4 +48,6 @@
 #define HEADER_GREEN  UIColorFromRGB(0x3dc46e)
 #define HEADER_BLUER  UIColorFromRGB(0x41c4b6)
 
+#define CHAT_CONTENT_COLOR [UIColor blackColor]
+
 #endif
