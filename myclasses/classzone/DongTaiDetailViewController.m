@@ -41,6 +41,8 @@ UIActionSheetDelegate,NameButtonDel>
     
     InputTableBar *inputTabBar;
     
+    UITapGestureRecognizer *backTgr;
+    
     CGFloat tmpheight;
     
     CGSize inputSize;
@@ -78,6 +80,9 @@ UIActionSheetDelegate,NameButtonDel>
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
+    
+    backTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(backInput)];
+    
 }
 
 -(void)viewWillAppear:(BOOL)animated
@@ -109,6 +114,7 @@ UIActionSheetDelegate,NameButtonDel>
     diaryDetailTableView.dataSource = self;
     diaryDetailTableView.delegate = self;
     diaryDetailTableView.tag = 10000;
+    diaryDetailTableView.userInteractionEnabled = YES;
     diaryDetailTableView.backgroundView = tableViewBg;
     diaryDetailTableView.backgroundColor = [UIColor clearColor];
     diaryDetailTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
@@ -224,6 +230,7 @@ UIActionSheetDelegate,NameButtonDel>
 {
     [UIView animateWithDuration:0.2 animations:^{
         [inputTabBar.inputTextView resignFirstResponder];
+        [diaryDetailTableView removeGestureRecognizer:backTgr];
         inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10, SCREEN_WIDTH, inputSize.height+10);
     }];
 }
@@ -234,6 +241,8 @@ UIActionSheetDelegate,NameButtonDel>
     [UIView animateWithDuration:0.2 animations:^{
         tmpheight = keyBoardHeight;
         inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10-keyBoardHeight, SCREEN_WIDTH, inputSize.height+10+ FaceViewHeight);
+        
+        [diaryDetailTableView addGestureRecognizer:backTgr];
     }];
 }
 
@@ -732,6 +741,7 @@ UIActionSheetDelegate,NameButtonDel>
 
 -(void)praiseDiary
 {
+    [self backInput];
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
@@ -872,6 +882,7 @@ UIActionSheetDelegate,NameButtonDel>
 #pragma mark - shareAPP
 -(void)shareAPP
 {
+    [self backInput];
     UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"转发到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"QQ空间",@"腾讯微博",@"QQ好友",@"微信朋友圈",@"人人网", nil];
     actionSheet.tag = 4444;
     [actionSheet showInView:self.bgView];
@@ -968,10 +979,10 @@ UIActionSheetDelegate,NameButtonDel>
     }
     
     //创建分享内容
-    //    NSString *imagePath = [[NSBundle mainBundle] pathForResource:IMAGE_NAME ofType:IMAGE_EXT];
+    NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
     id<ISSContent> publishContent = [ShareSDK content:content
                                        defaultContent:@""
-                                                image:[ShareSDK imageWithUrl:imagePath]
+                                                image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:@"班家"
                                                   url:ShareUrl
                                           description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
@@ -1049,10 +1060,11 @@ UIActionSheetDelegate,NameButtonDel>
         }
     }
     
+    NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
     //创建分享内容[ShareSDK imageWithUrl:imagePath]
     id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                        defaultContent:@""
-                                                image:[ShareSDK imageWithUrl:imagePath]
+                                                image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:@"班家"
                                                   url:ShareUrl
                                           description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
@@ -1132,9 +1144,10 @@ UIActionSheetDelegate,NameButtonDel>
         }
     }
     //创建分享内容
+     NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
     id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                        defaultContent:@""
-                                                image:[ShareSDK imageWithUrl:imagePath]
+                                                image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:@"班家"
                                                   url:ShareUrl
                                           description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
@@ -1212,9 +1225,11 @@ UIActionSheetDelegate,NameButtonDel>
         }
     }
     //创建分享内容
+    NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
+    
     id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                        defaultContent:@""
-                                                image:[ShareSDK imageWithUrl:imagePath]
+                                                image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:@"班家"
                                                   url:ShareUrl
                                           description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
@@ -1288,10 +1303,11 @@ UIActionSheetDelegate,NameButtonDel>
             imagePath = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[waitTransDict objectForKey:@"img"] firstObject]];
         }
     }
+    NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
     //创建分享内容
     id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                        defaultContent:@""
-                                                image:[ShareSDK imageWithUrl:imagePath]
+                                                image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                                   url:ShareUrl
                                           description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
@@ -1365,10 +1381,11 @@ UIActionSheetDelegate,NameButtonDel>
             imagePath = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[waitTransDict objectForKey:@"img"] firstObject]];
         }
     }
+    NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
     //创建分享内容
     id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                        defaultContent:@""
-                                                image:[ShareSDK imageWithUrl:imagePath]
+                                                image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:@"班家"
                                                   url:ShareUrl
                                           description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent

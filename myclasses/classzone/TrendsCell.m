@@ -410,7 +410,7 @@ verticalLineView;
                 NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row];
                 NSString *name = [NSString stringWithFormat:@"%@",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
                 NSString *content = [[commitDict objectForKey:@"content"] emojizedString];
-                CGSize s = [Tools getSizeWithString:content andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
+                CGSize s = [Tools getSizeWithString:content andWidth:MaxCommentWidth andFont:CommentFont];
                 cell.headerImageView.hidden = NO;
                 cell.headerImageView.frame = CGRectMake(12, 10, PraiseW, PraiseW);
                 cell.headerImageView.backgroundColor = [UIColor clearColor];
@@ -452,7 +452,7 @@ verticalLineView;
             NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row-1];
             NSString *name = [NSString stringWithFormat:@"%@",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
             NSString *content = [[commitDict objectForKey:@"content"] emojizedString];
-            CGSize s = [Tools getSizeWithString:content andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
+            CGSize s = [Tools getSizeWithString:content andWidth:MaxCommentWidth andFont:CommentFont];
             
             
             cell.headerImageView.hidden = NO;
@@ -564,7 +564,6 @@ verticalLineView;
                 NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row];
                 NSString *name = [NSString stringWithFormat:@"%@ : ",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
                 
-                UIFont *nameFont = CommentFont;
                 CGSize nameSize;
                 if (SYSVERSION >= 7)
                 {
@@ -580,7 +579,7 @@ verticalLineView;
                 
                 NSString *content = [[commitDict objectForKey:@"content"] emojizedString];
                 
-                CGSize commentSize = [Tools getSizeWithString:content andWidth:MaxCommentWidth-cell.nameLable.frame.size.width andFont:nameFont];
+                CGSize commentSize = [Tools getSizeWithString:content andWidth:MaxCommentWidth-cell.nameLable.frame.size.width andFont:CommentFont];
                 cell.commentContentLabel.text = content;
                 cell.commentContentLabel.lineBreakMode = NSLineBreakByCharWrapping;
                 cell.commentContentLabel.numberOfLines = 1000;
@@ -606,7 +605,6 @@ verticalLineView;
                 NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row-1];
                 NSString *name = [NSString stringWithFormat:@"%@ : ",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
                 
-                UIFont *nameFont = CommentFont;
                 CGSize nameSize;
                 if (SYSVERSION >= 7)
                 {
@@ -622,9 +620,9 @@ verticalLineView;
                 cell.nameLable.frame = CGRectMake(12, originalY, nameSize.width, nameSize.height);
                 
                 NSString *content = [[commitDict objectForKey:@"content"] emojizedString];
-                CGSize commentSize = [Tools getSizeWithString:content andWidth:MaxCommentWidth-nameSize.width andFont:nameFont];
+                CGSize commentSize = [Tools getSizeWithString:content andWidth:MaxCommentWidth-nameSize.width andFont:CommentFont];
                 cell.commentContentLabel.text = content;
-                cell.commentContentLabel.frame = CGRectMake(cell.nameLable.frame.size.width+12, originalY, MaxCommentWidth-cell.nameLable.frame.size.width, commentSize.height);
+                cell.commentContentLabel.frame = CGRectMake(cell.nameLable.frame.size.width+12, originalY, MaxCommentWidth-nameSize.width, commentSize.height);
                 
                 return cell;
             }

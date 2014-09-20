@@ -11,6 +11,7 @@
 
 #import "Color.h"
 #import "Font.h"
+#import "Size.h"
 
 
 #define FaceViewHeight  200
@@ -121,8 +122,6 @@ return shared##className; \
 #define CornerMore   @"corner_more"
 #define CORNERMORERIGHT  50
 
-#define NAMEFONT   [UIFont systemFontOfSize:16]
-
 #define USERID    @"u_id"
 #define PHONENUM  @"phone_num"
 #define LAST_PHONENUM  @"last_phone_num"
@@ -200,6 +199,9 @@ return shared##className; \
 #define ClassAssistantHeader   @"/assistant.png"
 
 #pragma mark - notification name
+#define UPDATECLASSNUMBER  @"updateclassnumber"
+#define UPDATECHATSNUMBER  @"updatechatnumber"
+
 #define UPDATECLASSMEMBERLIST   @"updateclassmemberlist"
 #define UPDATEFRIENDSLIST       @"updatefriendslist"
 #define LOGOUT                  @"logout"
@@ -230,7 +232,7 @@ return shared##className; \
 #define TakePhotoTag   7777
 #define AlbumTag      9999
 
-#define PhotoSpace  7
+#define PhotoSpace  9
 
 #pragma mark - aboutpushnotification
 #define BECOMEACTIVE  @"becomeactive"

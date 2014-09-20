@@ -16,4 +16,5 @@
 @property (nonatomic, strong) UIImageView *authenticationSign;
 @property (nonatomic, strong) UIImageView *arrowImageView;
 @property (nonatomic, strong) UIView *bgView;
+@property (nonatomic, strong) UIImageView *lineImageView;
 @end

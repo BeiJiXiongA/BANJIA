@@ -50,6 +50,8 @@ EGORefreshTableHeaderDelegate>
     NSMutableArray *messageArray;
     UITableView *messageTableView;
     
+    NSMutableArray *showTimesArray;
+    
     UIImagePickerController *imagePickerController;
     UIButton*editButton;
     BOOL edittingTableView;
@@ -161,6 +163,7 @@ EGORefreshTableHeaderDelegate>
     page = 0;
     faceViewHeight = 0;
     
+    showTimesArray = [[NSMutableArray alloc] initWithCapacity:0];
     
     if (toID && name)
     {
@@ -614,10 +617,10 @@ EGORefreshTableHeaderDelegate>
             [Tools hideProgress:self.bgView];
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"friendsList responsedict %@",responseDict);
+            DDLOG(@"update chat last time responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                
+                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECHATSNUMBER object:nil];
                 
             }
             else
@@ -709,6 +712,7 @@ EGORefreshTableHeaderDelegate>
         {
             messageTableView.contentOffset = CGPointZero;
         }
+        tmpheight = 0;
         iseditting = NO;
     }];
 }
@@ -776,6 +780,7 @@ EGORefreshTableHeaderDelegate>
             NSDictionary *tmpDict = [messageArray objectAtIndex:i];
             [db updeteKey:@"readed" toValue:@"1" withParaDict:@{@"fid":[tmpDict objectForKey:@"fid"],@"userid":[Tools user_id]} andTableName:CHATTABLE];
         }
+        [showTimesArray removeAllObjects];
         [messageTableView reloadData];
     }
     
@@ -795,20 +800,6 @@ EGORefreshTableHeaderDelegate>
 {
     if (actionSheet.tag == MoreACTag)
     {
-//        if (buttonIndex == 0)
-//        {
-//            if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"fid":toID} andTableName:FRIENDSTABLE] count] > 0)
-//            {
-//                UIAlertView *al = [[UIAlertView alloc] initWithTitle:nil message:[NSString stringWithFormat:@"您确定与%@解除好友关系吗？",name] delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定解除", nil];
-//                al.tag = 3333;
-//                [al show];
-//            }
-//            else
-//            {
-//                //添加为好友
-//                [self addFriend];
-//            }
-//        }
         if (buttonIndex == 0)
         {
             ReportViewController *reportVC = [[ReportViewController alloc] init];
@@ -1029,35 +1020,61 @@ EGORefreshTableHeaderDelegate>
     CGFloat rowHeight = 0;
     NSDictionary *dict = [messageArray objectAtIndex:indexPath.row];
     NSString *msgContent = [[messageArray objectAtIndex:indexPath.row] objectForKey:@"content"];
-    CGSize size = [SizeTools getSizeWithString:[msgContent emojizedString] andWidth:SCREEN_WIDTH/2+20 andFont:[UIFont systemFontOfSize:14]];
-    rowHeight = size.height+20;
+    CGSize size = [SizeTools getSizeWithString:[msgContent emojizedString] andWidth:SCREEN_WIDTH/2+20 andFont:MessageTextFont];
+    rowHeight = size.height+CHAT_TOP_TEXT_SPACE*2;
     if ([[dict objectForKey:@"content"] rangeOfString:@"$!#"].length >0)
     {
         NSString *msgContent = [dict objectForKey:@"content"];
         NSRange range = [msgContent rangeOfString:@"$!#"];
         msgContent = [msgContent substringFromIndex:range.location+range.length];
-        size = [SizeTools getSizeWithString:[msgContent emojizedString] andWidth:SCREEN_WIDTH/2+20 andFont:[UIFont systemFontOfSize:14]];
-        rowHeight = size.height+40;
+        size = [SizeTools getSizeWithString:[msgContent emojizedString] andWidth:SCREEN_WIDTH/2+20 andFont:MessageTextFont];
+        if ([[dict objectForKey:DIRECT] isEqualToString:@"f"])
+        {
+            rowHeight = size.height + CHAT_TOP_TEXT_SPACE * 2 + 21;
+        }
+        else
+        {
+            rowHeight = size.height + CHAT_TOP_TEXT_SPACE * 2 +1;
+        }
     }
     if ([[msgContent pathExtension] isEqualToString:@"png"] || [[msgContent pathExtension] isEqualToString:@"jpg"])
     {
-        
-        rowHeight = 100+PhotoSpace;
+        rowHeight = MESSAGE_IMAGE_HEIGHT+CHAT_TOP_IMAGE_SPACE*2;
     }
     else if ([msgContent rangeOfString:@"amr"].length > 0)
     {
-        rowHeight = 35;
+        rowHeight = 40;
     }
-    if (([[dict objectForKey:@"time"] integerValue] - currentSec) > 60*3  || indexPath.row == 0)
+    
+    if (rowHeight < 40)
     {
-//        currentSec = [[dict objectForKey:@"time"] integerValue];
-//        rowHeight+=20;
+        rowHeight = 40;
     }
+
+    if ((ABS(([[dict objectForKey:@"time"] integerValue] - currentSec)) > 60*3 || indexPath.row == 0))
+    {
+        DDLOG(@"current time %d",currentSec);
+        currentSec = [[dict objectForKey:@"time"] integerValue];
+        if(!isGroup)
+        {
+            if(([toID isEqualToString:OurTeamID] && [[dict objectForKey:DIRECT] isEqualToString:@"t"]) ||
+               ![toID isEqualToString:OurTeamID])
+            {
+                rowHeight += 25;
+            }
+        }
+        else if((isGroup && [[dict objectForKey:DIRECT] isEqualToString:@"t"]))
+        {
+            rowHeight += 25;
+        }
+        [showTimesArray addObject:[dict objectForKey:@"time"]];
+    }
+    
     if ([[dict objectForKey:DIRECT] isEqualToString:@"f"] && isGroup)
     {
-        rowHeight += 20;
+        rowHeight += 25;
     }
-    return rowHeight+20+20;
+    return rowHeight+ CHAT_MSG_SPACE * 2;
 }
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -1081,14 +1098,33 @@ EGORefreshTableHeaderDelegate>
     }
     cell.msgDelegate = self;
     
-    if (([[dict objectForKey:@"time"] integerValue] - currentSec) > 60*3  || indexPath.row == 0)
+    cell.timeLabel.hidden = YES;
+    if ([showTimesArray containsObject:[dict objectForKey:@"time"]])
     {
-        cell.timeLabel.hidden = NO;
-        currentSec = [[dict objectForKey:@"time"] integerValue];
-    }
-    else
-    {
-        cell.timeLabel.hidden = YES;
+        if(([toID isEqualToString:OurTeamID] && [[dict objectForKey:DIRECT] isEqualToString:@"t"]) ||
+           ![toID isEqualToString:OurTeamID])
+        {
+            cell.timeLabel.hidden = NO;
+            NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
+            cell.timeLabel.text = timeStr;
+            CGRect headerImageRect = cell.headerImageView.frame;
+            CGRect chatBgRect = cell.chatBg.frame;
+            CGRect msgContentLabelRect = cell.messageContentLabel.frame;
+            
+            CGRect msgImageViewRect = cell.msgImageView.frame;
+            CGRect soundButtonRect = cell.soundButton.frame;
+            
+            if (!isGroup || [[dict objectForKey:DIRECT] isEqualToString:@"t"])
+            {
+                cell.headerImageView.frame = CGRectMake(headerImageRect.origin.x, headerImageRect.origin.y+25, headerImageRect.size.width, headerImageRect.size.height);
+                cell.chatBg.frame = CGRectMake(chatBgRect.origin.x, chatBgRect.origin.y+25, chatBgRect.size.width, chatBgRect.size.height);
+                cell.messageContentLabel.frame = CGRectMake(msgContentLabelRect.origin.x, msgContentLabelRect.origin.y+25, msgContentLabelRect.size.width, msgContentLabelRect.size.height);
+                cell.msgImageView.frame = CGRectMake(msgImageViewRect.origin.x, msgImageViewRect.origin.y+25, msgImageViewRect.size.width, msgImageViewRect.size.height);
+                cell.soundButton.frame = CGRectMake(soundButtonRect.origin.x, soundButtonRect.origin.y+25, soundButtonRect.size.width, soundButtonRect.size.height);
+            }
+
+        }
+        
     }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     cell.backgroundColor = self.bgView.backgroundColor;

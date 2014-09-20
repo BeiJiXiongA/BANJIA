@@ -156,6 +156,10 @@ UIActionSheetDelegate>
             }
         }
     }
+    if (![self showPhoneNum])
+    {
+        phoneNum = @"";
+    }
     
     if([Tools NetworkReachable])
     {
@@ -173,6 +177,19 @@ UIActionSheetDelegate>
 -(void)unShowSelfViewController
 {
     [self.navigationController popViewControllerAnimated:YES];
+}
+
+-(BOOL)showPhoneNum
+{
+    if ([teacherID isEqualToString:[Tools user_id]])
+    {
+        return YES;
+    }
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"teachers"])
+    {
+        return YES;
+    }
+    return NO;
 }
 
 #pragma mark - setobjectdel
@@ -212,18 +229,25 @@ UIActionSheetDelegate>
 {
     if (section == 1)
     {
-        return 35;
+        if ([phoneNum length] > 0 || ([birth length] > 0 && ![birth isEqualToString:@"请设置生日"]))
+        {
+            return 35;
+        }
     }
     return 0;
 }
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
-    UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 100, 35)];
-    headerLabel.backgroundColor = [UIColor clearColor];
-    headerLabel.text = @"   个人信息";
-    //    headerLabel.font = [UIFont systemFontOfSize:14];
-    headerLabel.textColor = TITLE_COLOR;
-    return headerLabel;
+    if ([phoneNum length] > 0 || ([birth length] > 0 && ![birth isEqualToString:@"请设置生日"]))
+    {
+        UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 100, 35)];
+        headerLabel.backgroundColor = [UIColor clearColor];
+        headerLabel.text = @"   个人信息";
+        //    headerLabel.font = [UIFont systemFontOfSize:14];
+        headerLabel.textColor = TITLE_COLOR;
+        return headerLabel;
+    }
+    return nil;
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -239,7 +263,7 @@ UIActionSheetDelegate>
             {
                 return 40;
             }
-            if (indexPath.row == 1 && [birth length] > 0)
+            if (indexPath.row == 1 && ([birth length] > 0 && ![birth isEqualToString:@"请设置生日"]))
             {
                 return 40;
             }
@@ -794,6 +818,10 @@ UIActionSheetDelegate>
                             banjiaNum = @"";
                         }
                     }
+                }
+                if (![self showPhoneNum])
+                {
+                    phoneNum = @"";
                 }
                 [infoView reloadData];
             }

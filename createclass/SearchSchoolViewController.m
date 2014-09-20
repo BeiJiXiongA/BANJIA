@@ -22,7 +22,8 @@ UITableViewDelegate,
 SelectSchoolLevelDel,
 UITextFieldDelegate,
 SelectCitydelegate,
-SelectAreaDelegate>
+SelectAreaDelegate,
+CLLocationManagerDelegate>
 {
     NSArray *cellNameArray;
     
@@ -42,6 +43,17 @@ SelectAreaDelegate>
     
     OperatDB *db;
     
+    //位置
+    CLLocationManager *locationManager;
+    CLLocation *nowLocation;
+    UIButton *locationButton;
+    BOOL locationEditing;
+    UIView *locationBgView;
+    MyTextField *locationTextView;
+    CLLocationDegrees latitude;
+    CLLocationDegrees longitude;
+    BOOL enableLocation;
+    
 }
 @end
 
@@ -55,6 +67,87 @@ SelectAreaDelegate>
     }
     return self;
 }
+
+#pragma mark - location
+
+-(void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation
+{
+    
+    nowLocation = newLocation;
+    //do something else
+    CLGeocoder *geocoder = [[CLGeocoder alloc]init];
+    [geocoder reverseGeocodeLocation:newLocation completionHandler:^(NSArray *array,NSError *error){
+        if ([array count]>0) {
+            CLPlacemark * placemark = [array objectAtIndex:0];
+            NSDictionary *addDict = placemark.addressDictionary;
+            NSString *tmpCityName = [addDict objectForKey:@"State"];
+            NSRange range = [tmpCityName rangeOfString:@"市"];
+            if (range.length > 0)
+            {
+                cityname = [tmpCityName substringToIndex:range.location];
+            }
+            else
+            {
+                cityname = tmpCityName;
+            }
+            NSArray *cityArray = [db findSetWithDictionary:@{@"cityname":cityname} andTableName:CITYTABLE];
+            if ([cityArray count] > 0)
+            {
+                for (NSDictionary *dict in cityArray)
+                {
+                    DDLOG(@"+++++++%@",dict);
+                    if ([dict objectForKey:@"cityid"] && [[dict objectForKey:@"citylevel"] integerValue] == 1)
+                    {
+                        cityId = [dict objectForKey:@"cityid"];
+                        if ([cityname length] > 0 && [cityId length] > 0)
+                        {
+                            [self getAreasWith:cityId];
+                        }
+                        break ;
+                    }
+                }
+            }
+            
+            
+        }
+    }];
+}
+
+-(void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
+{
+    NSString *errorString;
+    [manager stopUpdatingLocation];
+    DDLOG(@"Error:%@",[error localizedDescription]);
+    switch ([error code])
+    {
+        case kCLErrorDenied:
+            errorString = @"定位服务被禁止，请到设置->隐私->定位服务里打开这个应用的定位服务";
+            break;
+        case kCLErrorLocationUnknown:
+            errorString = @"定位信息不可用";
+        default:
+            errorString = @"位置错误";
+            break;
+    }
+    [Tools showAlertView:errorString delegateViewController:nil];
+}
+
+- (void) setupLocationManager {
+    if (![Tools NetworkReachable])
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+        return ;
+    }
+    
+    locationManager = [[CLLocationManager alloc] init];
+    if ([CLLocationManager locationServicesEnabled]) {
+        locationManager.delegate = self;
+        locationManager.distanceFilter = 200;
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+        [locationManager startUpdatingLocation];
+    }
+}
+
 
 - (void)viewDidLoad
 {
@@ -75,6 +168,8 @@ SelectAreaDelegate>
     
     schoollevelName = @"全部";
     schoollevelId = @"-1";
+    
+    [self setupLocationManager];
     
     cellNameArray = [[NSArray alloc] initWithObjects:@"城市",@"地区",@"学校类别",@"学校名称", nil];
     areaArray = [[NSMutableArray alloc] initWithCapacity:0];

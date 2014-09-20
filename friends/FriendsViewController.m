@@ -158,7 +158,9 @@ OperateFriends>
 -(BOOL)haveNewMsg
 {
     NSMutableArray *array = [db findSetWithDictionary:@{@"readed":@"0",@"userid":[Tools user_id]} andTableName:@"chatMsg"];
-    if ([array count] > 0 || [[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue]>0)
+    if ([array count] > 0 ||
+        [[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue]>0 ||
+        [[[NSUserDefaults standardUserDefaults] objectForKey:NewClassNum] integerValue]>0)
     {
         return YES;
     }
@@ -170,11 +172,6 @@ OperateFriends>
 }
 -(BOOL)haveNewNotice
 {
-    NSMutableArray *array = [db findSetWithDictionary:@{@"readed":@"0",@"uid":[Tools user_id],@"type":@"f_apply"} andTableName:@"notice"];
-    if ([array count] > 0)
-    {
-        return YES;
-    }
     return NO;
 }
 
@@ -433,7 +430,6 @@ OperateFriends>
             cell.memNameLabel.frame = CGRectMake(60, 11, 115, 30);
             cell.memNameLabel.hidden = NO;
             cell.memNameLabel.text = [NSString stringWithFormat:@"群聊(%d)",[groupChatArray count]];
-            cell.memNameLabel.font = [UIFont systemFontOfSize:17];
             
             cell.markView.frame = CGRectMake(SCREEN_WIDTH-20, 19, 8, 12);
             [cell.markView setImage:[UIImage imageNamed:@"discovery_arrow"]];

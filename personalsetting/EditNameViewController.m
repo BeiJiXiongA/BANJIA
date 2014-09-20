@@ -43,6 +43,7 @@
     nameTextField.clipsToBounds = YES;
     nameTextField.text = name;
     nameTextField.delegate = self;
+    nameTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
     nameTextField.backgroundColor = [UIColor whiteColor];
     nameTextField.textColor = COMMENTCOLOR;
     nameTextField.font = [UIFont systemFontOfSize:16];
@@ -54,6 +55,11 @@
     {
         [textField.window makeKeyAndVisible];
     }
+}
+
+-(BOOL)textFieldShouldClear:(UITextField *)textField
+{
+    return YES;
 }
 
 -(void)editDone

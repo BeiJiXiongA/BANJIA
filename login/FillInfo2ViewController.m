@@ -261,7 +261,7 @@
         [Tools showAlertView:@"请输入您的姓名！" delegateViewController:nil];
         return;
     }
-    if ([nameTextField.text lengthOfBytesUsingEncoding:NSUTF8StringEncoding] <=1)
+    if ([nameTextField.text lengthOfBytesUsingEncoding:NSUTF8StringEncoding] < 2)
     {
         [Tools showAlertView:@"名字的长度应该大于1个字符" delegateViewController:nil];
         return;

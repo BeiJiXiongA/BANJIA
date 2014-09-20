@@ -187,7 +187,7 @@ UISearchBarDelegate>
     
     if (fromClass)
     {
-        iconOnArray = @[@"Invite_banjia_friend",@"invite_phone_on",@"invite_QQ_on",@"invite_weichat_on"];
+        iconOnArray = @[@"Invite_banjia_friend_on",@"invite_phone_on",@"invite_QQ_on",@"invite_weichat_on"];
         iconArray = @[@"Invite_banjia_friend",@"invite_phone",@"invite_QQ",@"invite_weichat"];
     }
     else
@@ -805,7 +805,15 @@ UISearchBarDelegate>
         
         CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
         UIImageView *lineImageView = [[UIImageView alloc] init];
-        lineImageView.frame = CGRectMake(45, cellHeight-0.5, cell.frame.size.width, 0.5);
+        if ((indexPath.section == 0 && indexPath.row == [friendsArry count]-1) ||
+            (indexPath.section == 1 && indexPath.row == [thisClassFriednsArray count]-1))
+        {
+            lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+        }
+        else
+        {
+            lineImageView.frame = CGRectMake(45, cellHeight-0.5, cell.frame.size.width, 0.5);
+        }
         lineImageView.backgroundColor = LineBackGroudColor;
         [cell.contentView addSubview:lineImageView];
         cell.contentView.backgroundColor = [UIColor whiteColor];
@@ -1960,15 +1968,18 @@ UISearchBarDelegate>
                         NSArray *tmpArray = [responseDict objectForKey:@"data"];
                         for (NSDictionary *dict in tmpArray)
                         {
-                            if ([[db findSetWithDictionary:@{@"classid":classID,@"uid":[dict objectForKey:@"_id"]} andTableName:CLASSMEMBERTABLE] count] > 0)
+                            if ([[dict objectForKey:@"cgroup"] intValue] == 0)
                             {
-                                [thisClassFriednsArray addObject:dict];
-                            }
-                            else
-                            {
-                                if (![[dict objectForKey:@"_id"] isEqualToString:OurTeamID] && ![[dict objectForKey:@"_id"] isEqualToString:AssistantID])
+                                if ([[db findSetWithDictionary:@{@"classid":classID,@"uid":[dict objectForKey:@"_id"]} andTableName:CLASSMEMBERTABLE] count] > 0)
                                 {
-                                    [friendsArry addObject:dict];
+                                    [thisClassFriednsArray addObject:dict];
+                                }
+                                else
+                                {
+                                    if (![[dict objectForKey:@"_id"] isEqualToString:OurTeamID] && ![[dict objectForKey:@"_id"] isEqualToString:AssistantID])
+                                    {
+                                        [friendsArry addObject:dict];
+                                    }
                                 }
                             }
                         }

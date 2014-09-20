@@ -109,7 +109,7 @@
     [_backButton setTitleColor:BackButtonTitleColor forState:UIControlStateNormal];
     [_backButton addTarget:self action:@selector(unShowSelfViewController) forControlEvents:UIControlEventTouchUpInside];
     _backButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentRight;
-    _backButton.titleLabel.font = [UIFont systemFontOfSize:16.5];
+//    _backButton.titleLabel.font = [UIFont systemFontOfSize:16.5];
     
     unReadLabel = [[UILabel alloc] initWithFrame:CGRectMake(35, YSTART +13, 15, 15)];
     unReadLabel.backgroundColor = [UIColor redColor];

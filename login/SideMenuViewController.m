@@ -74,6 +74,8 @@
     self.view.backgroundColor = [UIColor whiteColor];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeIcon) name:@"changeicon" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadSideButton) name:UPDATECLASSNUMBER object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadSideButton) name:UPDATECHATSNUMBER object:nil];
     
     selectIndex = 0;
     
@@ -129,6 +131,12 @@
     personalSetting = [[PersonalSettingViewController alloc] init];
     personSettingNav = [[KKNavigationController alloc] initWithRootViewController:personalSetting];
 }
+
+-(void)reloadSideButton
+{
+    [buttonTableView reloadData];
+}
+
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     return [menuNamesArray count];
@@ -176,10 +184,10 @@
     
     if (indexPath.row == 1)
     {
-        if ([self haveNewNotice] > 0)
+        if ([self haveNewClass] > 0)
         {
             cell.contentLable.hidden = NO;
-            cell.contentLable.text = [NSString stringWithFormat:@"%d",[self haveNewNotice]];
+            cell.contentLable.text = [NSString stringWithFormat:@"%d",[self haveNewClass]];
         }
     }
     else if (indexPath.row == 2)
@@ -192,10 +200,10 @@
     }
     else if (indexPath.row == 3)
     {
-        if ([self haveNewMsg] > 0)
+        if ([self haveNewChat] > 0)
         {
             cell.contentLable.hidden = NO;
-            cell.contentLable.text = [NSString stringWithFormat:@"%d",[self haveNewMsg]];
+            cell.contentLable.text = [NSString stringWithFormat:@"%d",[self haveNewChat]];
         }
     }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
@@ -280,21 +288,6 @@
 
 -(void)headerTap
 {
-//    [homeNav popToRootViewControllerAnimated:NO];
-//    [homeNav dismissViewControllerAnimated:NO completion:nil];
-//    
-//    [myClassesNav popToRootViewControllerAnimated:NO];
-//    [myClassesNav dismissViewControllerAnimated:NO completion:nil];
-//    
-//    [friendsNav popToRootViewControllerAnimated:NO];
-//    [friendsNav dismissViewControllerAnimated:NO completion:nil];
-//    
-//    [messageNav popToRootViewControllerAnimated:NO];
-//    [messageNav dismissViewControllerAnimated:NO completion:nil];
-//    
-//    [personSettingNav popToRootViewControllerAnimated:NO];
-//    [personSettingNav dismissViewControllerAnimated:NO completion:nil];
-    
     NSString *classStr = NSStringFromClass([[(KKNavigationController *)[self.sideMenuController contentController] topViewController] class]);
     if (![classStr isEqualToString:@"PersonalSettingViewController"])
     {
@@ -322,7 +315,12 @@
         NSDictionary *userIconDIct = [ImageTools iconDictWithUserID:[dataDict objectForKey:@"f_id"]];
         if(userIconDIct)
         {
-            chat.name = [userIconDIct objectForKey:@"username"];
+            NSString *name = [userIconDIct objectForKey:@"username"];
+            chat.name = name;
+            if ([name rangeOfString:@"人)"].length > 0)
+            {
+                chat.isGroup = YES;
+            }
             chat.imageUrl = [userIconDIct objectForKey:@"uicon"];
         }
         [[(KKNavigationController *)[self.sideMenuController contentController] visibleViewController].navigationController pushViewController:chat animated:YES];
@@ -348,7 +346,7 @@
     // Dispose of any resources that can be recreated.
 }
 
--(NSInteger)haveNewMsg
+-(NSInteger)haveNewChat
 {
     NSMutableArray *array = [db findSetWithDictionary:@{@"readed":@"0",@"userid":[Tools user_id]} andTableName:CHATTABLE];
     if ([array count] > 0)
@@ -361,19 +359,11 @@
     }
     return 0;
 }
--(NSInteger)haveNewNotice
+-(NSInteger)haveNewClass
 {
-    NSMutableArray *array = [db findSetWithDictionary:@{@"readed":@"0",@"uid":[Tools user_id]} andTableName:NOTICETABLE];
+    NSString *classNum = [[NSUserDefaults standardUserDefaults] objectForKey:NewClassNum];
     
-    if ([array count] > 0)
-    {
-        return [array count];
-    }
-    else if( [[[NSUserDefaults standardUserDefaults] objectForKey:NewClassNum] integerValue]>0)
-    {
-        return  [[[NSUserDefaults standardUserDefaults] objectForKey:NewClassNum] integerValue];
-    }
-    return 0;
+    return [classNum intValue];
 }
 -(BOOL)haveNewFriendApply
 {

@@ -411,6 +411,7 @@ ZBarReaderDelegate>
         break;
     
     DDLOG(@"%@",symbol.data);
+    
     if ([symbol.data rangeOfString:@";"].length > 0)
     {
         NSString *classNum = [symbol.data substringFromIndex:[symbol.data rangeOfString:@";"].location+1];

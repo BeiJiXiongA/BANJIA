@@ -231,10 +231,17 @@ SetClassInfoDel>
     {
         return 47;
     }
-    else
+    else if(indexPath.row == 6)
     {
         CGSize size = [Tools getSizeWithString:classInfo andWidth:SCREEN_WIDTH-150 andFont:[UIFont systemFontOfSize:16]];
-        return size.height+20>40?(size.height+20+30):(40+30);
+        if ([classInfo length] > 0)
+        {
+            return size.height + 20;
+        }
+        else
+        {
+            return 47;
+        }
     }
     return 0;
 }
@@ -258,11 +265,8 @@ SetClassInfoDel>
     cell.nameLabel.textAlignment = NSTextAlignmentLeft;
     
     CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
-    UIImageView *lineImageView = [[UIImageView alloc] init];
-    lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-    lineImageView.backgroundColor = LineBackGroudColor;
-    [cell.contentView addSubview:lineImageView];
-    cell.contentView.backgroundColor = [UIColor whiteColor];
+    cell.lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+    cell.lineImageView.backgroundColor = LineBackGroudColor;
     
     CGFloat left = 210;
     if (indexPath.row < 6)
@@ -273,7 +277,7 @@ SetClassInfoDel>
             cell.nameLabel.text = @"我的身份";
             cell.nameLabel.frame = CGRectMake(10, 10, 80, 27);
             
-            cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-220, 10, 180,27);
+            cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-left, 10, 180,27);
             NSString *role = [[NSUserDefaults standardUserDefaults] objectForKey:@"role"];
             if ([role isEqualToString:@"students"])
             {
@@ -356,7 +360,6 @@ SetClassInfoDel>
     {
         CGSize size = [Tools getSizeWithString:classInfo andWidth:SCREEN_WIDTH-150 andFont:[UIFont systemFontOfSize:16]];
         cell.nameLabel.frame = CGRectMake(10, 10, 80, 27);
-        cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-left, 10, 180, size.height>27?size.height:27);
         
         cell.nameLabel.text = @"班级介绍";
         if ([classInfo length] > 0)
@@ -364,11 +367,13 @@ SetClassInfoDel>
             cell.objectsLabel.text = classInfo;
             cell.objectsLabel.numberOfLines = 10;
             cell.objectsLabel.textAlignment = NSTextAlignmentLeft;
+            cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-left+18, 10, SCREEN_WIDTH-150, size.height);
         }
         else
         {
             cell.objectsLabel.text = @"请填写班级介绍";
             cell.objectsLabel.textAlignment = NSTextAlignmentRight;
+            cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-left+18, 10, SCREEN_WIDTH-150, 27);
         }
     }
     UIImageView *bgImageBG = [[UIImageView alloc] init];

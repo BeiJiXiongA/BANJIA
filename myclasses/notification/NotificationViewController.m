@@ -401,7 +401,7 @@ EGORefreshTableDelegate>
         {
             if ([unreadedArray count] > 0 || [readedArray count] > 0)
             {
-                return 32;
+                return 0;
             }
             return 0;
         }
@@ -456,19 +456,19 @@ EGORefreshTableDelegate>
         }
         else if(indexPath.row == 1)
         {
-            if ([unreadedArray count] > 0 || [readedArray count] > 0)
-            {
-                cell.contentLabel.hidden = NO;
-                cell.nameLabel.hidden = NO;
-                cell.contentLabel.frame = CGRectMake(0, 0, SCREEN_WIDTH, 32);
-                cell.contentLabel.backgroundColor = HEADER_GREEN;
-                cell.contentLabel.font = [UIFont systemFontOfSize:18];
-                cell.contentLabel.textColor = [UIColor whiteColor];
-                NSString *classname = [NSString stringWithFormat:@"   %@",[[NSUserDefaults standardUserDefaults] objectForKey:@"classname"]];
-                cell.contentLabel.text = classname;
-                cell.iconImageView.hidden = YES;
-            }
-            else
+//            if ([unreadedArray count] > 0 || [readedArray count] > 0)
+//            {
+//                cell.contentLabel.hidden = NO;
+//                cell.nameLabel.hidden = NO;
+//                cell.contentLabel.frame = CGRectMake(0, 0, SCREEN_WIDTH, 32);
+//                cell.contentLabel.backgroundColor = HEADER_GREEN;
+//                cell.contentLabel.font = [UIFont systemFontOfSize:18];
+//                cell.contentLabel.textColor = [UIColor whiteColor];
+//                NSString *classname = [NSString stringWithFormat:@"   %@",[[NSUserDefaults standardUserDefaults] objectForKey:@"classname"]];
+//                cell.contentLabel.text = classname;
+////                cell.iconImageView.hidden = YES;
+//            }
+//            else
             
                 cell.contentLabel.hidden = YES;
                 cell.nameLabel.hidden = YES;
@@ -782,6 +782,10 @@ EGORefreshTableDelegate>
 
 -(void)setSchool
 {
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] intValue] < 2)
+    {
+        return ;
+    }
     SearchSchoolViewController  *searchSchoolInfoViewController = [[SearchSchoolViewController alloc] init];
     [[NSUserDefaults standardUserDefaults] setObject:BINDCLASSTOSCHOOL forKey:SEARCHSCHOOLTYPE];
     [[NSUserDefaults standardUserDefaults] synchronize];

@@ -89,6 +89,9 @@ ChatVCDelegate>
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:NewChatMsgNum];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewWillAppear:) name:UPDATECLASSNUMBER object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dealNewChatMsg:) name:RECEIVENEWMSG object:nil];
+    
     db = [[OperatDB alloc] init];
     
     edittingTableView = NO;
@@ -142,9 +145,6 @@ ChatVCDelegate>
     [super viewWillAppear:animated];
     [[NSUserDefaults standardUserDefaults] setObject:@"chat" forKey:@"viewtype"];
     [[NSUserDefaults standardUserDefaults] synchronize];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dealNewChatMsg:) name:RECEIVENEWMSG object:nil];
-    
-    
     
     [self dealNewChatMsg:nil];
     [self dealNewMsg:nil];
@@ -153,7 +153,6 @@ ChatVCDelegate>
 
 -(void)viewWillDisappear:(BOOL)animated
 {
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:RECEIVENEWMSG object:nil];
     [[NSUserDefaults standardUserDefaults] setObject:@"notchat" forKey:@"viewtype"];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
@@ -161,19 +160,9 @@ ChatVCDelegate>
 -(void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self name:RECEIVENEWMSG object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UPDATECLASSNUMBER object:nil];
 }
 
--(void)dealNewMsg:(NSDictionary *)dict
-{
-    if ([[Tools user_id] length] == 0)
-    {
-        return ;
-    }
-    if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"checked":@"0"} andTableName:FRIENDSTABLE] count] > 0)
-    {
-        self.unReadLabel.hidden = NO;
-    }
-}
 -(void)getChatList
 {
     DDLOG_CURRENT_METHOD;
@@ -236,6 +225,10 @@ ChatVCDelegate>
                         }
                     }
                 }
+                else
+                {
+                    [unreadCountDict removeAllObjects];
+                }
                 [self dealNewChatMsg:nil];
                 _reloading = NO;
                 [pullRefreshView egoRefreshScrollViewDataSourceDidFinishedLoading:friendsListTableView];
@@ -263,8 +256,34 @@ ChatVCDelegate>
 }
 
 #pragma mark -chatDelegate
+
+-(void)dealNewMsg:(NSDictionary *)dict
+{
+    if ([[Tools user_id] length] == 0)
+    {
+        return ;
+    }
+    if([[dict objectForKey:@"type"]isEqualToString:@"f_apply"])
+    {
+        if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"checked":@"0"} andTableName:FRIENDSTABLE] count] > 0)
+        {
+            self.unReadLabel.hidden = NO;
+        }
+    }
+}
+
 -(void)dealNewChatMsg:(NSDictionary *)dict
 {
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:NewClassNum] integerValue]>0 ||
+        [[[NSUserDefaults standardUserDefaults] objectForKey:UCFRIENDSUM] integerValue] > 0)
+    {
+        self.unReadLabel.hidden = NO;
+    }
+    else
+    {
+        self.unReadLabel.hidden = YES;
+    }
+    
     if ([[Tools user_id] length] == 0)
     {
         return ;
@@ -463,7 +482,7 @@ ChatVCDelegate>
     
     cell.memNameLabel.frame = CGRectMake(55, 5, 190, 20);
     cell.memNameLabel.textColor = [UIColor blackColor];
-    cell.memNameLabel.font = [UIFont systemFontOfSize:15];
+    cell.memNameLabel.font = LIST_NAME_FONT;
     cell.unreadedMsgLabel.hidden = YES;
     
    

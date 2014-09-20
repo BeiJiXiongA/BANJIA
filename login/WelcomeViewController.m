@@ -49,6 +49,8 @@ UITextFieldDelegate>
     NSString *accountType;
     
     CGFloat space;
+    
+    HomeViewController *homeViewController;
 }
 @end
 
@@ -342,7 +344,7 @@ UITextFieldDelegate>
                 [passwordTextfield resignFirstResponder];
                 
                 SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
-                HomeViewController *homeViewController = [[HomeViewController alloc] init];
+                homeViewController = [[HomeViewController alloc] init];
                 KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:homeViewController];
                 JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:homeNav menuController:sideMenuViewController];
                 [self.navigationController presentViewController:sideMenu animated:YES completion:nil];
@@ -448,10 +450,13 @@ UITextFieldDelegate>
                 DDLOG(@"newclass responsedict %@",responseDict);
                 if ([[responseDict objectForKey:@"code"] intValue]== 1)
                 {
-                    if ([[[responseDict objectForKey:@"data"] objectForKey:@"count"] integerValue] > 0)
+                    if ([[responseDict objectForKey:@"data"] objectForKey:@"count"]||
+                        [[responseDict objectForKey:@"data"] objectForKey:@"ucfriendsnum"])
                     {
-                        [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"]objectForKey:@"count"] integerValue]] forKey:NewClassNum];
+                        [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"]objectForKey:@"count"] intValue]] forKey:NewClassNum];
+                        [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"] objectForKey:@"ucfriendsnum"] intValue]] forKey:UCFRIENDSUM];
                         [[NSUserDefaults standardUserDefaults] synchronize];
+                        [homeViewController viewWillAppear:NO];
                     }
                 }
                 else
@@ -485,6 +490,8 @@ UITextFieldDelegate>
                 {
                     [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",[[responseDict objectForKey:@"data"] integerValue]] forKey:NewChatMsgNum];
                     [[NSUserDefaults standardUserDefaults] synchronize];
+                    
+                    [homeViewController viewWillAppear:NO];
                 }
                 else
                 {

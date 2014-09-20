@@ -608,7 +608,14 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     }
     else
     {
-        resultStr = [NSString stringWithFormat:@"%d分钟前",resultTime/MINUTE];
+        if (resultTime/MINUTE < 3)
+        {
+            resultStr = [NSString stringWithFormat:@"刚刚"];
+        }
+        else
+        {
+            resultStr = [NSString stringWithFormat:@"%d分钟前",resultTime/MINUTE];
+        }
     }
     return resultStr;
 }

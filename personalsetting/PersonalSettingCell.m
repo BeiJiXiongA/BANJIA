@@ -10,7 +10,7 @@
 #import "Header.h"
 
 @implementation PersonalSettingCell
-@synthesize headerImageView,nameLabel,objectsLabel,authenticationSign,topImageView,arrowImageView,bgView;
+@synthesize headerImageView,nameLabel,objectsLabel,authenticationSign,topImageView,arrowImageView,bgView,lineImageView;
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
@@ -52,7 +52,8 @@
         arrowImageView = [[UIImageView alloc] init];
         [self.contentView addSubview:arrowImageView];
         
-        
+        lineImageView = [[UIImageView alloc] init];
+        [self.contentView addSubview:lineImageView];
     }
     return self;
 }

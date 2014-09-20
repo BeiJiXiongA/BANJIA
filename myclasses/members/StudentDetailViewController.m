@@ -36,7 +36,8 @@ UITableViewDataSource,
 UITableViewDelegate,
 SetStudentObject,
 MFMessageComposeViewControllerDelegate,
-UIActionSheetDelegate>
+UIActionSheetDelegate,
+UpdateUserSettingDelegate>
 {
     
     UITableView *infoView;
@@ -65,6 +66,8 @@ UIActionSheetDelegate>
     UIButton *defaultParentButtonOnTip;
     
     CGFloat defaultParentY;
+    
+    NSMutableDictionary *userOptDict;
     
     BOOL shouldAdd;
     BOOL haveDefaultParent;
@@ -118,6 +121,7 @@ UIActionSheetDelegate>
         studentNum = @"";
     }
     
+    userOptDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     
     UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
     moreButton.frame = CGRectMake(SCREEN_WIDTH-CORNERMORERIGHT, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
@@ -185,6 +189,11 @@ UIActionSheetDelegate>
     }
     
     [self getParentsWithStudentName];
+    
+    if (![self showPhoneNum])
+    {
+        phoneNum = @"";
+    }
     
     if (![studentID isEqual:[NSNull null]])
     {
@@ -290,6 +299,31 @@ UIActionSheetDelegate>
     [self.navigationController popViewControllerAnimated:YES];
 }
 
+-(BOOL)showPhoneNum
+{
+    if ([studentID isEqualToString:[Tools user_id]])
+    {
+        return YES;
+    }
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"teachers"])
+    {
+        return YES;
+    }
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"parents"])
+    {
+        NSArray *selfArray = [db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE];
+        if ([selfArray count] > 0)
+        {
+            NSDictionary *dict = [selfArray firstObject];
+            if ([studentID isEqualToString:[dict objectForKey:@"re_id"]])
+            {
+                return YES;
+            }
+        }
+    }
+    return NO;
+}
+
 -(void)getParentsWithStudentName
 {
     [pArray removeAllObjects];
@@ -376,7 +410,7 @@ UIActionSheetDelegate>
     }
     else if(section == 1)
     {
-        if([phoneNum length] > 0 || [birth length] > 0 || [studentNum length] > 0)
+        if([phoneNum length] > 0 || ([birth length] > 0 && ![birth isEqualToString:@"请设置生日"]) || [studentNum length] > 0)
         {
             headerLabel.text = @"   个人信息";
             return headerLabel;
@@ -399,7 +433,7 @@ UIActionSheetDelegate>
     }
     else if(section == 1)
     {
-        if([phoneNum length] > 0 || [birth length] > 0 || [studentNum length] > 0)
+        if([phoneNum length] > 0 || ([birth length] > 0 && ![birth isEqualToString:@"请设置生日"]) || [studentNum length] > 0)
         {
             return 35;
         }
@@ -437,7 +471,7 @@ UIActionSheetDelegate>
                 }
                 else if(indexPath.row == 1)
                 {
-                    if ([birth length] > 0)
+                    if (([birth length] > 0 && ![birth isEqualToString:@"请设置生日"]))
                     {
                         return 40;
                     }
@@ -620,7 +654,7 @@ UIActionSheetDelegate>
             }
             else if(indexPath.row == 1)
             {
-                if ([birth length] > 0)
+                if (([birth length] > 0 && ![birth isEqualToString:@"请设置生日"]))
                 {
                     cell.nameLabel.text = @"生日";
                     cell.contentLabel.text = birth;
@@ -884,6 +918,8 @@ UIActionSheetDelegate>
                 settingLimit.userid = studentID;
                 settingLimit.name = studentName;
                 settingLimit.role = role;
+                settingLimit.updateUserSettingDel = self;
+                settingLimit.userOptDict = userOptDict;
                 [self.navigationController pushViewController:settingLimit animated:YES];
             }
             else if(buttonIndex == 2)
@@ -949,6 +985,11 @@ UIActionSheetDelegate>
             [self showMessageView:phoneNum];
         }
     }
+}
+
+-(void)updateUserSetingObject:(NSString *)value forKey:(NSString *)key
+{
+    [userOptDict setObject:value forKey:key];
 }
 
 -(void)appointToAdmin
@@ -1138,6 +1179,18 @@ UIActionSheetDelegate>
                     }
                     otherUserAdmin = [NSString stringWithFormat:@"%d",[[[dict objectForKey:@"classInfo"] objectForKey:@"admin"] integerValue]];
                     headerImageUrl = [dict objectForKey:@"img_icon"];
+                    if ([[[dict objectForKey:@"classInfo"] objectForKey:@"opt"] isKindOfClass:[NSDictionary class]])
+                    {
+                        NSDictionary *tmpDict = [[dict objectForKey:@"classInfo"] objectForKey:@"opt"];
+                        for(NSString *key in [tmpDict allKeys])
+                        {
+                            [userOptDict setObject:[NSString stringWithFormat:@"%d",[[tmpDict objectForKey:key] integerValue]] forKey:key];
+                        }
+                    }
+                    if (![self showPhoneNum])
+                    {
+                        phoneNum = @"";
+                    }
                     [infoView reloadData];
                 }
             }

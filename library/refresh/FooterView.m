@@ -135,9 +135,9 @@
 			}
 			
             if (refresh) {
-                _statusLabel.text = NSLocalizedString(@"下拉加载更多...", @"Pull down to refresh status");
+                _statusLabel.text = NSLocalizedString(@"上拉加载更多...", @"Pull down to refresh status");
             } else {
-                _statusLabel.text = NSLocalizedString(@"下拉加载更多...", @"Pull down to load more status");
+                _statusLabel.text = NSLocalizedString(@"上拉加载更多...", @"Pull down to load more status");
             }
 			
 			[_activityView stopAnimating];

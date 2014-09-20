@@ -474,21 +474,7 @@ UIActionSheetDelegate>
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
             DDLOG(@"classesByUser responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
-            {
-                int ucfriendNum = [[[responseDict objectForKey:@"data"] objectForKey:@"ucfriendsnum"] intValue];
-                if (ucfriendNum > 0)
-                {
-                    [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",ucfriendNum] forKey:UCFRIENDSUM];
-                    [[NSUserDefaults standardUserDefaults] synchronize];
-                    self.unReadLabel.hidden = NO;
-                }
-                
-                if ([[[NSUserDefaults standardUserDefaults] objectForKey:NewClassNum] integerValue] > 0)
-                {
-                    [[NSUserDefaults standardUserDefaults] removeObjectForKey:NewClassNum];
-                    [[NSUserDefaults standardUserDefaults] synchronize];
-                }
-                
+            {                
                 [tmpArray removeAllObjects];
                 NSDictionary *dict1 = [responseDict objectForKey:@"data"];
                 if (![dict1 isEqual:[NSNull null]])

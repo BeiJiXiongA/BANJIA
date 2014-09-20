@@ -21,12 +21,13 @@
 @end
 
 @implementation SettingStateLimitViewController
-@synthesize name,userid,role;
+@synthesize name,userid,role,userOptDict,updateUserSettingDel;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
+        userOptDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     }
     return self;
 }
@@ -66,7 +67,7 @@
         [limitTableView setSeparatorInset:UIEdgeInsetsZero];
     }
     
-    [self getUserInfo];
+//    [self getUserInfo];
 }
 
 - (void)didReceiveMemoryWarning
@@ -99,22 +100,22 @@
     cell.contentLabel.text = [limitArray objectAtIndex:indexPath.row];
     if (indexPath.row == 0)
     {
-        if ([[optionDict objectForKey:UserSendLike] integerValue] == 0)
+        if ([[userOptDict objectForKey:UserSendLike] intValue] == 0)
         {
             [cell.mySwitch isOn:NO];
         }
-        else
+        else if ([[userOptDict objectForKey:UserSendLike] intValue] == 1)
         {
             [cell.mySwitch isOn:YES];
         }
     }
     else if (indexPath.row == 1)
     {
-        if ([[optionDict objectForKey:UserSendComment] integerValue] == 0)
+        if ([[userOptDict objectForKey:UserSendComment] intValue] == 0)
         {
             [cell.mySwitch isOn:NO];
         }
-        else
+        else if ([[userOptDict objectForKey:UserSendComment] intValue] == 1)
         {
             [cell.mySwitch isOn:YES];
         }
@@ -123,22 +124,22 @@
     {
         if ([role isEqualToString:@"students"])
         {
-            if ([[optionDict objectForKey:UserReceiveDiary] integerValue] == 0)
+            if ([[userOptDict objectForKey:UserReceiveDiary] intValue] == 0)
             {
                 [cell.mySwitch isOn:NO];
             }
-            else
+            else if ([[userOptDict objectForKey:UserReceiveDiary] intValue] == 1)
             {
                 [cell.mySwitch isOn:YES];
             }
         }
         else if([role isEqualToString:@"parents"])
         {
-            if ([[optionDict objectForKey:UserChatTeacher] integerValue] == 0)
+            if ([[userOptDict objectForKey:UserChatTeacher] intValue] == 0)
             {
                 [cell.mySwitch isOn:NO];
             }
-            else
+            else if ([[userOptDict objectForKey:UserChatTeacher] intValue] == 1)
             {
                 [cell.mySwitch isOn:YES];
             }
@@ -152,37 +153,68 @@
 
 -(void)switchchange:(KLSwitch *)sw
 {
-    NSString *value = @"";
-    if ([sw isOn])
+    switch (sw.tag % 1000)
     {
-        value = @"1";
-    }
-    else
-    {
-        value = @"0";
-    }
-    if (sw.tag-1000 == 0)
-    {
-        [self settingValue:value forKay:UserSendLike];
-    }
-    else if(sw.tag-1000 == 1)
-    {
-        [self settingValue:value forKay:UserSendComment];
-    }
-    else if(sw.tag-1000 == 2)
-    {
-        if ([role isEqualToString:@"students"])
+        case 0:
+            if ([[userOptDict objectForKey:UserSendLike] intValue] == 0)
+            {
+                [self settingValue:@"1" forKay:UserSendLike withSwitch:sw];
+                [userOptDict setObject:@"1" forKey:UserSendLike];
+            }
+            else if ([[userOptDict objectForKey:UserSendLike] intValue] == 1)
+            {
+                [self settingValue:@"0" forKay:UserSendLike withSwitch:sw];
+                [userOptDict setObject:@"0" forKey:UserSendLike];
+            }
+            break;
+        case 1:
+            if ([[userOptDict objectForKey:UserSendComment] intValue] == 0)
+            {
+                [self settingValue:@"1" forKay:UserSendComment withSwitch:sw];
+                [userOptDict setObject:@"1" forKey:UserSendComment];
+            }
+            else if ([[userOptDict objectForKey:UserSendComment] intValue] == 1)
+            {
+                [self settingValue:@"0" forKay:UserSendComment withSwitch:sw];
+                [userOptDict setObject:@"0" forKey:UserSendComment];
+            }
+            break;
+        case 2:
         {
-            [self settingValue:value forKay:UserReceiveDiary];
+            if ([role isEqualToString:@"students"])
+            {
+                if ([[userOptDict objectForKey:UserReceiveDiary] intValue] == 0)
+                {
+                    [self settingValue:@"1" forKay:UserReceiveDiary withSwitch:sw];
+                    [userOptDict setObject:@"1" forKey:UserReceiveDiary];
+                }
+                else if ([[userOptDict objectForKey:UserReceiveDiary] intValue] == 1)
+                {
+                    [self settingValue:@"0" forKay:UserReceiveDiary withSwitch:sw];
+                    [userOptDict setObject:@"0" forKey:UserReceiveDiary];
+                }
+            }
+            else if([role isEqualToString:@"parents"])
+            {
+                if ([[userOptDict objectForKey:UserChatTeacher] intValue] == 0)
+                {
+                    [self settingValue:@"1" forKay:UserChatTeacher withSwitch:sw];
+                    [userOptDict setObject:@"1" forKey:UserChatTeacher];
+                }
+                else if ([[userOptDict objectForKey:UserChatTeacher] intValue] == 1)
+                {
+                    [self settingValue:@"0" forKay:UserChatTeacher withSwitch:sw];
+                    [userOptDict setObject:@"0" forKey:UserChatTeacher];
+                }
+            }
+            break;
         }
-        else if([role isEqualToString:@"parents"])
-        {
-            [self settingValue:value forKay:UserChatTeacher];
-        }
+        default:
+            break;
     }
 }
 
--(void)settingValue:(NSString *)value forKay:(NSString *)key
+-(void)settingValue:(NSString *)value forKay:(NSString *)key withSwitch:(KLSwitch *)sw
 {
     if ([Tools NetworkReachable])
     {
@@ -199,9 +231,22 @@
             DDLOG(@"memberByClass responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                [optionDict setObject:value forKey:key];
-                [limitTableView reloadData];
+                [userOptDict setObject:value forKey:key];
                 [Tools showTips:@"设置成功" toView:self.bgView];
+                
+                if ([value intValue] == 0)
+                {
+                    [sw isOn:NO];
+                }
+                else if([value intValue] == 1)
+                {
+                    [sw isOn:YES];
+                }
+                
+                if ([self.updateUserSettingDel respondsToSelector:@selector(updateUserSeting)])
+                {
+                    [self.updateUserSettingDel updateUserSeting];
+                }
             }
             else
             {

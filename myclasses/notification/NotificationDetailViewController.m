@@ -418,11 +418,13 @@ UIActionSheetDelegate>
             {
                 DDLOG(@"read success!");
                 
+                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSNUMBER object:nil];
+                
                 if ([self.readnotificationDetaildel respondsToSelector:@selector(readNotificationDetail)])
                 {
                     [self.readnotificationDetaildel readNotificationDetail];
                 }
-
+                
                 if ([c_read integerValue] == 1)
                 {
                     [self getViewList:@"read"];

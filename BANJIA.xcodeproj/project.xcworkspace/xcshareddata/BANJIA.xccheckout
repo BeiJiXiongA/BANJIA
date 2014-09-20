@@ -20,7 +20,7 @@
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>671dc06b-d518-8248-8207-5643baf02e27++9191</key>
-		<string>../../library/refresh/EGORefresh.bundle/</string>
+		<string>../../library/refresh/EGORefresh.bundle</string>
 		<key>C432500CD9226E6BBCEBA029DAF848477FECF7C4</key>
 		<string>../..</string>
 	</dict>

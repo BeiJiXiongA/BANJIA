@@ -26,6 +26,7 @@
 @interface PersonalSettingViewController ()<UITableViewDataSource,
 UITableViewDelegate,
 ChatDelegate,
+MsgDelegate,
 UITextFieldDelegate,
 ChangePhoneNum,
 UIAlertViewDelegate,
@@ -74,6 +75,8 @@ UIActionSheetDelegate>
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeIcon) name:@"changeicon" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewWillAppear:) name:UPDATECHATSNUMBER object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewWillAppear:) name:UPDATECLASSNUMBER object:nil];
     
     userInfoDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     
@@ -85,6 +88,7 @@ UIActionSheetDelegate>
     self.returnImageView.hidden = YES;
     
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = self;
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = self;
     
     UIButton *setButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [setButton setTitle:@"设置" forState:UIControlStateNormal];
@@ -161,7 +165,12 @@ UIActionSheetDelegate>
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification  object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UPDATECLASSNUMBER object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UPDATECHATSNUMBER object:nil];
+    
+    
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = nil;
 }
 
 
@@ -182,11 +191,31 @@ UIActionSheetDelegate>
     }
 }
 
+-(void)dealNewMsg:(NSDictionary *)dict
+{
+    if ([[Tools user_id] length] == 0)
+    {
+        return ;
+    }
+    if ([self haveNewMsg] || [self haveNewNotice])
+    {
+        self.unReadLabel.hidden = NO;
+    }
+    else
+    {
+        self.unReadLabel.hidden = YES;
+    }
+}
+
 -(BOOL)haveNewMsg
 {
     OperatDB *db = [[OperatDB alloc] init];
-    NSMutableArray *array = [db findSetWithDictionary:@{@"readed":@"0",@"userid":[Tools user_id]} andTableName:@"chatMsg"];
-    if ([array count] > 0 || [[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue]>0)
+    NSArray *msgArray = [db findSetWithDictionary:@{@"readed":@"0",@"userid":[Tools user_id]} andTableName:CHATTABLE];
+    NSArray *friendsArray  =[db findSetWithDictionary:@{@"checked":@"0",@"uid":[Tools user_id]} andTableName:FRIENDSTABLE];
+    if ([msgArray count] > 0 || [friendsArray count] > 0 ||
+        [[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue]>0 ||
+        [[[NSUserDefaults standardUserDefaults] objectForKey:NewClassNum] integerValue]>0 ||
+        [[[NSUserDefaults standardUserDefaults] objectForKey:UCFRIENDSUM] integerValue] > 0)
     {
         return YES;
     }

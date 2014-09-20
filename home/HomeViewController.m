@@ -448,7 +448,7 @@ headerDelegate>
 {
     num = 0;
     upOrdown = NO;
-
+    addOpen = NO;
     [self closeAdd];
     
     reader = [ZBarReaderViewController new];
@@ -586,6 +586,7 @@ headerDelegate>
     line.image = [UIImage imageNamed:@"qrline"];
     [image addSubview:line];
     //定时器，设定时间过1.5秒，
+    [timer invalidate];
     timer = [NSTimer scheduledTimerWithTimeInterval:.03 target:self selector:@selector(animation1) userInfo:nil repeats:YES];
     
     UIView *_navigationBarView = [[UIView alloc] initWithFrame:CGRectMake(0, 0,
@@ -693,8 +694,6 @@ headerDelegate>
             upOrdown = NO;
         }
     }
-    
-    
 }
 
 
@@ -710,12 +709,15 @@ headerDelegate>
         break;
     
     DDLOG(@"%@",symbol.data);
+    AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
     NSString *resultStr = symbol.data;
+    [timer invalidate];
     if ([resultStr rangeOfString:@";"].length > 0)
     {
         [self searchClass:[resultStr substringFromIndex:[resultStr rangeOfString:@";"].location+1]];
     }
-    else
+    else if([resultStr rangeOfString:@"?"].length > 0 &&
+            [resultStr rangeOfString:@"="].length > 0)
     {
         NSRange range1 = [resultStr rangeOfString:@"?"];
         NSRange range2 = [resultStr rangeOfString:@"="];
@@ -732,7 +734,17 @@ headerDelegate>
             {
                 [self searchClass:value];
             }
+            else
+            {
+                [self.navigationController popViewControllerAnimated:NO];
+                [[UIApplication sharedApplication] openURL:[NSURL URLWithString:symbol.data]];
+            }
         }
+    }
+    else
+    {
+        [self.navigationController popViewControllerAnimated:NO];
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:symbol.data]];
     }
     [self.navigationController popViewControllerAnimated:NO];
 }
@@ -882,18 +894,6 @@ headerDelegate>
     {
         return ;
     }
-    db = [[OperatDB alloc] init];
-    NSMutableArray *array = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"readed":@"0"} andTableName:CHATTABLE];
-    if ([array count] > 0 ||
-        [[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue]>0 ||
-        [[[NSUserDefaults standardUserDefaults] objectForKey:NewClassNum] integerValue]>0)
-    {
-        self.unReadLabel.hidden = NO;
-    }
-    else
-    {
-        self.unReadLabel.hidden = YES;
-    }
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     if (![ud objectForKey:@"hometip1"])
     {
@@ -906,13 +906,6 @@ headerDelegate>
     if ([[Tools user_id] length] == 0)
     {
         return ;
-    }
-    if([[dict objectForKey:@"type"]isEqualToString:@"f_apply"])
-    {
-        if ([[db findSetWithDictionary:@{@"uid":[Tools user_id],@"checked":@"0"} andTableName:FRIENDSTABLE] count] > 0)
-        {
-            self.unReadLabel.hidden = NO;
-        }
     }
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     if (![ud objectForKey:@"hometip1"])
@@ -940,14 +933,51 @@ headerDelegate>
     [self backInput];
     
     
+    if ([self haveNewMsg] || [self haveNewNotice])
+    {
+        self.unReadLabel.hidden = NO;
+    }
+    else
+    {
+        self.unReadLabel.hidden = YES;
+    }
     [self dealNewChatMsg:nil];
     [self dealNewMsg:nil];
 }
+
+-(BOOL)haveNewMsg
+{
+    NSArray *msgArray = [db findSetWithDictionary:@{@"readed":@"0",@"userid":[Tools user_id]} andTableName:CHATTABLE];
+    NSArray *friendsArray  =[db findSetWithDictionary:@{@"checked":@"0",@"uid":[Tools user_id]} andTableName:FRIENDSTABLE];
+    if ([msgArray count] > 0 || [friendsArray count] > 0 ||
+        [[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue]>0 ||
+        [[[NSUserDefaults standardUserDefaults] objectForKey:NewClassNum] integerValue]>0 ||
+        [[[NSUserDefaults standardUserDefaults] objectForKey:UCFRIENDSUM] integerValue] > 0)
+    {
+        return YES;
+    }
+    else
+    {
+        return NO;
+    }
+    return NO;
+}
+-(BOOL)haveNewNotice
+{
+    NSMutableArray *array = [db findSetWithDictionary:@{@"readed":@"0",@"uid":[Tools user_id],@"type":@"f_apply"} andTableName:@"notice"];
+    if ([array count] > 0)
+    {
+        return YES;
+    }
+    return NO;
+}
+
 
 -(void)getData
 {
     if ([Tools NetworkReachable])
     {
+        [self getHomeAdCache];
         [self getHomeCache];
         [self getHomeAd];
         [self getHomeData];
@@ -955,6 +985,7 @@ headerDelegate>
     }
     else
     {
+        [self getHomeAdCache];
         [self getHomeCache];
     }
 }
@@ -1023,6 +1054,13 @@ headerDelegate>
                 
                 if ([[[[responseDict objectForKey:@"message"] allKeys] firstObject] isEqualToString:@"NO_CLASS"])
                 {
+                    [joinClassButton setTitle:@"加入班级" forState:UIControlStateNormal];
+                    [joinClassButton removeTarget:self action:@selector(addDongtai) forControlEvents:UIControlEventTouchUpInside];
+                    [joinClassButton addTarget:self action:@selector(joinClass) forControlEvents:UIControlEventTouchUpInside];
+                    [createClassButton setTitle:@"创建班级" forState:UIControlStateNormal];
+                    [createClassButton removeTarget:self action:@selector(addNotice) forControlEvents:UIControlEventTouchUpInside];
+                    [createClassButton addTarget:self action:@selector(createClass) forControlEvents:UIControlEventTouchUpInside];
+
                     tipImageView.hidden = NO;
                     subImageView.hidden = NO;
                     haveClass = NO;
@@ -1083,6 +1121,10 @@ headerDelegate>
             {
                 if ([[[responseDict objectForKey:@"data"] objectForKey:@"ad"] isKindOfClass:[NSArray class]])
                 {
+                    NSString *requestUrlStr = [NSString stringWithFormat:@"%@=%@",HOME_AD,[Tools user_id]];
+                    NSString *key = [requestUrlStr MD5Hash];
+                    [FTWCache setObject:[responseString dataUsingEncoding:NSUTF8StringEncoding] forKey:key];
+                    
                     [adArray removeAllObjects];
                     [adArray addObjectsFromArray:[[responseDict objectForKey:@"data"] objectForKey:@"ad"]];
                     HeaderCellHeight = SCREEN_WIDTH * [[[responseDict objectForKey:@"data"] objectForKey:@"scale"] floatValue];
@@ -1111,6 +1153,30 @@ headerDelegate>
     }
 }
 
+-(void)getHomeAdCache
+{
+    NSString *requestUrlStr = [NSString stringWithFormat:@"%@=%@",HOME_AD,[Tools user_id]];
+    NSString *key = [requestUrlStr MD5Hash];
+    NSData *cacheData = [FTWCache objectForKey:key];
+    if ([cacheData length] > 0)
+    {
+        NSString *responseString = [[NSString alloc] initWithData:cacheData encoding:NSUTF8StringEncoding];
+        NSDictionary *responseDict = [Tools JSonFromString:responseString];
+        [adArray removeAllObjects];
+        [adArray addObjectsFromArray:[[responseDict objectForKey:@"data"] objectForKey:@"ad"]];
+        HeaderCellHeight = SCREEN_WIDTH * [[[responseDict objectForKey:@"data"] objectForKey:@"scale"] floatValue];
+        if(adTimer)
+        {
+            [adTimer invalidate];
+        }
+        if ([adArray count] > 1)
+        {
+            adTimer = [NSTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(switchAd) userInfo:nil repeats:YES];
+        }
+        [classTableView reloadData];
+    }
+}
+
 -(void)getHomeCache
 {
     NSString *requestUrlStr = [NSString stringWithFormat:@"%@=%@",HOMEDATA,[Tools user_id]];
@@ -1125,18 +1191,67 @@ headerDelegate>
             haveClass = YES;
             [noticeArray addObjectsFromArray:[[responseDict objectForKey:@"data"] objectForKey:@"notices"]];
             [diariesArray addObjectsFromArray:[[responseDict objectForKey:@"data"] objectForKey:@"diaries"]];
+            
+            if ([noticeArray count] == 0 && [diariesArray count] == 0)
+            {
+                shoudShowTipView = YES;
+                tipLabel.text = @"你所在班级还没有人发布过空间和班级通知";
+                [joinClassButton setTitle:@"发表空间" forState:UIControlStateNormal];
+                [joinClassButton removeTarget:self action:@selector(joinClass) forControlEvents:UIControlEventTouchUpInside];
+                [joinClassButton addTarget:self action:@selector(addDongtai) forControlEvents:UIControlEventTouchUpInside];
+                [createClassButton setTitle:@"发布通知" forState:UIControlStateNormal];
+                [createClassButton removeTarget:self action:@selector(createClass) forControlEvents:UIControlEventTouchUpInside];
+                [createClassButton addTarget:self action:@selector(addNotice) forControlEvents:UIControlEventTouchUpInside];
+            }
+            else
+            {
+                [tipView removeFromSuperview];
+                shoudShowTipView = NO;
+            }
             [self groupByTime:diariesArray];
         }
         else
         {
+            [noticeArray removeAllObjects];
+            [diariesArray removeAllObjects];
+            [groupDiaries removeAllObjects];
+            
             if ([[[[responseDict objectForKey:@"message"] allKeys] firstObject] isEqualToString:@"NO_CLASS"])
             {
+                [joinClassButton setTitle:@"加入班级" forState:UIControlStateNormal];
+                [joinClassButton removeTarget:self action:@selector(addDongtai) forControlEvents:UIControlEventTouchUpInside];
+                [joinClassButton addTarget:self action:@selector(joinClass) forControlEvents:UIControlEventTouchUpInside];
+                [createClassButton setTitle:@"创建班级" forState:UIControlStateNormal];
+                [createClassButton removeTarget:self action:@selector(addNotice) forControlEvents:UIControlEventTouchUpInside];
+                [createClassButton addTarget:self action:@selector(createClass) forControlEvents:UIControlEventTouchUpInside];
+                tipImageView.hidden = NO;
+                subImageView.hidden = NO;
                 haveClass = NO;
+                shoudShowTipView = YES;
+                [classTableView reloadData];
                 return ;
             }
             [Tools dealRequestError:responseDict fromViewController:nil];
         }
-
+        _reloading = NO;
+        [egoheaderView egoRefreshScrollViewDataSourceDidFinishedLoading:classTableView];
+        [footerView egoRefreshScrollViewDataSourceDidFinishedLoading:classTableView];
+        if ([page integerValue] > 0)
+        {
+            if (footerView)
+            {
+                [footerView removeFromSuperview];
+                footerView = [[FooterView alloc] initWithScrollView:classTableView];
+                footerView.delegate = self;
+            }
+            else
+            {
+                footerView = [[FooterView alloc] initWithScrollView:classTableView];
+                footerView.delegate = self;
+            }
+            _reloading = NO;
+            [footerView egoRefreshScrollViewDataSourceDidFinishedLoading:classTableView];
+        }
     }
 }
 
@@ -1369,7 +1484,7 @@ headerDelegate>
         headerLabel.frame = CGRectMake(0, 0, SCREEN_WIDTH, 30);
         headerLabel.font = [UIFont systemFontOfSize:15.5];
     }
-    else if ((section-1 == [noticeArray count]))
+    else if ((section-1 == [noticeArray count]) && [groupDiaries count] > 0)
     {
         UIView *verticalLineView = [[UIView alloc] initWithFrame:CGRectMake(34.75, 10, 1.5, 30)];
         verticalLineView.backgroundColor = UIColorFromRGB(0xe2e3e4);
@@ -2051,6 +2166,7 @@ headerDelegate>
 
 -(void)praiseDiary:(UIButton *)button
 {
+    [self backInput];
     NSDictionary *groupDict = [groupDiaries objectAtIndex:button.tag/SectionTag];
     NSArray *tmpArray = [groupDict objectForKey:@"diaries"];
     NSDictionary *dict = [tmpArray objectAtIndex:button.tag%SectionTag];
@@ -2281,6 +2397,7 @@ headerDelegate>
 
 -(void)moreOpen
 {
+    [self backInput];
     if (![[self.navigationController sideMenuController] isMenuVisible])
     {
         [[self.navigationController sideMenuController] showMenuAnimated:YES];
@@ -2333,6 +2450,7 @@ headerDelegate>
 #pragma mark - shareAPP
 -(void)shareAPP:(UIButton *)sender
 {
+    [self backInput];
     UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"转发到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"QQ空间",@"腾讯微博",@"QQ好友",@"微信朋友圈",@"人人网", nil];
     [actionSheet showInView:self.bgView];
 }

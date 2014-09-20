@@ -241,7 +241,6 @@ EditNameDone>
                                                                 API:MB_SETUSERINFO];
         
         [request setCompletionBlock:^{
-            [Tools hideProgress:self.bgView];
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
             DDLOG(@"setusetInfo== responsedict %@",responseDict);
@@ -268,9 +267,7 @@ EditNameDone>
         [request setFailedBlock:^{
             NSError *error = [request error];
             DDLOG(@"error %@",error);
-            [Tools hideProgress:self.bgView];
         }];
-        [Tools showProgress:self.bgView];
         [request startAsynchronous];
     }
     else

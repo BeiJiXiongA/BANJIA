@@ -153,6 +153,11 @@ MFMailComposeViewControllerDelegate>
         }
     }
     
+    if (![personID isEqualToString:[Tools user_id]])
+    {
+        phoneNum = @"";
+    }
+    
     [infoView reloadData];
     
     
@@ -198,18 +203,25 @@ MFMailComposeViewControllerDelegate>
 {
     if (section == 1)
     {
-        return 35;
+        if ([phoneNum length] > 0 || ([birth length] > 0 && ![birth isEqualToString:@"请设置生日"]))
+        {
+            return 35;
+        }
     }
     return 0;
 }
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
-    UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 100, 35)];
-    headerLabel.backgroundColor = [UIColor clearColor];
-    headerLabel.text = @"   个人信息";
-    //    headerLabel.font = [UIFont systemFontOfSize:14];
-    headerLabel.textColor = TITLE_COLOR;
-    return headerLabel;
+    if ([phoneNum length] > 0 || ([birth length] > 0 && ![birth isEqualToString:@"请设置生日"]))
+    {
+        UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 100, 35)];
+        headerLabel.backgroundColor = [UIColor clearColor];
+        headerLabel.text = @"   个人信息";
+        //    headerLabel.font = [UIFont systemFontOfSize:14];
+        headerLabel.textColor = TITLE_COLOR;
+        return headerLabel;
+    }
+    return nil;
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -221,10 +233,28 @@ MFMailComposeViewControllerDelegate>
     {
         if (indexPath.row < 2)
         {
-            return 40;
+            if (![personID isEqualToString:OurTeamID] && ![personID isEqualToString:AssistantID])
+            {
+                if (indexPath.row == 0 && [phoneNum length] > 0)
+                {
+                    return 40;
+                }
+                else if (indexPath.row == 1 && ([birth length] > 0 && ![birth isEqualToString:@"请设置生日"]))
+                {
+                    return 40;
+                }
+            }
+            else
+            {
+                return 40;
+            }
+        }
+        else if(indexPath.row == 2)
+        {
+            return 65;
         }
     }
-    return 65;
+    return 0;
 }
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -281,6 +311,10 @@ MFMailComposeViewControllerDelegate>
     {
         if (indexPath.row < 2)
         {
+            CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+            cell.lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+            cell.lineImageView.image = [UIImage imageNamed:@"sepretorline"];
+            cell.contentView.backgroundColor = [UIColor whiteColor];
             cell.nameLabel.frame = CGRectMake(15, 5, 100, 30);
             cell.nameLabel.textColor = TITLE_COLOR;
             cell.contentLabel.frame = CGRectMake(SCREEN_WIDTH-200, 5, 190, 30);
@@ -290,8 +324,17 @@ MFMailComposeViewControllerDelegate>
             {
                 if (![personID isEqualToString:OurTeamID] && ![personID isEqualToString:AssistantID])
                 {
-                    cell.nameLabel.text = @"手机号";
+                    if ([phoneNum length] > 0)
+                    {
+                        cell.nameLabel.text = @"手机号";
+                    }
+                    else
+                    {
+                        cell.nameLabel.text = @"";
+                        cell.lineImageView.hidden = YES;
+                    }
                     cell.contentLabel.text = phoneNum;
+                    
                 }
                 else
                 {
@@ -304,20 +347,20 @@ MFMailComposeViewControllerDelegate>
                 if ([personID isEqualToString:OurTeamID])
                 {
                     cell.nameLabel.text = @"创建时间";
+                    cell.contentLabel.text = birth;
+                }
+                else if([birth length] > 0 && ![birth isEqualToString:@"请设置生日"])
+                {
+                    cell.nameLabel.text = @"生日";
+                    cell.contentLabel.text = birth;
                 }
                 else
                 {
-                    cell.nameLabel.text = @"生日";
+                    cell.nameLabel.text = @"";
+                    cell.contentLabel.text = @"";
+                    cell.lineImageView.hidden = YES;
                 }
-                cell.contentLabel.text = birth;
             }
-            
-            CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
-            UIImageView *lineImageView = [[UIImageView alloc] init];
-            lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-            lineImageView.image = [UIImage imageNamed:@"sepretorline"];
-            [cell.contentView addSubview:lineImageView];
-            cell.contentView.backgroundColor = [UIColor whiteColor];
         }
         else
         {
@@ -734,6 +777,10 @@ MFMailComposeViewControllerDelegate>
                         }
                     }
                     
+                }
+                if (![personID isEqualToString:[Tools user_id]])
+                {
+                    phoneNum = @"";
                 }
                 [infoView reloadData];
             }

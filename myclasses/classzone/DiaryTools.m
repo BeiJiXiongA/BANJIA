@@ -93,7 +93,7 @@
                 NSDictionary *dict = [array objectAtIndex:i];
                 NSString *content = [[dict objectForKey:@"content"] emojizedString];
                 NSString *contentString = [NSString stringWithFormat:@"%@",content];
-                CGSize s = [Tools getSizeWithString:contentString andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
+                CGSize s = [Tools getSizeWithString:contentString andWidth:MaxCommentWidth andFont:CommentFont];
                 tmpcommentHeight += (s.height+CommentSpace*1+32);
             }
         }

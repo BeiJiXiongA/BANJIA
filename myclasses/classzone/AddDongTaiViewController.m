@@ -166,15 +166,17 @@ int count = 0;
     CLGeocoder *geocoder = [[CLGeocoder alloc]init];
     [geocoder reverseGeocodeLocation:newLocation completionHandler:^(NSArray *array,NSError *error){
         if ([array count]>0) {
-            CLPlacemark * placemark = [array objectAtIndex:0];
-            name = placemark.name;
             
-                [UIView animateWithDuration:0.2 animations:^{
-                    locationTextView.frame = CGRectMake(locationButton.frame.size.width+locationButton.frame.origin.x, locationButton.frame.origin.y-3, [name length]*14>260?260:([name length]*14),35);
-                }];
-                locationTextView.text = name;
-                latitude = newLocation.coordinate.latitude;
-                longitude = newLocation.coordinate.longitude;
+            CLPlacemark * placemark = [array objectAtIndex:0];
+            NSDictionary *addDict = placemark.addressDictionary;
+            name = [NSString stringWithFormat:@"%@.%@.%@",[addDict objectForKey:@"State"],[addDict objectForKey:@"SubLocality"],[addDict objectForKey:@"Thoroughfare"]];
+            [UIView animateWithDuration:0.2 animations:^{
+                CGSize nameSize = [Tools getSizeWithString:name andWidth:200 andFont:[UIFont systemFontOfSize:14]];
+                locationTextView.frame = CGRectMake(locationButton.frame.size.width+locationButton.frame.origin.x, locationButton.frame.origin.y-3, nameSize.width+60,35);
+            }];
+            locationTextView.text = name;
+            latitude = newLocation.coordinate.latitude;
+            longitude = newLocation.coordinate.longitude;
         }
     }];
 }

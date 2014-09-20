@@ -19,4 +19,5 @@
 @property (nonatomic, strong) MyButton *button2;
 @property (nonatomic, strong) UIImageView *sexureImageView;
 @property (nonatomic, strong) UIView *nameBgView;
+@property (nonatomic, strong) UIImageView *lineImageView;
 @end

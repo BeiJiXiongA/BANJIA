@@ -54,7 +54,7 @@ MFMailComposeViewControllerDelegate>
 	// Do any additional setup after loading the view.
     
     self.titleLabel.text = @"个人设置";
-    setArray1 = [[NSArray alloc] initWithObjects:@"收到公告时提醒",@"收到公告时手机震动",@"新班级日记提醒",@"好友消息提醒", nil];
+    setArray1 = [[NSArray alloc] initWithObjects:@"收到公告时声音提醒",@"收到公告时手机震动",@"新班级日记提醒",@"好友消息手机震动", nil];
     setArray2 = [[NSArray alloc] initWithObjects:@"检查版本更新",@"手动清除缓存", nil];
     setArray3 = [[NSArray alloc] initWithObjects:@"关于我们",@"意见反馈",@"给五星好评",@"用户协议",@"", nil];
     
@@ -122,15 +122,15 @@ MFMailComposeViewControllerDelegate>
     
     if (section == 0)
     {
-        headerLabel.text = @"   消息设置";
+        headerLabel.text = @"  消息设置";
     }
     else if(section == 1)
     {
-        headerLabel.text = @"   功能设置";
+        headerLabel.text = @"  功能设置";
     }
     else if(section == 2)
     {
-        headerLabel.text = @"   其他";
+        headerLabel.text = @"  其他";
     }
     
     return headerLabel;
@@ -661,11 +661,11 @@ MFMailComposeViewControllerDelegate>
     {
         if ([[[NSUserDefaults standardUserDefaults] objectForKey:NewNoticeAlert] intValue] == 0)
         {
-            [self settingValue:@"1" forKay:NewNoticeAlert];
+            [self settingValue:@"1" forKay:NewNoticeAlert withSwitch:sw];
         }
         else
         {
-            [self settingValue:@"0" forKay:NewNoticeAlert];
+            [self settingValue:@"0" forKay:NewNoticeAlert withSwitch:sw];
         }
         
     }
@@ -673,38 +673,38 @@ MFMailComposeViewControllerDelegate>
     {
         if ([[[NSUserDefaults standardUserDefaults] objectForKey:NewNoticeMotion] intValue] == 0)
         {
-            [self settingValue:@"1" forKay:NewNoticeMotion];
+            [self settingValue:@"1" forKay:NewNoticeMotion withSwitch:sw];
         }
         else
         {
-            [self settingValue:@"0" forKay:NewNoticeMotion];
+            [self settingValue:@"0" forKay:NewNoticeMotion withSwitch:sw];
         }
     }
     else if(sw.tag/1000 == 2)
     {
         if ([[[NSUserDefaults standardUserDefaults] objectForKey:NewDiaryAlert] intValue] == 0)
         {
-            [self settingValue:@"1" forKay:NewDiaryAlert];
+            [self settingValue:@"1" forKay:NewDiaryAlert withSwitch:sw];
         }
         else
         {
-            [self settingValue:@"0" forKay:NewDiaryAlert];
+            [self settingValue:@"0" forKay:NewDiaryAlert withSwitch:sw];
         }
     }
     else if(sw.tag/1000 == 3)
     {
         if ([[[NSUserDefaults standardUserDefaults] objectForKey:NewChatAlert] intValue] == 0)
         {
-            [self settingValue:@"1" forKay:NewChatAlert];
+            [self settingValue:@"1" forKay:NewChatAlert withSwitch:sw];
         }
         else
         {
-            [self settingValue:@"0" forKay:NewChatAlert];
+            [self settingValue:@"0" forKay:NewChatAlert withSwitch:sw];
         }
     }
 }
 
--(void)settingValue:(NSString *)value forKay:(NSString *)key
+-(void)settingValue:(NSString *)value forKay:(NSString *)key withSwitch:(KLSwitch *)sw
 {
     if ([Tools NetworkReachable])
     {
@@ -721,10 +721,16 @@ MFMailComposeViewControllerDelegate>
             {
                 [[NSUserDefaults standardUserDefaults] setObject:value forKey:key];
                 [[NSUserDefaults standardUserDefaults]synchronize];
-                
                 [Tools showTips:@"设置成功" toView:self.bgView];
                 
-                [settingTableView reloadData];
+                if ([value intValue] == 1)
+                {
+                    [sw isOn:YES];
+                }
+                else if([value intValue] == 0)
+                {
+                    [sw isOn:NO];
+                }
             }
             else
             {
@@ -776,5 +782,4 @@ MFMailComposeViewControllerDelegate>
         [request startAsynchronous];
     }
 }
-
 @end

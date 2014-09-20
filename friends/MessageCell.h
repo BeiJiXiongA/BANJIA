@@ -21,6 +21,8 @@
     NSTimer *timer;
     
     BOOL isPlaying;
+    
+    int currentSec;
 }
 @property (nonatomic, strong) UIImageView *headerImageView;
 @property (nonatomic, strong) UILabel *messageContentLabel;

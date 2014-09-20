@@ -522,24 +522,6 @@ NameButtonDel>
     [ud setObject:opt forKey:@"opt"];
     [ud synchronize];
     
-    if ([self isInAccessTime])
-    {
-        if ([Tools NetworkReachable])
-        {
-            [self getCacheData];
-            [self getDongTaiList];
-        }
-        else
-        {
-            [self getCacheData];
-        }
-    }
-    else
-    {
-        [tmpArray removeAllObjects];
-        [classZoneTableView reloadData];
-        addButton.hidden = YES;
-    }
     if ([self canSendDiary])
     {
         addButton.hidden = NO;
@@ -585,6 +567,25 @@ NameButtonDel>
     }
     else
     {
+        addButton.hidden = YES;
+    }
+    
+    if ([self isInAccessTime])
+    {
+        if ([Tools NetworkReachable])
+        {
+            [self getCacheData];
+            [self getDongTaiList];
+        }
+        else
+        {
+            [self getCacheData];
+        }
+    }
+    else
+    {
+        [tmpArray removeAllObjects];
+        [classZoneTableView reloadData];
         addButton.hidden = YES;
     }
     
@@ -1293,7 +1294,7 @@ NameButtonDel>
         [Tools showAlertView:@"游客不能转发班级日志,赶快加入吧!" delegateViewController:nil];
         return ;
     }
-    
+    [self backInput];
     NSDictionary *groupDict = [tmpArray objectAtIndex:button.tag/SectionTag-1];
     NSArray *array = [groupDict objectForKey:@"diaries"];
     waitTransmitDict = [array objectAtIndex:button.tag%SectionTag];
@@ -1365,9 +1366,11 @@ NameButtonDel>
     
     //创建分享内容
 //    NSString *imagePath = [[NSBundle mainBundle] pathForResource:IMAGE_NAME ofType:IMAGE_EXT];
+    
+    NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
     id<ISSContent> publishContent = [ShareSDK content:content
                                        defaultContent:@""
-                                                image:[ShareSDK imageWithUrl:imagePath]
+                                                image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:@"班家"
                                                   url:ShareUrl
                                           description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
@@ -1448,9 +1451,11 @@ NameButtonDel>
     }
 
     //创建分享内容[ShareSDK imageWithUrl:imagePath]
+    
+     NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
     id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                        defaultContent:@""
-                                                image:[ShareSDK imageWithUrl:imagePath]
+                                                image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:@"班家"
                                                   url:ShareUrl
                                           description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
@@ -1530,10 +1535,11 @@ NameButtonDel>
             imagePath = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] firstObject]];
         }
     }
+    NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
     //创建分享内容
     id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                        defaultContent:@""
-                                                image:[ShareSDK imageWithUrl:imagePath]
+                                                image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:@"班家"
                                                   url:ShareUrl
                                           description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
@@ -1612,9 +1618,10 @@ NameButtonDel>
         }
     }
     //创建分享内容
+    NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
     id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                        defaultContent:@""
-                                                image:[ShareSDK imageWithUrl:imagePath]
+                                                image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:@"班家"
                                                   url:ShareUrl
                                           description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
@@ -1689,10 +1696,12 @@ NameButtonDel>
             imagePath = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] firstObject]];
         }
     }
+    
+    NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
     //创建分享内容
     id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
                                        defaultContent:@""
-                                                image:[ShareSDK imageWithUrl:imagePath]
+                                                image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                                   url:HOST_URL
                                           description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
@@ -1767,9 +1776,10 @@ NameButtonDel>
         }
     }
     //创建分享内容
+    NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
     id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
                                        defaultContent:@""
-                                                image:[ShareSDK imageWithUrl:imagePath]
+                                                image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:@"班家"
                                                   url:ShareUrl
                                           description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
@@ -1827,6 +1837,7 @@ NameButtonDel>
 
 -(void)praiseDiary:(UIButton *)button
 {
+    [self backInput];
     if (isApply)
     {
         [Tools showAlertView:@"游客不能赞班级日志,赶快加入吧!" delegateViewController:nil];

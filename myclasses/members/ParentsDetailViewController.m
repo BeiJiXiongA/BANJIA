@@ -32,7 +32,8 @@ UIAlertViewDelegate,
 UITableViewDataSource,
 UITableViewDelegate,
 MFMessageComposeViewControllerDelegate,
-UIActionSheetDelegate>
+UIActionSheetDelegate,
+UpdateUserSettingDelegate>
 {
     UIView *tmpBgView;
     UIImageView *genderImageView;
@@ -60,6 +61,8 @@ UIActionSheetDelegate>
     int defnum;
     
     NSDictionary *parentDict;
+    
+    NSMutableDictionary *userOptDict;
 }
 @end
 
@@ -91,6 +94,8 @@ UIActionSheetDelegate>
     
     dataDict  = [[NSMutableDictionary alloc] initWithCapacity:0];
     db = [[OperatDB alloc] init];
+    
+    userOptDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     
     UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
     moreButton.frame = CGRectMake(SCREEN_WIDTH-CORNERMORERIGHT, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
@@ -153,6 +158,11 @@ UIActionSheetDelegate>
         moreButton.hidden = NO;
     }
     
+    if (![self showPhoneNum])
+    {
+        phoneNum = @"";
+    }
+    
     if([Tools NetworkReachable])
     {
         [self getUserInfo];
@@ -174,6 +184,23 @@ UIActionSheetDelegate>
     [self.navigationController popViewControllerAnimated:YES];
 }
 
+-(BOOL)showPhoneNum
+{
+    if ([parentID isEqualToString:[Tools user_id]])
+    {
+        return YES;
+    }
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"teachers"])
+    {
+        return YES;
+    }
+    if ([[Tools user_id] isEqualToString:[parentDict objectForKey:@"re_id"]])
+    {
+        return YES;
+    }
+    return NO;
+}
+
 #pragma mark - tableview
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -185,7 +212,10 @@ UIActionSheetDelegate>
 {
     if (section == 1)
     {
-        return 35;
+        if ([phoneNum length] > 0 || ([birth length] > 0 && ![birth isEqualToString:@"请设置生日"]))
+        {
+            return 35;
+        }
     }
     return 0;
 }
@@ -207,11 +237,14 @@ UIActionSheetDelegate>
 {
     if (section == 1)
     {
-        UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 100, 35)];
-        headerLabel.backgroundColor = [UIColor clearColor];
-        headerLabel.text = @"   个人信息";
-        headerLabel.textColor = TITLE_COLOR;
-        return headerLabel;
+        if ([phoneNum length] > 0 || ([birth length] > 0 && ![birth isEqualToString:@"请设置生日"]))
+        {
+            UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 100, 35)];
+            headerLabel.backgroundColor = [UIColor clearColor];
+            headerLabel.text = @"   个人信息";
+            headerLabel.textColor = TITLE_COLOR;
+            return headerLabel;
+        }
     }
     return nil;
 }
@@ -229,7 +262,7 @@ UIActionSheetDelegate>
             {
                 return 40;
             }
-            if (indexPath.row == 1 && [birth length] > 0)
+            if (indexPath.row == 1 && ([birth length] > 0 && ![birth isEqualToString:@"请设置生日"]))
             {
                 return 40;
             }
@@ -319,7 +352,7 @@ UIActionSheetDelegate>
             }
             else if(indexPath.row == 1)
             {
-                if([birth length] > 0)
+                if(([birth length] > 0 && ![birth isEqualToString:@"请设置生日"]))
                 {
                     cell.nameLabel.text = @"生日";
                     cell.contentLabel.text = birth;
@@ -665,6 +698,8 @@ UIActionSheetDelegate>
                 settingLimit.userid = parentID;
                 settingLimit.name = parentName;
                 settingLimit.role = role;
+                settingLimit.updateUserSettingDel = self;
+                settingLimit.userOptDict = userOptDict;
                 [self.navigationController pushViewController:settingLimit animated:YES];
             }
             else if (buttonIndex == 3-defnum)
@@ -732,6 +767,10 @@ UIActionSheetDelegate>
     }
 }
 
+-(void)updateUserSetingObject:(NSString *)value forKey:(NSString *)key
+{
+    [userOptDict setObject:value forKey:key];
+}
 
 -(void)getUserInfo
 {
@@ -796,6 +835,18 @@ UIActionSheetDelegate>
                         }
                     }
                     
+                    if ([[[dict objectForKey:@"classInfo"] objectForKey:@"opt"] isKindOfClass:[NSDictionary class]])
+                    {
+                        NSDictionary *tmpDict = [[dict objectForKey:@"classInfo"] objectForKey:@"opt"];
+                        for(NSString *key in [tmpDict allKeys])
+                        {
+                            [userOptDict setObject:[NSString stringWithFormat:@"%d",[[tmpDict objectForKey:key] integerValue]] forKey:key];
+                        }
+                    }
+                    if (![self showPhoneNum])
+                    {
+                        phoneNum = @"";
+                    }
                     [infoView reloadData];
                 }
             }

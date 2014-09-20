@@ -57,6 +57,8 @@
     [[NSUserDefaults standardUserDefaults]  setObject:@"1" forKey:@"showad"];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getNewClass) name:UPDATECLASSNUMBER object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getNewChat) name:UPDATECHATSNUMBER object:nil];
     
     
     [application setStatusBarHidden:NO withAnimation:UIStatusBarAnimationFade];
@@ -435,14 +437,20 @@
                 DDLOG(@"newclass responsedict %@",responseDict);
                 if ([[responseDict objectForKey:@"code"] intValue]== 1)
                 {
-                    if ([[[responseDict objectForKey:@"data"] objectForKey:@"count"] integerValue] > 0)
+                    if ([[responseDict objectForKey:@"data"] objectForKey:@"count"]||
+                        [[responseDict objectForKey:@"data"] objectForKey:@"ucfriendsnum"])
                     {
                         [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"]objectForKey:@"count"] integerValue]] forKey:NewClassNum];
+                        [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"] objectForKey:@"ucfriendsnum"] intValue]] forKey:UCFRIENDSUM];
                         [[NSUserDefaults standardUserDefaults] synchronize];
                         
-                        if ([self.msgDelegate respondsToSelector:@selector(dealNewMsg:)])
+                        if ([[[responseDict objectForKey:@"data"] objectForKey:@"count"] integerValue] > 0||
+                            [[[responseDict objectForKey:@"data"] objectForKey:@"ucfriendsnum"] integerValue] > 0)
                         {
-                            [self.msgDelegate dealNewMsg:nil];
+                            if ([self.msgDelegate respondsToSelector:@selector(dealNewMsg:)])
+                            {
+                                [self.msgDelegate dealNewMsg:nil];
+                            }
                         }
                     }
                 }
@@ -478,9 +486,12 @@
                     [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",[[responseDict objectForKey:@"data"] integerValue]] forKey:NewChatMsgNum];
                     [[NSUserDefaults standardUserDefaults] synchronize];
                     
-                    if ([self.chatDelegate respondsToSelector:@selector(dealNewChatMsg:)])
+                    if([[responseDict objectForKey:@"data"] integerValue] > 0)
                     {
-                        [self.chatDelegate dealNewChatMsg:nil];
+                        if ([self.chatDelegate respondsToSelector:@selector(dealNewChatMsg:)])
+                        {
+                            [self.chatDelegate dealNewChatMsg:nil];
+                        }
                     }
                     
                     [[NSUserDefaults standardUserDefaults] setObject:ENTER_FORGROUD forKey:BECOMEACTIVE];
@@ -569,7 +580,6 @@
     {
         [self getNewChat];
         [self getNewClass];
-        
         if ([[userInfo objectForKey:@"type"] isEqualToString:@"chat"])
         {
             NSMutableDictionary *chatDict = [[NSMutableDictionary alloc] initWithCapacity:0];
@@ -601,6 +611,8 @@
             [chatDict setObject:ficon forKey:@"ficon"];
 //            [chatDict setObject:fname forKey:@"fname"];
             [chatDict setObject:[Tools user_id] forKey:@"userid"];
+            
+            DDLOG(@"NewChatAlert===%d",[[[NSUserDefaults standardUserDefaults] objectForKey:NewChatAlert] integerValue]);
             
             if ([[NSUserDefaults standardUserDefaults] objectForKey:NewChatAlert])
             {
@@ -642,19 +654,6 @@
                     if (!([[NSUserDefaults standardUserDefaults] objectForKey:@"viewtype"] &&
                           [[[NSUserDefaults standardUserDefaults] objectForKey:@"viewtype"] isEqualToString:@"chat"]))
                     {
-                        if ([[[NSUserDefaults standardUserDefaults]objectForKey:BECOMEACTIVE] isEqualToString:ENTER_BACKGROUD])
-                        {
-                            sideMenuViewController = [[SideMenuViewController alloc] init];
-                            MessageViewController *msgViewController = [[MessageViewController alloc] init];
-                            KKNavigationController *msgNav = [[KKNavigationController alloc] initWithRootViewController:msgViewController];
-                            [sideMenuViewController.buttonTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:2 inSection:0] animated:YES scrollPosition:UITableViewScrollPositionNone];
-                            JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:msgNav menuController:sideMenuViewController];
-                            self.window.rootViewController = sideMenu;
-                            
-                            [[NSUserDefaults standardUserDefaults] setObject:ENTER_FORGROUD forKey:BECOMEACTIVE];
-                            [[NSUserDefaults standardUserDefaults] synchronize];
-                        }
-                        
                         if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"viewtype"] rangeOfString:[userInfo  objectForKey:@"f_id"]].length == 0)
                         {
                             [[StatusBarTips shareTipsWindow] hideTips];
@@ -673,8 +672,21 @@
                             [[StatusBarTips shareTipsWindow] showTipsWithImage:[UIImage imageNamed:@"icon_chat"] message:[NSString stringWithFormat:@"%@(%d)",showname,[unreadArray count]] messageType:@"chat" tipDelegate:self];
                             [StatusBarTips shareTipsWindow].dataDict = userInfo;
                         }
+                        
+                        if ([[[NSUserDefaults standardUserDefaults]objectForKey:BECOMEACTIVE] isEqualToString:ENTER_BACKGROUD])
+                        {
+                            sideMenuViewController = [[SideMenuViewController alloc] init];
+                            MessageViewController *msgViewController = [[MessageViewController alloc] init];
+                            KKNavigationController *msgNav = [[KKNavigationController alloc] initWithRootViewController:msgViewController];
+                            [sideMenuViewController.buttonTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:2 inSection:0] animated:YES scrollPosition:UITableViewScrollPositionNone];
+                            JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:msgNav menuController:sideMenuViewController];
+                            self.window.rootViewController = sideMenu;
+                            
+                            [[NSUserDefaults standardUserDefaults] setObject:ENTER_FORGROUD forKey:BECOMEACTIVE];
+                            [[NSUserDefaults standardUserDefaults] synchronize];
+                        }
                     }
-                    
+                    [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECHATSNUMBER object:nil];
                     [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVENEWMSG object:nil];
                 }
             }
@@ -701,14 +713,13 @@
                     [self.msgDelegate dealNewMsg:userInfo];
                 }
             }
-            
-            NSArray *unreadArray = [db findSetWithDictionary:@{@"classid":[userInfo objectForKey:@"tag"],@"checked":@"0",} andTableName:CLASSMEMBERTABLE];
-            [[StatusBarTips shareTipsWindow] showTipsWithImage:[UIImage imageNamed:@""] message:[NSString stringWithFormat:@"班级新申请(%d)",[unreadArray count]] messageType:@"c_apply" tipDelegate:self];
-            [StatusBarTips shareTipsWindow].dataDict = userInfo;
             [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
+            [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSNUMBER object:nil];
         }
         else if ([[userInfo objectForKey:@"type"] isEqualToString:@"notice"])
         {
+            [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVENEWNOTICE object:nil];
+            [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSNUMBER object:nil];
             if ([[NSUserDefaults standardUserDefaults] objectForKey:NewNoticeMotion])
             {
                 if ([[[NSUserDefaults standardUserDefaults]objectForKey:NewNoticeMotion] integerValue] == 1)
@@ -728,17 +739,9 @@
                     AudioServicesPlaySystemSound (soundID);
                 }
             }
-            [[StatusBarTips shareTipsWindow] hideTips];
-            [[StatusBarTips shareTipsWindow] showTipsWithImage:[UIImage imageNamed:@"icon_chat"] message:[NSString stringWithFormat:@"班级通知"] messageType:@"chat" tipDelegate:self];
-            [StatusBarTips shareTipsWindow].dataDict = userInfo;
-            
-            [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVENEWNOTICE object:nil];
-            //            [self getClassInfo:userInfo];
         }
         else if([[userInfo objectForKey:@"type"] isEqualToString:@"f_apply"])
         {
-            UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:[[userInfo objectForKey:@"aps"] objectForKey:@"alert"] delegate:self cancelButtonTitle:@"知道了" otherButtonTitles: nil];
-            [al show];
             NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithCapacity:0];
             NSString *alertString = [[userInfo objectForKey:@"aps"] objectForKey:@"alert"];
             NSRange range = [alertString rangeOfString:@":"];
@@ -766,6 +769,9 @@
                     [self.msgDelegate dealNewMsg:userInfo];
                 }
             }
+            [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSNUMBER object:nil];
+            UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:[[userInfo objectForKey:@"aps"] objectForKey:@"alert"] delegate:self cancelButtonTitle:@"知道了" otherButtonTitles: nil];
+            [al show];
         }
         else if ([[userInfo objectForKey:@"type"] isEqualToString:@"c_allow"])
         {
@@ -883,12 +889,14 @@
 
 - (void)applicationWillResignActive:(UIApplication *)application
 {
+    DDLOG_CURRENT_METHOD;
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
     // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application
 {
+    DDLOG_CURRENT_METHOD;
     // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later. 
     // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
     [[NSUserDefaults standardUserDefaults] setObject:ENTER_BACKGROUD forKey:BECOMEACTIVE];
@@ -921,6 +929,7 @@
     // Saves changes in the application's managed object context before the application terminates.
     [self saveContext];
     
+    DDLOG_CURRENT_METHOD;
     [[NSUserDefaults standardUserDefaults] setObject:ENTER_BACKGROUD forKey:BECOMEACTIVE];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }

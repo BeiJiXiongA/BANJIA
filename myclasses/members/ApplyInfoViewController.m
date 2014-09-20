@@ -235,7 +235,7 @@
             {
                 return 40;
             }
-            else if(indexPath.row == 1 && [birth length] > 0)
+            else if(indexPath.row == 1 && ([birth length] > 0 && ![birth isEqualToString:@"请设置生日"]))
             {
                 return 40;
             }
@@ -345,7 +345,7 @@
             }
             else if(indexPath.row == 1)
             {
-                if ([birth length] > 0)
+                if (([birth length] > 0 && ![birth isEqualToString:@"请设置生日"]))
                 {
                     cell.nameLabel.text = @"生日";
                     cell.contentLabel.text = birth;
@@ -764,6 +764,7 @@
                 }
                 [Tools showTips:[NSString stringWithFormat:@"您已经同意%@的申请",applyName] toView:self.bgView];
                 [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
+                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSNUMBER object:nil];
                 [self.navigationController popToRootViewControllerAnimated:YES];
             }
             else
@@ -808,6 +809,7 @@
                 }
                 
                 [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
+                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSNUMBER object:nil];
                 [self.navigationController popToRootViewControllerAnimated:YES];
             }
             else

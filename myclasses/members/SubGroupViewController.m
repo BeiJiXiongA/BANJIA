@@ -397,6 +397,7 @@ updateGroupInfoDelegate>
                 {
                     [self.operateFriDel updataFriends:YES];
                 }
+                [[NSNotificationCenter defaultCenter] postNotificationName:UCFRIENDSUM object:nil];
             }
             else
             {
@@ -441,6 +442,7 @@ updateGroupInfoDelegate>
                 {
                     [self.operateFriDel updataFriends:YES];
                 }
+                [[NSNotificationCenter defaultCenter] postNotificationName:UCFRIENDSUM object:nil];
             }
             else
             {

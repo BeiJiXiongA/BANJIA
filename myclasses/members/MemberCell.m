@@ -38,7 +38,7 @@
         
         memNameLabel = [[UILabel alloc] initWithFrame:CGRectMake(60, 10, 150, 30)];
         memNameLabel.backgroundColor = [UIColor clearColor];
-        memNameLabel.font = [UIFont systemFontOfSize:15];
+        memNameLabel.font = LIST_NAME_FONT;
         memNameLabel.textColor = USER_NAME_COLOR;
         [self.contentView addSubview:memNameLabel];
         

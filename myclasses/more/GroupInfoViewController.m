@@ -360,7 +360,7 @@
     }
     cell.markLabel.frame = CGRectMake(16, 10, 180, 30);
     cell.markLabel.textAlignment = NSTextAlignmentLeft;
-    cell.markLabel.font = [UIFont systemFontOfSize:18];
+    cell.markLabel.font = [UIFont systemFontOfSize:16];
     cell.markLabel.textColor = COMMENTCOLOR;
     if (indexPath.row == 0)
     {
