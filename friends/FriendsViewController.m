@@ -87,6 +87,12 @@ OperateFriends>
     friendsListTableView.dataSource = self;
     friendsListTableView.backgroundColor = [UIColor clearColor];
     friendsListTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    friendsListTableView.sectionIndexTrackingBackgroundColor=[UIColor grayColor];
+    if (SYSVERSION>=7)
+    {
+        friendsListTableView.sectionIndexBackgroundColor = [UIColor clearColor];
+    }
+
     [self.bgView addSubview:friendsListTableView];
     
     _reloading = NO;
@@ -281,6 +287,34 @@ OperateFriends>
         return 0;
     }
     return 26.5;
+}
+
+-(NSArray *)sectionIndexTitlesForTableView:(UITableView *)tableView
+{
+    if ([tmpListArray count] > MinSortCount)
+    {
+        NSMutableArray *sectionArray = [[NSMutableArray alloc] initWithCapacity:0];
+        NSArray *letters = [NSArray arrayWithObjects:@"A",@"B",@"C",@"D",@"E",@"F",@"G",@"H",@"I",@"J",@"K",@"L",@"M",@"N",@"O",@"P",@"Q",@"R",@"S",@"T",@"U",@"V",@"W",@"X",@"Y",@"Z", nil];
+        [sectionArray addObject:@"*"];
+        for (int i=0; i<[letters count]; ++i)
+        {
+            NSString *letter = [letters objectAtIndex:i];
+            for (int j=0; j<[tmpArray count]; ++j)
+            {
+                NSString *first = [[tmpArray objectAtIndex:j] objectForKey:@"key"];
+                if ([letter isEqualToString:first])
+                {
+                    if (![sectionArray containsObject:letter])
+                    {
+                        [sectionArray addObject:letter];
+                    }
+                }
+            }
+        }
+        [sectionArray addObject:@"#"];
+        return sectionArray;
+    }
+    return nil;
 }
 
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section

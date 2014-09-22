@@ -17,6 +17,7 @@
 @end
 
 @implementation ClassPlusAccountViewController
+@synthesize reg_method,banjia_number;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];

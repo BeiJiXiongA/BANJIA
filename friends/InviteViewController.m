@@ -503,7 +503,6 @@ UISearchBarDelegate>
                     }
                 }
             }
-            DDLOG(@"sectionArray=%@",sectionArray);
             [sectionArray addObject:@"#"];
             return sectionArray;
         }

@@ -99,6 +99,10 @@ EGORefreshTableHeaderDelegate>
     UIView *recordingIndicatorView;
     UIImageView *recordingImageView;
     UILabel *recordingLabel;
+    
+    
+    UIImage *fromHeaderImage;
+    UIImage *selfHeaderImage;
 }
 @end
 
@@ -763,6 +767,11 @@ EGORefreshTableHeaderDelegate>
 -(void)dealNewChatMsg:(NSDictionary *)dict
 {
     if ([[Tools user_id] length] == 0)
+    {
+        return ;
+    }
+    
+    if (dict && ![[dict objectForKey:@"fid"] isEqualToString:toID])
     {
         return ;
     }

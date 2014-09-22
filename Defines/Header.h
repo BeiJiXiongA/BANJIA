@@ -12,6 +12,7 @@
 #import "Color.h"
 #import "Font.h"
 #import "Size.h"
+#import "CheckTools.h"
 
 
 #define FaceViewHeight  200

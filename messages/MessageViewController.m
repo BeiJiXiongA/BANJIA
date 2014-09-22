@@ -57,6 +57,8 @@ ChatVCDelegate>
     BOOL edittingTableView;
     
     NSMutableDictionary *unreadCountDict;
+    
+    NSString *currentId;
 }
 @end
 
@@ -185,7 +187,11 @@ ChatVCDelegate>
                     for (int i=0;i<[tmpArray count];i++)
                     {
                         NSDictionary *dict = [tmpArray objectAtIndex:i];
-                        [unreadCountDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"new"] intValue]] forKey:[dict objectForKey:@"tid"]];
+                        if (currentId && ![currentId isEqualToString:[dict objectForKey:@"tid"]])
+                        {
+                            [unreadCountDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"new"] intValue]] forKey:[dict objectForKey:@"tid"]];
+                        }
+                        
                         [tmpDict setObject:[dict objectForKey:@"tid"] forKey:@"fid"];
                         [tmpDict setObject:[dict objectForKey:@"r_name"] forKey:@"fname"];
                         [tmpDict setObject:[Tools user_id] forKey:@"tid"];
@@ -618,6 +624,7 @@ ChatVCDelegate>
         chat.imageUrl = [userIconDIct objectForKey:@"uicon"];
     }
     [unreadCountDict setObject:@"0" forKey:otherid];
+    currentId = otherid;
     [self.navigationController pushViewController:chat animated:YES];
 }
 

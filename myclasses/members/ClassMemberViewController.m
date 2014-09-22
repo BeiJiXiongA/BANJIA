@@ -134,6 +134,12 @@ MsgDelegate>
     memberTableView.backgroundColor = self.bgView.backgroundColor;
     memberTableView.tag = MemTableViewTag;
     memberTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    
+    memberTableView.sectionIndexTrackingBackgroundColor=[UIColor grayColor];
+    if (SYSVERSION>=7)
+    {
+        memberTableView.sectionIndexBackgroundColor = [UIColor clearColor];
+    }
     [self.bgView addSubview:memberTableView];
     
     pullRefreshView = [[EGORefreshTableHeaderView alloc] initWithScrollView:memberTableView orientation:EGOPullOrientationDown];
@@ -271,6 +277,7 @@ MsgDelegate>
 -(void)checkTip
 {
     [tipImageView removeFromSuperview];
+    [tapLabel removeFromSuperview];
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     [ud setObject:@"1" forKey:@"classmembertip"];
     [ud synchronize];
@@ -888,6 +895,37 @@ MsgDelegate>
         return 1;
     }
     return 0;
+}
+
+-(NSArray *)sectionIndexTitlesForTableView:(UITableView *)tableView
+{
+    if (tableView.tag == MemTableViewTag)
+    {
+        if ([allMembersArray count] > 20)
+        {
+            NSMutableArray *sectionArray = [[NSMutableArray alloc] initWithCapacity:0];
+            NSArray *letters = [NSArray arrayWithObjects:@"A",@"B",@"C",@"D",@"E",@"F",@"G",@"H",@"I",@"J",@"K",@"L",@"M",@"N",@"O",@"P",@"Q",@"R",@"S",@"T",@"U",@"V",@"W",@"X",@"Y",@"Z", nil];
+            [sectionArray addObject:@"*"];
+            for (int i=0; i<[letters count]; ++i)
+            {
+                NSString *letter = [letters objectAtIndex:i];
+                for (int j=0; j<[membersArray count]; ++j)
+                {
+                    NSString *first = [[membersArray objectAtIndex:j] objectForKey:@"key"];
+                    if ([letter isEqualToString:first])
+                    {
+                        if (![sectionArray containsObject:letter])
+                        {
+                            [sectionArray addObject:letter];
+                        }
+                    }
+                }
+            }
+            [sectionArray addObject:@"#"];
+            return sectionArray;
+        }
+    }
+    return nil;
 }
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section

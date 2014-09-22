@@ -28,7 +28,7 @@
 @end
 
 @implementation AuthViewController
-@synthesize img_id,img_tcard;
+@synthesize img_id,img_tcard,authImageDoneDel;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -55,10 +55,6 @@
     [setButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [setButton addTarget:self action:@selector(submit) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:setButton];
-    if ([img_tcard length] > 10 || [img_id length] > 10)
-    {
-        setButton.hidden = YES;
-    }
     
     imageArray = [[NSMutableArray alloc] initWithCapacity:0];
     
@@ -149,41 +145,39 @@
 
 -(void)submit
 {
-    if (idImage && componentImage)
+    if (idImage)
     {
         [self uploadImage:idImage used:@"img_id"];
+    }
+    if (componentImage)
+    {
         [self uploadImage:componentImage used:@"img_tcard"];
     }
-    else if(!idImage)
+    if(!idImage && [img_id length] == 0)
     {
         [Tools showAlertView:@"请添加身份证" delegateViewController:nil];
         return ;
     }
-    else if(!componentImage)
+    if(!componentImage && [img_tcard length] == 0)
     {
         [Tools showAlertView:@"请添加教师资格证" delegateViewController:nil];
+        return ;
+    }
+    if (!idImage && !componentImage && [img_tcard length] > 0 && [img_id length] > 0)
+    {
+        [Tools showAlertView:@"你未做任何更改" delegateViewController:nil];
         return ;
     }
 }
 
 -(void)changeCompetenceImage
 {
-    if ([img_tcard length] > 10)
-    {
-        [Tools showAlertView:@"正在审核中" delegateViewController:nil];
-        return;
-    }
     imageUsed = @"img_tcard";
     [self selectImage];
 }
 
 -(void)changeIDCardImage
 {
-    if ([img_id length] > 10)
-    {
-        [Tools showAlertView:@"正在审核中" delegateViewController:nil];
-        return;
-    }
     imageUsed = @"img_id";
     [self selectImage];
 }
@@ -309,15 +303,21 @@
                     [competenceImageView setImage:image];
                     comDone = 1;
                     [Tools showTips:@"教师资格证上传成功" toView:self.bgView];
+                    componentImage = nil;
                 }
                 else if ([imgUsed isEqualToString:@"img_id"])
                 {
                     [idCardImageView setImage:image];
                     idDone = 1;
                     [Tools showTips:@"身份证上传成功" toView:self.bgView];
+                    idImage = nil;
                 }
                 if (idDone == 1 && comDone == 1)
                 {
+                    if ([self.authImageDoneDel respondsToSelector:@selector(authImageDone)])
+                    {
+                        [self.authImageDoneDel authImageDone];
+                    }
                     [self.navigationController popViewControllerAnimated:YES];
                 }
             }

@@ -235,6 +235,51 @@ NameButtonDel>
 {
     
 }
+-(void)showIntroduce
+{
+    if (addButton.hidden == YES)
+    {
+        return ;
+    }
+    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+    if (ShowTips == 1)
+    {
+        [ud removeObjectForKey:@"classzonetip"];
+        [ud synchronize];
+    }
+    if (![ud objectForKey:@"classzonetip"])
+    {
+        self.unReadLabel.hidden = YES;
+        
+        tipImageView = [[UIImageView alloc] init];
+        tipImageView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 568);
+        
+        if (SYSVERSION >= 7)
+        {
+            [tipImageView setImage:[UIImage imageNamed:@"classzonetip"]];
+        }
+        else
+        {
+            [tipImageView setImage:[UIImage imageNamed:@"classzonetip6"]];
+        }
+        tipImageView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0];
+        [[XDTabViewController sharedTabViewController].bgView addSubview:tipImageView];
+        
+        UITapGestureRecognizer *outTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(outTap)];
+        tipImageView.userInteractionEnabled = YES;
+        [tipImageView addGestureRecognizer:outTap];
+        
+        
+        tapLabel = [[UIImageView alloc] init];
+        tapLabel.frame = CGRectMake(15, 100, 290, 60);
+        tapLabel.backgroundColor = [UIColor clearColor];
+        [[XDTabViewController sharedTabViewController].bgView addSubview:tapLabel];
+        
+        UITapGestureRecognizer *tipTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(checkTip)];
+        tapLabel.userInteractionEnabled = YES;
+        [tapLabel addGestureRecognizer:tipTap];
+    }
+}
 
 -(void)checkTip
 {
@@ -525,45 +570,6 @@ NameButtonDel>
     if ([self canSendDiary])
     {
         addButton.hidden = NO;
-        NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
-        if (ShowTips == 1)
-        {
-            [ud removeObjectForKey:@"classzonetip"];
-            [ud synchronize];
-        }
-        if (![ud objectForKey:@"classzonetip"])
-        {
-            self.unReadLabel.hidden = YES;
-            
-            tipImageView = [[UIImageView alloc] init];
-            tipImageView.frame = CGRectMake(0, 0, SCREEN_WIDTH, 568);
-            
-            if (SYSVERSION >= 7)
-            {
-                [tipImageView setImage:[UIImage imageNamed:@"classzonetip"]];
-            }
-            else
-            {
-                [tipImageView setImage:[UIImage imageNamed:@"classzonetip6"]];
-            }
-            tipImageView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0];
-            [[XDTabViewController sharedTabViewController].bgView addSubview:tipImageView];
-            
-            UITapGestureRecognizer *outTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(outTap)];
-            tipImageView.userInteractionEnabled = YES;
-            [tipImageView addGestureRecognizer:outTap];
-            
-            
-            tapLabel = [[UIImageView alloc] init];
-            tapLabel.frame = CGRectMake(15, 100, 290, 60);
-            tapLabel.backgroundColor = [UIColor clearColor];
-            [[XDTabViewController sharedTabViewController].bgView addSubview:tapLabel];
-            
-            UITapGestureRecognizer *tipTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(checkTip)];
-            tapLabel.userInteractionEnabled = YES;
-            [tapLabel addGestureRecognizer:tipTap];
-        }
-
     }
     else
     {
@@ -1868,7 +1874,6 @@ NameButtonDel>
                 DDLOG(@"commit diary responsedict %@",responseDict);
                 if ([[responseDict objectForKey:@"code"] intValue]== 1)
                 {
-                    //                [Tools showTips:@"赞成功" toView:classTableView];
                     page = @"";
                     monthStr = @"";
                     [self getDongTaiList];
@@ -2173,6 +2178,8 @@ NameButtonDel>
         noneDongTaiLabel.hidden = NO;
     }
     [classZoneTableView reloadData];
+    
+    [self showIntroduce];
     if (footerView)
     {
         [footerView removeFromSuperview];

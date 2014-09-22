@@ -64,6 +64,23 @@
 
 -(void)editDone
 {
+    if ([nameTextField.text length] == 0)
+    {
+        [Tools showAlertView:@"请输入您的姓名！" delegateViewController:nil];
+        return;
+    }
+    if ([nameTextField.text lengthOfBytesUsingEncoding:NSUTF8StringEncoding] < 2)
+    {
+        [Tools showAlertView:@"名字的长度应该大于1个字符" delegateViewController:nil];
+        return;
+    }
+    
+    if ([nameTextField.text lengthOfBytesUsingEncoding:NSUTF8StringEncoding] > 15)
+    {
+        [Tools showAlertView:@"名字的长度应该小于15个字符" delegateViewController:nil];
+        return;
+    }
+
     if ([self.editnameDoneDel respondsToSelector:@selector(editNameDone:)])
     {
         [self.editnameDoneDel editNameDone:nameTextField.text];

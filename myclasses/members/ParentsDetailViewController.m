@@ -322,7 +322,7 @@ UpdateUserSettingDelegate>
         NSMutableString *titlestr = [[NSMutableString alloc] initWithString:title];
         [titlestr replaceCharactersInRange:[title rangeOfString:@"."] withString:@"的"];
         
-        cell.contentLabel.frame = CGRectMake(DetailHeaderHeight+30, cell.headerImageView.frame.origin.y+35, 100, 20);
+        cell.contentLabel.frame = CGRectMake(DetailHeaderHeight+30, cell.headerImageView.frame.origin.y+35, 200, 20);
         cell.contentLabel.text = titlestr;
         cell.contentLabel.shadowOffset = CGSizeMake(0.5, 0.5);
         cell.contentLabel.shadowColor = TITLE_COLOR;

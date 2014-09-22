@@ -246,7 +246,7 @@ EditNameDone>
             DDLOG(@"setusetInfo== responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                [[NSUserDefaults standardUserDefaults] setObject:[[NSString stringWithFormat:@"%@",datePicker.date] substringToIndex:10] forKey:BIRTH];
+                [[NSUserDefaults standardUserDefaults] setObject:birth forKey:BIRTH];
                 [[NSUserDefaults standardUserDefaults] setObject:sex forKey:USERSEX];
                 [[NSUserDefaults standardUserDefaults] setObject:userName forKey:USERNAME];
                 [[NSUserDefaults standardUserDefaults] synchronize];
@@ -323,7 +323,7 @@ EditNameDone>
     cell.iconImageView.hidden = YES;
     cell.nametf.hidden = YES;
     
-    cell.nametf.frame = CGRectMake(SCREEN_WIDTH - 180, 10, 150, 28);
+    cell.nametf.frame = CGRectMake(SCREEN_WIDTH - 200, 10, 180, 28);
     cell.nametf.textColor = TITLE_COLOR;
     cell.nametf.textAlignment = NSTextAlignmentRight;
     cell.nametf.font = [UIFont systemFontOfSize:16];
@@ -495,15 +495,52 @@ EditNameDone>
 -(void)editInfo1:(NSInteger)tag
 {
     [UIView animateWithDuration:0.2 animations:^{
+        DDLOG(@"birth+++%@",birth);
+        NSString *day = @"";
+        NSString *month = @"";
+        NSString *year = @"";
+        if ([birth rangeOfString:@"-"].length > 0)
+        {
+            day = [birth substringFromIndex:8];
+            month = [birth substringWithRange:NSMakeRange(5, 2)];
+            year = [birth substringToIndex:4];
+        }
+        else if([birth rangeOfString:@"年"].length > 0)
+        {
+//            NSRange range1 = [birth rangeOfString:@"日"];
+            NSRange range2 = [birth rangeOfString:@"月"];
+            NSRange range3 = [birth rangeOfString:@"年"];
+            day = [birth substringWithRange:NSMakeRange(range2.location+1, 2)];
+            month = [birth substringWithRange:NSMakeRange(range3.location+1, 2)];
+            year = [birth substringToIndex:4];
+        }
+        if ([day length] > 0 && [month length] > 0 && [year length] > 0)
+        {
+            NSCalendar *calendar = [NSCalendar autoupdatingCurrentCalendar];
+            
+            NSDateComponents *dateComps = [[NSDateComponents alloc] init];
+            
+            [dateComps setDay:[day integerValue]];
+            
+            [dateComps setMonth:[month integerValue]];
+            
+            [dateComps setYear:[year integerValue]];
+            
+            NSDate *itemDate = [calendar dateFromComponents:dateComps];
+            [datePicker setDate:itemDate];
+        }
+        
+        
         dateView.frame = CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT);
     }];
 }
 -(void)dateDone
 {
-    DDLOG(@"%@",[[NSString stringWithFormat:@"%@",datePicker.date] substringToIndex:10]);
     [UIView animateWithDuration:0.2 animations:^{
         dateView.frame = CGRectMake(0, SCREEN_HEIGHT, SCREEN_WIDTH, 0);
-        birth = [[NSString stringWithFormat:@"%@",datePicker.date] substringToIndex:10];
+        NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+        [formatter setDateFormat:@"YYYY年MM月dd日"];
+        birth = [formatter stringFromDate:datePicker.date];
         [personInfoTableView reloadData];
     }];
 }
@@ -563,6 +600,7 @@ EditNameDone>
                 if ([dataDict objectForKey:@"birth"])
                 {
                     [userInfoDict setObject:[dataDict objectForKey:@"birth"] forKey:@"birth"];
+                    birth = [dataDict objectForKey:@"birth"];
                 }
                 else
                 {

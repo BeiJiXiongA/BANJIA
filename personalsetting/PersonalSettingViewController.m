@@ -21,6 +21,7 @@
 #import "ChangePhoneViewController.h"
 #import "UINavigationController+JDSideMenu.h"
 #import "ClassPlusAccountViewController.h"
+#import "ResetPwdViewController.h"
 
 
 @interface PersonalSettingViewController ()<UITableViewDataSource,
@@ -30,7 +31,8 @@ MsgDelegate,
 UITextFieldDelegate,
 ChangePhoneNum,
 UIAlertViewDelegate,
-UIActionSheetDelegate>
+UIActionSheetDelegate,
+AuthImageDone>
 {
     UITableView *personalSettiongTableView;
     BOOL isAuth;
@@ -45,6 +47,8 @@ UIActionSheetDelegate>
     NSString *rrNickName;
     
     int gf;
+    NSString *banjiaNumber;
+    NSString *reg_method;
 }
 @end
 
@@ -288,7 +292,7 @@ UIActionSheetDelegate>
     }
     else if (section == 2)
     {
-        return 2;
+        return 3;
     }
     return 0;
 }
@@ -310,6 +314,10 @@ UIActionSheetDelegate>
             {
                 return 0;
             }
+        }
+        if (indexPath.row == 2 && [[Tools phone_num] length] == 0)
+        {
+            return 0;
         }
         return 47;
     }
@@ -600,7 +608,7 @@ UIActionSheetDelegate>
                 cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:authcell];
             }
             cell.textLabel.font = [UIFont systemFontOfSize:18];
-            cell.textLabel.text = @" 个人设置";
+            cell.textLabel.text = @" 系统设置";
             cell.textLabel.textColor = USER_NAME_COLOR;
             
             cell.selectionStyle = UITableViewCellSelectionStyleGray;
@@ -621,6 +629,40 @@ UIActionSheetDelegate>
             
             return cell;
         }
+        else if (indexPath.row == 2)
+        {
+            static NSString *authcell = @"changepw";
+            UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:authcell];
+            if (cell == nil)
+            {
+                cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:authcell];
+            }
+            if ([[Tools phone_num] length] > 0)
+            {
+                cell.textLabel.font = [UIFont systemFontOfSize:18];
+                cell.textLabel.text = @" 修改密码";
+                cell.textLabel.textColor = USER_NAME_COLOR;
+                
+                cell.selectionStyle = UITableViewCellSelectionStyleGray;
+                cell.contentView.backgroundColor = [UIColor whiteColor];
+                
+                CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+                UIImageView *lineImageView = [[UIImageView alloc] init];
+                lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+                lineImageView.backgroundColor = LineBackGroudColor;
+                [cell.contentView addSubview:lineImageView];
+                cell.contentView.backgroundColor = [UIColor whiteColor];
+                
+                UIImageView *arrowImageView = [[UIImageView alloc] init];
+                arrowImageView.frame = CGRectMake(SCREEN_WIDTH-20, 16, 10, 15);
+                [arrowImageView setImage:[UIImage imageNamed:@"menu_arrow_right"]];
+                arrowImageView.backgroundColor = [UIColor whiteColor];
+                [cell.contentView addSubview:arrowImageView];
+            }
+            
+            return cell;
+        }
+
     }
     return nil;
 }
@@ -685,6 +727,7 @@ UIActionSheetDelegate>
             }
             
             AuthViewController *authViewController = [[AuthViewController alloc] init];
+            authViewController.authImageDoneDel = self;
             if ([accountDict objectForKey:@"img_id"])
             {
                 authViewController.img_id = [accountDict objectForKey:@"img_id"];
@@ -707,8 +750,16 @@ UIActionSheetDelegate>
         {
             [self settingClick];
         }
+        else if (indexPath.row == 2)
+        {
+            ResetPwdViewController *resetPwdViewController = [[ResetPwdViewController alloc] init];
+            [self.navigationController pushViewController:resetPwdViewController animated:YES];
+        }
     }
-    
+}
+-(void)authImageDone
+{
+    [self getAccount];
 }
 
 #pragma mark - loginAccount
@@ -1032,6 +1083,23 @@ static int loginID;
             DDLOG(@"getuserinfo responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue] == 1)
             {
+                if ([[[responseDict objectForKey:@"data"] objectForKey:@"number"] intValue] > 0)
+                {
+                    banjiaNumber = [NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"] objectForKey:@"number"] intValue]];
+                }
+                else
+                {
+                    banjiaNumber = @"";
+                }
+                if ([responseDict objectForKey:@"reg_method"] && [[responseDict objectForKey:@"reg_method"] length] > 0)
+                {
+                    reg_method = [[responseDict objectForKey:@"data"] objectForKey:@"reg_method"];
+                }
+                else
+                {
+                    reg_method = @"";
+                }
+                
                 gf = [[[responseDict objectForKey:@"data"] objectForKey:@"jf"] integerValue];
                 [personalSettiongTableView reloadData];
             }

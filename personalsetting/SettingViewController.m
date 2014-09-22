@@ -53,7 +53,7 @@ MFMailComposeViewControllerDelegate>
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     
-    self.titleLabel.text = @"个人设置";
+    self.titleLabel.text = @"系统设置";
     setArray1 = [[NSArray alloc] initWithObjects:@"收到公告时声音提醒",@"收到公告时手机震动",@"新班级日记提醒",@"好友消息手机震动", nil];
     setArray2 = [[NSArray alloc] initWithObjects:@"检查版本更新",@"手动清除缓存", nil];
     setArray3 = [[NSArray alloc] initWithObjects:@"关于我们",@"意见反馈",@"给五星好评",@"用户协议",@"", nil];

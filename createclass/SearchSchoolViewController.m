@@ -90,21 +90,17 @@ CLLocationManagerDelegate>
             {
                 cityname = tmpCityName;
             }
-            NSArray *cityArray = [db findSetWithDictionary:@{@"cityname":cityname} andTableName:CITYTABLE];
+            NSArray *cityArray = [db findSetWithDictionary:@{@"cityname":cityname,@"citylevel":@"2"} andTableName:CITYTABLE];
             if ([cityArray count] > 0)
             {
                 for (NSDictionary *dict in cityArray)
                 {
-                    DDLOG(@"+++++++%@",dict);
-                    if ([dict objectForKey:@"cityid"] && [[dict objectForKey:@"citylevel"] integerValue] == 1)
+                    cityId = [dict objectForKey:@"cityid"];
+                    if ([cityname length] > 0 && [cityId length] > 0)
                     {
-                        cityId = [dict objectForKey:@"cityid"];
-                        if ([cityname length] > 0 && [cityId length] > 0)
-                        {
-                            [self getAreasWith:cityId];
-                        }
-                        break ;
+                        [self getAreasWith:cityId];
                     }
+                    break ;
                 }
             }
             

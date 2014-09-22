@@ -111,7 +111,8 @@ ZBarReaderDelegate>
         
         cell.nametf.frame = CGRectMake(0, 0, SCREEN_WIDTH, 44);
         cell.nametf.textAlignment = NSTextAlignmentLeft;
-        cell.nametf.placeholder = @"请输入班号";
+        cell.nametf.placeholder = @"请输入班号(数字组成)";
+        cell.nametf.keyboardType = UIKeyboardTypeNumbersAndPunctuation;
     }
     else if(indexPath.row == 2 || indexPath.row == 4 || indexPath.row == 0)
     {
@@ -309,6 +310,7 @@ ZBarReaderDelegate>
     line.image = [UIImage imageNamed:@"qrline"];
     [image addSubview:line];
     //定时器，设定时间过1.5秒，
+    [timer invalidate];
     timer = [NSTimer scheduledTimerWithTimeInterval:.03 target:self selector:@selector(animation1) userInfo:nil repeats:YES];
     
     UIView *_navigationBarView = [[UIView alloc] initWithFrame:CGRectMake(0, 0,
@@ -462,6 +464,12 @@ ZBarReaderDelegate>
 {
     if ([Tools NetworkReachable])
     {
+        
+        if (![CheckTools isClassNumber:searchContent])
+        {
+            [Tools showAlertView:@"班号有数字组成" delegateViewController:nil];
+            return ;
+        }
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
                                                                       @"c_id":@"",

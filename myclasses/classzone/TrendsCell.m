@@ -181,6 +181,9 @@ verticalLineView;
         verticalLineView = [[UIView alloc] init];
         verticalLineView.backgroundColor = UIColorFromRGB(0xe2e3e4);
         [self.contentView insertSubview:verticalLineView belowSubview:self.bgView];
+        
+        self.backgroundColor = UIColorFromRGB(0xf1f0ec);
+        self.contentView.backgroundColor = UIColorFromRGB(0xf1f0ec);
     }
     return self;
 }
@@ -242,7 +245,8 @@ verticalLineView;
                 NSDictionary *commentDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row];
                 NSString *content = [[commentDict objectForKey:@"content"] emojizedString];
                 NSString *contentString = [NSString stringWithFormat:@"%@",content];
-                CGSize s = [Tools getSizeWithString:contentString andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
+                CGSize s = [Tools getSizeWithString:contentString andWidth:MaxCommentWidth-30 andFont:CommentFont];
+                DDLOG(@"diary height in diary tools %@ +++ %@",contentString,NSStringFromCGSize(s));
                 return s.height+CommentSpace*1+29;
             }
         }
@@ -252,7 +256,8 @@ verticalLineView;
             NSString *name = [[commentDict objectForKey:@"by"] objectForKey:@"name"];
             NSString *content = [[commentDict objectForKey:@"content"] emojizedString];
             NSString *contentString = [NSString stringWithFormat:@"%@:%@",name,content];
-            CGSize s = [Tools getSizeWithString:contentString andWidth:MaxCommentWidth andFont:[UIFont systemFontOfSize:14]];
+            CGSize s = [Tools getSizeWithString:contentString andWidth:MaxCommentWidth-30 andFont:CommentFont];
+            DDLOG(@"diary height in diary tools %@ +++ %@",contentString,NSStringFromCGSize(s));
             return s.height+CommentSpace*1+29;
         }
         if(praiseArray && !commentsArray)
@@ -275,7 +280,7 @@ verticalLineView;
             else if(indexPath.row < 7)
             {
                 NSDictionary *commentDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row];
-                NSString *name = [[commentDict objectForKey:@"by"] objectForKey:@"name"];
+                NSString *name = [NSString stringWithFormat:@"%@ : ",[[commentDict objectForKey:@"by"] objectForKey:@"name"]];
                 CGSize nameSize;
                 if (SYSVERSION >= 7)
                 {
@@ -300,7 +305,7 @@ verticalLineView;
             if (indexPath.row < 6)
             {
                 NSDictionary *commentDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row-1];
-                NSString *name = [[commentDict objectForKey:@"by"] objectForKey:@"name"];
+                NSString *name = [NSString stringWithFormat:@"%@ : ",[[commentDict objectForKey:@"by"] objectForKey:@"name"]];
                 CGSize nameSize;
                 if (SYSVERSION >= 7)
                 {
@@ -338,7 +343,6 @@ verticalLineView;
     }
 //    cell.nameButton.hidden = YES;
 //    CGFloat c_width = 15;
-    CGFloat hei = 12;
     CGFloat originalY = CommentSpace;
     cell.openPraiseButton.hidden = YES;
     [cell.nameButton setTitle:@"" forState:UIControlStateNormal];
@@ -410,7 +414,7 @@ verticalLineView;
                 NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row];
                 NSString *name = [NSString stringWithFormat:@"%@",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
                 NSString *content = [[commitDict objectForKey:@"content"] emojizedString];
-                CGSize s = [Tools getSizeWithString:content andWidth:MaxCommentWidth andFont:CommentFont];
+                CGSize s = [Tools getSizeWithString:content andWidth:MaxCommentWidth-30 andFont:CommentFont];
                 cell.headerImageView.hidden = NO;
                 cell.headerImageView.frame = CGRectMake(12, 10, PraiseW, PraiseW);
                 cell.headerImageView.backgroundColor = [UIColor clearColor];
@@ -429,7 +433,7 @@ verticalLineView;
                 cell.nameButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
                 [cell.nameButton setTitle:name forState:UIControlStateNormal];
                 
-                cell.commentContentLabel.frame = CGRectMake(48, cell.nameButton.frame.size.height+cell.nameButton.frame.origin.y-7, MaxCommentWidth-30, s.height+hei);
+                cell.commentContentLabel.frame = CGRectMake(48, cell.nameButton.frame.size.height+cell.nameButton.frame.origin.y, MaxCommentWidth-30, s.height);
                 cell.commentContentLabel.text = content;
                 
                 cell.timeLabel.frame = CGRectMake(150, 7, 150, 20);
@@ -452,7 +456,7 @@ verticalLineView;
             NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row-1];
             NSString *name = [NSString stringWithFormat:@"%@",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
             NSString *content = [[commitDict objectForKey:@"content"] emojizedString];
-            CGSize s = [Tools getSizeWithString:content andWidth:MaxCommentWidth andFont:CommentFont];
+            CGSize s = [Tools getSizeWithString:content andWidth:MaxCommentWidth-30 andFont:CommentFont];
             
             
             cell.headerImageView.hidden = NO;
@@ -473,7 +477,7 @@ verticalLineView;
             [cell.nameButton setTitle:name forState:UIControlStateNormal];
             cell.nameButton.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"clearimage"]];
             
-            cell.commentContentLabel.frame = CGRectMake(48, cell.nameButton.frame.size.height+cell.nameButton.frame.origin.y-7, MaxCommentWidth-30, s.height+hei);
+            cell.commentContentLabel.frame = CGRectMake(48, cell.nameButton.frame.size.height+cell.nameButton.frame.origin.y, MaxCommentWidth-30, s.height);
             cell.commentContentLabel.text = content;
             
             cell.timeLabel.frame = CGRectMake(150, 7, 150, 20);

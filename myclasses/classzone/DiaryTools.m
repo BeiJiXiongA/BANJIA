@@ -93,7 +93,9 @@
                 NSDictionary *dict = [array objectAtIndex:i];
                 NSString *content = [[dict objectForKey:@"content"] emojizedString];
                 NSString *contentString = [NSString stringWithFormat:@"%@",content];
-                CGSize s = [Tools getSizeWithString:contentString andWidth:MaxCommentWidth andFont:CommentFont];
+                CGSize s = [Tools getSizeWithString:contentString andWidth:MaxCommentWidth-30 andFont:CommentFont];
+                
+                DDLOG(@"diary height in diary tools %@ +++ %@",contentString,NSStringFromCGSize(s));
                 tmpcommentHeight += (s.height+CommentSpace*1+32);
             }
         }
@@ -105,7 +107,7 @@
             do {
                 NSDictionary *dict = [array objectAtIndex:i];
                 
-                NSString *name = [[dict objectForKey:@"by"] objectForKey:@"name"];
+               NSString *name = [NSString stringWithFormat:@"%@ : ",[[dict objectForKey:@"by"] objectForKey:@"name"]];
                 CGSize nameSize;
                 if (SYSVERSION >= 7)
                 {
@@ -119,6 +121,7 @@
                 NSString *content = [[dict objectForKey:@"content"] emojizedString];
                 
                 CGSize commentSize = [Tools getSizeWithString:content andWidth:MaxCommentWidth-nameSize.width andFont:CommentFont];
+                
                 tmpcommentHeight += (commentSize.height + CommentSpace * 2);
                 
                 --i;

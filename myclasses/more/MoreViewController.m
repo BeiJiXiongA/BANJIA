@@ -645,8 +645,7 @@ UIActionSheetDelegate>
                     if ([[responseDict objectForKey:@"code"] intValue]== 1)
                     {
                         [[NSNotificationCenter defaultCenter] postNotificationName:CHANGECLASSINFO object:nil];
-                        [[XDTabViewController sharedTabViewController] dismissViewControllerAnimated:YES completion:^{
-                            
+                        [[XDTabViewController sharedTabViewController].navigationController dismissViewControllerAnimated:YES completion:^{
                         }];
                     }
                     else

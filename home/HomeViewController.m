@@ -126,7 +126,7 @@ headerDelegate>
     UIImageView *subImageView;
     UIButton *tipJoinClassButton;
     UIButton *tipCreateClassButton;
-    UIImageView *tapLabel;
+    UIImageView *checkTipImageView;
     UIView *buttonView;
     
     NSTimer *adTimer;
@@ -299,6 +299,8 @@ headerDelegate>
     tipView.backgroundColor = self.bgView.backgroundColor;
     [self.bgView addSubview:tipView];
     
+    tipView.hidden = YES;
+    
     tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(21, 0, SCREEN_WIDTH-62, 70)];
     tipLabel.backgroundColor = self.bgView.backgroundColor;
     tipLabel.lineBreakMode = NSLineBreakByWordWrapping;
@@ -324,6 +326,15 @@ headerDelegate>
     
     [self.bgView addSubview:addView];
     
+    [self getData];
+}
+
+-(void)outTap
+{
+    
+}
+-(void)loadIntroduceTip
+{
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     if (ShowTips == 1)
     {
@@ -332,7 +343,11 @@ headerDelegate>
         [ud synchronize];
     }
     
-    if (![ud objectForKey:@"hometip1"])
+    if (tipImageView)
+    {
+        return ;
+    }
+    if (![ud objectForKey:@"hometip1"] && !haveClass)
     {
         self.unReadLabel.hidden = YES;
         
@@ -350,7 +365,6 @@ headerDelegate>
         }
         
         tipImageView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0];
-        tipImageView.hidden = YES;
         [self.bgView addSubview:tipImageView];
         
         buttonView = [[UIView alloc] init];
@@ -383,22 +397,15 @@ headerDelegate>
         tipImageView.userInteractionEnabled = YES;
         [tipImageView addGestureRecognizer:outTap];
         
-        tapLabel = [[UIImageView alloc] init];
-        tapLabel.frame = CGRectMake(30, 320, 260, 45);
-        tapLabel.backgroundColor = [UIColor clearColor];
-        [self.bgView addSubview:tapLabel];
+        checkTipImageView = [[UIImageView alloc] init];
+        checkTipImageView.frame = CGRectMake(30, 320, 260, 45);
+        checkTipImageView.backgroundColor = [UIColor clearColor];
+        [self.bgView addSubview:checkTipImageView];
         
         UITapGestureRecognizer *tipTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(checkTip)];
-        tapLabel.userInteractionEnabled = YES;
-        [tapLabel addGestureRecognizer:tipTap];
-        
+        checkTipImageView.userInteractionEnabled = YES;
+        [checkTipImageView addGestureRecognizer:tipTap];
     }
-    [self getData];
-}
-
--(void)outTap
-{
-    
 }
 
 -(void)checkTip
@@ -414,7 +421,7 @@ headerDelegate>
         {
             [tipImageView setImage:[UIImage imageNamed:@"hometip26"]];
         }
-        tapLabel.frame = CGRectMake(18, 100, 260, 45);
+        checkTipImageView.frame = CGRectMake(18, 100, 260, 45);
         tipJoinClassButton.hidden = YES;
         tipCreateClassButton.hidden = YES;
         moreButton.hidden = YES;
@@ -433,7 +440,7 @@ headerDelegate>
     }
     else if((![ud objectForKey:@"hometip2"]))
     {
-        [tapLabel removeFromSuperview];
+        [checkTipImageView removeFromSuperview];
         [tipImageView removeFromSuperview];
         tipView.hidden = NO;
         moreButton.hidden = NO;
@@ -471,7 +478,6 @@ headerDelegate>
 
 - (void)setOverlayPickerView
 {
-    
     //清除原有控件
     
     for (UIView *temp in [reader.view subviews])
@@ -1030,7 +1036,6 @@ headerDelegate>
                 
                 if ([noticeArray count] == 0 && [diariesArray count] == 0)
                 {
-                    shoudShowTipView = YES;
                     tipLabel.text = @"你所在班级还没有人发布过空间和班级通知";
                     [joinClassButton setTitle:@"发表空间" forState:UIControlStateNormal];
                     [joinClassButton removeTarget:self action:@selector(joinClass) forControlEvents:UIControlEventTouchUpInside];
@@ -1038,11 +1043,16 @@ headerDelegate>
                     [createClassButton setTitle:@"发布通知" forState:UIControlStateNormal];
                     [createClassButton removeTarget:self action:@selector(createClass) forControlEvents:UIControlEventTouchUpInside];
                     [createClassButton addTarget:self action:@selector(addNotice) forControlEvents:UIControlEventTouchUpInside];
+                    
+                    tipView.hidden = NO;
+                    if ([adArray count] > 0)
+                    {
+                        tipView.frame = CGRectMake(10, HeaderCellHeight+UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH-20, 300);
+                    }
                 }
                 else
                 {
                     [tipView removeFromSuperview];
-                    shoudShowTipView = NO;
                 }
                 [self groupByTime:diariesArray];
             }
@@ -1061,11 +1071,14 @@ headerDelegate>
                     [createClassButton removeTarget:self action:@selector(addNotice) forControlEvents:UIControlEventTouchUpInside];
                     [createClassButton addTarget:self action:@selector(createClass) forControlEvents:UIControlEventTouchUpInside];
 
-                    tipImageView.hidden = NO;
-                    subImageView.hidden = NO;
-                    haveClass = NO;
-                    shoudShowTipView = YES;
                     [classTableView reloadData];
+                    
+                    [self loadIntroduceTip];
+                    tipView.hidden = NO;
+                    if ([adArray count] > 0)
+                    {
+                        tipView.frame = CGRectMake(10, HeaderCellHeight+UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH-20, 300);
+                    }
                     return ;
                 }
                 [Tools dealRequestError:responseDict fromViewController:nil];
@@ -1137,6 +1150,11 @@ headerDelegate>
                         adTimer = [NSTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(switchAd) userInfo:nil repeats:YES];
                     }
                     [classTableView reloadData];
+                    if ([adArray count] > 0)
+                    {
+                        tipView.frame = CGRectMake(10, HeaderCellHeight+UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH-20, 300);
+                    }
+
                 }
             }
             else
@@ -1174,6 +1192,10 @@ headerDelegate>
             adTimer = [NSTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(switchAd) userInfo:nil repeats:YES];
         }
         [classTableView reloadData];
+        if ([adArray count] > 0)
+        {
+            tipView.frame = CGRectMake(10, HeaderCellHeight+UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH-20, 300);
+        }
     }
 }
 
@@ -1188,13 +1210,11 @@ headerDelegate>
         NSDictionary *responseDict = [Tools JSonFromString:responseString];
         if ([[responseDict objectForKey:@"code"] intValue]== 1)
         {
-            haveClass = YES;
             [noticeArray addObjectsFromArray:[[responseDict objectForKey:@"data"] objectForKey:@"notices"]];
             [diariesArray addObjectsFromArray:[[responseDict objectForKey:@"data"] objectForKey:@"diaries"]];
             
             if ([noticeArray count] == 0 && [diariesArray count] == 0)
             {
-                shoudShowTipView = YES;
                 tipLabel.text = @"你所在班级还没有人发布过空间和班级通知";
                 [joinClassButton setTitle:@"发表空间" forState:UIControlStateNormal];
                 [joinClassButton removeTarget:self action:@selector(joinClass) forControlEvents:UIControlEventTouchUpInside];
@@ -1202,13 +1222,16 @@ headerDelegate>
                 [createClassButton setTitle:@"发布通知" forState:UIControlStateNormal];
                 [createClassButton removeTarget:self action:@selector(createClass) forControlEvents:UIControlEventTouchUpInside];
                 [createClassButton addTarget:self action:@selector(addNotice) forControlEvents:UIControlEventTouchUpInside];
+                tipView.hidden = NO;
+                if ([adArray count] > 0)
+                {
+                    tipView.frame = CGRectMake(10, HeaderCellHeight+UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH-20, 300);
+                }
             }
-            else
+            if ([diariesArray count] > 0)
             {
-                [tipView removeFromSuperview];
-                shoudShowTipView = NO;
+                [self groupByTime:diariesArray];
             }
-            [self groupByTime:diariesArray];
         }
         else
         {
@@ -1218,21 +1241,33 @@ headerDelegate>
             
             if ([[[[responseDict objectForKey:@"message"] allKeys] firstObject] isEqualToString:@"NO_CLASS"])
             {
-                [joinClassButton setTitle:@"加入班级" forState:UIControlStateNormal];
-                [joinClassButton removeTarget:self action:@selector(addDongtai) forControlEvents:UIControlEventTouchUpInside];
-                [joinClassButton addTarget:self action:@selector(joinClass) forControlEvents:UIControlEventTouchUpInside];
-                [createClassButton setTitle:@"创建班级" forState:UIControlStateNormal];
-                [createClassButton removeTarget:self action:@selector(addNotice) forControlEvents:UIControlEventTouchUpInside];
-                [createClassButton addTarget:self action:@selector(createClass) forControlEvents:UIControlEventTouchUpInside];
-                tipImageView.hidden = NO;
-                subImageView.hidden = NO;
-                haveClass = NO;
-                shoudShowTipView = YES;
-                [classTableView reloadData];
+                if (![Tools NetworkReachable])
+                {
+                    [joinClassButton setTitle:@"加入班级" forState:UIControlStateNormal];
+                    [joinClassButton removeTarget:self action:@selector(addDongtai) forControlEvents:UIControlEventTouchUpInside];
+                    [joinClassButton addTarget:self action:@selector(joinClass) forControlEvents:UIControlEventTouchUpInside];
+                    [createClassButton setTitle:@"创建班级" forState:UIControlStateNormal];
+                    [createClassButton removeTarget:self action:@selector(addNotice) forControlEvents:UIControlEventTouchUpInside];
+                    [createClassButton addTarget:self action:@selector(createClass) forControlEvents:UIControlEventTouchUpInside];
+                    [classTableView reloadData];
+                    
+                    if (![Tools NetworkReachable])
+                    {
+                        [self loadIntroduceTip];
+                        tipView.hidden = NO;
+                        if ([adArray count] > 0)
+                        {
+                            tipView.frame = CGRectMake(10, HeaderCellHeight+UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH-20, 300);
+                        }
+                    }
+                }
                 return ;
             }
             [Tools dealRequestError:responseDict fromViewController:nil];
+            
+            
         }
+        
         _reloading = NO;
         [egoheaderView egoRefreshScrollViewDataSourceDidFinishedLoading:classTableView];
         [footerView egoRefreshScrollViewDataSourceDidFinishedLoading:classTableView];
@@ -1397,53 +1432,6 @@ headerDelegate>
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    if (shoudShowTipView)
-    {
-        joinClassButton.hidden = NO;
-        createClassButton.hidden = NO;
-        tipView.hidden = NO;
-        classTableView.scrollEnabled = NO;
-    }
-    else
-    {
-        joinClassButton.hidden = YES;
-        createClassButton.hidden = YES;
-        tipView.hidden = YES;
-        classTableView.scrollEnabled = YES;
-    }
-    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
-    if (![ud objectForKey:@"hometip1"] && !haveClass)
-    {
-        classTableView.hidden = YES;
-        joinClassButton.hidden = YES;
-        createClassButton.hidden = YES;
-    }
-    else if(shoudShowTipView)
-    {
-        classTableView.hidden = NO;
-        joinClassButton.hidden = NO;
-        createClassButton.hidden = NO;
-        if (HeaderCellHeight > 0)
-        {
-            tipView.frame = CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT+HeaderCellHeight, SCREEN_WIDTH-20, TipViewHeight);
-        }
-        else
-        {
-            tipView.frame = CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT+60, SCREEN_WIDTH-20, TipViewHeight);
-        }
-    }
-    else
-    {
-        classTableView.hidden = NO;
-    }
-    if (!haveClass)
-    {
-        addButton.hidden = YES;
-    }
-    else
-    {
-        addButton.hidden = NO;
-    }
     return [noticeArray count] + [groupDiaries count] + 2;
 }
 
@@ -1486,10 +1474,7 @@ headerDelegate>
     }
     else if ((section-1 == [noticeArray count]) && [groupDiaries count] > 0)
     {
-        UIView *verticalLineView = [[UIView alloc] initWithFrame:CGRectMake(34.75, 10, 1.5, 30)];
-        verticalLineView.backgroundColor = UIColorFromRGB(0xe2e3e4);
-        [headerView addSubview:verticalLineView];
-        
+
         headerLabel.backgroundColor = RGB(64, 196, 110, 1);
         headerLabel.text = @"    班级空间";
         headerLabel.font = [UIFont boldSystemFontOfSize:15];
@@ -1762,7 +1747,7 @@ headerDelegate>
         cell.contentTextField.hidden = YES;
         
         cell.headerImageView.tag = SectionTag * indexPath.section + indexPath.row;
-        cell.headerImageView.frame = CGRectMake(12, 12, 32, 32);
+        cell.headerImageView.frame = CGRectMake(12, 12, 31, 31);
         
         UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(headerImageViewClicked:)];
         cell.headerImageView.userInteractionEnabled = YES;

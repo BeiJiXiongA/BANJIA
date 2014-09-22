@@ -55,11 +55,11 @@ EGORefreshTableDelegate>
     classid = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     role = [[NSUserDefaults standardUserDefaults] objectForKey:@"role"];
     
-    UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    moreButton.frame = CGRectMake(SCREEN_WIDTH-CORNERMORERIGHT, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
-    [moreButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
-    [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
-    [self.navigationBarView addSubview:moreButton];
+//    UIButton *moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
+//    moreButton.frame = CGRectMake(SCREEN_WIDTH-CORNERMORERIGHT, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
+//    [moreButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
+//    [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
+//    [self.navigationBarView addSubview:moreButton];
     
     gradeTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT) style:UITableViewStylePlain];
     gradeTableView.delegate = self;

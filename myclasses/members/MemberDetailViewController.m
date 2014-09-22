@@ -357,7 +357,7 @@ UIActionSheetDelegate>
             }
             else if(indexPath.row == 1)
             {
-                if([birth length] > 0)
+                if([birth length] > 0 && ![birth isEqualToString:@"请设置生日"])
                 {
                     cell.nameLabel.text = @"生日";
                     cell.contentLabel.text = birth;

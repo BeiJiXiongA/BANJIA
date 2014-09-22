@@ -319,7 +319,7 @@ UITextFieldDelegate>
                     [ud setObject:@"1" forKey:NewDiaryAlert];
                     [ud setObject:@"1" forKey:NewChatAlert];
                 }
-            
+                
                 [ud synchronize];
                 NSString *name = [dict objectForKey:@"r_name"];
                 if ([name isEqualToString:ANONYMITY])

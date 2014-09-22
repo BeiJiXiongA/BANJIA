@@ -265,7 +265,7 @@ UpdateUserSettingDelegate>
             UIImage *tipImage = [UIImage imageNamed:@"defaultparenttip"];
             tipBgView.hidden = NO;
             tipImageView.frame = CGRectMake((SCREEN_WIDTH-tipImage.size.width)/2-2, defaultParentY-tipImage.size.height+10, SCREEN_WIDTH-10, tipImage.size.height);
-            defaultParentButtonOnTip.frame = CGRectMake(143, defaultParentY+17, 80, 35);
+            defaultParentButtonOnTip.frame = CGRectMake(173, defaultParentY+17, 80, 35);
         }
     }
     else
@@ -582,19 +582,27 @@ UpdateUserSettingDelegate>
             cell.headerImageView.layer.cornerRadius = 3;
             cell.headerImageView.clipsToBounds = YES;
             [Tools fillImageView:cell.headerImageView withImageFromURL:[parentDict objectForKey:@"img_icon"] andDefault:HEADERICON];
-            cell.nameLabel.frame = CGRectMake(70, 15, 75, 30);
+            cell.nameLabel.frame = CGRectMake(70, 15, 93, 30);
             cell.nameLabel.backgroundColor = [UIColor clearColor];
             
 //            NSString *name = [parentDict objectForKey:@"name"];
             
             cell.nameLabel.text = [parentDict objectForKey:@"name"];
-            cell.nameLabel.font = [UIFont systemFontOfSize:17];
+            cell.nameLabel.font = [UIFont systemFontOfSize:15];
             cell.nameLabel.textColor = TITLE_COLOR;
             
-            cell.contentLabel.frame = CGRectMake(SCREEN_WIDTH-100, 15, 80, 30);
+            cell.contentLabel.frame = CGRectMake(SCREEN_WIDTH-70, 15, 60, 30);
             cell.contentLabel.textAlignment = NSTextAlignmentRight;
             cell.contentLabel.textColor = TITLE_COLOR;
-            cell.contentLabel.text = [[parentDict objectForKey:@"title"] substringFromIndex:[[parentDict objectForKey:@"title"] rangeOfString:@"."].location+1];
+            NSRange range = [[parentDict objectForKey:@"title"] rangeOfString:@"."];
+            if (range.length > 0)
+            {
+                cell.contentLabel.text = [[parentDict objectForKey:@"title"] substringFromIndex:[[parentDict objectForKey:@"title"] rangeOfString:@"."].location+1];
+            }
+            else
+            {
+                cell.contentLabel.text = [parentDict objectForKey:@"title"];
+            }
             
             if ([[parentDict objectForKey:@"def"] intValue] == 1)
             {
@@ -604,7 +612,7 @@ UpdateUserSettingDelegate>
                 [cell.button1 setTitleColor:COMMENTCOLOR forState:UIControlStateNormal];
                 cell.button1.titleLabel.textAlignment = NSTextAlignmentLeft;
                 cell.button1.titleLabel.font = [UIFont systemFontOfSize:14];
-                cell.button1.frame = CGRectMake(145, 17, 65, 26);
+                cell.button1.frame = CGRectMake(175, 17, 65, 26);
                 cell.button1.backgroundColor = [UIColor clearColor];
                 haveDefaultParent = YES;
                 defaultParentY = 0;

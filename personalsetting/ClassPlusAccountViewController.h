@@ -9,4 +9,6 @@
 #import "XDContentViewController.h"
 
 @interface ClassPlusAccountViewController : XDContentViewController
+@property (nonatomic, strong) NSString *reg_method;
+@property (nonatomic, strong) NSString *banjia_number;
 @end

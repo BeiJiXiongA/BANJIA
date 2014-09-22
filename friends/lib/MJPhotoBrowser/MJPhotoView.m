@@ -186,6 +186,12 @@
 
 #pragma mark - UIScrollViewDelegate
 - (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView {
+//    DDLOG(@"_imageView frame %@",NSStringFromCGRect(_imageView.frame));
+//    CGFloat centerX = SCREEN_WIDTH/2;
+//    CGFloat centerY = SCREEN_HEIGHT/2;
+//    _imageView.center = CGPointMake(centerX, centerY);
+//    
+//    self.contentSize = _imageView.frame.size;
 	return _imageView;
 }
 

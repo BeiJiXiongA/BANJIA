@@ -59,10 +59,11 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 }
 +(BOOL)isPhoneNumber:(NSString *)numStr
 {
-    NSString *mobileNum = @"^1(3[0-9]|5[0-35-9]|8[025-9]|10|70)\\d{8}$";
+    NSString *mobileNum = @"^1(3[0-9]|5[0-35-9]|8[0-35-9]|10|7[70])\\d{8}$";
     NSPredicate *mobilePredicate = [NSPredicate predicateWithFormat:@"SELF MATCHES %@",mobileNum];
     return [mobilePredicate evaluateWithObject:numStr];
 }
+
 
 +(BOOL)isStudentsNumber:(NSString *)numStr
 {
@@ -162,7 +163,10 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     [ud removeObjectForKey:HEADERIMAGE];
     [ud removeObjectForKey:USERNAME];
     [ud removeObjectForKey:@"useropt"];
-    [ud setObject:[Tools phone_num] forKey:LAST_PHONENUM];
+    if ([[Tools phone_num] length] > 0)
+    {
+        [ud setObject:[Tools phone_num] forKey:LAST_PHONENUM];
+    }
     [ud removeObjectForKey:PHONENUM];
     [ud synchronize];
 }
@@ -191,7 +195,12 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 {
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     NSString *phone_num = [ud objectForKey:PHONENUM];
-    return phone_num;
+    if (phone_num)
+    {
+        return phone_num;
+    }
+    else
+        return @"";
 }
 
 +(NSString *)last_phone_num

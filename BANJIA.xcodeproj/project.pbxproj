@@ -41,7 +41,8 @@
 		3806883C19852B1E00529FE7 /* UIImageView+MJWebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 3806882119852B1E00529FE7 /* UIImageView+MJWebCache.m */; };
 		3806883D19852B1E00529FE7 /* UIImageView+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 3806882319852B1E00529FE7 /* UIImageView+WebCache.m */; };
 		3810306B1929B29100B92F15 /* 3100.png in Resources */ = {isa = PBXBuildFile; fileRef = 3810306A1929B29100B92F15 /* 3100.png */; };
-		38112B9219C297E30043DF8E /* defaultparenttip@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38112B9119C297E30043DF8E /* defaultparenttip@2x.png */; };
+		3810930819CF12AA0049DE68 /* CheckTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 3810930719CF12AA0049DE68 /* CheckTools.m */; };
+		3810930A19CFE2DF0049DE68 /* defaultparenttip@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3810930919CFE2DF0049DE68 /* defaultparenttip@2x.png */; };
 		38112B9419C3CAF90043DF8E /* weichat@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38112B9319C3CAF90043DF8E /* weichat@2x.png */; };
 		38157D3518FE0EEF0094C3EF /* headerbg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38157D3418FE0EEF0094C3EF /* headerbg@2x.png */; };
 		38157D3718FE0F2B0094C3EF /* headericon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38157D3618FE0F2B0094C3EF /* headericon@2x.png */; };
@@ -661,7 +662,9 @@
 		3806882219852B1E00529FE7 /* UIImageView+WebCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImageView+WebCache.h"; sourceTree = "<group>"; };
 		3806882319852B1E00529FE7 /* UIImageView+WebCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImageView+WebCache.m"; sourceTree = "<group>"; };
 		3810306A1929B29100B92F15 /* 3100.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 3100.png; sourceTree = "<group>"; };
-		38112B9119C297E30043DF8E /* defaultparenttip@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "defaultparenttip@2x.png"; sourceTree = "<group>"; };
+		3810930619CF12AA0049DE68 /* CheckTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CheckTools.h; sourceTree = "<group>"; };
+		3810930719CF12AA0049DE68 /* CheckTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CheckTools.m; sourceTree = "<group>"; };
+		3810930919CFE2DF0049DE68 /* defaultparenttip@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "defaultparenttip@2x.png"; sourceTree = "<group>"; };
 		38112B9319C3CAF90043DF8E /* weichat@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "weichat@2x.png"; sourceTree = "<group>"; };
 		38157D3418FE0EEF0094C3EF /* headerbg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "headerbg@2x.png"; sourceTree = "<group>"; };
 		38157D3618FE0F2B0094C3EF /* headericon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "headericon@2x.png"; sourceTree = "<group>"; };
@@ -1694,7 +1697,7 @@
 		382E9E5A19A77AE3002979D9 /* tips */ = {
 			isa = PBXGroup;
 			children = (
-				38112B9119C297E30043DF8E /* defaultparenttip@2x.png */,
+				3810930919CFE2DF0049DE68 /* defaultparenttip@2x.png */,
 				3800988D19B40DD4009E7B69 /* Refresh.png */,
 				3800988B19B40C9E009E7B69 /* refresh@2x.png */,
 				382E9E6919A77E32002979D9 /* classmembertip6@2x.png */,
@@ -1834,6 +1837,8 @@
 			children = (
 				3856ADFD19A6C3A90078CFCA /* EmptyTools.h */,
 				3856ADFE19A6C3A90078CFCA /* EmptyTools.m */,
+				3810930619CF12AA0049DE68 /* CheckTools.h */,
+				3810930719CF12AA0049DE68 /* CheckTools.m */,
 			);
 			path = tools;
 			sourceTree = "<group>";
@@ -3349,6 +3354,7 @@
 				386B28AB1961387900499F79 /* release@2x.png in Resources */,
 				38F65921198F363C00B553D9 /* searchbarbg@2x.png in Resources */,
 				38AD6CD418EF04050065A5F2 /* bg_bor_red.png in Resources */,
+				3810930A19CFE2DF0049DE68 /* defaultparenttip@2x.png in Resources */,
 				38F69BF81960449F00C7D5CA /* FillInfo2ViewController.xib in Resources */,
 				38282D5219889F350087018A /* defaultheader@2x.png in Resources */,
 				38AD6CAC18EF04050065A5F2 /* btn_bg_green@2x.png in Resources */,
@@ -3372,7 +3378,6 @@
 				38F69B9A195EAC8D00C7D5CA /* publish@2x.png in Resources */,
 				3891064E1996554E009B73B0 /* qr@2x.png in Resources */,
 				3842D86E194BE5F700ADBD6B /* icon_checked@2x.png in Resources */,
-				38112B9219C297E30043DF8E /* defaultparenttip@2x.png in Resources */,
 				38A24C13197C030E00C718BA /* icon_take_pic@2x.png in Resources */,
 				387D32D0194547C8006AE1C2 /* renrenicon.png in Resources */,
 				382E9E7019A77E32002979D9 /* classmembertip6@2x.png in Resources */,
@@ -3721,6 +3726,7 @@
 				3893933A18EEF53D0014F169 /* CreateClassViewController.m in Sources */,
 				3893923C18EEF1A30014F169 /* AGImagePickerController.m in Sources */,
 				3893924518EEF1A30014F169 /* UITextField+AKNumericFormatter.m in Sources */,
+				3810930819CF12AA0049DE68 /* CheckTools.m in Sources */,
 				38AE045719A31A1900F90B79 /* AFHTTPRequestOperation.m in Sources */,
 				3893934D18EEF5440014F169 /* MessageCell.m in Sources */,
 				38B24028195BC782008D2DF4 /* SearchClassViewController.m in Sources */,

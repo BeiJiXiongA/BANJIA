@@ -121,7 +121,7 @@ UITableViewDelegate>
     classLabel.layer.cornerRadius = 5;
     classLabel.clipsToBounds = YES;
     classLabel.font = [UIFont systemFontOfSize:18];
-    classLabel.textColor = CONTENTCOLOR;
+    classLabel.textColor = TITLE_COLOR;
     [self.bgView addSubview:classLabel];
     
     classNameTextField = [[MyTextField alloc] initWithFrame:CGRectMake(103, classLabel.frame.origin.y+6.2, SCREEN_WIDTH-127, 30)];
@@ -130,7 +130,7 @@ UITableViewDelegate>
     classNameTextField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
     classNameTextField.backgroundColor = [UIColor whiteColor];
     classNameTextField.textAlignment = NSTextAlignmentRight;
-    classNameTextField.textColor = CONTENTCOLOR;
+    classNameTextField.textColor = TITLE_COLOR;
     classNameTextField.delegate = self;
     classNameTextField.background= nil;
     classNameTextField.placeholder = @"班级名称";
