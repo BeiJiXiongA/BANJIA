@@ -132,7 +132,7 @@ UpdateUserSettingDelegate>
         }
         if (![[parentDict objectForKey:@"img_icon"] isEqual:[NSNull null]])
         {
-            headerImageUrl = [parentDict objectForKey:@"img_icon"];
+            headerImg = [parentDict objectForKey:@"img_icon"];
         }
         if (![[parentDict objectForKey:@"birth"] isEqual:[NSNull null]])
         {
@@ -296,14 +296,18 @@ UpdateUserSettingDelegate>
         [cell.bgImageView setImage:[UIImage imageNamed:@"toppic"]];
         
         cell.headerImageView.frame = CGRectMake(15, BGIMAGEHEIGHT-DetailHeaderHeight-15, DetailHeaderHeight, DetailHeaderHeight);
-        if ([headerImageUrl isEqualToString:HEADERICON])
+        if ([headerImg length] > 0)
         {
-            [cell.headerImageView setImage:[UIImage imageNamed:HEADERICON]];
+            [Tools fillImageView:cell.headerImageView withImageFromURL:headerImg imageWidth:106 andDefault:HEADERICON];
         }
         else
         {
-            [Tools fillImageView:cell.headerImageView withImageFromURL:headerImageUrl andDefault:HEADERICON];
+            [cell.headerImageView setImage:[UIImage imageNamed:HEADERICON]];
         }
+        
+        UITapGestureRecognizer *headerTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(headerTap:)];
+        cell.headerImageView.userInteractionEnabled = YES;
+        [cell.headerImageView addGestureRecognizer:headerTap];
         
         cell.headerImageView.layer.cornerRadius = 5;
         cell.headerImageView.clipsToBounds = YES;
@@ -320,7 +324,10 @@ UpdateUserSettingDelegate>
         [cell.sexureImageView setImage:[UIImage imageNamed:sexureimage]];
         
         NSMutableString *titlestr = [[NSMutableString alloc] initWithString:title];
-        [titlestr replaceCharactersInRange:[title rangeOfString:@"."] withString:@"的"];
+        if ([titlestr rangeOfString:@"."].length > 0)
+        {
+            [titlestr replaceCharactersInRange:[title rangeOfString:@"."] withString:@"的"];
+        }
         
         cell.contentLabel.frame = CGRectMake(DetailHeaderHeight+30, cell.headerImageView.frame.origin.y+35, 200, 20);
         cell.contentLabel.text = titlestr;
@@ -426,6 +433,25 @@ UpdateUserSettingDelegate>
         }
     }
 }
+
+#pragma mark - 查看大头像
+-(void)headerTap:(UITapGestureRecognizer *)headerTap
+{
+    MJPhoto *photo = [[MJPhoto alloc] init];
+    if ([headerImg length] > 0 && ![headerImg isEqualToString:HEADERICON])
+    {
+        photo.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",IMAGEURL,headerImg]];
+    }
+    else
+    {
+        photo.image = [UIImage imageNamed:HEADERICON];
+    }
+    photo.srcImageView = (UIImageView *)headerTap.view;
+    MJPhotoBrowser *photoBroser = [[MJPhotoBrowser alloc] init];
+    photoBroser.photos = [NSArray arrayWithObject:photo];
+    [photoBroser show];
+}
+
 
 -(void)callToUser
 {
@@ -827,11 +853,11 @@ UpdateUserSettingDelegate>
                         
                         if ([dict objectForKey:@"img_icon"])
                         {
-                            headerImageUrl = [dict objectForKey:@"img_icon"];
+                            headerImg = [dict objectForKey:@"img_icon"];
                         }
                         else
                         {
-                            headerImageUrl = HEADERICON;
+                            headerImg = HEADERICON;
                         }
                     }
                     

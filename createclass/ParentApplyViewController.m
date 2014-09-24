@@ -103,6 +103,8 @@ UIActionSheetDelegate>
     UILabel *selectStuNameLabel;
     UILabel *selectStuMarkLabel;
     UIButton *selectStuButton;
+    
+    NSString *getCodePhoneNumber;
 
 }
 @end
@@ -131,6 +133,8 @@ UIActionSheetDelegate>
     self.titleLabel.text = @"家长申请加入";
     db = [[OperatDB alloc] init];
     
+    getCodePhoneNumber = @"";
+    
     schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     className = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
@@ -152,7 +156,16 @@ UIActionSheetDelegate>
     tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapEvent)];
     mainScrollView.userInteractionEnabled = YES;
     
-    NSString *schollInfo = [NSString stringWithFormat:@"您希望加入%@-%@",schoolName,className];
+    NSString *schollInfo;
+    if(schoolName && [schoolName length] > 0 && ![schoolName isEqualToString:@"未指定学校"])
+    {
+        schollInfo = [NSString stringWithFormat:@"您希望加入%@-%@",schoolName,className];
+    }
+    else
+    {
+        schollInfo = [NSString stringWithFormat:@"您希望加入%@",className];;
+    }
+    
     CGSize size = [Tools getSizeWithString:schollInfo andWidth:SCREEN_WIDTH-40 andFont:[UIFont systemFontOfSize:18]];
     
     schoolInfoLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 20, SCREEN_WIDTH-40, size.height)];
@@ -440,7 +453,7 @@ UIActionSheetDelegate>
     [studentButton setTitle:@"提交" forState:UIControlStateNormal];
     [phoneNumView addSubview:studentButton];
     
-    if ([Tools phone_num] > 0)
+    if ([[Tools phone_num] length] > 0)
     {
         studentButton.frame = CGRectMake(38, tipLabel.frame.size.height + tipLabel.frame.origin.y+15, SCREEN_WIDTH-76, 40);
     }
@@ -617,6 +630,7 @@ UIActionSheetDelegate>
             {
                 //                codeStr = [responseDict objectForKey:@"data"];
                 codeTextField.text = [responseDict objectForKey:@"data"];
+                getCodePhoneNumber = phoneNumTextfield.text;
                 
             }
             else
@@ -653,13 +667,16 @@ UIActionSheetDelegate>
         [Tools showAlertView:@"请输入正确的手机号码！" delegateViewController:nil];
         return ;
     }
-    
     if ([codeTextField.text length] == 0)
     {
         [Tools showAlertView:@"请您填写验证码" delegateViewController:nil];
         return ;
     }
-    
+    if ([getCodePhoneNumber length] > 0 && ![phoneNumTextfield.text isEqualToString:getCodePhoneNumber])
+    {
+        [Tools showAlertView:@"手机号不正确" delegateViewController:nil];
+        return ;
+    }
     
     if ([Tools NetworkReachable])
     {

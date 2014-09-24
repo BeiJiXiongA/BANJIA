@@ -186,13 +186,37 @@
 
 #pragma mark - UIScrollViewDelegate
 - (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView {
-//    DDLOG(@"_imageView frame %@",NSStringFromCGRect(_imageView.frame));
+    
 //    CGFloat centerX = SCREEN_WIDTH/2;
 //    CGFloat centerY = SCREEN_HEIGHT/2;
 //    _imageView.center = CGPointMake(centerX, centerY);
-//    
 //    self.contentSize = _imageView.frame.size;
+    
 	return _imageView;
+}
+
+- (void)scrollViewDidZoom:(UIScrollView *)scrollView
+{
+    
+    CGSize boundsSize = scrollView.bounds.size;
+    CGRect imgFrame = _imageView.frame;
+    CGSize contentSize = scrollView.contentSize;
+    
+    CGPoint centerPoint = CGPointMake(contentSize.width/2, contentSize.height/2);
+    
+    // center horizontally
+    if (imgFrame.size.width <= boundsSize.width)
+    {
+        centerPoint.x = boundsSize.width/2;
+    }
+    
+    // center vertically
+    if (imgFrame.size.height <= boundsSize.height)
+    {
+        centerPoint.y = boundsSize.height/2;
+    }
+    
+    _imageView.center = centerPoint;
 }
 
 #pragma mark - 手势处理

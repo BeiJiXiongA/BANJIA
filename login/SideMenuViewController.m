@@ -220,69 +220,40 @@
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     selectIndex = indexPath.row;
-    NSString *classStr = NSStringFromClass([[(KKNavigationController *)[self.sideMenuController contentController] topViewController] class]);
     
     if (indexPath.row == HOMETAG-2000)
     {
-        if (![classStr isEqualToString:@"HomeViewController"])
-        {
-            [self.sideMenuController setContentController:homeNav animted:NO];
-        }
-        else
-        {
-            [home viewWillAppear:NO];
-        }
-        [home getData];
+        home = [[HomeViewController alloc] init];
+        homeNav = [[KKNavigationController alloc] initWithRootViewController:home];
+        [self.sideMenuController setContentController:homeNav animted:NO];
     }
     else if(indexPath.row == MYCLASSTAG-2000)
     {
-        if (![classStr isEqualToString:@"MyClassesViewController"])
-        {
-            [self.sideMenuController setContentController:myClassesNav animted:NO];
-        }
-        else
-        {
-            [myClasses viewWillAppear:NO];
-        }
-        [myClasses getData];
+        myClasses = [[MyClassesViewController alloc] init];
+        myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClasses];
+        [self.sideMenuController setContentController:myClassesNav animted:NO];
     }
     else if(indexPath.row == FRIENDSTAG-2000)
     {
-        if (![classStr isEqualToString:@"FriendsViewController"])
-        {
-            [self.sideMenuController setContentController:friendsNav animted:NO];
-        }
-        else
-        {
-            [friends viewWillAppear:NO];
-        }
-        [friends getData];
+        friends = [[FriendsViewController alloc] init];
+        friendsNav = [[KKNavigationController alloc] initWithRootViewController:friends];
+        [self.sideMenuController setContentController:friendsNav animted:NO];
+        
     }
     else if(indexPath.row == MESSAGETAG-2000)
     {
-        if (![classStr isEqualToString:@"MessageViewController"])
-        {
-            [self.sideMenuController setContentController:messageNav animted:NO];
-        }
-        else
-        {
-            [message viewWillAppear:NO];
-        }
-        [message getChatList];
+        message = [[MessageViewController alloc] init];
+        messageNav = [[KKNavigationController alloc] initWithRootViewController:message];
+        [self.sideMenuController setContentController:messageNav animted:NO];
     }
     else if(indexPath.row == PERSONTAG-2000)
     {
-        if (![classStr isEqualToString:@"PersonalSettingViewController"])
-        {
-            [self.sideMenuController setContentController:personSettingNav animted:NO];
-        }
-        else
-        {
-            [personalSetting viewWillAppear:NO];
-        }
-        [personalSetting getData];
+        personalSetting = [[PersonalSettingViewController alloc] init];
+        personSettingNav = [[KKNavigationController alloc] initWithRootViewController:personalSetting];
+        [self.sideMenuController setContentController:personSettingNav animted:NO];
     }
-    [self.sideMenuController hideMenuAnimated:NO];
+
+//    [self.sideMenuController hideMenuAnimated:NO];
     [tableView reloadData];
 }
 
@@ -348,12 +319,8 @@
 
 -(NSInteger)haveNewChat
 {
-    NSMutableArray *array = [db findSetWithDictionary:@{@"readed":@"0",@"userid":[Tools user_id]} andTableName:CHATTABLE];
-    if ([array count] > 0)
-    {
-        return [array count];
-    }
-    else if([[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue]>0)
+    
+    if([[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue]>0)
     {
         return [[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue];
     }
@@ -362,7 +329,6 @@
 -(NSInteger)haveNewClass
 {
     NSString *classNum = [[NSUserDefaults standardUserDefaults] objectForKey:NewClassNum];
-    
     return [classNum intValue];
 }
 -(BOOL)haveNewFriendApply
@@ -373,9 +339,7 @@
     {
         return ucfriendNum;
     }
-    
-    NSArray *ucfriends = [db findSetWithDictionary:@{@"uid":[Tools user_id],@"checked":@"0"} andTableName:FRIENDSTABLE];
-    return [ucfriends count];
+    return 0;
 }
 
 @end

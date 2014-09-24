@@ -333,8 +333,6 @@ extern NSString *CTSettingCopyMyPhoneNumber();
         [postDataStr insertString:[NSString stringWithFormat:@"%@:%@&,",key,[parameterDict objectForKey:key]] atIndex:[postDataStr length]];
     }
     [postDataStr replaceCharactersInRange:NSMakeRange([postDataStr length]-1, 1) withString:@"}"];
-//    NSString * postStr = [postDataStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    DDLOG(@"postStr %@",postDataStr);
     NSURL *url = [NSURL URLWithString:hostUrl];
     ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
     NSMutableData *postData = [NSMutableData dataWithData:[postDataStr dataUsingEncoding:NSUTF8StringEncoding]];
@@ -377,7 +375,6 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     }
     NSString *tmpStr = [postDataStr substringToIndex:[postDataStr length]-1];
     NSString * postStr = [tmpStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    DDLOG(@"postStr %@",postStr);
     NSURL *url = [NSURL URLWithString:postStr];
     ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
     [request setTimeOutSeconds:12];
@@ -387,17 +384,16 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 + (ASIFormDataRequest*)postRequestWithDict:(NSDictionary *)parameterDict API:(NSString *)subUrl
 {
     NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",HOST_URL,subUrl]];
-    DDLOG(@"url=%@",url);
     NSMutableString *postDataStr = [[NSMutableString alloc] initWithCapacity:0];
     ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:url];
-    
+    DDLOG(@"%@",url);
     [request setRequestMethod:@"POST"];
     [request setTimeOutSeconds:12];
     [postDataStr insertString:[NSString stringWithFormat:@"%@%@?",HOST_URL,subUrl] atIndex:[postDataStr length]];
     for (id keys in parameterDict)
     {
         [request setPostValue:[parameterDict objectForKey:keys] forKey:keys];
-        DDLOG(@"post date &%@=%@",keys,[parameterDict objectForKey:keys]);
+        DDLOG(@"%@=%@",keys,[parameterDict objectForKey:keys]);
     }
     
     return request;
@@ -409,18 +405,15 @@ extern NSString *CTSettingCopyMyPhoneNumber();
                                                                       [NSString stringWithFormat:@"%@%@",HOST_URL,subUrl]]];
     [request setRequestMethod:@"POST"];
     [request setTimeOutSeconds:12];
-    DDLOG(@"url=%@",request.url);
     for (NSString *key in pareDict.allKeys)
     {
         [request setPostValue:[pareDict objectForKey:key] forKey:key];
-        DDLOG(@"post date &%@=%@",key,[pareDict objectForKey:key]);
     }
     
     for (int i=0; i<[imageArray count]; ++i)
     {
         UIImage *image = [imageArray objectAtIndex:i];
         NSData *imageData = UIImagePNGRepresentation(image);
-        DDLOG(@"%@",NSStringFromCGSize(image.size));
         [request addData:imageData withFileName:[NSString stringWithFormat:@"%d.png",i+1] andContentType:@"image/png" forKey:[NSString stringWithFormat:@"img%@",i==0?@"":[NSString stringWithFormat:@"%d",i+1]]];
     }
     return request;
@@ -432,18 +425,15 @@ extern NSString *CTSettingCopyMyPhoneNumber();
                                                                       [NSString stringWithFormat:@"%@%@",HOST_URL,subUrl]]];
     [request setRequestMethod:@"POST"];
     [request setTimeOutSeconds:20];
-    DDLOG(@"url=%@",request.url);
     for (NSString *key in pareDict.allKeys)
     {
         [request setPostValue:[pareDict objectForKey:key] forKey:key];
-        DDLOG(@"post date &%@=%@",key,[pareDict objectForKey:key]);
     }
     
     for (int i=0; i<[filesArray count]; ++i)
     {
         UIImage *image = [filesArray objectAtIndex:i];
-        NSData *imageData = UIImagePNGRepresentation(image);
-        DDLOG(@"%@",NSStringFromCGSize(image.size));
+        NSData *imageData = UIImageJPEGRepresentation(image, 0.8f);
         [request addData:imageData withFileName:[NSString stringWithFormat:@"%d@%.0fX%.0f.png",i+1,image.size.width,image.size.height] andContentType:@"file" forKey:[NSString stringWithFormat:@"file%@",i==0?@"":[NSString stringWithFormat:@"%d",i+1]]];
     }
     return request;
@@ -460,18 +450,14 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     [request setRequestMethod:@"POST"];
     
     [request setTimeOutSeconds:12];
-    DDLOG(@"url=%@",request.url);
     for (NSString *key in pareDict.allKeys)
     {
         [request setPostValue:[pareDict objectForKey:key] forKey:key];
-        DDLOG(@"post date &%@=%@",key,[pareDict objectForKey:key]);
     }
     
     for (int i=0; i<[filesArray count]; ++i)
     {
         NSData *data = [NSData dataWithContentsOfFile:[filesArray objectAtIndex:i]];
-        DDLOG(@"%d",data.length);
-//        [request addData:data forKey:[NSString stringWithFormat:@"file%@",i==0?@"":[NSString stringWithFormat:@"%d",i+1]]];
         [request addData:data withFileName:[NSString stringWithFormat:@"%d.amr",i+1] andContentType:@"audio/amr" forKey:[NSString stringWithFormat:@"file%@",i==0?@"":[NSString stringWithFormat:@"%d",i+1]]];
     }
     return request;
@@ -487,7 +473,6 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     }
     NSString *tmpStr = [postDataStr substringToIndex:[postDataStr length]-1];
     NSString * postStr = [tmpStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    DDLOG(@"postStr %@",postStr);
     return postStr;
 }
 #pragma mark - 提示
@@ -529,19 +514,6 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     }
     return CGRectMake((SCREEN_WIDTH-displayWidth)/2 ,(SCREEN_HEIGHT-displayHeight)/2 ,displayWidth, displayHeight);
 }
-
-//-(CGSize)getSizeWithString:(NSString *)content andWidth:(CGFloat)width andFont:(UIFont *)font
-//{
-//    if (font == nil)
-//    {
-//        font = [UIFont systemFontOfSize:14];
-//    }
-//    
-//}
-
-
-
-//    }
 
 + (UIImage *)thumbnailWithImageWithoutScale:(UIImage *)image size:(CGSize)asize
 {
@@ -678,23 +650,29 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 
 +(void)dealRequestError:(NSDictionary *)errorDict fromViewController:(XDContentViewController *)viewController
 {
-    if ([[[[errorDict objectForKey:@"message"] allKeys] firstObject] isEqualToString:@"NO_AUTH"])
+    if (errorDict)
     {
-        if ([self user_id] == 0)
+        if ([[[[errorDict objectForKey:@"message"] allKeys] firstObject] isEqualToString:@"NO_AUTH"])
         {
+            if ([self user_id] == 0)
+            {
+                return ;
+            }
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"logout" object:nil];
+            //        [Tools showAlertView:[[[errorDict objectForKey:@"message"] allValues] firstObject] delegateViewController:viewController];
             return ;
         }
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"logout" object:nil];
-//        [Tools showAlertView:[[[errorDict objectForKey:@"message"] allValues] firstObject] delegateViewController:viewController];
-        return ;
+        else if([[[[errorDict objectForKey:@"message"] allKeys] firstObject] isEqualToString:@"PHONE_NUM_EXITS"])
+        {
+            [Tools showAlertView:@"该手机号已经注册" delegateViewController:viewController];
+            return ;
+        }
+        [Tools showAlertView:[[[errorDict objectForKey:@"message"] allValues] firstObject] delegateViewController:viewController];
     }
-    else if([[[[errorDict objectForKey:@"message"] allKeys] firstObject] isEqualToString:@"PHONE_NUM_EXITS"])
+    else
     {
-        [Tools showAlertView:@"该手机号已经注册" delegateViewController:viewController];
-        return ;
+        [Tools showAlertView:@"数据错误" delegateViewController:viewController];
     }
-    [Tools showAlertView:[[[errorDict objectForKey:@"message"] allValues] firstObject] delegateViewController:viewController];
-
 }
 
 #pragma mark - aboutSort

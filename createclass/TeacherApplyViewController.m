@@ -93,10 +93,20 @@ UIScrollViewDelegate>
 //    mainScrollView.userInteractionEnabled = YES;
 //    [mainScrollView addGestureRecognizer:scTap];
     
+    NSString *schollInfo;
+    if(schoolName && [schoolName length] > 0 && ![schoolName isEqualToString:@"未指定学校"])
+    {
+        schollInfo = [NSString stringWithFormat:@"您希望加入%@-%@",schoolName,className];
+    }
+    else
+    {
+        schollInfo = [NSString stringWithFormat:@"您希望加入%@",className];;
+    }
+    
     schoolInfoLabel = [[UILabel alloc] initWithFrame:CGRectMake(30, 44, SCREEN_WIDTH-60, 90)];
     schoolInfoLabel.numberOfLines = 2;
     schoolInfoLabel.font = [UIFont systemFontOfSize:18];
-    schoolInfoLabel.text = [NSString stringWithFormat:@"您希望加入%@-%@",schoolName,className];
+    schoolInfoLabel.text = schollInfo;
     schoolInfoLabel.lineBreakMode = NSLineBreakByWordWrapping;
     schoolInfoLabel.backgroundColor = [UIColor clearColor];
     schoolInfoLabel.textColor = TITLE_COLOR;

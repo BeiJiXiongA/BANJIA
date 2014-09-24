@@ -51,7 +51,15 @@
     label.font = [UIFont systemFontOfSize:18];
     label.lineBreakMode = NSLineBreakByWordWrapping;
     label.textAlignment = NSTextAlignmentCenter;
-    label.text = [NSString stringWithFormat:@"%@，您希望加入%@-%@，您的身份是？",[Tools user_name],schoolName,className];
+    if(schoolName && [schoolName length] > 0 && ![schoolName isEqualToString:@"未指定学校"])
+    {
+        label.text = [NSString stringWithFormat:@"%@，您希望加入%@-%@，您的身份是？",[Tools user_name],schoolName,className];
+    }
+    else
+    {
+        label.text = [NSString stringWithFormat:@"%@，您希望加入%@，您的身份是？",[Tools user_name],className];
+    }
+    
     [self.bgView addSubview:label];
     
     UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];

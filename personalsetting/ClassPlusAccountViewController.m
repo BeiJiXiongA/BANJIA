@@ -34,9 +34,9 @@
     
     self.titleLabel.text = @"班家账号";
     
-    array = [[NSArray alloc] initWithObjects:@"班家账号",@"注册方式",@"修改密码", nil];
+    array = [[NSArray alloc] initWithObjects:@"班家账号",@"注册方式", nil];
     
-    UITableView *accountTableView = [[UITableView alloc] initWithFrame:CGRectMake(20, UI_NAVIGATION_BAR_HEIGHT+30, SCREEN_WIDTH-40, 100) style:UITableViewStylePlain];
+    UITableView *accountTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT+30, SCREEN_WIDTH, 80) style:UITableViewStylePlain];
     accountTableView.delegate = self;
     accountTableView.dataSource = self;
     accountTableView.tableHeaderView = nil;
@@ -61,36 +61,28 @@
 #pragma mark - tableView
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return 2;
+    return 1;
 }
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    if (section == 0)
-    {
-        return 1;
-    }
-    else if(section == 1)
-    {
-        return 1;
-    }
-    return 0;
+    return 2;
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
-    return section==1?20:0;
+    return 0;
 }
-
--(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
-{
-    UILabel *headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 5, SCREEN_WIDTH, 10)];
-    headerLabel.backgroundColor = self.bgView.backgroundColor;
-    return headerLabel;
-}
-
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return 40;
+    if (indexPath.row == 0 || indexPath.row == 1)
+    {
+        return 40;
+    }
+    else if (indexPath.row == 2 && [[Tools phone_num] length] > 0)
+    {
+        return 40;
+    }
+    return 0;
 }
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -102,48 +94,58 @@
         cell = [[PersonalSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:classInfoCell];
     }
     cell.headerImageView.hidden = YES;
-    cell.nameLabel.font = [UIFont systemFontOfSize:15];
-    cell.objectsLabel.font = [UIFont systemFontOfSize:15];
+    cell.nameLabel.font = [UIFont systemFontOfSize:16];
+    cell.objectsLabel.font = [UIFont systemFontOfSize:16];
     cell.nameLabel.textAlignment = NSTextAlignmentLeft;
     
-    cell.nameLabel.frame = CGRectMake(10, 0, SCREEN_WIDTH-40, 40);
+    cell.nameLabel.frame = CGRectMake(15, 0, SCREEN_WIDTH-40, 40);
     cell.nameLabel.backgroundColor = [UIColor whiteColor];
     cell.nameLabel.layer.cornerRadius = 5;
     cell.nameLabel.clipsToBounds = YES;
-    cell.nameLabel.textColor = COMMENTCOLOR;
+    cell.nameLabel.textColor = TITLE_COLOR;
     
-    cell.objectsLabel.textColor = CONTENTCOLOR;
-    cell.objectsLabel.frame = CGRectMake(100, 10, SCREEN_WIDTH-150, 20);
+    cell.objectsLabel.textColor = TITLE_COLOR;
+    cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-115, 10, 100, 20);
     cell.objectsLabel.backgroundColor = [UIColor whiteColor];
     cell.objectsLabel.textAlignment = NSTextAlignmentRight;
-    cell.nameLabel.text = [NSString stringWithFormat:@"    %@",[array objectAtIndex:indexPath.section *2+indexPath.row]];
-    cell.accessoryView = nil;
-    if (indexPath.section == 0)
+    
+    if (indexPath.row == 0)
     {
-        if (indexPath.row == 0)
-        {
-            cell.objectsLabel.text = [Tools phone_num];
-        }
-        else if(indexPath.row == 1)
-        {
-            cell.objectsLabel.text = @"手机注册";
-        }
-        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        cell.nameLabel.text = @"班家账号";
+        cell.objectsLabel.text = banjia_number;
     }
-    else if(indexPath.section == 1)
+    else if(indexPath.row == 1)
     {
-        if (indexPath.row == 0)
+        cell.nameLabel.text = @"注册方式";
+        if ([reg_method isEqualToString:@"phone"])
         {
-            UIImageView *accImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"discovery_arrow"]];
-            accImageView.backgroundColor = [UIColor whiteColor];
-            cell.accessoryView = accImageView;
-            cell.accessoryView.backgroundColor = [UIColor whiteColor];
-            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 55.5, 10, 15)];
+            cell.objectsLabel.text = @"手机";
         }
-        cell.selectionStyle = UITableViewCellSelectionStyleGray;
+        else if([reg_method isEqualToString:@"sw"])
+        {
+            cell.objectsLabel.text = @"新浪微博";
+        }
+        else if ([reg_method isEqualToString:@"qq"])
+        {
+            cell.objectsLabel.text = @"QQ";
+        }
+        else if ([reg_method isEqualToString:@"rr"])
+        {
+            cell.objectsLabel.text = @"人人";
+        }
     }
-    cell.backgroundColor = self.bgView.backgroundColor;
-    cell.contentView.backgroundColor = self.bgView.backgroundColor;
+    else
+    {
+        cell.nameLabel.text = @"";
+        cell.objectsLabel.text = @"";
+    }
+    
+    CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+    cell.lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+    cell.lineImageView.backgroundColor = LineBackGroudColor;
+    cell.selectionStyle = UITableViewCellSelectionStyleGray;
+    cell.backgroundColor = [UIColor whiteColor];
+    cell.contentView.backgroundColor = [UIColor whiteColor];
     return cell;
 }
 

@@ -21,4 +21,6 @@
 
 #define NAMEFONT   [UIFont systemFontOfSize:16]
 
+#define DONGTAI_CONTENT_FONT [UIFont systemFontOfSize:14]
+
 #endif

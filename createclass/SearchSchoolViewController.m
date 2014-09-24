@@ -509,7 +509,7 @@ CLLocationManagerDelegate>
 {
     [((MyTextField *)[searchSchoolTableView viewWithTag:3333]) resignFirstResponder];
     
-    if ([tmpDityDict count] <= 0)
+    if (!cityId || [cityId length] == 0)
     {
         [Tools showAlertView:@"请选择城市" delegateViewController:nil];
         return ;
@@ -535,7 +535,7 @@ CLLocationManagerDelegate>
                                                                       @"r_id":areaId,
                                                                       @"level":schoollevelId,
                                                                       @"name":name,
-                                                                      @"pr_id":[tmpDityDict objectForKey:@"cityid"]
+                                                                      @"pr_id":cityId
                                                                       } API:SEARCHSCHOOLBYCITY];
         
         [request setCompletionBlock:^{
@@ -552,7 +552,7 @@ CLLocationManagerDelegate>
                     schoolListViewController.schoolArray = [[responseDict objectForKey:@"data"] allValues];
                 }
                 schoolListViewController.areaId = areaId;
-                schoolListViewController.pr_Id = [tmpDityDict objectForKey:@"cityid"];
+                schoolListViewController.pr_Id = cityId;
                 schoolListViewController.name = name;
                 schoolListViewController.prname = cityname;
                 schoolListViewController.areaName = areaname;

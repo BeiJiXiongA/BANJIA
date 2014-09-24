@@ -48,7 +48,6 @@ UIActionSheetDelegate>
     NSString *classID;
     
     NSString *phoneNum;
-    NSString *headerImageUrl;
     NSString *bgImageUrl;
     NSString *name;
     NSString *qqnum;
@@ -136,7 +135,7 @@ UIActionSheetDelegate>
         }
         if (![[dict objectForKey:@"img_icon"] isEqual:[NSNull null]])
         {
-            headerImageUrl = [dict objectForKey:@"img_icon"];
+            headerImg = [dict objectForKey:@"img_icon"];
         }
         if (![[dict objectForKey:@"birth"] isEqual:[NSNull null]])
         {
@@ -302,14 +301,19 @@ UIActionSheetDelegate>
         [cell.bgImageView setImage:[UIImage imageNamed:@"toppic"]];
         
         cell.headerImageView.frame = CGRectMake(15, BGIMAGEHEIGHT-DetailHeaderHeight-15, DetailHeaderHeight, DetailHeaderHeight);
-        if ([headerImageUrl isEqualToString:HEADERICON])
+        
+        if ([headerImg length] > 0)
         {
-            [cell.headerImageView setImage:[UIImage imageNamed:HEADERICON]];
+            [Tools fillImageView:cell.headerImageView withImageFromURL:headerImg imageWidth:106 andDefault:HEADERICON];
         }
         else
         {
-            [Tools fillImageView:cell.headerImageView withImageFromURL:headerImageUrl andDefault:HEADERICON];
+            [cell.headerImageView setImage:[UIImage imageNamed:HEADERICON]];
         }
+        
+        UITapGestureRecognizer *headerTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(headerTap:)];
+        cell.headerImageView.userInteractionEnabled = YES;
+        [cell.headerImageView addGestureRecognizer:headerTap];
         
         cell.headerImageView.layer.cornerRadius = 5;
         cell.headerImageView.clipsToBounds = YES;
@@ -462,6 +466,24 @@ UIActionSheetDelegate>
             }
         }
     }
+}
+
+#pragma mark - 查看大头像
+-(void)headerTap:(UITapGestureRecognizer *)headerTap
+{
+    MJPhoto *photo = [[MJPhoto alloc] init];
+    if ([headerImg length] > 0 && ![headerImg isEqualToString:HEADERICON])
+    {
+        photo.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",IMAGEURL,headerImg]];
+    }
+    else
+    {
+        photo.image = [UIImage imageNamed:HEADERICON];
+    }
+    photo.srcImageView = (UIImageView *)headerTap.view;
+    MJPhotoBrowser *photoBroser = [[MJPhotoBrowser alloc] init];
+    photoBroser.photos = [NSArray arrayWithObject:photo];
+    [photoBroser show];
 }
 
 -(void)callToUser
@@ -802,11 +824,11 @@ UIActionSheetDelegate>
                         
                         if ([[dict objectForKey:@"img_icon"] isKindOfClass:[NSString class]])
                         {
-                            headerImageUrl = [dict objectForKey:@"img_icon"];
+                            headerImg = [dict objectForKey:@"img_icon"];
                         }
                         else
                         {
-                            headerImageUrl = HEADERICON;
+                            headerImg = HEADERICON;
                         }
                     }
                     

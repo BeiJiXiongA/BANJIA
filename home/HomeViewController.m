@@ -444,8 +444,8 @@ headerDelegate>
         [tipImageView removeFromSuperview];
         tipView.hidden = NO;
         moreButton.hidden = NO;
-        self.unReadLabel.hidden = NO;
         [classTableView reloadData];
+        [self viewWillAppear:NO];
     }
 }
 
@@ -1447,11 +1447,11 @@ headerDelegate>
     }
     else if(section -1 == [noticeArray count] && [noticeArray count] > 0)
     {
-        return 30;
+        return 32;
     }
     else
     {
-        return 30;
+        return 32;
     }
     return 0;
 }
@@ -1479,12 +1479,12 @@ headerDelegate>
         headerLabel.text = @"    班级空间";
         headerLabel.font = [UIFont boldSystemFontOfSize:15];
         headerLabel.textColor = [UIColor whiteColor];
-        headerLabel.frame = CGRectMake(0, 0, SCREEN_WIDTH, 30);
+        headerLabel.frame = CGRectMake(0, 0, SCREEN_WIDTH, 32);
     }
     else if(section-1 > [noticeArray count])
     {
         
-        UIView *verticalLineView = [[UIView alloc] initWithFrame:CGRectMake(34.75, 0, 1.5, 30)];
+        UIView *verticalLineView = [[UIView alloc] initWithFrame:CGRectMake(34.75, 0, 1.5, 32)];
         verticalLineView.backgroundColor = UIColorFromRGB(0xe2e3e4);
         [headerView addSubview:verticalLineView];
         
@@ -1498,7 +1498,7 @@ headerDelegate>
         NSDictionary *groupDict = [groupDiaries objectAtIndex:section-[noticeArray count]-2];
         headerLabel.text = [groupDict objectForKey:@"date"];
         headerLabel.font = [UIFont systemFontOfSize:15];
-        headerLabel.frame = CGRectMake(50, 0, SCREEN_WIDTH, 30);
+        headerLabel.frame = CGRectMake(50, 0, SCREEN_WIDTH, 32);
         
     }
     [headerView addSubview:headerLabel];
@@ -1771,7 +1771,8 @@ headerDelegate>
         
         cell.headerImageView.backgroundColor = [UIColor clearColor];
         
-        [Tools fillImageView:cell.headerImageView withImageFromURL:[[dict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERBG];
+        [Tools fillImageView:cell.headerImageView withImageFromURL:[[dict objectForKey:@"by"] objectForKey:@"img_icon"] imageWidth:62 andDefault:HEADERICON];
+        
         cell.locationLabel.frame = CGRectMake(50, cell.headerImageView.frame.origin.y+cell.headerImageView.frame.size.height-LOCATIONLABELHEI+3, SCREEN_WIDTH-90, LOCATIONLABELHEI);
         if ([[dict objectForKey:@"detail"] objectForKey:@"add"] &&
             [[[dict objectForKey:@"detail"] objectForKey:@"add"] length] > 0)
@@ -1803,7 +1804,7 @@ headerDelegate>
             //有文字
             NSString *content = [[[dict objectForKey:@"detail"] objectForKey:@"content"] emojizedString];
             
-            CGSize contentSize = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-DongTaiHorizantolSpace*2-16 andFont:[UIFont systemFontOfSize:14]];
+            CGSize contentSize = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-DongTaiHorizantolSpace*2-16 andFont:DONGTAI_CONTENT_FONT];
             
             if (contentSize.height > 45)
             {

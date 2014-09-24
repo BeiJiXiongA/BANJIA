@@ -514,7 +514,7 @@ OperateFriends>
         cell.headerImageView.clipsToBounds = YES;
         
         cell.unreadedMsgLabel.hidden = YES;
-        [Tools fillImageView:cell.headerImageView withImageFromURL:[friendDict objectForKey:@"ficon"] andDefault:HEADERICON];
+        [Tools fillImageView:cell.headerImageView withImageFromURL:[friendDict objectForKey:@"ficon"] imageWidth:68 andDefault:HEADERICON];
         
         cell.memNameLabel.frame = CGRectMake(60, 10, 150, 30);
         cell.memNameLabel.text = [friendDict objectForKey:@"fname"];

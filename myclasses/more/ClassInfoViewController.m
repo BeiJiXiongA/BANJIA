@@ -50,6 +50,7 @@ SetClassInfoDel>
     NSString *schoolLevel;
     NSString *classNumber;
     NSString *regionStr;
+    NSString *joinYear;
     
     NSArray *schoolLevelArray;
     
@@ -222,16 +223,16 @@ SetClassInfoDel>
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return 7;
+    return 8;
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     
-    if (indexPath.row < 6)
+    if (indexPath.row < 7)
     {
         return 47;
     }
-    else if(indexPath.row == 6)
+    else if(indexPath.row == 7)
     {
         CGSize size = [Tools getSizeWithString:classInfo andWidth:SCREEN_WIDTH-150 andFont:[UIFont systemFontOfSize:16]];
         if ([classInfo length] > 0)
@@ -269,7 +270,7 @@ SetClassInfoDel>
     cell.lineImageView.backgroundColor = LineBackGroudColor;
     
     CGFloat left = 210;
-    if (indexPath.row < 6)
+    if (indexPath.row < 7)
     {
         cell.nameLabel.frame = CGRectMake(10, 10, 80, 27);
         if (indexPath.row == 0)
@@ -322,6 +323,22 @@ SetClassInfoDel>
         }
         else if(indexPath.row == 3)
         {
+            cell.nameLabel.text = @"入学年份";
+            cell.nameLabel.frame = CGRectMake(10, 10, 80, 27);
+            
+             cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-left, 10, 180, 27);
+            
+            if ([joinYear length] > 0)
+            {
+                cell.objectsLabel.text = joinYear;
+            }
+            else
+            {
+                cell.objectsLabel.text = @"未指定";
+            }
+        }
+        else if(indexPath.row == 4)
+        {
             cell.nameLabel.text = @"班级类型";
             cell.nameLabel.frame = CGRectMake(10, 10, 80, 27);
             
@@ -337,15 +354,23 @@ SetClassInfoDel>
             }
         }
         
-        else if(indexPath.row == 4)
+        else if(indexPath.row == 5)
         {
             CGSize schoolNameSize = [Tools getSizeWithString:schoolName andWidth:SCREEN_WIDTH-150 andFont:[UIFont systemFontOfSize:16]];
             cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-left, 10, 180, schoolNameSize.height>27?schoolNameSize.height:27);
             
             cell.nameLabel.text = @"学      校";
-            cell.objectsLabel.text = schoolName;
+            
+            if (schoolName && [schoolName length] > 0)
+            {
+                cell.objectsLabel.text = schoolName;
+            }
+            else
+            {
+                cell.objectsLabel.text = @"未指定学校";
+            }
         }
-        else if(indexPath.row == 5)
+        else if(indexPath.row == 6)
         {
             cell.nameLabel.text = @"地      区";
             cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-left, 10, 180, 27);
@@ -356,7 +381,7 @@ SetClassInfoDel>
             }
         }
     }
-    else if(indexPath.row == 6)
+    else if(indexPath.row == 7)
     {
         CGSize size = [Tools getSizeWithString:classInfo andWidth:SCREEN_WIDTH-150 andFont:[UIFont systemFontOfSize:16]];
         cell.nameLabel.frame = CGRectMake(10, 10, 80, 27);
@@ -379,7 +404,7 @@ SetClassInfoDel>
     UIImageView *bgImageBG = [[UIImageView alloc] init];
     bgImageBG.image = [UIImage imageNamed:@"cell_bg2"];
     cell.backgroundView = bgImageBG;
-    if (indexPath.row == 1 || indexPath.row == 4 || indexPath.row == 6 || indexPath.row == 2)
+    if (indexPath.row == 1 || indexPath.row == 5 || indexPath.row == 7 || indexPath.row == 2)
     {
         UIImageView *markView = [[UIImageView alloc] init];
         markView.hidden = YES;
@@ -425,7 +450,7 @@ SetClassInfoDel>
             [self.navigationController pushViewController:classQRVC animated:YES];
         }
     }
-    else if(indexPath.row == 6)
+    else if(indexPath.row == 7)
     {
         OperatDB *db = [[OperatDB alloc] init];
         NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
@@ -439,7 +464,7 @@ SetClassInfoDel>
             [self.navigationController pushViewController:setClassInfoViewController animated:YES];
         }
     }
-    else if (indexPath.row == 4)
+    else if (indexPath.row == 5)
     {
         OperatDB *db = [[OperatDB alloc] init];
         NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
@@ -710,6 +735,16 @@ SetClassInfoDel>
                 else
                 {
                     classNumber = @"未获取到";
+                }
+                
+                if ([[responseDict objectForKey:@"data"] objectForKey:@"enter_t"] &&
+                    [[NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"] objectForKey:@"enter_t"] integerValue]] length] == 4)
+                {
+                    joinYear = [NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"] objectForKey:@"enter_t"] integerValue]];
+                }
+                else
+                {
+                    joinYear = @"";
                 }
                 [classInfoTableView reloadData];
             }

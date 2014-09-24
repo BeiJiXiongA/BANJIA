@@ -448,6 +448,25 @@
     return cell;
 
 }
+
+#pragma mark - 查看大头像
+-(void)headerTap:(UITapGestureRecognizer *)headerTap
+{
+    MJPhoto *photo = [[MJPhoto alloc] init];
+    if ([headerImg length] > 0 && ![headerImg isEqualToString:HEADERICON])
+    {
+        photo.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",IMAGEURL,headerImg]];
+    }
+    else
+    {
+        photo.image = [UIImage imageNamed:HEADERICON];
+    }
+    photo.srcImageView = (UIImageView *)headerTap.view;
+    MJPhotoBrowser *photoBroser = [[MJPhotoBrowser alloc] init];
+    photoBroser.photos = [NSArray arrayWithObject:photo];
+    [photoBroser show];
+}
+
 #define CALLBUTTONTAG  2000
 -(void)callToUser
 {

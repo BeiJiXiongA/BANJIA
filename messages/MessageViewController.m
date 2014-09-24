@@ -78,18 +78,12 @@ ChatVCDelegate>
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     
-    [[NSUserDefaults standardUserDefaults] setObject:@"0" forKey:NewChatMsgNum];
-    [[NSUserDefaults standardUserDefaults] synchronize];
-    
     self.titleLabel.text = @"聊天记录";
     [[self.bgView layer] setShadowOffset:CGSizeMake(-5.0f, 5.0f)];
     [[self.bgView layer] setShadowColor:[UIColor darkGrayColor].CGColor];
     [[self.bgView layer] setShadowOpacity:1.0f];
     [[self.bgView layer] setShadowRadius:3.0f];
     self.returnImageView.hidden = YES;
-    
-    [[NSUserDefaults standardUserDefaults] removeObjectForKey:NewChatMsgNum];
-    [[NSUserDefaults standardUserDefaults] synchronize];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewWillAppear:) name:UPDATECLASSNUMBER object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dealNewChatMsg:) name:RECEIVENEWMSG object:nil];
@@ -188,6 +182,10 @@ ChatVCDelegate>
                     {
                         NSDictionary *dict = [tmpArray objectAtIndex:i];
                         if (currentId && ![currentId isEqualToString:[dict objectForKey:@"tid"]])
+                        {
+                            [unreadCountDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"new"] intValue]] forKey:[dict objectForKey:@"tid"]];
+                        }
+                        else if(!currentId)
                         {
                             [unreadCountDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"new"] intValue]] forKey:[dict objectForKey:@"tid"]];
                         }
@@ -358,11 +356,6 @@ ChatVCDelegate>
         editButton.hidden = YES;
         tipLabel.hidden = NO;
     }
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue] > 0)
-    {
-        [[NSUserDefaults standardUserDefaults] removeObjectForKey:NewChatMsgNum];
-        [[NSUserDefaults standardUserDefaults] synchronize];
-    }
 }
 
 -(NSDictionary *)findLastMsgWithUser:(NSString *)fid
@@ -513,7 +506,7 @@ ChatVCDelegate>
     
     if(userIconDIct && ![[userIconDIct objectForKey:@"username"] isEqual:[NSNull null]]) //NTNjMzg0OWUzNGRhYjVmMTY2OGI0NmNj
     {
-        [Tools fillImageView:cell.headerImageView withImageFromURL:[userIconDIct objectForKey:@"uicon"] andDefault:HEADERICON];
+        [Tools fillImageView:cell.headerImageView withImageFromURL:[userIconDIct objectForKey:@"uicon"] imageWidth:68 andDefault:HEADERICON];
         cell.memNameLabel.text = [userIconDIct objectForKey:@"username"];
         
         NSString *fname = [userIconDIct objectForKey:@"username"];

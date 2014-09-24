@@ -86,7 +86,7 @@ UITableViewDelegate>
     
     joinYear = @"请选择";
     className = @"";
-    schoolType = @"2";
+    schoolType = @"1";
     isSelect = NO;
  
     pickerViewWidth = 120;
@@ -259,7 +259,7 @@ UITableViewDelegate>
         
         if (indexPath.row == 0)
         {
-            cell.contentLable.text = [schoolLevelArray objectAtIndex:[schoolType integerValue]-1];
+            cell.contentLable.text = [schoolLevelArray objectAtIndex:[schoolType integerValue]];
         }
         else if(indexPath.row == 1)
         {
@@ -357,7 +357,7 @@ UITableViewDelegate>
     {
         if([selectType isEqualToString:SCHOOLTYPE])
         {
-            schoolType = [NSString stringWithFormat:@"%d",indexPath.row+1];
+            schoolType = [NSString stringWithFormat:@"%d",indexPath.row];
         }
         else if([selectType isEqualToString:JOINYEAR])
         {
@@ -443,10 +443,6 @@ UITableViewDelegate>
             DDLOG(@"createclass responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-//                UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"您班级创建成功，快去查看吧！" delegate:self cancelButtonTitle:@"返回我的班级" otherButtonTitles: nil];
-//                al.delegate = self;
-//                [al show];
-                
                 SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
                 MyClassesViewController *myClassesViewController = [[MyClassesViewController alloc] init];
                 KKNavigationController *myClassesNav = [[KKNavigationController alloc] initWithRootViewController:myClassesViewController];

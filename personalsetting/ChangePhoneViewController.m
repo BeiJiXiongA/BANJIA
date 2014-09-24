@@ -21,6 +21,8 @@
     NSInteger sec;
     NSTimer *timer;
     NSString *codeStr;
+    
+    NSString *getCodePhoneNumber;
 }
 @end
 
@@ -42,6 +44,7 @@
     self.titleLabel.text = @"绑定手机号";
     
     sec = 60;
+    getCodePhoneNumber = @"";
     
     UIImage*inputImage = [Tools getImageFromImage:[UIImage imageNamed:@""] andInsets:UIEdgeInsetsMake(20, 3, 20, 2.3)];
     
@@ -199,7 +202,7 @@
             {
                 codeStr = [responseDict objectForKey:@"data"];
                 codeTextField.text = [responseDict objectForKey:@"data"];
-                
+                getCodePhoneNumber = phoneNumTextfield.text;
             }
             else
             {
@@ -227,6 +230,21 @@
     if ([codeTextField.text length] == 0)
     {
         [Tools showAlertView:@"请您填写验证码" delegateViewController:nil];
+        return ;
+    }
+    if (![Tools isPhoneNumber:phoneNumTextfield.text])
+    {
+        [Tools showAlertView:@"请输入正确的手机号码！" delegateViewController:nil];
+        return ;
+    }
+    if ([codeTextField.text length] == 0)
+    {
+        [Tools showAlertView:@"请您填写验证码" delegateViewController:nil];
+        return ;
+    }
+    if ([getCodePhoneNumber length] > 0 && ![phoneNumTextfield.text isEqualToString:getCodePhoneNumber])
+    {
+        [Tools showAlertView:@"手机号不正确" delegateViewController:nil];
         return ;
     }
     if ([Tools NetworkReachable])

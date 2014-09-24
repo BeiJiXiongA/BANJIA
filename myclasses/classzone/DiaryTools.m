@@ -14,18 +14,16 @@
 #define PraiseW   31
 #define ColumnPerRow  8
 
-#define PraiseCellHeight  30
-
 @implementation DiaryTools
 + (CGFloat)heightWithDiaryDict:(NSDictionary *)dict andShowAll:(BOOL)showAll
 {
     //头像
-    CGFloat headerHeight = 44;
+    CGFloat headerHeight = 41;
     
     //文字
     NSString *content = [[[dict objectForKey:@"detail"] objectForKey:@"content"] emojizedString];
     
-    CGSize size = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-30 andFont:[UIFont systemFontOfSize:15]];
+    CGSize size = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-DongTaiHorizantolSpace*2-16 andFont:DONGTAI_CONTENT_FONT];
     
     CGFloat contentHeight = 0;
     if ([content length] > 0)
@@ -145,11 +143,12 @@
         }
         else
         {
-            tmpcommentHeight += (PraiseCellHeight+CommentSpace);
+            
+            tmpcommentHeight += (PraiseCellHeight+(CommentSpace)*2);
         }
         
     }
-    return headerHeight + imgsHeight + contentHeight + buttonHeight + tmpcommentHeight + 6; //6为动态与动态之间距离一半
+    return headerHeight + imgsHeight + contentHeight + buttonHeight + tmpcommentHeight+3; //6为动态与动态之间距离一半
 }
 
 @end

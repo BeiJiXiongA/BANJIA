@@ -83,7 +83,16 @@ UITableViewDelegate>
     
     studentNum = @"";
     
-    NSString *tipString = [NSString stringWithFormat:@"你将要申请加入%@-%@，如班主任老师同意您的申请，您将加入该班级。",schoolName,className];
+    NSString *tipString;
+    if(schoolName && [schoolName length] > 0 && ![schoolName isEqualToString:@"未指定学校"])
+    {
+        tipString = [NSString stringWithFormat:@"你将要申请加入%@-%@，如班主任老师同意您的申请，您将加入该班级。",schoolName,className];
+    }
+    else
+    {
+        tipString = [NSString stringWithFormat:@"你将要申请加入%@，如班主任老师同意您的申请，您将加入该班级。",className];
+    }
+    
     CGSize size = [Tools getSizeWithString:tipString andWidth:SCREEN_WIDTH-40 andFont:[UIFont systemFontOfSize:18]];
     tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, UI_NAVIGATION_BAR_HEIGHT+40, size.width, size.height)];
     tipLabel.text = tipString;

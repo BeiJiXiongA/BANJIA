@@ -411,7 +411,7 @@ UIActionSheetDelegate,NameButtonDel>
         
         NSString *content = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"];
         
-        CGSize contentSize = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-15 andFont:[UIFont systemFontOfSize:15]];
+        CGSize contentSize = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-DongTaiHorizantolSpace*2-16 andFont:DONGTAI_CONTENT_FONT];
         
         cell.contentTextField.text = [[[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"] emojizedString];
         

@@ -403,9 +403,20 @@ AuthImageDone>
                 cell.nameLabel.text = [NSString stringWithFormat:@"绑定手机"];
                 cell.textLabel.textColor = TITLE_COLOR;
             }
-            cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-150, 15, 134, 30);
-            cell.objectsLabel.text = [Tools phone_num];
-            cell.objectsLabel.font = [UIFont systemFontOfSize:18];
+            
+            if ([[Tools phone_num] length] > 0)
+            {
+                cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-150, 15, 134, 30);
+                cell.objectsLabel.text = [Tools phone_num];
+                cell.objectsLabel.font = [UIFont systemFontOfSize:18];
+            }
+            else
+            {
+                cell.objectsLabel.frame = CGRectMake(SCREEN_WIDTH-96, 15, 80, 30);
+                cell.objectsLabel.text = @"绑定手机";
+                cell.objectsLabel.font = [UIFont systemFontOfSize:16];
+            }
+            
             cell.objectsLabel.textColor = TITLE_COLOR;
             
             cell.arrowImageView.hidden = NO;
@@ -678,7 +689,7 @@ AuthImageDone>
     {
         if(indexPath.row == 0)
         {
-            if (![Tools phone_num])
+            if ([[Tools phone_num] length] == 0)
             {
                 ChangePhoneViewController *changePhoneNumVC = [[ChangePhoneViewController alloc] init];
                 changePhoneNumVC.changePhoneDel = self;
@@ -687,6 +698,8 @@ AuthImageDone>
             else
             {
                 ClassPlusAccountViewController *classPlusViewController = [[ClassPlusAccountViewController alloc] init];
+                classPlusViewController.banjia_number = banjiaNumber;
+                classPlusViewController.reg_method = reg_method;
                 [self.navigationController pushViewController:classPlusViewController animated:YES];
             }
         }
@@ -1091,7 +1104,7 @@ static int loginID;
                 {
                     banjiaNumber = @"";
                 }
-                if ([responseDict objectForKey:@"reg_method"] && [[responseDict objectForKey:@"reg_method"] length] > 0)
+                if ([[responseDict objectForKey:@"data"] objectForKey:@"reg_method"] && [[[responseDict objectForKey:@"data"] objectForKey:@"reg_method"] length] > 0)
                 {
                     reg_method = [[responseDict objectForKey:@"data"] objectForKey:@"reg_method"];
                 }

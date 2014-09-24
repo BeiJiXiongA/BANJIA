@@ -1183,7 +1183,7 @@ MsgDelegate>
             {
                 cell.memNameLabel.text = [dict objectForKey:@"name"];
             }
-            [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERICON];
+            [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] imageWidth:68 andDefault:HEADERICON];
             cell.headerImageView.layer.cornerRadius = 3;
             cell.headerImageView.clipsToBounds = YES;
             cell.remarkLabel.hidden = NO;
@@ -1229,7 +1229,7 @@ MsgDelegate>
                 cell.remarkLabel.text = [dict objectForKey:@"title"];
                 cell.remarkLabel.textAlignment = NSTextAlignmentLeft;
             }
-            [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] andDefault:HEADERICON];
+            [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"img_icon"] imageWidth:68 andDefault:HEADERICON];
             
             cell.button2.hidden = YES;
             if (![self haveParents:[dict objectForKey:@"uid"]])

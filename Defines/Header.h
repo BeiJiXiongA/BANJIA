@@ -252,6 +252,8 @@ return shared##className; \
 
 #define DongTaiSpace  5
 
-#define CommentSpace 10
+#define CommentSpace 9
 
 #define DongTaiHorizantolSpace  6.5
+
+#define PraiseCellHeight  18.5

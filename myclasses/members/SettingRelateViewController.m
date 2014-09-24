@@ -116,9 +116,18 @@
     relateButton.layer.cornerRadius = 5;
     [relateButton setContentHorizontalAlignment:UIControlContentHorizontalAlignmentLeft];
     relateButton.clipsToBounds = YES;
-    [relateButton setTitle:[NSString stringWithFormat:@"   %@",[title substringFromIndex:[title rangeOfString:@"."].location+1]] forState:UIControlStateNormal];
+    if ([title rangeOfString:@"."].length > 0)
+    {
+        [relateButton setTitle:[NSString stringWithFormat:@"   %@",[title substringFromIndex:[title rangeOfString:@"."].location+1]] forState:UIControlStateNormal];
+        re_type = [title substringFromIndex:[title rangeOfString:@"."].location+1];
+    }
+    else if([title rangeOfString:@"的"].length > 0)
+    {
+        [relateButton setTitle:title forState:UIControlStateNormal];
+        re_type = [title substringFromIndex:[title rangeOfString:@"的"].location+1];
+    }
     
-    re_type = [title substringFromIndex:[title rangeOfString:@"."].location+1];
+    
     relateButton.frame = CGRectMake(studentButton.frame.origin.x, tipLabel2.frame.origin.y+tipLabel2.frame.size.height, 134, studentButton.frame.size.height);
     [relateButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [relateButton addTarget:self action:@selector(selectRelate) forControlEvents:UIControlEventTouchUpInside];

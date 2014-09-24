@@ -993,7 +993,7 @@ NameButtonDel>
             cell.contentLabel.hidden = NO;
             cell.contentLabel.textColor = CONTENTCOLOR;
             
-            CGSize contentSize = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-30 andFont:[UIFont systemFontOfSize:15]];
+            CGSize contentSize = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-DongTaiHorizantolSpace*2-16 andFont:DONGTAI_CONTENT_FONT];
             
             cell.contentLabel.textColor = CONTENTCOLOR;
             cell.contentLabel.tag = SectionTag * indexPath.section + indexPath.row;

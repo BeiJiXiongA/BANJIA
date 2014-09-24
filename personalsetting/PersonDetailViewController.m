@@ -278,14 +278,19 @@ MFMailComposeViewControllerDelegate>
         [cell.bgImageView setImage:[UIImage imageNamed:@"toppic"]];
         
         cell.headerImageView.frame = CGRectMake(15, BGIMAGEHEIGHT-DetailHeaderHeight-15, DetailHeaderHeight, DetailHeaderHeight);
-        if ([headerImageUrl isEqualToString:HEADERICON])
+        
+        if ([headerImg length] > 0)
         {
-            [cell.headerImageView setImage:[UIImage imageNamed:HEADERICON]];
+            [Tools fillImageView:cell.headerImageView withImageFromURL:headerImg imageWidth:106 andDefault:HEADERICON];
         }
         else
         {
-            [Tools fillImageView:cell.headerImageView withImageFromURL:headerImg andDefault:HEADERICON];
+            [cell.headerImageView setImage:[UIImage imageNamed:HEADERICON]];
         }
+        
+        UITapGestureRecognizer *headerTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(headerTap:)];
+        cell.headerImageView.userInteractionEnabled = YES;
+        [cell.headerImageView addGestureRecognizer:headerTap];
         
         cell.headerImageView.layer.cornerRadius = 5;
         cell.headerImageView.clipsToBounds = YES;
@@ -293,7 +298,10 @@ MFMailComposeViewControllerDelegate>
         cell.headerImageView.layer.borderWidth = 2;
         
         //        cell.nameLabel.textColor = TITLE_COLOR;
-        cell.nameLabel.frame = CGRectMake(DetailHeaderHeight+30, 60, 100, 20);
+        
+        CGSize nameSize = [Tools getSizeWithString:personName andWidth:100 andFont:[UIFont boldSystemFontOfSize:18]];
+        cell.nameLabel.frame = CGRectMake(DetailHeaderHeight+30, 60, nameSize.width, 20);
+        
         cell.nameLabel.text = personName;
         cell.nameLabel.shadowColor = TITLE_COLOR;
         cell.nameLabel.shadowOffset = CGSizeMake(0.5, 0.5);
@@ -306,6 +314,10 @@ MFMailComposeViewControllerDelegate>
         cell.contentLabel.shadowColor = TITLE_COLOR;
         cell.contentLabel.font = [UIFont boldSystemFontOfSize:14];
         cell.backgroundColor = [UIColor whiteColor];
+        
+        cell.sexureImageView.frame = CGRectMake(cell.nameLabel.frame.origin.x+cell.nameLabel.frame.size.width+10, cell.nameLabel.frame.origin.y, 20, 20);
+        [cell.sexureImageView setImage:[UIImage imageNamed:sexureimage]];
+        cell.sexureImageView.hidden = NO;
     }
     else if (indexPath.section == 1)
     {
@@ -437,6 +449,24 @@ MFMailComposeViewControllerDelegate>
     }
 }
 
+#pragma mark - 查看大头像
+-(void)headerTap:(UITapGestureRecognizer *)headerTap
+{
+    MJPhoto *photo = [[MJPhoto alloc] init];
+    if ([headerImg length] > 0 && ![headerImg isEqualToString:HEADERICON])
+    {
+        photo.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",IMAGEURL,headerImg]];
+    }
+    else
+    {
+        photo.image = [UIImage imageNamed:HEADERICON];
+    }
+    photo.srcImageView = (UIImageView *)headerTap.view;
+    MJPhotoBrowser *photoBroser = [[MJPhotoBrowser alloc] init];
+    photoBroser.photos = [NSArray arrayWithObject:photo];
+    [photoBroser show];
+}
+#pragma mark - 打电话
 -(void)callToUser
 {
     if ([phoneNum length] > 0)
@@ -720,7 +750,7 @@ MFMailComposeViewControllerDelegate>
                         //男
                         sexureimage = @"male";
                     }
-                    else if ([[dict objectForKey:@"sex"] intValue] == 0)
+                    else
                     {
                         //
                         sexureimage = @"female";

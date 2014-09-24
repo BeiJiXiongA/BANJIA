@@ -539,14 +539,18 @@ UpdateUserSettingDelegate>
         [cell.bgImageView setImage:[UIImage imageNamed:@"toppic"]];
         
         cell.headerImageView.frame = CGRectMake(15, BGIMAGEHEIGHT-DetailHeaderHeight-15, DetailHeaderHeight, DetailHeaderHeight);
-        if ([headerImg isEqualToString:HEADERICON])
+        if ([headerImg length] > 0)
         {
-            [cell.headerImageView setImage:[UIImage imageNamed:HEADERICON]];
+            [Tools fillImageView:cell.headerImageView withImageFromURL:headerImg imageWidth:106 andDefault:HEADERICON];
         }
         else
         {
-            [Tools fillImageView:cell.headerImageView withImageFromURL:headerImg andDefault:HEADERICON];
+            [cell.headerImageView setImage:[UIImage imageNamed:HEADERICON]];
         }
+        
+        UITapGestureRecognizer *headerTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(headerTap:)];
+        cell.headerImageView.userInteractionEnabled = YES;
+        [cell.headerImageView addGestureRecognizer:headerTap];
         
         cell.headerImageView.layer.cornerRadius = 5;
         cell.headerImageView.clipsToBounds = YES;
@@ -733,6 +737,7 @@ UpdateUserSettingDelegate>
     }
     return cell;
 }
+
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (indexPath.section == 2)
@@ -774,6 +779,24 @@ UpdateUserSettingDelegate>
         }
     }
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
+}
+
+#pragma mark - 查看大头像
+-(void)headerTap:(UITapGestureRecognizer *)headerTap
+{
+    MJPhoto *photo = [[MJPhoto alloc] init];
+    if ([headerImg length] > 0 && ![headerImg isEqualToString:HEADERICON])
+    {
+        photo.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",IMAGEURL,headerImg]];
+    }
+    else
+    {
+        photo.image = [UIImage imageNamed:HEADERICON];
+    }
+    photo.srcImageView = (UIImageView *)headerTap.view;
+    MJPhotoBrowser *photoBroser = [[MJPhotoBrowser alloc] init];
+    photoBroser.photos = [NSArray arrayWithObject:photo];
+    [photoBroser show];
 }
 
 #pragma mark - parentDetailDelegate

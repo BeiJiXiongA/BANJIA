@@ -590,6 +590,12 @@
             {
                 chatContent = [alertContent substringFromIndex:[alertContent rangeOfString:@":"].location+1];
                 fname = [alertContent substringToIndex:[alertContent rangeOfString:@":"].location];
+                NSRange range1 = [fname rangeOfString:@"["];
+                NSRange range2 = [fname rangeOfString:@"]"];
+                if (range1.length > 0 && range2.length > 0)
+                {
+                    fname = [fname substringWithRange:NSMakeRange(range1.location+1, range2.location-1-range1.location)];
+                }
             }
             else
             {
@@ -606,7 +612,7 @@
             [chatDict setObject:@"text" forKey:@"msgType"];
             [chatDict setObject:[Tools user_id] forKey:@"tid"];
             [chatDict setObject:@"0" forKey:@"readed"];
-            [chatDict setObject:[userInfo objectForKey:@"f_name"] forKey:@"byname"];
+            [chatDict setObject:fname forKey:@"byname"];
             NSString *ficon = @"";
             [chatDict setObject:ficon forKey:@"ficon"];
 //            [chatDict setObject:fname forKey:@"fname"];
