@@ -41,7 +41,7 @@
 @end
 
 @implementation SettingRelateViewController
-@synthesize parentID,parentName,title,admin,classID;
+@synthesize parentID,parentName,title,admin,classID,sex;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -109,7 +109,15 @@
     tipLabel2.backgroundColor = self.bgView.backgroundColor;
     [self.bgView addSubview:tipLabel2];
     
-    relateArray = RELATEARRAY;
+    if ([sex integerValue] == 1)
+    {
+        relateArray = @[@"爸爸",@"爷爷",@"姥爷",@"其他"];
+    }
+    else
+    {
+        relateArray = @[@"妈妈",@"奶奶",@"姥姥",@"其他"];
+    }
+//    relateArray = RELATEARRAY;
     
     relateButton = [UIButton buttonWithType:UIButtonTypeCustom];
     relateButton.backgroundColor = [UIColor whiteColor];

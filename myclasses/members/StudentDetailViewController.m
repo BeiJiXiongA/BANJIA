@@ -194,6 +194,10 @@ UpdateUserSettingDelegate>
     {
         phoneNum = @"";
     }
+    if ([birth rangeOfString:@"设置"].length > 0)
+    {
+        birth = @"";
+    }
     
     if (![studentID isEqual:[NSNull null]])
     {
@@ -1221,6 +1225,10 @@ UpdateUserSettingDelegate>
                     if (![self showPhoneNum])
                     {
                         phoneNum = @"";
+                    }
+                    if ([birth rangeOfString:@"设置"].length > 0)
+                    {
+                        birth = @"";
                     }
                     [infoView reloadData];
                 }

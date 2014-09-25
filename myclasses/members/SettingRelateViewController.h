@@ -14,4 +14,5 @@
 @property (nonatomic, strong) NSString *title;
 @property (nonatomic, assign) BOOL admin;
 @property (nonatomic, strong) NSString *classID;
+@property (nonatomic, strong) NSString *sex;
 @end

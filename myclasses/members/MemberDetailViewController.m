@@ -159,6 +159,10 @@ UIActionSheetDelegate>
     {
         phoneNum = @"";
     }
+    if ([birth rangeOfString:@"设置"].length > 0)
+    {
+        birth = @"";
+    }
     
     if([Tools NetworkReachable])
     {
@@ -844,6 +848,10 @@ UIActionSheetDelegate>
                 if (![self showPhoneNum])
                 {
                     phoneNum = @"";
+                }
+                if ([birth rangeOfString:@"设置"].length > 0)
+                {
+                    birth = @"";
                 }
                 [infoView reloadData];
             }

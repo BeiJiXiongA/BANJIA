@@ -200,9 +200,9 @@
     
     NSString *userStr = @"";
     
-    if ([[APService registrionID] length] > 0)
+    if ([[APService registrationID] length] > 0)
     {
-        userStr = [APService registrionID];
+        userStr = [APService registrationID];
 //        [Tools showAlertView:userStr delegateViewController:nil];
     }
 

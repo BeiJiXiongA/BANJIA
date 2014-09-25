@@ -900,11 +900,6 @@ headerDelegate>
     {
         return ;
     }
-    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
-    if (![ud objectForKey:@"hometip1"])
-    {
-        self.unReadLabel.hidden = YES;
-    }
 }
 
 -(void)dealNewMsg:(NSDictionary *)dict
@@ -912,11 +907,6 @@ headerDelegate>
     if ([[Tools user_id] length] == 0)
     {
         return ;
-    }
-    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
-    if (![ud objectForKey:@"hometip1"])
-    {
-        self.unReadLabel.hidden = YES;
     }
 }
 

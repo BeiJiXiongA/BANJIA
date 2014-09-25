@@ -97,7 +97,7 @@
     
     [self updateDatabase];
     
-    [APService setAlias:[APService registrionID] callbackSelector:nil object:nil];
+    [APService setAlias:[APService registrationID] callbackSelector:nil object:nil];
     
     if ([[_db findSetWithDictionary:@{} andTableName:CITYTABLE] count] <= 0)
     {
@@ -179,14 +179,24 @@
     [ShareSDK registerApp:@"182899e1ea92"];
     [self shareAppKeysForEvery];
 
-    [APService registerForRemoteNotificationTypes:
-     UIRemoteNotificationTypeAlert
-     |UIRemoteNotificationTypeBadge
-     |UIRemoteNotificationTypeSound];
-    
+    if ([[UIDevice currentDevice].systemVersion floatValue] >= 8.0)
+    {
+        //可以添加自定义categories
+        [APService registerForRemoteNotificationTypes:(UIUserNotificationTypeBadge |
+                                                       UIUserNotificationTypeSound |
+                                                       UIUserNotificationTypeAlert)
+                                           categories:nil];
+    }
+    else
+    {
+        //categories 必须为nil
+        [APService registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge |
+                                                       UIRemoteNotificationTypeSound |
+                                                       UIRemoteNotificationTypeAlert)
+                                           categories:nil];
+    }
     [APService setupWithOption:launchOptions];
-    
-//    [self 你哈];
+
     
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
@@ -451,6 +461,7 @@
                             {
                                 [self.msgDelegate dealNewMsg:nil];
                             }
+                            [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSNUMBER object:nil];
                         }
                     }
                 }
@@ -492,6 +503,7 @@
                         {
                             [self.chatDelegate dealNewChatMsg:nil];
                         }
+                        [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECHATSNUMBER object:nil];
                     }
                     
                     [[NSUserDefaults standardUserDefaults] setObject:ENTER_FORGROUD forKey:BECOMEACTIVE];

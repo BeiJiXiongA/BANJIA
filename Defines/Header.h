@@ -13,6 +13,7 @@
 #import "Font.h"
 #import "Size.h"
 #import "CheckTools.h"
+#import "APService.h"
 
 
 #define FaceViewHeight  200

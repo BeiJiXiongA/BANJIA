@@ -373,9 +373,9 @@ UIActionSheetDelegate>
     if ([accountID length] > 0)
     {
         NSString *userStr = @"";
-        if ([[APService registrionID] length] > 0)
+        if ([[APService registrationID] length] > 0)
         {
-            userStr = [APService registrionID];
+            userStr = [APService registrationID];
         }
 
         paraDict = @{@"a_id":accountID,

@@ -262,9 +262,9 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 +(NSString *)device_uid
 {
     NSString *userStr = @"simulator";
-    if ([[APService registrionID] length] > 0)
+    if ([[APService registrationID] length] > 0)
     {
-        userStr = [APService registrionID];
+        userStr = [APService registrationID];
     }
     return userStr;
 }

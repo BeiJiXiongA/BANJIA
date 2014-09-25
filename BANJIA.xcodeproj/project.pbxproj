@@ -101,7 +101,6 @@
 		384CC9131918B3FE0051B446 /* UINavigationController+JDSideMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 384CC9121918B3FE0051B446 /* UINavigationController+JDSideMenu.m */; };
 		384CC9151918B6E00051B446 /* nav_bar_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 384CC9141918B6E00051B446 /* nav_bar_bg@2x.png */; };
 		3852D068193D6077000437E6 /* ReportViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3852D067193D6077000437E6 /* ReportViewController.m */; };
-		3852D091194065BC000437E6 /* libPushSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3852D090194065BC000437E6 /* libPushSDK.a */; };
 		3852D094194065D1000437E6 /* JSONKit.m in Sources */ = {isa = PBXBuildFile; fileRef = 3852D093194065D1000437E6 /* JSONKit.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		3852D09719406609000437E6 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 3852D09619406609000437E6 /* Reachability.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		3852D099194066B6000437E6 /* PushConfig.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3852D098194066B6000437E6 /* PushConfig.plist */; };
@@ -136,6 +135,7 @@
 		385D8D6C19641812007E717F /* arrow_up@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 385D8D6A19641812007E717F /* arrow_up@2x.png */; };
 		385D8D6E1964396E007E717F /* 53@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 385D8D6D1964396D007E717F /* 53@2x.png */; };
 		385D8D7019643C07007E717F /* 43@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 385D8D6F19643C06007E717F /* 43@2x.png */; };
+		3862855719D3C0E3004B5E76 /* libPushSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3862855619D3C0E3004B5E76 /* libPushSDK.a */; };
 		386939C719612D4E00B9AD62 /* SetImageTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 386939C619612D4E00B9AD62 /* SetImageTools.m */; };
 		38695F9E199E036100646BC4 /* QQConnection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38695F71199E036100646BC4 /* QQConnection.framework */; };
 		38695F9F199E036100646BC4 /* QZoneConnection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38695F72199E036100646BC4 /* QZoneConnection.framework */; };
@@ -737,8 +737,6 @@
 		384CC9141918B6E00051B446 /* nav_bar_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "nav_bar_bg@2x.png"; sourceTree = "<group>"; };
 		3852D066193D6077000437E6 /* ReportViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ReportViewController.h; sourceTree = "<group>"; };
 		3852D067193D6077000437E6 /* ReportViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ReportViewController.m; sourceTree = "<group>"; };
-		3852D08F194065BC000437E6 /* APService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = APService.h; sourceTree = "<group>"; };
-		3852D090194065BC000437E6 /* libPushSDK.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libPushSDK.a; sourceTree = "<group>"; };
 		3852D092194065D1000437E6 /* JSONKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSONKit.h; sourceTree = "<group>"; };
 		3852D093194065D1000437E6 /* JSONKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JSONKit.m; sourceTree = "<group>"; };
 		3852D09519406609000437E6 /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
@@ -780,6 +778,8 @@
 		385D8D6A19641812007E717F /* arrow_up@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "arrow_up@2x.png"; path = "personsetting/arrow_up@2x.png"; sourceTree = "<group>"; };
 		385D8D6D1964396D007E717F /* 53@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "53@2x.png"; sourceTree = "<group>"; };
 		385D8D6F19643C06007E717F /* 43@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "43@2x.png"; sourceTree = "<group>"; };
+		3862855519D3C0E3004B5E76 /* APService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = APService.h; sourceTree = "<group>"; };
+		3862855619D3C0E3004B5E76 /* libPushSDK.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libPushSDK.a; sourceTree = "<group>"; };
 		386939C519612D4E00B9AD62 /* SetImageTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SetImageTools.h; sourceTree = "<group>"; };
 		386939C619612D4E00B9AD62 /* SetImageTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SetImageTools.m; sourceTree = "<group>"; };
 		38695F71199E036100646BC4 /* QQConnection.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = QQConnection.framework; sourceTree = "<group>"; };
@@ -1524,6 +1524,7 @@
 				38695FBC199E036100646BC4 /* ShareSDKShareActionSheet.framework in Frameworks */,
 				3899BC0B196CE8380037C586 /* CoreMedia.framework in Frameworks */,
 				38695FAC199E036100646BC4 /* libSinaWeiboSDK.a in Frameworks */,
+				3862855719D3C0E3004B5E76 /* libPushSDK.a in Frameworks */,
 				38BD38BC190A43D900BC01F7 /* AVFoundation.framework in Frameworks */,
 				38695FA4199E036100646BC4 /* AGCommon.framework in Frameworks */,
 				3899BC09196CE7D90037C586 /* CoreVideo.framework in Frameworks */,
@@ -1569,7 +1570,6 @@
 				38F366621904AB5C0024BD7E /* libMobClickLibrary.a in Frameworks */,
 				38938FCC18EEF0260014F169 /* CoreData.framework in Frameworks */,
 				38938FCA18EEF0260014F169 /* UIKit.framework in Frameworks */,
-				3852D091194065BC000437E6 /* libPushSDK.a in Frameworks */,
 				38938FC618EEF0260014F169 /* Foundation.framework in Frameworks */,
 				38B711411923470D00AEB55D /* libbaidumapapi.a in Frameworks */,
 			);
@@ -1865,6 +1865,15 @@
 			path = home;
 			sourceTree = "<group>";
 		};
+		3862855419D3C0CC004B5E76 /* JPush */ = {
+			isa = PBXGroup;
+			children = (
+				3862855519D3C0E3004B5E76 /* APService.h */,
+				3862855619D3C0E3004B5E76 /* libPushSDK.a */,
+			);
+			path = JPush;
+			sourceTree = "<group>";
+		};
 		38695F6F199E036100646BC4 /* ShareSDK */ = {
 			isa = PBXGroup;
 			children = (
@@ -2124,6 +2133,7 @@
 		38938FFA18EEF1A30014F169 /* library */ = {
 			isa = PBXGroup;
 			children = (
+				3862855419D3C0CC004B5E76 /* JPush */,
 				38695F6F199E036100646BC4 /* ShareSDK */,
 				38A24C9A197CE06400C718BA /* UIImage-Helpers */,
 				3899BC11196CF1760037C586 /* libqrencode */,
@@ -2134,8 +2144,6 @@
 				3852D09619406609000437E6 /* Reachability.m */,
 				3852D092194065D1000437E6 /* JSONKit.h */,
 				3852D093194065D1000437E6 /* JSONKit.m */,
-				3852D08F194065BC000437E6 /* APService.h */,
-				3852D090194065BC000437E6 /* libPushSDK.a */,
 				38B492AF1923063900C0098D /* BMap */,
 				38F3665E1904AB5C0024BD7E /* youmeng */,
 				38B2DDC018F780D900782D0E /* customswitch */,
@@ -3979,7 +3987,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = "LaunchImage-2";
 				CODE_SIGN_IDENTITY = "iPhone Developer: Rui Wang (VEUQ5JBY8P)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Lanjing Tongchuang (Tianjin) Technology & Development Co., Ltd. (X7FQ79MF8R)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Rui Wang (VEUQ5JBY8P)";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/library/ShareSDK/Connection",
@@ -4032,11 +4040,12 @@
 					"$(PROJECT_DIR)/library/ShareSDK",
 					2/Extend/WeChatSDK,
 					"$(PROJECT_DIR)/messages/VoiceConvert/lib",
+					"$(PROJECT_DIR)/library/JPush",
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "-all_load";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "98A54D58-3225-4CB8-B5D6-13F9FFE6A365";
+				PROVISIONING_PROFILE = "29a590a4-1d84-45dc-bd1b-71ad8d1829c1";
 				SDKROOT = iphoneos7.1;
 				TARGETED_DEVICE_FAMILY = 1;
 				VALID_ARCHS = armv7;
@@ -4104,6 +4113,7 @@
 					"$(PROJECT_DIR)/library/ShareSDK",
 					2/Extend/WeChatSDK,
 					"$(PROJECT_DIR)/messages/VoiceConvert/lib",
+					"$(PROJECT_DIR)/library/JPush",
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "-all_load";

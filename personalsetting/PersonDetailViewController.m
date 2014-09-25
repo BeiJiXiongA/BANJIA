@@ -157,6 +157,10 @@ MFMailComposeViewControllerDelegate>
     {
         phoneNum = @"";
     }
+    if ([birth rangeOfString:@"设置"].length > 0)
+    {
+        birth = @"";
+    }
     
     [infoView reloadData];
     
@@ -811,6 +815,10 @@ MFMailComposeViewControllerDelegate>
                 if (![personID isEqualToString:[Tools user_id]])
                 {
                     phoneNum = @"";
+                }
+                if ([birth rangeOfString:@"设置"].length > 0)
+                {
+                    birth = @"";
                 }
                 [infoView reloadData];
             }

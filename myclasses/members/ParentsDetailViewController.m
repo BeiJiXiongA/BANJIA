@@ -162,6 +162,10 @@ UpdateUserSettingDelegate>
     {
         phoneNum = @"";
     }
+    if ([birth rangeOfString:@"设置"].length > 0)
+    {
+        birth = @"";
+    }
     
     if([Tools NetworkReachable])
     {
@@ -872,6 +876,10 @@ UpdateUserSettingDelegate>
                     if (![self showPhoneNum])
                     {
                         phoneNum = @"";
+                    }
+                    if ([birth rangeOfString:@"设置"].length > 0)
+                    {
+                        birth = @"";
                     }
                     [infoView reloadData];
                 }
