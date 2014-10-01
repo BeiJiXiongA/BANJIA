@@ -11,7 +11,7 @@
 @interface SelectSchoolLevelViewController ()<UITableViewDataSource,UITableViewDelegate>
 {
     NSArray *schoolLevelArray;
-    NSArray *valueArray;
+    NSDictionary *schoolLevelDict;
 }
 @end
 
@@ -34,16 +34,25 @@
     if (fromCreate)
     {
         schoolLevelArray = SCHOOLLEVELARRAY;
-        valueArray = [NSArray arrayWithObjects:@"0",@"1",@"2",@"3",@"4",@"5",@"6", nil];
+        schoolLevelDict = SCHOOLLEVELDICT;
     }
     else
     {
-        schoolLevelArray = [NSArray arrayWithObjects:@"全部",@"小学",@"中学",@"夏令营",@"社团",@"职业学校",@"幼儿园",@"其他", nil];
-        valueArray = [NSArray arrayWithObjects:@"-1",@"0",@"1",@"2",@"3",@"4",@"5",@"6", nil];
+        schoolLevelArray = SEARCHSCHOOLLEVELARRAY;
+        schoolLevelDict = SEARCHSCHOOLLEVELDICT;
     }
     
+    CGFloat maxHeight = SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT-10;
+    if ([schoolLevelArray count] * 40 > maxHeight)
+    {
+        maxHeight = maxHeight/40 * 40;
+    }
+    else
+    {
+        maxHeight = [schoolLevelArray count] * 40;
+    }
     
-    UITableView *schoolLevelTableView = [[UITableView alloc] initWithFrame:CGRectMake(5, UI_NAVIGATION_BAR_HEIGHT + 10, SCREEN_WIDTH-10, 240) style:UITableViewStylePlain];
+    UITableView *schoolLevelTableView = [[UITableView alloc] initWithFrame:CGRectMake(5, UI_NAVIGATION_BAR_HEIGHT + 10, SCREEN_WIDTH-10, maxHeight) style:UITableViewStylePlain];
     schoolLevelTableView.delegate  = self;
     schoolLevelTableView.dataSource = self;
     schoolLevelTableView.backgroundColor = [UIColor whiteColor];
@@ -78,7 +87,7 @@
     {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:schoolLevel];
     }
-    cell.textLabel.text = [schoolLevelArray objectAtIndex:indexPath.row];
+    cell.textLabel.text = [schoolLevelDict objectForKey:[schoolLevelArray objectAtIndex:indexPath.row]];
     cell.textLabel.font = [UIFont systemFontOfSize:14];
     cell.selectionStyle = UITableViewCellSelectionStyleGray;
     return cell;
@@ -90,7 +99,7 @@
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     if ([self.selectSchoolLevelDel respondsToSelector:@selector(updateSchoolLevelWith:andId:)])
     {
-        [self.selectSchoolLevelDel updateSchoolLevelWith:[schoolLevelArray objectAtIndex:indexPath.row] andId:[valueArray objectAtIndex:indexPath.row]];
+        [self.selectSchoolLevelDel updateSchoolLevelWith:[schoolLevelDict objectForKey:[schoolLevelArray objectAtIndex:indexPath.row]] andId:[schoolLevelArray objectAtIndex:indexPath.row]];
     }
     [self unShowSelfViewController];
 }

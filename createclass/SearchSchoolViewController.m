@@ -136,6 +136,10 @@ CLLocationManagerDelegate>
     }
     
     locationManager = [[CLLocationManager alloc] init];
+    if (SYSVERSION >= 8)
+    {
+        [locationManager requestWhenInUseAuthorization];
+    }
     if ([CLLocationManager locationServicesEnabled]) {
         locationManager.delegate = self;
         locationManager.distanceFilter = 200;

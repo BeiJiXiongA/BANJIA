@@ -208,6 +208,10 @@ int count = 0;
     }
     
     locationManager = [[CLLocationManager alloc] init];
+    if (SYSVERSION >= 8)
+    {
+        [locationManager requestWhenInUseAuthorization];
+    }
     if ([CLLocationManager locationServicesEnabled]) {
                 locationManager.delegate = self;
                 locationManager.distanceFilter = 200;
@@ -698,6 +702,14 @@ int count = 0;
     if ([alreadySelectAssets count] > 0)
     {
         addImageButton.hidden = YES;
+        if ([alreadySelectAssets count] == 12)
+        {
+            imageTipLabel.hidden = YES;
+        }
+        else
+        {
+            imageTipLabel.hidden = NO;
+        }
         for (int i=0; i<[alreadySelectAssets count]; ++i)
         {
 //            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
@@ -765,6 +777,7 @@ int count = 0;
             mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, locationBgView.frame.size.height+locationBgView.frame.origin.y+20);
         }];
     }
+    
 }
 
 -(BOOL)hasThisLatelyImage:(ALAsset *)asset
@@ -841,8 +854,18 @@ int count = 0;
         
         locationBgView.frame = CGRectMake(lateImageView.frame.origin.x, imageScrollView.frame.origin.y+imageScrollView.frame.size.height+spaceHeight, lateImageView.frame.size.width , 45);
         
+        isBlogView.frame = CGRectMake(locationBgView.frame.origin.x, locationBgView.frame.origin.y+locationBgView.frame.size.height+10, locationBgView.frame.size.width, locationBgView.frame.size.height);
+        
         mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, locationBgView.frame.size.height+locationBgView.frame.origin.y+20);
     }];
+    if ([alreadySelectAssets count] == 12)
+    {
+        imageTipLabel.hidden = YES;
+    }
+    else
+    {
+        imageTipLabel.hidden = NO;
+    }
 }
 
 - (void)tapImage:(UITapGestureRecognizer *)tap
@@ -853,9 +876,9 @@ int count = 0;
 -(void)emitClick
 {
     [contentTextView resignFirstResponder];
-    if ([contentTextView.text length] <= 0 && [normalPhotosArray count] <= 0)
+    if ([normalPhotosArray count] <= 0)
     {
-        [Tools showAlertView:@"说点什么或添加几张图片吧！" delegateViewController:nil];
+        [Tools showAlertView:@"添加几张图片吧！" delegateViewController:nil];
         return ;
     }
     if (!fromCLass)
@@ -985,7 +1008,7 @@ int count = 0;
     if(textField.tag == LocationTextViewTag)
     {
         [UIView animateWithDuration:0.25 animations:^{
-            self.bgView.center = CGPointMake(CENTER_POINT.x, CENTER_POINT.y-100-(([normalPhotosArray count]+1)/4)*imageH);
+            self.bgView.center = CGPointMake(CENTER_POINT.x, CENTER_POINT.y-(([alreadySelectAssets count]+1)/4)*imageH);
             
         }completion:^(BOOL finished) {
         }];
@@ -1118,7 +1141,6 @@ int count = 0;
 - (void)agImagePickerController:(AGImagePickerController *)picker didFail:(NSError *)error
 {
     NSLog(@"Fail. Error: %@", error);
-    [((XDContentViewController *)self.parentViewController.parentViewController).sideMenuController setPanGestureEnabled:NO];
     isSelectPhoto = NO;
     if (error == nil) {
         NSLog(@"User has cancelled.");

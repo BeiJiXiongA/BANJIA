@@ -9,6 +9,8 @@
 
 #import "KLSwitch.h"
 
+//#define ANIMATED  (SYSVERSION < 8 ? YES:NO)
+#define ANIMATED  NO
 #define kConstrainsFrameToProportions YES
 #define kHeightWidthRatio 1.6451612903  //Magic number as a result of dividing the height by the width on the default UISwitch size (51/31)
 
@@ -93,7 +95,6 @@ typedef enum {
 @implementation KLSwitch
 
 #pragma mark - Initializers
-
 - (void)encodeWithCoder:(NSCoder *)aCoder {
     [super encodeWithCoder: aCoder];
     
@@ -207,7 +208,7 @@ typedef enum {
                                              offColor: self.tintColor
                                         contrastColor: self.contrastColor];
         [_track setOn: self.isOn
-             animated: NO];
+             animated: ANIMATED];
         [self addSubview: self.track];
     }
     if (!_thumb) {
@@ -260,7 +261,7 @@ typedef enum {
     if (gesture.state == UIGestureRecognizerStateBegan) {
         //Grow the thumb horizontally towards center by defined ratio
         [self setThumbIsTracking: YES
-                   animated: YES];
+                   animated: ANIMATED];
     }
     else if (gesture.state == UIGestureRecognizerStateChanged) {
         //If touch crosses the threshold then toggle the state
@@ -280,7 +281,7 @@ typedef enum {
     }
     else  if (gesture.state == UIGestureRecognizerStateEnded) {
         [self setThumbIsTracking: NO
-                   animated: YES];
+                   animated: ANIMATED];
     }
 }
 
@@ -289,7 +290,7 @@ typedef enum {
 -(void) toggleState {
     //Alternate between on/off
     [self setOn: self.isOn ? NO : YES
-       animated: YES];
+       animated: ANIMATED];
 }
 
 - (void)setOn:(BOOL)on
@@ -310,26 +311,26 @@ typedef enum {
     _on = on;
     
     //Trigger the completion block if exists
-    if (self.didChangeHandler) {
-        self.didChangeHandler(_on);
-    }
+//    if (self.didChangeHandler) {
+//        self.didChangeHandler(_on);
+//    }
     [self sendActionsForControlEvents:UIControlEventValueChanged];
 }
 
 -(void)isOn:(BOOL)on
 {
     [self setThumbOn: on
-            animated: NO];
+            animated: ANIMATED];
     [self.track setOn: on
-                 animated: NO];
-    if (self.didChangeHandler)
-    {
-        self.didChangeHandler(_on);
-    }
+                 animated: ANIMATED];
+//    if (self.didChangeHandler)
+//    {
+//        self.didChangeHandler(_on);
+//    }
 }
 
 - (void) setOn:(BOOL)on {
-    [self setOn: on animated: NO];
+    [self setOn: on animated: ANIMATED];
 }
 
 - (void) setLocked:(BOOL)locked {
@@ -402,7 +403,7 @@ typedef enum {
           animated:(BOOL) animated {
     if (animated) {
         [UIView animateWithDuration:0.3 animations:^{
-            [self setThumbOn:on animated:NO];
+            [self setThumbOn:on animated:animated];
         }];
     }
     CGRect thumbFrame = self.thumb.frame;
@@ -509,7 +510,7 @@ typedef enum {
                             options: UIViewAnimationOptionCurveEaseOut
                          animations:^{
                              [weakSelf setOn: on
-                                animated: NO];
+                                animated:NO];
                          }
                          completion:nil];
     }

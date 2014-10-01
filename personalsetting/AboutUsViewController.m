@@ -38,12 +38,18 @@
     logoImageView.backgroundColor = [UIColor clearColor];
     [self.bgView addSubview:logoImageView];
     
+    UITapGestureRecognizer *copyUidTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(copyUid)];
+    logoImageView.userInteractionEnabled = YES;
+    copyUidTap.numberOfTapsRequired = 4;
+    copyUidTap.numberOfTouchesRequired = 2;
+    [logoImageView addGestureRecognizer:copyUidTap];
+    
     UILabel *tipLabel1 = [[UILabel alloc] initWithFrame:CGRectMake(70, UI_NAVIGATION_BAR_HEIGHT+160, SCREEN_WIDTH-140, 30)];
     tipLabel1.backgroundColor = [UIColor clearColor];
     tipLabel1.textAlignment = NSTextAlignmentCenter;
     tipLabel1.font = [UIFont systemFontOfSize:17];
     
-    tipLabel1.text = [NSString stringWithFormat:@"班家%.1f For iPhone",[[Tools client_ver] floatValue]];
+    tipLabel1.text = [NSString stringWithFormat:@"班家%@ For iPhone",[Tools client_ver]];
     [self.bgView addSubview:tipLabel1];
     
     
@@ -63,6 +69,13 @@
     tipLabel3.textColor = TITLE_COLOR;
     tipLabel3.text = [NSString stringWithFormat:@"Copyright 2014 LanJingTongChuang(TianJin)Technology & Development All Rights Reserved"];
     [self.bgView addSubview:tipLabel3];
+}
+
+-(void)copyUid
+{
+    UIPasteboard *generalPasteBoard = [UIPasteboard generalPasteboard];
+    [generalPasteBoard setString:[Tools user_id]];
+    [Tools showTips:@"copy uid success!" toView:self.bgView];
 }
 
 - (void)didReceiveMemoryWarning

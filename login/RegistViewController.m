@@ -8,7 +8,6 @@
 
 #import "RegistViewController.h"
 #import "Header.h"
-#import "Regist3ViewController.h"
 #import "UITextField+AKNumericFormatter.h"
 #import "NSString+AKNumericFormatter.h"
 #import "AKNumericFormatter.h"

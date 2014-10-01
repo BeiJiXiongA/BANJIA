@@ -50,7 +50,7 @@ static StatusBarTips *tipsWindows = nil;
     self = [super initWithFrame:frame];
     if (self)
     {
-        
+        return self;
         self.frame = CGRectMake(SCREEN_WIDTH-120, 0, 200, 20);
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         self.windowLevel = UIWindowLevelStatusBar +10;
@@ -70,8 +70,8 @@ static StatusBarTips *tipsWindows = nil;
         tipIcon.backgroundColor = [UIColor clearColor];
         [self addSubview:tipIcon];
         
-        tipLabel = [[UILabel alloc] initWithFrame:self.bounds];
-//#ifdef NSTextAlignmentRight
+        tipLabel = [[UILabel alloc] init];
+        tipLabel.frame = CGRectMake(0, 0, self.frame.size.width, self.frame.size.height);
         tipLabel.textAlignment = NSTextAlignmentLeft;
         tipLabel.lineBreakMode = NSLineBreakByTruncatingTail;
         
@@ -85,7 +85,6 @@ static StatusBarTips *tipsWindows = nil;
         self.userInteractionEnabled = YES;
         [self addGestureRecognizer:tap];
         
-//        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(update) name:<#(NSString *)#> object:<#(id)#>]
     }
     return self;
 }

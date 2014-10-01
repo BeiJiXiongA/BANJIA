@@ -12,6 +12,7 @@
 #import "Header.h"
 #import "KKNavigationController.h"
 #import "WelcomeViewController.h"
+#import "UINavigationController+JDSideMenu.h"
 
 //@class WelcomeViewController;
 //@class KKNavigationController;
@@ -19,7 +20,7 @@
 
 #define YSTART  (([[[UIDevice currentDevice] systemVersion] floatValue] < 7.0)?0.0f:20.0f)
 
-@interface XDContentViewController ()<UITextViewDelegate>
+@interface XDContentViewController ()<UITextViewDelegate,ChatDelegate,MsgDelegate>
 
 @end
 
@@ -69,6 +70,12 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(postlogOut) name:@"logout" object:nil];
     
+//    if ([[Tools user_id] length] > 0)
+//    {
+//        ((AppDelegate *)[[UIApplication sharedApplication] delegate]).ChatDelegate = self;
+//        ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = self;
+//    }
+    
     _bgView = [[UIView alloc] initWithFrame:CGRectMake(0, 0,
                                                        UI_SCREEN_WIDTH,
                                                        UI_SCREEN_HEIGHT)];
@@ -81,9 +88,9 @@
     _contentView = [[UIView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT,
                                                               UI_SCREEN_WIDTH,
                                                               UI_MAINSCREEN_HEIGHT - UI_NAVIGATION_BAR_HEIGHT)];
+
     [_bgView addSubview:_contentView];
     [_bgView addSubview:_navigationBarView];
-    
 
     _navigationBarBg = [[UIImageView alloc] init];
     _navigationBarBg.backgroundColor = NavigationBgColor;
@@ -98,6 +105,11 @@
     _titleLabel.textColor = TITLE_COLOR;
     _titleLabel.textAlignment = NSTextAlignmentCenter;
     [_navigationBarView addSubview:_titleLabel];
+    
+    UITapGestureRecognizer *navtap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showCurrentVersion)];
+    _titleLabel.userInteractionEnabled = YES;
+    navtap.numberOfTapsRequired = 5;
+    [_titleLabel addGestureRecognizer:navtap];
     
     returnImageView = [[UIImageView alloc] initWithFrame:CGRectMake(11, YSTART +13, 11, 18)];
     [returnImageView setImage:[UIImage imageNamed:@"icon_return"]];
@@ -126,11 +138,48 @@
     
 }
 
+-(void)showCurrentVersion
+{
+    [Tools showTips:[[NSUserDefaults standardUserDefaults]objectForKey:@"currentVersion"] toView:self.bgView];
+}
+
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    if (SYSVERSION >= 7)
+    {
+        NSString *visibleViewControllerName = NSStringFromClass([[self.navigationController visibleViewController] class]);
+        if ([visibleViewControllerName isEqualToString:@"HomeViewController"] ||
+            [visibleViewControllerName isEqualToString:@"MyClassesViewController"] ||
+            [visibleViewControllerName isEqualToString:@"FriendsViewController"] ||
+            [visibleViewControllerName isEqualToString:@"MessageViewController"] ||
+            [visibleViewControllerName isEqualToString:@"PersonalSettingViewController"])
+        {
+            self.navigationController.sideMenuController.panGestureEnabled = YES;
+        }
+        else
+        {
+            self.navigationController.sideMenuController.panGestureEnabled = NO;
+        }
+    }
+    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+    DDLOG(@"sum unread number %d",
+          [[ud objectForKey:NewChatMsgNum] integerValue]+
+          [[ud objectForKey:NewClassNum] integerValue]+
+          [[ud objectForKey:UCFRIENDSUM] integerValue]);
+    
+    
 }
 
+-(void)dealNewChatMsg:(NSDictionary *)dict
+{
+    [self viewWillAppear:NO];
+}
+
+-(void)dealNewMsg:(NSDictionary *)dict
+{
+    [self viewWillAppear:NO];
+}
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
     // Return YES for supported orientations
     return NO;//系统默认不支持旋转功能

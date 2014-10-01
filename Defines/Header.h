@@ -14,6 +14,7 @@
 #import "Size.h"
 #import "CheckTools.h"
 #import "APService.h"
+#import "DXAlertView.h"
 
 
 #define FaceViewHeight  200
@@ -184,9 +185,16 @@ return shared##className; \
 #define MinCommentHeight  35
 #define MaxCommentWidth   (SCREEN_WIDTH-40)
 
-#define SCHOOLLEVELARRAY  @[@"小学",@"中学",@"夏令营",@"社团",@"职业学校",@"幼儿园",@"其他"]
+#pragma mark - 学校
+
+#define SCHOOLLEVELARRAY @[@"6",@"1",@"2",@"9",@"3",@"4",@"5",@"8",@"7"];
+#define SCHOOLLEVELDICT  @{@"1":@"小学",@"2":@"中学",@"3":@"夏令营",@"4":@"社团",@"5":@"职业学校",@"6":@"幼儿园",@"7":@"其他",@"8":@"培训机构",@"9":@"大学"}
+
+#define SEARCHSCHOOLLEVELARRAY @[@"-1",@"6",@"1",@"2",@"9",@"3",@"4",@"5",@"8",@"7"]
+#define SEARCHSCHOOLLEVELDICT  @{@"-1":@"全部",@"1":@"小学",@"2":@"中学",@"3":@"夏令营",@"4":@"社团",@"5":@"职业学校",@"6":@"幼儿园",@"7":@"其他",@"8":@"培训机构",@"9":@"大学"}
+
 #define OBJECTARRAY   @[@"语文老师",@"数学老师",@"英语老师"]
-#define RELATEARRAY   @[@"爸爸",@"妈妈",@"爷爷",@"奶奶",@"其他"]
+#define RELATEARRAY   @[@"爸爸",@"妈妈",@"爷爷",@"奶奶",@"姥爷",@"姥姥",@"家长"]
 
 
 #define ROLEPARENTS  @"parents"

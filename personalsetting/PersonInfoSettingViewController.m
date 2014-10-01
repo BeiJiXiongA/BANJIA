@@ -195,18 +195,6 @@ EditNameDone>
             [self submitChange];
         }
     }
-    else if (alertView.tag == SEXTAG)
-    {
-        if (buttonIndex ==1)
-        {
-            sex = @"1";
-        }
-        else if(buttonIndex == 2)
-        {
-            sex = @"0";
-        }
-        [personInfoTableView reloadData];
-    }
 }
 
 -(void)submitChange
@@ -231,6 +219,12 @@ EditNameDone>
         
         return ;
     }
+    
+    if([birth rangeOfString:@"设置"].length > 0)
+    {
+        birth = @"";
+    }
+    
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
@@ -375,7 +369,14 @@ EditNameDone>
     else if(indexPath.row == 2)
     {
         cell.nametf.hidden = NO;
-        cell.nametf.text = birth;
+        if ([birth length] == 0)
+        {
+            cell.nametf.text = @"请设置生日";
+        }
+        else
+        {
+            cell.nametf.text = birth;
+        }
     }
     else if (indexPath.row == 3)
     {
@@ -384,9 +385,13 @@ EditNameDone>
         {
             cell.nametf.text = @"男";
         }
-        else
+        else if([sex integerValue] == 0)
         {
             cell.nametf.text = @"女";
+        }
+        else if([sex integerValue] == -1)
+        {
+            cell.nametf.text = @"保密";
         }
     }
     else if (indexPath.row == 4)
@@ -449,10 +454,9 @@ EditNameDone>
     else if (indexPath.row == 3)
     {
         //性别
-        UIAlertView *al = [[UIAlertView alloc] initWithTitle:nil message:nil delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"男",@"女", nil];
-        al.tag = SEXTAG;
-        [al show];
-        
+        UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"性别选择" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"男", @"女", @"保密",nil];
+        ac.tag = SEXTAG;
+        [ac showInView:self.bgView];
     }
     else if (indexPath.row == 3)
     {
@@ -658,13 +662,35 @@ EditNameDone>
 
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    if (buttonIndex == 0)
+    if (actionSheet.tag == SEXTAG)
     {
-        [self selectPicture:1001];
+        if(buttonIndex == 0)
+        {
+            //
+            sex = @"1";
+        }
+        else if(buttonIndex == 1)
+        {
+            //
+            sex = @"0";
+        }
+        else if(buttonIndex == 2)
+        {
+            //
+            sex = @"-1";
+        }
+        [personInfoTableView reloadData];
     }
-    else if(buttonIndex == 1)
+    else
     {
-        [self selectPicture:1000];
+        if (buttonIndex == 0)
+        {
+            [self selectPicture:1001];
+        }
+        else if(buttonIndex == 1)
+        {
+            [self selectPicture:1000];
+        }
     }
 }
 

@@ -144,7 +144,7 @@
                     //男
                     sexureimage = @"male";
                 }
-                else
+                else if ([[applyDict objectForKey:@"sex"] intValue] == 0)
                 {
                     //
                     sexureimage = @"female";
@@ -538,7 +538,7 @@
                             //男
                             sexureimage = @"male";
                         }
-                        else
+                        else if ([[dict objectForKey:@"sex"] intValue] == 0)
                         {
                             //
                             sexureimage = @"female";

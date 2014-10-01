@@ -35,6 +35,8 @@
     NSString *roleStr;
     
     UIButton *qrButton;
+    
+    NSString *headerImg;
 }
 @end
 
@@ -94,14 +96,20 @@
     [topicImageView setImage:[UIImage imageNamed:@"toppic"]];
     [self.bgView addSubview:topicImageView];
     
+    headerImg = @"headpic.jpg";
+    
     headerImageView = [[UIImageView alloc] initWithFrame:CGRectMake(10, topicImageView.frame.size.height-100, 80, 80)];
     headerImageView.backgroundColor = [UIColor whiteColor];
     headerImageView.layer.cornerRadius = 5;
-    [headerImageView setImage:[UIImage imageNamed:@"headpic.jpg"]];
+    [headerImageView setImage:[UIImage imageNamed:headerImg]];
     headerImageView.layer.borderColor = [UIColor whiteColor].CGColor;
     headerImageView.layer.borderWidth = 2;
     headerImageView.layer.masksToBounds = YES;
     [topicImageView addSubview:headerImageView];
+    
+    UITapGestureRecognizer *headerTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(ShowBigImage:)];
+    headerImageView.userInteractionEnabled = YES;
+    [headerImageView addGestureRecognizer:headerTap];
     
     CGFloat fontSize = 16;
     
@@ -175,6 +183,23 @@
     [self reloadView];
 }
 
+#pragma mark - 查看头像
+-(void)ShowBigImage:(UITapGestureRecognizer *)headerTap
+{
+    MJPhoto *photo = [[MJPhoto alloc] init];
+    if ([headerImg length] > 0 && ![headerImg isEqualToString:@"headpic.jpg"])
+    {
+        photo.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",IMAGEURL,headerImg]];
+    }
+    else
+    {
+        photo.image = [UIImage imageNamed:headerImg];
+    }
+    photo.srcImageView = (UIImageView *)headerTap.view;
+    MJPhotoBrowser *photoBroser = [[MJPhotoBrowser alloc] init];
+    photoBroser.photos = [NSArray arrayWithObject:photo];
+    [photoBroser show];
+}
 
 -(void)unShowSelfViewController
 {
@@ -200,7 +225,7 @@
     }
     else if (button.tag - 333 == 1)
     {
-        //群聊
+        //群聊   18622653143 android
         
         GroupChatViewController *groupChatViewController = [[GroupChatViewController alloc] init];
         [[XDTabViewController sharedTabViewController].navigationController pushViewController:groupChatViewController animated:YES];
@@ -281,6 +306,10 @@
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 classInfoDict = [responseDict objectForKey:@"data"];
+                if ([classInfoDict objectForKey:@"img_icon"] && [[classInfoDict objectForKey:@"img_icon"] length] > 0)
+                {
+                    headerImg = [classInfoDict objectForKey:@"img_icon"];
+                }
                 [self reloadView];
             }
             else
@@ -303,13 +332,13 @@
     {
         [Tools fillImageView:headerImageView withImageFromURL:[ud objectForKey:@"classiconimage"] andDefault:@"headpic.jpg"];
     }
-    else if ([[classInfoDict objectForKey:@"img_icon"] length] > 10)
+    else if ([headerImg length] > 0 && ![headerImg isEqualToString:@"headpic.jpg"])
     {
-        [Tools fillImageView:headerImageView withImageFromURL:[classInfoDict objectForKey:@"img_icon"] andDefault:@"toppic"];
+        [Tools fillImageView:headerImageView withImageFromURL:headerImg andDefault:@"headpic.jpg"];
     }
     else
     {
-        [headerImageView setImage:[UIImage imageNamed:@"headpic.jpg"]];
+        [headerImageView setImage:[UIImage imageNamed:headerImg]];
     }
     
     NSString *topurlstring = [[NSUserDefaults standardUserDefaults] objectForKey:@"classkbimage"];
@@ -321,7 +350,6 @@
     {
         [Tools fillImageView:topicImageView withImageFromURL:[classInfoDict objectForKey:@"img_kb"] andDefault:@"toppic"];
     }
-    
     else
     {
         [topicImageView setImage:[UIImage imageNamed:@"toppic"]];

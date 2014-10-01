@@ -327,10 +327,11 @@ MFMailComposeViewControllerDelegate>
     {
         if (indexPath.row < 2)
         {
+            cell.contentView.backgroundColor = [UIColor whiteColor];
             CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
             cell.lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
             cell.lineImageView.image = [UIImage imageNamed:@"sepretorline"];
-            cell.contentView.backgroundColor = [UIColor whiteColor];
+            cell.lineImageView.hidden = NO;
             cell.nameLabel.frame = CGRectMake(15, 5, 100, 30);
             cell.nameLabel.textColor = TITLE_COLOR;
             cell.contentLabel.frame = CGRectMake(SCREEN_WIDTH-200, 5, 190, 30);
@@ -754,7 +755,7 @@ MFMailComposeViewControllerDelegate>
                         //男
                         sexureimage = @"male";
                     }
-                    else
+                    else if ([[dict objectForKey:@"sex"] intValue] == 0)
                     {
                         //
                         sexureimage = @"female";

@@ -680,6 +680,11 @@ originWav,recorderVC,player,hideSoundButton;
 -(void)textViewDidChange:(UITextView *)textView
 {
     CGSize size = textView.contentSize;
+    DDLOG(@"input size ++%@",NSStringFromCGSize(size));
+    if(size.height >= 93)
+    {
+        size = CGSizeMake(inputWidth, 93);
+    }
     inputTextViewSize = size;
     [self inputChange];
     

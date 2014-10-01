@@ -120,6 +120,7 @@ NameButtonDel>
 -(void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self name:CHANGECLASSINFO object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification object:nil];
 }
 
 - (void)viewDidLoad
@@ -135,6 +136,8 @@ NameButtonDel>
     classTopImage = [[NSUserDefaults standardUserDefaults] objectForKey:@"classtopimage"];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeClassInfo) name:CHANGECLASSINFO object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     
     self.titleLabel.text = @"班级空间";
     monthStr = @"";
@@ -196,11 +199,13 @@ NameButtonDel>
     [classZoneTableView addSubview:noneDongTaiLabel];
     
     if(([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"students"]) &&
+       [[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] isKindOfClass:[NSDictionary class]] &&
        ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:StudentSendDiary] integerValue] != 1))
     {
         addButton.hidden = YES;
     }
     else if(([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"parents"]) &&
+            [[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] isKindOfClass:[NSDictionary class]] &&
             ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:ParentSendDiary] integerValue] != 1))
     {
         addButton.hidden = YES;
@@ -229,6 +234,11 @@ NameButtonDel>
     
     backTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(backInput)];
     
+}
+
+- (void)keyBoardWillHide:(NSNotification *)aNotification
+{
+    [self backInput];
 }
 
 -(void)outTap
@@ -660,12 +670,14 @@ NameButtonDel>
 {
     if (isApply)
     {
+        NSDictionary *setDict = [[NSUserDefaults standardUserDefaults] objectForKey:@"set"];
         if(section == 0)
         {
             return 1;
         }
-        else if(([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:VisitorAccess] integerValue] == 1))
+        else if([setDict isKindOfClass:[NSDictionary class]] && ([[setDict objectForKey:VisitorAccess] integerValue] == 1))
         {
+            
             if ([DongTaiArray count] > 5)
             {
                 return 5;
@@ -831,7 +843,10 @@ NameButtonDel>
             verticalLineView.backgroundColor = UIColorFromRGB(0xe2e3e4);
             
             CGFloat verticalLineHeight = 0;
-            if ([DongTaiArray count] == 0 || (([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"visitor"]) && ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:VisitorAccess] integerValue] == 0)))
+            if ([DongTaiArray count] == 0 ||
+                (([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"visitor"]) &&
+                 [[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] isKindOfClass:[NSDictionary class]] &&
+                 ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:VisitorAccess] integerValue] == 0)))
             {
                 verticalLineHeight = 13;
             }
@@ -926,9 +941,33 @@ NameButtonDel>
         
         cell.diaryDetailDict = dict;
         NSString *name = [[dict objectForKey:@"by"] objectForKey:@"name"];
+        NSString *role = [[dict objectForKey:@"by"] objectForKey:@"role"];
         
-        NSString *nameStr = name;
         
+        NSString *nameStr;
+        if (role)
+        {
+            if ([role isEqualToString:@"teachers"])
+            {
+                nameStr = [NSString stringWithFormat:@"%@(%@)",name,@"老师"];
+            }
+            else if([role isEqualToString:@"parents"])
+            {
+                nameStr = [NSString stringWithFormat:@"%@(%@)",name,@"家长"];
+            }
+            else if([role isEqualToString:@"students"])
+            {
+                nameStr = [NSString stringWithFormat:@"%@(%@)",name,@"学生"];
+            }
+            else
+            {
+                nameStr = name;
+            }
+        }
+        else
+        {
+            nameStr = name;
+        }
         
         cell.headerImageView.hidden = NO;
         cell.nameLabel.hidden = NO;
@@ -962,7 +1001,7 @@ NameButtonDel>
         cell.headerImageView.userInteractionEnabled = YES;
         [cell.headerImageView addGestureRecognizer:tap];
         
-        [Tools fillImageView:cell.headerImageView withImageFromURL:[[dict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERBG];
+        [Tools fillImageView:cell.headerImageView withImageFromURL:[[dict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERICON];
         cell.locationLabel.frame = CGRectMake(50, cell.headerImageView.frame.origin.y+cell.headerImageView.frame.size.height-LOCATIONLABELHEI+3, SCREEN_WIDTH-90, LOCATIONLABELHEI);
         if ([[dict objectForKey:@"detail"] objectForKey:@"add"] &&
             [[[dict objectForKey:@"detail"] objectForKey:@"add"] length] > 0)
@@ -1459,7 +1498,7 @@ NameButtonDel>
     //创建分享内容[ShareSDK imageWithUrl:imagePath]
     
      NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
-    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
+    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
                                        defaultContent:@""
                                                 image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:@"班家"
@@ -1542,8 +1581,8 @@ NameButtonDel>
         }
     }
     NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
-    //创建分享内容
-    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
+    //创建分享内容[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
+    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
                                        defaultContent:@""
                                                 image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:@"班家"
@@ -1625,7 +1664,7 @@ NameButtonDel>
     }
     //创建分享内容
     NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
-    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
+    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
                                        defaultContent:@""
                                                 image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:@"班家"
@@ -1783,7 +1822,7 @@ NameButtonDel>
     }
     //创建分享内容
     NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
-    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
+    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
                                        defaultContent:@""
                                                 image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:@"班家"
@@ -1905,6 +1944,7 @@ NameButtonDel>
     }
     
     if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"parents"] &&
+        [[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] isKindOfClass:[NSDictionary class]] &&
         [[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:ParentComment] intValue] == 0)
     {
         [Tools showAlertView:@"不好意思，这个班级不允许家长评论班级日志!" delegateViewController:nil];
@@ -2303,12 +2343,16 @@ NameButtonDel>
             }
         }
     }
-    else if(([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"visitor"]) && ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:VisitorAccess] integerValue] == 0))
+    else if(([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"visitor"]) &&
+            [[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] isKindOfClass:[NSDictionary class]] &&
+            ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:VisitorAccess] integerValue] == 0))
     {
         [Tools showAlertView:@"游客不可以查看班级空间！" delegateViewController:nil];
         return NO;
     }
-    if(([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"visitor"]) && ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:VisitorAccess] integerValue] == 1))
+    if(([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"visitor"]) &&
+       [[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] isKindOfClass:[NSDictionary class]] &&
+       ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:VisitorAccess] integerValue] == 1))
     {
         return YES;
     }
@@ -2318,11 +2362,13 @@ NameButtonDel>
 -(BOOL)canSendDiary
 {
     if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"parents"] &&
+        [[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] isKindOfClass:[NSDictionary class]] &&
         [[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:ParentSendDiary] integerValue] == 1)
     {
         return YES;
     }
     else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"students"] &&
+             [[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] isKindOfClass:[NSDictionary class]] &&
              [[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:StudentSendDiary] integerValue] == 1)
     {
         return YES;

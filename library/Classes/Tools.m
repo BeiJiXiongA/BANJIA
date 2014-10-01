@@ -300,7 +300,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 #pragma mark - my method
 +(void)showAlertView:(NSString *)message delegateViewController:(XDContentViewController *)viewController
 {
-    UIAlertView *alertView = [[UIAlertView alloc]initWithTitle:nil message:message delegate:viewController cancelButtonTitle:@"知道啦" otherButtonTitles:nil, nil];
+    UIAlertView *alertView = [[UIAlertView alloc]initWithTitle:@"提示" message:message delegate:viewController cancelButtonTitle:@"知道啦" otherButtonTitles:nil, nil];
     [alertView show];
 }
 
@@ -559,7 +559,6 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     NSString *timeStr = [NSString stringWithFormat:@"%@",time];
     int resultTime = [localtimeStr intValue] - [timeStr intValue];
     
-    
     NSString *resultStr;
     if (resultTime > SECPERYEAR)
     {
@@ -579,7 +578,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
         NSDate *datetimeDate = [NSDate dateWithTimeIntervalSince1970:sec];
         resultStr = [dateFormatter stringFromDate:datetimeDate];
     }
-    else if(resultTime > 10*MINUTE)
+    else if(resultTime > 3*MINUTE || resultTime < 0)
     {
         long sec = (long)[time longLongValue];
         NSDateFormatter *dateFormatter = [[NSDateFormatter alloc]init];
@@ -589,14 +588,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     }
     else
     {
-        if (resultTime/MINUTE < 3)
-        {
-            resultStr = [NSString stringWithFormat:@"刚刚"];
-        }
-        else
-        {
-            resultStr = [NSString stringWithFormat:@"%d分钟前",resultTime/MINUTE];
-        }
+        resultStr = [NSString stringWithFormat:@"刚刚"];
     }
     return resultStr;
 }
@@ -621,7 +613,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     int resultTime = [localtimeStr intValue] - [timeStr intValue];
     
     NSString *resultStr;
-    if (resultTime > MINUTE*10)
+    if (resultTime > MINUTE*3 || resultTime < 0)
     {
         long sec = (long)[time longLongValue];
         NSDateFormatter *dateFormatter = [[NSDateFormatter alloc]init];
@@ -631,7 +623,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     }
     else
     {
-        resultStr = [NSString stringWithFormat:@"%d分钟前",resultTime/MINUTE];
+         resultStr = @"刚刚";
     }
     return resultStr;
 }
@@ -680,7 +672,8 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 {
     NSMutableArray *resultArray = [[NSMutableArray alloc] initWithCapacity:0];
     
-    NSArray *letters = [NSArray arrayWithObjects:@"A",@"B",@"C",@"D",@"E",@"F",@"G",@"H",@"I",@"J",@"K",@"L",@"M",@"N",@"O",@"P",@"Q",@"R",@"S",@"T",@"U",@"V",@"W",@"X",@"Y",@"Z", nil];
+    NSArray *letters = [NSArray arrayWithObjects:@"a",@"b",@"c",@"d",@"e",@"f",@"g",@"h",@"i",@"j",@"k",@"l",@"m",@"n",@"o",@"p",@"q",@"r",@"s",@"t",@"u",@"v",@"w",@"x",@"y",@"z", nil];
+    NSArray *letters1 = [NSArray arrayWithObjects:@"A",@"B",@"C",@"D",@"E",@"F",@"G",@"H",@"I",@"J",@"K",@"L",@"M",@"N",@"O",@"P",@"Q",@"R",@"S",@"T",@"U",@"V",@"W",@"X",@"Y",@"Z", nil];
     
     for (int i=0; i<[letters count]+1; ++i)
     {
@@ -693,7 +686,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
             {
                 NSDictionary *dict = [sourceArray objectAtIndex:j];
                 NSString *first = [NSString stringWithFormat:@"%c",[[ChineseToPinyin jianPinFromChiniseString:[dict objectForKey:key]] characterAtIndex:0]];
-                if (![letters containsObject:first])
+                if (![letters containsObject:first] && ![letters1 containsObject:first])
                 {
                     [array addObject:dict];
                     count ++;
@@ -709,7 +702,10 @@ extern NSString *CTSettingCopyMyPhoneNumber();
             {
                 NSDictionary *dict = [sourceArray objectAtIndex:j];
                 NSString *first = [NSString stringWithFormat:@"%c",[[ChineseToPinyin jianPinFromChiniseString:[dict objectForKey:key]] characterAtIndex:0]];
-                if ([[letters objectAtIndex:i]isEqualToString:first])
+                char ch1 = [first characterAtIndex:0];
+                char ch2 = [[letters objectAtIndex:i] characterAtIndex:0];
+                if ([[letters objectAtIndex:i]isEqualToString:first] ||
+                    ch1 == ch2 || (ch1+32) == ch2)
                 {
                     [array addObject:dict];
                     count++;

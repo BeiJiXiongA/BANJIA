@@ -7,7 +7,6 @@
 //
 
 #import "SettingPasswordViewController.h"
-#import "FillInfoViewController.h"
 #import "MyClassesViewController.h"
 #import "SideMenuViewController.h"
 #import "JDSideMenu.h"

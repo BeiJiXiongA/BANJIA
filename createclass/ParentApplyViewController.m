@@ -304,7 +304,7 @@ UIActionSheetDelegate>
     studentNumField.textColor = COMMENTCOLOR;
     [childInfoView addSubview:studentNumField];
 
-    relateArray = [[NSArray alloc] initWithObjects:@"   爸爸",@"   妈妈",@"   爷爷",@"   奶奶",@"   其他", nil];
+    relateArray = RELATEARRAY;
     
     relateStr = [relateArray firstObject];
     
@@ -751,27 +751,27 @@ UIActionSheetDelegate>
 //    showRelate = !showRelate;
 //    [relateTableView reloadData];
     
-    UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"爸爸",@"妈妈",@"爷爷",@"奶奶",@"其他", nil];
+    UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"爸爸",@"妈妈",@"爷爷",@"奶奶",@"姥爷",@"姥姥",@"家长", nil];
     ac.tag = RelateActionTag;
     [ac showInView:self.bgView];
 }
 
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    if (buttonIndex == 4)
-    {
-        [mySearchBar resignFirstResponder];
-        UIAlertView *stunumal = [[UIAlertView alloc] initWithTitle:@"" message:@"你是孩子的:" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
-        stunumal.alertViewStyle = UIAlertViewStylePlainTextInput;
-        stunumal.tag = STUDENTALTERTAG;
-        [stunumal show];
-        childInfoView.frame = CGRectMake(0, mySearchBar.frame.size.height+mySearchBar.frame.origin.y+20, SCREEN_WIDTH, 120);
-    }
-    else if(buttonIndex < 5)
+//    if (buttonIndex == 4)
+//    {
+//        [mySearchBar resignFirstResponder];
+//        UIAlertView *stunumal = [[UIAlertView alloc] initWithTitle:@"" message:@"你是孩子的:" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
+//        stunumal.alertViewStyle = UIAlertViewStylePlainTextInput;
+//        stunumal.tag = STUDENTALTERTAG;
+//        [stunumal show];
+//        childInfoView.frame = CGRectMake(0, mySearchBar.frame.size.height+mySearchBar.frame.origin.y+20, SCREEN_WIDTH, 120);
+//    }
+//    else if(buttonIndex < 5)
     {
         childInfoView.frame = CGRectMake(0, mySearchBar.frame.size.height+mySearchBar.frame.origin.y+20, SCREEN_WIDTH, 50);
         relateStr = [relateArray objectAtIndex:buttonIndex];
-        [relateButton setTitle:relateStr forState:UIControlStateNormal];
+        [relateButton setTitle:[NSString stringWithFormat:@"  %@",relateStr] forState:UIControlStateNormal];
     }
 
 }

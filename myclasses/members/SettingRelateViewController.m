@@ -109,15 +109,15 @@
     tipLabel2.backgroundColor = self.bgView.backgroundColor;
     [self.bgView addSubview:tipLabel2];
     
-    if ([sex integerValue] == 1)
-    {
-        relateArray = @[@"爸爸",@"爷爷",@"姥爷",@"其他"];
-    }
-    else
-    {
-        relateArray = @[@"妈妈",@"奶奶",@"姥姥",@"其他"];
-    }
-//    relateArray = RELATEARRAY;
+//    if ([sex integerValue] == 1)
+//    {
+//        relateArray = @[@"爸爸",@"爷爷",@"姥爷",@"其他"];
+//    }
+//    else
+//    {
+//        relateArray = @[@"妈妈",@"奶奶",@"姥姥",@"其他"];
+//    }
+    relateArray = RELATEARRAY;
     
     relateButton = [UIButton buttonWithType:UIButtonTypeCustom];
     relateButton.backgroundColor = [UIColor whiteColor];
@@ -322,17 +322,17 @@
     }
     else if(tableView.tag == RelateTableViewTag)
     {
-        if (indexPath.row == [relateArray count]-1)
-        {
-            re_type = [relateArray objectAtIndex:indexPath.row];
-            [relateButton setTitle:[NSString stringWithFormat:@"  %@",re_type] forState:UIControlStateNormal];
-            relatextField.enabled = YES;
-            relatextField.hidden = NO;
-            [relatextField becomeFirstResponder];
-            [tableView deselectRowAtIndexPath:indexPath animated:YES];
-            [self selectRelate];
-        }
-        else
+//        if (indexPath.row == [relateArray count]-1)
+//        {
+//            re_type = [relateArray objectAtIndex:indexPath.row];
+//            [relateButton setTitle:[NSString stringWithFormat:@"  %@",re_type] forState:UIControlStateNormal];
+//            relatextField.enabled = YES;
+//            relatextField.hidden = NO;
+//            [relatextField becomeFirstResponder];
+//            [tableView deselectRowAtIndexPath:indexPath animated:YES];
+//            [self selectRelate];
+//        }
+//        else
         {
             re_type = [relateArray objectAtIndex:indexPath.row];
             [relateButton setTitle:[NSString stringWithFormat:@"  %@",re_type] forState:UIControlStateNormal];

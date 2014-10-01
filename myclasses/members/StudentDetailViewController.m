@@ -178,7 +178,7 @@ UpdateUserSettingDelegate>
                         //男
                         sexureimage = @"male";
                     }
-                    else
+                    else if ([[dict objectForKey:@"sex"] intValue] == 0)
                     {
                         //
                         sexureimage = @"female";
@@ -1193,7 +1193,7 @@ UpdateUserSettingDelegate>
                         //男
                         sexureimage = @"male";
                     }
-                    else
+                    else if ([[dict objectForKey:@"sex"] intValue] == 0)
                     {
                         //
                         sexureimage = @"female";

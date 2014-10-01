@@ -8,14 +8,12 @@
 //
 
 #import "AddNotificationViewController.h"
-#import "MySwitchView.h"
 #import "Header.h"
 #import "ClassesListViewController.h"
 
 @interface AddNotificationViewController ()<UITableViewDataSource,
 UITableViewDelegate,
 UITextViewDelegate,
-MySwitchDel,
 UITextViewDelegate,
 SelectClasses>
 {
@@ -26,7 +24,6 @@ SelectClasses>
     NSArray *objectsValues;
     
     UILabel *replayLabel;
-    MySwitchView *replaySwitch;
     NSInteger replay;
     
     BOOL objectOpen;
@@ -108,39 +105,6 @@ SelectClasses>
     if ([objectsTableView respondsToSelector:@selector(setSeparatorInset:)]) {
         [objectsTableView setSeparatorInset:UIEdgeInsetsZero];
     }
-    
-    replayLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, UI_NAVIGATION_BAR_HEIGHT+9, 150, 30)];
-    replayLabel.textColor = COMMENTCOLOR;
-    replayLabel.backgroundColor = [UIColor clearColor];
-    replayLabel.font = [UIFont systemFontOfSize:18];
-    replayLabel.text = @"填写通知内容";
-//    [self.bgView addSubview:replayLabel];
-    
-    replaySwitch = [[MySwitchView alloc] initWithFrame:CGRectMake(replayLabel.frame.size.width+replaySwitch.frame.origin.x+20, replayLabel.frame.origin.y, 80, 30)];
-//    [self.bgView addSubview:replaySwitch];
-    replaySwitch.selectView.backgroundColor = [UIColor whiteColor];
-    replaySwitch.selectView.frame = CGRectMake(replaySwitch.frame.size.width/2, 0, replaySwitch.frame.size.width/2, replaySwitch.frame.size.height);
-    replaySwitch.mySwitchDel = self;
-    replaySwitch.leftView.layer.borderColor = [UIColor clearColor].CGColor;
-    replaySwitch.rightView.layer.borderColor = [UIColor clearColor].CGColor;
-    replaySwitch.selectView.layer.borderColor = [UIColor clearColor].CGColor;
-    
-    UILabel *leftLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 40, 30)];
-    leftLabel.text = @"YES";
-    leftLabel.backgroundColor = [UIColor clearColor];
-    leftLabel.font = [UIFont systemFontOfSize:14];
-    leftLabel.textAlignment = NSTextAlignmentCenter;
-    leftLabel.textColor = [UIColor whiteColor];
-    [replaySwitch.leftView addSubview:leftLabel];
-    
-    UILabel *rightLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 40, 30)];
-    rightLabel.text = @"NO";
-    rightLabel.backgroundColor = [UIColor clearColor];
-    rightLabel.textColor = [UIColor whiteColor];
-    rightLabel.font = [UIFont systemFontOfSize:14];
-    rightLabel.textAlignment = NSTextAlignmentCenter;
-    [replaySwitch.rightView addSubview:rightLabel];
-    
     
     sendButton = [UIButton buttonWithType:UIButtonTypeCustom];
     sendButton.backgroundColor = [UIColor clearColor];
@@ -228,20 +192,6 @@ SelectClasses>
     [objectsTableView reloadData];
 }
 
-#pragma mark - mySwitchDelegate
--(void)switchStateChanged:(MySwitchView *)mySwitchView
-{
-    if ([mySwitchView isOpen])
-    {
-        replay = 0;
-        DDLOG(@"replaySwitch--on===%ld",(long)replay);
-    }
-    else
-    {
-        replay = 1;
-        DDLOG(@"replaySwitch--off==%ld",(long)replay);
-    }
-}
 
 -(void)sendnotice
 {

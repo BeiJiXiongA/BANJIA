@@ -232,12 +232,12 @@ UIAlertViewDelegate>
             cell = [[ClassCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:parentcell];
         }
         
-        CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
-        UIImageView *lineImageView = [[UIImageView alloc] init];
-        lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-        lineImageView.backgroundColor = LineBackGroudColor;
-        [cell.contentView addSubview:lineImageView];
-        cell.contentView.backgroundColor = [UIColor whiteColor];
+//        CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
+//        UIImageView *lineImageView = [[UIImageView alloc] init];
+//        lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+//        lineImageView.backgroundColor = LineBackGroudColor;
+//        [cell.contentView addSubview:lineImageView];
+//        cell.contentView.backgroundColor = [UIColor whiteColor];
         
         cell.nameLabel.text = [parentArray objectAtIndex:indexPath.row];
         cell.nameLabel.frame = CGRectMake(20, 6, 150, 30);
@@ -268,8 +268,9 @@ UIAlertViewDelegate>
             [cell setSeparatorInset:UIEdgeInsetsMake(0, 50, 0, 0)];
         }
         
-        cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"discovery_arrow"]];
-        [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 15, 10, 15)];
+        cell.arrowImageView.hidden = NO;
+        [cell.arrowImageView setFrame:CGRectMake(SCREEN_WIDTH-20, 17.5, 10, 15)];
+        [cell.arrowImageView setImage:[UIImage imageNamed:@"menu_arrow_right"]];
         
         cell.selectionStyle = UITableViewCellSelectionStyleGray;
         

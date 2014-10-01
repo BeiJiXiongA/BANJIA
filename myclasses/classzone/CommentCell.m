@@ -29,7 +29,6 @@
         [self.contentView addSubview:nameLable];
         
         commentContentLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
-//        commentContentLabel.backgroundColor = RGB(252, 252, 252, 1);
         commentContentLabel.backgroundColor = [UIColor clearColor];
         commentContentLabel.font = [UIFont systemFontOfSize:14];
         commentContentLabel.numberOfLines = 100;

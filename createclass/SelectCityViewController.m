@@ -230,7 +230,7 @@ UITableViewDelegate>
     if (tableView.tag == HOTTAG)
     {
         NSMutableArray *sectionArray = [[NSMutableArray alloc] initWithCapacity:0];
-        NSArray *letters = [NSArray arrayWithObjects:@"A",@"B",@"C",@"D",@"E",@"F",@"G",@"H",@"I",@"J",@"K",@"L",@"M",@"N",@"O",@"P",@"Q",@"R",@"S",@"T",@"U",@"V",@"W",@"X",@"Y",@"Z", nil];
+       NSArray *letters = [NSArray arrayWithObjects:@"a",@"b",@"c",@"d",@"e",@"f",@"g",@"h",@"i",@"j",@"k",@"l",@"m",@"n",@"o",@"p",@"q",@"r",@"s",@"t",@"u",@"v",@"w",@"x",@"y",@"z", nil];
         [sectionArray addObject:@"*"];
         for (int i=0; i<[letters count]; ++i)
         {

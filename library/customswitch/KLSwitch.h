@@ -28,7 +28,6 @@ typedef void(^changeHandler)(BOOL isOn);
 @property(nonatomic, strong) UIColor *contrastColor;
 @property(nonatomic, strong) UIColor *thumbBorderColor;
 
-
 @property(nonatomic, getter=isOn) BOOL on;
 @property(nonatomic, getter=isLocked) BOOL locked;
 

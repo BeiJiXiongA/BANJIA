@@ -27,7 +27,7 @@
 #define MESSAGETAG  2003
 #define PERSONTAG   2004
 
-@interface SideMenuViewController ()<UITableViewDataSource,UITableViewDelegate>
+@interface SideMenuViewController ()<UITableViewDataSource,UITableViewDelegate,ChatDelegate,MsgDelegate>
 {
     UIImage *greenImage;
     UIImage *btnImage;
@@ -76,6 +76,9 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeIcon) name:@"changeicon" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadSideButton) name:UPDATECLASSNUMBER object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadSideButton) name:UPDATECHATSNUMBER object:nil];
+    
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = self;
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = self;
     
     selectIndex = 0;
     
@@ -135,6 +138,12 @@
 -(void)reloadSideButton
 {
     [buttonTableView reloadData];
+}
+
+-(void)dealloc
+{
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = nil;
 }
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -315,6 +324,16 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+-(void)dealNewChatMsg:(NSDictionary *)dict
+{
+    [self viewWillAppear:NO];
+}
+
+-(void)dealNewMsg:(NSDictionary *)dict
+{
+    [self viewWillAppear:NO];
 }
 
 -(NSInteger)haveNewChat

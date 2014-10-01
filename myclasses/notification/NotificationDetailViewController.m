@@ -73,7 +73,7 @@ UIActionSheetDelegate>
     
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     scoreId = @"";
-    
+        
     moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
     moreButton.frame = CGRectMake(SCREEN_WIDTH-CORNERMORERIGHT, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [moreButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
@@ -221,14 +221,14 @@ UIActionSheetDelegate>
                 
                 
                 NSArray *objectArray = [[responseDict objectForKey:@"data"] objectForKey:@"details"];
-                if ([[responseDict objectForKey:@"isTeacher"] integerValue] == 0)
+                if ([[[responseDict objectForKey:@"data"] objectForKey:@"isTeacher"] integerValue] == 0)
                 {
                     ScoreDetailViewController *scoreDetailViewController = [[ScoreDetailViewController alloc] init];
                     scoreDetailViewController.scoreId = scoreId;
                     scoreDetailViewController.testName = [[responseDict objectForKey:@"data"] objectForKey:@"name"];
                     [self.navigationController pushViewController:scoreDetailViewController animated:YES];
                 }
-                else if([[responseDict objectForKey:@"isTeacher"] integerValue] == 1)
+                else if([[[responseDict objectForKey:@"data"] objectForKey:@"isTeacher"] integerValue] == 1)
                 {
                     ScoreMemListViewController *memlist = [[ScoreMemListViewController alloc] init];
                     memlist.scoreid = scoreId;

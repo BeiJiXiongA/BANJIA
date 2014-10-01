@@ -9,7 +9,6 @@
 #import "WelcomeViewController.h"
 #import "Header.h"
 #import "RegistViewController.h"
-#import "CustomSwitch.h"
 #import "UIImageView+WebCache.h"
 #import "SideMenuViewController.h"
 #import "MyClassesViewController.h"
@@ -121,6 +120,14 @@ UITextFieldDelegate>
     bancaImageView.frame = CGRectMake(SCREEN_WIDTH-80, logoImageHeight-bancaImage.size.height, bancaImage.size.width,bancaImage.size.height);
     bancaImageView.backgroundColor = [UIColor clearColor];
     [headerView addSubview:bancaImageView];
+    
+    UILabel *versionLabel = [[UILabel alloc] init];
+    versionLabel.text = [NSString stringWithFormat:@"Ver:%@",[Tools client_ver]];
+    versionLabel.textColor = [UIColor whiteColor];
+    versionLabel.font = [UIFont systemFontOfSize:12];
+    versionLabel.frame = CGRectMake(10, headerView.frame.size.height-30, 200, 20);
+    versionLabel.textAlignment = NSTextAlignmentLeft;
+//    [headerView addSubview:versionLabel];
     
 //    UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
     

@@ -8,7 +8,6 @@
 
 #import "FillInfo2ViewController.h"
 #import "Header.h"
-#import "MySwitchView.h"
 #import "SideMenuViewController.h"
 #import "MyClassesViewController.h"
 #import "JDSideMenu.h"
@@ -250,7 +249,7 @@
     [nameTextField resignFirstResponder];
     [pwdTextField resignFirstResponder];
     
-    UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"女", @"男",nil];
+    UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"性别选择" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"男", @"女", @"保密",nil];
     ac.tag = SEXTAG;
     [ac showInView:self.bgView];
 }
@@ -447,14 +446,23 @@
     }
     else
     {
-        sex = [NSString stringWithFormat:@"%d",buttonIndex];
-        if ([sex isEqualToString:@"1"])
+        if(buttonIndex == 0)
         {
+            //
+            sex = @"1";
             [self.sexButton setTitle:@" 男" forState:UIControlStateNormal];
         }
-        else
+        else if(buttonIndex == 1)
         {
+            //
+            sex = @"0";
             [self.sexButton setTitle:@" 女" forState:UIControlStateNormal];
+        }
+        else if(buttonIndex == 2)
+        {
+            //
+            sex = @"-1";
+            [self.sexButton setTitle:@" 保密" forState:UIControlStateNormal];
         }
     }
 }

@@ -800,6 +800,7 @@ UIActionSheetDelegate>
         cell.contentLable.layer.cornerRadius = 5;
         cell.contentLable.clipsToBounds = YES;
         cell.contentLable.hidden = NO;
+        cell.contentLable.text = @"";
     }
     else
     {
@@ -820,7 +821,7 @@ UIActionSheetDelegate>
     
     [cell.timeLabel cnv_setUILabelText:[NSString stringWithFormat:@"%d名学生",studentNum]
                             andKeyWord:[NSString stringWithFormat:@"%d",studentNum]];
-    cell.timeLabel.frame = CGRectMake(cell.nameLabel.frame.origin.x, cell.nameLabel.frame.origin.y+cell.nameLabel.frame.size.height+3, [cell.timeLabel.text lengthOfBytesUsingEncoding:NSUTF8StringEncoding]*6.5, 20);
+    cell.timeLabel.frame = CGRectMake(cell.nameLabel.frame.origin.x+3, cell.nameLabel.frame.origin.y+cell.nameLabel.frame.size.height+3, [cell.timeLabel.text lengthOfBytesUsingEncoding:NSUTF8StringEncoding]*6.5, 20);
     cell.timeLabel.font = [UIFont systemFontOfSize:16];
     [cell.timeLabel cnv_setUIlabelTextColor:COMMENTCOLOR andKeyWordColor:RGB(51, 204, 102, 0.8)];
     

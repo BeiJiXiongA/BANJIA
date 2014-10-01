@@ -52,7 +52,7 @@ SetClassInfoDel>
     NSString *regionStr;
     NSString *joinYear;
     
-    NSArray *schoolLevelArray;
+    NSDictionary *schoolLevelDict;
     
     BOOL first;
 }
@@ -80,7 +80,7 @@ SetClassInfoDel>
     
     first = YES;
     
-    schoolLevelArray = SCHOOLLEVELARRAY;
+    schoolLevelDict = SCHOOLLEVELDICT;
     
     schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
     
@@ -348,9 +348,10 @@ SetClassInfoDel>
             {
                 cell.objectsLabel.text = @"未指定学校";
             }
-            else
+            else if([schoollevel isKindOfClass:[NSNumber class]])
             {
-                 cell.objectsLabel.text = [NSString stringWithFormat:@"%@",[schoolLevelArray objectAtIndex:[schoollevel integerValue]]];
+                cell.objectsLabel.text = [schoolLevelDict objectForKey:[NSString stringWithFormat:@"%@",schoollevel]];
+                ;
             }
         }
         

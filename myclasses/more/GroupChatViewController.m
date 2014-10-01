@@ -176,7 +176,7 @@
     
     cell.headerImageView.layer.cornerRadius = 5;
     cell.headerImageView.clipsToBounds = YES;
-    [cell.headerImageView setImage:[UIImage imageNamed:@"headpic.jpg"]];
+    [cell.headerImageView setImage:[UIImage imageNamed:HEADERICON]];
     
     cell.memNameLabel.frame = CGRectMake(70, 7, 220, 20);
     

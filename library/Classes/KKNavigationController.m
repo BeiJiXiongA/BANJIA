@@ -86,19 +86,20 @@
 {
     [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleDefault;
     
-//    if (SYSVERSION <= 7)
+    if (SYSVERSION <= 7)
     {
         [self.screenShotsList addObject:[self capture]];
         [self.view addGestureRecognizer:recognizer];
     }
-    
     [super pushViewController:viewController animated:animated];
 }
 
 - (UIViewController *)popViewControllerAnimated:(BOOL)animated
 {
-    [self.screenShotsList removeLastObject];
-    
+    if (SYSVERSION <= 7)
+    {
+        [self.screenShotsList removeLastObject];
+    }
     return [super popViewControllerAnimated:animated];
 }
 

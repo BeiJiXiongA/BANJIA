@@ -199,6 +199,8 @@ headerDelegate>
     
     addOpen = NO;
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getHomeData) name:RECEIVENEWNOTICE object:nil];
     
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).ChatDelegate = self;
@@ -891,23 +893,8 @@ headerDelegate>
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self name:RECEIVENEWNOTICE object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification object:nil];
     inputTabBar.returnFunDel = nil;
-}
-
--(void)dealNewChatMsg:(NSDictionary *)dict
-{
-    if ([[Tools user_id] length] == 0)
-    {
-        return ;
-    }
-}
-
--(void)dealNewMsg:(NSDictionary *)dict
-{
-    if ([[Tools user_id] length] == 0)
-    {
-        return ;
-    }
 }
 
 -(void)viewWillDisappear:(BOOL)animated
@@ -937,8 +924,6 @@ headerDelegate>
     {
         self.unReadLabel.hidden = YES;
     }
-    [self dealNewChatMsg:nil];
-    [self dealNewMsg:nil];
 }
 
 -(BOOL)haveNewMsg
@@ -957,6 +942,15 @@ headerDelegate>
         return NO;
     }
     return NO;
+}
+-(void)dealNewChatMsg:(NSDictionary *)dict
+{
+    [self viewWillAppear:NO];
+}
+
+-(void)dealNewMsg:(NSDictionary *)dict
+{
+    [self viewWillAppear:NO];
 }
 -(BOOL)haveNewNotice
 {
@@ -1724,8 +1718,34 @@ headerDelegate>
         NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
         cell.diaryDetailDict = dict;
         NSString *name = [[dict objectForKey:@"by"] objectForKey:@"name"];
+        NSString *role = [[dict objectForKey:@"by"] objectForKey:@"role"];
         
-        NSString *nameStr = name;
+        
+        NSString *nameStr;
+        if (role)
+        {
+            if ([role isEqualToString:@"teachers"])
+            {
+                nameStr = [NSString stringWithFormat:@"%@(%@)",name,@"老师"];
+            }
+            else if([role isEqualToString:@"parents"])
+            {
+                nameStr = [NSString stringWithFormat:@"%@(%@)",name,@"家长"];
+            }
+            else if([role isEqualToString:@"students"])
+            {
+                nameStr = [NSString stringWithFormat:@"%@(%@)",name,@"学生"];
+            }
+            else
+            {
+                nameStr = name;
+            }
+        }
+        else
+        {
+            nameStr = name;
+        }
+        
         
         cell.headerImageView.hidden = NO;
         cell.nameLabel.hidden = NO;
@@ -2423,6 +2443,11 @@ headerDelegate>
     [inputTabBar.inputTextView becomeFirstResponder];
 }
 
+- (void)keyBoardWillHide:(NSNotification *)aNotification
+{
+    [self backInput];
+}
+
 #pragma mark - shareAPP
 -(void)shareAPP:(UIButton *)sender
 {
@@ -2574,7 +2599,7 @@ headerDelegate>
     
     NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
     //创建分享内容[ShareSDK imageWithUrl:imagePath]
-    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
+    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
                                        defaultContent:ShareContent
                                                 image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:@"班家"

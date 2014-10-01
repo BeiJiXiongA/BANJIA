@@ -8,7 +8,6 @@
 
 #import "CreateClassViewController.h"
 #import "Header.h"
-#import "MySwitchView.h"
 #import "MyClassesViewController.h"
 #import "SideMenuViewController.h"
 #import "JDSideMenu.h"
@@ -23,7 +22,7 @@
 #define CreateClassTableViewTag  3000
 #define TmpTableViewTag    4000
 
-@interface CreateClassViewController ()<MySwitchDel,
+@interface CreateClassViewController ()<
 UITextFieldDelegate,
 UIPickerViewDelegate,
 UIPickerViewDataSource,
@@ -49,6 +48,7 @@ UITableViewDelegate>
     
     UITableView *createTableView;
     NSArray *schoolLevelArray;
+    NSDictionary *schoolLevelDict;
     
     NSString *selectType;
     NSString *joinYear;
@@ -94,8 +94,9 @@ UITableViewDelegate>
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     
-    schoolLevelArray = [NSArray arrayWithObjects:@"小学",@"中学",@"夏令营",@"社团",@"职业学校",@"幼儿园",@"其他", nil];
-
+    schoolLevelArray = SCHOOLLEVELARRAY;
+    schoolLevelDict = SCHOOLLEVELDICT;
+    
     cellNameArray = @[@"学校类型",@"入学时间"];
     
     createTableView = [[UITableView alloc] initWithFrame:CGRectMake(20, UI_NAVIGATION_BAR_HEIGHT+40, SCREEN_WIDTH-40, 100) style:UITableViewStylePlain];
@@ -259,7 +260,7 @@ UITableViewDelegate>
         
         if (indexPath.row == 0)
         {
-            cell.contentLable.text = [schoolLevelArray objectAtIndex:[schoolType integerValue]];
+            cell.contentLable.text = [schoolLevelDict objectForKey:schoolType];
         }
         else if(indexPath.row == 1)
         {
@@ -295,7 +296,14 @@ UITableViewDelegate>
             cell = [[ClassCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:iderstr];
         }
         cell.nameLabel.frame = CGRectMake(10, 10, 100, 20);
-        cell.nameLabel.text = [dataSourceArray objectAtIndex:indexPath.row];
+        if ([[dataSourceArray firstObject] length] > 2)
+        {
+            cell.nameLabel.text = [yearArray objectAtIndex:indexPath.row];
+        }
+        else
+        {
+            cell.nameLabel.text = [schoolLevelDict objectForKey:[dataSourceArray objectAtIndex:indexPath.row]];
+        }
         
         cell.bgView.frame = CGRectMake(0, 0, SCREEN_WIDTH-40, 40);
         cell.bgView.backgroundColor = [UIColor whiteColor];
@@ -357,7 +365,7 @@ UITableViewDelegate>
     {
         if([selectType isEqualToString:SCHOOLTYPE])
         {
-            schoolType = [NSString stringWithFormat:@"%d",indexPath.row];
+            schoolType = [schoolLevelArray objectAtIndex:indexPath.row];
         }
         else if([selectType isEqualToString:JOINYEAR])
         {
@@ -417,7 +425,7 @@ UITableViewDelegate>
     }
     
     className = classNameTextField.text;
-    if ([className length] <4 || [className length] > 20)
+    if ([className length] < 4 || [className length] > 20)
     {
         [Tools showAlertView:@"学校名称应该在4~20个字符之间" delegateViewController:nil];
         return ;

@@ -294,7 +294,7 @@ OperateFriends>
     if ([tmpListArray count] > MinSortCount)
     {
         NSMutableArray *sectionArray = [[NSMutableArray alloc] initWithCapacity:0];
-        NSArray *letters = [NSArray arrayWithObjects:@"A",@"B",@"C",@"D",@"E",@"F",@"G",@"H",@"I",@"J",@"K",@"L",@"M",@"N",@"O",@"P",@"Q",@"R",@"S",@"T",@"U",@"V",@"W",@"X",@"Y",@"Z", nil];
+       NSArray *letters = [NSArray arrayWithObjects:@"a",@"b",@"c",@"d",@"e",@"f",@"g",@"h",@"i",@"j",@"k",@"l",@"m",@"n",@"o",@"p",@"q",@"r",@"s",@"t",@"u",@"v",@"w",@"x",@"y",@"z", nil];
         [sectionArray addObject:@"*"];
         for (int i=0; i<[letters count]; ++i)
         {
@@ -674,8 +674,6 @@ OperateFriends>
             DDLOG(@"clear chat success!");
         }
     }
-    [[NSUserDefaults standardUserDefaults] removeObjectForKey:UCFRIENDSUM];
-    [[NSUserDefaults standardUserDefaults] synchronize];
     [newFriendsApply addObjectsFromArray:[db findSetWithDictionary:@{@"uid":[Tools user_id],@"checked":@"0",@"cgroup":@"0"} andTableName:FRIENDSTABLE]];
     [groupChatArray addObjectsFromArray:[db findSetWithDictionary:@{@"uid":[Tools user_id],@"cgroup":@"1"} andTableName:FRIENDSTABLE]];
     tmpListArray = [db findSetWithDictionary:@{@"uid":[Tools user_id],@"checked":@"1",@"cgroup":@"0"} andTableName:FRIENDSTABLE];

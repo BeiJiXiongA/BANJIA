@@ -82,8 +82,20 @@ UIActionSheetDelegate,NameButtonDel>
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
     backTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(backInput)];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     
 }
+
+-(void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification object:nil];
+}
+
+- (void)keyBoardWillHide:(NSNotification *)aNotification
+{
+    [self backInput];
+}
+
 
 -(void)viewWillAppear:(BOOL)animated
 {
@@ -337,20 +349,23 @@ UIActionSheetDelegate,NameButtonDel>
     cell.nameButtonDel = self;
     
     NSString *name = [[diaryDetailDict objectForKey:@"by"] objectForKey:@"name"];
+    NSString *role = [[diaryDetailDict objectForKey:@"by"] objectForKey:@"role"];
+    
     
     NSString *nameStr;
-    NSArray *classmen = [db findSetWithDictionary:@{@"uid":[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"],@"classid":classID} andTableName:CLASSMEMBERTABLE];
-    if ([classmen count]>0)
+    if (role)
     {
-        NSDictionary *memdict = [classmen firstObject];
-        if (![[memdict objectForKey:@"title"] isEqual:[NSNull null]])
+        if ([role isEqualToString:@"teachers"])
         {
-            if ([[memdict objectForKey:@"title"] length] >0)
-            {
-                nameStr = [NSString stringWithFormat:@"%@（%@）",name,[memdict objectForKey:@"title"]];
-            }
-            else
-                nameStr = name;
+            nameStr = [NSString stringWithFormat:@"%@(%@)",name,@"老师"];
+        }
+        else if([role isEqualToString:@"parents"])
+        {
+            nameStr = [NSString stringWithFormat:@"%@(%@)",name,@"家长"];
+        }
+        else if([role isEqualToString:@"studnets"])
+        {
+            nameStr = [NSString stringWithFormat:@"%@(%@)",name,@"学生"];
         }
         else
         {
@@ -361,7 +376,7 @@ UIActionSheetDelegate,NameButtonDel>
     {
         nameStr = name;
     }
-    
+
     cell.nameLabel.frame = CGRectMake(50, cell.headerImageView.frame.origin.y-3, [nameStr length]*25>170?170:([nameStr length]*18), 20);
     cell.nameLabel.text = nameStr;
     cell.nameLabel.font = [UIFont systemFontOfSize:15];
@@ -1062,7 +1077,7 @@ UIActionSheetDelegate,NameButtonDel>
     
     NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
     //创建分享内容[ShareSDK imageWithUrl:imagePath]
-    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
+    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
                                        defaultContent:@""
                                                 image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:@"班家"
@@ -1145,7 +1160,7 @@ UIActionSheetDelegate,NameButtonDel>
     }
     //创建分享内容
      NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
-    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
+    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
                                        defaultContent:@""
                                                 image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:@"班家"
@@ -1227,7 +1242,7 @@ UIActionSheetDelegate,NameButtonDel>
     //创建分享内容
     NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
     
-    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
+    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
                                        defaultContent:@""
                                                 image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:@"班家"
@@ -1305,7 +1320,7 @@ UIActionSheetDelegate,NameButtonDel>
     }
     NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
     //创建分享内容
-    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
+    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
                                        defaultContent:@""
                                                 image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
@@ -1383,7 +1398,7 @@ UIActionSheetDelegate,NameButtonDel>
     }
     NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
     //创建分享内容
-    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
+    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
                                        defaultContent:@""
                                                 image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:@"班家"

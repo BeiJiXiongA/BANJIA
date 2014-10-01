@@ -11,7 +11,7 @@
 
 #define SELECTED_VIEW_CONTROLLER_TAG 98456345
 
-@interface XDTabViewController ()
+@interface XDTabViewController ()<ChatDelegate,MsgDelegate>
 {
     NSString *classID;
 }
@@ -74,6 +74,9 @@ static XDTabViewController *_tabViewController = nil;
     self.tabBar.frame = CGRectMake(0,0,UI_SCREEN_WIDTH,SCREEN_HEIGHT);
     self.tabBar.backgroundColor = [UIColor whiteColor];
     [self.bgView addSubview:_tabBar];
+    
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = self;
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = self;
     
 
     label0 = [[UILabel alloc] initWithFrame:CGRectMake(50, SCREEN_HEIGHT-50, 20, 20)];
@@ -141,12 +144,18 @@ static XDTabViewController *_tabViewController = nil;
     if ([newApplyArray count] > 0)
     {
         [XDTabViewController sharedTabViewController].label2.hidden = NO;
-        [XDTabViewController sharedTabViewController].label2.text = [NSString stringWithFormat:@"%lu",[newApplyArray count]];
+        [XDTabViewController sharedTabViewController].label2.text = [NSString stringWithFormat:@"%lu",(unsigned long)[newApplyArray count]];
     }
     else
     {
         [XDTabViewController sharedTabViewController].label2.hidden = YES;
     }
+}
+
+-(void)dealloc
+{
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = nil;
 }
 
 - (void)viewDidUnload

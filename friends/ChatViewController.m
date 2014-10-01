@@ -695,9 +695,19 @@ EGORefreshTableHeaderDelegate>
         tmpheight = keyBoardHeight;
         keyboardHeight = keyBoardHeight;
         inputTabBar.frame = CGRectMake(0, SCREEN_HEIGHT-inputSize.height-10-keyboardHeight, SCREEN_WIDTH, inputSize.height+10+ FaceViewHeight);
-        if (messageTableView.contentSize.height>tmpheight)
+        if (tmpheight > 0)
         {
-            messageTableView.contentOffset = CGPointMake(0, messageTableView.contentSize.height-messageTableView.frame.size.height+keyBoardHeight);
+            if (messageTableView.frame.size.height - messageTableView.contentSize.height < tmpheight)
+            {
+                messageTableView.contentOffset = CGPointMake(0, (tmpheight - (messageTableView.frame.size.height - messageTableView.contentSize.height)));
+            }
+            else
+            {
+                if (messageTableView.contentSize.height > tmpheight)
+                {
+                    messageTableView.contentOffset = CGPointMake(0, messageTableView.contentSize.height-messageTableView.frame.size.height+tmpheight);
+                }
+            }
         }
         iseditting = YES;
     }];
@@ -784,18 +794,51 @@ EGORefreshTableHeaderDelegate>
     }
     else
     {
+        [showTimesArray removeAllObjects];
         for (int i=0; i<[messageArray count]; ++i)
         {
             NSDictionary *tmpDict = [messageArray objectAtIndex:i];
+            if ((ABS(([[tmpDict objectForKey:@"time"] integerValue] - currentSec)) >= 60*3) || i==0)
+            {
+                currentSec = [[tmpDict objectForKey:@"time"] integerValue];
+                if(!isGroup)
+                {
+                    if(([toID isEqualToString:OurTeamID] &&
+                        [[tmpDict objectForKey:DIRECT] isEqualToString:@"t"])
+                       ||![toID isEqualToString:OurTeamID])
+                    {
+                        if (![showTimesArray containsObject:[tmpDict objectForKey:@"time"]])
+                        {
+                            [showTimesArray addObject:[tmpDict objectForKey:@"time"]];
+                        }
+                    }
+                }
+                else if((isGroup && [[tmpDict objectForKey:DIRECT] isEqualToString:@"t"]))
+                {
+                    if (![showTimesArray containsObject:[tmpDict objectForKey:@"time"]])
+                    {
+                        [showTimesArray addObject:[tmpDict objectForKey:@"time"]];
+                    }
+                }
+            }
             [db updeteKey:@"readed" toValue:@"1" withParaDict:@{@"fid":[tmpDict objectForKey:@"fid"],@"userid":[Tools user_id]} andTableName:CHATTABLE];
         }
-        [showTimesArray removeAllObjects];
         [messageTableView reloadData];
     }
     
-    if (messageTableView.contentSize.height>messageTableView.frame.size.height)
+    if (tmpheight > 0)
     {
-        messageTableView.contentOffset = CGPointMake(0, messageTableView.contentSize.height-messageTableView.frame.size.height+tmpheight);
+        if (messageTableView.frame.size.height - messageTableView.contentSize.height < tmpheight)
+        {
+            messageTableView.contentOffset = CGPointMake(0, (tmpheight - (messageTableView.frame.size.height - messageTableView.contentSize.height)));
+        }
+        else
+        {
+            if (messageTableView.contentSize.height > tmpheight)
+            {
+                messageTableView.contentOffset = CGPointMake(0, messageTableView.contentSize.height-messageTableView.frame.size.height+tmpheight);
+            }
+        }
     }
     if ([self.chatVcDel respondsToSelector:@selector(updateChatList:)])
     {
@@ -1060,23 +1103,9 @@ EGORefreshTableHeaderDelegate>
         rowHeight = 40;
     }
 
-    if ((ABS(([[dict objectForKey:@"time"] integerValue] - currentSec)) > 60*3 || indexPath.row == 0))
+    if ([showTimesArray containsObject:[dict objectForKey:@"time"]])
     {
-        DDLOG(@"current time %d",currentSec);
-        currentSec = [[dict objectForKey:@"time"] integerValue];
-        if(!isGroup)
-        {
-            if(([toID isEqualToString:OurTeamID] && [[dict objectForKey:DIRECT] isEqualToString:@"t"]) ||
-               ![toID isEqualToString:OurTeamID])
-            {
-                rowHeight += 25;
-            }
-        }
-        else if((isGroup && [[dict objectForKey:DIRECT] isEqualToString:@"t"]))
-        {
-            rowHeight += 25;
-        }
-        [showTimesArray addObject:[dict objectForKey:@"time"]];
+        rowHeight += 25;
     }
     
     if ([[dict objectForKey:DIRECT] isEqualToString:@"f"] && isGroup)
@@ -1134,6 +1163,23 @@ EGORefreshTableHeaderDelegate>
 
         }
         
+    }
+    else
+    {
+        cell.timeLabel.hidden = YES;
+        NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
+        cell.timeLabel.text = timeStr;
+        CGRect headerImageRect = cell.headerImageView.frame;
+        CGRect chatBgRect = cell.chatBg.frame;
+        CGRect msgContentLabelRect = cell.messageContentLabel.frame;
+        
+        CGRect msgImageViewRect = cell.msgImageView.frame;
+        CGRect soundButtonRect = cell.soundButton.frame;
+        cell.headerImageView.frame = headerImageRect;
+        cell.chatBg.frame = chatBgRect;
+        cell.messageContentLabel.frame = msgContentLabelRect;
+        cell.msgImageView.frame = msgImageViewRect;
+        cell.soundButton.frame = soundButtonRect;
     }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     cell.backgroundColor = self.bgView.backgroundColor;

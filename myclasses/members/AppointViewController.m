@@ -8,12 +8,11 @@
 
 #import "AppointViewController.h"
 #import "Header.h"
-#import "MySwitchView.h"
 #import "OtherAppointViewController.h"
 #import "ClassMemberViewController.h"
 
 
-@interface AppointViewController ()<MySwitchDel,UIAlertViewDelegate>
+@interface AppointViewController ()<UIAlertViewDelegate>
 {
     NSArray *jobArray;
 }
@@ -67,28 +66,6 @@
     notificateMemLabel.text = [NSString stringWithFormat:@"通知班级成员"];
     notificateMemLabel.font = [UIFont systemFontOfSize:14];
     [self.bgView addSubview:notificateMemLabel];
-    
-    MySwitchView *mySwitch = [[MySwitchView alloc] initWithFrame:CGRectMake(notificateMemLabel.frame.size.width+notificateMemLabel.frame.origin.x+20, notificateMemLabel.frame.origin.y, 80, 30)];
-    mySwitch.mySwitchDel = self;
-    [self.bgView addSubview:mySwitch];
-    
-    mySwitch.selectView.frame = CGRectMake(mySwitch.frame.size.width/2, 0, mySwitch.frame.size.width/2, mySwitch.frame.size.height);
-    
-    UILabel *leftLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 40, 30)];
-    leftLabel.text = @"NO";
-    leftLabel.font = [UIFont systemFontOfSize:14];
-    leftLabel.textAlignment = NSTextAlignmentCenter;
-    leftLabel.backgroundColor = [UIColor colorWithRed:22.00/255.00 green:157.00/255.00 blue:195.00/255.00 alpha:1.0f];
-    leftLabel.textColor = [UIColor whiteColor];
-    [mySwitch.leftView addSubview:leftLabel];
-    
-    UILabel *rightLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 40, 30)];
-    rightLabel.text = @"YES";
-    rightLabel.textColor = [UIColor whiteColor];
-    rightLabel.font = [UIFont systemFontOfSize:14];
-    rightLabel.textAlignment = NSTextAlignmentCenter;
-    rightLabel.backgroundColor = [UIColor colorWithRed:22.00/255.00 green:157.00/255.00 blue:195.00/255.00 alpha:1.0f];
-    [mySwitch.rightView addSubview:rightLabel];
 }
 
 - (void)didReceiveMemoryWarning
@@ -155,18 +132,6 @@
         [request startAsynchronous];
     }
 
-}
-
--(void)switchStateChanged:(MySwitchView *)mySwitchView
-{
-    if ([mySwitchView isOpen])
-    {
-        DDLOG(@"不通知班级");
-    }
-    else
-    {
-        DDLOG(@"通知班级");
-    }
 }
 
 @end

@@ -69,6 +69,11 @@ const CGFloat JDSideMenuDefaultCloseAnimationTime = 0.2;
     [self.containerView addGestureRecognizer:self.panRecognizer];
 }
 
+-(void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+}
+
 - (void)setBackgroundImage:(UIImage*)image;
 {
     if (!self.backgroundView && image) {

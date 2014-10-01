@@ -51,10 +51,8 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for cupstomization after application launch.
     
-//    [[NSUserDefaults standardUserDefaults] setObject:@"0008" forKey:@"currentVersion"];
-    [[NSUserDefaults standardUserDefaults] setObject:@"0020" forKey:@"currentVersion"];
+    [[NSUserDefaults standardUserDefaults] setObject:@"1.2.3" forKey:@"currentVersion"];
     [[NSUserDefaults standardUserDefaults] setObject:SCHEMERELEASE forKey:SCHEMETYPE];
-    [[NSUserDefaults standardUserDefaults]  setObject:@"1" forKey:@"showad"];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getNewClass) name:UPDATECLASSNUMBER object:nil];
@@ -78,7 +76,6 @@
     {
         [self updateNewVersionWithDate:resultStr];
     }
-    
     
     NSString *soundDir = [NSString stringWithFormat:@"%@/soundCache",[DirectyTools documents]];
     BOOL isDir;
@@ -370,9 +367,9 @@
                         [[NSUserDefaults standardUserDefaults] setObject:[[responseDict objectForKey:@"data"] objectForKey:@"iOS_url"] forKey:@"iOS_url"];
                         [[NSUserDefaults standardUserDefaults] synchronize];
                         
-                        UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"新版本提示" message:@"有新版本哦，快去更新吧，加了好多功能的！" delegate:self cancelButtonTitle:@"一会在更新" otherButtonTitles:@"用最新的", nil];
-                        al.tag = NewVersionTag;
-                        [al show];
+//                        UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"新版本提示" message:@"有新版本哦，快去更新吧，加了好多功能的！" delegate:self cancelButtonTitle:@"一会在更新" otherButtonTitles:@"用最新的", nil];
+//                        al.tag = NewVersionTag;
+//                        [al show];
 
                     }
                     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
@@ -461,7 +458,6 @@
                             {
                                 [self.msgDelegate dealNewMsg:nil];
                             }
-                            [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSNUMBER object:nil];
                         }
                     }
                 }
@@ -503,7 +499,6 @@
                         {
                             [self.chatDelegate dealNewChatMsg:nil];
                         }
-                        [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECHATSNUMBER object:nil];
                     }
                     
                     [[NSUserDefaults standardUserDefaults] setObject:ENTER_FORGROUD forKey:BECOMEACTIVE];
@@ -584,8 +579,9 @@
     [APService handleRemoteNotification:userInfo];
     [[UIApplication sharedApplication] cancelAllLocalNotifications];
     [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
-    DDLOG(@"push msg==%@",userInfo);
     
+//    [Tools showAlertView:[userInfo description] delegateViewController:nil];
+    DDLOG(@"push info %@",userInfo);
     OperatDB *db = [[OperatDB alloc] init];
     
     if ([Tools user_id])

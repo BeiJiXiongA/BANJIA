@@ -24,7 +24,7 @@ UITextFieldDelegate>
 {
     MyTextField *schoolNameTextField;
     NSArray *schoolLevelArray;
-    NSArray *valueArray;
+    NSDictionary *schoolLevelDict;
     
     UITableView *levelTableView;
     UIButton *openLevelButton;
@@ -66,7 +66,7 @@ UITextFieldDelegate>
     cellNameArray = [[NSArray alloc] initWithObjects:@"城市",@"地区",@"学校类别",@"学校名称", nil];
     
     schoolLevelArray = SCHOOLLEVELARRAY;
-    valueArray = [NSArray arrayWithObjects:@"0",@"1",@"2",@"3",@"4",@"5",@"6", nil];
+    schoolLevelDict = SCHOOLLEVELDICT;
     if ([schoolLevel integerValue] >=0)
     {
         levelStr = [schoolLevelArray objectAtIndex:[schoolLevel integerValue]];
@@ -441,10 +441,11 @@ UITextFieldDelegate>
         [Tools showAlertView:@"请选择学校类型" delegateViewController:nil];
         return ;
     }
-    if ([((MyTextField *)[searchSchoolTableView viewWithTag:3333]).text length] < 4 )
+    NSString *schoolName1 = ((MyTextField *)[searchSchoolTableView viewWithTag:3333]).text;
+    if ([schoolName1 length] < 4 || [schoolName1 length] > 20)
     {
-        [Tools showAlertView:@"学校名称应该多于4个字符哦" delegateViewController:nil];
-        return;
+        [Tools showAlertView:@"学校名称应该在4~20个字符之间" delegateViewController:nil];
+        return ;
     }
     
     if ([Tools NetworkReachable])

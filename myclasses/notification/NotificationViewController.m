@@ -65,7 +65,7 @@ EGORefreshTableDelegate>
     month = @"";
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getNotifications) name:RECEIVENEWNOTICE object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receiveNewNotice) name:RECEIVENEWNOTICE object:nil];
     
     db = [[OperatDB alloc] init];
     
@@ -97,7 +97,7 @@ EGORefreshTableDelegate>
     
     
     [self getCacheNotices];
-    [self getNotifications];
+    [self getNotifications:NO];
     
     tipLabel = [[UILabel alloc] init];
     tipLabel.frame = CGRectMake(40, 100, SCREEN_WIDTH-80, 80);
@@ -219,7 +219,7 @@ EGORefreshTableDelegate>
 {
     page = 0;
     month = @"";
-    [self getNotifications];
+    [self getNotifications:NO];
 }
 
 -(void)mybackClick
@@ -233,7 +233,7 @@ EGORefreshTableDelegate>
     {
         page = 0;
         month = @"";
-        [self getNotifications];
+        [self getNotifications:NO];
     }
 }
 
@@ -247,7 +247,7 @@ EGORefreshTableDelegate>
 {
     page = 0;
     month = @"";
-    [self getNotifications];
+    [self getNotifications:NO];
 }
 //@""
 -(void)egoRefreshTableDidTriggerRefresh:(EGORefreshPos)aRefreshPos
@@ -573,7 +573,7 @@ EGORefreshTableDelegate>
 -(void)getMoreNotifications
 {
     page++;
-    [self getNotifications];
+    [self getNotifications:NO];
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
@@ -601,23 +601,32 @@ EGORefreshTableDelegate>
     notificationDetailViewController.markString = [NSString stringWithFormat:@"%@发布于%@",[[dict objectForKey:@"by"] objectForKey:@"name"],[Tools showTime:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] intValue]]]];
     if ([[dict objectForKey:@"new"] integerValue] == 1)
     {
+        int newNoticeNum = [[[NSUserDefaults standardUserDefaults] objectForKey:[NSString stringWithFormat:@"%@-notice",classID]] integerValue];
+        if (newNoticeNum > 0)
+        {
+            [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",newNoticeNum-1] forKey:[NSString stringWithFormat:@"%@-notice",classID]];
+            [[NSUserDefaults standardUserDefaults] synchronize];
+        }
         notificationDetailViewController.isnew = YES;
-        
-        int newNoticeNum = [[[NSUserDefaults standardUserDefaults]objectForKey:[NSString stringWithFormat:@"%@-notice",classID]] intValue];
-        [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",--newNoticeNum ] forKey:[NSString stringWithFormat:@"%@-notice",classID]];
-        [[NSUserDefaults standardUserDefaults] synchronize];
-        [[XDTabViewController sharedTabViewController] viewWillAppear:YES];
     }
     else
     {
         notificationDetailViewController.isnew = NO;
     }
+    
     [[XDTabViewController sharedTabViewController].navigationController pushViewController:notificationDetailViewController animated:YES];
     
-    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+//    [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
--(void)getNotifications
+-(void)receiveNewNotice
+{
+    page = 0;
+    month = @"";
+    [self getNotifications:YES];
+}
+
+-(void)getNotifications:(BOOL)receive
 {
     if ([Tools NetworkReachable])
     {
@@ -628,6 +637,7 @@ EGORefreshTableDelegate>
                                                                       @"page":[NSNumber numberWithInteger:page]
                                                                       } API:GETNOTIFICATIONS];
         [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
             DDLOG(@"notifications responseDict==%@",responseDict);
@@ -681,6 +691,16 @@ EGORefreshTableDelegate>
                     {
                         [self.readNoticedel readNotice:YES];
                     }
+                    if (receive)
+                    {
+                        int newNoticeNum = [unreadedArray count];
+                        if (newNoticeNum > 0)
+                        {
+                            [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",newNoticeNum] forKey:[NSString stringWithFormat:@"%@-notice",classID]];
+                            [[NSUserDefaults standardUserDefaults] synchronize];
+                        }
+                        [[XDTabViewController sharedTabViewController] viewWillAppear:NO];
+                    }
                 }
                 else
                 {
@@ -730,9 +750,11 @@ EGORefreshTableDelegate>
         }];
         
         [request setFailedBlock:^{
+            [Tools hideProgress:self.bgView];
             NSError *error = [request error];
             DDLOG(@"error %@",error);
         }];
+        [Tools showProgress:self.bgView];
         [request startAsynchronous];
     }
     else
