@@ -29,6 +29,8 @@
 @property (nonatomic, strong) id<ChatVCDelegate> chatVcDel;
 @property (nonatomic, strong) id<FriendListDelegate> friendVcDel;
 
+@property (nonatomic, strong) NSString *number;
+
 @property (nonatomic, assign) int unreadCount;
 
 @end

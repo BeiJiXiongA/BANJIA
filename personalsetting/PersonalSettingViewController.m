@@ -1099,6 +1099,8 @@ static int loginID;
                 if ([[[responseDict objectForKey:@"data"] objectForKey:@"number"] intValue] > 0)
                 {
                     banjiaNumber = [NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"] objectForKey:@"number"] intValue]];
+                    [[NSUserDefaults standardUserDefaults] setObject:banjiaNumber forKey:BANJIANUM];
+                    [[NSUserDefaults standardUserDefaults] synchronize];
                 }
                 else
                 {

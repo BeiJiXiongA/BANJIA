@@ -194,6 +194,7 @@
 		387D334E194733C3006AE1C2 /* logo152.png in Resources */ = {isa = PBXBuildFile; fileRef = 387D334A194733C3006AE1C2 /* logo152.png */; };
 		387FA4A01974CCD100C40609 /* moreinchat@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 387FA49F1974CCD100C40609 /* moreinchat@2x.png */; };
 		38800DF81959B3A50077E30B /* home_more@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38800DF71959B3A50077E30B /* home_more@2x.png */; };
+		38808DF819DB8366004782DB /* CommonFunc.m in Sources */ = {isa = PBXBuildFile; fileRef = 38808DF719DB8366004782DB /* CommonFunc.m */; };
 		3881A630195145C000DBA619 /* 640X960.png in Resources */ = {isa = PBXBuildFile; fileRef = 3881A62F195145C000DBA619 /* 640X960.png */; };
 		3881A632195145C900DBA619 /* 320X480.png in Resources */ = {isa = PBXBuildFile; fileRef = 3881A631195145C900DBA619 /* 320X480.png */; };
 		3884D24B19B84BCF0012B6D2 /* ad_pause_close@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3884D24A19B84BCF0012B6D2 /* ad_pause_close@2x.png */; };
@@ -844,6 +845,8 @@
 		387D334A194733C3006AE1C2 /* logo152.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo152.png; sourceTree = "<group>"; };
 		387FA49F1974CCD100C40609 /* moreinchat@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "moreinchat@2x.png"; sourceTree = "<group>"; };
 		38800DF71959B3A50077E30B /* home_more@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "home_more@2x.png"; sourceTree = "<group>"; };
+		38808DF619DB8366004782DB /* CommonFunc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommonFunc.h; sourceTree = "<group>"; };
+		38808DF719DB8366004782DB /* CommonFunc.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommonFunc.m; sourceTree = "<group>"; };
 		3881A62F195145C000DBA619 /* 640X960.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 640X960.png; sourceTree = "<group>"; };
 		3881A631195145C900DBA619 /* 320X480.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 320X480.png; sourceTree = "<group>"; };
 		3884D24A19B84BCF0012B6D2 /* ad_pause_close@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ad_pause_close@2x.png"; sourceTree = "<group>"; };
@@ -1825,6 +1828,8 @@
 				3810930719CF12AA0049DE68 /* CheckTools.m */,
 				38A9530119D816D900221B54 /* ChineseToPinyin.h */,
 				38A9530219D816D900221B54 /* ChineseToPinyin.m */,
+				38808DF619DB8366004782DB /* CommonFunc.h */,
+				38808DF719DB8366004782DB /* CommonFunc.m */,
 			);
 			path = tools;
 			sourceTree = "<group>";
@@ -3731,6 +3736,7 @@
 				3893924518EEF1A30014F169 /* UITextField+AKNumericFormatter.m in Sources */,
 				38A952FB19D815A400221B54 /* PinyinFormatter.m in Sources */,
 				3810930819CF12AA0049DE68 /* CheckTools.m in Sources */,
+				38808DF819DB8366004782DB /* CommonFunc.m in Sources */,
 				38AE045719A31A1900F90B79 /* AFHTTPRequestOperation.m in Sources */,
 				3893934D18EEF5440014F169 /* MessageCell.m in Sources */,
 				38B24028195BC782008D2DF4 /* SearchClassViewController.m in Sources */,

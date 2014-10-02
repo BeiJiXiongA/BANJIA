@@ -58,7 +58,6 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getNewClass) name:UPDATECLASSNUMBER object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getNewChat) name:UPDATECHATSNUMBER object:nil];
     
-    
     [application setStatusBarHidden:NO withAnimation:UIStatusBarAnimationFade];
     
     _db = [[OperatDB alloc] init];
@@ -343,6 +342,27 @@
     {
         [_db alterTableAdd:@"def" charLength:8 defaultValue:@"" andTableName:CLASSMEMBERTABLE];
     }
+    
+    NSArray *array12 = [_db findSetWithDictionary:@{} andTableName:CHATTABLE];
+    NSDictionary *dict12 = [array12 firstObject];
+    if (![[dict12 allKeys] containsObject:@"def"])
+    {
+        [_db alterTableAdd:@"l" charLength:4 defaultValue:@"" andTableName:CHATTABLE];
+    }
+    
+    NSArray *array13 = [_db findSetWithDictionary:@{} andTableName:USERICONTABLE];
+    NSDictionary *dict13 = [array13 firstObject];
+    if (![[dict13 allKeys] containsObject:@"unum"])
+    {
+        [_db alterTableAdd:@"unum" charLength:4 defaultValue:@"" andTableName:USERICONTABLE];
+    }
+    
+    NSArray *array14 = [_db findSetWithDictionary:@{} andTableName:FRIENDSTABLE];
+    NSDictionary *dict14 = [array14 firstObject];
+    if (![[dict14 allKeys] containsObject:@"fnum"])
+    {
+        [_db alterTableAdd:@"fnum" charLength:4 defaultValue:@"" andTableName:FRIENDSTABLE];
+    }
 }
 
 -(void)getNewVersion
@@ -495,10 +515,10 @@
                     
                     if([[responseDict objectForKey:@"data"] integerValue] > 0)
                     {
-                        if ([self.chatDelegate respondsToSelector:@selector(dealNewChatMsg:)])
-                        {
-                            [self.chatDelegate dealNewChatMsg:nil];
-                        }
+//                        if ([self.chatDelegate respondsToSelector:@selector(dealNewChatMsg:)])
+//                        {
+//                            [self.chatDelegate dealNewChatMsg:nil];
+//                        }
                     }
                     
                     [[NSUserDefaults standardUserDefaults] setObject:ENTER_FORGROUD forKey:BECOMEACTIVE];
@@ -611,16 +631,32 @@
                 fname = @"";
             }
             
-            [chatDict setObject:[userInfo objectForKey:@"m_id"] forKey:@"mid"];
+            [chatDict setObject:[userInfo objectForKey:@"m"] forKey:@"mid"];
             
             [chatDict setObject:chatContent forKey:@"content"];
-            [chatDict setObject:[userInfo  objectForKey:@"f_id"] forKey:@"fid"];
-            [chatDict setObject:[userInfo objectForKey:@"time"] forKey:@"time"];
+            
+            
+            NSString *unum;
+            if ([[userInfo  objectForKey:@"u"] rangeOfString:@"u_"].length > 0)
+            {
+                unum = [[userInfo  objectForKey:@"u"] substringFromIndex:2];
+            }
+            else
+            {
+                unum = [userInfo  objectForKey:@"u"];
+            }
+            [chatDict setObject:unum forKey:@"fid"];
+            
+            NSString *timeStr = [[userInfo objectForKey:@"m"] substringToIndex:8];
+            
+            [chatDict setObject:[CommonFunc from16To10:timeStr] forKey:@"time"];
+            DDLOG(@"%@",[CommonFunc from16To10:timeStr]);
             [chatDict setObject:@"f" forKey:@"direct"];
             [chatDict setObject:@"text" forKey:@"msgType"];
-            [chatDict setObject:[Tools user_id] forKey:@"tid"];
+            [chatDict setObject:[Tools banjia_num] forKey:@"tid"];
             [chatDict setObject:@"0" forKey:@"readed"];
             [chatDict setObject:fname forKey:@"byname"];
+            [chatDict setObject:[NSString stringWithFormat:@"%d",[[userInfo objectForKey:@"l"] intValue]] forKey:@"l"];
             NSString *ficon = @"";
             [chatDict setObject:ficon forKey:@"ficon"];
 //            [chatDict setObject:fname forKey:@"fname"];
@@ -656,7 +692,7 @@
                     }
                 }
             }
-            else if ([[_db findSetWithDictionary:@{@"userid":[Tools user_id],@"mid":[userInfo objectForKey:@"m_id"]} andTableName:CHATTABLE] count]==0)
+            else if ([[_db findSetWithDictionary:@{@"userid":[Tools user_id],@"mid":[userInfo objectForKey:@"m"]} andTableName:CHATTABLE] count]==0)
             {
                 if ([_db insertRecord:chatDict andTableName:CHATTABLE])
                 {
@@ -668,7 +704,7 @@
                     if (!([[NSUserDefaults standardUserDefaults] objectForKey:@"viewtype"] &&
                           [[[NSUserDefaults standardUserDefaults] objectForKey:@"viewtype"] isEqualToString:@"chat"]))
                     {
-                        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"viewtype"] rangeOfString:[userInfo  objectForKey:@"f_id"]].length == 0)
+                        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"viewtype"] rangeOfString:[userInfo  objectForKey:@"u"]].length == 0)
                         {
                             [[StatusBarTips shareTipsWindow] hideTips];
                             NSMutableString *showname = [[NSMutableString alloc] initWithString:fname];
@@ -682,7 +718,7 @@
                             {
                                 [showname deleteCharactersInRange:range];
                             }
-                            NSArray *unreadArray = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"readed":@"0",@"fid":[userInfo  objectForKey:@"f_id"]} andTableName:CHATTABLE];
+                            NSArray *unreadArray = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"readed":@"0",@"fid":[userInfo  objectForKey:@"u"]} andTableName:CHATTABLE];
                             [[StatusBarTips shareTipsWindow] showTipsWithImage:[UIImage imageNamed:@"icon_chat"] message:[NSString stringWithFormat:@"%@(%d)",showname,[unreadArray count]] messageType:@"chat" tipDelegate:self];
                             [StatusBarTips shareTipsWindow].dataDict = userInfo;
                         }

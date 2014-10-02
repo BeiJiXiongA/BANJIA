@@ -129,8 +129,8 @@ OperateFriends>
 {
     if([Tools NetworkReachable])
     {
-        NSArray *array = [db findSetWithDictionary:@{@"uid":[Tools user_id]} andTableName:FRIENDSTABLE];
-        [self operateFriendsList:array andDataType:@"database"];
+//        NSArray *array = [db findSetWithDictionary:@{@"uid":[Tools user_id]} andTableName:FRIENDSTABLE];
+//        [self operateFriendsList:array andDataType:@"database"];
         [self getFriendList];
     }
     else
@@ -586,7 +586,7 @@ OperateFriends>
         [request setCompletionBlock:^{
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"friendsList responsedict %@",responseDict);
+            DDLOG(@"friendsList responsedict %@",responseString);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 if (![[responseDict objectForKey:@"data"] isEqual:[NSNull null]])
@@ -624,6 +624,7 @@ OperateFriends>
     [tmpArray removeAllObjects];
     [groupChatArray removeAllObjects];
     [tmpListArray removeAllObjects];
+    DDLOG(@"dict+++ %@",tmpFriendsList);
     if ([tmpFriendsList count] > 0)
     {
         if ([db deleteRecordWithDict:@{@"uid":[Tools user_id]} andTableName:FRIENDSTABLE])
@@ -644,6 +645,24 @@ OperateFriends>
                 [tmpDict setObject:[dict objectForKey:@"fname"] forKey:@"fname"];
                 [tmpDict setObject:@"" forKey:@"phone"];
                 [db insertRecord:tmpDict andTableName:FRIENDSTABLE];
+                
+                
+                
+                NSDictionary *userIconDict = @{@"uid":[dict objectForKey:@"_id"],
+                                               @"uicon":[dict objectForKey:@"img_icon"],
+                                               @"username":[dict objectForKey:@"name"],
+                                               @"unum":[dict objectForKey:@"number"]};
+                
+                if ([[db findSetWithDictionary:@{@"unum":[dict objectForKey:@"number"]} andTableName:USERICONTABLE] count] > 0)
+                {
+                    [db deleteRecordWithDict:@{@"unum":[dict objectForKey:@"number"]} andTableName:USERICONTABLE];
+                    [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                }
+                else
+                {
+                    [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                }
+
             }
         }
         else if([datatype isEqualToString:@"network"])
@@ -652,6 +671,8 @@ OperateFriends>
             {
                 NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithCapacity:0];
                 NSDictionary *dict = [tmpFriendsList objectAtIndex:i];
+                DDLOG(@"dict+++ %@",dict);
+                
                 [tmpDict setObject:[Tools user_id] forKey:@"uid"];
                 [tmpDict setObject:[dict objectForKey:@"cgroup"] forKey:@"cgroup"];
                 [tmpDict setObject:[dict objectForKey:@"_id"] forKey:@"fid"];
@@ -664,6 +685,23 @@ OperateFriends>
                 [tmpDict setObject:[dict objectForKey:@"name"] forKey:@"fname"];
                 [tmpDict setObject:@"" forKey:@"phone"];
                 [db insertRecord:tmpDict andTableName:FRIENDSTABLE];
+                
+                
+                NSDictionary *userIconDict = @{@"uid":[dict objectForKey:@"_id"],
+                                               @"uicon":[dict objectForKey:@"img_icon"],
+                                               @"username":[dict objectForKey:@"name"],
+                                               @"unum":[dict objectForKey:@"number"]};
+                
+                if ([[db findSetWithDictionary:@{@"unum":[dict objectForKey:@"number"]} andTableName:USERICONTABLE] count] > 0)
+                {
+                    [db deleteRecordWithDict:@{@"unum":[dict objectForKey:@"number"]} andTableName:USERICONTABLE];
+                    [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                }
+                else
+                {
+                    [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                }
+
             }
         }
     }

@@ -311,6 +311,7 @@ UITextFieldDelegate>
                 [ud setObject:[dict objectForKey:@"token"] forKey:CLIENT_TOKEN];
                 [ud setObject:[dict objectForKey:@"img_icon"] forKey:HEADERIMAGE];
                 [ud setObject:[dict objectForKey:@"r_name"] forKey:USERNAME];
+                [ud setObject:[dict objectForKey:@"number"] forKey:BANJIANUM];
                 
                 if ([[dict objectForKey:@"opt"] isKindOfClass:[NSDictionary class]])
                 {

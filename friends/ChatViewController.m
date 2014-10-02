@@ -107,7 +107,7 @@ EGORefreshTableHeaderDelegate>
 @end
 
 @implementation ChatViewController
-@synthesize name,toID,imageUrl,chatVcDel,fromClass,isGroup,unreadCount;
+@synthesize name,toID,imageUrl,chatVcDel,fromClass,isGroup,unreadCount,number;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -161,6 +161,8 @@ EGORefreshTableHeaderDelegate>
     }
     
     db = [[OperatDB alloc] init];
+    
+//    [db deleteRecordWithDict:@{@"userid":[Tools user_id]} andTableName:CHATTABLE];
     
     currentSec = 0;
     iseditting = NO;
@@ -336,7 +338,7 @@ EGORefreshTableHeaderDelegate>
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
-#pragma mark - egodelegate
+#pragma mark - 下拉刷新
 -(void)egoRefreshTableHeaderDidTriggerRefresh:(EGORefreshTableHeaderView *)view
 {
     if (unreadCount > 0)
@@ -372,9 +374,45 @@ EGORefreshTableHeaderDelegate>
     }
 }
 
+#pragma mark - 刷新消息列表
+-(void)reloadTableView
+{
+    [messageTableView reloadData];
+    
+    if (tmpheight > 0)
+    {
+        //显示键盘
+        if(messageTableView.frame.size.height - messageTableView.contentSize.height < tmpheight)
+        {
+            //聊天内容被盖住
+            messageTableView.contentOffset = CGPointMake(0, (tmpheight - (messageTableView.frame.size.height - messageTableView.contentSize.height)));
+        }
+    }
+    else
+    {
+        //收起键盘
+        if (messageTableView.contentSize.height - messageTableView.frame.size.height > 0)
+        {
+            //列表内容大于列表高度
+            messageTableView.contentOffset = CGPointMake(0, messageTableView.contentSize.height-messageTableView.frame.size.height+tmpheight);
+        }
+    }
+//    if (tmpheight > 0 && messageTableView.frame.size.height - messageTableView.contentSize.height < tmpheight)
+//    {
+//        messageTableView.contentOffset = CGPointMake(0, (tmpheight - (messageTableView.frame.size.height - messageTableView.contentSize.height)));
+//    }
+//    else if(tmpheight == 0 && messageTableView.contentSize.height - messageTableView.frame.size.height > 0)
+//    {
+//        if (messageTableView.contentSize.height > tmpheight)
+//        {
+//            messageTableView.contentOffset = CGPointMake(0, messageTableView.contentSize.height-messageTableView.frame.size.height+tmpheight);
+//        }
+//    }
+}
 
 
-#pragma mark - getchatlog
+
+#pragma mark - 获得聊天记录
 -(void)getChatLog
 {
     if (isGroup)
@@ -470,6 +508,63 @@ EGORefreshTableHeaderDelegate>
         [request startAsynchronous];
     }
 
+}
+
+-(void)getMsgContentWithMid:(NSString *)mid
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"t_id":toID,
+                                                                      @"m_id":mid
+                                                                      } API:GETCHATLOGBYID];
+        [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"chat msg content =responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                NSDictionary *fullChatDict = [responseDict objectForKey:@"data"];
+                NSArray *chatLogArray = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"mid":[[responseDict objectForKey:@"data"] objectForKey:@"_id"]} andTableName:CHATTABLE];
+                if ([chatLogArray count] > 0)
+                {
+                    NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithDictionary:[chatLogArray firstObject]];
+                    [tmpDict setObject:[fullChatDict objectForKey:@"msg"] forKey:@"content"];
+                    [tmpDict setObject:toID forKey:@"fid"];
+                    if (([db updeteKey:@"content" toValue:[fullChatDict objectForKey:@"msg"]
+                         withParaDict:@{@"userid":[Tools user_id],@"mid":[[responseDict objectForKey:@"data"] objectForKey:@"_id"]}
+                         andTableName:CHATTABLE])&&
+                        ([db updeteKey:@"fid" toValue:toID
+                         withParaDict:@{@"userid":[Tools user_id],@"mid":[[responseDict objectForKey:@"data"] objectForKey:@"_id"]}
+                         andTableName:CHATTABLE]))
+                    {
+                        DDLOG(@"update full chat log success!");
+                    }
+                    [messageArray insertObject:tmpDict atIndex:[messageArray count]];
+                    [self reloadTableView];
+                }
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        
+            
+        }];
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools hideProgress:self.bgView];
+        }];
+        [Tools showProgress:self.bgView];
+        [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
 }
 
 -(void)getGroupInfo
@@ -591,7 +686,7 @@ EGORefreshTableHeaderDelegate>
     }
 }
 
-#pragma mark - lastViewTime
+#pragma mark - 更新聊天时间
 -(void)uploadLastViewTime
 {
     if ([[Tools user_id] length] == 0)
@@ -643,7 +738,7 @@ EGORefreshTableHeaderDelegate>
 
 }
 
-#pragma mark - returnfunctionDelegate
+#pragma mark - 关于键盘
 -(void)selectPic:(int)selectPicTag
 {
     [inputTabBar backKeyBoard];
@@ -769,13 +864,20 @@ EGORefreshTableHeaderDelegate>
     }];
 }
 
--(void)dealNewChatMsg
-{
-    [self dealNewChatMsg:nil];
-}
-#pragma mark - chatDelegate
+#pragma mark - 聊天代理
 -(void)dealNewChatMsg:(NSDictionary *)dict
 {
+    if (dict && [dict count] > 0)
+    {
+        if ([[dict objectForKey:@"l"] intValue] == 1)
+        {
+            [self getMsgContentWithMid:[dict objectForKey:@"mid"]];
+            return;
+        }
+        [messageArray addObject:dict];
+        [self reloadTableView];
+        return;
+    }
     if ([[Tools user_id] length] == 0)
     {
         return ;
@@ -808,7 +910,7 @@ EGORefreshTableHeaderDelegate>
                        ||![toID isEqualToString:OurTeamID])
                     {
                         if (![showTimesArray containsObject:[tmpDict objectForKey:@"time"]])
-                        {
+                          {
                             [showTimesArray addObject:[tmpDict objectForKey:@"time"]];
                         }
                     }
@@ -823,22 +925,7 @@ EGORefreshTableHeaderDelegate>
             }
             [db updeteKey:@"readed" toValue:@"1" withParaDict:@{@"fid":[tmpDict objectForKey:@"fid"],@"userid":[Tools user_id]} andTableName:CHATTABLE];
         }
-        [messageTableView reloadData];
-    }
-    
-    if (tmpheight > 0)
-    {
-        if (messageTableView.frame.size.height - messageTableView.contentSize.height < tmpheight)
-        {
-            messageTableView.contentOffset = CGPointMake(0, (tmpheight - (messageTableView.frame.size.height - messageTableView.contentSize.height)));
-        }
-        else
-        {
-            if (messageTableView.contentSize.height > tmpheight)
-            {
-                messageTableView.contentOffset = CGPointMake(0, messageTableView.contentSize.height-messageTableView.frame.size.height+tmpheight);
-            }
-        }
+        [self reloadTableView];
     }
     if ([self.chatVcDel respondsToSelector:@selector(updateChatList:)])
     {
@@ -846,7 +933,7 @@ EGORefreshTableHeaderDelegate>
     }
 }
 
-#pragma mark - takepicture
+#pragma mark - 选照片
 
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
@@ -1065,6 +1152,7 @@ EGORefreshTableHeaderDelegate>
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
+    DDLOG(@"messageArray=%@",messageArray);
     return [messageArray count];
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -1129,6 +1217,8 @@ EGORefreshTableHeaderDelegate>
     cell.msgImageView.tag = indexPath.row;
     [cell.msgImageView addGestureRecognizer:[[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(tapImage:)]];
     cell.msgImageView.userInteractionEnabled = YES;
+    
+    DDLOG(@"%d+++++%@",indexPath.row,[dict objectForKey:@"content"]);
     
     if (!isGroup)
     {
@@ -1417,7 +1507,7 @@ EGORefreshTableHeaderDelegate>
     [self dealNewChatMsg:nil];
 }
 
-#pragma mark - sendMsg
+#pragma mark - 发送消息
 -(void)sendMsgWithString:(NSString *)msgContent
 {
     if ([Tools NetworkReachable])
@@ -1450,34 +1540,35 @@ EGORefreshTableHeaderDelegate>
             DDLOG(@"chat responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                    NSMutableDictionary *chatDict = [[NSMutableDictionary alloc] initWithCapacity:0];
-                    NSString *messageID = [[responseDict objectForKey:@"data"] objectForKey:@"m_id"];
-                    
-                    [chatDict setObject:messageID forKey:@"mid"];
-                    [chatDict setObject:msgContent forKey:@"content"];
-                    [chatDict setObject:[Tools user_id] forKey:@"userid"];
-                    [chatDict setObject:[Tools user_id] forKey:@"fid"];
-                    [chatDict setObject:[Tools user_name] forKey:@"fname"];
-                    [chatDict setObject:@"null" forKey:@"ficon"];
-                    [chatDict setObject:[NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"] objectForKey:@"time"] integerValue]] forKey:@"time"];
-                    [chatDict setObject:@"t" forKey:@"direct"];
-                    [chatDict setObject:@"text" forKey:@"msgType"];
-                    [chatDict setObject:toID forKey:@"tid"];
-                    [chatDict setObject:@"1" forKey:@"readed"];
-                    if (isGroup)
-                    {
-                        [chatDict setObject:[Tools user_id] forKey:@"by"];
-                    }
-                    
-                    if ([[db findSetWithDictionary:@{@"mid":messageID,@"userid":[Tools user_id]} andTableName:CHATTABLE] count] == 0)
-                    {
-                        [db insertRecord:chatDict andTableName:CHATTABLE];
-                    }
-                    if ([self.chatVcDel respondsToSelector:@selector(updateChatList:)])
-                    {
-                        [self.chatVcDel updateChatList:YES];
-                    }
-                    [self dealNewChatMsg:nil];
+                NSMutableDictionary *chatDict = [[NSMutableDictionary alloc] initWithCapacity:0];
+                NSString *messageID = [[responseDict objectForKey:@"data"] objectForKey:@"m_id"];
+                
+                [chatDict setObject:messageID forKey:@"mid"];
+            
+                [chatDict setObject:[CommonFunc from16To10:[messageID substringToIndex:8]] forKey:@"time"];
+                [chatDict setObject:msgContent forKey:@"content"];
+                [chatDict setObject:[Tools user_id] forKey:@"userid"];
+                [chatDict setObject:[Tools user_id] forKey:@"fid"];
+                [chatDict setObject:[Tools user_name] forKey:@"fname"];
+                [chatDict setObject:@"null" forKey:@"ficon"];
+                [chatDict setObject:@"t" forKey:@"direct"];
+                [chatDict setObject:@"text" forKey:@"msgType"];
+                [chatDict setObject:toID forKey:@"tid"];
+                [chatDict setObject:@"1" forKey:@"readed"];
+                if (isGroup)
+                {
+                    [chatDict setObject:[Tools user_id] forKey:@"by"];
+                }
+                
+                if ([[db findSetWithDictionary:@{@"mid":messageID,@"userid":[Tools user_id]} andTableName:CHATTABLE] count] == 0)
+                {
+                    [db insertRecord:chatDict andTableName:CHATTABLE];
+                }
+                if ([self.chatVcDel respondsToSelector:@selector(updateChatList:)])
+                {
+                    [self.chatVcDel updateChatList:YES];
+                }
+                [self dealNewChatMsg:chatDict];
             }
             else
             {

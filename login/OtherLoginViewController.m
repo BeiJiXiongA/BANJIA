@@ -199,6 +199,7 @@ static int loginID;
                 [ud setObject:[dict objectForKey:@"img_icon"] forKey:HEADERIMAGE];
                 [ud setObject:[dict objectForKey:@"r_name"] forKey:USERNAME];
                 [ud setObject:[dict objectForKey:@"opt"] forKey:@"useropt"];
+                [ud setObject:[dict objectForKey:@"number"] forKey:BANJIANUM];
                 
                 NSString *a_type = [accountDict objectForKey:@"a_type"];
                 if ([a_type isEqualToString:@"qq"])

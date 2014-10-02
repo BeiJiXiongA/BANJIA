@@ -64,6 +64,12 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     return [mobilePredicate evaluateWithObject:numStr];
 }
 
++(BOOL)isNumberStr:(NSString *)numStr
+{
+    NSString *studentsNum = @"([0-9]{0,}";
+    NSPredicate *studentsPredicate = [NSPredicate predicateWithFormat:@"SELF MATCHES %@",studentsNum];
+    return [studentsPredicate evaluateWithObject:numStr];
+}
 
 +(BOOL)isStudentsNumber:(NSString *)numStr
 {

@@ -15,7 +15,7 @@
 #import "CheckTools.h"
 #import "APService.h"
 #import "DXAlertView.h"
-
+#import "CommonFunc.h"
 
 #define FaceViewHeight  200
 

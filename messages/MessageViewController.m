@@ -172,10 +172,10 @@ ChatVCDelegate>
             DDLOG(@"newchatlist responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
+                [newMessageArray removeAllObjects];
+                
                 if ([[responseDict objectForKey:@"data"] isKindOfClass:[NSDictionary class]])
                 {
-                    [newMessageArray removeAllObjects];
-                    
                     NSArray *tmpArray = [[responseDict objectForKey:@"data"] allValues];
                     NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithCapacity:0];
                     for (int i=0;i<[tmpArray count];i++)
@@ -183,11 +183,13 @@ ChatVCDelegate>
                         NSDictionary *dict = [tmpArray objectAtIndex:i];
                         if (currentId && ![currentId isEqualToString:[dict objectForKey:@"tid"]])
                         {
-                            [unreadCountDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"new"] intValue]] forKey:[dict objectForKey:@"tid"]];
+                            [unreadCountDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"new"] intValue]]
+                                                forKey:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"tid"] intValue]]];
                         }
                         else if(!currentId)
                         {
-                            [unreadCountDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"new"] intValue]] forKey:[dict objectForKey:@"tid"]];
+                            [unreadCountDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"new"] intValue]]
+                                                forKey:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"tid"] intValue]]];
                         }
                         
                         [tmpDict setObject:[dict objectForKey:@"tid"] forKey:@"fid"];
@@ -209,7 +211,9 @@ ChatVCDelegate>
                         
                         NSDictionary *userIconDict = @{@"uid":[dict objectForKey:@"tid"],
                                                        @"uicon":[dict objectForKey:@"img_icon"],
-                                                       @"username":[dict objectForKey:@"r_name"]};
+                                                       @"username":[dict objectForKey:@"r_name"],
+                                                       @"unum":[dict objectForKey:@"number"]};
+                        
                         if ([[db findSetWithDictionary:@{@"uid":[dict objectForKey:@"tid"]} andTableName:USERICONTABLE] count] > 0)
                         {
                             [db deleteRecordWithDict:@{@"uid":[dict objectForKey:@"tid"]} andTableName:USERICONTABLE];
@@ -228,12 +232,13 @@ ChatVCDelegate>
                             }
                         }
                     }
+                    [self dealNewChatMsg:nil];
                 }
                 else
                 {
-                    [unreadCountDict removeAllObjects];
+                    [self dealNewChatMsg:nil];
                 }
-                [self dealNewChatMsg:nil];
+                
                 _reloading = NO;
                 [pullRefreshView egoRefreshScrollViewDataSourceDidFinishedLoading:friendsListTableView];
             }
@@ -292,7 +297,7 @@ ChatVCDelegate>
     {
         return ;
     }
-    if(dict)
+    if(dict && [dict isKindOfClass:[NSDictionary class]] && [dict count] > 0)
     {
         if ([Tools NetworkReachable])
         {
@@ -360,14 +365,16 @@ ChatVCDelegate>
 
 -(NSDictionary *)findLastMsgWithUser:(NSString *)fid
 {
-    NSMutableArray *array = [db findChatLogWithUid:[Tools user_id] andOtherId:fid andTableName:CHATTABLE];
+    NSMutableArray *array = [db findChatLogWithUid:[Tools banjia_num] andOtherId:fid andTableName:CHATTABLE];
     return [array lastObject];
 }
 
 -(int)findCountOfUserId:(NSString *)fid
 {
+    DDLOG(@"%@",[unreadCountDict objectForKey:fid]);
     if ([unreadCountDict objectForKey:fid] && [[unreadCountDict objectForKey:fid] intValue] > 0)
     {
+        DDLOG(@"%@",[unreadCountDict objectForKey:fid]);
         return [[unreadCountDict objectForKey:fid] intValue];
     }
     NSMutableArray *array = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"fid":fid,@"readed":@"0"} andTableName:CHATTABLE];
@@ -486,7 +493,7 @@ ChatVCDelegate>
     
    
     
-    int unreadMsgCount = [self findCountOfUserId:otherid];
+    int unreadMsgCount = [self findCountOfUserId:[NSString stringWithFormat:@"%d",[otherid integerValue]]];
     if (unreadMsgCount > 0)
     {
         cell.unreadedMsgLabel.text = [NSString stringWithFormat:@"%d",unreadMsgCount];
@@ -597,6 +604,7 @@ ChatVCDelegate>
     
     ChatViewController *chat = [[ChatViewController alloc] init];
     chat.toID = otherid;
+    
     chat.chatVcDel = self;
     chat.fromClass = NO;
     

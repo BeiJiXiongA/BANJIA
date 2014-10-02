@@ -27,6 +27,7 @@
 +(BOOL)isStudentsNumber:(NSString *)numStr;
 +(BOOL)isMailAddress:(NSString *)mailStr;
 +(BOOL)isPassWord:(NSString *)passStr;
++(BOOL)isNumberStr:(NSString *)numStr;
 +(BOOL)islogin;
 +(void)exit;
 
