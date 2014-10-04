@@ -31,6 +31,10 @@
 
 @property (nonatomic, strong) NSString *number;
 
+@property (nonatomic, strong) NSString *timeStr;
+
+@property (nonatomic, assign) int unReadedNumber;
+
 @property (nonatomic, assign) int unreadCount;
 
 @end

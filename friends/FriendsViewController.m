@@ -454,7 +454,7 @@ OperateFriends>
         else  if(indexPath.row == 1 && [groupChatArray count] > 0)
         {
             cell.headerImageView.hidden = NO;
-            cell.headerImageView.frame = CGRectMake(10, 9, 34, 34);
+            cell.headerImageView.frame = CGRectMake(14, 9, 34, 34);
             [cell.headerImageView setImage:[UIImage imageNamed:@"groupchatheader"]];
             
             cell.contentLabel.frame = CGRectMake(60, 1.5, 178, 47);
@@ -687,19 +687,24 @@ OperateFriends>
                 [db insertRecord:tmpDict andTableName:FRIENDSTABLE];
                 
                 
-                NSDictionary *userIconDict = @{@"uid":[dict objectForKey:@"_id"],
-                                               @"uicon":[dict objectForKey:@"img_icon"],
-                                               @"username":[dict objectForKey:@"name"],
-                                               @"unum":[dict objectForKey:@"number"]};
-                
-                if ([[db findSetWithDictionary:@{@"unum":[dict objectForKey:@"number"]} andTableName:USERICONTABLE] count] > 0)
+                if ([dict objectForKey:@"number"] &&
+                    [dict objectForKey:@"_id"] &&
+                    [dict objectForKey:@"img_icon"])
                 {
-                    [db deleteRecordWithDict:@{@"unum":[dict objectForKey:@"number"]} andTableName:USERICONTABLE];
-                    [db insertRecord:userIconDict andTableName:USERICONTABLE];
-                }
-                else
-                {
-                    [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                    NSDictionary *userIconDict = @{@"uid":[dict objectForKey:@"_id"],
+                                                   @"uicon":[dict objectForKey:@"img_icon"],
+                                                   @"username":[dict objectForKey:@"name"],
+                                                   @"unum":[dict objectForKey:@"number"]};
+                    
+                    if ([[db findSetWithDictionary:@{@"unum":[dict objectForKey:@"number"]} andTableName:USERICONTABLE] count] > 0)
+                    {
+                        [db deleteRecordWithDict:@{@"unum":[dict objectForKey:@"number"]} andTableName:USERICONTABLE];
+                        [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                    }
+                    else
+                    {
+                        [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                    }
                 }
 
             }

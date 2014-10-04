@@ -173,6 +173,9 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     {
         [ud setObject:[Tools phone_num] forKey:LAST_PHONENUM];
     }
+    [ud removeObjectForKey:NewChatMsgNum];
+    [ud removeObjectForKey:NewClassNum];
+    [ud removeObjectForKey:UCFRIENDSUM];
     [ud removeObjectForKey:PHONENUM];
     [ud synchronize];
 }

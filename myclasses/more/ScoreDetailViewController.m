@@ -90,11 +90,27 @@
     headerLabel.backgroundColor = self.bgView.backgroundColor;
     if (stuName)
     {
-         headerLabel.text = [NSString stringWithFormat:@"%@的成绩", stuName];
+        if ([objectArray count] == 0)
+        {
+            headerLabel.text = [NSString stringWithFormat:@"%@本次考试没有成绩", stuName];
+        }
+        else
+        {
+            headerLabel.text = [NSString stringWithFormat:@"%@的成绩", stuName];
+        }
+        
     }
     else
     {
-         headerLabel.text = @"我的成绩";
+        if ([objectArray count] == 0)
+        {
+            headerLabel.text = @"您本次考试没有成绩";
+        }
+        else
+        {
+             headerLabel.text = @"我的成绩";
+        }
+        
     }
    
     headerLabel.textColor = COMMENTCOLOR;

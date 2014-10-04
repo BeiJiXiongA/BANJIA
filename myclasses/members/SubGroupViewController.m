@@ -82,7 +82,7 @@ updateGroupInfoDelegate>
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return 60;
+    return 50;
 }
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -96,7 +96,7 @@ updateGroupInfoDelegate>
             cell = [[MemberCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:memCell];
         }
         NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
-        cell.headerImageView.frame = CGRectMake(10, 7, 46, 46);
+        cell.headerImageView.frame = CGRectMake(14, 7, 34, 34);
         cell.headerImageView.layer.cornerRadius = 5;
         cell.headerImageView.clipsToBounds = YES;
 
@@ -104,7 +104,7 @@ updateGroupInfoDelegate>
 
         [Tools fillImageView:cell.headerImageView withImageFromURL:[dict objectForKey:@"ficon"] andDefault:HEADERICON];
 
-        cell.memNameLabel.frame = CGRectMake(70, 15, 150, 30);
+        cell.memNameLabel.frame = CGRectMake(60, 10, 150, 30);
         cell.memNameLabel.text = [dict objectForKey:@"fname"];
 
         cell.button1.hidden = NO;
@@ -154,8 +154,10 @@ updateGroupInfoDelegate>
             cell.memNameLabel.text = [dict objectForKey:@"fname"];
         }
         
-        cell.memNameLabel.frame = CGRectMake(70, 15, 220, 30);
+        cell.memNameLabel.frame = CGRectMake(60, 10, 220, 30);
         [cell.headerImageView setImage:[UIImage imageNamed:@"headpic.jpg"]];
+        cell.headerImageView.layer.cornerRadius = 5;
+        cell.headerImageView.clipsToBounds = YES;
         
         CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
         UIImageView *lineImageView = [[UIImageView alloc] init];

@@ -107,7 +107,7 @@ EGORefreshTableHeaderDelegate>
 @end
 
 @implementation ChatViewController
-@synthesize name,toID,imageUrl,chatVcDel,fromClass,isGroup,unreadCount,number;
+@synthesize name,toID,imageUrl,chatVcDel,fromClass,isGroup,unreadCount,number,timeStr,unReadedNumber;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -163,7 +163,7 @@ EGORefreshTableHeaderDelegate>
     db = [[OperatDB alloc] init];
     
 //    [db deleteRecordWithDict:@{@"userid":[Tools user_id]} andTableName:CHATTABLE];
-    
+    timeStr = @"0";
     currentSec = 0;
     iseditting = NO;
     page = 0;
@@ -243,14 +243,40 @@ EGORefreshTableHeaderDelegate>
         }
         else
         {
-            [self getChatLog];
+            NSArray *cacheChatArray = [db findChatLogWithUid:[Tools user_id]
+                                                  andOtherId:toID
+                                                andTableName:CHATTABLE
+                                                       start:[messageArray count] count:10];
+            if ([cacheChatArray count] > 0 && [cacheChatArray count] >= unReadedNumber)
+            {
+                for (int i=0; i<[cacheChatArray count]; i++)
+                {
+                    [messageArray insertObject:[cacheChatArray objectAtIndex:i] atIndex:0];
+                }
+                [self reloadTableView];
+            }
+            else
+            {
+                timeStr = @"9999999999";
+                [self getChatLog];
+            }
         }
     }
     else
     {
         [self dealNewChatMsg:nil];
     }
-    [self dealNewChatMsg:nil];
+    
+    if (isGroup)
+    {
+        [moreButton setImage:[UIImage imageNamed:@"newapplyheader"] forState:UIControlStateNormal];
+        [moreButton addTarget:self action:@selector(groupInfo) forControlEvents:UIControlEventTouchUpInside];
+    }
+    else
+    {
+        [moreButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
+        [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
+    }
     
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = self;
     
@@ -341,12 +367,33 @@ EGORefreshTableHeaderDelegate>
 #pragma mark - 下拉刷新
 -(void)egoRefreshTableHeaderDidTriggerRefresh:(EGORefreshTableHeaderView *)view
 {
-    if (unreadCount > 0)
+    if ([messageArray count] > 0)
     {
-        page ++;
+        NSArray *cacheChatArray = [db findChatLogWithUid:[Tools user_id]
+                                              andOtherId:toID
+                                            andTableName:CHATTABLE
+                                                   start:[messageArray count] count:10];
+        if ([cacheChatArray count] > 0)
+        {
+            for (int i=0; i<[cacheChatArray count]; i++)
+            {
+                [messageArray insertObject:[cacheChatArray objectAtIndex:i] atIndex:0];
+            }
+            [self reloadTableView];
+        }
+        else
+        {
+            NSDictionary *firstDict = [messageArray firstObject];
+            timeStr = [firstDict objectForKey:@"time"];
+            [self getChatLog];
+        }
+    }
+    else
+    {
+        timeStr = @"9999999999";
         [self getChatLog];
     }
-    //    [self dealNewChatMsg:nil];
+    
 }
 
 - (BOOL)egoRefreshTableHeaderDataSourceIsLoading:(EGORefreshTableHeaderView*)view
@@ -377,6 +424,36 @@ EGORefreshTableHeaderDelegate>
 #pragma mark - 刷新消息列表
 -(void)reloadTableView
 {
+    [showTimesArray removeAllObjects];
+    for (int i=0; i<[messageArray count]; ++i)
+    {
+        NSDictionary *tmpDict = [messageArray objectAtIndex:i];
+        if ((ABS(([[tmpDict objectForKey:@"time"] integerValue] - currentSec)) >= 60*3) || i==0)
+        {
+            currentSec = [[tmpDict objectForKey:@"time"] integerValue];
+            if(!isGroup)
+            {
+                if(([toID isEqualToString:OurTeamID] &&
+                    [[tmpDict objectForKey:DIRECT] isEqualToString:@"t"])
+                   ||![toID isEqualToString:OurTeamID])
+                {
+                    if (![showTimesArray containsObject:[tmpDict objectForKey:@"time"]])
+                    {
+                        [showTimesArray addObject:[tmpDict objectForKey:@"time"]];
+                    }
+                }
+            }
+            else if((isGroup && [[tmpDict objectForKey:DIRECT] isEqualToString:@"t"]))
+            {
+                if (![showTimesArray containsObject:[tmpDict objectForKey:@"time"]])
+                {
+                    [showTimesArray addObject:[tmpDict objectForKey:@"time"]];
+                }
+            }
+        }
+        [db updeteKey:@"readed" toValue:@"1" withParaDict:@{@"fid":[tmpDict objectForKey:@"fid"],@"userid":[Tools user_id]} andTableName:CHATTABLE];
+    }
+    
     [messageTableView reloadData];
     
     if (tmpheight > 0)
@@ -397,17 +474,6 @@ EGORefreshTableHeaderDelegate>
             messageTableView.contentOffset = CGPointMake(0, messageTableView.contentSize.height-messageTableView.frame.size.height+tmpheight);
         }
     }
-//    if (tmpheight > 0 && messageTableView.frame.size.height - messageTableView.contentSize.height < tmpheight)
-//    {
-//        messageTableView.contentOffset = CGPointMake(0, (tmpheight - (messageTableView.frame.size.height - messageTableView.contentSize.height)));
-//    }
-//    else if(tmpheight == 0 && messageTableView.contentSize.height - messageTableView.frame.size.height > 0)
-//    {
-//        if (messageTableView.contentSize.height > tmpheight)
-//        {
-//            messageTableView.contentOffset = CGPointMake(0, messageTableView.contentSize.height-messageTableView.frame.size.height+tmpheight);
-//        }
-//    }
 }
 
 
@@ -415,16 +481,6 @@ EGORefreshTableHeaderDelegate>
 #pragma mark - 获得聊天记录
 -(void)getChatLog
 {
-    if (isGroup)
-    {
-        [moreButton setImage:[UIImage imageNamed:@"newapplyheader"] forState:UIControlStateNormal];
-        [moreButton addTarget:self action:@selector(groupInfo) forControlEvents:UIControlEventTouchUpInside];
-    }
-    else
-    {
-        [moreButton setImage:[UIImage imageNamed:CornerMore] forState:UIControlStateNormal];
-        [moreButton addTarget:self action:@selector(moreClick) forControlEvents:UIControlEventTouchUpInside];
-    }
     if ([Tools NetworkReachable])
     {
         NSDictionary *paraDict;
@@ -433,7 +489,7 @@ EGORefreshTableHeaderDelegate>
             paraDict = @{@"u_id":[Tools user_id],
                          @"token":[Tools client_token],
                          @"g_id":toID,
-                         @"page":[NSString stringWithFormat:@"%d",page]
+                         @"time":timeStr
                          };
         }
         else
@@ -441,7 +497,7 @@ EGORefreshTableHeaderDelegate>
             paraDict = @{@"u_id":[Tools user_id],
                          @"token":[Tools client_token],
                          @"t_id":toID,
-                         @"page":[NSString stringWithFormat:@"%d",page]
+                         @"time":timeStr
                          };
         }
         
@@ -453,6 +509,12 @@ EGORefreshTableHeaderDelegate>
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 //NTNhM2U1OWIzNGRhYjVkODFjOGI0NWIy
+                
+                if ([timeStr length] > 0 && ![timeStr isEqualToString:@"9999999999"] && [[responseDict objectForKey:@"data"] count] == 0)
+                {
+                    [Tools showTips:@"已经没有历史消息了" toView:self.bgView];
+                    return ;
+                }
                 NSArray *array = [[NSArray alloc] initWithArray:[responseDict objectForKey:@"data"]];
                 for (int i=0; i<[array count]; ++i)
                 {
@@ -514,11 +576,24 @@ EGORefreshTableHeaderDelegate>
 {
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
-                                                                      @"token":[Tools client_token],
-                                                                      @"t_id":toID,
-                                                                      @"m_id":mid
-                                                                      } API:GETCHATLOGBYID];
+        NSDictionary *paraDict;
+        if(isGroup)
+        {
+            paraDict = @{@"u_id":[Tools user_id],
+                         @"token":[Tools client_token],
+                         @"g_id":toID,
+                         @"m_id":mid
+                         };
+        }
+        else
+        {
+            paraDict = @{@"u_id":[Tools user_id],
+                         @"token":[Tools client_token],
+                         @"t_id":toID,
+                         @"m_id":mid
+                         };
+        }
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:paraDict API:GETCHATLOGBYID];
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
             NSString *responseString = [request responseString];
@@ -527,23 +602,50 @@ EGORefreshTableHeaderDelegate>
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 NSDictionary *fullChatDict = [responseDict objectForKey:@"data"];
-                NSArray *chatLogArray = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"mid":[[responseDict objectForKey:@"data"] objectForKey:@"_id"]} andTableName:CHATTABLE];
-                if ([chatLogArray count] > 0)
+                if ([fullChatDict isKindOfClass:[NSDictionary class]])
                 {
-                    NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithDictionary:[chatLogArray firstObject]];
-                    [tmpDict setObject:[fullChatDict objectForKey:@"msg"] forKey:@"content"];
-                    [tmpDict setObject:toID forKey:@"fid"];
-                    if (([db updeteKey:@"content" toValue:[fullChatDict objectForKey:@"msg"]
-                         withParaDict:@{@"userid":[Tools user_id],@"mid":[[responseDict objectForKey:@"data"] objectForKey:@"_id"]}
-                         andTableName:CHATTABLE])&&
-                        ([db updeteKey:@"fid" toValue:toID
-                         withParaDict:@{@"userid":[Tools user_id],@"mid":[[responseDict objectForKey:@"data"] objectForKey:@"_id"]}
-                         andTableName:CHATTABLE]))
+                    NSArray *chatLogArray = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"mid":[[responseDict objectForKey:@"data"] objectForKey:@"_id"]} andTableName:CHATTABLE];
+                    if ([chatLogArray count] > 0)
                     {
-                        DDLOG(@"update full chat log success!");
+                        NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithDictionary:[chatLogArray firstObject]];
+                        if (isGroup)
+                        {
+                            [tmpDict setObject:[fullChatDict objectForKey:@"msg"] forKey:@"content"];
+                            [tmpDict setObject:toID forKey:@"fid"];
+                            [tmpDict setObject:[fullChatDict objectForKey:@"by"] forKey:@"by"];
+                            if(([db updeteKey:@"content" toValue:[fullChatDict objectForKey:@"msg"]
+                                  withParaDict:@{@"userid":[Tools user_id],@"mid":[[responseDict objectForKey:@"data"] objectForKey:@"_id"]}
+                                  andTableName:CHATTABLE])&&
+                                ([db updeteKey:@"fid" toValue:toID
+                                  withParaDict:@{@"userid":[Tools user_id],@"mid":[[responseDict objectForKey:@"data"] objectForKey:@"_id"]}
+                                  andTableName:CHATTABLE]) &&
+                                ([db updeteKey:@"by" toValue:[fullChatDict objectForKey:@"by"] withParaDict:@{@"userid":[Tools user_id],@"mid":[[responseDict objectForKey:@"data"] objectForKey:@"_id"]} andTableName:CHATTABLE]) &&
+                               ([db updeteKey:@"readed" toValue:@"1" withParaDict:@{@"userid":[Tools user_id],@"mid":[[responseDict objectForKey:@"data"] objectForKey:@"_id"]} andTableName:CHATTABLE]))
+                            {
+                                DDLOG(@"update full chat log success!");
+                            }
+                            [messageArray insertObject:tmpDict atIndex:[messageArray count]];
+                            [self reloadTableView];
+                        }
+                        else
+                        {
+                            
+                            [tmpDict setObject:[fullChatDict objectForKey:@"msg"] forKey:@"content"];
+                            [tmpDict setObject:toID forKey:@"fid"];
+                            if (([db updeteKey:@"content" toValue:[fullChatDict objectForKey:@"msg"]
+                                  withParaDict:@{@"userid":[Tools user_id],@"mid":[[responseDict objectForKey:@"data"] objectForKey:@"_id"]}
+                                  andTableName:CHATTABLE])&&
+                                ([db updeteKey:@"fid" toValue:toID
+                                  withParaDict:@{@"userid":[Tools user_id],@"mid":[[responseDict objectForKey:@"data"] objectForKey:@"_id"]}
+                                  andTableName:CHATTABLE]) &&
+                                ([db updeteKey:@"readed" toValue:@"1" withParaDict:@{@"userid":[Tools user_id],@"mid":[[responseDict objectForKey:@"data"] objectForKey:@"_id"]} andTableName:CHATTABLE]))
+                            {
+                                DDLOG(@"update full chat log success!");
+                            }
+                            [messageArray insertObject:tmpDict atIndex:[messageArray count]];
+                            [self reloadTableView];
+                        }
                     }
-                    [messageArray insertObject:tmpDict atIndex:[messageArray count]];
-                    [self reloadTableView];
                 }
             }
             else
@@ -629,6 +731,7 @@ EGORefreshTableHeaderDelegate>
                         [tmpDict setObject:@"" forKey:@"uicon"];
                     }
                     [tmpDict setObject:[dict objectForKey:@"r_name"] forKey:@"username"];
+                    [tmpDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"number"] intValue]] forKey:@"unum"];
                     if ([[db findSetWithDictionary:@{@"uid":[dict objectForKey:@"_id"]} andTableName:USERICONTABLE] count]>0)
                     {
                         [db deleteRecordWithDict:@{@"uid":[dict objectForKey:@"_id"]} andTableName:USERICONTABLE];
@@ -649,7 +752,7 @@ EGORefreshTableHeaderDelegate>
                 }
                 
                 name = [[responseDict objectForKey:@"data"] objectForKey:@"name"];
-                NSDictionary *userIconDict = @{@"uid":toID,@"username":name,@"uicon":@""};
+                NSDictionary *userIconDict = @{@"uid":toID,@"username":name,@"uicon":@"",@"unum":@""};
                 if ([[db findSetWithDictionary:@{@"uid":toID} andTableName:USERICONTABLE] count] > 0)
                 {
                     [db deleteRecordWithDict:@{@"uid":toID} andTableName:USERICONTABLE];
@@ -669,7 +772,23 @@ EGORefreshTableHeaderDelegate>
                     g_r_a = @"";
                     g_a_f = @"";
                 }
-                [self getChatLog];
+                NSArray *cacheChatArray = [db findChatLogWithUid:[Tools user_id]
+                                                      andOtherId:toID
+                                                    andTableName:CHATTABLE
+                                                           start:[messageArray count] count:10];
+                if ([cacheChatArray count] > 0 && [cacheChatArray count] >= unReadedNumber)
+                {
+                    for (int i=0; i<[cacheChatArray count]; i++)
+                    {
+                        [messageArray insertObject:[cacheChatArray objectAtIndex:i] atIndex:0];
+                    }
+                    [self reloadTableView];
+                }
+                else
+                {
+                    timeStr = @"9999999999";
+                    [self getChatLog];
+                }
             }
             else
             {
@@ -874,7 +993,31 @@ EGORefreshTableHeaderDelegate>
             [self getMsgContentWithMid:[dict objectForKey:@"mid"]];
             return;
         }
-        [messageArray addObject:dict];
+        if (isGroup)
+        {
+            NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithDictionary:dict];
+            NSArray *usericonArray = [db findSetWithDictionary:@{@"unum":[dict objectForKey:@"by"]} andTableName:USERICONTABLE];
+            if ([usericonArray count] > 0)
+            {
+                NSDictionary *userIcon = [usericonArray firstObject];
+                [tmpDict setObject:[userIcon objectForKey:@"uid"] forKey:@"by"];
+                [tmpDict setObject:[Tools user_id] forKey:[Tools user_id]];
+                if([db updeteKey:@"by" toValue:[userIcon objectForKey:@"uid"] withParaDict:@{@"userid":[Tools user_id],@"mid":[dict objectForKey:@"mid"]} andTableName:USERICONTABLE] &&
+                   [db updeteKey:@"tid" toValue:[Tools user_id] withParaDict:@{@"userid":[Tools user_id],@"mid":[dict objectForKey:@"mid"]} andTableName:USERICONTABLE] &&
+                   [db updeteKey:@"readed" toValue:@"1" withParaDict:@{@"userid":[Tools user_id],@"mid":[dict objectForKey:@"mid"]} andTableName:USERICONTABLE])
+                {
+                    DDLOG(@"update full chat log success!");
+                }
+            }
+            [messageArray insertObject:tmpDict atIndex:[messageArray count]];
+            [self reloadTableView];
+            return;
+        }
+        else
+        {
+            [messageArray addObject:dict];
+        }
+        
         [self reloadTableView];
         return;
     }
@@ -887,6 +1030,7 @@ EGORefreshTableHeaderDelegate>
     {
         return ;
     }
+    
     [messageArray removeAllObjects];
     [messageArray addObjectsFromArray:[db findChatLogWithUid:[Tools user_id] andOtherId:toID andTableName:CHATTABLE]];
     if(dict && ([[dict objectForKey:@"content"] isEqualToString:@"给您发来一条新消息"]||
@@ -897,34 +1041,6 @@ EGORefreshTableHeaderDelegate>
     else
     {
         [showTimesArray removeAllObjects];
-        for (int i=0; i<[messageArray count]; ++i)
-        {
-            NSDictionary *tmpDict = [messageArray objectAtIndex:i];
-            if ((ABS(([[tmpDict objectForKey:@"time"] integerValue] - currentSec)) >= 60*3) || i==0)
-            {
-                currentSec = [[tmpDict objectForKey:@"time"] integerValue];
-                if(!isGroup)
-                {
-                    if(([toID isEqualToString:OurTeamID] &&
-                        [[tmpDict objectForKey:DIRECT] isEqualToString:@"t"])
-                       ||![toID isEqualToString:OurTeamID])
-                    {
-                        if (![showTimesArray containsObject:[tmpDict objectForKey:@"time"]])
-                          {
-                            [showTimesArray addObject:[tmpDict objectForKey:@"time"]];
-                        }
-                    }
-                }
-                else if((isGroup && [[tmpDict objectForKey:DIRECT] isEqualToString:@"t"]))
-                {
-                    if (![showTimesArray containsObject:[tmpDict objectForKey:@"time"]])
-                    {
-                        [showTimesArray addObject:[tmpDict objectForKey:@"time"]];
-                    }
-                }
-            }
-            [db updeteKey:@"readed" toValue:@"1" withParaDict:@{@"fid":[tmpDict objectForKey:@"fid"],@"userid":[Tools user_id]} andTableName:CHATTABLE];
-        }
         [self reloadTableView];
     }
     if ([self.chatVcDel respondsToSelector:@selector(updateChatList:)])
@@ -968,6 +1084,8 @@ EGORefreshTableHeaderDelegate>
     }
 }
 
+//加为好友
+
 -(void)addFriend
 {
     if ([Tools NetworkReachable])
@@ -1000,6 +1118,8 @@ EGORefreshTableHeaderDelegate>
         [request startAsynchronous];
     }
 }
+
+//拒绝好友
 
 -(void)releaseFriend
 {
@@ -1043,6 +1163,7 @@ EGORefreshTableHeaderDelegate>
     }
 }
 
+
 -(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
     [imagePickerController dismissViewControllerAnimated:YES completion:^{
@@ -1052,6 +1173,7 @@ EGORefreshTableHeaderDelegate>
     }];
     
 }
+
 
 -(void)sendImage:(UIImage *)image
 {
@@ -1214,11 +1336,10 @@ EGORefreshTableHeaderDelegate>
     NSDictionary *dict = [messageArray objectAtIndex:indexPath.row];
     cell.isGroup = isGroup;
     [cell setCellWithDict:dict];
+    DDLOG(@"%d+++%@",indexPath.row,dict);
     cell.msgImageView.tag = indexPath.row;
     [cell.msgImageView addGestureRecognizer:[[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(tapImage:)]];
     cell.msgImageView.userInteractionEnabled = YES;
-    
-    DDLOG(@"%d+++++%@",indexPath.row,[dict objectForKey:@"content"]);
     
     if (!isGroup)
     {
@@ -1233,8 +1354,8 @@ EGORefreshTableHeaderDelegate>
            ![toID isEqualToString:OurTeamID])
         {
             cell.timeLabel.hidden = NO;
-            NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
-            cell.timeLabel.text = timeStr;
+            NSString *time = [Tools showTime:[dict objectForKey:@"time"]];
+            cell.timeLabel.text = time;
             CGRect headerImageRect = cell.headerImageView.frame;
             CGRect chatBgRect = cell.chatBg.frame;
             CGRect msgContentLabelRect = cell.messageContentLabel.frame;
@@ -1257,8 +1378,8 @@ EGORefreshTableHeaderDelegate>
     else
     {
         cell.timeLabel.hidden = YES;
-        NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
-        cell.timeLabel.text = timeStr;
+        NSString *time = [Tools showTime:[dict objectForKey:@"time"]];
+        cell.timeLabel.text = time;
         CGRect headerImageRect = cell.headerImageView.frame;
         CGRect chatBgRect = cell.chatBg.frame;
         CGRect msgContentLabelRect = cell.messageContentLabel.frame;
@@ -1444,44 +1565,57 @@ EGORefreshTableHeaderDelegate>
     if ([[Tools JSonFromString:jsonStr] isKindOfClass:[NSDictionary class]])
     {
         NSDictionary *dict = [Tools JSonFromString:jsonStr];
-        scoreid = [dict objectForKey:@"e_id"];
-        [self getScoreDetail];
+        if ([[dict objectForKey:@"t"] isEqualToString:@"e_p"])
+        {
+            scoreid = [dict objectForKey:@"e_id"];
+            [self getScoreDetail];
+        }
+        else if ([[dict objectForKey:@"t"] isEqualToString:@"c_i"])
+        {
+            NSString *classID = [dict objectForKey:@"c_id"];
+            
+            NSRange range2 = [msgContent rangeOfString:@"["];
+            NSRange range3 = [msgContent rangeOfString:@"—"];
+            NSRange range4 = [msgContent rangeOfString:@"]"];
+            if ([self isInThisClass:classID])
+            {
+                [Tools showAlertView:@"您已经是这个班的一员了" delegateViewController:nil];
+                return;
+            }
+            
+            NSString *schoolName;
+            if (range2.length >0 && range4.length > 0 && range3.length > 0)
+            {
+                schoolName = [msgContent substringWithRange:NSMakeRange(range2.location+1,range4.location-range2.location-1)];
+            }
+            else
+            {
+                schoolName = @"";
+            }
+            
+            NSString *className;
+            if (range3.length >0 && range4.length>0)
+            {
+                className = [msgContent substringWithRange:NSMakeRange(range3.location+1, range4.location-range3.location-1)];
+            }
+            else
+            {
+                className = [msgContent substringWithRange:NSMakeRange(range2.location+1, range4.location-range2.location-1)];
+            }
+            
+            ClassZoneViewController *classZone = [[ClassZoneViewController alloc] init];
+            classZone.isApply = YES;
+            [[NSUserDefaults standardUserDefaults] setObject:classID forKey:@"classid"];
+            [[NSUserDefaults standardUserDefaults] setObject:className forKey:@"classname"];
+            [[NSUserDefaults standardUserDefaults] setObject:schoolName forKey:@"schoolname"];
+            [[NSUserDefaults standardUserDefaults] synchronize];
+            [self.navigationController pushViewController:classZone animated:YES];
+        }
     }
     else
     {
 //        1411142370
-        NSRange range1 = [msgContent rangeOfString:@"$!#"];
-        NSRange range2 = [msgContent rangeOfString:@"["];
-        NSRange range3 = [msgContent rangeOfString:@"—"];
-        NSRange range4 = [msgContent rangeOfString:@"]"];
-        //    NSRange range5 = [msgContent rangeOfString:@"("];
-        NSString *classID = [msgContent substringToIndex:range1.location];
-
-        if ([self isInThisClass:classID])
-        {
-            [Tools showAlertView:@"您已经是这个班的一员了" delegateViewController:nil];
-            return;
-        }
-
-        NSString *schoolName;
-        if (range2.length >0 && range4.length > 0 && range3.length > 0)
-        {
-            schoolName = [msgContent substringWithRange:NSMakeRange(range2.location+1,range4.location-range2.location-1)];
-        }
-
-        NSString *className;
-        if (range3.length >0 && range4.length>0)
-        {
-            className = [msgContent substringWithRange:NSMakeRange(range3.location+1, range4.location-range3.location-1)];
-        }
-
-        ClassZoneViewController *classZone = [[ClassZoneViewController alloc] init];
-        classZone.isApply = YES;
-        [[NSUserDefaults standardUserDefaults] setObject:classID forKey:@"classid"];
-        [[NSUserDefaults standardUserDefaults] setObject:className forKey:@"classname"];
-        [[NSUserDefaults standardUserDefaults] setObject:schoolName forKey:@"schoolname"];
-        [[NSUserDefaults standardUserDefaults] synchronize];
-        [self.navigationController pushViewController:classZone animated:YES];
+        
     }
 
 }
@@ -1554,6 +1688,10 @@ EGORefreshTableHeaderDelegate>
                 [chatDict setObject:@"t" forKey:@"direct"];
                 [chatDict setObject:@"text" forKey:@"msgType"];
                 [chatDict setObject:toID forKey:@"tid"];
+                if (isGroup)
+                {
+                    [chatDict setObject:[Tools user_id] forKey:@"by"];
+                }
                 [chatDict setObject:@"1" forKey:@"readed"];
                 if (isGroup)
                 {

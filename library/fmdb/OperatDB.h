@@ -62,5 +62,9 @@
                andTableName:(NSString *)tableName;
 -(NSMutableArray *)findChatLogWithUid:(NSString *)uid andOtherId:(NSString *)otherid
                          andTableName:(NSString *)tableName;
+
+-(NSMutableArray *)findChatLogWithUid:(NSString *)uid andOtherId:(NSString *)otherid
+                         andTableName:(NSString *)tableName start:(int)start count:(int)count;
+
 -(NSMutableArray *)findChatUseridWithTableName:(NSString *)tableName;
 @end

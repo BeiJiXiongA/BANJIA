@@ -86,7 +86,7 @@ ChatVCDelegate>
     self.returnImageView.hidden = YES;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewWillAppear:) name:UPDATECLASSNUMBER object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dealNewChatMsg:) name:RECEIVENEWMSG object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dealNewChatMsgNotification:) name:RECEIVENEWMSG object:nil];
     
     db = [[OperatDB alloc] init];
     
@@ -142,6 +142,8 @@ ChatVCDelegate>
     [[NSUserDefaults standardUserDefaults] setObject:@"chat" forKey:@"viewtype"];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
+    currentId = @"";
+    
     [self dealNewChatMsg:nil];
     [self dealNewMsg:nil];
 
@@ -184,12 +186,12 @@ ChatVCDelegate>
                         if (currentId && ![currentId isEqualToString:[dict objectForKey:@"tid"]])
                         {
                             [unreadCountDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"new"] intValue]]
-                                                forKey:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"tid"] intValue]]];
+                                                forKey:[dict objectForKey:@"tid"]];
                         }
                         else if(!currentId)
                         {
                             [unreadCountDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"new"] intValue]]
-                                                forKey:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"tid"] intValue]]];
+                                                forKey:[dict objectForKey:@"tid"]];
                         }
                         
                         [tmpDict setObject:[dict objectForKey:@"tid"] forKey:@"fid"];
@@ -209,26 +211,67 @@ ChatVCDelegate>
                             [tmpDict setObject:[msgDict objectForKey:@"by"] forKey:@"by"];
                         }
                         
-                        NSDictionary *userIconDict = @{@"uid":[dict objectForKey:@"tid"],
-                                                       @"uicon":[dict objectForKey:@"img_icon"],
-                                                       @"username":[dict objectForKey:@"r_name"],
-                                                       @"unum":[dict objectForKey:@"number"]};
-                        
-                        if ([[db findSetWithDictionary:@{@"uid":[dict objectForKey:@"tid"]} andTableName:USERICONTABLE] count] > 0)
+                        if ([dict objectForKey:@"tid"])
                         {
-                            [db deleteRecordWithDict:@{@"uid":[dict objectForKey:@"tid"]} andTableName:USERICONTABLE];
-                            [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                            NSDictionary *userIconDict;
+                            if ([dict objectForKey:@"number"])
+                            {
+                                userIconDict = @{@"uid":[dict objectForKey:@"tid"],
+                                                 @"uicon":[dict objectForKey:@"img_icon"],
+                                                 @"username":[dict objectForKey:@"r_name"],
+                                                 @"unum":[dict objectForKey:@"number"]};
+                            }
+                            else
+                            {
+                                userIconDict = @{@"uid":[dict objectForKey:@"tid"],
+                                                 @"uicon":[dict objectForKey:@"img_icon"],
+                                                 @"username":[dict objectForKey:@"r_name"],
+                                                 @"unum":@""};
+                            }
+                            
+                            //更新用户表
+                            if ([[db findSetWithDictionary:@{@"uid":[dict objectForKey:@"tid"]} andTableName:USERICONTABLE] count] > 0)
+                            {
+                                [db deleteRecordWithDict:@{@"uid":[dict objectForKey:@"tid"]} andTableName:USERICONTABLE];
+                                [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                            }
+                            else
+                            {
+                                [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                            }
+                        }
+                        //更新聊天记录的number -》id
+                        NSArray *notiChatArray = [db findSetWithDictionary:@{@"mid":[msgDict objectForKey:@"_id"],@"userid":[Tools user_id]} andTableName:CHATTABLE];
+                        if ([notiChatArray count] > 0)
+                        {
+                            if ([dict objectForKey:@"tid"] &&
+                                [[dict objectForKey:@"tid"] isEqual:[NSNull null]] &&
+                                [[dict objectForKey:@"tid"] length] == [[Tools user_id] length])
+                            {
+                                //私人聊天
+                                if ([db updeteKey:@"fid" toValue:[dict objectForKey:@"tid"] withParaDict:@{@"mid":[msgDict objectForKey:@"_id"],@"userid":[Tools user_id]} andTableName:CHATTABLE] &&
+                                    [db updeteKey:@"tid" toValue:[Tools user_id] withParaDict:@{@"userid":[Tools user_id],@"mid":[msgDict objectForKey:@"_id"]} andTableName:CHATTABLE])
+                                {
+                                    DDLOG(@"update number to tid success");
+                                }
+                            }
+                            else
+                            {
+                                //群聊消息
+                                if ([db updeteKey:@"fid" toValue:[dict objectForKey:@"tid"] withParaDict:@{@"mid":[msgDict objectForKey:@"_id"],@"userid":[Tools user_id]} andTableName:CHATTABLE] &&
+                                    [db updeteKey:@"tid" toValue:[Tools user_id] withParaDict:@{@"userid":[Tools user_id],@"mid":[msgDict objectForKey:@"_id"]} andTableName:CHATTABLE] &&
+                                    [db updeteKey:@"by" toValue:[msgDict objectForKey:@"by"] withParaDict:@{@"userid":[Tools user_id],@"mid":[msgDict objectForKey:@"_id"]} andTableName:CHATTABLE])
+                                {
+                                    DDLOG(@"update number to tid success");
+                                }
+                            }
+                            
                         }
                         else
                         {
-                            [db insertRecord:userIconDict andTableName:USERICONTABLE];
-                        }
-                        
-                        if ([[db findSetWithDictionary:@{@"mid":[msgDict objectForKey:@"_id"],@"userid":[Tools user_id]} andTableName:CHATTABLE] count] == 0)
-                        {
-                            if ([db insertRecord:tmpDict  andTableName:CHATTABLE])
+                            if ([db insertRecord:tmpDict andTableName:CHATTABLE])
                             {
-                                DDLOG(@"insert chat success in msg log");
+                                DDLOG(@"insert chat success in messageviewcontroller!");
                             }
                         }
                     }
@@ -314,11 +357,16 @@ ChatVCDelegate>
     }
 }
 
+-(void)dealNewChatMsgNotification:(NSNotification *)noti
+{
+    [self dealNewChatMsg:noti.object];
+}
+
 -(void)manageChatList
 {
-    
     [newMessageArray removeAllObjects];
     [newMessageArray addObjectsFromArray:[db findChatUseridWithTableName:CHATTABLE]];
+
     if ([newMessageArray count] > 0)
     {
         for(int i = 0; i < [newMessageArray count]-1; i++)
@@ -345,7 +393,7 @@ ChatVCDelegate>
     {
         NSString *tid = [[[newMessageArray objectAtIndex:i] allValues] firstObject];
         NSDictionary *userIconDIct = [ImageTools iconDictWithUserID:tid];
-        if (!userIconDIct)
+        if (!userIconDIct && [tid length] == [[Tools user_id] length])
         {
             [newMessageArray removeObjectAtIndex:i];
         }
@@ -365,7 +413,7 @@ ChatVCDelegate>
 
 -(NSDictionary *)findLastMsgWithUser:(NSString *)fid
 {
-    NSMutableArray *array = [db findChatLogWithUid:[Tools banjia_num] andOtherId:fid andTableName:CHATTABLE];
+    NSMutableArray *array = [db findChatLogWithUid:[Tools user_id] andOtherId:fid andTableName:CHATTABLE];
     return [array lastObject];
 }
 
@@ -377,8 +425,9 @@ ChatVCDelegate>
         DDLOG(@"%@",[unreadCountDict objectForKey:fid]);
         return [[unreadCountDict objectForKey:fid] intValue];
     }
-    NSMutableArray *array = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"fid":fid,@"readed":@"0"} andTableName:CHATTABLE];
-    return [array count];
+    return 0;
+//    NSMutableArray *array = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"fid":fid,@"readed":@"0"} andTableName:CHATTABLE];
+//    return [array count];
 }
 
 #pragma mark - egodelegate
@@ -455,6 +504,7 @@ ChatVCDelegate>
 }
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
+    DDLOG(@"unreadCountDict+++%@",unreadCountDict);
     return [newMessageArray count];
 }
 
@@ -493,7 +543,7 @@ ChatVCDelegate>
     
    
     
-    int unreadMsgCount = [self findCountOfUserId:[NSString stringWithFormat:@"%d",[otherid integerValue]]];
+    int unreadMsgCount = [self findCountOfUserId:otherid];
     if (unreadMsgCount > 0)
     {
         cell.unreadedMsgLabel.text = [NSString stringWithFormat:@"%d",unreadMsgCount];
@@ -624,9 +674,11 @@ ChatVCDelegate>
         }
         chat.imageUrl = [userIconDIct objectForKey:@"uicon"];
     }
-    [unreadCountDict setObject:@"0" forKey:otherid];
+    chat.unReadedNumber = ([unreadCountDict objectForKey:otherid])?([[unreadCountDict objectForKey:otherid] intValue]):0;
     currentId = otherid;
     [self.navigationController pushViewController:chat animated:YES];
+    [unreadCountDict setObject:@"0" forKey:otherid];
+    [tableView reloadData];
 }
 
 -(void)updateChatList:(BOOL)update

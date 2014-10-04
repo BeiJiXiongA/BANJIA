@@ -100,6 +100,8 @@ UISearchBarDelegate>
     UIButton *selectButton;
     
     int fromClassTableViewIndex;
+    
+    NSString *sendMsg;
 }
 @end
 
@@ -123,12 +125,23 @@ UISearchBarDelegate>
         
     schoolName = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
     if ([schoolName isEqualToString:@"未指定学校"] ||
-        [schoolName isEqualToString:@"位甚至学校"])
+        [schoolName isEqualToString:@"未设置学校"])
     {
         schoolName = @"";
     }
     className = [[NSUserDefaults standardUserDefaults] objectForKey:@"classname"];
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
+    
+    if (![schoolName isEqualToString:@"未设置学校"] && [schoolName length] > 0)
+    {
+         sendMsg = [NSString stringWithFormat:@"{\"t\":\"c_i\",\"c_id\":\"%@\"}$!#我是%@,我在[%@—%@],你也一起加入吧！",classID,[Tools user_name],schoolName,className];
+    }
+    else
+    {
+        sendMsg = [NSString stringWithFormat:@"{\"t\":\"c_i\",\"c_id\":\"%@\"}$!#我是%@,我在[%@],你也一起加入吧！",classID,[Tools user_name],className];
+    }
+    
+   
     
     pageNum = 0;
     pageSize = 100;
@@ -993,15 +1006,6 @@ UISearchBarDelegate>
     NSDictionary *dict = [friendsArry objectAtIndex:button.tag];
     if (fromClass)
     {
-        NSString *sendMsg;
-//        if (![schoolName isEqualToString:@"未设置学校"] && [schoolName length] > 0)
-//        {
-            sendMsg = [NSString stringWithFormat:@"%@$!#我是%@,我在[%@—%@],你也一起加入吧！",classID,[Tools user_name],schoolName,className];
-//        }
-//        else
-//        {
-//            sendMsg = [NSString stringWithFormat:@"%@$!#我是%@,我在[%@],你也一起加入吧！",classID,[Tools user_name],className];
-//        }
         [self sendMsgWithString:sendMsg andUserID:[dict objectForKey:@"_id"] andUserInfo:dict userType:@"friend"];
     }
 }
@@ -1018,7 +1022,6 @@ UISearchBarDelegate>
             {
                 if (fromClass)
                 {
-                    NSString *sendMsg = [NSString stringWithFormat:@"%@$!#我是%@,我在[%@—%@],你也一起加入吧！",classID,[Tools user_name],schoolName,className];
                     [self sendMsgWithString:sendMsg andUserID:[dict objectForKey:@"_id"] andUserInfo:dict userType:@"friend"];
                 }
             }
@@ -1061,7 +1064,6 @@ UISearchBarDelegate>
             {
                 if (fromClass)
                 {
-                    NSString *sendMsg = [NSString stringWithFormat:@"%@$!#我是%@,我在[%@—%@],你也一起加入吧！",classID,[Tools user_name],schoolName,className];
                     [self sendMsgWithString:sendMsg andUserID:[dict objectForKey:@"_id"] andUserInfo:dict userType:@"contact"];
                 }
                 else
@@ -1827,7 +1829,6 @@ UISearchBarDelegate>
     NSDictionary *dict = [alreadyUsers objectAtIndex:button.tag-ContactTableViewTag-3333];
     if (![selectedUsers containsObject:dict])
     {
-        NSString *sendMsg = [NSString stringWithFormat:@"%@$!#我是%@,我在[%@—%@],你也一起加入吧！",classID,[Tools user_name],schoolName,className];
         [self sendMsgWithString:sendMsg andUserID:[dict objectForKey:@"_id"] andUserInfo:dict userType:@"contact"];
         [selectedUsers addObject:dict];
         [contactTableView reloadData];

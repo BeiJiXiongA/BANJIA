@@ -17,7 +17,7 @@
     if (self) {
         // Initialization code
         
-        unreadedMsgLabel = [[UILabel alloc] initWithFrame:CGRectMake(45, 2, 20, 20)];
+        unreadedMsgLabel = [[UILabel alloc] initWithFrame:CGRectMake(34, 2, 20, 20)];
         unreadedMsgLabel.layer.cornerRadius = 10;
         unreadedMsgLabel.clipsToBounds = YES;
         unreadedMsgLabel.layer.borderColor = [UIColor whiteColor].CGColor;

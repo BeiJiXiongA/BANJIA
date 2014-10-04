@@ -304,7 +304,7 @@
                          andTableName:(NSString *)tableName
 {
     NSMutableArray *msgArray = [[NSMutableArray alloc] initWithCapacity:0];
-    NSMutableString *query = [NSMutableString stringWithFormat:@"SELECT * FROM %@ WHERE (fid='%@' AND tid='%@' and direct='t') OR (fid='%@' AND tid='%@' and direct='f') ORDER BY time",tableName,uid,otherid,otherid,uid];
+    NSMutableString *query = [NSMutableString stringWithFormat:@"SELECT * FROM %@ WHERE (fid='%@' AND tid='%@' and direct='t') OR (fid='%@' AND tid='%@' and direct='f') ORDER BY mid",tableName,uid,otherid,otherid,uid];
     NSString *queryStr = [query substringToIndex:[query length]];
     FMResultSet *resultSet = [_db executeQuery:queryStr];
     DDLOG(@"chat log query %@",queryStr);
@@ -315,11 +315,32 @@
     return msgArray;
 }
 
+-(NSMutableArray *)findChatLogWithUid:(NSString *)uid andOtherId:(NSString *)otherid
+                         andTableName:(NSString *)tableName start:(int)start count:(int)count
+{
+    NSMutableArray *msgArray = [[NSMutableArray alloc] initWithCapacity:0];
+    NSMutableString *query = [NSMutableString stringWithFormat:@"SELECT * FROM %@ WHERE (fid='%@' AND tid='%@' and direct='t') OR (fid='%@' AND tid='%@' and direct='f') ORDER BY mid desc limit %d,%d",tableName,uid,otherid,otherid,uid,start,count];
+    NSString *queryStr = [query substringToIndex:[query length]];
+    FMResultSet *resultSet = [_db executeQuery:queryStr];
+    DDLOG(@"chat log query %@",queryStr);
+    while ([resultSet next])
+    {
+        [msgArray addObject:[resultSet resultDictionary]];
+    }
+    return msgArray;
+}
+
+
 -(NSMutableArray *)findChatUseridWithTableName:(NSString *)tableName
 {
     NSMutableArray *msgArray = [[NSMutableArray alloc] initWithCapacity:0];
 //    NSMutableString *query = [NSMutableString stringWithFormat:@"SELECT  * FROM chatMsg where fid IN (SELECT DISTINCT fid FROM chatMsg WHERE userid='%@') AND  userid='%@' GROUP BY fid",[Tools user_id],[Tools user_id]];
-    NSMutableString *query = [NSMutableString stringWithFormat:@"select distinct tid from chatMsg where userid = '%@' and direct = 't' and fid = %@ union select distinct fid from chatMsg where userid = '%@' and  direct = 'f' and tid = %@",[Tools user_id],[Tools user_id],[Tools user_id],[Tools user_id]];
+    NSMutableString *query = [NSMutableString stringWithFormat:
+                              @"select distinct fid from chatMsg where userid = '%@' and direct = 'f' and tid = '%@' union select distinct fid from chatMsg where userid = '%@' and direct = 'f' and tid = '%@'",
+                              [Tools user_id],
+                              [Tools user_id],
+                              [Tools user_id],
+                              [Tools user_id]];
     NSString *queryStr = [query substringToIndex:[query length]];
     FMResultSet *resultSet = [_db executeQuery:queryStr];
     DDLOG(@"quert dictinct %@",queryStr);
@@ -327,7 +348,6 @@
     {
         [msgArray addObject:[resultSet resultDictionary]];
     }
-    DDLOG(@"chat list=%@",msgArray);
     return msgArray;
 }
 

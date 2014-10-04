@@ -754,12 +754,12 @@ MFMailComposeViewControllerDelegate>
                 NSDictionary *dict = [responseDict objectForKey:@"data"];
                 if (![dict isEqual:[NSNull null]])
                 {
-                    if ([[dict objectForKey:@"sex"] intValue] == 1)
+                    if ([dict objectForKey:@"sex"] && [[dict objectForKey:@"sex"] intValue] == 1)
                     {
                         //男
                         sexureimage = @"male";
                     }
-                    else if ([[dict objectForKey:@"sex"] intValue] == 0)
+                    else if ([dict objectForKey:@"sex"] &&[[dict objectForKey:@"sex"] intValue] == 0)
                     {
                         //
                         sexureimage = @"female";
@@ -824,7 +824,7 @@ MFMailComposeViewControllerDelegate>
                 NSDictionary *userIconDict = @{@"uid":[dict objectForKey:@"_id"],
                                                @"uicon":[dict objectForKey:@"img_icon"],
                                                @"username":[dict objectForKey:@"r_name"],
-                                               @"unum":[dict objectForKey:@"number"]};
+                                               @"unum":userNumber};
                 
                 if ([[db findSetWithDictionary:@{@"unum":[userIconDict objectForKey:@"unum"]} andTableName:USERICONTABLE] count] > 0)
                 {
@@ -835,6 +835,8 @@ MFMailComposeViewControllerDelegate>
                 {
                     [db insertRecord:userIconDict andTableName:USERICONTABLE];
                 }
+
+                
                 if (![personID isEqualToString:[Tools user_id]])
                 {
                     phoneNum = @"";

@@ -602,7 +602,7 @@
     
 //    [Tools showAlertView:[userInfo description] delegateViewController:nil];
     DDLOG(@"push info %@",userInfo);
-    OperatDB *db = [[OperatDB alloc] init];
+//    OperatDB *db = [[OperatDB alloc] init];
     
     if ([Tools user_id])
     {
@@ -635,22 +635,30 @@
             
             [chatDict setObject:chatContent forKey:@"content"];
             
-            
-            NSString *unum;
-            if ([[userInfo  objectForKey:@"u"] rangeOfString:@"u_"].length > 0)
+            if ([userInfo objectForKey:@"g_id"] &&
+                ![[userInfo objectForKey:@"g_id"] isEqual:[NSNull null]] &&
+                [[userInfo objectForKey:@"g_id"] length] > 0)
             {
-                unum = [[userInfo  objectForKey:@"u"] substringFromIndex:2];
+                [chatDict setObject:[userInfo objectForKey:@"g_id"] forKey:@"fid"];
+                [chatDict setObject:[userInfo objectForKey:@"u"] forKey:@"by"];
             }
             else
             {
-                unum = [userInfo  objectForKey:@"u"];
+                NSString *unum;
+                if ([[userInfo  objectForKey:@"u"] rangeOfString:@"u_"].length > 0)
+                {
+                    unum = [[userInfo  objectForKey:@"u"] substringFromIndex:2];
+                }
+                else
+                {
+                    unum = [userInfo  objectForKey:@"u"];
+                }
+
             }
-            [chatDict setObject:unum forKey:@"fid"];
-            
+                        
             NSString *timeStr = [[userInfo objectForKey:@"m"] substringToIndex:8];
             
             [chatDict setObject:[CommonFunc from16To10:timeStr] forKey:@"time"];
-            DDLOG(@"%@",[CommonFunc from16To10:timeStr]);
             [chatDict setObject:@"f" forKey:@"direct"];
             [chatDict setObject:@"text" forKey:@"msgType"];
             [chatDict setObject:[Tools banjia_num] forKey:@"tid"];
@@ -704,24 +712,24 @@
                     if (!([[NSUserDefaults standardUserDefaults] objectForKey:@"viewtype"] &&
                           [[[NSUserDefaults standardUserDefaults] objectForKey:@"viewtype"] isEqualToString:@"chat"]))
                     {
-                        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"viewtype"] rangeOfString:[userInfo  objectForKey:@"u"]].length == 0)
-                        {
-                            [[StatusBarTips shareTipsWindow] hideTips];
-                            NSMutableString *showname = [[NSMutableString alloc] initWithString:fname];
-                            NSRange range = [showname rangeOfString:@"["];
-                            if (range.length > 0)
-                            {
-                                [showname deleteCharactersInRange:range];
-                            }
-                            range = [showname rangeOfString:@"]"];
-                            if (range.length > 0)
-                            {
-                                [showname deleteCharactersInRange:range];
-                            }
-                            NSArray *unreadArray = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"readed":@"0",@"fid":[userInfo  objectForKey:@"u"]} andTableName:CHATTABLE];
-                            [[StatusBarTips shareTipsWindow] showTipsWithImage:[UIImage imageNamed:@"icon_chat"] message:[NSString stringWithFormat:@"%@(%d)",showname,[unreadArray count]] messageType:@"chat" tipDelegate:self];
-                            [StatusBarTips shareTipsWindow].dataDict = userInfo;
-                        }
+//                        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"viewtype"] rangeOfString:[userInfo  objectForKey:@"u"]].length == 0)
+//                        {
+////                            [[StatusBarTips shareTipsWindow] hideTips];
+//                            NSMutableString *showname = [[NSMutableString alloc] initWithString:fname];
+//                            NSRange range = [showname rangeOfString:@"["];
+//                            if (range.length > 0)
+//                            {
+//                                [showname deleteCharactersInRange:range];
+//                            }
+//                            range = [showname rangeOfString:@"]"];
+//                            if (range.length > 0)
+//                            {
+//                                [showname deleteCharactersInRange:range];
+//                            }
+//                            NSArray *unreadArray = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"readed":@"0",@"fid":[userInfo  objectForKey:@"u"]} andTableName:CHATTABLE];
+//                            [[StatusBarTips shareTipsWindow] showTipsWithImage:[UIImage imageNamed:@"icon_chat"] message:[NSString stringWithFormat:@"%@(%d)",showname,[unreadArray count]] messageType:@"chat" tipDelegate:self];
+//                            [StatusBarTips shareTipsWindow].dataDict = userInfo;
+//                        }
                         
                         if ([[[NSUserDefaults standardUserDefaults]objectForKey:BECOMEACTIVE] isEqualToString:ENTER_BACKGROUD])
                         {
@@ -737,7 +745,7 @@
                         }
                     }
                     [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECHATSNUMBER object:nil];
-                    [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVENEWMSG object:nil];
+                    [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVENEWMSG object:chatDict];
                 }
             }
         }

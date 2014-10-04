@@ -151,8 +151,6 @@
     [pullRefreshView egoRefreshScrollViewDidEndDragging:groupChatTableView];
 }
 
-
-
 #pragma mark - tableview
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
@@ -258,6 +256,7 @@
     chat.name = [dict objectForKey:@"name"];
     chat.toID = [dict objectForKey:@"_id"];
     chat.imageUrl = @"";
+    chat.unReadedNumber = [self findCountOfUserId:[dict objectForKey:@"_id"]];
     [self.navigationController pushViewController:chat animated:YES];
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
