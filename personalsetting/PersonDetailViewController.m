@@ -822,7 +822,7 @@ MFMailComposeViewControllerDelegate>
                 userNumber = [dict objectForKey:@"number"];
                 
                 NSDictionary *userIconDict = @{@"uid":[dict objectForKey:@"_id"],
-                                               @"uicon":[dict objectForKey:@"img_icon"],
+                                               @"uicon":[dict objectForKey:@"img_icon"]?[dict objectForKey:@"img_icon"]:@"",
                                                @"username":[dict objectForKey:@"r_name"],
                                                @"unum":userNumber};
                 

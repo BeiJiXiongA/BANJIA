@@ -117,8 +117,13 @@
 +(NSDictionary *)iconDictWithUserID:(NSString *)userid
 {
     OperatDB *db = [[OperatDB alloc] init];
-    NSDictionary *userDict = [[db findSetWithDictionary:@{@"uid":userid} andTableName:USERICONTABLE] firstObject];
-    return userDict;
+    if(userid)
+    {
+        NSDictionary *userDict = [[db findSetWithDictionary:@{@"uid":userid} andTableName:USERICONTABLE] firstObject];
+        return userDict;
+    }
+    return nil;
+    
 }
 
 + (UIImage *)imageWithUrl:(NSString *)imageUrl

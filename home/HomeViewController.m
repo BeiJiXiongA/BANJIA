@@ -145,6 +145,9 @@ headerDelegate>
     int headerNewsIndex;
     
     CGFloat HeaderCellHeight;
+    
+    NSInteger waitCommentSection;
+    NSInteger waitCommentIndex;
 }
 @end
 
@@ -885,7 +888,7 @@ headerDelegate>
     }
 }
 
-
+#pragma mark - 视图周期
 
 
 -(void)dealloc
@@ -926,6 +929,8 @@ headerDelegate>
     }
 }
 
+#pragma mark - 代理
+
 -(BOOL)haveNewMsg
 {
     NSArray *msgArray = [db findSetWithDictionary:@{@"readed":@"0",@"userid":[Tools user_id]} andTableName:CHATTABLE];
@@ -962,6 +967,7 @@ headerDelegate>
     return NO;
 }
 
+#pragma mark - 获得网络数据
 
 -(void)getData
 {
@@ -1273,8 +1279,55 @@ headerDelegate>
         }
     }
 }
+#pragma mark - getNetdata
+-(void)getDiaryDetail:(NSString *)dongtaiId inSection:(NSInteger)section  index:(NSInteger)index
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"p_id":dongtaiId
+                                                                      } API:GETDIARY_DETAIL];
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"diary detail responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                NSMutableDictionary *groupDict = [[NSMutableDictionary alloc] initWithDictionary:[groupDiaries objectAtIndex:section]];
+                NSMutableArray *tmpArray = [[NSMutableArray alloc] initWithArray:[groupDict objectForKey:@"diaries"]];
+                NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithDictionary:[responseDict objectForKey:@"data"]];
+                NSDictionary *oldDiaryDict = [tmpArray objectAtIndex:index];
+                [tmpDict setObject:[oldDiaryDict objectForKey:@"c_id"] forKey:@"c_id"];
+                [tmpDict setObject:[oldDiaryDict objectForKey:@"c_name"] forKey:@"c_name"];
+                [tmpArray replaceObjectAtIndex:index withObject:tmpDict];
+                [groupDict setObject:tmpArray forKey:@"diaries"];
+                [groupDiaries replaceObjectAtIndex:section withObject:groupDict];
+                [classTableView reloadData];
+                
+                waitCommentIndex = 0;
+                waitCommentSection = 0;
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools showAlertView:@"连接错误" delegateViewController:nil];
+        }];
+        [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
+}
 
-#pragma mark - inputtabbardel
+#pragma mark - 评论日志
 -(void)myReturnFunction
 {
     DDLOG(@"comment content in home %@",inputTabBar.inputTextView.text);
@@ -1297,7 +1350,7 @@ headerDelegate>
             DDLOG(@"commit diary responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                [self getHomeData];
+                [self getDiaryDetail:[waitCommentDict objectForKey:@"_id"] inSection:waitCommentSection index:waitCommentIndex];
             }
             else
             {
@@ -1325,7 +1378,7 @@ headerDelegate>
 }
 
 
-#pragma mark - egodelegate
+#pragma mark - 下拉刷新
 -(void)egoRefreshTableHeaderDidTriggerRefresh:(EGORefreshTableHeaderView *)view
 {
     page = @"0";
@@ -1414,6 +1467,8 @@ headerDelegate>
     }
 }
 
+
+#pragma mark - 首页列表
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     return [noticeArray count] + [groupDiaries count] + 2;
@@ -1549,6 +1604,8 @@ headerDelegate>
     }
     return 0;
 }
+
+#pragma mark - 广告开关
 
 -(void)switchAd
 {
@@ -1713,6 +1770,7 @@ headerDelegate>
         }
         cell.showAllComments = NO;
         cell.nameButtonDel = self;
+        
         NSDictionary *groupDict = [groupDiaries objectAtIndex:indexPath.section-[noticeArray count]-2];
         NSArray *tmpArray = [groupDict objectForKey:@"diaries"];
         NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
@@ -1966,6 +2024,7 @@ headerDelegate>
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         cell.commentButton.backgroundColor = UIColorFromRGB(0xfcfcfc);
         cell.commentButton.tag = (indexPath.section-cha-1)*SectionTag+indexPath.row;
+        cell.diaryIndexPath = [NSIndexPath indexPathForRow:cell.commentButton.tag%SectionTag inSection:cell.commentButton.tag/SectionTag];
         [cell.commentButton addTarget:self action:@selector(commentDiary:) forControlEvents:UIControlEventTouchUpInside];
         
         cell.geduan1.hidden = NO;
@@ -2159,6 +2218,7 @@ headerDelegate>
     [photoBroser show];
 }
 
+#pragma mark - 赞
 
 -(void)praiseDiary:(UIButton *)button
 {
@@ -2179,10 +2239,7 @@ headerDelegate>
             DDLOG(@"commit diary responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-//                NSMutableDictionary *newDict = [[NSMutableDictionary alloc] initWithDictionary:dict];
-//                DDLOG(@"newdict %@",newDict);
-//                [Tools showTips:@"赞成功" toView:classTableView];
-                [self getHomeData];
+                [self getDiaryDetail:[dict objectForKey:@"_id"] inSection:button.tag/SectionTag index:button.tag%SectionTag];
             }
             else
             {
@@ -2206,12 +2263,14 @@ headerDelegate>
     }
 }
 
-
+#pragma mark - 评论按钮评论日志
 -(void)commentDiary:(UIButton *)button
 {
     NSDictionary *groupDict = [groupDiaries objectAtIndex:button.tag/SectionTag];
     NSArray *tmpArray = [groupDict objectForKey:@"diaries"];
     waitCommentDict = [tmpArray objectAtIndex:button.tag%SectionTag];
+    waitCommentSection = button.tag/SectionTag;
+    waitCommentIndex = button.tag%SectionTag;
     [inputTabBar.inputTextView becomeFirstResponder];
 }
 
@@ -2437,8 +2496,12 @@ headerDelegate>
     [self.navigationController pushViewController:dongtaiDetailViewController animated:YES];
 }
 
--(void)cellCommentDiary:(NSDictionary *)dict
+#pragma mark - 点击评论，评论日志
+
+-(void)cellCommentDiary:(NSDictionary *)dict andIndexPath:(NSIndexPath *)indexPath
 {
+    waitCommentIndex = indexPath.row;
+    waitCommentSection = indexPath.section;
     waitCommentDict = dict;
     [inputTabBar.inputTextView becomeFirstResponder];
 }

@@ -98,6 +98,9 @@ NameButtonDel>
     
     UIImageView *tipImageView;
     UIImageView *tapLabel;
+    
+    NSInteger waitCommentIndex;
+    NSInteger waitCommentSection;
 }
 @end
 
@@ -331,9 +334,7 @@ NameButtonDel>
             DDLOG(@"commit diary responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                page = @"";
-                monthStr = @"";
-                [self getDongTaiList];
+                [self getDiaryDetail:[waitCommentDict objectForKey:@"_id"] inSection:waitCommentSection index:waitCommentIndex];
             }
             else
             {
@@ -782,13 +783,15 @@ NameButtonDel>
     [[XDTabViewController sharedTabViewController].navigationController pushViewController:dongtaiDetailViewController animated:YES];
 }
 
--(void)cellCommentDiary:(NSDictionary *)dict
+-(void)cellCommentDiary:(NSDictionary *)dict andIndexPath:(NSIndexPath *)indexPath
 {
     if (isApply)
     {
         [Tools showAlertView:@"游客不能评论班级日志,赶快加入吧!" delegateViewController:nil];
         return ;
     }
+    waitCommentSection = indexPath.section;
+    waitCommentIndex = indexPath.row;
     waitCommentDict = dict;
     [inputTabBar.inputTextView becomeFirstResponder];
 }
@@ -924,7 +927,6 @@ NameButtonDel>
         {
             cell = [[TrendsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:topImageView];
         }
-        
         cell.nameButtonDel = self;
         
         NSDictionary *dict;
@@ -1188,6 +1190,8 @@ NameButtonDel>
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         cell.commentButton.backgroundColor = UIColorFromRGB(0xfcfcfc);
         cell.commentButton.tag = indexPath.section*SectionTag+indexPath.row;
+        cell.diaryIndexPath = [NSIndexPath indexPathForRow:cell.commentButton.tag%SectionTag inSection:cell.commentButton.tag/SectionTag-1];
+        
         [cell.commentButton addTarget:self action:@selector(commentDiary:) forControlEvents:UIControlEventTouchUpInside];
         
         cell.geduan1.hidden = NO;
@@ -1913,9 +1917,7 @@ NameButtonDel>
                 DDLOG(@"commit diary responsedict %@",responseDict);
                 if ([[responseDict objectForKey:@"code"] intValue]== 1)
                 {
-                    page = @"";
-                    monthStr = @"";
-                    [self getDongTaiList];
+                    [self getDiaryDetail:[dict objectForKey:@"_id"] inSection:button.tag/SectionTag-1 index:button.tag%SectionTag];
                     
                 }
                 else
@@ -1961,8 +1963,58 @@ NameButtonDel>
     NSArray *array = [groupDict objectForKey:@"diaries"];
     NSDictionary *dict = [array objectAtIndex:button.tag%SectionTag];
     waitCommentDict = dict;
+    waitCommentSection = button.tag/SectionTag-1;
+    waitCommentIndex = button.tag%SectionTag;
     [inputTabBar.inputTextView becomeFirstResponder];
 }
+
+
+#pragma mark - getNetdata
+-(void)getDiaryDetail:(NSString *)dongtaiId inSection:(NSInteger)section  index:(NSInteger)index
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"p_id":dongtaiId
+                                                                      } API:GETDIARY_DETAIL];
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"diary detail responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                DDLOG(@"%d+++%d",section,index);
+                NSMutableDictionary *groupDict = [[NSMutableDictionary alloc] initWithDictionary:[tmpArray objectAtIndex:section]];
+                NSMutableArray *newArray = [[NSMutableArray alloc] initWithArray:[groupDict objectForKey:@"diaries"]];
+                NSMutableDictionary *newDict = [[NSMutableDictionary alloc] initWithDictionary:[responseDict objectForKey:@"data"]];
+                [newArray replaceObjectAtIndex:index withObject:newDict];
+                [groupDict setObject:newArray forKey:@"diaries"];
+                [tmpArray replaceObjectAtIndex:section withObject:groupDict];
+                [classZoneTableView reloadData];
+                
+                waitCommentIndex = 0;
+                waitCommentSection = 0;
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools showAlertView:@"连接错误" delegateViewController:nil];
+        }];
+        [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
+}
+
 
 -(void)showKeyBoard:(CGFloat)keyBoardHeight
 {

@@ -344,6 +344,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     [postDataStr replaceCharactersInRange:NSMakeRange([postDataStr length]-1, 1) withString:@"}"];
     NSURL *url = [NSURL URLWithString:hostUrl];
     ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
+    [request setRequestHeaders:[[NSMutableDictionary alloc] initWithObjectsAndKeys:[Tools client_ver],@"current_version", nil]];
     NSMutableData *postData = [NSMutableData dataWithData:[postDataStr dataUsingEncoding:NSUTF8StringEncoding]];
     if ([parameterDict count] >0)
     {
@@ -365,6 +366,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     NSMutableData *postData = [NSMutableData dataWithData:[postDataStr dataUsingEncoding:NSUTF8StringEncoding]];
     NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@",hostUrl]];
     ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:url];
+    [request setRequestHeaders:[[NSMutableDictionary alloc] initWithObjectsAndKeys:[Tools client_ver],@"current_version", nil]];
     [request setRequestMethod:@"GET"];
     [request setTimeOutSeconds:12];
     if ([parameterDict count] > 0)
@@ -386,6 +388,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     NSString * postStr = [tmpStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     NSURL *url = [NSURL URLWithString:postStr];
     ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
+    [request setRequestHeaders:[[NSMutableDictionary alloc] initWithObjectsAndKeys:[Tools client_ver],@"current_version", nil]];
     [request setTimeOutSeconds:12];
     return request;
 }
@@ -395,9 +398,10 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",HOST_URL,subUrl]];
     NSMutableString *postDataStr = [[NSMutableString alloc] initWithCapacity:0];
     ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:url];
-    DDLOG(@"%@",url);
     [request setRequestMethod:@"POST"];
     [request setTimeOutSeconds:12];
+    [request setRequestHeaders:[[NSMutableDictionary alloc] initWithObjectsAndKeys:[Tools client_ver],@"current_version", nil]];
+//    DDLOG(@"request header+++++ %@",request.requestHeaders);
     [postDataStr insertString:[NSString stringWithFormat:@"%@%@?",HOST_URL,subUrl] atIndex:[postDataStr length]];
     for (id keys in parameterDict)
     {
@@ -414,6 +418,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
                                                                       [NSString stringWithFormat:@"%@%@",HOST_URL,subUrl]]];
     [request setRequestMethod:@"POST"];
     [request setTimeOutSeconds:12];
+    [request setRequestHeaders:[[NSMutableDictionary alloc] initWithObjectsAndKeys:[Tools client_ver],@"current_version", nil]];
     for (NSString *key in pareDict.allKeys)
     {
         [request setPostValue:[pareDict objectForKey:key] forKey:key];
@@ -434,6 +439,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
                                                                       [NSString stringWithFormat:@"%@%@",HOST_URL,subUrl]]];
     [request setRequestMethod:@"POST"];
     [request setTimeOutSeconds:20];
+    [request setRequestHeaders:[[NSMutableDictionary alloc] initWithObjectsAndKeys:[Tools client_ver],@"current_version", nil]];
     for (NSString *key in pareDict.allKeys)
     {
         [request setPostValue:[pareDict objectForKey:key] forKey:key];
@@ -457,7 +463,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:
                                                                       [NSString stringWithFormat:@"%@%@",HOST_URL,subUrl]]];
     [request setRequestMethod:@"POST"];
-    
+    [request setRequestHeaders:[[NSMutableDictionary alloc] initWithObjectsAndKeys:[Tools client_ver],@"current_version", nil]];
     [request setTimeOutSeconds:12];
     for (NSString *key in pareDict.allKeys)
     {
@@ -653,6 +659,10 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 {
     if (errorDict)
     {
+        if (![errorDict objectForKey:@"message"])
+        {
+            return ;
+        }
         if ([[[[errorDict objectForKey:@"message"] allKeys] firstObject] isEqualToString:@"NO_AUTH"])
         {
             if ([self user_id] == 0)

@@ -3264,7 +3264,7 @@
 						DevelopmentTeam = X7FQ79MF8R;
 						SystemCapabilities = {
 							com.apple.BackgroundModes = {
-								enabled = 0;
+								enabled = 1;
 							};
 						};
 					};
@@ -4119,7 +4119,7 @@
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "-all_load";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "98A54D58-3225-4CB8-B5D6-13F9FFE6A365";
+				PROVISIONING_PROFILE = "EBE4EC5D-C843-431C-9B1E-16626F088634";
 				SDKROOT = iphoneos7.1;
 				TARGETED_DEVICE_FAMILY = 1;
 				VALID_ARCHS = armv7;

@@ -41,6 +41,8 @@
 @property (nonatomic, strong) UIView *geduan1;
 @property (nonatomic, strong) UIView *geduan2;
 
+@property (nonatomic, strong) NSIndexPath *diaryIndexPath;
+
 
 @property (nonatomic, assign) BOOL openPraise;
 @end
@@ -50,5 +52,5 @@
 -(void)nameButtonClick:(NSDictionary *)dict;
 @optional
 -(void)showPersonDetail:(NSDictionary *)dict;
--(void)cellCommentDiary:(NSDictionary *)dict;
+-(void)cellCommentDiary:(NSDictionary *)dict andIndexPath:(NSIndexPath *)indexPath;
 @end

@@ -39,7 +39,8 @@ geduan1,
 geduan2,
 openPraise,
 topImageView,
-verticalLineView;
+verticalLineView,
+diaryIndexPath;
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
@@ -677,9 +678,9 @@ verticalLineView;
         }
         else
         {
-            if ([self.nameButtonDel respondsToSelector:@selector(cellCommentDiary:)])
+            if ([self.nameButtonDel respondsToSelector:@selector(cellCommentDiary:andIndexPath:)])
             {
-                [self.nameButtonDel cellCommentDiary:diaryDetailDict];
+                [self.nameButtonDel cellCommentDiary:diaryDetailDict andIndexPath:diaryIndexPath];
             }
         }
     }
@@ -689,9 +690,9 @@ verticalLineView;
     }
     else if(!praiseArray && commentsArray)
     {
-        if ([self.nameButtonDel respondsToSelector:@selector(cellCommentDiary:)])
+        if ([self.nameButtonDel respondsToSelector:@selector(cellCommentDiary:andIndexPath:)])
         {
-            [self.nameButtonDel cellCommentDiary:diaryDetailDict];
+            [self.nameButtonDel cellCommentDiary:diaryDetailDict andIndexPath:diaryIndexPath];
         }
     }
 }

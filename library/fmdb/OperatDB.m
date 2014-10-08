@@ -307,7 +307,7 @@
     NSMutableString *query = [NSMutableString stringWithFormat:@"SELECT * FROM %@ WHERE (fid='%@' AND tid='%@' and direct='t') OR (fid='%@' AND tid='%@' and direct='f') ORDER BY mid",tableName,uid,otherid,otherid,uid];
     NSString *queryStr = [query substringToIndex:[query length]];
     FMResultSet *resultSet = [_db executeQuery:queryStr];
-    DDLOG(@"chat log query %@",queryStr);
+//    DDLOG(@"chat log query %@",queryStr);
     while ([resultSet next])
     {
         [msgArray addObject:[resultSet resultDictionary]];
@@ -322,7 +322,7 @@
     NSMutableString *query = [NSMutableString stringWithFormat:@"SELECT * FROM %@ WHERE (fid='%@' AND tid='%@' and direct='t') OR (fid='%@' AND tid='%@' and direct='f') ORDER BY mid desc limit %d,%d",tableName,uid,otherid,otherid,uid,start,count];
     NSString *queryStr = [query substringToIndex:[query length]];
     FMResultSet *resultSet = [_db executeQuery:queryStr];
-    DDLOG(@"chat log query %@",queryStr);
+//    DDLOG(@"chat log query %@",queryStr);
     while ([resultSet next])
     {
         [msgArray addObject:[resultSet resultDictionary]];
@@ -336,14 +336,14 @@
     NSMutableArray *msgArray = [[NSMutableArray alloc] initWithCapacity:0];
 //    NSMutableString *query = [NSMutableString stringWithFormat:@"SELECT  * FROM chatMsg where fid IN (SELECT DISTINCT fid FROM chatMsg WHERE userid='%@') AND  userid='%@' GROUP BY fid",[Tools user_id],[Tools user_id]];
     NSMutableString *query = [NSMutableString stringWithFormat:
-                              @"select distinct fid from chatMsg where userid = '%@' and direct = 'f' and tid = '%@' union select distinct fid from chatMsg where userid = '%@' and direct = 'f' and tid = '%@'",
+                              @"select distinct fid from chatMsg where userid = '%@' and direct = 'f' and tid = '%@' union select distinct tid from chatMsg where userid = '%@' and direct = 't' and fid = '%@'",
                               [Tools user_id],
                               [Tools user_id],
                               [Tools user_id],
                               [Tools user_id]];
     NSString *queryStr = [query substringToIndex:[query length]];
     FMResultSet *resultSet = [_db executeQuery:queryStr];
-    DDLOG(@"quert dictinct %@",queryStr);
+//    DDLOG(@"quert dictinct %@",queryStr);
     while ([resultSet next])
     {
         [msgArray addObject:[resultSet resultDictionary]];
@@ -409,7 +409,7 @@
         }
         [query deleteCharactersInRange:NSMakeRange([query length]-3, 3)];
     }
-    DDLOG(@"find query %@",query);
+//    DDLOG(@"find query %@",query);
     FMResultSet *resultSet = [_db executeQuery:query];
     while ([resultSet next])
     {
@@ -467,9 +467,8 @@
             [query deleteCharactersInRange:NSMakeRange([query length]-2, 2)];
             [query insertString:@")" atIndex:[query length]];
         }
-//        [query appendString:[NSString stringWithFormat:@" (%@ like \'%%%@%%\' or %@ like \'%@%%\' or %@ like \'%%%@\')",fuzzyKey,fuzzyValue,fuzzyKey,fuzzyValue,fuzzyKey,fuzzyValue]];
     }
-    DDLOG(@"fuzzy query %@",query);
+//    DDLOG(@"fuzzy query %@",query);
     FMResultSet *resultSet = [_db executeQuery:query];
     while ([resultSet next])
     {
@@ -498,7 +497,7 @@
     }
     NSString *queryStr = [query substringToIndex:[query length]-3];
     FMResultSet *resultSet = [_db executeQuery:queryStr];
-    DDLOG(@"===%@",queryStr);
+//    DDLOG(@"===%@",queryStr);
     while ([resultSet next])
     {
         [msgArray addObject:[resultSet resultDictionary]];
@@ -514,7 +513,7 @@
         [query insertString:[NSString stringWithFormat:@" %@='%@' and",key,[dict objectForKey:key]] atIndex:[query length]];
     }
     NSString *queryStr = [query substringToIndex:[query length]-3];
-    DDLOG(@"queryStr %@",queryStr);
+//    DDLOG(@"queryStr %@",queryStr);
     BOOL success = [_db executeUpdate:queryStr];
     if (success)
     {

@@ -170,30 +170,36 @@
         [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
     }
     
-    DDLOG(@"uinavigation bar height %d",UI_NAVIGATION_BAR_HEIGHT);
-    
     [ShareSDK registerApp:@"182899e1ea92"];
     [self shareAppKeysForEvery];
 
-    if ([[UIDevice currentDevice].systemVersion floatValue] >= 8.0)
-    {
+    
+     //Required
+#if __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_7_1
+    if ([[UIDevice currentDevice].systemVersion floatValue] >= 8.0) {
         //可以添加自定义categories
         [APService registerForRemoteNotificationTypes:(UIUserNotificationTypeBadge |
                                                        UIUserNotificationTypeSound |
                                                        UIUserNotificationTypeAlert)
                                            categories:nil];
-    }
-    else
-    {
+    } else {
         //categories 必须为nil
         [APService registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge |
                                                        UIRemoteNotificationTypeSound |
                                                        UIRemoteNotificationTypeAlert)
                                            categories:nil];
     }
+#else
+    //categories 必须为nil
+    [APService registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge |
+                                                   UIRemoteNotificationTypeSound |
+                                                   UIRemoteNotificationTypeAlert)
+                                       categories:nil];
+#endif
+     //Required
     [APService setupWithOption:launchOptions];
-
     
+
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
     return YES;
@@ -644,16 +650,8 @@
             }
             else
             {
-                NSString *unum;
-                if ([[userInfo  objectForKey:@"u"] rangeOfString:@"u_"].length > 0)
-                {
-                    unum = [[userInfo  objectForKey:@"u"] substringFromIndex:2];
-                }
-                else
-                {
-                    unum = [userInfo  objectForKey:@"u"];
-                }
-
+                NSString *unum = [userInfo  objectForKey:@"u"];
+                [chatDict setObject:unum forKey:@"fid"];
             }
                         
             NSString *timeStr = [[userInfo objectForKey:@"m"] substringToIndex:8];
@@ -670,38 +668,17 @@
 //            [chatDict setObject:fname forKey:@"fname"];
             [chatDict setObject:[Tools user_id] forKey:@"userid"];
             
-            DDLOG(@"NewChatAlert===%d",[[[NSUserDefaults standardUserDefaults] objectForKey:NewChatAlert] integerValue]);
-            
             if ([[NSUserDefaults standardUserDefaults] objectForKey:NewChatAlert])
             {
                 if ([[[NSUserDefaults standardUserDefaults] objectForKey:NewChatAlert] integerValue] == 1)
                 {
-//                    NSString *path = [[NSBundle mainBundle] pathForResource:@"msg"
-//                                                                     ofType:@"wav"];
-//                    SystemSoundID soundID;
-//                    AudioServicesCreateSystemSoundID((__bridge CFURLRef)[NSURL fileURLWithPath:path]
-//                                                     , &soundID);
-                    
                     AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
-                    
-                    
-//                    AudioServicesPlaySystemSound (soundID);
                 }
             }
             
-            
-            if ([[chatDict objectForKey:@"mid"] integerValue] == 0)
+            if ([[_db findSetWithDictionary:@{@"userid":[Tools user_id],@"mid":[userInfo objectForKey:@"m"]} andTableName:CHATTABLE] count]==0)
             {
-                if ([_db insertRecord:chatDict andTableName:CHATTABLE])
-                {
-                    if ([self.chatDelegate respondsToSelector:@selector(dealNewChatMsg:)])
-                    {
-                        [self.chatDelegate dealNewChatMsg:chatDict];
-                    }
-                }
-            }
-            else if ([[_db findSetWithDictionary:@{@"userid":[Tools user_id],@"mid":[userInfo objectForKey:@"m"]} andTableName:CHATTABLE] count]==0)
-            {
+                
                 if ([_db insertRecord:chatDict andTableName:CHATTABLE])
                 {
                     
@@ -712,25 +689,6 @@
                     if (!([[NSUserDefaults standardUserDefaults] objectForKey:@"viewtype"] &&
                           [[[NSUserDefaults standardUserDefaults] objectForKey:@"viewtype"] isEqualToString:@"chat"]))
                     {
-//                        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"viewtype"] rangeOfString:[userInfo  objectForKey:@"u"]].length == 0)
-//                        {
-////                            [[StatusBarTips shareTipsWindow] hideTips];
-//                            NSMutableString *showname = [[NSMutableString alloc] initWithString:fname];
-//                            NSRange range = [showname rangeOfString:@"["];
-//                            if (range.length > 0)
-//                            {
-//                                [showname deleteCharactersInRange:range];
-//                            }
-//                            range = [showname rangeOfString:@"]"];
-//                            if (range.length > 0)
-//                            {
-//                                [showname deleteCharactersInRange:range];
-//                            }
-//                            NSArray *unreadArray = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"readed":@"0",@"fid":[userInfo  objectForKey:@"u"]} andTableName:CHATTABLE];
-//                            [[StatusBarTips shareTipsWindow] showTipsWithImage:[UIImage imageNamed:@"icon_chat"] message:[NSString stringWithFormat:@"%@(%d)",showname,[unreadArray count]] messageType:@"chat" tipDelegate:self];
-//                            [StatusBarTips shareTipsWindow].dataDict = userInfo;
-//                        }
-                        
                         if ([[[NSUserDefaults standardUserDefaults]objectForKey:BECOMEACTIVE] isEqualToString:ENTER_BACKGROUD])
                         {
                             sideMenuViewController = [[SideMenuViewController alloc] init];

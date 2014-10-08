@@ -131,7 +131,7 @@
 
 #pragma mark - chat
 #define CREATE_CHAT_MSG  @"/v11/chats/mbChat"
-#define GETCHATLOG       @"/chats/mbGetChatLog"
+#define GETCHATLOG       @"/v11/chats/mbGetChatLog"
 #define GETCHATLIST     @"/chats/mbNewChatList"
 #define LASTVIEWTIME    @"/chats/mbLastViewTime"
 #define UPLOADCHATFILE     @"/chats/mbUploadChatFile"

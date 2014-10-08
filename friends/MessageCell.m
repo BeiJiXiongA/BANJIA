@@ -93,6 +93,8 @@
     self.timeLabel.backgroundColor = RGB(203, 203, 203, 1);
     CGFloat messageBgY = CHAT_MSG_SPACE;
     
+    
+    
     NSString *msgContent = [[dict objectForKey:@"content"] emojizedString];
     CGSize size = [SizeTools getSizeWithString:msgContent andWidth:SCREEN_WIDTH/2+20 andFont:MessageTextFont];
     headerTapTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(headerImageViewTap:)];
