@@ -1639,7 +1639,6 @@ headerDelegate>
     if (indexPath.section == 0)
     {
         ADHeaderCell *cell = [[ADHeaderCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"adheadercell"];
-        
         if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"showad"] intValue] == 0 || [adArray count] == 0)
         {
             return cell;
