@@ -1045,6 +1045,7 @@ headerDelegate>
                     [tipView removeFromSuperview];
                 }
                 [self groupByTime:diariesArray];
+                addButton.hidden = NO;
             }
             else
             {
@@ -1062,6 +1063,8 @@ headerDelegate>
                     [createClassButton addTarget:self action:@selector(createClass) forControlEvents:UIControlEventTouchUpInside];
 
                     [classTableView reloadData];
+                    
+                    addButton.hidden = YES;
                     
                     [self loadIntroduceTip];
                     tipView.hidden = NO;

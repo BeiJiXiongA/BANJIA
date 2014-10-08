@@ -557,10 +557,10 @@ UISearchBarDelegate>
         }
         if ([addedContactArray count] > 0)
         {
-            [UIView animateWithDuration:0.2 animations:^{
+//            [UIView animateWithDuration:0.2 animations:^{
                 contactTableView.frame = CGRectMake(((ContactTableViewTag-fromClassTableViewIndex)%tableViewTagBase)*SCREEN_WIDTH, mySearchBar.frame.size.height, SCREEN_WIDTH,bgScrollView.frame.size.height-mySearchBar.frame.size.height-50);
                 selectView.frame = CGRectMake(((ContactTableViewTag-fromClassTableViewIndex)%tableViewTagBase)*SCREEN_WIDTH, bgScrollView.frame.size.height-50, SCREEN_WIDTH, 50);
-            }];
+//            }];
             for(int i = 0 ; i< [addedContactArray count] ; i++)
             {
                 NSDictionary *dict = [addedContactArray objectAtIndex:i];
@@ -585,11 +585,11 @@ UISearchBarDelegate>
         }
         else
         {
-            [UIView animateWithDuration:0.2 animations:^{
+//            [UIView animateWithDuration:0.2 animations:^{
                 contactTableView.frame = CGRectMake(((ContactTableViewTag-fromClassTableViewIndex)%tableViewTagBase)*SCREEN_WIDTH, mySearchBar.frame.size.height, SCREEN_WIDTH,bgScrollView.frame.size.height-mySearchBar.frame.size.height);
                 selectView.frame = CGRectMake(((ContactTableViewTag-fromClassTableViewIndex)%tableViewTagBase)*SCREEN_WIDTH, bgScrollView.frame.size.height, SCREEN_WIDTH, 50);
                 
-            }];
+//            }];
             [inviteButton setTitle:@"邀请" forState:UIControlStateNormal];
         }
         if ([groupContactArray count] > 0 || [alreadyUsers count] > 0)

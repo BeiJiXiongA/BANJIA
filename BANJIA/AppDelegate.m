@@ -584,7 +584,9 @@
 {
 //    [[NSUserDefaults standardUserDefaults] setObject:@"accept" forKey:@"receive"];
 //    [[NSUserDefaults standardUserDefaults] synchronize];
+//    DDLOG(@"device token %@",deviceToken);
     [APService registerDeviceToken:deviceToken];
+   
 }
 - (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 {
@@ -604,15 +606,23 @@
     return [ShareSDK handleOpenURL:url sourceApplication:sourceApplication annotation:annotation wxDelegate:self];
 }
 
+
+-(void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
+{
+    [self handlePushNotification:userInfo];
+}
+
 -(void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
+{
+    [self handlePushNotification:userInfo];
+}
+
+-(void)handlePushNotification:(NSDictionary *)userInfo
 {
     [APService handleRemoteNotification:userInfo];
     [[UIApplication sharedApplication] cancelAllLocalNotifications];
     [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
-    
-//    [Tools showAlertView:[userInfo description] delegateViewController:nil];
     DDLOG(@"push info %@",userInfo);
-//    OperatDB *db = [[OperatDB alloc] init];
     
     if ([Tools user_id])
     {
@@ -657,7 +667,7 @@
                 NSString *unum = [userInfo  objectForKey:@"u"];
                 [chatDict setObject:unum forKey:@"fid"];
             }
-                        
+            
             NSString *timeStr = [[userInfo objectForKey:@"m"] substringToIndex:8];
             
             [chatDict setObject:[CommonFunc from16To10:timeStr] forKey:@"time"];
@@ -669,7 +679,7 @@
             [chatDict setObject:[NSString stringWithFormat:@"%d",[[userInfo objectForKey:@"l"] intValue]] forKey:@"l"];
             NSString *ficon = @"";
             [chatDict setObject:ficon forKey:@"ficon"];
-//            [chatDict setObject:fname forKey:@"fname"];
+            //            [chatDict setObject:fname forKey:@"fname"];
             [chatDict setObject:[Tools user_id] forKey:@"userid"];
             
             if ([[NSUserDefaults standardUserDefaults] objectForKey:NewChatAlert])

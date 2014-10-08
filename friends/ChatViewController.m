@@ -1752,7 +1752,7 @@ EGORefreshTableHeaderDelegate>
                 [chatDict setObject:toID forKey:@"tid"];
                 [chatDict setObject:@"1" forKey:@"readed"];
                 
-                
+                [messageArray replaceObjectAtIndex:[messageArray count]-1 withObject:chatDict];
                 
                 if (isGroup)
                 {
@@ -1763,6 +1763,7 @@ EGORefreshTableHeaderDelegate>
                 {
                     [db insertRecord:chatDict andTableName:CHATTABLE];
                 }
+                
                 if ([self.chatVcDel respondsToSelector:@selector(updateChatList:)])
                 {
                     [self.chatVcDel updateChatList:YES];
