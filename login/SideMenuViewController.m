@@ -343,6 +343,10 @@
     {
         return [[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue];
     }
+    if ([db findSetWithDictionary:@{@"userid":[Tools user_id],@"readed":@"0"} andTableName:CHATTABLE])
+    {
+        return [[db findSetWithDictionary:@{@"userid":[Tools user_id],@"readed":@"0"} andTableName:CHATTABLE] count];
+    }
     return 0;
 }
 -(NSInteger)haveNewClass

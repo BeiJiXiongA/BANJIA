@@ -180,8 +180,10 @@ EGORefreshTableHeaderDelegate>
         }
         else
         {
-            [db deleteRecordWithDict:@{toID:@"uid"} andTableName:USERICONTABLE];
-            [db insertRecord:userDict andTableName:USERICONTABLE];
+            if ([db deleteRecordWithDict:@{toID:@"uid"} andTableName:USERICONTABLE])
+            {
+                [db insertRecord:userDict andTableName:USERICONTABLE];
+            }
         }
     }
     
@@ -753,8 +755,10 @@ EGORefreshTableHeaderDelegate>
                     [tmpDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"number"] intValue]] forKey:@"unum"];
                     if ([[db findSetWithDictionary:@{@"uid":[dict objectForKey:@"_id"]} andTableName:USERICONTABLE] count]>0)
                     {
-                        [db deleteRecordWithDict:@{@"uid":[dict objectForKey:@"_id"]} andTableName:USERICONTABLE];
-                        [db insertRecord:tmpDict andTableName:USERICONTABLE];
+                        if ([db deleteRecordWithDict:@{@"uid":[dict objectForKey:@"_id"]} andTableName:USERICONTABLE])
+                        {
+                            [db insertRecord:tmpDict andTableName:USERICONTABLE];
+                        }
                     }
                     else
                     {
@@ -774,8 +778,10 @@ EGORefreshTableHeaderDelegate>
                 NSDictionary *userIconDict = @{@"uid":toID,@"username":name,@"uicon":@"",@"unum":@""};
                 if ([[db findSetWithDictionary:@{@"uid":toID} andTableName:USERICONTABLE] count] > 0)
                 {
-                    [db deleteRecordWithDict:@{@"uid":toID} andTableName:USERICONTABLE];
-                    [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                    if ([db deleteRecordWithDict:@{@"uid":toID} andTableName:USERICONTABLE])
+                    {
+                        [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                    }
                 }
                 else
                 {

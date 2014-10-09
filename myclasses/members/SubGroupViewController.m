@@ -113,8 +113,8 @@ updateGroupInfoDelegate>
         [cell.button2 setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         [cell.button1 setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
         [cell.button2 setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
-        cell.button1.frame = CGRectMake(SCREEN_WIDTH-120, 15, 50, 30);
-        cell.button2.frame = CGRectMake(SCREEN_WIDTH-60, 15, 50, 30);
+        cell.button1.frame = CGRectMake(SCREEN_WIDTH-120, 10, 50, 30);
+        cell.button2.frame = CGRectMake(SCREEN_WIDTH-60, 10, 50, 30);
 
         [cell.button1 setTitle:@"同意" forState:UIControlStateNormal];
         cell.button1.tag =indexPath.row+1000;
@@ -182,7 +182,7 @@ updateGroupInfoDelegate>
         cell.remarkLabel.hidden = YES;
         cell.button2.hidden = YES;
         cell.button1.hidden = YES;
-        cell.remarkLabel.frame = CGRectMake(SCREEN_WIDTH - 130, 15, 100, 30);
+        cell.remarkLabel.frame = CGRectMake(SCREEN_WIDTH - 130, 10, 100, 30);
         if ([[dict objectForKey:@"checked"] integerValue] == 0)
         {
             cell.remarkLabel.hidden = YES;
@@ -223,7 +223,7 @@ updateGroupInfoDelegate>
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
-    if ([[dict objectForKey:@"checked"] intValue] == 0 || [titleString isEqualToString:@"新申请"])
+    if ([[dict objectForKey:@"checked"] intValue] == 0 && [titleString isEqualToString:@"新申请"])
     {
         ApplyInfoViewController *applyInfoViewController = [[ApplyInfoViewController alloc] init];
         applyInfoViewController.role = [dict objectForKey:@"role"];

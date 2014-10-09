@@ -59,6 +59,7 @@
     [[NSUserDefaults standardUserDefaults] setObject:@"1" forKey:@"showad"];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getNewClass) name:UPDATECLASSNUMBER object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getNewChat) name:UPDATECHATSNUMBER object:nil];
     
@@ -661,11 +662,13 @@
             {
                 [chatDict setObject:[userInfo objectForKey:@"g_id"] forKey:@"fid"];
                 [chatDict setObject:[userInfo objectForKey:@"u"] forKey:@"by"];
+                [chatDict setObject:fname forKey:@"byname"];
             }
             else
             {
                 NSString *unum = [userInfo  objectForKey:@"u"];
                 [chatDict setObject:unum forKey:@"fid"];
+                [chatDict setObject:fname forKey:@"fname"];
             }
             
             NSString *timeStr = [[userInfo objectForKey:@"m"] substringToIndex:8];
@@ -675,11 +678,9 @@
             [chatDict setObject:@"text" forKey:@"msgType"];
             [chatDict setObject:[Tools banjia_num] forKey:@"tid"];
             [chatDict setObject:@"0" forKey:@"readed"];
-            [chatDict setObject:fname forKey:@"byname"];
             [chatDict setObject:[NSString stringWithFormat:@"%d",[[userInfo objectForKey:@"l"] intValue]] forKey:@"l"];
             NSString *ficon = @"";
             [chatDict setObject:ficon forKey:@"ficon"];
-            //            [chatDict setObject:fname forKey:@"fname"];
             [chatDict setObject:[Tools user_id] forKey:@"userid"];
             
             if ([[NSUserDefaults standardUserDefaults] objectForKey:NewChatAlert])
@@ -696,7 +697,7 @@
                 if ([_db insertRecord:chatDict andTableName:CHATTABLE])
                 {
                     
-                    if ([self.chatDelegate respondsToSelector:@selector(dealNewChatMsg:)])
+                    if ([self.chatDelegate respondsToSelector:@selector(dealNewChatMsg:)]) //1412832211
                     {
                         [self.chatDelegate dealNewChatMsg:chatDict];
                     }
@@ -817,6 +818,14 @@
             {
                 [[NSNotificationCenter defaultCenter] postNotificationName:@"logout" object:userInfo];
             }
+            [Tools showAlertView:[[userInfo objectForKey:@"aps"] objectForKey:@"alert"] delegateViewController:nil];
+        }
+        else if([[userInfo objectForKey:@"type"] isEqualToString:@"sys"])
+        {
+            [Tools showAlertView:[NSString stringWithFormat:@"[系统]:%@",[[userInfo objectForKey:@"aps"] objectForKey:@"alert"]] delegateViewController:nil];
+        }
+        else
+        {
             [Tools showAlertView:[[userInfo objectForKey:@"aps"] objectForKey:@"alert"] delegateViewController:nil];
         }
     }

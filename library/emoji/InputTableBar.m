@@ -364,7 +364,9 @@ maxTextLength;
     UIButton *delFaceButton = [UIButton buttonWithType:UIButtonTypeCustom];
     delFaceButton.backgroundColor = [UIColor whiteColor];
     [delFaceButton setBackgroundImage:[UIImage imageNamed:@"facedel"] forState:UIControlStateNormal];
-    delFaceButton.frame = CGRectMake(5+SCREEN_WIDTH*(104/(row*colum)) +faceWidth*((104%(row*colum))%colum)+3,5+ faceHeight*((104%(row*colum))/colum)+8, 30, 25);
+    delFaceButton.frame = CGRectMake(5+SCREEN_WIDTH*(104/(row*colum)) + faceWidth*((104%(row*colum)) % colum)+3,
+                                     5+ faceHeight*((104%(row*colum))/colum)+8,
+                                     30, 25);
     delFaceButton.userInteractionEnabled = YES;
     [delFaceButton addGestureRecognizer:longPress];
     [delFaceButton addTarget:self action:@selector(delCharacter) forControlEvents:UIControlEventTouchUpInside];
@@ -680,14 +682,14 @@ maxTextLength;
 {
     if ([text isEqualToString:@"\n"])
     {
-        inputTextViewSize = CGSizeMake(250, DEFAULTTEXTHEIGHT);
-        [self inputChange];
         if (textView.text.length > maxTextLength)
         {
             [Tools showAlertView:[NSString stringWithFormat:@"字数不能超过%d",maxTextLength] delegateViewController:nil];
         }
         else
         {
+            inputTextViewSize = CGSizeMake(250, DEFAULTTEXTHEIGHT);
+            [self inputChange];
             if ([self.returnFunDel respondsToSelector:@selector(myReturnFunction)])
             {
                 [self.returnFunDel myReturnFunction];
@@ -711,11 +713,11 @@ maxTextLength;
     inputTextViewSize = size;
     [self inputChange];
     
-    if ([textView.text length] > maxTextLength)
-    {
-        [Tools showAlertView:[NSString stringWithFormat:@"字数不能超过%d",maxTextLength] delegateViewController:nil];
-        return ;
-    }
+//    if ([textView.text length] > maxTextLength)
+//    {
+//        [Tools showAlertView:[NSString stringWithFormat:@"字数不能超过%d",maxTextLength] delegateViewController:nil];
+//        return ;
+//    }
     
     if ([self.returnFunDel respondsToSelector:@selector(changeInputViewSize:)])
     {

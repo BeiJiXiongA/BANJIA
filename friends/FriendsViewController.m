@@ -655,8 +655,11 @@ OperateFriends>
                 
                 if ([[db findSetWithDictionary:@{@"unum":[dict objectForKey:@"number"]} andTableName:USERICONTABLE] count] > 0)
                 {
-                    [db deleteRecordWithDict:@{@"unum":[dict objectForKey:@"number"]} andTableName:USERICONTABLE];
-                    [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                    if ([db deleteRecordWithDict:@{@"unum":[dict objectForKey:@"number"]} andTableName:USERICONTABLE])
+                    {
+                        [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                    }
+                    
                 }
                 else
                 {
@@ -698,8 +701,10 @@ OperateFriends>
                     
                     if ([[db findSetWithDictionary:@{@"unum":[dict objectForKey:@"number"]} andTableName:USERICONTABLE] count] > 0)
                     {
-                        [db deleteRecordWithDict:@{@"unum":[dict objectForKey:@"number"]} andTableName:USERICONTABLE];
-                        [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                        if ([db deleteRecordWithDict:@{@"unum":[dict objectForKey:@"number"]} andTableName:USERICONTABLE])
+                        {
+                            [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                        }
                     }
                     else
                     {

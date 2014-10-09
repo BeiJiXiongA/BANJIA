@@ -876,9 +876,9 @@ int count = 0;
 -(void)emitClick
 {
     [contentTextView resignFirstResponder];
-    if ([normalPhotosArray count] <= 0)
+    if ([contentTextView.text length] <= 0 && [normalPhotosArray count] <= 0)
     {
-        [Tools showAlertView:@"添加几张图片吧！" delegateViewController:nil];
+        [Tools showAlertView:@"说点什么或添加几张图片吧！" delegateViewController:nil];
         return ;
     }
     if (!fromCLass)

@@ -514,7 +514,7 @@ MFMailComposeViewControllerDelegate>
         {
             if (buttonIndex == 0)
             {
-                UIAlertView *al = [[UIAlertView alloc] initWithTitle:nil message:[NSString stringWithFormat:@"您确定与%@解除好友关系吗？",personName] delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定解除", nil];
+                UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:[NSString stringWithFormat:@"您确定与%@解除好友关系吗？",personName] delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定解除", nil];
                 al.tag = 3333;
                 [al show];
             }
@@ -828,8 +828,10 @@ MFMailComposeViewControllerDelegate>
                 
                 if ([[db findSetWithDictionary:@{@"unum":[userIconDict objectForKey:@"unum"]} andTableName:USERICONTABLE] count] > 0)
                 {
-                    [db deleteRecordWithDict:@{@"unum":[userIconDict objectForKey:@"unum"]} andTableName:USERICONTABLE];
-                    [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                    if ([db deleteRecordWithDict:@{@"unum":[userIconDict objectForKey:@"unum"]} andTableName:USERICONTABLE])
+                    {
+                        [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                    }
                 }
                 else
                 {

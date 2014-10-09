@@ -933,9 +933,9 @@ headerDelegate>
 
 -(BOOL)haveNewMsg
 {
-    NSArray *msgArray = [db findSetWithDictionary:@{@"readed":@"0",@"userid":[Tools user_id]} andTableName:CHATTABLE];
+    NSArray *msgArray = [db findSetWithDictionary:@{@"readed":@"0",@"userid":[Tools user_id]} andTableName:CHATTABLE]; //[msgArray count] > 0 ||
     NSArray *friendsArray  =[db findSetWithDictionary:@{@"checked":@"0",@"uid":[Tools user_id]} andTableName:FRIENDSTABLE];
-    if ([msgArray count] > 0 || [friendsArray count] > 0 ||
+    if ([friendsArray count] > 0 || [msgArray count] > 0 ||
         [[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue]>0 ||
         [[[NSUserDefaults standardUserDefaults] objectForKey:NewClassNum] integerValue]>0 ||
         [[[NSUserDefaults standardUserDefaults] objectForKey:UCFRIENDSUM] integerValue] > 0)

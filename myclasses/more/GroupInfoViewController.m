@@ -125,10 +125,12 @@
                         [tmpDict setObject:@"" forKey:@"uicon"];
                     }
                     [tmpDict setObject:[dict objectForKey:@"r_name"] forKey:@"username"];
-                    if ([[db findSetWithDictionary:@{@"uid":[dict objectForKey:@"_id"]} andTableName:USERICONTABLE] count]>0)
+                    if ([[db findSetWithDictionary:@{@"uid":[dict objectForKey:@"_id"]} andTableName:USERICONTABLE] count] >0)
                     {
-                        [db deleteRecordWithDict:@{@"uid":[dict objectForKey:@"_id"]} andTableName:USERICONTABLE];
-                        [db insertRecord:tmpDict andTableName:USERICONTABLE];
+                        if ([db deleteRecordWithDict:@{@"uid":[dict objectForKey:@"_id"]} andTableName:USERICONTABLE])
+                        {
+                            [db insertRecord:tmpDict andTableName:USERICONTABLE];
+                        }
                     }
                     else
                     {

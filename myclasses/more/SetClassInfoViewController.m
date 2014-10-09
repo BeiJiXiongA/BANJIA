@@ -96,7 +96,7 @@
         infoTextView.backgroundColor = [UIColor clearColor];
         [self.bgView addSubview:infoTextView];
         
-        countLabel = [[UILabel alloc] initWithFrame:CGRectMake(infoTextView.frame.size.width+infoTextView.frame.origin.x-50, infoTextView.frame.size.height+infoTextView.frame.origin.y-15, 50, 20)];
+        countLabel = [[UILabel alloc] initWithFrame:CGRectMake(infoTextView.frame.size.width+infoTextView.frame.origin.x-50, infoTextView.frame.size.height+infoTextView.frame.origin.y-15, 70, 20)];
         countLabel.backgroundColor = [UIColor clearColor];
 //        countLabel.font = [UIFont systemFontOfSize:12];
         countLabel.font = [UIFont fontWithName:@"Futura" size:14];

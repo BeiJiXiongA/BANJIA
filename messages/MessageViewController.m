@@ -232,8 +232,10 @@ ChatVCDelegate>
                             //更新用户表
                             if ([[db findSetWithDictionary:@{@"uid":[dict objectForKey:@"tid"]} andTableName:USERICONTABLE] count] > 0)
                             {
-                                [db deleteRecordWithDict:@{@"uid":[dict objectForKey:@"tid"]} andTableName:USERICONTABLE];
-                                [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                                if ([db deleteRecordWithDict:@{@"uid":[dict objectForKey:@"tid"]} andTableName:USERICONTABLE])
+                                {
+                                    [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                                }
                             }
                             else
                             {
@@ -425,9 +427,32 @@ ChatVCDelegate>
         DDLOG(@"%@",[unreadCountDict objectForKey:fid]);
         return [[unreadCountDict objectForKey:fid] intValue];
     }
-    return 0;
-//    NSMutableArray *array = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"fid":fid,@"readed":@"0"} andTableName:CHATTABLE];
-//    return [array count];
+    
+    NSArray *userIconArray = [db findSetWithDictionary:@{@"uid":fid} andTableName:USERICONTABLE];
+    NSString *uNumber = @"";
+    if ([userIconArray count] > 0)
+    {
+        NSDictionary *userIconDict = [userIconArray firstObject];
+        
+        if ([userIconDict objectForKey:@"unum"] &&
+            ![[userIconDict objectForKey:@"unum"] isEqual:[NSNull null]] &&
+            [[userIconDict objectForKey:@"unum"] length] > 0)
+        {
+            uNumber = [userIconDict objectForKey:@"unum"];
+        }
+    }
+    
+    NSArray *array = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"fid":fid,@"readed":@"0"} andTableName:CHATTABLE];
+    NSArray *array1 = [db findSetWithDictionary:@{@"fid":uNumber} andTableName:CHATTABLE];
+    for (NSDictionary *dbDict in array1)
+    {
+        if ([db updeteKey:@"fid" toValue:fid withParaDict:@{@"mid":[dbDict objectForKey:@"mid"],@"userid":[Tools user_id]} andTableName:CHATTABLE] &&
+            [db updeteKey:@"tid" toValue:[Tools user_id] withParaDict:@{@"userid":[Tools user_id],@"mid":[dbDict objectForKey:@"mid"]} andTableName:CHATTABLE])
+        {
+            DDLOG(@"updata fid and tid success!");
+        }
+    }
+    return [array count] + [array1 count];
 }
 
 #pragma mark - egodelegate
