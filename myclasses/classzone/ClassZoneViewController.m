@@ -231,6 +231,7 @@ NameButtonDel>
     inputTabBar.backgroundColor = [UIColor grayColor];
     inputTabBar.returnFunDel = self;
     inputTabBar.notOnlyFace = NO;
+    inputTabBar.maxTextLength = COMMENT_TEXT_LENGHT;
     [self.bgView addSubview:inputTabBar];
     inputSize = CGSizeMake(250, 30);
     [inputTabBar setLayout];

@@ -96,6 +96,7 @@
     
     
     NSString *msgContent = [[dict objectForKey:@"content"] emojizedString];
+    DDLOG(@"msgContent %@",msgContent);
     CGSize size = [SizeTools getSizeWithString:msgContent andWidth:SCREEN_WIDTH/2+20 andFont:MessageTextFont];
     headerTapTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(headerImageViewTap:)];
     [self.headerImageView addGestureRecognizer:headerTapTgr];
@@ -131,8 +132,6 @@
             NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
             self.timeLabel.text = timeStr;
             
-            
-            
             self.chatBg.frame = CGRectMake(headerImageX, messageBgY, MESSAGE_IMAGE_HEIGHT+leftSpace+CHAT_TOP_IMAGE_SPACE, MESSAGE_IMAGE_HEIGHT+CHAT_TOP_IMAGE_SPACE*2);
             [self.chatBg setImage:fromImage];
             
@@ -141,7 +140,6 @@
             self.msgImageView.clipsToBounds = YES;
             
             [Tools fillImageView:self.msgImageView withImageFromURL:msgContent imageWidth:200 andDefault:@"3100"];
-            
             
             if(isGroup)
             {

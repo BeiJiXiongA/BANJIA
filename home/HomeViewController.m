@@ -295,10 +295,10 @@ headerDelegate>
     inputTabBar.backgroundColor = [UIColor grayColor];
     inputTabBar.returnFunDel = self;
     inputTabBar.notOnlyFace = NO;
+    inputTabBar.maxTextLength = COMMENT_TEXT_LENGHT;
     [self.bgView addSubview:inputTabBar];
     inputSize = CGSizeMake(250, 30);
     [inputTabBar setLayout];
-    
     
     tipView = [[UIView alloc] initWithFrame:CGRectMake(10, UI_NAVIGATION_BAR_HEIGHT+60, SCREEN_WIDTH-20, 300)];
     tipView.backgroundColor = self.bgView.backgroundColor;

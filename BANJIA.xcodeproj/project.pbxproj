@@ -210,7 +210,6 @@
 		388E1B4919B01CE40085B685 /* TOWebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 388E1B4119B01CE40085B685 /* TOWebViewController.m */; };
 		388E1B4A19B01CE40085B685 /* UIImage+TOWebViewControllerIcons.m in Sources */ = {isa = PBXBuildFile; fileRef = 388E1B4319B01CE40085B685 /* UIImage+TOWebViewControllerIcons.m */; };
 		388E1B5119B075ED0085B685 /* slogan@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 388E1B5019B075ED0085B685 /* slogan@2x.png */; };
-		3890096019E4C0860052D99B /* emoji.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3890095F19E4C0860052D99B /* emoji.plist */; };
 		3890096219E4DC310052D99B /* facedel@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3890096119E4DC310052D99B /* facedel@2x.png */; };
 		3891064D1996554E009B73B0 /* qr_on@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3891064B1996554E009B73B0 /* qr_on@2x.png */; };
 		3891064E1996554E009B73B0 /* qr@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3891064C1996554E009B73B0 /* qr@2x.png */; };
@@ -878,7 +877,6 @@
 		388E1B4419B01CE40085B685 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/TOWebViewControllerLocalizable.strings"; sourceTree = "<group>"; };
 		388E1B4519B01CE40085B685 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/TOWebViewControllerLocalizable.strings"; sourceTree = "<group>"; };
 		388E1B5019B075ED0085B685 /* slogan@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "slogan@2x.png"; sourceTree = "<group>"; };
-		3890095F19E4C0860052D99B /* emoji.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = emoji.plist; sourceTree = "<group>"; };
 		3890096119E4DC310052D99B /* facedel@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "facedel@2x.png"; sourceTree = "<group>"; };
 		3891064B1996554E009B73B0 /* qr_on@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "qr_on@2x.png"; path = "../qr_on@2x.png"; sourceTree = "<group>"; };
 		3891064C1996554E009B73B0 /* qr@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "qr@2x.png"; path = "../qr@2x.png"; sourceTree = "<group>"; };
@@ -1979,7 +1977,6 @@
 		3884D25219B871610012B6D2 /* Resource */ = {
 			isa = PBXGroup;
 			children = (
-				3890095F19E4C0860052D99B /* emoji.plist */,
 			);
 			name = Resource;
 			sourceTree = "<group>";
@@ -3428,7 +3425,6 @@
 				3855221A195D6E570052B3B5 /* unchecked@2x.png in Resources */,
 				38C044E719A23BB100F500BA /* icon_sound_t@2x.png in Resources */,
 				38282D561988B9CE0087018A /* scorealbum@2x.png in Resources */,
-				3890096019E4C0860052D99B /* emoji.plist in Resources */,
 				38549769194ACBF600BBDA4F /* tips_bg@2x.png in Resources */,
 				38BE46DA18F3E3D7001D805C /* addimage@2x.png in Resources */,
 				3899BC2B196D0F470037C586 /* outer_nav_backbtn_s.png in Resources */,

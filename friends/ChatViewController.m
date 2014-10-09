@@ -279,6 +279,7 @@ EGORefreshTableHeaderDelegate>
     inputTabBar.backgroundColor = [UIColor whiteColor];
     inputTabBar.returnFunDel = self;
     inputTabBar.notOnlyFace = YES;
+    inputTabBar.maxTextLength = CHAT_MESSAGE_LENGHT;
     if ([toID isEqualToString:OurTeamID])
     {
         inputTabBar.hideSoundButton = YES;
