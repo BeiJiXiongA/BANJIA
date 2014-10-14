@@ -564,15 +564,112 @@ UIActionSheetDelegate>
     return cell;
 }
 
--(void)switchViewChange:(UISwitch *)switchItem
+-(void)switchViewChange:(KLSwitch *)switchItem
 {
-    if ([switchItem isOn])
+    DDLOG(@"row %d",switchItem.tag);
+    if (switchItem.tag == 0)
     {
-        [self settingValue:@"0" forKay:[settingKeysArray objectAtIndex:switchItem.tag]];
+        if ([[settingDict objectForKey:ParentComment] intValue] == 0)
+        {
+            [self settingValue:@"1" forKay:ParentComment];
+            [switchItem isOn:YES];
+        }
+        else if([[settingDict objectForKey:ParentComment] intValue] == 1)
+        {
+            [self settingValue:@"0" forKay:ParentComment];
+            [switchItem isOn:NO];
+        }
     }
-    else
+    else if(switchItem.tag == 1)
     {
-        [self settingValue:@"1" forKay:[settingKeysArray objectAtIndex:switchItem.tag]];
+        if ([[settingDict objectForKey:ParentTeacherFriend] intValue] == 0)
+        {
+            [self settingValue:@"1" forKay:ParentTeacherFriend];
+            [switchItem isOn:YES];
+        }
+        else if([[settingDict objectForKey:ParentTeacherFriend] intValue] == 1)
+        {
+            [self settingValue:@"0" forKay:ParentTeacherFriend];
+            [switchItem isOn:NO];
+        }
+    }
+    else if(switchItem.tag == 3)
+    {
+        if ([[settingDict objectForKey:ParentInviteMem] intValue] == 0)
+        {
+            [self settingValue:@"1" forKay:ParentInviteMem];
+            [switchItem isOn:YES];
+        }
+        else if([[settingDict objectForKey:ParentInviteMem] intValue] == 1)
+        {
+            [self settingValue:@"0" forKay:ParentInviteMem];
+            [switchItem isOn:NO];
+        }
+    }
+    else if(switchItem.tag == 4)
+    {
+        if ([[settingDict objectForKey:StudentTeacherFriend] intValue] == 0)
+        {
+            [self settingValue:@"1" forKay:StudentTeacherFriend];
+            [switchItem isOn:YES];
+        }
+        else if([[settingDict objectForKey:StudentTeacherFriend] intValue] == 1)
+        {
+            [self settingValue:@"0" forKay:StudentTeacherFriend];
+            [switchItem isOn:NO];
+        }
+    }
+    else if(switchItem.tag == 6)
+    {
+        if ([[settingDict objectForKey:StudentInviteMem] intValue] == 0)
+        {
+            [self settingValue:@"1" forKay:StudentInviteMem];
+            [switchItem isOn:YES];
+        }
+        else if([[settingDict objectForKey:StudentInviteMem] intValue] == 1)
+        {
+            [self settingValue:@"0" forKay:StudentInviteMem];
+            [switchItem isOn:NO];
+        }
+    }
+    else if(switchItem.tag == 8)
+    {
+        if ([[settingDict objectForKey:AdminInviteMem] intValue] == 0)
+        {
+            [self settingValue:@"1" forKay:AdminInviteMem];
+            [switchItem isOn:YES];
+        }
+        else if([[settingDict objectForKey:AdminInviteMem] intValue] == 1)
+        {
+            [self settingValue:@"0" forKay:AdminInviteMem];
+            [switchItem isOn:NO];
+        }
+    }
+    else if(switchItem.tag == 9)
+    {
+        if ([[settingDict objectForKey:AdminCheckApply] intValue] == 0)
+        {
+            [self settingValue:@"1" forKay:AdminCheckApply];
+            [switchItem isOn:YES];
+        }
+        else if([[settingDict objectForKey:AdminCheckApply] intValue] == 1)
+        {
+            [self settingValue:@"0" forKay:AdminCheckApply];
+            [switchItem isOn:NO];
+        }
+    }
+    else if(switchItem.tag == 10)
+    {
+        if ([[settingDict objectForKey:AdminSendNotice] intValue] == 0)
+        {
+            [self settingValue:@"1" forKay:AdminSendNotice];
+            [switchItem isOn:YES];
+        }
+        else if([[settingDict objectForKey:AdminSendNotice] intValue] == 1)
+        {
+            [self settingValue:@"0" forKay:AdminSendNotice];
+            [switchItem isOn:NO];
+        }
     }
 }
 

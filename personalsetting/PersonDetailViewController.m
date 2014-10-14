@@ -570,7 +570,7 @@ MFMailComposeViewControllerDelegate>
     //设置主题
     [mailPicker setSubject: @"班家意见反馈"];
     //添加收件人
-    NSArray *toRecipients = [NSArray arrayWithObject: phoneNum];
+    NSArray *toRecipients = [NSArray arrayWithObject: email];
     [mailPicker setToRecipients: toRecipients];
     //添加抄送
     //    NSArray *ccRecipients = [NSArray arrayWithObjects:@"second@example.com", @"third@example.com", nil];

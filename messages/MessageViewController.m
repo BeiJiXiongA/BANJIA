@@ -268,6 +268,14 @@ ChatVCDelegate>
                                 }
                             }
                             
+                            if(![[[notiChatArray firstObject] objectForKey:@"l"] isEqual:[NSNull null]] &&
+                               [[[notiChatArray firstObject] objectForKey:@"l"] intValue] == 1)
+                            {
+                                if ([db updeteKey:@"content" toValue:[msgDict objectForKey:@"msg"] withParaDict:@{@"mid":[msgDict objectForKey:@"_id"],@"userid":[Tools user_id]} andTableName:CHATTABLE])
+                                {
+                                    DDLOG(@"updata msg content success!");
+                                }
+                            }
                         }
                         else
                         {
@@ -369,14 +377,14 @@ ChatVCDelegate>
     [newMessageArray removeAllObjects];
     [newMessageArray addObjectsFromArray:[db findChatUseridWithTableName:CHATTABLE]];
 
+    
+    //时间由大到小排序
     if ([newMessageArray count] > 0)
     {
         for(int i = 0; i < [newMessageArray count]-1; i++)
         {
             NSString *tid = [[[newMessageArray objectAtIndex:i] allValues] firstObject];
-            NSDictionary *userIconDIct = [ImageTools iconDictWithUserID:tid];
             NSDictionary *messageDict = [self findLastMsgWithUser:tid];
-            DDLOG(@"tid==%@,usericon==%@,lastmsg==%@",tid,userIconDIct,messageDict);
             int msgTime = [[messageDict objectForKey:@"time"] intValue];
             for (int j= 0; j<[newMessageArray count]-i; j++)
             {

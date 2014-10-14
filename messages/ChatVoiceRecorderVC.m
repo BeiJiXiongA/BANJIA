@@ -139,6 +139,12 @@
         {
             [recorder stop];
         }
+        if ([self.recordDel respondsToSelector:@selector(updateVoiceLength:)])
+        {
+            [self.recordDel updateVoiceLength:curCount];
+        }
+        
+        
 //        if (curCount <= 1)
 //        {
 //            

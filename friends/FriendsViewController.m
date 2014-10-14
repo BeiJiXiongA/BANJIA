@@ -605,11 +605,13 @@ OperateFriends>
             }
         }];
         [request setFailedBlock:^{
+            [Tools hideProgress:self.bgView];
             NSError *error = [request error];
             DDLOG(@"error %@",error);
             _reloading = NO;
             [pullRefreshView egoRefreshScrollViewDataSourceDidFinishedLoading:friendsListTableView];
         }];
+        [Tools showProgress:self.bgView];
         [request startAsynchronous];
     }
     else
@@ -711,7 +713,6 @@ OperateFriends>
                         [db insertRecord:userIconDict andTableName:USERICONTABLE];
                     }
                 }
-
             }
         }
     }
@@ -729,6 +730,8 @@ OperateFriends>
     [tmpArray addObjectsFromArray:[Tools getSpellSortArrayFromChineseArray:tmpListArray andKey:@"fname"]];
     
     [friendsListTableView reloadData];
+    
+    [Tools hideProgress:self.bgView];
     
     if ([newFriendsApply count] > 0 || [tmpArray count] > 0 || [groupChatArray count] > 0)
     {

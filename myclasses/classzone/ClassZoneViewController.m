@@ -53,7 +53,7 @@ NameButtonDel>
     NSMutableArray *DongTaiArray;
     NSMutableArray *tmpArray;
     NSMutableDictionary *tmpDict;
-    NSString *page;
+    int page;
     NSString *monthStr;
     CGFloat bgImageViewHeight;
     
@@ -149,7 +149,7 @@ NameButtonDel>
     
     db = [[OperatDB alloc] init];
     
-    page = @"";
+    page = 0;
     haveNew = NO;
     _reloading = NO;
     
@@ -419,7 +419,7 @@ NameButtonDel>
         [Tools showAlertView:@"您还没有进入这个班级，快去申请加入吧！" delegateViewController:self];
         return ;
     }
-    page = @"";
+    page = 0;
     monthStr = @"";
     [self getCLassSettings];
 }
@@ -472,7 +472,7 @@ NameButtonDel>
     if (add)
     {
         haveNew = YES;
-        page = @"";
+        page = 0;
         monthStr = @"";
         [self getDongTaiList];
     }
@@ -2097,7 +2097,6 @@ NameButtonDel>
 {
     if (add)
     {
-        page = @"";
         monthStr = @"";
         [self getDongTaiList];
     }
@@ -2105,8 +2104,12 @@ NameButtonDel>
 
 -(void)getMoreDongTai
 {
-    int tmppage = [page intValue];
-    page = [NSString stringWithFormat:@"%d",++tmppage];
+    if (page == -1)
+    {
+        [Tools showAlertView:@"没有更多动态了" delegateViewController:nil];
+        return ;
+    }
+    page ++;
     [self getDongTaiList];
 }
 
@@ -2116,7 +2119,7 @@ NameButtonDel>
     if ([Tools NetworkReachable])
     {
         NSDictionary *paraDict;
-        if ([page length] == 0)
+        if (page == 0)
         {
             paraDict = @{@"u_id":[Tools user_id],
                          @"token":[Tools client_token],
@@ -2127,7 +2130,7 @@ NameButtonDel>
             paraDict = @{@"u_id":[Tools user_id],
                          @"token":[Tools client_token],
                          @"c_id":classID,
-                         @"page":page,
+                         @"page":[NSString stringWithFormat:@"%d",page],
                          @"month":monthStr};
         }
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:paraDict API:GETDIARIESLIST];
@@ -2138,7 +2141,7 @@ NameButtonDel>
             DDLOG(@"diaries list responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                if ([page length]== 0)
+                if (page== 0)
                 {
                     [tmpArray removeAllObjects];
                     [DongTaiArray removeAllObjects];
@@ -2159,16 +2162,22 @@ NameButtonDel>
                         classZoneTableView.hidden = NO;
                         [DongTaiArray addObjectsFromArray:array];
                     }
-                    page = [NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"] objectForKey:@"page"] intValue]];
+                    page = [[[responseDict objectForKey:@"data"] objectForKey:@"page"] intValue];
                     monthStr = [NSString stringWithFormat:@"%@",[[responseDict objectForKey:@"data"] objectForKey:@"month"]];
+                    
+                    if (page == 0 && [monthStr intValue] == 0)
+                    {
+                        page = -1;
+                    }
                 }
-                else if ([page length] == 0 && [monthStr length]==0 )
+                else if (page == 0 && [monthStr length]==0 )
                 {
                     noneDongTaiLabel.hidden = NO;
                 }
-                else if([monthStr length] > 0 && [page integerValue]>0)
+                else if([monthStr length] == 0 && page ==0)
                 {
                     [Tools showAlertView:@"没有更多动态了" delegateViewController:nil];
+                    page = -1;
                 }
                 if (!isApply)
                 {

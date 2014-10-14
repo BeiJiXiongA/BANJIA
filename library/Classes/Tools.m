@@ -21,7 +21,6 @@
 
 extern NSString *CTSettingCopyMyPhoneNumber();
 
-
 @implementation Tools
 
 + (NSDictionary *)JSonFromString:(NSString* )result
@@ -263,7 +262,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 
 +(NSString *)device_os
 {
-    NSString *deviceOS = [[UIDevice currentDevice] systemName];
+    NSString *deviceOS = [NSString stringWithFormat:@"%@",[[UIDevice currentDevice] systemVersion]];
     return deviceOS;
 }
 

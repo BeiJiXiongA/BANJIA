@@ -526,10 +526,7 @@
                     
                     if([[responseDict objectForKey:@"data"] integerValue] > 0)
                     {
-//                        if ([self.chatDelegate respondsToSelector:@selector(dealNewChatMsg:)])
-//                        {
-//                            [self.chatDelegate dealNewChatMsg:nil];
-//                        }
+                        
                     }
                     
                     [[NSUserDefaults standardUserDefaults] setObject:ENTER_FORGROUD forKey:BECOMEACTIVE];
@@ -610,7 +607,20 @@
 
 -(void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
 {
-    [self handlePushNotification:userInfo];
+    
+    if (application.applicationState == UIApplicationStateInactive)
+    {
+        // 点击通知栏
+        DDLOG(@"click notification bar");
+        [[UIApplication sharedApplication] cancelAllLocalNotifications];
+        [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
+    }
+//    else
+//    {
+        [self handlePushNotification:userInfo];
+//        DDLOG(@"notification come in backgroud");
+//    }
+    
 }
 
 -(void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
@@ -621,8 +631,7 @@
 -(void)handlePushNotification:(NSDictionary *)userInfo
 {
     [APService handleRemoteNotification:userInfo];
-    [[UIApplication sharedApplication] cancelAllLocalNotifications];
-    [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
+    
     DDLOG(@"push info %@",userInfo);
     
     if ([Tools user_id])
@@ -940,6 +949,11 @@
     // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
     [[NSUserDefaults standardUserDefaults] setObject:ENTER_BACKGROUD forKey:BECOMEACTIVE];
     [[NSUserDefaults standardUserDefaults] synchronize];
+    
+    if ([self.chatDelegate respondsToSelector:@selector(uploadLastViewTime)])
+    {
+        [self.chatDelegate uploadLastViewTime];
+    }
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application

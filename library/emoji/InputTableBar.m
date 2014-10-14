@@ -29,7 +29,8 @@ originWav,
 recorderVC,
 player,
 hideSoundButton,
-maxTextLength;
+maxTextLength,
+voiceView;
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
@@ -136,7 +137,6 @@ maxTextLength;
         recordButton.hidden = YES;
         [inputBgView addSubview:recordButton];
 
-        
         moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
         moreButton.frame = CGRectMake( SCREEN_WIDTH - 40, INPUTBUTTONT, INPUTBUTTONH, INPUTBUTTONH);
         [moreButton setImage:[UIImage imageNamed:@"moreinchat"] forState:UIControlStateNormal];
@@ -390,6 +390,8 @@ maxTextLength;
     self.backgroundColor = TITLE_COLOR;
 }
 
+#pragma mark - 录音
+
 -(void)longPress:(UILongPressGestureRecognizer *)longPress
 {
     if (longPress.state == UIGestureRecognizerStateBegan)
@@ -399,6 +401,7 @@ maxTextLength;
         [recordButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:@"touchDown"] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
         self.originWav = [VoiceRecorderBaseVC getCurrentTimeString];
         //开始录音
+        [self showVoiceView];
         [recorderVC beginRecordByFileName:self.originWav];
     }
     else if (longPress.state == UIGestureRecognizerStateEnded ||
@@ -408,10 +411,54 @@ maxTextLength;
         [recordButton setTitle:@"按下录音" forState:UIControlStateNormal];
         [recordButton setBackgroundImage:[UIImage imageNamed:@"recordBtn"] forState:UIControlStateNormal];
         [recorderVC.recorder stop];
+        [self hideVoiceView];
     }
 }
 
+-(void)updateVoiceLength:(int)voiceLength
+{
+    DDLOG(@"voice length %d",voiceLength);
+    if (voiceLength < 60)
+    {
+        voiceView.text = [NSString stringWithFormat:@"%d/60",voiceLength];
+        voiceView.textColor = [UIColor whiteColor];
+    }
+    else
+    {
+        voiceView.text = @"开始发送";
+        voiceView.textColor = [UIColor redColor];
+    }
+}
 
+-(void)showVoiceView
+{
+    UIViewController *topVC = [self appRootViewController];
+    voiceView = [[UILabel alloc] init];
+    voiceView.frame = CGRectMake(CENTER_POINT.x-70, CENTER_POINT.y-50, 140, 100);
+    voiceView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
+    voiceView.layer.cornerRadius = 5;
+    voiceView.clipsToBounds = YES;
+    voiceView.font = [UIFont systemFontOfSize:35];
+    voiceView.textColor = [UIColor whiteColor];
+    voiceView.textAlignment = NSTextAlignmentCenter;
+    [topVC.view addSubview:voiceView];
+    [self updateVoiceLength:0];
+}
+
+-(void)hideVoiceView
+{
+    [voiceView removeFromSuperview];
+}
+
+- (UIViewController *)appRootViewController
+{
+    UIViewController *appRootVC = [UIApplication sharedApplication].keyWindow.rootViewController;
+    UIViewController *topVC = appRootVC;
+    while (topVC.presentedViewController) {
+        topVC = topVC.presentedViewController;
+    }
+    return topVC;
+}
 
 -(void)delCharacter
 {
@@ -796,6 +843,7 @@ maxTextLength;
 }
 -(void)recordFinished:(NSString *)filePath andFileName:(NSString *)fileName voiceLength:(int)length
 {
+    
     if ([self.returnFunDel respondsToSelector:@selector(recordFinished:andFileName:voiceLength:)] && length >= 1)
     {
         [self.returnFunDel recordFinished:filePath andFileName:fileName voiceLength:length];

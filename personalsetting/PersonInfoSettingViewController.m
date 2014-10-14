@@ -531,7 +531,7 @@ EditNameDone>
             [dateComps setYear:[year integerValue]];
             
             NSDate *itemDate = [calendar dateFromComponents:dateComps];
-            [datePicker setDate:itemDate];
+            [datePicker setDate:itemDate animated:NO];
         }
         
         

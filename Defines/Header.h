@@ -16,6 +16,7 @@
 #import "APService.h"
 #import "DXAlertView.h"
 #import "CommonFunc.h"
+#import "MLEmojiLabel.h"
 
 #define FaceViewHeight  200
 

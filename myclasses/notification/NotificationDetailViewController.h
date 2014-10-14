@@ -10,7 +10,7 @@
 
 @protocol NotificationDetailDelegate <NSObject>
 
--(void)readNotificationDetail;
+-(void)readNotificationDetail:(NSDictionary *)noticeDict deleted:(BOOL)deleted;
 
 @end
 
@@ -20,6 +20,8 @@
 @property (nonatomic, strong) NSString *c_read;
 @property (nonatomic, strong) NSString *byID;
 @property (nonatomic, assign) BOOL isnew;
+
+@property (nonatomic, strong) NSDictionary *noticeDict;
 @property (nonatomic, assign) id<NotificationDetailDelegate> readnotificationDetaildel;
 @property (nonatomic, assign) BOOL fromClass;
 @property (nonatomic, strong) NSString *markString;

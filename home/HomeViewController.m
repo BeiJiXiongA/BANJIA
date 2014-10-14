@@ -71,7 +71,7 @@ DongTaiDetailAddCommentDelegate,
 ZBarReaderDelegate,
 headerDelegate>
 {
-    NSString *page;
+    int page;
     
     
     UIButton *moreButton;
@@ -148,6 +148,8 @@ headerDelegate>
     
     NSInteger waitCommentSection;
     NSInteger waitCommentIndex;
+    
+    NSIndexPath *currentIndexPath;
 }
 @end
 
@@ -182,7 +184,7 @@ headerDelegate>
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
-    page = @"0";
+    page = 0;
     
     commentHeight = 0;
     tmpheight = 0;
@@ -452,6 +454,12 @@ headerDelegate>
         [classTableView reloadData];
         [self viewWillAppear:NO];
     }
+}
+
+#pragma mark - updatelasttime
+-(void)uploadLastViewTime
+{
+    
 }
 
 #pragma mark - 扫一扫
@@ -991,7 +999,7 @@ headerDelegate>
     if ([Tools NetworkReachable])
     {
         NSDictionary *paraDict;
-        if ([page intValue] == 0)
+        if (page == 0)
         {
             paraDict = @{@"u_id":[Tools user_id],
                          @"token":[Tools client_token]};
@@ -1000,7 +1008,7 @@ headerDelegate>
         {
             paraDict = @{@"u_id":[Tools user_id],
                          @"token":[Tools client_token],
-                         @"page":page};
+                         @"page":[NSString stringWithFormat:@"%d",page]};
         }
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:paraDict
                                                                 API:HOMEDATA];
@@ -1012,7 +1020,7 @@ headerDelegate>
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 haveClass = YES;
-                if ([page integerValue] == 0)
+                if (page == 0)
                 {
                     NSString *requestUrlStr = [NSString stringWithFormat:@"%@=%@",HOMEDATA,[Tools user_id]];
                     NSString *key = [requestUrlStr MD5Hash];
@@ -1021,8 +1029,15 @@ headerDelegate>
                     [noticeArray removeAllObjects];
                     [diariesArray removeAllObjects];
                 }
+                if ([[[responseDict objectForKey:@"data"] objectForKey:@"page"] intValue] == 0 &&
+                    ([diariesArray count] > 0 || [noticeArray count] > 0))
+                {
+                    page = -1;
+                }
+
                 [noticeArray addObjectsFromArray:[[responseDict objectForKey:@"data"] objectForKey:@"notices"]];
                 [diariesArray addObjectsFromArray:[[responseDict objectForKey:@"data"] objectForKey:@"diaries"]];
+                
                 
                 if ([noticeArray count] == 0 && [diariesArray count] == 0)
                 {
@@ -1079,7 +1094,7 @@ headerDelegate>
             _reloading = NO;
             [egoheaderView egoRefreshScrollViewDataSourceDidFinishedLoading:classTableView];
             [footerView egoRefreshScrollViewDataSourceDidFinishedLoading:classTableView];
-            if ([page integerValue] > 0)
+            if (page > 0)
             {
                 if (footerView)
                 {
@@ -1264,7 +1279,7 @@ headerDelegate>
         _reloading = NO;
         [egoheaderView egoRefreshScrollViewDataSourceDidFinishedLoading:classTableView];
         [footerView egoRefreshScrollViewDataSourceDidFinishedLoading:classTableView];
-        if ([page integerValue] > 0)
+        if (page > 0)
         {
             if (footerView)
             {
@@ -1384,15 +1399,19 @@ headerDelegate>
 #pragma mark - 下拉刷新
 -(void)egoRefreshTableHeaderDidTriggerRefresh:(EGORefreshTableHeaderView *)view
 {
-    page = @"0";
+    page = 0;
     [self getHomeData];
     [self getHomeAd];
 }
 
 -(void)egoRefreshTableDidTriggerRefresh:(EGORefreshPos)aRefreshPos
 {
-    NSInteger pageNum = [page integerValue];
-    page = [NSString stringWithFormat:@"%d",++pageNum];
+    if (page == -1)
+    {
+        [Tools showAlertView:@"没有更多数据了" delegateViewController:nil];
+        return ;
+    }
+    page ++;
     [self getHomeData];
 }
 
@@ -1465,7 +1484,7 @@ headerDelegate>
 {
     if (add)
     {
-        page = @"0";
+        page = 0;
         [self getHomeData];
     }
 }
@@ -2152,15 +2171,13 @@ headerDelegate>
         [[NSUserDefaults standardUserDefaults] synchronize];
         NSDictionary *dict = [[[noticeArray objectAtIndex:indexPath.section-1] objectForKey:@"news"] objectAtIndex:indexPath.row];
         NotificationDetailViewController *notificationDetailViewController = [[NotificationDetailViewController alloc] init];
-        notificationDetailViewController.noticeID = [dict objectForKey:@"_id"];
-        notificationDetailViewController.noticeContent = [dict objectForKey:@"content"];
+        notificationDetailViewController.noticeDict = dict;
         notificationDetailViewController.c_read = @"1";
-        notificationDetailViewController.markString = [NSString stringWithFormat:@"%@发布于%@",[[dict objectForKey:@"by"] objectForKey:@"name"],[Tools showTime:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]]];
         notificationDetailViewController.readnotificationDetaildel = self;
         notificationDetailViewController.isnew = YES;
         notificationDetailViewController.fromClass = NO;
-        notificationDetailViewController.byID = [[dict objectForKey:@"by"] objectForKey:@"_id"];
         [self.navigationController pushViewController:notificationDetailViewController animated:YES];
+        currentIndexPath = indexPath;
     }
     else
     {
@@ -2180,9 +2197,16 @@ headerDelegate>
     }
 }
 
--(void)readNotificationDetail
+-(void)readNotificationDetail:(NSDictionary *)noticeDict deleted:(BOOL)deleted
 {
+    page = 0;
     [self getHomeData];
+//    NSMutableDictionary *tmpNoticeDict = [noticeArray objectAtIndex:currentIndexPath.section-1];
+//    NSMutableArray *tmpArray = [tmpNoticeDict objectForKey:@"news"];
+//    [tmpArray removeObjectAtIndex:currentIndexPath.row];
+//    [tmpNoticeDict setObject:tmpArray  forKey:@"news"];
+//    [noticeArray replaceObjectAtIndex:currentIndexPath.section-1 withObject:tmpNoticeDict];
+//    [classTableView reloadData];
 }
 
 - (void)tapImage:(UITapGestureRecognizer *)tap
@@ -2581,7 +2605,7 @@ headerDelegate>
     //创建分享内容
     //    NSString *imagePath = [[NSBundle mainBundle] pathForResource:IMAGE_NAME ofType:IMAGE_EXT];
     NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
-    id<ISSContent> publishContent = [ShareSDK content:content
+    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
                                        defaultContent:ShareContent
                                                 image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
                                                 title:@"班家"
@@ -3039,6 +3063,7 @@ headerDelegate>
                                  }
                              }];
 }
+
 /*
 #pragma mark - Navigation
 

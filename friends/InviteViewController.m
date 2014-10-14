@@ -1283,6 +1283,7 @@ UISearchBarDelegate>
     
 }
 
+#pragma mark - 获取本地通讯录
 -(void)getLocalContacts
 {
     
@@ -1308,6 +1309,7 @@ UISearchBarDelegate>
     }
     if (tmpAddressBook)
     {
+        [Tools showProgress:contactTableView];
         // ABAddressBookRequestAccessWithCompletion is iOS 6 and up. 适配IOS6以上版本
         if (&ABAddressBookRequestAccessWithCompletion)
         {
@@ -1316,6 +1318,7 @@ UISearchBarDelegate>
             {
                                                          if (granted)
                                                          {
+                                                             
                                                              // constructInThread: will CFRelease ab.
                                                              [NSThread detachNewThreadSelector:@selector(constructInThread:)
                                                                                       toTarget:self
@@ -1371,6 +1374,10 @@ UISearchBarDelegate>
     if ([Tools NetworkReachable])
     {
         [self checkContacts:contactArray];
+    }
+    else
+    {
+        [Tools hideProgress:contactTableView];
     }
     
     CFRelease(results);
@@ -1452,7 +1459,6 @@ UISearchBarDelegate>
                                                                       @"contacts":[tmpStr substringWithRange:NSMakeRange(1, [tmpStr length]-2)]
                                                                       } API:CHECKCONTACTS];
         [request setCompletionBlock:^{
-            [Tools hideProgress:self.bgView];
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
             DDLOG(@"checkcontact responsedict %@",responseDict);
@@ -1524,6 +1530,8 @@ UISearchBarDelegate>
                 NSArray *tmpArray = [Tools getSpellSortArrayFromChineseArray:contactArray andKey:@"name"];
                 [groupContactArray addObjectsFromArray:tmpArray];
                 [contactTableView reloadData];
+                [Tools hideProgress:contactTableView];
+                
             }
             else
             {
@@ -1535,9 +1543,8 @@ UISearchBarDelegate>
             [Tools hideProgress:contactTableView];
             NSError *error = [request error];
             DDLOG(@"error %@",error);
-            [Tools hideProgress:self.bgView];
+            [Tools hideProgress:contactTableView];
         }];
-        [Tools showProgress:self.bgView];
         [request startAsynchronous];
     }
 }
