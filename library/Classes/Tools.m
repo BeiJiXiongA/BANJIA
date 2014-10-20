@@ -414,7 +414,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     [request setRequestMethod:@"POST"];
     [request setTimeOutSeconds:12];
     [request setRequestHeaders:[[NSMutableDictionary alloc] initWithObjectsAndKeys:[Tools client_ver],@"current_version", nil]];
-//    DDLOG(@"request header+++++ %@",request.requestHeaders);
+    DDLOG(@"request header+++++ %@",request.requestHeaders);
     [postDataStr insertString:[NSString stringWithFormat:@"%@%@?",HOST_URL,subUrl] atIndex:[postDataStr length]];
     for (id keys in parameterDict)
     {
@@ -432,6 +432,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     [request setRequestMethod:@"POST"];
     [request setTimeOutSeconds:20];
     [request setRequestHeaders:[[NSMutableDictionary alloc] initWithObjectsAndKeys:[Tools client_ver],@"current_version", nil]];
+//    DDLOG(@"request headers %@",request.requestHeaders);
     for (NSString *key in pareDict.allKeys)
     {
         [request setPostValue:[pareDict objectForKey:key] forKey:key];
