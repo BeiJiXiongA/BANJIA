@@ -66,8 +66,6 @@
     
 //    [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleBlackTranslucent;
     
-    DDLOG(@"version %@ screenheight %.1f==%.1f",[Tools device_version],SCREEN_HEIGHT,[UIScreen mainScreen].bounds.size.height);
-    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(postlogOut) name:@"logout" object:nil];
     
 //    if ([[Tools user_id] length] > 0)
@@ -140,7 +138,7 @@
 
 -(void)showCurrentVersion
 {
-    [Tools showTips:[[NSUserDefaults standardUserDefaults]objectForKey:@"currentVersion"] toView:self.bgView];
+    [Tools showTips:[NSString stringWithFormat:@"%@-%@",[Tools client_ver],[Tools bundleVerSion]] toView:self.bgView];
 }
 
 -(void)viewWillAppear:(BOOL)animated
@@ -161,12 +159,29 @@
         {
             self.navigationController.sideMenuController.panGestureEnabled = NO;
         }
+        
+        if ([visibleViewControllerName isEqualToString:@"MessageViewController"])
+        {
+            //在聊天列表界面
+            [[NSUserDefaults standardUserDefaults] setObject:AT_MSGLIST forKey:VIEW_TYPE];
+            [[NSUserDefaults standardUserDefaults] synchronize];
+        }
+        else
+        {
+            //不在聊天列表界面
+            [[NSUserDefaults standardUserDefaults] setObject:NOT_AT_MSGLIST forKey:VIEW_TYPE];
+            [[NSUserDefaults standardUserDefaults] synchronize];
+        }
     }
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
-    DDLOG(@"sum unread number %d",
-          [[ud objectForKey:NewChatMsgNum] integerValue]+
-          [[ud objectForKey:NewClassNum] integerValue]+
-          [[ud objectForKey:UCFRIENDSUM] integerValue]);
+    int subNum = [[ud objectForKey:NewChatMsgNum] integerValue]+
+    [[ud objectForKey:NewClassNum] integerValue]+
+    [[ud objectForKey:UCFRIENDSUM] integerValue];
+    if (subNum == 0)
+    {
+        [[UIApplication sharedApplication] cancelAllLocalNotifications];
+        [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
+    }
     
     
 }

@@ -61,9 +61,12 @@
 - (void)setProgress:(float)progress
 {
     _progress = progress;
-    _progressView.progress = progress;
-    if (progress >= 1.0) {
-        [_progressView removeFromSuperview];
+    if (_progressView)
+    {
+        _progressView.progress = progress;
+        if (progress >= 1.0) {
+            [_progressView removeFromSuperview];
+        }
     }
 }
 @end

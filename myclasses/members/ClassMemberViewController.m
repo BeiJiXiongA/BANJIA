@@ -1104,7 +1104,7 @@ MsgDelegate>
                     cell.markView.frame = CGRectMake(226, 19, 8, 12);
                     [cell.markView setImage:[UIImage imageNamed:@"discovery_arrow"]];
                     cell.markView.hidden = NO;
-                    cell.backgroundColor = self.bgView.backgroundColor;
+                    cell.backgroundColor = [UIColor whiteColor];
                 }
                 else
                 {

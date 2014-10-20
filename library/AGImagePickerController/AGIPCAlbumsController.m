@@ -8,7 +8,7 @@
 //  For the full copyright and license information, please view the LICENSE
 //  file that was distributed with this source code.
 //  
-
+//展示相册列表
 #import "AGIPCAlbumsController.h"
 
 #import "AGImagePickerController.h"
@@ -177,7 +177,6 @@
     if (cell == nil) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:CellIdentifier];
     }
-    
     ALAssetsGroup *group = (self.assetsGroups)[indexPath.row];
     [group setAssetsFilter:[ALAssetsFilter allPhotos]];
     NSUInteger numberOfAssets = group.numberOfAssets;
@@ -198,7 +197,6 @@
     
 	AGIPCAssetsController *controller = [[AGIPCAssetsController alloc] initWithImagePickerController:self.imagePickerController andAssetsGroup:self.assetsGroups[indexPath.row] andAlreadyAssets:self.alreadySelectedAssets];
     controller.selectAssetsDoneDel = self;
-    DDLOG(@"self.alreadySelectedAssets %d",[self.alreadySelectedAssets count]);
 	[self.navigationController pushViewController:controller animated:YES];
 }
 

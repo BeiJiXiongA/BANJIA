@@ -22,6 +22,8 @@
 
 #import "KLSwitch.h"
 
+#define CONTENT_TEXTVIEW_HEIGHT  49
+
 #define NormalImageScale  2
 #define BigImageScale    2
 
@@ -257,13 +259,13 @@ int count = 0;
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    self.titleLabel.text = @"发布日记";
+    self.titleLabel.text = @"发表空间";
     
     keyBoardHeight = 0.0f;
     imageW = 67.5;
     imageH = 67.5;
     
-    spaceHeight = 10;
+    spaceHeight = 12;
     
     enableLocation = YES;
     
@@ -304,7 +306,10 @@ int count = 0;
     placeHolderLabel.font = [UIFont systemFontOfSize:16];
     [mainScrollView addSubview:placeHolderLabel];
     
-    contentTextView = [[UITextView alloc] initWithFrame:CGRectMake(13, spaceHeight, SCREEN_WIDTH -26, 47)];
+    
+    
+    contentTextView = [[UITextView alloc] init];
+    contentTextView.frame = CGRectMake(13, spaceHeight, SCREEN_WIDTH -26, CONTENT_TEXTVIEW_HEIGHT);
     contentTextView.delegate = self;
     contentTextView.tag = ContentTextViewTag;
     contentTextView.backgroundColor = [UIColor clearColor];
@@ -480,7 +485,7 @@ int count = 0;
         addImageButton.hidden = YES;
         return ;
     }
-    UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"从相册选取",@"拍照", nil];
+    UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"从相册选取",@"拍照", nil];
     [ac showInView:self.bgView];
 }
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
@@ -510,18 +515,12 @@ int count = 0;
 -(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
     [sysImagePickerController dismissViewControllerAnimated:YES completion:nil];
-    
-    
-    isSelectPhoto = NO;
-    
-    UIImage *fullScreenImage = [info objectForKey:UIImagePickerControllerOriginalImage];
-    UIImageWriteToSavedPhotosAlbum(fullScreenImage, nil, nil, nil);
-    
-    fullScreenImage = [self getNormalImageFromImage:fullScreenImage];
-    
-    [alreadySelectAssets addObject:[[ImageItem alloc] initWithSourceType:ImageSourceTypeCamera andAsset:nil andFullImage:fullScreenImage]];
-    
-    [self reloadImages];
+    UIImageWriteToSavedPhotosAlbum([info objectForKey:@"UIImagePickerControllerOriginalImage"], self, @selector(image:didFinishSavingWithError:contextInfo:), NULL);
+}
+- (void)image:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo
+{
+    [self loadAssetsGroups];
+//    [self getImgs];
 }
 
 #pragma mark - dealImage
@@ -569,7 +568,6 @@ int count = 0;
             imageWidth = originalImage.size.width;
         }
     }
-    DDLOG(@"image direction %d",originalImage.imageOrientation);
     originalImage = [Tools thumbnailWithImageWithoutScale:originalImage size:CGSizeMake(imageWidth, imageHeight)];
     
     return originalImage;
@@ -616,7 +614,6 @@ int count = 0;
             if (group!=nil)
             {
                 NSString *g=[NSString stringWithFormat:@"%@",group];//获取相簿的组
-                NSLog(@"gg:%@",g);//gg:ALAssetsGroup - Name:Camera Roll, Type:Saved Photos, Assets count:71
                 
                 NSString *g1=[g substringFromIndex:16 ] ;
                 NSArray *arr=[NSArray arrayWithArray:[g1 componentsSeparatedByString:@","]];
@@ -645,21 +642,9 @@ int count = 0;
 
 -(void)updateLately
 {
-    for (int i=0; i<4; ++i)
-    {
-        ALAsset *asset = [latelyAssetArray objectAtIndex:i];
-        UIImage *image=[self getImageFromALAssesst:asset];
-        
-        UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(10+(67.5+5)*i, 37, 67.5, 67.5)];
-        imageView.layer.cornerRadius = 5;
-        imageView.clipsToBounds = YES;
-        imageView.tag = ImageTag+i;
-        [imageView setImage:image];
-        [lateImageView addSubview:imageView];
-        UITapGestureRecognizer *addLatelyImageTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(addLatelyImage:)];
-        imageView.userInteractionEnabled = YES;
-        [imageView addGestureRecognizer:addLatelyImageTgr];
-    }
+    ALAsset *asset = [latelyAssetArray lastObject];
+    [alreadySelectAssets addObject:asset];
+    [self reloadImages];
 }
 
 -(void)addLatelyImage:(UITapGestureRecognizer *)tap
@@ -667,13 +652,13 @@ int count = 0;
     ALAsset *asset = [latelyAssetArray objectAtIndex:tap.view.tag-ImageTag];
     if (![self hasThisLatelyImage:asset])
     {
-        [alreadySelectAssets addObject:[[ImageItem alloc] initWithSourceType:ImageSourceTypeAlbum andAsset:asset andFullImage:nil]];
+        [alreadySelectAssets addObject:asset];
     }
     else
     {
-        for(ImageItem *item in alreadySelectAssets)
+        for(ALAsset *item in alreadySelectAssets)
         {
-            if ([item.asset isEqual:asset])
+            if ([item isEqual:asset])
             {
                 [alreadySelectAssets removeObject:item];
             }
@@ -702,7 +687,7 @@ int count = 0;
     if ([alreadySelectAssets count] > 0)
     {
         addImageButton.hidden = YES;
-        if ([alreadySelectAssets count] == 12)
+        if ([alreadySelectAssets count] >= 12)
         {
             imageTipLabel.hidden = YES;
         }
@@ -712,55 +697,42 @@ int count = 0;
         }
         for (int i=0; i<[alreadySelectAssets count]; ++i)
         {
-//            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-                ImageItem *item = [alreadySelectAssets objectAtIndex:i];
-                DDLOG(@"%d-%d-%d",item.imageSourceType,ImageSourceTypeCamera,ImageSourceTypeAlbum);
-                UIImage *normarlImage;
-                if (item.imageSourceType == ImageSourceTypeCamera)
-                {
-                    normarlImage = item.fullImage;
-                }
-                else if(item.imageSourceType == ImageSourceTypeAlbum)
-                {
-                    normarlImage = [self getImageFromALAssesst:item.asset];
-                }
-                [normalPhotosArray addObject:normarlImage];
-//            dispatch_async(dispatch_get_main_queue(), ^{
-                    UIImageView *imageView = [[UIImageView alloc] init];
-                    imageView.layer.contentsGravity = kCAGravityResizeAspectFill;
-                    imageView.frame = CGRectMake(10+(imageW+5)*(i%4), 11.5+(imageH+5)*(i/4), imageW, imageH);
-                    [imageView setImage:normarlImage];
-                    imageView.tag = ImageTag + i;
-                    imageView.layer.cornerRadius = 5;
-                    imageView.clipsToBounds = YES;
-                    [imageScrollView addSubview:imageView];
-                    
-                    UIButton *deleteButton = [UIButton buttonWithType:UIButtonTypeCustom];
-                    deleteButton.frame = CGRectMake(10+(imageW+5)*(i%4), 5+(imageH+5)*(i/4), imageW, 20);
-                    deleteButton.tag = DeleteButtonTag +i;
-                    [deleteButton setImage:[UIImage imageNamed:@"icon_del"] forState:UIControlStateNormal];
-                    [deleteButton addTarget:self action:@selector(deleteImage:) forControlEvents:UIControlEventTouchUpInside];
-                    [imageScrollView addSubview:deleteButton];
-                    
-                    if (row <= 3)
-                    {
-                        imageScrollView.frame = CGRectMake(9.5, 7.5+contentImageView.frame.size.height+contentImageView.frame.origin.y, SCREEN_WIDTH-19, (row>1?(10+(imageH+5)*row):(imageW+23))+5);
-                    }
-                    else
-                    {
-                        imageScrollView.frame = CGRectMake(9.5, 7.5+contentImageView.frame.size.height+contentImageView.frame.origin.y, SCREEN_WIDTH-19, (10+(imageH+5)*3));
-                    }
-                    
-                    imageTipLabel.frame = CGRectMake(19+(imageW+5)*([normalPhotosArray count]%4), 11.5+(imageH+5)*([normalPhotosArray count]/4)+imageScrollView.frame.origin.y, imageW, imageH);
-                    addImageButton.frame = CGRectMake(imageTipLabel.frame.origin.x+imageTipLabel.frame.size.width + 10, imageTipLabel.frame.origin.y, 80, imageH);
-                    lateImageView.frame = CGRectMake(9.5, imageScrollView.frame.size.height+imageScrollView.frame.origin.y+10.5, SCREEN_WIDTH-19, lateImageHeight);
-                    latelyLabel.frame = CGRectMake(lateImageView.frame.origin.x+10, lateImageView.frame.origin.y+6, 17*[latelyLabel.text length], 20);
-                    
-                    locationBgView.frame = CGRectMake(lateImageView.frame.origin.x, imageScrollView.frame.origin.y+imageScrollView.frame.size.height+spaceHeight, lateImageView.frame.size.width , 45);
-                    isBlogView.frame = CGRectMake(locationBgView.frame.origin.x, locationBgView.frame.origin.y+locationBgView.frame.size.height+10, locationBgView.frame.size.width, locationBgView.frame.size.height);
-                    mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, isBlogView.frame.size.height+isBlogView.frame.origin.y+20);
-//                });
-//            });
+            ALAsset *item = [alreadySelectAssets objectAtIndex:i];
+            UIImage *normarlImage = [ImageTools getImageFromALAssesst:item];
+            [normalPhotosArray addObject:normarlImage];
+            UIImageView *imageView = [[UIImageView alloc] init];
+            imageView.layer.contentsGravity = kCAGravityResizeAspectFill;
+            imageView.frame = CGRectMake(10+(imageW+5)*(i%4), 11.5+(imageH+5)*(i/4), imageW, imageH);
+            [imageView setImage:normarlImage];
+            imageView.tag = ImageTag + i;
+            imageView.layer.cornerRadius = 5;
+            imageView.clipsToBounds = YES;
+            [imageScrollView addSubview:imageView];
+            
+            UIButton *deleteButton = [UIButton buttonWithType:UIButtonTypeCustom];
+            deleteButton.frame = CGRectMake(10+(imageW+5)*(i%4), 5+(imageH+5)*(i/4), imageW, 20);
+            deleteButton.tag = DeleteButtonTag +i;
+            [deleteButton setImage:[UIImage imageNamed:@"icon_del"] forState:UIControlStateNormal];
+            [deleteButton addTarget:self action:@selector(deleteImage:) forControlEvents:UIControlEventTouchUpInside];
+            [imageScrollView addSubview:deleteButton];
+            
+            if (row <= 3)
+            {
+                imageScrollView.frame = CGRectMake(9.5, 7.5+contentImageView.frame.size.height+contentImageView.frame.origin.y, SCREEN_WIDTH-19, (row>1?(10+(imageH+5)*row):(imageW+23))+5);
+            }
+            else
+            {
+                imageScrollView.frame = CGRectMake(9.5, 7.5+contentImageView.frame.size.height+contentImageView.frame.origin.y, SCREEN_WIDTH-19, (10+(imageH+5)*3));
+            }
+            
+            imageTipLabel.frame = CGRectMake(19+(imageW+5)*([normalPhotosArray count]%4), 11.5+(imageH+5)*([normalPhotosArray count]/4)+imageScrollView.frame.origin.y, imageW, imageH);
+            addImageButton.frame = CGRectMake(imageTipLabel.frame.origin.x+imageTipLabel.frame.size.width + 10, imageTipLabel.frame.origin.y, 80, imageH);
+            lateImageView.frame = CGRectMake(9.5, imageScrollView.frame.size.height+imageScrollView.frame.origin.y+10.5, SCREEN_WIDTH-19, lateImageHeight);
+            latelyLabel.frame = CGRectMake(lateImageView.frame.origin.x+10, lateImageView.frame.origin.y+6, 17*[latelyLabel.text length], 20);
+            
+            locationBgView.frame = CGRectMake(lateImageView.frame.origin.x, imageScrollView.frame.origin.y+imageScrollView.frame.size.height+spaceHeight, lateImageView.frame.size.width , 45);
+            isBlogView.frame = CGRectMake(locationBgView.frame.origin.x, locationBgView.frame.origin.y+locationBgView.frame.size.height+10, locationBgView.frame.size.width, locationBgView.frame.size.height);
+            mainScrollView.contentSize = CGSizeMake(SCREEN_WIDTH, isBlogView.frame.size.height+isBlogView.frame.origin.y+20);
         }
 
     }
@@ -803,9 +775,9 @@ int count = 0;
     }
     
     int row = 0;
-    if (([normalPhotosArray count]+1)%4 == 0)
+    if (([alreadySelectAssets count]+1)%4 == 0)
     {
-        row = ([alreadySelectAssets count]+1)/4;
+        row = ([normalPhotosArray count]+1)/4;
     }
     else
     {
@@ -1098,31 +1070,16 @@ int count = 0;
 
 #pragma mark - AGIImagePickerController
 
--(UIImage *)getImageFromALAssesst:(ALAsset *)asset
-{
-    DDLOG(@"getimagefromalasset %@",asset);
-    ALAssetRepresentation *assetPresentation = [asset defaultRepresentation];
-    
-    CGImageRef imageRef = [assetPresentation fullResolutionImage];
-    
-    UIImage *image = [UIImage imageWithCGImage:imageRef scale:1 orientation:(int)assetPresentation.orientation];
-    image = [self getNormalImageFromImage:image];
-    return image;
-}
-
 - (void)openAction:(id)sender
 {
     // Show saved photos on top
-    NSMutableArray *tmpArray = [[NSMutableArray alloc] initWithCapacity:0];
-    for (int i=0; i<[alreadySelectAssets count]; i++)
+    
+    for (int i = 0; i<[alreadySelectAssets count]; i++)
     {
-        ImageItem *item = [alreadySelectAssets objectAtIndex:i];
-        if (item.imageSourceType == ImageSourceTypeAlbum)
-        {
-            [tmpArray addObject:item.asset];
-        }
+        DDLOG(@"asset %@",[alreadySelectAssets objectAtIndex:i]);
     }
-    imagePickerController = [[AGImagePickerController alloc] initWithDelegate:self andAlreadySelect:tmpArray];
+
+    imagePickerController = [[AGImagePickerController alloc] initWithDelegate:self andAlreadySelect:alreadySelectAssets];
     imagePickerController.shouldShowSavedPhotosOnTop = YES;
     imagePickerController.shouldShowSavedPhotosOnTop = NO;
     imagePickerController.shouldChangeStatusBarStyle = YES;
@@ -1131,6 +1088,7 @@ int count = 0;
     {
         imagePickerController.selection = alreadySelectAssets;
     }
+    
     imagePickerController.maximumNumberOfPhotosToBeSelected = 12;
     isSelectPhoto = YES;
     [self presentViewController:imagePickerController animated:YES completion:^{
@@ -1166,56 +1124,20 @@ int count = 0;
 - (void)agImagePickerController:(AGImagePickerController *)picker didFinishPickingMediaWithInfo:(NSArray *)info
 {
     [self dismissViewControllerAnimated:YES completion:^{
-        
+        DDLOG(@"album info %@",info);
     }];
-    NSMutableArray *tmpArray = [[NSMutableArray alloc] initWithCapacity:0];
-    for (ImageItem *item in alreadySelectAssets)
-    {
-        if (item.imageSourceType == ImageSourceTypeAlbum)
-        {
-            [tmpArray addObject:item];
-        }
-    }
-    
-    for(ImageItem *item in tmpArray)
-    {
-        [alreadySelectAssets removeObject:item];
-    }
-    
+    [alreadySelectAssets removeAllObjects];
     for (int i= 0; i<[info count]; i++)
     {
         ALAsset *asset = [info objectAtIndex:i];
-        [alreadySelectAssets addObject:[[ImageItem alloc] initWithSourceType:ImageSourceTypeAlbum andAsset:asset andFullImage:nil]];
+        [alreadySelectAssets addObject:asset];
     }
     [self reloadImages];
 }
 
 -(void)handleSelected:(NSNotification *)notification
 {
-//    DDLOG(@"notification %@",notification.object);
-//    ALAsset *asset = ((AGIPCGridItem *)[notification object]).asset;
-//    if ([self contaionThisAsset:asset] >= 0)
-//    {
-//        [alreadySelectAssets removeObjectAtIndex:[self contaionThisAsset:asset]];
-//    }
-//    else
-//    {
-//        [alreadySelectAssets addObject:[[ImageItem alloc] initWithSourceType:ImageSourceTypeAlbum andAsset:asset andFullImage:nil]];
-//    }
-//    [self reloadImages];
-}
-
--(int)contaionThisAsset:(ALAsset *)asset
-{
-    for (int i=0; i<[alreadySelectAssets count]; i++)
-    {
-        ImageItem *item = [alreadySelectAssets objectAtIndex:i];
-        if (item.imageSourceType == ImageSourceTypeAlbum && [item.asset isEqual:asset])
-        {
-            return i;
-        }
-    }
-    return -1;
+    
 }
 
 #pragma mark - AGImagePickerControllerDelegate methods
@@ -1251,4 +1173,60 @@ int count = 0;
 {
     return AGImagePickerControllerSelectionBehaviorTypeRadio;
 }
+
+
+- (void)loadAssets:(ALAssetsGroup *)assetsGroup
+{
+     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+ 
+         [assetsGroup enumerateAssetsUsingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) {
+ 
+             if (result == nil)
+             {
+                 return;
+             }
+             if (index == [assetsGroup numberOfAssets]-1)
+             {
+                 [alreadySelectAssets addObject:result];
+                 dispatch_async(dispatch_get_main_queue(), ^{
+                     [self reloadImages];
+                 });
+             }
+         }];
+     });
+ }
+ 
+ 
+ - (void)loadAssetsGroups
+ {
+     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+ 
+         @autoreleasepool {
+ 
+             void (^assetGroupEnumerator)(ALAssetsGroup *, BOOL *) = ^(ALAssetsGroup *group, BOOL *stop)
+             {
+                 if (group == nil || group.numberOfAssets == 0)
+                 {
+                     return;
+                 }
+                 if ([[group valueForProperty:ALAssetsGroupPropertyType] intValue] == ALAssetsGroupSavedPhotos)
+                 {
+                     [self loadAssets:group];
+                 }
+             };
+ 
+             void (^assetGroupEnumberatorFailure)(NSError *) = ^(NSError *error) {
+                 NSLog(@"A problem occured. Error: %@", error.localizedDescription);
+             };
+ 
+             [[AGImagePickerController defaultAssetsLibrary] enumerateGroupsWithTypes:ALAssetsGroupAll
+                                                                           usingBlock:assetGroupEnumerator
+                                                                         failureBlock:assetGroupEnumberatorFailure];
+ 
+         }
+ 
+     });
+ }
+
+
 @end

@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <AssetsLibrary/AssetsLibrary.h>
 
 @interface ImageTools : NSObject
 + (UIImage *)getNormalImageFromImage:(UIImage *)originalImage;
@@ -19,6 +20,8 @@
 
 + (UIImage *)getQrImageWithString:(NSString *)qrString width:(CGFloat)width;
 
-+ (void)convertViewToImage:(UIScrollView*)v inViewController:(XDContentViewController *)viewController;
++ (UIImage *)convertViewToImage:(UIScrollView*)v inViewController:(XDContentViewController *)viewController;
+
++(UIImage *)getImageFromALAssesst:(ALAsset *)asset;
 
 @end

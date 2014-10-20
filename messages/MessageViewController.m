@@ -73,6 +73,11 @@ ChatVCDelegate>
     return self;
 }
 
+-(void)uploadLastViewTime
+{
+    
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -85,8 +90,9 @@ ChatVCDelegate>
     [[self.bgView layer] setShadowRadius:3.0f];
     self.returnImageView.hidden = YES;
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewWillAppear:) name:UPDATECLASSNUMBER object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dealNewChatMsgNotification:) name:RECEIVENEWMSG object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getChatList) name:UPDATE_MSG_LIST object:nil];
+    
     
     db = [[OperatDB alloc] init];
     
@@ -131,7 +137,6 @@ ChatVCDelegate>
     tipLabel.text = @"您还没有消息记录";
     tipLabel.hidden = YES;
     [friendsListTableView addSubview:tipLabel];
-    
     [self getChatList];
 }
 
@@ -158,7 +163,7 @@ ChatVCDelegate>
 -(void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self name:RECEIVENEWMSG object:nil];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UPDATECLASSNUMBER object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UPDATE_MSG_LIST object:nil];
 }
 
 -(void)getChatList
@@ -718,7 +723,8 @@ ChatVCDelegate>
 {
     if (update)
     {
-        [self dealNewChatMsg:nil];
+        [self getChatList];
+//        [self dealNewChatMsg:nil];
     }
 }
 

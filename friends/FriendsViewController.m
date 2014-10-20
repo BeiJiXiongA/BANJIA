@@ -69,7 +69,8 @@ OperateFriends>
     self.returnImageView.hidden = YES;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getFriendList) name:UPDATEFRIENDSLIST object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getFriendList) name:UPDATEGROUPCHATLIST object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewWillAppear:) name:RELOAD_MENU_BUTTON object:nil];
     
     db = [[OperatDB alloc] init];
     
@@ -158,8 +159,8 @@ OperateFriends>
 {
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = nil;
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UPDATEGROUPCHATLIST object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UPDATEFRIENDSLIST object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:RELOAD_MENU_BUTTON object:nil];
 }
 -(BOOL)haveNewMsg
 {

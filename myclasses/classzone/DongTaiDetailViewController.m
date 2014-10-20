@@ -652,9 +652,25 @@ UIActionSheetDelegate,NameButtonDel>
     NSMutableArray *photos = [[NSMutableArray alloc] initWithCapacity:0];
     for (int i=0; i<[imgs count]; i++)
     {
-        NSString *url = [NSString stringWithFormat:@"%@%@",IMAGEURL,imgs[i]];
+        NSString *url = imgs[i];
         MJPhoto *photo = [[MJPhoto alloc] init];
-        photo.url = [NSURL URLWithString:url];
+        if ([Tools NetworkReachable])
+        {
+            if ([[Reachability reachabilityForLocalWiFi] currentReachabilityStatus] == ReachableViaWiFi)
+            {
+                //wifi
+                photo.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",IMAGEURL,url]];
+            }
+            else if ([[Reachability reachabilityForInternetConnection] currentReachabilityStatus] == ReachableViaWWAN)
+            {
+                //蜂窝
+                photo.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@@%dw",IMAGEURL,url,WWAN_IMAGE_WIDTH]];
+            }
+        }
+        else
+        {
+            photo.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",IMAGEURL,url]];
+        }
         photo.srcImageView = (UIImageView *)tap.view;
         [photos addObject:photo];
     }

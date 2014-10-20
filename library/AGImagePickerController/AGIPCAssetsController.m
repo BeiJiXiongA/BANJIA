@@ -16,6 +16,8 @@
 #import "AGIPCGridCell.h"
 #import "AGIPCToolbarItem.h"
 
+//展示照片
+
 static NSMutableArray *_assets;
 @interface AGIPCAssetsController ()
 {
@@ -290,7 +292,6 @@ static NSMutableArray *_assets;
                         return;
                     }
                 }
-                
                 AGIPCGridItem *gridItem = [[AGIPCGridItem alloc] initWithImagePickerController:self.imagePickerController asset:result andDelegate:self];
                 
                 [strongSelf.assets insertObject:gridItem atIndex:0];
@@ -310,7 +311,6 @@ static NSMutableArray *_assets;
 {
     // Don't display the select button until all the assets are loaded.
     [self.navigationController setToolbarHidden:[self toolbarHidden] animated:YES];
-    
     [self.tableView reloadData];
     
     [self changeSelectionInformation];

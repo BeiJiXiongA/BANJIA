@@ -51,7 +51,7 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for cupstomization after application launch.
     
-    [[NSUserDefaults standardUserDefaults] setObject:@"1.2.3" forKey:@"currentVersion"];
+    [[NSUserDefaults standardUserDefaults] setObject:@"1.3.0" forKey:@"currentVersion"];
     [[NSUserDefaults standardUserDefaults] setObject:SCHEMERELEASE forKey:SCHEMETYPE];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
@@ -90,11 +90,6 @@
             DDLOG(@"create sound cache success");
         }
     }
-    
-    [[NSUserDefaults standardUserDefaults] setObject:@"notchat" forKey:@"viewtype"];
-    [[NSUserDefaults standardUserDefaults] synchronize];
-    
-//    [self initialize];
     
     [self updateDatabase];
     
@@ -485,6 +480,8 @@
                         if ([[[responseDict objectForKey:@"data"] objectForKey:@"count"] integerValue] > 0||
                             [[[responseDict objectForKey:@"data"] objectForKey:@"ucfriendsnum"] integerValue] > 0)
                         {
+                            [[NSNotificationCenter defaultCenter] postNotificationName:RELOAD_MENU_BUTTON object:nil];
+                            [[NSNotificationCenter defaultCenter] postNotificationName:RELOAD_SIDE_MENU object:nil];
                             if ([self.msgDelegate respondsToSelector:@selector(dealNewMsg:)])
                             {
                                 [self.msgDelegate dealNewMsg:nil];
@@ -502,7 +499,6 @@
             }];
             [request startAsynchronous];
         }
-
     }
 }
 
@@ -526,7 +522,26 @@
                     
                     if([[responseDict objectForKey:@"data"] integerValue] > 0)
                     {
-                        
+                        [[NSNotificationCenter defaultCenter] postNotificationName:UPDATE_MSG_LIST object:nil];
+                        [[NSNotificationCenter defaultCenter] postNotificationName:RELOAD_MENU_BUTTON object:nil];
+                        DDLOG(@"view type %@",[[NSUserDefaults standardUserDefaults] objectForKey:VIEW_TYPE]);
+                        [[NSNotificationCenter defaultCenter] postNotificationName:GET_UNREAD_CHATLOG object:nil];
+                        if ([[NSUserDefaults standardUserDefaults] objectForKey:VIEW_TYPE] &&
+                            [[[NSUserDefaults standardUserDefaults] objectForKey:VIEW_TYPE] isEqualToString:NOT_AT_MSGLIST])
+                        {
+                            
+                            if ([UIApplication sharedApplication].applicationState == UIApplicationStateInactive)
+                            {
+                                sideMenuViewController = [[SideMenuViewController alloc] init];
+                                MessageViewController *msgViewController = [[MessageViewController alloc] init];
+                                KKNavigationController *msgNav = [[KKNavigationController alloc] initWithRootViewController:msgViewController];
+                                [sideMenuViewController.buttonTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:2 inSection:0] animated:YES scrollPosition:UITableViewScrollPositionNone];
+                                JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:msgNav menuController:sideMenuViewController];
+                                self.window.rootViewController = sideMenu;
+                                
+                                
+                            }
+                        }
                     }
                     
                     [[NSUserDefaults standardUserDefaults] setObject:ENTER_FORGROUD forKey:BECOMEACTIVE];
@@ -580,6 +595,7 @@
 
 -(void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
 {
+    DDLOG_CURRENT_METHOD;
 //    [[NSUserDefaults standardUserDefaults] setObject:@"accept" forKey:@"receive"];
 //    [[NSUserDefaults standardUserDefaults] synchronize];
 //    DDLOG(@"device token %@",deviceToken);
@@ -612,8 +628,6 @@
     {
         // 点击通知栏
         DDLOG(@"click notification bar");
-        [[UIApplication sharedApplication] cancelAllLocalNotifications];
-        [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
     }
 //    else
 //    {
@@ -634,7 +648,7 @@
     
     DDLOG(@"push info %@",userInfo);
     
-    if ([Tools user_id])
+    if ([[Tools user_id] length] > 0)
     {
         [self getNewChat];
         [self getNewClass];
@@ -710,10 +724,13 @@
                     {
                         [self.chatDelegate dealNewChatMsg:chatDict];
                     }
-                    if (!([[NSUserDefaults standardUserDefaults] objectForKey:@"viewtype"] &&
-                          [[[NSUserDefaults standardUserDefaults] objectForKey:@"viewtype"] isEqualToString:@"chat"]))
+                    
+                    
+                    if ([[NSUserDefaults standardUserDefaults] objectForKey:VIEW_TYPE] &&
+                          [[[NSUserDefaults standardUserDefaults] objectForKey:VIEW_TYPE] isEqualToString:NOT_AT_MSGLIST])
                     {
-                        if ([[[NSUserDefaults standardUserDefaults]objectForKey:BECOMEACTIVE] isEqualToString:ENTER_BACKGROUD])
+                        DDLOG(@"view type %@",[[NSUserDefaults standardUserDefaults] objectForKey:VIEW_TYPE]);
+                        if ([UIApplication sharedApplication].applicationState == UIApplicationStateInactive)
                         {
                             sideMenuViewController = [[SideMenuViewController alloc] init];
                             MessageViewController *msgViewController = [[MessageViewController alloc] init];
@@ -721,9 +738,6 @@
                             [sideMenuViewController.buttonTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:2 inSection:0] animated:YES scrollPosition:UITableViewScrollPositionNone];
                             JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:msgNav menuController:sideMenuViewController];
                             self.window.rootViewController = sideMenu;
-                            
-                            [[NSUserDefaults standardUserDefaults] setObject:ENTER_FORGROUD forKey:BECOMEACTIVE];
-                            [[NSUserDefaults standardUserDefaults] synchronize];
                         }
                     }
                     [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECHATSNUMBER object:nil];
@@ -947,34 +961,54 @@
     DDLOG_CURRENT_METHOD;
     // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later. 
     // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-    [[NSUserDefaults standardUserDefaults] setObject:ENTER_BACKGROUD forKey:BECOMEACTIVE];
-    [[NSUserDefaults standardUserDefaults] synchronize];
     
     if ([self.chatDelegate respondsToSelector:@selector(uploadLastViewTime)])
     {
         [self.chatDelegate uploadLastViewTime];
     }
+    
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:UIKeyboardWillHideNotification object:nil];
+    [[UIApplication sharedApplication]setKeepAliveTimeout:600
+                                                  handler:^{
+                                                      DDLOG(@"backgroud++++");
+                                                  }];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
     // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
+    DDLOG_CURRENT_METHOD;
     [[StatusBarTips shareTipsWindow] hideTips];
     if ([[Tools user_id] length] > 0 && [[Tools client_token] length] > 0)
     {
         [self getNewChat];
         [self getNewClass];
-//        [[NSUserDefaults standardUserDefaults] setObject:ENTER_FORGROUD forKey:BECOMEACTIVE];
-//        [[NSUserDefaults standardUserDefaults] synchronize];
     }
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
+    DDLOG_CURRENT_METHOD;
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
 //    [self getNewChat];
     
     
+}
+
+-(void)application:(UIApplication *)application handleEventsForBackgroundURLSession:(NSString *)identifier completionHandler:(void (^)())completionHandler
+{
+    DDLOG_CURRENT_METHOD;
+}
+
+-(void)application:(UIApplication *)application performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
+{
+    DDLOG_CURRENT_METHOD;
+}
+
+-(void)applicationDidReceiveMemoryWarning:(UIApplication *)application
+{
+    DDLOG_CURRENT_METHOD;
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application

@@ -54,7 +54,6 @@
             imageWidth = originalImage.size.width;
         }
     }
-    DDLOG(@"image direction %d",originalImage.imageOrientation);
     originalImage = [Tools thumbnailWithImageWithoutScale:originalImage size:CGSizeMake(imageWidth, imageHeight)];
     return originalImage;
 }
@@ -143,7 +142,7 @@
     return qrimage;
 }
 
-+ (void)convertViewToImage:(UIScrollView*)v inViewController:(XDContentViewController *)viewController
++ (UIImage *)convertViewToImage:(UIScrollView*)v inViewController:(XDContentViewController *)viewController
 {
     
     //支持retian高分辨率
@@ -185,10 +184,20 @@
     //save phone album
 //    UIImageWriteToSavedPhotosAlbum(img, nil, nil,nil);
     //save to desktop
-    [UIImagePNGRepresentation(img) writeToFile:@"/users/test/desktop/saveview.png" atomically:YES];
+//    [UIImagePNGRepresentation(img) writeToFile:@"/users/test/desktop/saveview.png" atomically:YES];
     
-//    return img;
+    return img;
 }
 
++(UIImage *)getImageFromALAssesst:(ALAsset *)asset
+{
+    ALAssetRepresentation *assetPresentation = [asset defaultRepresentation];
+    
+    CGImageRef imageRef = [assetPresentation fullResolutionImage];
+    
+    UIImage *image = [UIImage imageWithCGImage:imageRef scale:1 orientation:(int)assetPresentation.orientation];
+    image = [self getNormalImageFromImage:image];
+    return image;
+}
 
 @end

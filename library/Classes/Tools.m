@@ -236,7 +236,14 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 {
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     NSString *headerimage = [ud objectForKey:HEADERIMAGE];
-    return headerimage;
+    if (headerimage && ![headerimage isEqual:[NSNull null]])
+    {
+        return headerimage;
+    }
+    else
+    {
+        return @"";
+    }
 }
 
 +(NSString *)top_image
@@ -293,6 +300,13 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 }
 
 +(NSString *)client_ver
+{
+    NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
+    NSString *app_Version = [infoDictionary objectForKey:@"CFBundleShortVersionString"];
+    return app_Version;
+}
+
++(NSString *)bundleVerSion
 {
     NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
     NSString *app_Version = [infoDictionary objectForKey:@"CFBundleVersion"];
@@ -416,7 +430,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:
                                                                       [NSString stringWithFormat:@"%@%@",HOST_URL,subUrl]]];
     [request setRequestMethod:@"POST"];
-    [request setTimeOutSeconds:12];
+    [request setTimeOutSeconds:20];
     [request setRequestHeaders:[[NSMutableDictionary alloc] initWithObjectsAndKeys:[Tools client_ver],@"current_version", nil]];
     for (NSString *key in pareDict.allKeys)
     {
@@ -426,8 +440,8 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     for (int i=0; i<[imageArray count]; ++i)
     {
         UIImage *image = [imageArray objectAtIndex:i];
-        NSData *imageData = UIImagePNGRepresentation(image);
-        [request addData:imageData withFileName:[NSString stringWithFormat:@"%d.png",i+1] andContentType:@"image/png" forKey:[NSString stringWithFormat:@"img%@",i==0?@"":[NSString stringWithFormat:@"%d",i+1]]];
+        NSData *imageData = UIImageJPEGRepresentation(image, 0.8f);
+        [request addData:imageData withFileName:[NSString stringWithFormat:@"%d.jpeg",i+1] andContentType:@"image/jpeg" forKey:[NSString stringWithFormat:@"img%@",i==0?@"":[NSString stringWithFormat:@"%d",i+1]]];
     }
     return request;
 }
@@ -767,7 +781,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 +(CGSize)getSizeWithString:(NSString *)content andWidth:(CGFloat)width andFont:(UIFont *)font
 {
     CGSize maxSize=CGSizeMake(width, 99999);
-    CGSize  strSize=[content sizeWithFont:font constrainedToSize:maxSize lineBreakMode:NSLineBreakByWordWrapping];
+    CGSize  strSize=[content sizeWithFont:font constrainedToSize:maxSize lineBreakMode:NSLineBreakByCharWrapping];
     return strSize;
 }
 

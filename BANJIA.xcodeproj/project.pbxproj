@@ -47,6 +47,7 @@
 		38157D3518FE0EEF0094C3EF /* headerbg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38157D3418FE0EEF0094C3EF /* headerbg@2x.png */; };
 		38157D3718FE0F2B0094C3EF /* headericon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38157D3618FE0F2B0094C3EF /* headericon@2x.png */; };
 		38157D3A1943169A009D4C2A /* DemoVIew.m in Sources */ = {isa = PBXBuildFile; fileRef = 38157D391943169A009D4C2A /* DemoVIew.m */; };
+		38173FA819ECFA5F00E65DC0 /* ChineseToPinyin.m in Sources */ = {isa = PBXBuildFile; fileRef = 38173FA719ECFA5F00E65DC0 /* ChineseToPinyin.m */; };
 		38282D4B198887AD0087018A /* exitgroupbtn.png in Resources */ = {isa = PBXBuildFile; fileRef = 38282D49198887AD0087018A /* exitgroupbtn.png */; };
 		38282D4C198887AD0087018A /* groupadd@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38282D4A198887AD0087018A /* groupadd@2x.png */; };
 		38282D4F1988946A0087018A /* groupchatheader@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38282D4D1988946A0087018A /* groupchatheader@2x.png */; };
@@ -381,13 +382,6 @@
 		38A2E40F192E483B00CA9EBD /* citys.plist in Resources */ = {isa = PBXBuildFile; fileRef = 38A2E40E192E483B00CA9EBD /* citys.plist */; };
 		38A715F41914971B000798D0 /* KKNavigationController+JDSideMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 38A715F31914971B000798D0 /* KKNavigationController+JDSideMenu.m */; };
 		38A715F71914C771000798D0 /* SendAdviseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 38A715F61914C771000798D0 /* SendAdviseViewController.m */; };
-		38A952F819D815A400221B54 /* ChineseToPinyinResource.m in Sources */ = {isa = PBXBuildFile; fileRef = 38A952EC19D815A400221B54 /* ChineseToPinyinResource.m */; };
-		38A952F919D815A400221B54 /* HanyuPinyinOutputFormat.m in Sources */ = {isa = PBXBuildFile; fileRef = 38A952EE19D815A400221B54 /* HanyuPinyinOutputFormat.m */; };
-		38A952FA19D815A400221B54 /* NSString+PinYin4Cocoa.m in Sources */ = {isa = PBXBuildFile; fileRef = 38A952F019D815A400221B54 /* NSString+PinYin4Cocoa.m */; };
-		38A952FB19D815A400221B54 /* PinyinFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 38A952F319D815A400221B54 /* PinyinFormatter.m */; };
-		38A952FC19D815A400221B54 /* PinyinHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 38A952F519D815A400221B54 /* PinyinHelper.m */; };
-		38A952FD19D815A400221B54 /* unicode_to_hanyu_pinyin.txt in Resources */ = {isa = PBXBuildFile; fileRef = 38A952F719D815A400221B54 /* unicode_to_hanyu_pinyin.txt */; };
-		38A9530319D816D900221B54 /* ChineseToPinyin.m in Sources */ = {isa = PBXBuildFile; fileRef = 38A9530219D816D900221B54 /* ChineseToPinyin.m */; };
 		38AAE01018FBB6C800FCACE4 /* telephone@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38AAE00F18FBB6C800FCACE4 /* telephone@2x.png */; };
 		38AC81C519EBA28B00183E6C /* QQConnection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38AC819C19EBA28B00183E6C /* QQConnection.framework */; };
 		38AC81C619EBA28B00183E6C /* QZoneConnection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38AC819D19EBA28B00183E6C /* QZoneConnection.framework */; };
@@ -672,6 +666,8 @@
 		38157D3618FE0F2B0094C3EF /* headericon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "headericon@2x.png"; sourceTree = "<group>"; };
 		38157D381943169A009D4C2A /* DemoVIew.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DemoVIew.h; sourceTree = "<group>"; };
 		38157D391943169A009D4C2A /* DemoVIew.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DemoVIew.m; sourceTree = "<group>"; };
+		38173FA619ECFA5F00E65DC0 /* ChineseToPinyin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChineseToPinyin.h; sourceTree = "<group>"; };
+		38173FA719ECFA5F00E65DC0 /* ChineseToPinyin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChineseToPinyin.m; sourceTree = "<group>"; };
 		38282D49198887AD0087018A /* exitgroupbtn.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = exitgroupbtn.png; sourceTree = "<group>"; };
 		38282D4A198887AD0087018A /* groupadd@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "groupadd@2x.png"; sourceTree = "<group>"; };
 		38282D4D1988946A0087018A /* groupchatheader@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "groupchatheader@2x.png"; sourceTree = "<group>"; };
@@ -795,6 +791,8 @@
 		386E632C1947F1410091710E /* MyButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyButton.h; sourceTree = "<group>"; };
 		386E632D1947F1410091710E /* MyButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyButton.m; sourceTree = "<group>"; };
 		38726D3219A4DAF90094653B /* qrline@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "qrline@2x.png"; sourceTree = "<group>"; };
+		387491FF19EFF70A00C18F79 /* NotificationName.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NotificationName.h; sourceTree = "<group>"; };
+		3874920019EFF75000C18F79 /* DefineNames.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DefineNames.h; sourceTree = "<group>"; };
 		3876261F1991C3B0009EE318 /* ParentApplyViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParentApplyViewController.m; sourceTree = "<group>"; };
 		3876262119921890009EE318 /* AlreadyInStudentsListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AlreadyInStudentsListViewController.h; sourceTree = "<group>"; };
 		3876262219921890009EE318 /* AlreadyInStudentsListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AlreadyInStudentsListViewController.m; sourceTree = "<group>"; };
@@ -1212,20 +1210,6 @@
 		38A715F31914971B000798D0 /* KKNavigationController+JDSideMenu.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "KKNavigationController+JDSideMenu.m"; sourceTree = "<group>"; };
 		38A715F51914C771000798D0 /* SendAdviseViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SendAdviseViewController.h; sourceTree = "<group>"; };
 		38A715F61914C771000798D0 /* SendAdviseViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SendAdviseViewController.m; sourceTree = "<group>"; };
-		38A952EB19D815A400221B54 /* ChineseToPinyinResource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChineseToPinyinResource.h; sourceTree = "<group>"; };
-		38A952EC19D815A400221B54 /* ChineseToPinyinResource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChineseToPinyinResource.m; sourceTree = "<group>"; };
-		38A952ED19D815A400221B54 /* HanyuPinyinOutputFormat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HanyuPinyinOutputFormat.h; sourceTree = "<group>"; };
-		38A952EE19D815A400221B54 /* HanyuPinyinOutputFormat.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HanyuPinyinOutputFormat.m; sourceTree = "<group>"; };
-		38A952EF19D815A400221B54 /* NSString+PinYin4Cocoa.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+PinYin4Cocoa.h"; sourceTree = "<group>"; };
-		38A952F019D815A400221B54 /* NSString+PinYin4Cocoa.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+PinYin4Cocoa.m"; sourceTree = "<group>"; };
-		38A952F119D815A400221B54 /* PinYin4Objc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PinYin4Objc.h; sourceTree = "<group>"; };
-		38A952F219D815A400221B54 /* PinyinFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PinyinFormatter.h; sourceTree = "<group>"; };
-		38A952F319D815A400221B54 /* PinyinFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PinyinFormatter.m; sourceTree = "<group>"; };
-		38A952F419D815A400221B54 /* PinyinHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PinyinHelper.h; sourceTree = "<group>"; };
-		38A952F519D815A400221B54 /* PinyinHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PinyinHelper.m; sourceTree = "<group>"; };
-		38A952F719D815A400221B54 /* unicode_to_hanyu_pinyin.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = unicode_to_hanyu_pinyin.txt; sourceTree = "<group>"; };
-		38A9530119D816D900221B54 /* ChineseToPinyin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChineseToPinyin.h; sourceTree = "<group>"; };
-		38A9530219D816D900221B54 /* ChineseToPinyin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChineseToPinyin.m; sourceTree = "<group>"; };
 		38AAE00F18FBB6C800FCACE4 /* telephone@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "telephone@2x.png"; sourceTree = "<group>"; };
 		38AC819C19EBA28B00183E6C /* QQConnection.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = QQConnection.framework; sourceTree = "<group>"; };
 		38AC819D19EBA28B00183E6C /* QZoneConnection.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = QZoneConnection.framework; sourceTree = "<group>"; };
@@ -1727,6 +1711,8 @@
 				3830B97D19CB267300CA591D /* Color.h */,
 				3830B97E19CB267300CA591D /* Font.h */,
 				3830B97F19CB26BF00CA591D /* Size.h */,
+				387491FF19EFF70A00C18F79 /* NotificationName.h */,
+				3874920019EFF75000C18F79 /* DefineNames.h */,
 			);
 			path = Defines;
 			sourceTree = "<group>";
@@ -1842,8 +1828,6 @@
 				3856ADFE19A6C3A90078CFCA /* EmptyTools.m */,
 				3810930619CF12AA0049DE68 /* CheckTools.h */,
 				3810930719CF12AA0049DE68 /* CheckTools.m */,
-				38A9530119D816D900221B54 /* ChineseToPinyin.h */,
-				38A9530219D816D900221B54 /* ChineseToPinyin.m */,
 				38808DF619DB8366004782DB /* CommonFunc.h */,
 				38808DF719DB8366004782DB /* CommonFunc.m */,
 			);
@@ -2060,7 +2044,6 @@
 			isa = PBXGroup;
 			children = (
 				38AC819A19EBA28B00183E6C /* ShareSDK */,
-				38A952E919D815A400221B54 /* PinYin4Objc */,
 				3862855419D3C0CC004B5E76 /* JPush */,
 				38A24C9A197CE06400C718BA /* UIImage-Helpers */,
 				3899BC11196CF1760037C586 /* libqrencode */,
@@ -2168,6 +2151,8 @@
 		3893904618EEF1A30014F169 /* ChineseToPinyin */ = {
 			isa = PBXGroup;
 			children = (
+				38173FA619ECFA5F00E65DC0 /* ChineseToPinyin.h */,
+				38173FA719ECFA5F00E65DC0 /* ChineseToPinyin.m */,
 			);
 			path = ChineseToPinyin;
 			sourceTree = "<group>";
@@ -2686,41 +2671,6 @@
 				38A24CB4197E108300C718BA /* UIHelpers.m */,
 			);
 			path = Helpers;
-			sourceTree = "<group>";
-		};
-		38A952E919D815A400221B54 /* PinYin4Objc */ = {
-			isa = PBXGroup;
-			children = (
-				38A952EA19D815A400221B54 /* Classes */,
-				38A952F619D815A400221B54 /* Resources */,
-			);
-			path = PinYin4Objc;
-			sourceTree = "<group>";
-		};
-		38A952EA19D815A400221B54 /* Classes */ = {
-			isa = PBXGroup;
-			children = (
-				38A952EB19D815A400221B54 /* ChineseToPinyinResource.h */,
-				38A952EC19D815A400221B54 /* ChineseToPinyinResource.m */,
-				38A952ED19D815A400221B54 /* HanyuPinyinOutputFormat.h */,
-				38A952EE19D815A400221B54 /* HanyuPinyinOutputFormat.m */,
-				38A952EF19D815A400221B54 /* NSString+PinYin4Cocoa.h */,
-				38A952F019D815A400221B54 /* NSString+PinYin4Cocoa.m */,
-				38A952F119D815A400221B54 /* PinYin4Objc.h */,
-				38A952F219D815A400221B54 /* PinyinFormatter.h */,
-				38A952F319D815A400221B54 /* PinyinFormatter.m */,
-				38A952F419D815A400221B54 /* PinyinHelper.h */,
-				38A952F519D815A400221B54 /* PinyinHelper.m */,
-			);
-			path = Classes;
-			sourceTree = "<group>";
-		};
-		38A952F619D815A400221B54 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				38A952F719D815A400221B54 /* unicode_to_hanyu_pinyin.txt */,
-			);
-			path = Resources;
 			sourceTree = "<group>";
 		};
 		38AC819A19EBA28B00183E6C /* ShareSDK */ = {
@@ -3417,7 +3367,6 @@
 				38AC81D419EBA28B00183E6C /* WeiboSDK.bundle in Resources */,
 				38AD6CE318EF04060065A5F2 /* icon_infor1@2x.png in Resources */,
 				386B28B01961545F00499F79 /* selectBtn@2x.png in Resources */,
-				38A952FD19D815A400221B54 /* unicode_to_hanyu_pinyin.txt in Resources */,
 				387D334419472F3C006AE1C2 /* logo114.png in Resources */,
 				38AD6CE918EF04060065A5F2 /* icon_sel.png in Resources */,
 				38282D4C198887AD0087018A /* groupadd@2x.png in Resources */,
@@ -3719,7 +3668,6 @@
 				389393A718EEF5620014F169 /* InfoCell.m in Sources */,
 				3893926618EEF1A40014F169 /* NSString+MD5.m in Sources */,
 				3893926518EEF1A40014F169 /* MyTextField.m in Sources */,
-				38A952FA19D815A400221B54 /* NSString+PinYin4Cocoa.m in Sources */,
 				3893926018EEF1A30014F169 /* KKNavigationController.m in Sources */,
 				3893924F18EEF1A30014F169 /* ASINetworkQueue.m in Sources */,
 				3846AAAC197F47290061B6CA /* ScoreTableViewController.m in Sources */,
@@ -3747,11 +3695,9 @@
 				38B4929D1921C56A00C0098D /* ResetPwdViewController.m in Sources */,
 				3893932318EEF2030014F169 /* RegistViewController.m in Sources */,
 				3806883919852B1E00529FE7 /* UIImage+GIF.m in Sources */,
-				38A952F819D815A400221B54 /* ChineseToPinyinResource.m in Sources */,
 				3806883119852B1E00529FE7 /* SDWebImageCompat.m in Sources */,
 				3893935118EEF55C0014F169 /* MessageViewController.m in Sources */,
 				3806882619852B1E00529FE7 /* MBProgressHUD.m in Sources */,
-				38A952F919D815A400221B54 /* HanyuPinyinOutputFormat.m in Sources */,
 				388665F31986150A00D8CDF2 /* CheckQRCodeViewController.m in Sources */,
 				38C044DA19A1F64E00F500BA /* amrFileCodec.mm in Sources */,
 				38A24CAE197D323100C718BA /* GroupChatViewController.m in Sources */,
@@ -3768,7 +3714,6 @@
 				3893933A18EEF53D0014F169 /* CreateClassViewController.m in Sources */,
 				3893923C18EEF1A30014F169 /* AGImagePickerController.m in Sources */,
 				3893924518EEF1A30014F169 /* UITextField+AKNumericFormatter.m in Sources */,
-				38A952FB19D815A400221B54 /* PinyinFormatter.m in Sources */,
 				3810930819CF12AA0049DE68 /* CheckTools.m in Sources */,
 				38808DF819DB8366004782DB /* CommonFunc.m in Sources */,
 				38AE045719A31A1900F90B79 /* AFHTTPRequestOperation.m in Sources */,
@@ -3778,7 +3723,6 @@
 				3846AAB21980A0D70061B6CA /* BlankCell.m in Sources */,
 				38419A4319B6C0DF00B27C04 /* ImageItem.m in Sources */,
 				3893929A18EEF1A40014F169 /* NSString+Emojize.m in Sources */,
-				38A952FC19D815A400221B54 /* PinyinHelper.m in Sources */,
 				389392E218EEF1A40014F169 /* UIViewController+JDSideMenu.m in Sources */,
 				389393D618EEF56A0014F169 /* PersonInfoSettingViewController.m in Sources */,
 				38D5559819CC1D9A0043B3EB /* LocationViewController.m in Sources */,
@@ -3791,6 +3735,7 @@
 				38A24CB8197E108300C718BA /* SSCheckBoxView.m in Sources */,
 				3893926718EEF1A40014F169 /* TFIndicatorView.m in Sources */,
 				38B99C5519179E9D006EA082 /* ShareTools.m in Sources */,
+				38173FA819ECFA5F00E65DC0 /* ChineseToPinyin.m in Sources */,
 				3893933918EEF53D0014F169 /* ClassesViewController.m in Sources */,
 				389393AA18EEF5620014F169 /* MemberCell.m in Sources */,
 				38B492A31921F81800C0098D /* DemoViewController.m in Sources */,
@@ -3838,7 +3783,6 @@
 				389393D818EEF56A0014F169 /* SettingViewController.m in Sources */,
 				3806882419852B1E00529FE7 /* MBProgressHUD+Add.m in Sources */,
 				38AE045D19A31A1900F90B79 /* AFURLRequestSerialization.m in Sources */,
-				38A9530319D816D900221B54 /* ChineseToPinyin.m in Sources */,
 				389393D118EEF56A0014F169 /* AuthViewController.m in Sources */,
 				3806883519852B1E00529FE7 /* SDWebImageManager+MJ.m in Sources */,
 				3893933818EEF53D0014F169 /* ChooseSchoolViewController.m in Sources */,
@@ -4155,7 +4099,7 @@
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "-all_load";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "EBE4EC5D-C843-431C-9B1E-16626F088634";
+				PROVISIONING_PROFILE = "98A54D58-3225-4CB8-B5D6-13F9FFE6A365";
 				SDKROOT = iphoneos7.1;
 				TARGETED_DEVICE_FAMILY = 1;
 				VALID_ARCHS = armv7;

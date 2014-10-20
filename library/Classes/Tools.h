@@ -46,6 +46,7 @@
 +(NSString *)reg_method;
 +(NSString *)device_version;
 +(NSString *)client_ver;
++(NSString *)bundleVerSion;
 +(NSString *)client_token;
 +(NSString *)user_sex;
 

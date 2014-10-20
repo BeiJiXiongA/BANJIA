@@ -17,6 +17,7 @@
 #import "DXAlertView.h"
 #import "CommonFunc.h"
 #import "MLEmojiLabel.h"
+#import "DefineNames.h"
 
 #define FaceViewHeight  200
 
@@ -115,6 +116,7 @@ return shared##className; \
 #pragma mark - 关于提示
 #define NOT_NETWORK    @"没有网络哦！"
 
+#pragma mark - 每一页数量
 #define COUNT_PERPAGE  @"10"
 
 #pragma mark - 用户信息
@@ -209,29 +211,12 @@ return shared##className; \
 
 #define ClassAssistantHeader   @"/assistant.png"
 
-#pragma mark - notification name
-#define UPDATECLASSNUMBER  @"updateclassnumber"
-#define UPDATECHATSNUMBER  @"updatechatnumber"
-
-#define UPDATECLASSMEMBERLIST   @"updateclassmemberlist"
-#define UPDATEFRIENDSLIST       @"updatefriendslist"
-#define LOGOUT                  @"logout"
-#define CHANGECLASSINFO         @"changeclassinfo"
-#define CHANGEHEADERICON    @"changeicon"
-#define RECEIVENEWMSG     @"receivenewmsg"
-#define RECEIVENEWMSGNOTATCHATVIEW   @"receivenewmsgnotatchatview"
-#define RECEIVENEWNOTICE   @"receivenewnotice"
-#define STARTRECORD   @"startrecord"
-#define STOPRECORD    @"stoprecord"
-
-#define UPDATEGROUPCHATLIST   @"updategroupchatlist"
-
-#pragma mark - aboutinvite
+#pragma mark - 邀请内容
 #define InviteParentKey  @"item3"
 #define InviteClassMemberKey  @"item2"
 #define ShareContentKey    @"item1"
 
-
+#pragma mark - 关于分享
 #define ShareContent [[NSUserDefaults standardUserDefaults] objectForKey:ShareContentKey]
 #define InviteClassMember [[NSUserDefaults standardUserDefaults] objectForKey:InviteClassMemberKey]
 #define InviteParent [[NSUserDefaults standardUserDefaults] objectForKey:InviteParentKey]

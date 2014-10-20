@@ -399,9 +399,10 @@ voiceView;
         [[NSNotificationCenter defaultCenter] postNotificationName:STARTRECORD object:nil];
         [recordButton setTitle:@"录音开始" forState:UIControlStateNormal];
         [recordButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:@"touchDown"] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+        [self showVoiceView];
+        
         self.originWav = [VoiceRecorderBaseVC getCurrentTimeString];
         //开始录音
-        [self showVoiceView];
         [recorderVC beginRecordByFileName:self.originWav];
     }
     else if (longPress.state == UIGestureRecognizerStateEnded ||
@@ -735,7 +736,7 @@ voiceView;
         }
         else
         {
-            inputTextViewSize = CGSizeMake(250, DEFAULTTEXTHEIGHT);
+            inputTextViewSize = CGSizeMake(inputWidth, DEFAULTTEXTHEIGHT);
             [self inputChange];
             if ([self.returnFunDel respondsToSelector:@selector(myReturnFunction)])
             {
@@ -751,24 +752,26 @@ voiceView;
 }
 -(void)textViewDidChange:(UITextView *)textView
 {
-    DDLOG(@"%@",textView.text);
+    
+//    CGFloat width = textView.contentSize.width;
+//    CGSize size = [SizeTools getSizeWithString:textView.text andWidth:inputWidth andFont:[UIFont systemFontOfSize:16]];
     CGSize size = textView.contentSize;
     if(size.height >= 93)
     {
+        DDLOG(@"%@==%@==%@",NSStringFromCGSize(textView.contentSize),NSStringFromCGPoint(textView.contentOffset),NSStringFromCGSize(textView.frame.size));
+//        textView.contentOffset = CGPointMake(0, (textView.contentSize.height-60)/2+93);
         size = CGSizeMake(inputWidth, 93);
+    }
+    else if(size.height < DEFAULTTEXTHEIGHT)
+    {
+        size = CGSizeMake(inputWidth, DEFAULTTEXTHEIGHT);
     }
     inputTextViewSize = size;
     [self inputChange];
     
-//    if ([textView.text length] > maxTextLength)
-//    {
-//        [Tools showAlertView:[NSString stringWithFormat:@"字数不能超过%d",maxTextLength] delegateViewController:nil];
-//        return ;
-//    }
-    
     if ([self.returnFunDel respondsToSelector:@selector(changeInputViewSize:)])
     {
-        [self.returnFunDel changeInputViewSize:size];
+        [self.returnFunDel changeInputViewSize:inputTextViewSize];
     }
 }
 
@@ -800,6 +803,7 @@ voiceView;
         faceView.frame = CGRectMake(0, inputTextViewSize.height+8, SCREEN_WIDTH, FaceViewHeight-40);
         emoButton.frame = CGRectMake(0, faceView.frame.size.height+inputTextViewSize.height, 110, 49);
         sendButton.frame = CGRectMake(SCREEN_WIDTH-70, faceView.frame.size.height+8+inputTextViewSize.height+8, 60, 30);
+        inputTextView.text = inputTextView.text;
     }];
 }
 

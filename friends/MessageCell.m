@@ -138,7 +138,7 @@
             self.msgImageView.layer.cornerRadius = 3;
             self.msgImageView.clipsToBounds = YES;
             
-            [Tools fillImageView:self.msgImageView withImageFromURL:msgContent imageWidth:200 andDefault:@"3100"];
+            [Tools fillImageView:self.msgImageView withImageFromURL:msgContent imageWidth:100 andDefault:@"3100"];
             
             if(isGroup)
             {
@@ -376,7 +376,7 @@
             self.chatBg.frame = CGRectMake(SCREEN_WIDTH - (msgX+MESSAGE_IMAGE_HEIGHT+CHAT_TOP_IMAGE_SPACE*2), messageBgY, MESSAGE_IMAGE_HEIGHT+CHAT_TOP_IMAGE_SPACE*2+rightBgSpace, MESSAGE_IMAGE_HEIGHT+CHAT_TOP_IMAGE_SPACE*2);
             [self.chatBg setImage:toImage];
             self.msgImageView.frame = CGRectMake(self.chatBg.frame.origin.x+CHAT_TOP_IMAGE_SPACE, self.chatBg.frame.origin.y+CHAT_TOP_IMAGE_SPACE, MESSAGE_IMAGE_HEIGHT, MESSAGE_IMAGE_HEIGHT);
-            [Tools fillImageView:self.msgImageView withImageFromURL:msgContent imageWidth:200 andDefault:@"3100"];
+            [Tools fillImageView:self.msgImageView withImageFromURL:msgContent imageWidth:100 andDefault:@"3100"];
             [Tools fillImageView:self.headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERICON];
         }
         else if([msgContent rangeOfString:@"amr"].length > 0)

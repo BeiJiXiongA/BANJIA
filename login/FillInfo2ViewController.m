@@ -411,7 +411,7 @@
 {
     [nameTextField resignFirstResponder];
     
-    UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"从相册选取",@"拍照", nil];
+    UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"从相册选取",@"拍照", nil];
     ac.tag = HEADERTAG;
     [ac showInView:self.bgView];
 }
@@ -472,6 +472,7 @@
     [imagePickerController dismissViewControllerAnimated:YES completion:nil];
     
     fullScreenImage = [info objectForKey:UIImagePickerControllerEditedImage];
+    fullScreenImage = [ImageTools getNormalImageFromImage:fullScreenImage];
     
     if (fullScreenImage.size.width>SCREEN_WIDTH*1.5 || fullScreenImage.size.height>SCREEN_HEIGHT*2)
     {

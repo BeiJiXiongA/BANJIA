@@ -85,6 +85,11 @@
     classTableView.delegate = self;
     classTableView.dataSource = self;
     [self.bgView addSubview:classTableView];
+    
+    if ([classTableView respondsToSelector:@selector(setSeparatorInset:)])
+    {
+        [classTableView setSeparatorInset:UIEdgeInsetsZero];
+    }
 
     [self getSchoolClasses];
 }
@@ -220,7 +225,7 @@
     NSDictionary *dict = [tmpArray objectAtIndex:section];
     UIButton *headerButton = [UIButton buttonWithType:UIButtonTypeCustom];
     headerButton.frame = CGRectMake(0, 5, SCREEN_WIDTH, 20);
-    headerButton.backgroundColor = [UIColor lightGrayColor];
+    headerButton.backgroundColor = HEADER_GREEN;
     headerButton.titleLabel.textAlignment = NSTextAlignmentLeft;
     [headerButton setTitle:[NSString stringWithFormat:@"%@",[dict objectForKey:@"enter_t"]] forState:UIControlStateNormal];
     headerButton.tag = 2000+section;

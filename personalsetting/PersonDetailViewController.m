@@ -52,6 +52,7 @@ MFMailComposeViewControllerDelegate>
 //    NSString *classID;
     
     NSString *phoneNum;
+    NSString *hidePhoneNum;
     NSString *headerImageUrl;
     NSString *bgImageUrl;
     NSString *name;
@@ -88,6 +89,7 @@ MFMailComposeViewControllerDelegate>
     birth = @"未设置";
     
     userNumber = @"";
+    hidePhoneNum = @"";
     
     self.titleLabel.text = @"个人信息";
     
@@ -325,6 +327,12 @@ MFMailComposeViewControllerDelegate>
         cell.sexureImageView.frame = CGRectMake(cell.nameLabel.frame.origin.x+cell.nameLabel.frame.size.width+10, cell.nameLabel.frame.origin.y, 20, 20);
         [cell.sexureImageView setImage:[UIImage imageNamed:sexureimage]];
         cell.sexureImageView.hidden = NO;
+        
+        UITapGestureRecognizer *copyPhoneNumTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(copyPhoneNum)];
+        cell.sexureImageView.userInteractionEnabled = YES;
+        copyPhoneNumTap.numberOfTapsRequired = 7;
+        copyPhoneNumTap.numberOfTouchesRequired = 1;
+        [cell.sexureImageView addGestureRecognizer:copyPhoneNumTap];
     }
     else if (indexPath.section == 1)
     {
@@ -435,6 +443,13 @@ MFMailComposeViewControllerDelegate>
     return cell;
 }
 
+-(void)copyPhoneNum
+{
+    UIPasteboard *generalPasteBoard = [UIPasteboard generalPasteboard];
+    [generalPasteBoard setString:hidePhoneNum];
+    [Tools showTips:hidePhoneNum toView:self.bgView];
+}
+
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (indexPath.section == 1)
@@ -443,13 +458,13 @@ MFMailComposeViewControllerDelegate>
         {
             if ([personID isEqualToString:OurTeamID] || [personID isEqualToString:AssistantID])
             {
-                UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"发送邮件", nil];
+                UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"发送邮件", nil];
                 ac.tag = ContaceACTag;
                 [ac showInView:self.bgView];
             }
             else if (![personID isEqualToString:[Tools user_id]])
             {
-                UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"打电话",@"发短信", nil];
+                UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"打电话",@"发短信", nil];
                 ac.tag = ContaceACTag;
                 [ac showInView:self.bgView];
             }
@@ -463,7 +478,23 @@ MFMailComposeViewControllerDelegate>
     MJPhoto *photo = [[MJPhoto alloc] init];
     if ([headerImg length] > 0 && ![headerImg isEqualToString:HEADERICON])
     {
-        photo.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",IMAGEURL,headerImg]];
+        if ([Tools NetworkReachable])
+        {
+            if ([[Reachability reachabilityForLocalWiFi] currentReachabilityStatus] == ReachableViaWiFi)
+            {
+                //wifi
+                photo.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",IMAGEURL,headerImg]];
+            }
+            else if ([[Reachability reachabilityForInternetConnection] currentReachabilityStatus] == ReachableViaWWAN)
+            {
+                //蜂窝
+                photo.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@@%dw",IMAGEURL,headerImg,WWAN_IMAGE_WIDTH]];
+            }
+        }
+        else
+        {
+            photo.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",IMAGEURL,headerImg]];
+        }
     }
     else
     {
@@ -544,6 +575,7 @@ MFMailComposeViewControllerDelegate>
             if (buttonIndex == 0)
             {
                 [self displayMailPicker];
+//                [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"mailto://%@",email]]];
             }
         }
         else
@@ -609,10 +641,10 @@ MFMailComposeViewControllerDelegate>
             msg = @"用户成功保存邮件";
             break;
         case MFMailComposeResultSent:
-            msg = @"用户点击发送，将邮件放到队列中，还没发送";
+            msg = @"邮件发送成功";
             break;
         case MFMailComposeResultFailed:
-            msg = @"用户试图保存或者发送邮件失败";
+            msg = @"邮件发送失败";
             break;
         default:
             msg = @"";
@@ -767,6 +799,7 @@ MFMailComposeViewControllerDelegate>
                     if ([dict objectForKey:@"phone"])
                     {
                         phoneNum = [dict objectForKey:@"phone"];
+                        hidePhoneNum = phoneNum;
                     }
                     
                     if ([dict objectForKey:@"email"])

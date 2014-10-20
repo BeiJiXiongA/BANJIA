@@ -79,8 +79,8 @@ AuthImageDone>
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeIcon) name:@"changeicon" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewWillAppear:) name:UPDATECHATSNUMBER object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewWillAppear:) name:UPDATECLASSNUMBER object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewWillAppear:) name:RELOAD_MENU_BUTTON object:nil];
     
     userInfoDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     
@@ -169,9 +169,7 @@ AuthImageDone>
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification  object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillShowNotification object:nil];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UPDATECLASSNUMBER object:nil];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UPDATECHATSNUMBER object:nil];
-    
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:RELOAD_MENU_BUTTON object:nil];
     
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = nil;

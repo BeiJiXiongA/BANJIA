@@ -444,7 +444,23 @@ UpdateUserSettingDelegate>
     MJPhoto *photo = [[MJPhoto alloc] init];
     if ([headerImg length] > 0 && ![headerImg isEqualToString:HEADERICON])
     {
-        photo.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",IMAGEURL,headerImg]];
+        if ([Tools NetworkReachable])
+        {
+            if ([[Reachability reachabilityForLocalWiFi] currentReachabilityStatus] == ReachableViaWiFi)
+            {
+                //wifi
+                photo.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",IMAGEURL,headerImg]];
+            }
+            else if ([[Reachability reachabilityForInternetConnection] currentReachabilityStatus] == ReachableViaWWAN)
+            {
+                //蜂窝
+                photo.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@@%dw",IMAGEURL,headerImg,WWAN_IMAGE_WIDTH]];
+            }
+        }
+        else
+        {
+            photo.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",IMAGEURL,headerImg]];
+        }
     }
     else
     {
