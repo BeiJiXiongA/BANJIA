@@ -64,6 +64,8 @@ UITableViewDelegate>
     
     UITableView *tmpTableView;
     
+    BOOL alreadyHaveSchoolType;
+    
 }
 @end
 
@@ -88,7 +90,16 @@ UITableViewDelegate>
     className = @"";
     schoolType = @"1";
     isSelect = NO;
- 
+    alreadyHaveSchoolType = NO;
+    
+    if (schoolLevel &&
+        ![schoolLevel isEqual:[NSNull null]] &&
+        [schoolLevel length] > 0)
+    {
+        schoolType = schoolLevel;
+        alreadyHaveSchoolType = YES;
+    }
+    
     pickerViewWidth = 120;
     pickerViewHeight = 150;
     
@@ -256,15 +267,24 @@ UITableViewDelegate>
         
         cell.arrowImageView.frame = CGRectMake(SCREEN_WIDTH-75, 16, 18, 10);
         [cell.arrowImageView setImage:[UIImage imageNamed:@"arrow_down"]];
-        
+        cell.arrowImageView.hidden = YES;
         
         if (indexPath.row == 0)
         {
             cell.contentLable.text = [schoolLevelDict objectForKey:schoolType];
+            if (alreadyHaveSchoolType)
+            {
+                cell.arrowImageView.hidden = YES;
+            }
+            else
+            {
+                cell.arrowImageView.hidden = NO;
+            }
         }
         else if(indexPath.row == 1)
         {
             cell.contentLable.text = joinYear;
+            cell.arrowImageView.hidden = NO;
         }
         else if (indexPath.row == 2)
         {
@@ -323,6 +343,10 @@ UITableViewDelegate>
     {
         if (indexPath.row == 0)
         {
+            if (alreadyHaveSchoolType)
+            {
+                return ;
+            }
             selectType = SCHOOLTYPE;
             dataSourceArray = schoolLevelArray;
         }
@@ -363,8 +387,13 @@ UITableViewDelegate>
     }
     else
     {
+        
         if([selectType isEqualToString:SCHOOLTYPE])
         {
+            if (alreadyHaveSchoolType)
+            {
+                return ;
+            }
             schoolType = [schoolLevelArray objectAtIndex:indexPath.row];
         }
         else if([selectType isEqualToString:JOINYEAR])

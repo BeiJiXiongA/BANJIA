@@ -464,7 +464,7 @@ UIActionSheetDelegate>
         {
             if (![teacherID isEqualToString:[Tools user_id]])
             {
-                UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"打电话",@"发短信", nil];
+                UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"打电话",@"发短信", nil];
                 ac.tag = ContaceACTag;
                 [ac showInView:self.bgView];
             }
@@ -478,7 +478,23 @@ UIActionSheetDelegate>
     MJPhoto *photo = [[MJPhoto alloc] init];
     if ([headerImg length] > 0 && ![headerImg isEqualToString:HEADERICON])
     {
-        photo.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",IMAGEURL,headerImg]];
+        if ([Tools NetworkReachable])
+        {
+            if ([[Reachability reachabilityForLocalWiFi] currentReachabilityStatus] == ReachableViaWiFi)
+            {
+                //wifi
+                photo.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",IMAGEURL,headerImg]];
+            }
+            else if ([[Reachability reachabilityForInternetConnection] currentReachabilityStatus] == ReachableViaWWAN)
+            {
+                //蜂窝
+                photo.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@@%dw",IMAGEURL,headerImg,WWAN_IMAGE_WIDTH]];
+            }
+        }
+        else
+        {
+            photo.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",IMAGEURL,headerImg]];
+        }
     }
     else
     {

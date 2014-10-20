@@ -10,7 +10,7 @@
 
 @protocol MessageDelegate;
 
-@interface MessageCell : UITableViewCell
+@interface MessageCell : UITableViewCell<MLEmojiLabelDelegate>
 {
     UITapGestureRecognizer *headerTapTgr;
     UIImage *fromImage;
@@ -25,7 +25,7 @@
     int currentSec;
 }
 @property (nonatomic, strong) UIImageView *headerImageView;
-@property (nonatomic, strong) UILabel *messageContentLabel;
+@property (nonatomic, strong) MLEmojiLabel *messageContentLabel;
 @property (nonatomic, strong) UIImageView *chatBg;
 @property (nonatomic, strong) UIButton *soundButton;
 @property (nonatomic, strong) UILabel *timeLabel;
@@ -45,6 +45,8 @@
 @property (nonatomic, assign) id<MessageDelegate> msgDelegate;
 
 -(void)setCellWithDict:(NSDictionary *)dict;
+
+-(NSInteger)getHeightFromMessageDict:(NSDictionary *)dict showTime:(BOOL)showTime isGroup:(BOOL)isGroup;
 @end
 
 @protocol MessageDelegate <NSObject>

@@ -62,6 +62,10 @@
 @property (nonatomic, strong) ChatVoiceRecorderVC *recorderVC;
 @property (nonatomic, strong) AVAudioPlayer *player;
 
+@property (nonatomic, assign) NSInteger maxTextLength;
+
+@property (nonatomic, strong) UILabel *voiceView;
+
 -(NSMutableString *)analyString:(NSString *)inputString;
 
 -(void)backKeyBoard;

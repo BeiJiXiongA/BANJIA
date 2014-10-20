@@ -17,4 +17,9 @@
 
 #define MESSAGE_IMAGE_HEIGHT  97
 
+#define CHAT_MESSAGE_LENGHT  500
+#define COMMENT_TEXT_LENGHT  200
+
+#define WWAN_IMAGE_WIDTH   350
+
 #endif

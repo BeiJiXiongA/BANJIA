@@ -25,7 +25,12 @@ soundButton,
 moreButton,
 notOnlyFace,
 recordButton,
-originWav,recorderVC,player,hideSoundButton;
+originWav,
+recorderVC,
+player,
+hideSoundButton,
+maxTextLength,
+voiceView;
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
@@ -132,7 +137,6 @@ originWav,recorderVC,player,hideSoundButton;
         recordButton.hidden = YES;
         [inputBgView addSubview:recordButton];
 
-        
         moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
         moreButton.frame = CGRectMake( SCREEN_WIDTH - 40, INPUTBUTTONT, INPUTBUTTONH, INPUTBUTTONH);
         [moreButton setImage:[UIImage imageNamed:@"moreinchat"] forState:UIControlStateNormal];
@@ -224,94 +228,96 @@ originWav,recorderVC,player,hideSoundButton;
     CGFloat faceWidth = SCREEN_WIDTH/colum;
     CGFloat faceHeight = faceWidth;
     
-    faceArray = @[@"smile",
-                    @"blush",
-                    @"smiley",
-                    @"relaxed",
-                    @"smirk",
-                    @"heart_eyes",
-                    @"kissing_heart",
-                    @"kissing_closed_eyes",
-                    @"flushed",
-                    @"relieved",
-                    @"grin",
-                    @"stuck_out_tongue_winking_eye",
-                    @"stuck_out_tongue_closed_eyes",
-                    @"worried",
-                    @"confused",
-                    @"wink",
-                    @"sweat",
-                    @"pensive",
-                    @"disappointed",
-                    @"confounded",
-                    @"disappointed_relieved",
-                    @"fearful",
-                    @"cold_sweat",
-                    @"cry",
-                    @"sob",
-                    @"joy",
-                    @"astonished",
-                    @"scream",
-                    @"angry",
-                    @"rage",
-                    @"sleepy",
-                    @"mask",
-                    @"no_mouth",
-                    @"alien",
-                    @"smiling_imp",
-                    @"innocent",
-                    @"heart",
-                    @"broken_heart",
-                    @"cupid",
-                    @"two_hearts",
-                    @"sparkling_heart",
-                    @"sparkles",
-                    @"star",
-                    @"zzz",
-                    @"dash",
-                    @"sweat_drops",
-                    @"musical_note",
-                    @"fire",
-                    @"hankey",
-                    @"shit",
-                    @"thumbsup",
-                    @"thumbsdown",
-                    @"ok_hand",
-                    @"punch",
-                    @"facepunch",
-                    @"fist",
-                    @"wave",
-                    @"hand",
-                    @"point_up",
-                    @"pray",
-                    @"clap",
-                    @"muscle",
-                    @"walking",
-                    @"runner",
-                    @"couple",
-                    @"family",
-                    @"bow",
-                    @"couplekiss",
-                    @"couple_with_heart",
-                    @"massage",
-                    @"boy",
-                    @"girl",
-                    @"woman",
-                    @"man",
-                    @"baby",
-                    @"older_woman",
-                    @"older_man",
-                    @"person_with_blond_hair",
-                    @"man_with_gua_pi_mao",
-                    @"man_with_turban",
-                    @"construction_worker",
-                    @"cop",
-                    @"angel",
-                    @"princess",
-                    @"smile_cat",
-                    @"kiss",
-                ];
+    faceArray =@[@"哈哈",
+                 @"高兴",
+                 @"微笑",
+//                 @"可爱",
+                 @"假笑",
+                 @"爱你",
+                 @"飞吻",
+                 @"亲吻",
+                 @"脸红",
+                 @"浅笑",
+                 @"大笑",
+                 @"鬼脸",
+                 @"闭眼",
+                 @"担心",
+                 @"困惑",
+                 @"眨眼",
+                 @"流汗",
+                 @"悲伤",
+                 @"难过",
+                 @"糊涂",
+                 @"失望",
+                 @"可怕",
+                 @"冷汗",
+                 @"哭",
+                 @"大哭",
+                 @"欢乐",
+                 @"吃惊",
+                 @"恐惧",
+                 @"生气",
+                 @"愤怒",
+                 @"睡觉",
+                 @"口罩",
+                 @"闭嘴",
+                 @"外星人",
+                 @"恶魔",
+                 @"天真",
+                 @"心",
+                 @"心碎",
+                 @"丘比特",
+                 @"心心相印",
+                 @"喜爱",
+                 @"闪烁",
+                 @"星星",
+                 @"休息",
+                 @"快跑",
+                 @"汗水",
+                 @"音符",
+                 @"火",
+                 @"便便",
+                 @"大便",
+                 @"大拇指",
+                 @"鄙视",
+                 @"ok",
+                 @"拳头",
+                 @"拳击",
+//                 @"握拳",
+                 @"挥手",
+//                 @"击掌",
+//                 @"上面",
+                 @"祈祷",
+                 @"鼓掌",
+                 @"强壮",
+                 @"行人",
+                 @"跑步",
+                 @"情侣",
+                 @"家庭",
+                 @"鞠躬",
+                 @"相爱",
+                 @"夫妻",
+                 @"按摩",
+                 @"男孩",
+                 @"女孩",
+                 @"女人",
+                 @"男人",
+                 @"小孩",
+                 @"老奶奶",
+                 @"老爷爷",
+                 @"金发碧眼",
+                 @"瓜皮帽",
+                 @"包头巾",
+                 @"建筑工人",
+                 @"警察",
+                 @"天使",
+                 @"公主",
+                 @"猫",
+                 @"红唇",
+                 ];
     
+//    NSString *emoPath = [[NSBundle mainBundle] pathForResource:@"emoji" ofType:@"plist"];
+//    NSDictionary *emoDict = [[NSDictionary alloc] initWithContentsOfFile:emoPath];
     for (;i<[faceArray count];)
     {
         if ((i+1)%(colum * row) == 0)
@@ -329,12 +335,12 @@ originWav,recorderVC,player,hideSoundButton;
         }
         else
         {
-            NSString *faceName = [NSString emojizedStringWithString:[NSString stringWithFormat:@":%@:",[faceArray objectAtIndex:i]]];
+            NSString *faceName = [NSString stringWithFormat:@":%@:",[faceArray objectAtIndex:i]];
             
             UITapGestureRecognizer *faceTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(faceClick:)];
             UILabel *faceLabel = [[UILabel alloc] initWithFrame:CGRectMake(5+SCREEN_WIDTH*(count/(row*colum)) +faceWidth*((count%(row*colum))%colum),5+ faceHeight*((i%(row*colum))/colum), faceWidth-5, faceHeight-5)];
             faceLabel.tag = i;
-            faceLabel.text = faceName;
+            faceLabel.text = [NSString emojizedStringWithString:faceName];
             faceLabel.textAlignment = NSTextAlignmentCenter;
             if (SYSVERSION < 7.0)
             {
@@ -358,11 +364,15 @@ originWav,recorderVC,player,hideSoundButton;
     UIButton *delFaceButton = [UIButton buttonWithType:UIButtonTypeCustom];
     delFaceButton.backgroundColor = [UIColor whiteColor];
     [delFaceButton setBackgroundImage:[UIImage imageNamed:@"facedel"] forState:UIControlStateNormal];
-    delFaceButton.frame = CGRectMake(5+SCREEN_WIDTH*(104/(row*colum)) +faceWidth*((104%(row*colum))%colum)+3,5+ faceHeight*((104%(row*colum))/colum)+8, 30, 25);
+    delFaceButton.frame = CGRectMake(5+SCREEN_WIDTH*(104/(row*colum)) + faceWidth*((104%(row*colum)) % colum)+3,
+                                     5+ faceHeight*((104%(row*colum))/colum)+8,
+                                     30, 25);
     delFaceButton.userInteractionEnabled = YES;
     [delFaceButton addGestureRecognizer:longPress];
     [delFaceButton addTarget:self action:@selector(delCharacter) forControlEvents:UIControlEventTouchUpInside];
     [faceScrollView addSubview:delFaceButton];
+    
+//    faceScrollView.backgroundColor = [UIColor yellowColor];
     
     page = count%(row*colum)>0?(count/(row*colum)+1):(count/(row*colum));
     
@@ -380,6 +390,8 @@ originWav,recorderVC,player,hideSoundButton;
     self.backgroundColor = TITLE_COLOR;
 }
 
+#pragma mark - 录音
+
 -(void)longPress:(UILongPressGestureRecognizer *)longPress
 {
     if (longPress.state == UIGestureRecognizerStateBegan)
@@ -387,6 +399,8 @@ originWav,recorderVC,player,hideSoundButton;
         [[NSNotificationCenter defaultCenter] postNotificationName:STARTRECORD object:nil];
         [recordButton setTitle:@"录音开始" forState:UIControlStateNormal];
         [recordButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:@"touchDown"] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+        [self showVoiceView];
+        
         self.originWav = [VoiceRecorderBaseVC getCurrentTimeString];
         //开始录音
         [recorderVC beginRecordByFileName:self.originWav];
@@ -398,10 +412,54 @@ originWav,recorderVC,player,hideSoundButton;
         [recordButton setTitle:@"按下录音" forState:UIControlStateNormal];
         [recordButton setBackgroundImage:[UIImage imageNamed:@"recordBtn"] forState:UIControlStateNormal];
         [recorderVC.recorder stop];
+        [self hideVoiceView];
     }
 }
 
+-(void)updateVoiceLength:(int)voiceLength
+{
+    DDLOG(@"voice length %d",voiceLength);
+    if (voiceLength < 60)
+    {
+        voiceView.text = [NSString stringWithFormat:@"%d/60",voiceLength];
+        voiceView.textColor = [UIColor whiteColor];
+    }
+    else
+    {
+        voiceView.text = @"开始发送";
+        voiceView.textColor = [UIColor redColor];
+    }
+}
 
+-(void)showVoiceView
+{
+    UIViewController *topVC = [self appRootViewController];
+    voiceView = [[UILabel alloc] init];
+    voiceView.frame = CGRectMake(CENTER_POINT.x-70, CENTER_POINT.y-50, 140, 100);
+    voiceView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
+    voiceView.layer.cornerRadius = 5;
+    voiceView.clipsToBounds = YES;
+    voiceView.font = [UIFont systemFontOfSize:35];
+    voiceView.textColor = [UIColor whiteColor];
+    voiceView.textAlignment = NSTextAlignmentCenter;
+    [topVC.view addSubview:voiceView];
+    [self updateVoiceLength:0];
+}
+
+-(void)hideVoiceView
+{
+    [voiceView removeFromSuperview];
+}
+
+- (UIViewController *)appRootViewController
+{
+    UIViewController *appRootVC = [UIApplication sharedApplication].keyWindow.rootViewController;
+    UIViewController *topVC = appRootVC;
+    while (topVC.presentedViewController) {
+        topVC = topVC.presentedViewController;
+    }
+    return topVC;
+}
 
 -(void)delCharacter
 {
@@ -472,7 +530,7 @@ originWav,recorderVC,player,hideSoundButton;
             faceView.frame = CGRectMake(0, inputTextViewSize.height+8, SCREEN_WIDTH, FaceViewHeight-40);
             emoButton.frame = CGRectMake(0, faceView.frame.size.height+inputTextViewSize.height, 110, 49);
             sendButton.frame = CGRectMake(SCREEN_WIDTH-70, faceView.frame.size.height+8+inputTextViewSize.height+8, 60, 30);
-            faceScrollView.frame = CGRectMake(0, 0, SCREEN_WIDTH, faceView.frame.size.height-30);
+            faceScrollView.frame = CGRectMake(0, 0, SCREEN_WIDTH, faceView.frame.size.height-27);
             faceScrollView.contentSize = CGSizeMake(SCREEN_WIDTH*page, FaceViewHeight-77);
             pageControl.frame = CGRectMake(SCREEN_WIDTH/2-70, faceView.frame.size.height-35, 140, 30);
             pageControl.hidden = NO;
@@ -483,6 +541,10 @@ originWav,recorderVC,player,hideSoundButton;
             if ([self.returnFunDel respondsToSelector:@selector(changeInputType:)])
             {
                 [self.returnFunDel changeInputType:@"face"];
+            }
+            if ([self.returnFunDel respondsToSelector:@selector(showKeyBoard:)])
+            {
+                [self.returnFunDel showKeyBoard:FaceViewHeight];
             }
         }];
     }
@@ -511,6 +573,10 @@ originWav,recorderVC,player,hideSoundButton;
             if ([self.returnFunDel respondsToSelector:@selector(changeInputType:)])
             {
                 [self.returnFunDel changeInputType:@"face"];
+            }
+            if ([self.returnFunDel respondsToSelector:@selector(showKeyBoard:)])
+            {
+                [self.returnFunDel showKeyBoard:FaceViewHeight];
             }
         }];
     }
@@ -578,7 +644,7 @@ originWav,recorderVC,player,hideSoundButton;
 -(void)faceClick:(UITapGestureRecognizer *)tgr
 {
     
-    if ((tgr.view.tag+1)%28 != 0)
+    if ((tgr.view.tag+1)%21 != 0)
     {
         NSString *text = [inputTextView text];
         NSString *imageFileName = [[faceArray objectAtIndex:tgr.view.tag] emojizedString];
@@ -588,7 +654,7 @@ originWav,recorderVC,player,hideSoundButton;
         inputTextView.text = text2;
         CGSize size = inputTextView.contentSize;
         inputTextViewSize = size;
-        
+        DDLOG(@"%@++++%@",[NSString stringWithFormat:@":%@:",imageFileName],[NSString emojizedStringWithString:[NSString stringWithFormat:@":%@:",imageFileName]]);
         [self inputChange];
         if ([self.returnFunDel respondsToSelector:@selector(changeInputViewSize:)])
         {
@@ -664,14 +730,21 @@ originWav,recorderVC,player,hideSoundButton;
 {
     if ([text isEqualToString:@"\n"])
     {
-        inputTextViewSize = CGSizeMake(250, DEFAULTTEXTHEIGHT);
-        [self inputChange];
-        if ([self.returnFunDel respondsToSelector:@selector(myReturnFunction)])
+        if (textView.text.length > maxTextLength)
         {
-            [self.returnFunDel myReturnFunction];
+            [Tools showAlertView:[NSString stringWithFormat:@"字数不能超过%d",maxTextLength] delegateViewController:nil];
         }
-        [textView setText:nil];
-        [sendString  setString:@""];
+        else
+        {
+            inputTextViewSize = CGSizeMake(inputWidth, DEFAULTTEXTHEIGHT);
+            [self inputChange];
+            if ([self.returnFunDel respondsToSelector:@selector(myReturnFunction)])
+            {
+                [self.returnFunDel myReturnFunction];
+            }
+            [textView setText:nil];
+            [sendString  setString:@""];
+        }
         return NO;
     }
     [sendString insertString:text atIndex:[sendString length]];
@@ -679,25 +752,26 @@ originWav,recorderVC,player,hideSoundButton;
 }
 -(void)textViewDidChange:(UITextView *)textView
 {
+    
+//    CGFloat width = textView.contentSize.width;
+//    CGSize size = [SizeTools getSizeWithString:textView.text andWidth:inputWidth andFont:[UIFont systemFontOfSize:16]];
     CGSize size = textView.contentSize;
-    DDLOG(@"input size ++%@",NSStringFromCGSize(size));
     if(size.height >= 93)
     {
+        DDLOG(@"%@==%@==%@",NSStringFromCGSize(textView.contentSize),NSStringFromCGPoint(textView.contentOffset),NSStringFromCGSize(textView.frame.size));
+//        textView.contentOffset = CGPointMake(0, (textView.contentSize.height-60)/2+93);
         size = CGSizeMake(inputWidth, 93);
+    }
+    else if(size.height < DEFAULTTEXTHEIGHT)
+    {
+        size = CGSizeMake(inputWidth, DEFAULTTEXTHEIGHT);
     }
     inputTextViewSize = size;
     [self inputChange];
     
-    DDLOG(@"length %d",[textView.text length]);
-    if ([textView.text length] > 200)
-    {
-        [Tools showAlertView:@"字数不能超过200" delegateViewController:nil];
-        return ;
-    }
-    
     if ([self.returnFunDel respondsToSelector:@selector(changeInputViewSize:)])
     {
-        [self.returnFunDel changeInputViewSize:size];
+        [self.returnFunDel changeInputViewSize:inputTextViewSize];
     }
 }
 
@@ -729,6 +803,7 @@ originWav,recorderVC,player,hideSoundButton;
         faceView.frame = CGRectMake(0, inputTextViewSize.height+8, SCREEN_WIDTH, FaceViewHeight-40);
         emoButton.frame = CGRectMake(0, faceView.frame.size.height+inputTextViewSize.height, 110, 49);
         sendButton.frame = CGRectMake(SCREEN_WIDTH-70, faceView.frame.size.height+8+inputTextViewSize.height+8, 60, 30);
+        inputTextView.text = inputTextView.text;
     }];
 }
 
@@ -772,6 +847,7 @@ originWav,recorderVC,player,hideSoundButton;
 }
 -(void)recordFinished:(NSString *)filePath andFileName:(NSString *)fileName voiceLength:(int)length
 {
+    
     if ([self.returnFunDel respondsToSelector:@selector(recordFinished:andFileName:voiceLength:)] && length >= 1)
     {
         [self.returnFunDel recordFinished:filePath andFileName:fileName voiceLength:length];

@@ -105,10 +105,10 @@ UIActionSheetDelegate>
     schoolLevelArray = SCHOOLLEVELARRAY;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeClassInfo) name:CHANGECLASSINFO object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getClassesByUser) name:UPDATECLASSMEMBERLIST object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getClassesByUser) name:CHANGECLASSINFO object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getClassesByUser) name:RECEIVENEWNOTICE object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewWillAppear:) name:RELOAD_MENU_BUTTON object:nil];
     
     [[self.bgView layer] setShadowOffset:CGSizeMake(-5.0f, 5.0f)];
     [[self.bgView layer] setShadowColor:[UIColor darkGrayColor].CGColor];
@@ -271,7 +271,7 @@ UIActionSheetDelegate>
 {
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = nil;
-    
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:RELOAD_MENU_BUTTON object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:RECEIVENEWNOTICE object:nil];
 }
 

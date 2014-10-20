@@ -32,6 +32,10 @@ SelectClasses>
     NSString *objectsValueString;
     
     UIButton *sendButton;
+    
+    UILabel *countLabel;
+    
+    UIImageView *inputImageView;
 }
 @end
 
@@ -74,7 +78,7 @@ SelectClasses>
     contentHolder.textColor = [UIColor lightGrayColor];
     contentHolder.backgroundColor = [UIColor clearColor];
     
-    UIImageView *inputImageView = [[UIImageView alloc] initWithFrame:CGRectMake((SCREEN_WIDTH - 300)/2, UI_NAVIGATION_BAR_HEIGHT+10.5, 300, 95)];
+    inputImageView = [[UIImageView alloc] initWithFrame:CGRectMake((SCREEN_WIDTH - 300)/2, UI_NAVIGATION_BAR_HEIGHT+10.5, 300, 115)];
     inputImageView.layer.cornerRadius = 7;
     inputImageView.clipsToBounds = YES;
     inputImageView.layer.borderWidth = 0.3;
@@ -90,6 +94,14 @@ SelectClasses>
     contentTextView.textColor = TITLE_COLOR;
     contentTextView.font = [UIFont systemFontOfSize:19];
     [self.bgView addSubview:contentTextView];
+    
+    countLabel = [[UILabel alloc] initWithFrame:CGRectMake(contentTextView.frame.size.width+contentTextView.frame.origin.x-50, contentTextView.frame.size.height+contentTextView.frame.origin.y-10, 70, 20)];
+    countLabel.backgroundColor = [UIColor clearColor];
+    //        countLabel.font = [UIFont systemFontOfSize:12];
+    countLabel.font = [UIFont fontWithName:@"Futura" size:14];
+    countLabel.textColor = HEADER_BLUER;
+    countLabel.text = [NSString stringWithFormat:@"%d/200",[contentTextView.text length]];
+    [self.bgView addSubview:countLabel];
     
     UILabel *objectLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, contentTextView.frame.size.height+contentTextView.frame.origin.y+20, 80, 30)];
     objectLabel.text = @"发送对象";
@@ -117,7 +129,7 @@ SelectClasses>
     UIButton *sendButton1 = [UIButton buttonWithType:UIButtonTypeCustom];
     sendButton1.backgroundColor = [UIColor clearColor];
     [sendButton1 setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
-    sendButton1.frame = CGRectMake((SCREEN_WIDTH-300)/2, contentTextView.frame.size.height+contentTextView.frame.origin.y+13, 300, 42);
+    sendButton1.frame = CGRectMake((SCREEN_WIDTH-300)/2, inputImageView.frame.size.height+inputImageView.frame.origin.y+10, 300, 42);
     [sendButton1 setTitle:@"发布" forState:UIControlStateNormal];
     [sendButton1 addTarget:self action:@selector(sendnotice) forControlEvents:UIControlEventTouchUpInside];
     [self.bgView addSubview:sendButton1];
@@ -326,6 +338,15 @@ SelectClasses>
     if ([textView.text length] > 0)
     {
         contentHolder.text = @"";
+        countLabel.text = [NSString stringWithFormat:@"%d/200",[contentTextView.text length]];
+        if ([contentTextView.text length] > 200)
+        {
+            countLabel.textColor = [UIColor redColor];
+        }
+        else
+        {
+            countLabel.textColor = HEADER_BLUER;
+        }
     }
     else
     {

@@ -69,7 +69,8 @@ OperateFriends>
     self.returnImageView.hidden = YES;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getFriendList) name:UPDATEFRIENDSLIST object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getFriendList) name:UPDATEGROUPCHATLIST object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewWillAppear:) name:RELOAD_MENU_BUTTON object:nil];
     
     db = [[OperatDB alloc] init];
     
@@ -158,8 +159,8 @@ OperateFriends>
 {
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = nil;
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UPDATEGROUPCHATLIST object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UPDATEFRIENDSLIST object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:RELOAD_MENU_BUTTON object:nil];
 }
 -(BOOL)haveNewMsg
 {
@@ -605,11 +606,13 @@ OperateFriends>
             }
         }];
         [request setFailedBlock:^{
+            [Tools hideProgress:self.bgView];
             NSError *error = [request error];
             DDLOG(@"error %@",error);
             _reloading = NO;
             [pullRefreshView egoRefreshScrollViewDataSourceDidFinishedLoading:friendsListTableView];
         }];
+        [Tools showProgress:self.bgView];
         [request startAsynchronous];
     }
     else
@@ -655,8 +658,11 @@ OperateFriends>
                 
                 if ([[db findSetWithDictionary:@{@"unum":[dict objectForKey:@"number"]} andTableName:USERICONTABLE] count] > 0)
                 {
-                    [db deleteRecordWithDict:@{@"unum":[dict objectForKey:@"number"]} andTableName:USERICONTABLE];
-                    [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                    if ([db deleteRecordWithDict:@{@"unum":[dict objectForKey:@"number"]} andTableName:USERICONTABLE])
+                    {
+                        [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                    }
+                    
                 }
                 else
                 {
@@ -698,15 +704,16 @@ OperateFriends>
                     
                     if ([[db findSetWithDictionary:@{@"unum":[dict objectForKey:@"number"]} andTableName:USERICONTABLE] count] > 0)
                     {
-                        [db deleteRecordWithDict:@{@"unum":[dict objectForKey:@"number"]} andTableName:USERICONTABLE];
-                        [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                        if ([db deleteRecordWithDict:@{@"unum":[dict objectForKey:@"number"]} andTableName:USERICONTABLE])
+                        {
+                            [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                        }
                     }
                     else
                     {
                         [db insertRecord:userIconDict andTableName:USERICONTABLE];
                     }
                 }
-
             }
         }
     }
@@ -724,6 +731,8 @@ OperateFriends>
     [tmpArray addObjectsFromArray:[Tools getSpellSortArrayFromChineseArray:tmpListArray andKey:@"fname"]];
     
     [friendsListTableView reloadData];
+    
+    [Tools hideProgress:self.bgView];
     
     if ([newFriendsApply count] > 0 || [tmpArray count] > 0 || [groupChatArray count] > 0)
     {

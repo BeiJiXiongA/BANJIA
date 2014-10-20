@@ -531,7 +531,7 @@ EditNameDone>
             [dateComps setYear:[year integerValue]];
             
             NSDate *itemDate = [calendar dateFromComponents:dateComps];
-            [datePicker setDate:itemDate];
+            [datePicker setDate:itemDate animated:NO];
         }
         
         
@@ -656,7 +656,7 @@ EditNameDone>
 -(void)selectoo
 {
     imageUsed = @"img_icon";
-    UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"从相册选取",@"拍照", nil];
+    UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"从相册选取",@"拍照", nil];
     [ac showInView:self.bgView];
 }
 
@@ -729,22 +729,8 @@ EditNameDone>
     [imagePickerController dismissViewControllerAnimated:YES completion:nil];
     
     UIImage *fullScreenImage = [info objectForKey:UIImagePickerControllerEditedImage];
-    if (fullScreenImage.size.width>SCREEN_WIDTH*2 || fullScreenImage.size.height>SCREEN_HEIGHT*2)
-    {
-        CGFloat imageHeight = 0.0f;
-        CGFloat imageWidth = 0.0f;
-        if (fullScreenImage.size.width>SCREEN_WIDTH*2)
-        {
-            imageWidth = SCREEN_WIDTH*2;
-            imageHeight = imageWidth*fullScreenImage.size.height/fullScreenImage.size.width;
-        }
-        else
-        {
-            imageHeight = SCREEN_HEIGHT*2;
-            imageWidth = imageHeight*fullScreenImage.size.width/fullScreenImage.size.height;
-        }
-        fullScreenImage = [Tools thumbnailWithImageWithoutScale:fullScreenImage size:CGSizeMake(imageWidth, imageHeight)];
-    }
+    fullScreenImage = [ImageTools getNormalImageFromImage:fullScreenImage];
+    
     if ([imageUsed isEqualToString:@"img_kb"])
     {
         bgImage = fullScreenImage;

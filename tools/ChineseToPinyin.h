@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "PinYin4Objc.h"
 
 @interface ChineseToPinyin : NSObject
 +(NSString *)jianPinFromChiniseString:(NSString *)sourceText;

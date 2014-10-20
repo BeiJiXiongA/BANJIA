@@ -82,7 +82,6 @@
     
     NSArray *apply = [db findSetWithDictionary:@{@"uid":j_id,@"classid":classID} andTableName:CLASSMEMBERTABLE];
     applyDict = [apply firstObject];
-    
     if ([applyDict objectForKey:@"cb_id"] &&
         ![[applyDict objectForKey:@"cb_id"] isEqual:[NSNull null]] &&
         [[applyDict objectForKey:@"cb_id"] length] > 0)
@@ -94,6 +93,7 @@
             [[applyDict objectForKey:@"re_id"] length] > 0)
     {
         re_id = [applyDict objectForKey:@"re_id"];
+        userid = [applyDict objectForKey:@"uid"];
     }
     else
     {
@@ -297,6 +297,10 @@
         cell.headerImageView.clipsToBounds = YES;
         cell.headerImageView.layer.borderColor = [UIColor whiteColor].CGColor;
         cell.headerImageView.layer.borderWidth = 2;
+        
+        UITapGestureRecognizer *headerTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(headerTap:)];
+        cell.headerImageView.userInteractionEnabled = YES;
+        [cell.headerImageView addGestureRecognizer:headerTap];
         
         cell.nameLabel.frame = CGRectMake(DetailHeaderHeight+30, cell.headerImageView.frame.origin.y+10, [applyName length]*18, 20);
         cell.nameLabel.text = applyName;

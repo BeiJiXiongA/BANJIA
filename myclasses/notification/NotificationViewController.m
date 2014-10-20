@@ -42,6 +42,8 @@ EGORefreshTableDelegate>
     
     UIImageView *tipImageView;
     UIImageView *tapLabel;
+    
+    NSInteger currentReadNoticeIndex;
 }
 @end
 
@@ -62,6 +64,7 @@ EGORefreshTableDelegate>
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"班级通知";
     page = 0;
+    currentReadNoticeIndex = -1;
     month = @"";
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
@@ -215,11 +218,39 @@ EGORefreshTableDelegate>
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
--(void)readNotificationDetail
+-(void)readNotificationDetail:(NSDictionary *)noticeDict deleted:(BOOL)deleted
 {
-    page = 0;
-    month = @"";
-    [self getNotifications:NO];
+//    page = 0;
+//    month = @"";
+//    [self getNotifications:NO];
+    
+    BOOL isNew = ([[noticeDict objectForKey:@"new"] intValue]==1)?YES:NO;
+    if (deleted && isNew)
+    {
+        [unreadedArray removeObjectAtIndex:currentReadNoticeIndex];
+        [notificationTableView reloadData];
+    }
+    else if(deleted && !isNew)
+    {
+        [readedArray removeObjectAtIndex:currentReadNoticeIndex];
+        [notificationTableView reloadData];
+    }
+    else if(!deleted && isNew)
+    {
+        [unreadedArray removeObjectAtIndex:currentReadNoticeIndex];
+        NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithDictionary:noticeDict];
+        [tmpDict setObject:@"0" forKey:@"new"];
+        for (int i=0; i<[readedArray count]; i++)
+        {
+            NSDictionary *readDict = [readedArray objectAtIndex:i];
+            if ([[[noticeDict objectForKey:@"created"] objectForKey:@"sec"] intValue] >= [[[readDict objectForKey:@"created"] objectForKey:@"sec"] intValue])
+            {
+                [readedArray insertObject:tmpDict atIndex:i];
+                [notificationTableView reloadData];
+                break;
+            }
+        }
+    }
 }
 
 -(void)mybackClick
@@ -572,6 +603,11 @@ EGORefreshTableDelegate>
 }
 -(void)getMoreNotifications
 {
+    if (page == -1)
+    {
+        [Tools showAlertView:@"没有更多公告了！" delegateViewController:nil];
+        return ;
+    }
     page++;
     [self getNotifications:NO];
 }
@@ -592,13 +628,10 @@ EGORefreshTableDelegate>
         return ;
     }
     NotificationDetailViewController *notificationDetailViewController = [[NotificationDetailViewController alloc] init];
-    notificationDetailViewController.noticeID = [dict objectForKey:@"_id"];
-    notificationDetailViewController.noticeContent = [dict objectForKey:@"content"];
+    notificationDetailViewController.noticeDict = dict;
     notificationDetailViewController.c_read = @"1";
     notificationDetailViewController.readnotificationDetaildel = self;
     notificationDetailViewController.fromClass = YES;
-    notificationDetailViewController.byID = [[dict objectForKey:@"by"] objectForKey:@"_id"];
-    notificationDetailViewController.markString = [NSString stringWithFormat:@"%@发布于%@",[[dict objectForKey:@"by"] objectForKey:@"name"],[Tools showTime:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] intValue]]]];
     if ([[dict objectForKey:@"new"] integerValue] == 1)
     {
         int newNoticeNum = [[[NSUserDefaults standardUserDefaults] objectForKey:[NSString stringWithFormat:@"%@-notice",classID]] integerValue];
@@ -608,13 +641,15 @@ EGORefreshTableDelegate>
             [[NSUserDefaults standardUserDefaults] synchronize];
         }
         notificationDetailViewController.isnew = YES;
+        
     }
     else
     {
         notificationDetailViewController.isnew = NO;
     }
-    
+    currentReadNoticeIndex = indexPath.row;
     [[XDTabViewController sharedTabViewController].navigationController pushViewController:notificationDetailViewController animated:YES];
+   
     
 //    [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
@@ -672,6 +707,11 @@ EGORefreshTableDelegate>
                     page = [[[responseDict objectForKey:@"data"] objectForKey:@"page"] intValue];
                     month = [NSString stringWithFormat:@"%@",[[responseDict objectForKey:@"data"] objectForKey:@"month"]];
                     
+                    if (page == 0 && [month intValue] == 0)
+                    {
+                        page = -1;
+                    }
+                    
                     [db deleteRecordWithDict:@{@"uid":[Tools user_id],@"type":@"notice"} andTableName:@"notice"];
                     
                     if ([[responseDict objectForKey:@"data"] objectForKey:@"posts"] > 0)
@@ -704,7 +744,13 @@ EGORefreshTableDelegate>
                 }
                 else
                 {
-                    if (page ==0)
+                    
+                    if (page ==0 && month == 0)
+                    {
+                        [Tools showAlertView:@"没有更多公告了！" delegateViewController:nil];
+                        page = -1;
+                    }
+                    else if(page == 0)
                     {
                         if ([readedArray count] > 0 || [unreadedArray count] > 0)
                         {
@@ -714,11 +760,6 @@ EGORefreshTableDelegate>
                         {
                             tipLabel.hidden = NO;
                         }
-                        
-                    }
-                    else
-                    {
-                        [Tools showAlertView:@"没有更多公告了！" delegateViewController:nil];
                     }
                     
                     if (page == 0 && [month length] == 0)

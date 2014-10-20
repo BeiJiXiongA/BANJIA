@@ -21,7 +21,8 @@
     static dispatch_once_t onceToken;
     static NSRegularExpression *regex = nil;
     dispatch_once(&onceToken, ^{
-        regex = [[NSRegularExpression alloc] initWithPattern:@"(:[a-z0-9-+_]+:)" options:NSRegularExpressionCaseInsensitive error:NULL];
+//        regex = [[NSRegularExpression alloc] initWithPattern:@"(:[a-z0-9-+_]+:)" options:NSRegularExpressionCaseInsensitive error:NULL];
+        regex = [[NSRegularExpression alloc] initWithPattern:@"(:[^:]+:)" options:NSRegularExpressionCaseInsensitive error:NULL];
     });
     
     __block NSString *resultText = text;

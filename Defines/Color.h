@@ -50,4 +50,6 @@
 
 #define CHAT_CONTENT_COLOR [UIColor blackColor]
 
+#define SIDE_MENU_LINE_COLOR  RGB(85, 85, 85, 1)
+
 #endif

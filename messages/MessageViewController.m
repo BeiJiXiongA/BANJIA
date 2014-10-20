@@ -73,6 +73,11 @@ ChatVCDelegate>
     return self;
 }
 
+-(void)uploadLastViewTime
+{
+    
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -85,8 +90,9 @@ ChatVCDelegate>
     [[self.bgView layer] setShadowRadius:3.0f];
     self.returnImageView.hidden = YES;
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewWillAppear:) name:UPDATECLASSNUMBER object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dealNewChatMsgNotification:) name:RECEIVENEWMSG object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getChatList) name:UPDATE_MSG_LIST object:nil];
+    
     
     db = [[OperatDB alloc] init];
     
@@ -131,7 +137,6 @@ ChatVCDelegate>
     tipLabel.text = @"您还没有消息记录";
     tipLabel.hidden = YES;
     [friendsListTableView addSubview:tipLabel];
-    
     [self getChatList];
 }
 
@@ -158,7 +163,7 @@ ChatVCDelegate>
 -(void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self name:RECEIVENEWMSG object:nil];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UPDATECLASSNUMBER object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UPDATE_MSG_LIST object:nil];
 }
 
 -(void)getChatList
@@ -232,8 +237,10 @@ ChatVCDelegate>
                             //更新用户表
                             if ([[db findSetWithDictionary:@{@"uid":[dict objectForKey:@"tid"]} andTableName:USERICONTABLE] count] > 0)
                             {
-                                [db deleteRecordWithDict:@{@"uid":[dict objectForKey:@"tid"]} andTableName:USERICONTABLE];
-                                [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                                if ([db deleteRecordWithDict:@{@"uid":[dict objectForKey:@"tid"]} andTableName:USERICONTABLE])
+                                {
+                                    [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                                }
                             }
                             else
                             {
@@ -266,6 +273,14 @@ ChatVCDelegate>
                                 }
                             }
                             
+                            if(![[[notiChatArray firstObject] objectForKey:@"l"] isEqual:[NSNull null]] &&
+                               [[[notiChatArray firstObject] objectForKey:@"l"] intValue] == 1)
+                            {
+                                if ([db updeteKey:@"content" toValue:[msgDict objectForKey:@"msg"] withParaDict:@{@"mid":[msgDict objectForKey:@"_id"],@"userid":[Tools user_id]} andTableName:CHATTABLE])
+                                {
+                                    DDLOG(@"updata msg content success!");
+                                }
+                            }
                         }
                         else
                         {
@@ -367,14 +382,14 @@ ChatVCDelegate>
     [newMessageArray removeAllObjects];
     [newMessageArray addObjectsFromArray:[db findChatUseridWithTableName:CHATTABLE]];
 
+    
+    //时间由大到小排序
     if ([newMessageArray count] > 0)
     {
         for(int i = 0; i < [newMessageArray count]-1; i++)
         {
             NSString *tid = [[[newMessageArray objectAtIndex:i] allValues] firstObject];
-            NSDictionary *userIconDIct = [ImageTools iconDictWithUserID:tid];
             NSDictionary *messageDict = [self findLastMsgWithUser:tid];
-            DDLOG(@"tid==%@,usericon==%@,lastmsg==%@",tid,userIconDIct,messageDict);
             int msgTime = [[messageDict objectForKey:@"time"] intValue];
             for (int j= 0; j<[newMessageArray count]-i; j++)
             {
@@ -425,9 +440,32 @@ ChatVCDelegate>
         DDLOG(@"%@",[unreadCountDict objectForKey:fid]);
         return [[unreadCountDict objectForKey:fid] intValue];
     }
-    return 0;
-//    NSMutableArray *array = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"fid":fid,@"readed":@"0"} andTableName:CHATTABLE];
-//    return [array count];
+    
+    NSArray *userIconArray = [db findSetWithDictionary:@{@"uid":fid} andTableName:USERICONTABLE];
+    NSString *uNumber = @"";
+    if ([userIconArray count] > 0)
+    {
+        NSDictionary *userIconDict = [userIconArray firstObject];
+        
+        if ([userIconDict objectForKey:@"unum"] &&
+            ![[userIconDict objectForKey:@"unum"] isEqual:[NSNull null]] &&
+            [[userIconDict objectForKey:@"unum"] length] > 0)
+        {
+            uNumber = [userIconDict objectForKey:@"unum"];
+        }
+    }
+    
+    NSArray *array = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"fid":fid,@"readed":@"0"} andTableName:CHATTABLE];
+    NSArray *array1 = [db findSetWithDictionary:@{@"fid":uNumber} andTableName:CHATTABLE];
+    for (NSDictionary *dbDict in array1)
+    {
+        if ([db updeteKey:@"fid" toValue:fid withParaDict:@{@"mid":[dbDict objectForKey:@"mid"],@"userid":[Tools user_id]} andTableName:CHATTABLE] &&
+            [db updeteKey:@"tid" toValue:[Tools user_id] withParaDict:@{@"userid":[Tools user_id],@"mid":[dbDict objectForKey:@"mid"]} andTableName:CHATTABLE])
+        {
+            DDLOG(@"updata fid and tid success!");
+        }
+    }
+    return [array count] + [array1 count];
 }
 
 #pragma mark - egodelegate
@@ -685,7 +723,8 @@ ChatVCDelegate>
 {
     if (update)
     {
-        [self dealNewChatMsg:nil];
+        [self getChatList];
+//        [self dealNewChatMsg:nil];
     }
 }
 

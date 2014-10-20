@@ -42,6 +42,7 @@
 @protocol ChatDelegate <NSObject>
 
 -(void)dealNewChatMsg:(NSDictionary *)dict;
+-(void)uploadLastViewTime;
 
 @end
 @protocol MsgDelegate <NSObject>

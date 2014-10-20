@@ -54,7 +54,7 @@
         joinlable.backgroundColor = [UIColor clearColor];
         [chatBg addSubview:joinlable];
         
-        messageContentLabel = [[UILabel alloc] init];
+        messageContentLabel = [[MLEmojiLabel alloc] init];
         messageContentLabel.backgroundColor = [UIColor clearColor];
         messageContentLabel.hidden = YES;
         messageContentLabel.lineBreakMode = NSLineBreakByCharWrapping;
@@ -93,9 +93,8 @@
     self.timeLabel.backgroundColor = RGB(203, 203, 203, 1);
     CGFloat messageBgY = CHAT_MSG_SPACE;
     
-    
-    
     NSString *msgContent = [[dict objectForKey:@"content"] emojizedString];
+//    DDLOG(@"msgContent %@",msgContent);
     CGSize size = [SizeTools getSizeWithString:msgContent andWidth:SCREEN_WIDTH/2+20 andFont:MessageTextFont];
     headerTapTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(headerImageViewTap:)];
     [self.headerImageView addGestureRecognizer:headerTapTgr];
@@ -110,6 +109,7 @@
     
     self.messageContentLabel.hidden = NO;
     self.timeLabel.hidden = YES;
+    self.messageContentLabel.disableThreeCommon = YES;
     
     self.messageContentLabel.textColor = CHAT_CONTENT_COLOR;
     self.messageContentLabel.backgroundColor = [UIColor clearColor];
@@ -131,8 +131,6 @@
             NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
             self.timeLabel.text = timeStr;
             
-            
-            
             self.chatBg.frame = CGRectMake(headerImageX, messageBgY, MESSAGE_IMAGE_HEIGHT+leftSpace+CHAT_TOP_IMAGE_SPACE, MESSAGE_IMAGE_HEIGHT+CHAT_TOP_IMAGE_SPACE*2);
             [self.chatBg setImage:fromImage];
             
@@ -140,8 +138,7 @@
             self.msgImageView.layer.cornerRadius = 3;
             self.msgImageView.clipsToBounds = YES;
             
-            [Tools fillImageView:self.msgImageView withImageFromURL:msgContent imageWidth:200 andDefault:@"3100"];
-            
+            [Tools fillImageView:self.msgImageView withImageFromURL:msgContent imageWidth:100 andDefault:@"3100"];
             
             if(isGroup)
             {
@@ -254,13 +251,21 @@
             NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
             self.timeLabel.text = timeStr;
             
-            self.chatBg.frame = CGRectMake(headerImageX, messageBgY, size.width+leftSpace+CHAT_TOP_TEXT_SPACE, size.height+CHAT_TOP_TEXT_SPACE*2);
-            [self.chatBg setImage:fromImage];
-            
             self.messageContentLabel.frame = CGRectMake(self.chatBg.frame.origin.x + leftSpace,
                                                         self.chatBg.frame.origin.y + CHAT_TOP_TEXT_SPACE,
                                                         size.width, size.height);
-            self.messageContentLabel.text = msgContent;
+//            self.messageContentLabel.text = msgContent;
+            
+            [self.messageContentLabel setEmojiText:msgContent];
+            [self.messageContentLabel sizeToFit];
+            
+            size = self.messageContentLabel.frame.size;
+            self.chatBg.frame = CGRectMake(headerImageX, messageBgY, size.width+leftSpace+CHAT_TOP_TEXT_SPACE, size.height+CHAT_TOP_TEXT_SPACE*2);
+            self.messageContentLabel.frame = CGRectMake(self.chatBg.frame.origin.x + leftSpace,
+                                                        self.chatBg.frame.origin.y + CHAT_TOP_TEXT_SPACE,
+                                                        size.width, size.height);
+            [self.chatBg setImage:fromImage];
+            
             self.selectionStyle = UITableViewCellSelectionStyleNone;
             
             UILongPressGestureRecognizer *longTgr = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(msgLongTgr:)];
@@ -271,14 +276,19 @@
             NSRange range = [msgContent rangeOfString:@"$!#"];
             if (range.length >0)
             {
-                self.messageContentLabel.text = [msgContent substringFromIndex:range.location+range.length];
+//                self.messageContentLabel.text = [msgContent substringFromIndex:range.location+range.length];
+//                
                 
-                size = [SizeTools getSizeWithString:[[msgContent substringFromIndex:range.location+range.length] emojizedString] andWidth:SCREEN_WIDTH/2+20 andFont:MessageTextFont];
                 
                 self.messageContentLabel.frame = CGRectMake(self.chatBg.frame.origin.x + leftSpace,
                                                             self.chatBg.frame.origin.y + CHAT_TOP_TEXT_SPACE,
                                                             size.width,
                                                             size.height);
+                
+                [self.messageContentLabel setEmojiText:[msgContent substringFromIndex:range.location+range.length]];
+                [self.messageContentLabel sizeToFit];
+                
+                size = self.messageContentLabel.frame.size;
                 
                 UITapGestureRecognizer *msgTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(joinClass:)];
                 self.chatBg.userInteractionEnabled = YES;
@@ -293,6 +303,10 @@
                 self.joinlable.hidden = NO;
                 
                 self.chatBg.frame = CGRectMake(headerImageX, messageBgY-0, size.width+CHAT_TOP_TEXT_SPACE+leftSpace, size.height+CHAT_TOP_TEXT_SPACE*2+20);
+                self.messageContentLabel.frame = CGRectMake(self.chatBg.frame.origin.x + leftSpace,
+                                                            self.chatBg.frame.origin.y + CHAT_TOP_TEXT_SPACE,
+                                                            size.width,
+                                                            size.height);
                 
                 self.joinlable.userInteractionEnabled = YES;
             }
@@ -314,11 +328,16 @@
                 self.nameLabel.hidden = NO;
                 self.nameLabel.frame = CGRectMake(self.headerImageView.frame.size.width+self.headerImageView.frame.origin.x+5, self.headerImageView.frame.origin.y, 100, 20);
                 self.nameLabel.text = name;
+                
+                size = self.messageContentLabel.frame.size;
+                
                 self.chatBg.frame = CGRectMake(headerImageX, messageBgY+25, size.width+leftSpace+CHAT_TOP_TEXT_SPACE, size.height+CHAT_TOP_TEXT_SPACE*2);
                 self.messageContentLabel.frame = CGRectMake(self.chatBg.frame.origin.x + leftSpace,
                                                             self.chatBg.frame.origin.y + CHAT_TOP_TEXT_SPACE,
                                                             size.width,
                                                             size.height);
+
+                
                 [Tools fillImageView:self.headerImageView withImageFromURL:img_icon andDefault:HEADERICON];
             }
             else
@@ -336,7 +355,6 @@
         CGFloat rightSpace = 14;
         
         CGFloat rightBgSpace = 8;
-        
         self.nameLabel.hidden = YES;
         self.headerImageView.frame = CGRectMake(SCREEN_WIDTH-40-HEADER_EDGE_SPACE, messageBgY, 40, 40);
         CGFloat msgX = 40+HEADER_EDGE_SPACE + rightSpace;
@@ -358,7 +376,7 @@
             self.chatBg.frame = CGRectMake(SCREEN_WIDTH - (msgX+MESSAGE_IMAGE_HEIGHT+CHAT_TOP_IMAGE_SPACE*2), messageBgY, MESSAGE_IMAGE_HEIGHT+CHAT_TOP_IMAGE_SPACE*2+rightBgSpace, MESSAGE_IMAGE_HEIGHT+CHAT_TOP_IMAGE_SPACE*2);
             [self.chatBg setImage:toImage];
             self.msgImageView.frame = CGRectMake(self.chatBg.frame.origin.x+CHAT_TOP_IMAGE_SPACE, self.chatBg.frame.origin.y+CHAT_TOP_IMAGE_SPACE, MESSAGE_IMAGE_HEIGHT, MESSAGE_IMAGE_HEIGHT);
-            [Tools fillImageView:self.msgImageView withImageFromURL:msgContent imageWidth:200 andDefault:@"3100"];
+            [Tools fillImageView:self.msgImageView withImageFromURL:msgContent imageWidth:100 andDefault:@"3100"];
             [Tools fillImageView:self.headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERICON];
         }
         else if([msgContent rangeOfString:@"amr"].length > 0)
@@ -415,14 +433,25 @@
             NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
             self.timeLabel.text = timeStr;
             
-            self.chatBg.frame = CGRectMake(SCREEN_WIDTH - (msgX+size.width+CHAT_TOP_TEXT_SPACE*2), messageBgY, size.width+CHAT_TOP_TEXT_SPACE*2+rightBgSpace, size.height+CHAT_TOP_TEXT_SPACE*2);
+//            self.chatBg.frame = CGRectMake(SCREEN_WIDTH - (msgX+size.width+CHAT_TOP_TEXT_SPACE*2), messageBgY, size.width+CHAT_TOP_TEXT_SPACE*2+rightBgSpace, size.height+CHAT_TOP_TEXT_SPACE*2);
             [self.chatBg setImage:toImage];
             
             self.messageContentLabel.frame = CGRectMake(self.chatBg.frame.origin.x+CHAT_TOP_TEXT_SPACE,
                                                         self.chatBg.frame.origin.y+CHAT_TOP_TEXT_SPACE,
                                                         size.width,
                                                         size.height);
-            self.messageContentLabel.text = msgContent;
+//            self.messageContentLabel.text = msgContent;
+            
+            [self.messageContentLabel setEmojiText:msgContent];
+            [self.messageContentLabel sizeToFit];
+            
+            size = self.messageContentLabel.frame.size;
+            
+            self.chatBg.frame = CGRectMake(SCREEN_WIDTH - (msgX+size.width+CHAT_TOP_TEXT_SPACE*2), messageBgY, size.width+CHAT_TOP_TEXT_SPACE*2+rightBgSpace, size.height+CHAT_TOP_TEXT_SPACE*2);
+            self.messageContentLabel.frame = CGRectMake(self.chatBg.frame.origin.x+CHAT_TOP_TEXT_SPACE,
+                                                        self.chatBg.frame.origin.y+CHAT_TOP_TEXT_SPACE,
+                                                        size.width,
+                                                        size.height);
             
             UILongPressGestureRecognizer *longTgr = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(msgLongTgr:)];
             self.messageContentLabel.userInteractionEnabled = YES;
@@ -435,8 +464,11 @@
             {
                 NSString *msgContent = [dict objectForKey:@"content"];
                 NSRange range = [msgContent rangeOfString:@"$!#"];
-                self.messageContentLabel.text = [msgContent substringFromIndex:range.location+range.length];
-                size = [SizeTools getSizeWithString:[[msgContent substringFromIndex:range.location+range.length] emojizedString] andWidth:SCREEN_WIDTH/2+20 andFont:MessageTextFont];
+//                self.messageContentLabel.text = [msgContent substringFromIndex:range.location+range.length];
+                [self.messageContentLabel setEmojiText:[msgContent substringFromIndex:range.location+range.length]];
+                [self.messageContentLabel sizeToFit];
+                
+                size = self.messageContentLabel.frame.size;
                 self.chatBg.frame = CGRectMake(SCREEN_WIDTH - (msgX+size.width+CHAT_TOP_TEXT_SPACE*2), messageBgY, size.width+rightBgSpace+CHAT_TOP_TEXT_SPACE*2, size.height+CHAT_TOP_TEXT_SPACE*2);
                 self.messageContentLabel.frame = CGRectMake(self.chatBg.frame.origin.x+CHAT_TOP_TEXT_SPACE,
                                                             self.chatBg.frame.origin.y+CHAT_TOP_TEXT_SPACE,
@@ -445,12 +477,398 @@
             [Tools fillImageView:self.headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERICON];
         }
     }
+    
     self.timeLabel.frame = CGRectMake(SCREEN_WIDTH/2-50, 5, 100, 20);
     self.timeLabel.layer.cornerRadius = self.timeLabel.frame.size.height/2;
     self.timeLabel.clipsToBounds = YES;
     self.timeLabel.textColor = [UIColor whiteColor];
     self.headerImageView.layer.cornerRadius = 5;
     self.headerImageView.clipsToBounds = YES;
+}
+
+-(NSInteger)getHeightFromMessageDict:(NSDictionary *)dict showTime:(BOOL)showTime isGroup:(BOOL)isGroup1
+{
+    
+    self.timeLabel.backgroundColor = RGB(203, 203, 203, 1);
+    CGFloat messageBgY = CHAT_MSG_SPACE;
+    
+    NSString *msgContent = [[dict objectForKey:@"content"] emojizedString];
+    //    DDLOG(@"msgContent %@",msgContent);
+    CGSize size = [SizeTools getSizeWithString:msgContent andWidth:SCREEN_WIDTH/2+20 andFont:MessageTextFont];
+    headerTapTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(headerImageViewTap:)];
+    [self.headerImageView addGestureRecognizer:headerTapTgr];
+    self.headerImageView.userInteractionEnabled = YES;
+    self.chatBg.hidden = YES;
+    
+    self.soundButton.hidden = YES;
+    self.joinlable.hidden = YES;
+    
+    self.msgImageView.layer.cornerRadius = 3;
+    self.msgImageView.clipsToBounds = YES;
+    
+    self.messageContentLabel.hidden = NO;
+    self.timeLabel.hidden = YES;
+    
+    self.messageContentLabel.textColor = CHAT_CONTENT_COLOR;
+    self.messageContentLabel.backgroundColor = [UIColor clearColor];
+    self.messageContentLabel.font = MessageTextFont;
+    
+    if ([[dict objectForKey:DIRECT] isEqualToString:@"f"])
+    {
+        CGFloat leftSpace = 7.5+CHAT_TOP_IMAGE_SPACE;
+        
+        self.headerImageView.frame = CGRectMake(HEADER_EDGE_SPACE, messageBgY, 40, 40);
+        CGFloat headerImageX = self.headerImageView.frame.size.width+headerImageView.frame.origin.x+6;
+        NSString *extension =  [msgContent pathExtension];
+        if ([extension isEqualToString:@"png"] || [extension isEqualToString:@"jpg"])
+        {
+            //图片
+            self.chatBg.hidden = NO;
+            self.messageContentLabel.hidden = YES;
+            self.msgImageView.hidden = NO;
+            NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
+            self.timeLabel.text = timeStr;
+            
+            self.chatBg.frame = CGRectMake(headerImageX, messageBgY, MESSAGE_IMAGE_HEIGHT+leftSpace+CHAT_TOP_IMAGE_SPACE, MESSAGE_IMAGE_HEIGHT+CHAT_TOP_IMAGE_SPACE*2);
+            [self.chatBg setImage:fromImage];
+            
+            self.msgImageView.frame = CGRectMake(self.chatBg.frame.origin.x+leftSpace, self.chatBg.frame.origin.y+CHAT_TOP_IMAGE_SPACE, MESSAGE_IMAGE_HEIGHT, MESSAGE_IMAGE_HEIGHT);
+            self.msgImageView.layer.cornerRadius = 3;
+            self.msgImageView.clipsToBounds = YES;
+            
+            [Tools fillImageView:self.msgImageView withImageFromURL:msgContent imageWidth:200 andDefault:@"3100"];
+            
+            if(isGroup1)
+            {
+                OperatDB *db = [[OperatDB alloc] init];
+                NSString *by = [dict objectForKey:@"by"];
+                NSDictionary *userDict = [[db findSetWithDictionary:@{@"uid":by} andTableName:USERICONTABLE] firstObject];
+                NSString *img_icon = [userDict objectForKey:@"uicon"];
+                NSString *name = [userDict objectForKey:@"username"];
+                
+                self.nameLabel.hidden = NO;
+                self.nameLabel.frame = CGRectMake(self.headerImageView.frame.size.width+self.headerImageView.frame.origin.x+5, self.headerImageView.frame.origin.y, 100, 20);
+                self.nameLabel.text = name;
+                self.chatBg.frame = CGRectMake(headerImageX, messageBgY+25, MESSAGE_IMAGE_HEIGHT+leftSpace+CHAT_TOP_IMAGE_SPACE, MESSAGE_IMAGE_HEIGHT+CHAT_TOP_IMAGE_SPACE*2);
+                [self.chatBg setImage:fromImage];
+                
+                self.msgImageView.frame = CGRectMake(self.chatBg.frame.origin.x+leftSpace, self.chatBg.frame.origin.y+CHAT_TOP_IMAGE_SPACE, MESSAGE_IMAGE_HEIGHT, MESSAGE_IMAGE_HEIGHT);
+                [Tools fillImageView:self.headerImageView withImageFromURL:img_icon andDefault:HEADERICON];
+            }
+            else
+            {
+                NSDictionary *usericondict = [ImageTools iconDictWithUserID:[dict objectForKey:@"fid"]];
+                if (usericondict)
+                {
+                    [Tools fillImageView:self.headerImageView withImageFromURL:[usericondict objectForKey:@"uicon"] andDefault:HEADERICON];
+                }
+            }
+        }
+        else if([msgContent rangeOfString:@"amr"].length > 0)
+        {
+            //语音
+            self.chatBg.hidden = YES;
+            self.msgImageView.hidden = NO;
+            NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
+            self.timeLabel.text = timeStr;
+            
+            NSRange range = [msgContent rangeOfString:@"time="];
+            NSString *timelength = @"";
+            if (range.length > 0)
+            {
+                timelength = [NSString stringWithFormat:@"%@\"",[msgContent substringFromIndex:range.location+range.length]];
+                self.messageContentLabel.text = timelength;
+            }
+            
+            CGFloat soundLength = 0;
+            if ([timelength integerValue] * 10 > 120)
+            {
+                soundLength = 120;
+            }
+            else if([timelength integerValue] * 10 < 80)
+            {
+                soundLength = 80;
+            }
+            else
+            {
+                soundLength = [timelength integerValue] * 10;
+            }
+            
+            self.soundButton.hidden = NO;
+            self.soundButton.frame = CGRectMake(headerImageX, messageBgY, soundLength, 40);
+            [self.soundButton setBackgroundImage:fromImage forState:UIControlStateNormal];
+            [self.soundButton addTarget:self action:@selector(playSound) forControlEvents:UIControlEventTouchUpInside];
+            
+            self.soundButton.backgroundColor = [UIColor clearColor];
+            
+            self.messageContentLabel.frame = CGRectMake(self.soundButton.frame.size.width+self.soundButton.frame.origin.x+7, self.soundButton.frame.origin.y+4, 40, 25);
+            
+            self.msgImageView.frame = CGRectMake(self.soundButton.frame.origin.x+leftSpace, self.soundButton.frame.origin.y+7.5, 25, 25);
+            [self.msgImageView setImage:[UIImage imageNamed:@"icon_sound_f"]];
+            
+            UITapGestureRecognizer *playTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(playSound)];
+            self.soundButton.userInteractionEnabled = YES;
+            [self.soundButton addGestureRecognizer:playTgr];
+            
+            
+            self.headerImageView.frame = CGRectMake(HEADER_EDGE_SPACE, messageBgY, 40, 40);
+            if(isGroup1)
+            {
+                OperatDB *db = [[OperatDB alloc] init];
+                NSString *by = [dict objectForKey:@"by"];
+                NSDictionary *userDict = [[db findSetWithDictionary:@{@"uid":by} andTableName:USERICONTABLE] firstObject];
+                NSString *img_icon = [userDict objectForKey:@"uicon"];
+                NSString *name = [userDict objectForKey:@"username"];
+                
+                self.nameLabel.hidden = NO;
+                self.nameLabel.frame = CGRectMake(headerImageX, self.headerImageView.frame.origin.y, 100, 20);
+                self.nameLabel.text = name;
+                self.soundButton.frame = CGRectMake(headerImageX, messageBgY+25, soundLength, 40);
+                [self.soundButton setBackgroundImage:fromImage forState:UIControlStateNormal];
+                self.messageContentLabel.frame = CGRectMake(self.soundButton.frame.size.width+self.soundButton.frame.origin.x+7, self.soundButton.frame.origin.y+7.5, 40, 25);
+                self.msgImageView.frame = CGRectMake(self.soundButton.frame.origin.x+leftSpace, self.soundButton.frame.origin.y+7.5, 25, 25);
+                [self.msgImageView setImage:[UIImage imageNamed:@"icon_sound_f"]];
+                
+                [Tools fillImageView:self.headerImageView withImageFromURL:img_icon andDefault:HEADERICON];
+            }
+            else
+            {
+                NSDictionary *usericondict = [ImageTools iconDictWithUserID:[dict objectForKey:@"fid"]];
+                if (usericondict)
+                {
+                    [Tools fillImageView:self.headerImageView withImageFromURL:[usericondict objectForKey:@"uicon"] andDefault:HEADERICON];
+                }
+            }
+            
+        }
+        else
+        {
+            self.chatBg.hidden = NO;
+            self.messageContentLabel.hidden = NO;
+            self.msgImageView.hidden = YES;
+            NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
+            self.timeLabel.text = timeStr;
+            
+            self.messageContentLabel.frame = CGRectMake(self.chatBg.frame.origin.x + leftSpace,
+                                                        self.chatBg.frame.origin.y + CHAT_TOP_TEXT_SPACE,
+                                                        size.width, size.height);
+            //            self.messageContentLabel.text = msgContent;
+            
+            [self.messageContentLabel setEmojiText:msgContent];
+            [self.messageContentLabel sizeToFit];
+            
+            size = self.messageContentLabel.frame.size;
+            self.chatBg.frame = CGRectMake(headerImageX, messageBgY, size.width+leftSpace+CHAT_TOP_TEXT_SPACE, size.height+CHAT_TOP_TEXT_SPACE*2);
+            self.messageContentLabel.frame = CGRectMake(self.chatBg.frame.origin.x + leftSpace,
+                                                        self.chatBg.frame.origin.y + CHAT_TOP_TEXT_SPACE,
+                                                        size.width, size.height);
+            [self.chatBg setImage:fromImage];
+            
+            self.selectionStyle = UITableViewCellSelectionStyleNone;
+            
+            UILongPressGestureRecognizer *longTgr = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(msgLongTgr:)];
+            self.messageContentLabel.userInteractionEnabled = YES;
+            [self.messageContentLabel addGestureRecognizer:longTgr];
+            
+            
+            NSRange range = [msgContent rangeOfString:@"$!#"];
+            if (range.length >0)
+            {
+                //                self.messageContentLabel.text = [msgContent substringFromIndex:range.location+range.length];
+                //
+                
+                
+                self.messageContentLabel.frame = CGRectMake(self.chatBg.frame.origin.x + leftSpace,
+                                                            self.chatBg.frame.origin.y + CHAT_TOP_TEXT_SPACE,
+                                                            size.width,
+                                                            size.height);
+                
+                [self.messageContentLabel setEmojiText:[msgContent substringFromIndex:range.location+range.length]];
+                [self.messageContentLabel sizeToFit];
+                
+                size = self.messageContentLabel.frame.size;
+                
+                UITapGestureRecognizer *msgTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(joinClass:)];
+                self.chatBg.userInteractionEnabled = YES;
+                [self.chatBg addGestureRecognizer:msgTap];
+                self.chatBg.backgroundColor = [UIColor clearColor];
+                
+                self.messageContentLabel.userInteractionEnabled = YES;
+                
+                self.joinlable.frame = CGRectMake(15, size.height+10, size.width, 30);
+                self.joinlable.text = @"点击查看详情";
+                self.joinlable.backgroundColor = [UIColor clearColor];
+                self.joinlable.hidden = NO;
+                
+                self.chatBg.frame = CGRectMake(headerImageX, messageBgY-0, size.width+CHAT_TOP_TEXT_SPACE+leftSpace, size.height+CHAT_TOP_TEXT_SPACE*2+20);
+                self.messageContentLabel.frame = CGRectMake(self.chatBg.frame.origin.x + leftSpace,
+                                                            self.chatBg.frame.origin.y + CHAT_TOP_TEXT_SPACE,
+                                                            size.width,
+                                                            size.height);
+                
+                self.joinlable.userInteractionEnabled = YES;
+            }
+            else
+            {
+                self.soundButton.hidden = YES;
+            }
+            
+            self.headerImageView.frame = CGRectMake(HEADER_EDGE_SPACE, messageBgY, 40, 40);
+            
+            if(isGroup1)
+            {
+                OperatDB *db = [[OperatDB alloc] init];
+                NSString *by = [dict objectForKey:@"by"];
+                NSDictionary *userDict = [[db findSetWithDictionary:@{@"uid":by} andTableName:USERICONTABLE] firstObject];
+                NSString *img_icon = [userDict objectForKey:@"uicon"];
+                NSString *name = [userDict objectForKey:@"username"];
+                
+                self.nameLabel.hidden = NO;
+                self.nameLabel.frame = CGRectMake(self.headerImageView.frame.size.width+self.headerImageView.frame.origin.x+5, self.headerImageView.frame.origin.y, 100, 20);
+                self.nameLabel.text = name;
+                
+                size = self.messageContentLabel.frame.size;
+                
+                self.chatBg.frame = CGRectMake(headerImageX, messageBgY+25, size.width+leftSpace+CHAT_TOP_TEXT_SPACE, size.height+CHAT_TOP_TEXT_SPACE*2);
+                self.messageContentLabel.frame = CGRectMake(self.chatBg.frame.origin.x + leftSpace,
+                                                            self.chatBg.frame.origin.y + CHAT_TOP_TEXT_SPACE,
+                                                            size.width,
+                                                            size.height);
+                
+                
+                [Tools fillImageView:self.headerImageView withImageFromURL:img_icon andDefault:HEADERICON];
+            }
+            else
+            {
+                NSDictionary *usericondict = [ImageTools iconDictWithUserID:[dict objectForKey:@"fid"]];
+                if (usericondict)
+                {
+                    [Tools fillImageView:self.headerImageView withImageFromURL:[usericondict objectForKey:@"uicon"] andDefault:HEADERICON];
+                }
+            }
+        }
+    }
+    else if([[dict objectForKey:DIRECT] isEqualToString:@"t"])
+    {
+        CGFloat rightSpace = 14;
+        
+        CGFloat rightBgSpace = 8;
+        self.nameLabel.hidden = YES;
+        self.headerImageView.frame = CGRectMake(SCREEN_WIDTH-40-HEADER_EDGE_SPACE, messageBgY, 40, 40);
+        CGFloat msgX = 40+HEADER_EDGE_SPACE + rightSpace;
+        NSString *extension =  [msgContent pathExtension];
+        if ([extension isEqualToString:@"png"] || [extension isEqualToString:@"jpg"])
+        {
+            self.chatBg.hidden = NO;
+            self.messageContentLabel.hidden = YES;
+            self.msgImageView.hidden = NO;
+            
+            NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
+            self.timeLabel.text = timeStr;
+            
+            CGFloat x=7;
+            if([[Tools device_version] integerValue] >= 7.0)
+            {
+                x=0;
+            }
+            self.chatBg.frame = CGRectMake(SCREEN_WIDTH - (msgX+MESSAGE_IMAGE_HEIGHT+CHAT_TOP_IMAGE_SPACE*2), messageBgY, MESSAGE_IMAGE_HEIGHT+CHAT_TOP_IMAGE_SPACE*2+rightBgSpace, MESSAGE_IMAGE_HEIGHT+CHAT_TOP_IMAGE_SPACE*2);
+            [self.chatBg setImage:toImage];
+            self.msgImageView.frame = CGRectMake(self.chatBg.frame.origin.x+CHAT_TOP_IMAGE_SPACE, self.chatBg.frame.origin.y+CHAT_TOP_IMAGE_SPACE, MESSAGE_IMAGE_HEIGHT, MESSAGE_IMAGE_HEIGHT);
+            [Tools fillImageView:self.msgImageView withImageFromURL:msgContent imageWidth:200 andDefault:@"3100"];
+            [Tools fillImageView:self.headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERICON];
+        }
+        else if([msgContent rangeOfString:@"amr"].length > 0)
+        {
+            //语音
+            self.chatBg.hidden = YES;
+            
+            [Tools fillImageView:self.headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERICON];
+            
+            NSRange range = [msgContent rangeOfString:@"time="];
+            NSString *timelength = @"";
+            if (range.length > 0)
+            {
+                timelength = [NSString stringWithFormat:@"%@\"",[msgContent substringFromIndex:range.location+range.length]];
+                self.messageContentLabel.text = timelength;
+            }
+            
+            CGFloat soundLength = 0;
+            if ([timelength integerValue] * 10 > 120)
+            {
+                soundLength = 120;
+            }
+            else if([timelength integerValue] *10 < 80)
+            {
+                soundLength = 80;
+            }
+            else
+            {
+                soundLength = [timelength integerValue] * 10;
+            }
+            
+            self.soundButton.frame = CGRectMake(SCREEN_WIDTH - (soundLength+msgX-rightBgSpace), messageBgY, soundLength, 40);
+            [self.soundButton setBackgroundImage:toImage forState:UIControlStateNormal];
+            [self.soundButton addTarget:self action:@selector(playSound) forControlEvents:UIControlEventTouchUpInside];
+            
+            self.msgImageView.hidden = NO;
+            self.msgImageView.frame = CGRectMake(self.soundButton.frame.origin.x + self.soundButton.frame.size.width - 38, self.soundButton.frame.origin.y+7.5, 25, 25);
+            [self.msgImageView setImage:[UIImage imageNamed:@"icon_sound_t"]];
+            
+            UITapGestureRecognizer *playTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(playSound)];
+            self.soundButton.userInteractionEnabled = YES;
+            [self.soundButton addGestureRecognizer:playTgr];
+            
+            self.messageContentLabel.frame = CGRectMake(self.soundButton.frame.origin.x-30,
+                                                        self.soundButton.frame.origin.y+self.soundButton.frame.size.height/2-12.5,
+                                                        40,25);
+        }
+        else
+        {
+            self.chatBg.hidden = NO;
+            self.msgImageView.hidden = YES;
+            self.messageContentLabel.hidden = NO;
+            NSString *timeStr = [Tools showTime:[dict objectForKey:@"time"]];
+            self.timeLabel.text = timeStr;
+            
+            self.chatBg.frame = CGRectMake(SCREEN_WIDTH - (msgX+size.width+CHAT_TOP_TEXT_SPACE*2), messageBgY, size.width+CHAT_TOP_TEXT_SPACE*2+rightBgSpace, size.height+CHAT_TOP_TEXT_SPACE*2);
+            [self.chatBg setImage:toImage];
+            
+            self.messageContentLabel.frame = CGRectMake(self.chatBg.frame.origin.x+CHAT_TOP_TEXT_SPACE,
+                                                        self.chatBg.frame.origin.y+CHAT_TOP_TEXT_SPACE,
+                                                        size.width,
+                                                        size.height);
+            //            self.messageContentLabel.text = msgContent;
+            
+            [self.messageContentLabel setEmojiText:msgContent];
+            [self.messageContentLabel sizeToFit];
+            
+            size = self.messageContentLabel.frame.size;
+            
+            self.chatBg.frame = CGRectMake(SCREEN_WIDTH - (msgX+size.width+CHAT_TOP_TEXT_SPACE*2), messageBgY, size.width+CHAT_TOP_TEXT_SPACE*2+rightBgSpace, size.height+CHAT_TOP_TEXT_SPACE*2);
+            self.messageContentLabel.frame = CGRectMake(self.chatBg.frame.origin.x+CHAT_TOP_TEXT_SPACE,
+                                                        self.chatBg.frame.origin.y+CHAT_TOP_TEXT_SPACE,
+                                                        size.width,
+                                                        size.height);
+            if ([[dict objectForKey:@"content"] rangeOfString:@"$!#"].length >0)
+            {
+                NSString *msgContent = [dict objectForKey:@"content"];
+                NSRange range = [msgContent rangeOfString:@"$!#"];
+                //                self.messageContentLabel.text = [msgContent substringFromIndex:range.location+range.length];
+                [self.messageContentLabel setEmojiText:[msgContent substringFromIndex:range.location+range.length]];
+                [self.messageContentLabel sizeToFit];
+                
+                size = self.messageContentLabel.frame.size;
+                self.chatBg.frame = CGRectMake(SCREEN_WIDTH - (msgX+size.width+CHAT_TOP_TEXT_SPACE*2), messageBgY, size.width+rightBgSpace+CHAT_TOP_TEXT_SPACE*2, size.height+CHAT_TOP_TEXT_SPACE*2);
+                self.messageContentLabel.frame = CGRectMake(self.chatBg.frame.origin.x+CHAT_TOP_TEXT_SPACE,
+                                                            self.chatBg.frame.origin.y+CHAT_TOP_TEXT_SPACE,
+                                                            size.width, size.height);
+            }
+            [Tools fillImageView:self.headerImageView withImageFromURL:[Tools header_image] andDefault:HEADERICON];
+        }
+    }
+    
+    return chatBg.frame.size.height + CHAT_MSG_SPACE*2 + soundButton.frame.size.height + (showTime?25:0) + (([[dict objectForKey:DIRECT] isEqualToString:@"f"] && isGroup1)?25:0);
+    
 }
 
 -(void)msgLongTgr:(UILongPressGestureRecognizer *)longTgr
@@ -506,7 +924,6 @@
 {
     if ([self.msgDelegate respondsToSelector:@selector(toPersonDetail:)])
     {
-        DDLOG(@"msgdict %@",msgDict);
         [self.msgDelegate toPersonDetail:msgDict];
     }
 }
@@ -631,7 +1048,6 @@
 
 -(void)joinClass:(UITapGestureRecognizer *)tap
 {
-    DDLOG(@"msg dict %@",msgDict);
     NSString *msgContent = [msgDict objectForKey:@"content"];
     if ([self.msgDelegate respondsToSelector:@selector(joinClassWithMsgContent:)])
     {
@@ -687,5 +1103,4 @@
 
     // Configure the view for the selected state
 }
-
 @end

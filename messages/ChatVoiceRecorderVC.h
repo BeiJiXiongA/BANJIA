@@ -28,4 +28,6 @@
 
 -(void)recordFinished:(NSString *)filePath andFileName:(NSString *)fileName voiceLength:(int)length;
 
+-(void)updateVoiceLength:(int)voiceLength;
+
 @end

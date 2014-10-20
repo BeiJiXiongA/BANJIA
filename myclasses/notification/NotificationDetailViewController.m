@@ -56,7 +56,7 @@ UIActionSheetDelegate>
 @end
 
 @implementation NotificationDetailViewController
-@synthesize noticeContent,noticeID,c_read,byID,readnotificationDetaildel,isnew,fromClass,markString;
+@synthesize noticeContent,noticeID,c_read,byID,readnotificationDetaildel,isnew,fromClass,markString,noticeDict;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -73,6 +73,14 @@ UIActionSheetDelegate>
     
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     scoreId = @"";
+    
+    DDLOG(@"notice dict %@",noticeDict);
+    
+    noticeContent = [noticeDict objectForKey:@"content"];
+    noticeID = [noticeDict objectForKey:@"_id"];
+    byID = [[noticeDict objectForKey:@"by"] objectForKey:@"_id"];
+    markString = [NSString stringWithFormat:@"%@发布于%@",[[noticeDict objectForKey:@"by"] objectForKey:@"name"],[Tools showTime:[NSString stringWithFormat:@"%d",[[[noticeDict objectForKey:@"created"] objectForKey:@"sec"] intValue]]]];
+
         
     moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
     moreButton.frame = CGRectMake(SCREEN_WIDTH-CORNERMORERIGHT, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
@@ -379,9 +387,9 @@ UIActionSheetDelegate>
             {
                 DDLOG(@"read success!");
                 
-                if ([self.readnotificationDetaildel respondsToSelector:@selector(readNotificationDetail)])
+                if ([self.readnotificationDetaildel respondsToSelector:@selector(readNotificationDetail:deleted:)])
                 {
-                    [self.readnotificationDetaildel readNotificationDetail];
+                    [self.readnotificationDetaildel readNotificationDetail:noticeDict deleted:YES];
                 }
                 
                 [self.navigationController popViewControllerAnimated:YES];
@@ -420,9 +428,9 @@ UIActionSheetDelegate>
                 
                 [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSNUMBER object:nil];
                 
-                if ([self.readnotificationDetaildel respondsToSelector:@selector(readNotificationDetail)])
+                if ([self.readnotificationDetaildel respondsToSelector:@selector(readNotificationDetail:deleted:)])
                 {
-                    [self.readnotificationDetaildel readNotificationDetail];
+                    [self.readnotificationDetaildel readNotificationDetail:noticeDict deleted:NO];
                 }
                 
                 if ([c_read integerValue] == 1)

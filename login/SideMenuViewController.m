@@ -74,8 +74,8 @@
     self.view.backgroundColor = [UIColor whiteColor];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeIcon) name:@"changeicon" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadSideButton) name:UPDATECLASSNUMBER object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadSideButton) name:UPDATECHATSNUMBER object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadSideButton) name:RELOAD_SIDE_MENU object:nil];
     
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = self;
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = self;
@@ -118,10 +118,8 @@
     buttonTableView.separatorColor = RGB(80, 80, 80, 1);
     buttonTableView.backgroundColor = [UIColor clearColor];
     [self.bgView addSubview:buttonTableView];
-    if ([buttonTableView respondsToSelector:@selector(setSeparatorInset:)])
-    {
-        [buttonTableView setSeparatorInset:UIEdgeInsetsZero];
-    }
+    buttonTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    
     
     home = [[HomeViewController alloc] init];
     homeNav = [[KKNavigationController alloc] initWithRootViewController:home];
@@ -139,11 +137,18 @@
 {
     [buttonTableView reloadData];
 }
+-(void)uploadLastViewTime
+{
+    
+}
 
 -(void)dealloc
 {
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = nil;
+    
+    [[NSNotificationCenter defaultCenter]removeObserver:self name:RELOAD_SIDE_MENU object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"changeicon" object:nil];
 }
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -162,6 +167,7 @@
     {
         cell = [[ClassCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:sideButton];
     }
+    
     cell.headerImageView.frame = CGRectMake(10, 10, 20, 20);
     [cell.headerImageView setImage:[UIImage imageNamed:[menuIconArray objectAtIndex:indexPath.row]]];
     cell.headerImageView.layer.contentsGravity = kCAGravityResizeAspect;
@@ -171,6 +177,7 @@
     cell.nameLabel.textColor = [UIColor whiteColor];
     cell.nameLabel.text = [menuNamesArray objectAtIndex:indexPath.row];
     cell.nameLabel.font = [UIFont systemFontOfSize:18];
+    
     if (indexPath.row == selectIndex)
     {
         cell.contentView.backgroundColor = RGB(58, 63, 67, 1);
@@ -219,8 +226,9 @@
     
     CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
     cell.lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-    cell.lineImageView.backgroundColor = UIColorFromRGB(0x394043);
+    cell.lineImageView.backgroundColor = SIDE_MENU_LINE_COLOR;
     //394043
+    
     return cell;
 }
 
@@ -342,6 +350,10 @@
     if([[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue]>0)
     {
         return [[[NSUserDefaults standardUserDefaults] objectForKey:NewChatMsgNum] integerValue];
+    }
+    if ([db findSetWithDictionary:@{@"userid":[Tools user_id],@"readed":@"0"} andTableName:CHATTABLE])
+    {
+        return [[db findSetWithDictionary:@{@"userid":[Tools user_id],@"readed":@"0"} andTableName:CHATTABLE] count];
     }
     return 0;
 }

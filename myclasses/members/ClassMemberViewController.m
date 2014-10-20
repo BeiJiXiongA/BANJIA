@@ -577,7 +577,6 @@ MsgDelegate>
                                                                       @"role":@"all"
                                                                       } API:GETUSERSBYCLASS];
         [request setCompletionBlock:^{
-            [Tools hideProgress:self.bgView];
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
             DDLOG(@"memberByClass responsedict %@",responseDict);
@@ -786,12 +785,14 @@ MsgDelegate>
             DDLOG(@"error %@",error);
             [Tools hideProgress:self.bgView];
         }];
+        [Tools showProgress:self.bgView];
         [request startAsynchronous];
     }
     else
     {
         _reloading = NO;
         [pullRefreshView egoRefreshScrollViewDataSourceDidFinishedLoading:memberTableView];
+        [Tools hideProgress:self.bgView];
         [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
     }
 }
@@ -867,6 +868,8 @@ MsgDelegate>
     
     [membersArray addObjectsFromArray:[Tools getSpellSortArrayFromChineseArray:studentArray andKey:@"name"]];
     [memberTableView reloadData];
+    
+    [Tools hideProgress:self.bgView];
 }
 
 -(BOOL)haveParentsOfStudent:(NSString *)studentID
@@ -1101,7 +1104,7 @@ MsgDelegate>
                     cell.markView.frame = CGRectMake(226, 19, 8, 12);
                     [cell.markView setImage:[UIImage imageNamed:@"discovery_arrow"]];
                     cell.markView.hidden = NO;
-                    cell.backgroundColor = self.bgView.backgroundColor;
+                    cell.backgroundColor = [UIColor whiteColor];
                 }
                 else
                 {
