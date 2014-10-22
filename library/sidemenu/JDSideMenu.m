@@ -20,8 +20,6 @@ const CGFloat JDSideMenuDefaultCloseAnimationTime = 0.2;
 @interface JDSideMenu ()
 @property (nonatomic, strong) UIImageView *backgroundView;
 @property (nonatomic, strong) UIView *containerView;
-@property (nonatomic, strong) UITapGestureRecognizer *tapRecognizer;
-@property (nonatomic, strong) UIPanGestureRecognizer *panRecognizer;
 @end
 
 @implementation JDSideMenu

@@ -533,6 +533,7 @@
 		38C044E719A23BB100F500BA /* icon_sound_t@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38C044E519A23BB100F500BA /* icon_sound_t@2x.png */; };
 		38C0FC9E19C01E990069490D /* searchBG@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38C0FC9D19C01E990069490D /* searchBG@2x.png */; };
 		38CDBD58199D993D00F5374C /* DealJiFen.m in Sources */ = {isa = PBXBuildFile; fileRef = 38CDBD57199D993D00F5374C /* DealJiFen.m */; };
+		38D3880F19F7555C00A35EF6 /* libWeChatSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 38D3880C19F7555C00A35EF6 /* libWeChatSDK.a */; };
 		38D5559819CC1D9A0043B3EB /* LocationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 38D5559719CC1D9A0043B3EB /* LocationViewController.m */; };
 		38E3933319C68DF90020067F /* Invite_banjia_friend_on@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38E3933219C68DF90020067F /* Invite_banjia_friend_on@2x.png */; };
 		38E8CAEE195004090075BDEC /* CommentCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 38E8CAED195004090075BDEC /* CommentCell.m */; };
@@ -1442,6 +1443,9 @@
 		38C0FC9D19C01E990069490D /* searchBG@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "searchBG@2x.png"; sourceTree = "<group>"; };
 		38CDBD56199D993D00F5374C /* DealJiFen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DealJiFen.h; sourceTree = "<group>"; };
 		38CDBD57199D993D00F5374C /* DealJiFen.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DealJiFen.m; sourceTree = "<group>"; };
+		38D3880C19F7555C00A35EF6 /* libWeChatSDK.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libWeChatSDK.a; sourceTree = "<group>"; };
+		38D3880D19F7555C00A35EF6 /* WXApi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WXApi.h; sourceTree = "<group>"; };
+		38D3880E19F7555C00A35EF6 /* WXApiObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WXApiObject.h; sourceTree = "<group>"; };
 		38D5559619CC1D9A0043B3EB /* LocationViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocationViewController.h; sourceTree = "<group>"; };
 		38D5559719CC1D9A0043B3EB /* LocationViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocationViewController.m; sourceTree = "<group>"; };
 		38E3933219C68DF90020067F /* Invite_banjia_friend_on@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Invite_banjia_friend_on@2x.png"; sourceTree = "<group>"; };
@@ -1543,6 +1547,7 @@
 				389C32E418EF8ABD00DA05E8 /* CoreMotion.framework in Frameworks */,
 				389C32E018EF88BD00DA05E8 /* libstdc++.dylib in Frameworks */,
 				38AC81CF19EBA28B00183E6C /* TencentOpenAPI.framework in Frameworks */,
+				38D3880F19F7555C00A35EF6 /* libWeChatSDK.a in Frameworks */,
 				389C32DE18EF88AD00DA05E8 /* libz.1.2.5.dylib in Frameworks */,
 				389C32DC18EF88A000DA05E8 /* libicucore.dylib in Frameworks */,
 				38AD6A5418EF00EA0065A5F2 /* libsqlite3.dylib in Frameworks */,
@@ -2043,6 +2048,7 @@
 		38938FFA18EEF1A30014F169 /* library */ = {
 			isa = PBXGroup;
 			children = (
+				38D3880B19F7555C00A35EF6 /* WeChatSDK_64 */,
 				38AC819A19EBA28B00183E6C /* ShareSDK */,
 				3862855419D3C0CC004B5E76 /* JPush */,
 				38A24C9A197CE06400C718BA /* UIImage-Helpers */,
@@ -3165,6 +3171,16 @@
 			path = "opencore-amrwb";
 			sourceTree = "<group>";
 		};
+		38D3880B19F7555C00A35EF6 /* WeChatSDK_64 */ = {
+			isa = PBXGroup;
+			children = (
+				38D3880C19F7555C00A35EF6 /* libWeChatSDK.a */,
+				38D3880D19F7555C00A35EF6 /* WXApi.h */,
+				38D3880E19F7555C00A35EF6 /* WXApiObject.h */,
+			);
+			path = WeChatSDK_64;
+			sourceTree = "<group>";
+		};
 		38D38AF8195678F600D4CB8E /* home */ = {
 			isa = PBXGroup;
 			children = (
@@ -4022,6 +4038,7 @@
 					2/Extend/WeChatSDK,
 					"$(PROJECT_DIR)/messages/VoiceConvert/lib",
 					"$(PROJECT_DIR)/library/JPush",
+					"$(PROJECT_DIR)/library/WeChatSDK_64",
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "-all_load";
@@ -4095,6 +4112,7 @@
 					2/Extend/WeChatSDK,
 					"$(PROJECT_DIR)/messages/VoiceConvert/lib",
 					"$(PROJECT_DIR)/library/JPush",
+					"$(PROJECT_DIR)/library/WeChatSDK_64",
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "-all_load";

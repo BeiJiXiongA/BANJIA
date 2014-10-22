@@ -1693,6 +1693,8 @@ headerDelegate>
             headImageView.userInteractionEnabled = YES;
             [headImageView addGestureRecognizer:headerTapTgr];
             [cell.headerScrollView addSubview:headImageView];
+            
+//            [headerTapTgr requireGestureRecognizerToFail:((JDSideMenu *)self.sideMenuController).tapRecognizer];
         }
         
         cell.closeAd.frame = CGRectMake(SCREEN_WIDTH-40, 0, 40, 40);

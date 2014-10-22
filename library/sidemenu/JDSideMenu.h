@@ -21,6 +21,9 @@
 @property (nonatomic, assign) BOOL panGestureEnabled;
 @property (nonatomic, assign) id<SideMenuDelegate> sideMenuDelegate;
 
+@property (nonatomic, strong) UITapGestureRecognizer *tapRecognizer;
+@property (nonatomic, strong) UIPanGestureRecognizer *panRecognizer;
+
 - (id)initWithContentController:(UIViewController*)contentController
                  menuController:(UIViewController*)menuController;
 
