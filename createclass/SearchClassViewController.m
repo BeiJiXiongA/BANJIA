@@ -11,6 +11,7 @@
 #import "SearchSchoolViewController.h"
 #import "ClassZoneViewController.h"
 #import "ZBarSDK.h"
+#import "ChatViewController.h"
 
 @interface SearchClassViewController ()<
 UITableViewDataSource,
@@ -26,6 +27,8 @@ ZBarReaderDelegate>
     NSTimer * timer;
     
     ZBarReaderViewController *reader;
+    
+    UIImagePickerController *imagePickerController;
 }
 @end
 
@@ -46,6 +49,9 @@ ZBarReaderDelegate>
     // Do any additional setup after loading the view.
     
     self.titleLabel.text = @"查找班级";
+    
+    imagePickerController = [[UIImagePickerController alloc] init];
+    imagePickerController.delegate = self;
     
     searchClassTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, 237) style:UITableViewStylePlain];
     searchClassTableView.delegate = self;
@@ -175,25 +181,352 @@ ZBarReaderDelegate>
     else if(indexPath.row == 5)
     {
         //扫一扫
-        num = 0;
-        upOrdown = NO;
-        reader = [ZBarReaderViewController new];
-        reader.readerDelegate = self;
-        reader.readerView.frame = CGRectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        [self scanBtnAction];
+    }
+}
+
+#pragma mark - 扫一扫
+
+-(void)scanBtnAction
+{
+    num = 0;
+    upOrdown = NO;
+    
+    reader = [ZBarReaderViewController new];
+    reader.readerDelegate = self;
+    reader.readerView.torchMode = 0;
+    reader.readerView.frame = CGRectMake( 0, YSTART == 0?20:0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    reader.supportedOrientationsMask = ZBarOrientationMaskAll;
+    reader.showsZBarControls = NO;
+    [self setOverlayPickerView];
+    reader.scanCrop = CGRectMake(0.1, 0.2, 0.8, 0.8);//扫描的感应框
+    ZBarImageScanner * scanner = reader.scanner;
+    [scanner setSymbology:ZBAR_I25
+                   config:ZBAR_CFG_ENABLE
+                       to:0];
+    [self.navigationController pushViewController:reader animated:YES];
+    //    [self presentViewController:reader animated:YES completion:^{
+    //
+    //    }];
+}
+
+- (void)setOverlayPickerView
+{
+    //清除原有控件
+    
+    for (UIView *temp in [reader.view subviews])
+    {
+        if (temp.frame.size.height == 54)
+        {
+            [temp removeFromSuperview];
+        }
+        for (UIButton *button in [temp subviews])
+        {
+            if ([button isKindOfClass:[UIButton class]])
+            {
+                [button removeFromSuperview];
+            }
+        }
+        
+        for (UIToolbar *toolbar in [temp subviews])
+        {
+            
+            if ([toolbar isKindOfClass:[UIToolbar class]])
+            {
+                [toolbar setHidden:YES];
+                
+                [toolbar removeFromSuperview];
+            }
+        }
+    }
+    
+    CGFloat height = SCREEN_WIDTH-100;
+    
+    UIColor *viewColor = [UIColor blackColor];
+    
+    //最上部view
+    
+    UIView* upView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_WIDTH, (SCREEN_HEIGHT-height)/2-40)];
+    
+    upView.alpha = 0.3;
+    
+    upView.backgroundColor = viewColor;
+    
+    [reader.view addSubview:upView];
+    
+    //left,up
+    UIImageView *upLeftCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_1"]];
+    upLeftCorner.frame = CGRectMake(50, (SCREEN_HEIGHT-height)/2-40, 25, 25);
+    [reader.view addSubview:upLeftCorner];
+    
+    //right,up
+    UIImageView *upRightCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_2"]];
+    upRightCorner.frame = CGRectMake(SCREEN_WIDTH-50-25, (SCREEN_HEIGHT-height)/2-40, 25, 25);
+    [reader.view addSubview:upRightCorner];
+    
+    
+    //左侧的view
+    
+    UIView *leftView = [[UIView alloc] initWithFrame:CGRectMake(0, (SCREEN_HEIGHT-height)/2-40, 50, height)];
+    
+    leftView.alpha = 0.3;
+    
+    leftView.backgroundColor = viewColor;
+    
+    [reader.view addSubview:leftView];
+    
+    
+    //右侧的view
+    
+    UIView *rightView = [[UIView alloc] initWithFrame:CGRectMake(SCREEN_WIDTH-50, (SCREEN_HEIGHT-height)/2-40, 50, height)];
+    
+    rightView.alpha = 0.3;
+    
+    rightView.backgroundColor = viewColor;
+    
+    [reader.view addSubview:rightView];
+    
+    //left,down
+    UIImageView *downLeftCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_4"]];
+    downLeftCorner.frame = CGRectMake(50, (SCREEN_HEIGHT-height)/2+height-25-40, 25, 25);
+    [reader.view addSubview:downLeftCorner];
+    
+    //right,down
+    UIImageView *downRightCorner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_3"]];
+    downRightCorner.frame = CGRectMake(SCREEN_WIDTH-50-25, (SCREEN_HEIGHT-height)/2+height-25-40, 25, 25);
+    [reader.view addSubview:downRightCorner];
+    
+    
+    //底部view
+    
+    UIView * downView = [[UIView alloc] initWithFrame:CGRectMake(0, height+(SCREEN_HEIGHT-height)/2-40, SCREEN_WIDTH, (SCREEN_HEIGHT-height)/2+80)];
+    
+    downView.alpha = 0.3;
+    
+    downView.backgroundColor = viewColor;
+    
+    [reader.view addSubview:downView];
+    
+    
+    UILabel * label = [[UILabel alloc] initWithFrame:CGRectMake(70, (SCREEN_HEIGHT-height)/2+height+15-40, SCREEN_WIDTH-140, 50)];
+    label.text = @"请将[班级二维码]或\n[群聊二维码]置于方框内";
+    label.numberOfLines = 2;
+    label.lineBreakMode = NSLineBreakByCharWrapping;
+    label.textColor = [UIColor whiteColor];
+    label.textAlignment = 1;
+    label.backgroundColor = [UIColor clearColor];
+    [reader.view addSubview:label];
+    
+    UIImageView * image = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@""]];
+    image.frame = CGRectMake(20, (SCREEN_HEIGHT-height)/2-40, height, height);
+    [reader.view addSubview:image];
+    
+    
+    line = [[UIImageView alloc] initWithFrame:CGRectMake(30, 10, 220, 2)];
+    line.image = [UIImage imageNamed:@"qrline"];
+    [image addSubview:line];
+    //定时器，设定时间过1.5秒，
+    [timer invalidate];
+    timer = [NSTimer scheduledTimerWithTimeInterval:.03 target:self selector:@selector(animation1) userInfo:nil repeats:YES];
+    
+    UIView *_navigationBarView = [[UIView alloc] initWithFrame:CGRectMake(0, 0,
+                                                                          UI_SCREEN_WIDTH,
+                                                                          UI_NAVIGATION_BAR_HEIGHT)];
+    _navigationBarView.backgroundColor = [UIColor yellowColor];
+    [reader.view addSubview:_navigationBarView];
+    
+    UIImageView * _navigationBarBg = [[UIImageView alloc] init];
+    _navigationBarBg.backgroundColor = UIColorFromRGB(0xffffff);
+    _navigationBarBg.frame = CGRectMake(0, 0, UI_SCREEN_WIDTH, UI_NAVIGATION_BAR_HEIGHT);
+    _navigationBarBg.image = [UIImage imageNamed:@"nav_bar_bg"];
+    [_navigationBarView addSubview:_navigationBarBg];
+    
+    UILabel * _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(self.view.frame.size.width/2-90, YSTART + 6, 180, 36)];
+    _titleLabel.font = [UIFont fontWithName:@"Courier" size:19];
+    _titleLabel.text = @"扫一扫";
+    _titleLabel.backgroundColor = [UIColor clearColor];
+    _titleLabel.textColor = UIColorFromRGB(0x666464);
+    _titleLabel.textAlignment = NSTextAlignmentCenter;
+    [_navigationBarView addSubview:_titleLabel];
+    
+    
+    UIImageView *returnImageView = [[UIImageView alloc] initWithFrame:CGRectMake(11, YSTART +13, 11, 18)];
+    [returnImageView setImage:[UIImage imageNamed:@"icon_return"]];
+    [_navigationBarView addSubview:returnImageView];
+    
+    UIButton *_backButton = [[UIButton alloc] initWithFrame:CGRectMake(0, YSTART +2, 58 , NAV_RIGHT_BUTTON_HEIGHT)];
+    [_backButton setTitle:@"返回" forState:UIControlStateNormal];
+    [_backButton setBackgroundColor:[UIColor clearColor]];
+    [_backButton setTitleColor:UIColorFromRGB(0x727171) forState:UIControlStateNormal];
+    [_backButton addTarget:self action:@selector(unShowSelfViewController) forControlEvents:UIControlEventTouchUpInside];
+    _backButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentRight;
+    _backButton.titleLabel.font = [UIFont systemFontOfSize:16.5];
+    [_navigationBarView addSubview:_backButton];
+    
+    //用于取消操作的button
+    
+    UIButton *cancelButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    cancelButton.alpha = 0.6;
+    cancelButton.showsTouchWhenHighlighted = YES;
+    cancelButton.backgroundColor = [UIColor blackColor];
+    [cancelButton setFrame:CGRectMake(SCREEN_WIDTH/2, SCREEN_HEIGHT-40, SCREEN_WIDTH/2, 40)];
+    cancelButton.clipsToBounds = YES;
+    [cancelButton setImage:[UIImage imageNamed:@"flash"] forState:UIControlStateNormal];
+    [cancelButton addTarget:self action:@selector(light)forControlEvents:UIControlEventTouchUpInside];
+    [reader.view addSubview:cancelButton];
+    
+    //用于取消操作的button
+    UIButton *albumButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    albumButton.alpha = 0.6;
+    albumButton.backgroundColor = [UIColor blackColor];
+    [albumButton setFrame:CGRectMake(0, SCREEN_HEIGHT-40, SCREEN_WIDTH/2, 40)];
+    albumButton.showsTouchWhenHighlighted = YES;
+    [albumButton setImage:[UIImage imageNamed:@"album"] forState:UIControlStateNormal];
+    [albumButton addTarget:self action:@selector(selectImage) forControlEvents:UIControlEventTouchUpInside];
+    [reader.view addSubview:albumButton];
+}
+
+-(void)selectImage
+{
+    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary])
+    {
+        imagePickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+        [self.navigationController presentViewController:imagePickerController animated:YES completion:nil];
+    }
+}
+
+-(void)light
+{
+    if (reader.readerView.torchMode == 0)
+    {
+        reader.readerView.torchMode = 1;
+    }
+    else
+    {
         reader.readerView.torchMode = 0;
-        reader.supportedOrientationsMask = ZBarOrientationMaskAll;
-        reader.showsZBarControls = NO;
-        [self setOverlayPickerView];
-        ZBarImageScanner *scanner = reader.scanner;
-        [scanner setSymbology: ZBAR_I25
-                       config: ZBAR_CFG_ENABLE
-                           to: 0];
-        [self.navigationController pushViewController:reader animated:YES];
     }
 }
 
 
-- (void)setOverlayPickerView
+-(void)animation1
+{
+    if (upOrdown == NO) {
+        num ++;
+        line.frame = CGRectMake(30, 10+2*num, 220, 2);
+        if (2*num == SCREEN_WIDTH-120) {
+            upOrdown = YES;
+        }
+    }
+    else {
+        num --;
+        line.frame = CGRectMake(30, 10+2*num, 220, 2);
+        if (num == 0) {
+            upOrdown = NO;
+        }
+    }
+}
+
+
+- (void) imagePickerController: (UIImagePickerController*) picker
+ didFinishPickingMediaWithInfo: (NSDictionary*) info
+{
+    [imagePickerController dismissViewControllerAnimated:NO completion:nil];
+    
+    UIImage *image = [info objectForKey:@"UIImagePickerControllerOriginalImage"];
+    ZBarReaderController *readerController = [[ZBarReaderController alloc] init];
+    
+    id<NSFastEnumeration> results = [readerController scanImage:image.CGImage];
+    
+    ZBarSymbol *symbol = nil;
+    for(symbol in results)
+        break;
+    
+    DDLOG(@"%@",symbol.data);
+    NSString *resultStr = symbol.data;
+    [timer invalidate];
+    if ([resultStr rangeOfString:@";"].length > 0)
+    {
+        [self searchClass:[resultStr substringFromIndex:[resultStr rangeOfString:@";"].location+1]];
+    }
+    else if([resultStr rangeOfString:@"?"].length > 0 &&
+            [resultStr rangeOfString:@"="].length > 0)
+    {
+        NSRange range1 = [resultStr rangeOfString:@"?"];
+        NSRange range2 = [resultStr rangeOfString:@"="];
+        if (range1.length > 0 && range2.length > 0)
+        {
+            NSString *key = [resultStr substringWithRange:NSMakeRange(range1.location+1, range2.location-range1.location-1)];
+            NSString *value = [resultStr substringWithRange:NSMakeRange(range2.location+1, [resultStr length]-range2.location-1)];
+            DDLOG(@"key = %@  value = %@",key,value);
+            if([key isEqualToString:@"groupid"])
+            {
+                [self joinGroupChat:value];
+            }
+            else if([key isEqualToString:@"classid"])
+            {
+                [self searchClass:value];
+            }
+            else
+            {
+                [self.navigationController popViewControllerAnimated:NO];
+                [[UIApplication sharedApplication] openURL:[NSURL URLWithString:symbol.data]];
+            }
+        }
+    }
+    else
+    {
+        [self.navigationController popViewControllerAnimated:NO];
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:symbol.data]];
+    }
+    [self.navigationController popViewControllerAnimated:NO];
+}
+
+#pragma mark - 加入群聊
+
+-(void)joinGroupChat:(NSString *)groupID
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"g_id":groupID,
+                                                                      } API:JOINGROUPCHAR];
+        [request setCompletionBlock:^{
+            [Tools hideProgress:self.bgView];
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"searchclass responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                ChatViewController *chatVC = [[ChatViewController alloc] init];
+                chatVC.toID = groupID;
+                chatVC.isGroup = YES;
+                [self.navigationController pushViewController:chatVC animated:YES];
+            }
+            else
+            {
+                [self.navigationController popViewControllerAnimated:YES];
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+            
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools hideProgress:self.bgView];
+        }];
+        [Tools showProgress:self.bgView];
+        [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
+}
+
+
+/*- (void)setOverlayPickerView
 
 {
     
@@ -426,6 +759,7 @@ ZBarReaderDelegate>
     }
     [self.navigationController popViewControllerAnimated:NO];
 }
+ */
 
 -(void)unShowSelfViewController
 {

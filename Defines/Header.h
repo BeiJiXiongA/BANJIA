@@ -8,6 +8,8 @@
 //
 
 #import <QuartzCore/QuartzCore.h>
+#import <ShareSDK/ShareSDK.h>
+
 
 #import "Color.h"
 #import "Font.h"
@@ -18,6 +20,8 @@
 #import "CommonFunc.h"
 #import "MLEmojiLabel.h"
 #import "DefineNames.h"
+#import "ShareTools.h"
+#import "UserIconTools.h"
 
 #define FaceViewHeight  200
 

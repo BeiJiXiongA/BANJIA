@@ -222,7 +222,11 @@ extern NSString *CTSettingCopyMyPhoneNumber();
 {
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
     NSString *banjia_num = [ud objectForKey:BANJIANUM];
-    return banjia_num;
+    if (banjia_num)
+    {
+        return banjia_num;
+    }
+    return @"";
 }
 
 +(NSString *)pwd
@@ -357,7 +361,8 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     [postDataStr replaceCharactersInRange:NSMakeRange([postDataStr length]-1, 1) withString:@"}"];
     NSURL *url = [NSURL URLWithString:hostUrl];
     ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
-    [request setRequestHeaders:[[NSMutableDictionary alloc] initWithObjectsAndKeys:[Tools client_ver],@"current_version", nil]];
+    [request setRequestMethod:@"GET"];
+//    [request setRequestHeaders:[[NSMutableDictionary alloc] initWithObjectsAndKeys:[Tools client_ver],@"current_version", nil]];
     NSMutableData *postData = [NSMutableData dataWithData:[postDataStr dataUsingEncoding:NSUTF8StringEncoding]];
     if ([parameterDict count] >0)
     {
@@ -559,9 +564,6 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     UIGraphicsEndImageContext();
     
     // Return the new image.
-//    NSData *imageData = UIImageJPEGRepresentation(newImage, 0.8);
-//    
-//    newImage = [UIImage imageWithData:imageData];
     
     return newImage;
 }

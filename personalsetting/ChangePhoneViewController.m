@@ -27,7 +27,7 @@
 @end
 
 @implementation ChangePhoneViewController
-@synthesize changePhoneDel;
+@synthesize changePhoneDel,createSchool;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -265,9 +265,12 @@
                 [Tools showTips:@"绑定成功,密码为手机号后6位，请牢记。" toView:self.bgView];
                 [[NSUserDefaults standardUserDefaults] setObject:phoneNumTextfield.text forKey:PHONENUM];
                 [[NSUserDefaults standardUserDefaults] synchronize];
-                if ([self.changePhoneDel respondsToSelector:@selector(changePhoneNum:)])
+                if (!createSchool)
                 {
-                    [self.changePhoneDel changePhoneNum:YES];
+                    if ([self.changePhoneDel respondsToSelector:@selector(changePhoneNum:)])
+                    {
+                        [self.changePhoneDel changePhoneNum:YES];
+                    }
                 }
                 [self.navigationController popViewControllerAnimated:YES];
             }

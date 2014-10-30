@@ -501,7 +501,6 @@ int count = 0;
             if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
             {
                 sysImagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
-                isSelectPhoto = YES;
                 [self presentViewController:sysImagePickerController animated:YES completion:nil];
             }
             else
@@ -514,7 +513,7 @@ int count = 0;
 
 -(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
-    [sysImagePickerController dismissViewControllerAnimated:YES completion:nil];
+    [Tools showProgress:picker.view];
     UIImageWriteToSavedPhotosAlbum([info objectForKey:@"UIImagePickerControllerOriginalImage"], self, @selector(image:didFinishSavingWithError:contextInfo:), NULL);
 }
 - (void)image:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo
@@ -698,16 +697,20 @@ int count = 0;
         for (int i=0; i<[alreadySelectAssets count]; ++i)
         {
             ALAsset *item = [alreadySelectAssets objectAtIndex:i];
-            UIImage *normarlImage = [ImageTools getImageFromALAssesst:item];
-            [normalPhotosArray addObject:normarlImage];
+            
             UIImageView *imageView = [[UIImageView alloc] init];
             imageView.layer.contentsGravity = kCAGravityResizeAspectFill;
             imageView.frame = CGRectMake(10+(imageW+5)*(i%4), 11.5+(imageH+5)*(i/4), imageW, imageH);
-            [imageView setImage:normarlImage];
             imageView.tag = ImageTag + i;
             imageView.layer.cornerRadius = 5;
             imageView.clipsToBounds = YES;
             [imageScrollView addSubview:imageView];
+
+            [ImageTools setImageView:imageView withAsset:item andDefault:@"3100"];
+            
+            UIImage *normalImage = [ImageTools getImageFromALAssesst:item];
+            [normalPhotosArray addObject:normalImage];
+//            [imageView setImage:normalImage];
             
             UIButton *deleteButton = [UIButton buttonWithType:UIButtonTypeCustom];
             deleteButton.frame = CGRectMake(10+(imageW+5)*(i%4), 5+(imageH+5)*(i/4), imageW, 20);
@@ -725,7 +728,7 @@ int count = 0;
                 imageScrollView.frame = CGRectMake(9.5, 7.5+contentImageView.frame.size.height+contentImageView.frame.origin.y, SCREEN_WIDTH-19, (10+(imageH+5)*3));
             }
             
-            imageTipLabel.frame = CGRectMake(19+(imageW+5)*([normalPhotosArray count]%4), 11.5+(imageH+5)*([normalPhotosArray count]/4)+imageScrollView.frame.origin.y, imageW, imageH);
+            imageTipLabel.frame = CGRectMake(19+(imageW+5)*([alreadySelectAssets count]%4), 11.5+(imageH+5)*([alreadySelectAssets count]/4)+imageScrollView.frame.origin.y, imageW, imageH);
             addImageButton.frame = CGRectMake(imageTipLabel.frame.origin.x+imageTipLabel.frame.size.width + 10, imageTipLabel.frame.origin.y, 80, imageH);
             lateImageView.frame = CGRectMake(9.5, imageScrollView.frame.size.height+imageScrollView.frame.origin.y+10.5, SCREEN_WIDTH-19, lateImageHeight);
             latelyLabel.frame = CGRectMake(lateImageView.frame.origin.x+10, lateImageView.frame.origin.y+6, 17*[latelyLabel.text length], 20);
@@ -740,7 +743,7 @@ int count = 0;
     {
         addImageButton.hidden = NO;
         [UIView animateWithDuration:0.2 animations:^{
-            imageTipLabel.frame = CGRectMake(19+(imageW+5)*([normalPhotosArray count]%4), 11.5+(imageH+5)*([normalPhotosArray count]/4)+imageScrollView.frame.origin.y, imageW, imageH);
+            imageTipLabel.frame = CGRectMake(19+(imageW+5)*([alreadySelectAssets count]%4), 11.5+(imageH+5)*([alreadySelectAssets count]/4)+imageScrollView.frame.origin.y, imageW, imageH);
             addImageButton.frame = CGRectMake(imageTipLabel.frame.origin.x+imageTipLabel.frame.size.width + 10, imageTipLabel.frame.origin.y, 80, imageH);
             lateImageView.frame = CGRectMake(9.5, imageScrollView.frame.size.height+imageScrollView.frame.origin.y+10.5, SCREEN_WIDTH-19, lateImageHeight);
             latelyLabel.frame = CGRectMake(lateImageView.frame.origin.x+10, lateImageView.frame.origin.y+6, 17*[latelyLabel.text length], 20);
@@ -1123,16 +1126,18 @@ int count = 0;
 
 - (void)agImagePickerController:(AGImagePickerController *)picker didFinishPickingMediaWithInfo:(NSArray *)info
 {
-    [self dismissViewControllerAnimated:YES completion:^{
-        DDLOG(@"album info %@",info);
-    }];
     [alreadySelectAssets removeAllObjects];
     for (int i= 0; i<[info count]; i++)
     {
         ALAsset *asset = [info objectAtIndex:i];
+        DDLOG(@"%@",asset);
         [alreadySelectAssets addObject:asset];
     }
     [self reloadImages];
+    
+    [self dismissViewControllerAnimated:YES completion:^{
+        DDLOG(@"album info %@",info);
+    }];
 }
 
 -(void)handleSelected:(NSNotification *)notification
@@ -1189,6 +1194,9 @@ int count = 0;
              {
                  [alreadySelectAssets addObject:result];
                  dispatch_async(dispatch_get_main_queue(), ^{
+                     [sysImagePickerController dismissViewControllerAnimated:YES completion:^{
+                         [Tools hideProgress:sysImagePickerController.view];
+                     }];
                      [self reloadImages];
                  });
              }

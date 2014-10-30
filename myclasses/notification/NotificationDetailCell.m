@@ -10,7 +10,7 @@
 #import "Header.h"
 
 @implementation NotificationDetailCell
-@synthesize headerImageView,nameLabel,contactButton,button2,textField,numLabel;
+@synthesize headerImageView,nameLabel,contactButton,button2,textField,numLabel,lineImageView;
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
@@ -48,6 +48,9 @@
         textField.clipsToBounds = YES;
         textField.backgroundColor = [UIColor whiteColor];
         [self.contentView addSubview:textField];
+        
+        lineImageView = [[UIImageView alloc] init];
+        [self.contentView addSubview:lineImageView];
         
     }
     return self;

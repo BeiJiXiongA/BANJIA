@@ -427,7 +427,6 @@ UIActionSheetDelegate>
                 DDLOG(@"read success!");
                 
                 [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSNUMBER object:nil];
-                
                 if ([self.readnotificationDetaildel respondsToSelector:@selector(readNotificationDetail:deleted:)])
                 {
                     [self.readnotificationDetaildel readNotificationDetail:noticeDict deleted:NO];

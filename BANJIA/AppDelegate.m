@@ -127,9 +127,14 @@
         DDLOG(@"manager start failed!");
     }
     
+    
+    //友盟
     [MobClick startWithAppkey:@"53c5f0ec56240be9ed07306e" reportPolicy:SEND_INTERVAL channelId:@"123"];
     NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
     [MobClick setAppVersion:version];
+    
+    //微信
+    [WXApi registerApp:@"wx480bf9924a52975f"];
     
     if (![[NSUserDefaults standardUserDefaults] objectForKey:@"first"])
     {
@@ -520,12 +525,11 @@
                     [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",[[responseDict objectForKey:@"data"] integerValue]] forKey:NewChatMsgNum];
                     [[NSUserDefaults standardUserDefaults] synchronize];
                     
+                    [[NSNotificationCenter defaultCenter] postNotificationName:RELOAD_SIDE_MENU object:nil];
+                    
                     if([[responseDict objectForKey:@"data"] integerValue] > 0)
                     {
-                        [[NSNotificationCenter defaultCenter] postNotificationName:UPDATE_MSG_LIST object:nil];
                         [[NSNotificationCenter defaultCenter] postNotificationName:RELOAD_MENU_BUTTON object:nil];
-                        DDLOG(@"view type %@",[[NSUserDefaults standardUserDefaults] objectForKey:VIEW_TYPE]);
-                        [[NSNotificationCenter defaultCenter] postNotificationName:GET_UNREAD_CHATLOG object:nil];
                         if ([[NSUserDefaults standardUserDefaults] objectForKey:VIEW_TYPE] &&
                             [[[NSUserDefaults standardUserDefaults] objectForKey:VIEW_TYPE] isEqualToString:NOT_AT_MSGLIST])
                         {
@@ -538,8 +542,6 @@
                                 [sideMenuViewController.buttonTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:2 inSection:0] animated:YES scrollPosition:UITableViewScrollPositionNone];
                                 JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:msgNav menuController:sideMenuViewController];
                                 self.window.rootViewController = sideMenu;
-                                
-                                
                             }
                         }
                     }
@@ -614,12 +616,96 @@
 
 - (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url
 {
+//    return  [WXApi handleOpenURL:url delegate:self];
+    if ([[url absoluteString] rangeOfString:@"wx"].length > 0 && [[url absoluteString] rangeOfString:@"state=123"].length > 0)
+    {
+        return [WXApi handleOpenURL:url delegate:self];
+    }
     return [ShareSDK handleOpenURL:url wxDelegate:self];
 }
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation{
+    
+    DDLOG(@"url %@",url);
+   
+    if ([[url absoluteString] rangeOfString:@"wx"].length > 0 && [[url absoluteString] rangeOfString:@"state=123"].length > 0)
+    {
+        NSString *urlStr = [url absoluteString];
+        NSRange range1 = [urlStr rangeOfString:@":"];
+        NSRange range2 = [urlStr rangeOfString:@"code="];
+        NSRange range3 = [urlStr rangeOfString:@"&"];
+        DDLOG(@"appid=%@ code=%@",[urlStr substringToIndex:range1.location],
+              [urlStr substringWithRange:NSMakeRange(range2.location+range2.length, range3.location-range2.location-range2.length)]);
+        
+        NSString *appid = [urlStr substringToIndex:range1.location];
+        NSString *code = [urlStr substringWithRange:NSMakeRange(range2.location+range2.length, range3.location-range2.location-range2.length)];
+        [self getTokenWithAppID:appid andCode:code];
+        return  [WXApi handleOpenURL:url delegate:self];
+    }
     return [ShareSDK handleOpenURL:url sourceApplication:sourceApplication annotation:annotation wxDelegate:self];
 }
+-(void) onResp:(BaseResp*)resp
+{
+    
+}
 
+-(void)getTokenWithAppID:(NSString *)appid andCode:(NSString *)code
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://api.weixin.qq.com/sns/oauth2/access_token?appid=%@&secret=6e897dc02cf9fe9727c0327574af0632&code=%@&grant_type=authorization_code",appid,code]]];
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"get weichat responsedict %@",responseDict);
+            if ([responseDict isKindOfClass:[NSDictionary class]])
+            {
+                NSString *openId = [responseDict objectForKey:@"openid"];
+                NSString *accessToken = [responseDict objectForKey:@"access_token"];
+                if (openId && accessToken)
+                {
+                    [self getWeiChatUserInfoWithToken:accessToken andOpenID:openId];
+                }
+            }
+        }];
+        
+        [request setFailedBlock:^{
+        }];
+        [request startAsynchronous];
+    }
+}
+
+-(void)getWeiChatUserInfoWithToken:(NSString *)access_token andOpenID:(NSString *)openId
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://api.weixin.qq.com/sns/userinfo?access_token=%@&openid=%@",access_token,openId]]];
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"get weichat userinfo responsedict %@",responseString);
+            if ([responseDict isKindOfClass:[NSDictionary class]])
+            {
+                NSString *nickName = [responseDict objectForKey:@"nickname"];
+                NSString *userid = [responseDict objectForKey:@"unionid"];
+                NSString *sex = [NSString stringWithFormat:@"%d",[[responseDict objectForKey:@"sex"] intValue]];
+                NSString *headerUrl = [responseDict objectForKey:@"headimgurl"];
+                DDLOG(@"   %@",nickName);
+                if ([self.weiChatDel respondsToSelector:@selector(loginWithWeiChatId:andHeaderIcon:andUserName:andSex:)])
+                {
+                    [self.weiChatDel loginWithWeiChatId:userid andHeaderIcon:headerUrl andUserName:nickName andSex:sex];
+                }
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+        }];
+        [request startAsynchronous];
+    }
+}
 
 -(void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
 {
@@ -648,10 +734,11 @@
     
     DDLOG(@"push info %@",userInfo);
     
+//    DDLOG(@"+++++++%@",NSStringFromClass([self.window.rootViewController class]));
+    
     if ([[Tools user_id] length] > 0)
     {
-        [self getNewChat];
-        [self getNewClass];
+
         if ([[userInfo objectForKey:@"type"] isEqualToString:@"chat"])
         {
             NSMutableDictionary *chatDict = [[NSMutableDictionary alloc] initWithCapacity:0];
@@ -720,11 +807,28 @@
                 if ([_db insertRecord:chatDict andTableName:CHATTABLE])
                 {
                     
-                    if ([self.chatDelegate respondsToSelector:@selector(dealNewChatMsg:)]) //1412832211
-                    {
-                        [self.chatDelegate dealNewChatMsg:chatDict];
-                    }
+//                    NSString *topViewControllerName = NSStringFromClass([[((KKNavigationController *)[((JDSideMenu *)[UIApplication sharedApplication].keyWindow.rootViewController) contentController]) topViewController]class]);
+//                    DDLOG(@"topviewcontroller %@",topViewControllerName);
                     
+                    NSString *topViewControllerName = [self topViewControllerName];
+                    
+                    DDLOG(@"topviewcontroller %@",topViewControllerName);
+                    
+                    if ([topViewControllerName isEqualToString:@"ChatViewController"])
+                    {
+                        if ([self.chatDelegate respondsToSelector:@selector(dealNewChatMsg:)]) //1412832211
+                        {
+                            [self.chatDelegate dealNewChatMsg:chatDict];
+                        }
+                    }
+                    else if([topViewControllerName isEqualToString:@"MessageViewController"])
+                    {
+                        [[NSNotificationCenter defaultCenter] postNotificationName:UPDATE_MSG_LIST object:nil];
+                    }
+                    else
+                    {
+                        [self getNewChat];
+                    }
                     
                     if ([[NSUserDefaults standardUserDefaults] objectForKey:VIEW_TYPE] &&
                           [[[NSUserDefaults standardUserDefaults] objectForKey:VIEW_TYPE] isEqualToString:NOT_AT_MSGLIST])
@@ -740,8 +844,7 @@
                             self.window.rootViewController = sideMenu;
                         }
                     }
-                    [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECHATSNUMBER object:nil];
-                    [[NSNotificationCenter defaultCenter] postNotificationName:RECEIVENEWMSG object:chatDict];
+                    
                 }
             }
         }
@@ -852,6 +955,25 @@
             [Tools showAlertView:[[userInfo objectForKey:@"aps"] objectForKey:@"alert"] delegateViewController:nil];
         }
     }
+}
+
+-(NSString *)topViewControllerName
+{
+    UIViewController *topViewController = [UIApplication sharedApplication].keyWindow.rootViewController;
+    while (topViewController.presentedViewController)
+    {
+        topViewController = topViewController.presentedViewController;
+    }
+    NSString *topViewControllerName = @"";
+    if ([NSStringFromClass([topViewController class]) isEqualToString:@"KKNavigationController"])
+    {
+        topViewControllerName = NSStringFromClass([((KKNavigationController *)topViewController).visibleViewController class]);
+    }
+    else if([NSStringFromClass([topViewController class]) isEqualToString:@"JDSideMenu"])
+    {
+        topViewControllerName = NSStringFromClass([((KKNavigationController *)[((JDSideMenu *)topViewController) contentController]).visibleViewController class]);
+    }
+    return topViewControllerName;
 }
 
 #pragma mark - tapstip
@@ -969,10 +1091,6 @@
     
     
     [[NSNotificationCenter defaultCenter] postNotificationName:UIKeyboardWillHideNotification object:nil];
-    [[UIApplication sharedApplication]setKeepAliveTimeout:600
-                                                  handler:^{
-                                                      DDLOG(@"backgroud++++");
-                                                  }];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application
@@ -984,6 +1102,16 @@
     {
         [self getNewChat];
         [self getNewClass];
+    }
+    if ([[Tools user_id] length] > 0)
+    {
+        NSString *topViewControllerName = [self topViewControllerName];
+        DDLOG(@"topviewcontroller %@",topViewControllerName);
+        
+        if ([topViewControllerName isEqualToString:@"ChatViewController"])
+        {
+            [[NSNotificationCenter defaultCenter] postNotificationName:GET_UNREAD_CHATLOG object:nil];
+        }
     }
 }
 

@@ -114,7 +114,7 @@ UITextFieldDelegate>
     logoImageView.backgroundColor = [UIColor clearColor];
     [headerView addSubview:logoImageView];
     
-    UIImage *bancaImage = [UIImage imageNamed:@"icon"];
+    UIImage *bancaImage = [UIImage imageNamed:@"eraser"];
     UIImageView *bancaImageView = [[UIImageView alloc] init];
     bancaImageView.image = bancaImage;
     bancaImageView.frame = CGRectMake(SCREEN_WIDTH-80, logoImageHeight-bancaImage.size.height, bancaImage.size.width,bancaImage.size.height);
@@ -355,6 +355,7 @@ UITextFieldDelegate>
                 homeViewController = [[HomeViewController alloc] init];
                 KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:homeViewController];
                 JDSideMenu *sideMenu = [[JDSideMenu alloc] initWithContentController:homeNav menuController:sideMenuViewController];
+//                [UIApplication sharedApplication].keyWindow.rootViewController = sideMenu;
                 [self.navigationController presentViewController:sideMenu animated:YES completion:nil];
             }
             else

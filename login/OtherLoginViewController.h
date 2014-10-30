@@ -8,6 +8,6 @@
 
 #import "XDContentViewController.h"
 
-@interface OtherLoginViewController : XDContentViewController
+@interface OtherLoginViewController : XDContentViewController<WXApiDelegate>
 
 @end

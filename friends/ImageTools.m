@@ -197,7 +197,39 @@
     
     UIImage *image = [UIImage imageWithCGImage:imageRef scale:1 orientation:(int)assetPresentation.orientation];
     image = [self getNormalImageFromImage:image];
+    
+//    CGImageRelease(imageRef);
     return image;
 }
 
++(void)setImageView:(UIImageView *)imageView withAsset:(ALAsset *)asset andDefault:(NSString *)defaultName
+{
+    [imageView setImage:[UIImage imageNamed:defaultName]];
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        ALAssetRepresentation *assetPresentation = [asset defaultRepresentation];
+        
+        CGImageRef imageRef = [assetPresentation fullResolutionImage];
+        
+        UIImage *image = [UIImage imageWithCGImage:imageRef scale:1 orientation:(int)assetPresentation.orientation];
+        image = [self getNormalImageFromImage:image];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [imageView setImage:image];
+        });
+    });
+}
+
+
+//+ (UIImage *)shrinkImage:(UIImage *)orignal andSize:(CGSize) size
+//{
+//    CGFloat scale=[UIScreen mainScreen].scale;
+//    CGColorSpaceRef colorSpace=CGColorSpaceCreateDeviceRGB();
+//    CGContextRef context=CGBitmapContextCreate(NULL, size.width *scale,size.height*scale, 8, 0, colorSpace, kCGImageAlphaPremultipliedFirst);
+//    CGContextDrawImage(context, CGRectMake(0, 0, size.width*scale, size.height*scale), orignal.CGImage);
+//    CGImageRef shrunken=CGBitmapContextCreateImage(context);
+//    UIImage *final=[UIImage imageWithCGImage:shrunken];
+//    CGContextRelease(context);
+//    CGImageRelease(shrunken);
+//    return  final;
+//}
 @end

@@ -1378,528 +1378,57 @@ NameButtonDel>
 {
     DDLOG(@"waittransdict %@",waitTransmitDict);
     diaryID = [waitTransmitDict objectForKey:@"_id"];
+    
+    NSString *content;
+    if ([waitTransmitDict objectForKey:@"content"])
+    {
+        if ([[waitTransmitDict objectForKey:@"content"] length] > 0)
+        {
+            content = [waitTransmitDict objectForKey:@"content"];
+        }
+    }
+    
+    
+    NSString *imagePath;
+    if ([waitTransmitDict objectForKey:@"img"])
+    {
+        NSArray *imageTmpArray = [waitTransmitDict objectForKey:@"img"];
+        if ([imageTmpArray count] > 0)
+        {
+            imagePath = [NSString stringWithFormat:@"%@%@@150w",IMAGEURL,[[waitTransmitDict objectForKey:@"img"] firstObject]];
+        }
+    }
+    content = [content length]>0?content:ShareContent;
+    NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
+    id<ISSCAttachment> attchment= imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath];
+    NSString *url = ShareUrl;
+    ShareType shareType;
     switch (buttonIndex)
     {
         case 0:
-            [self shareToSinaWeiboClickHandler:nil];
+            shareType = ShareTypeSinaWeibo;
             break;
         case 1:
-            [self shareToQQSpaceClickHandler:nil];
+            shareType = ShareTypeQQSpace;
             break;
         case 2:
-            [self shareToTencentWeiboClickHandler:nil];
+            shareType = ShareTypeTencentWeibo;
             break;
         case 3:
-            [self shareToQQFriendClickHandler:nil];
+            shareType = ShareTypeQQ;
             break;
         case 4:
-            [self shareToWeixinTimelineClickHandler:nil];
+            shareType = ShareTypeWeixiTimeline;
             break;
         case 5:
-            [self shareToRenRenClickHandler:nil];
+            shareType = ShareTypeRenren;
             break;
         default:
             break;
     }
+    ShareTools *shareTools = [[ShareTools alloc] init];
+    [shareTools shareTo:shareType andShareContent:content andImage:attchment andMediaType:SSPublishContentMediaTypeNews description:content andUrl:url];
 }
-
-/**
- *	@brief	分享到QQ空间
- *
- *	@param 	sender 	事件对象
- */
-- (void)shareToQQSpaceClickHandler:(UIButton *)sender
-{
-    NSString *content;
-    DDLOG(@"waittransdict QQSpace %@",waitTransmitDict);
-    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"])
-    {
-        if ([[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"] length] > 0)
-        {
-            content = [[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"];
-        }
-    }
-    
-    
-    NSString *imagePath;
-    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"])
-    {
-        if ([[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] count] > 0)
-        {
-            imagePath = [NSString stringWithFormat:@"%@%@@150w",IMAGEURL,[[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] firstObject]];
-        }
-    }
-    
-    //创建分享内容
-//    NSString *imagePath = [[NSBundle mainBundle] pathForResource:IMAGE_NAME ofType:IMAGE_EXT];
-    
-    NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
-    id<ISSContent> publishContent = [ShareSDK content:content
-                                       defaultContent:@""
-                                                image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
-                                                title:@"班家"
-                                                  url:ShareUrl
-                                          description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
-                                            mediaType:SSPublishContentMediaTypeNews];
-    
-    //创建弹出菜单容器
-    id<ISSContainer> container = [ShareSDK container];
-    [container setIPadContainerWithView:sender arrowDirect:UIPopoverArrowDirectionUp];
-    
-    id<ISSAuthOptions> authOptions = [ShareSDK authOptionsWithAutoAuth:YES
-                                                         allowCallback:YES
-                                                         authViewStyle:SSAuthViewStyleFullScreenPopup
-                                                          viewDelegate:nil
-                                               authManagerViewDelegate:nil];
-    
-    //在授权页面中添加关注官方微博
-    [authOptions setFollowAccounts:[NSDictionary dictionaryWithObjectsAndKeys:
-                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
-                                    SHARE_TYPE_NUMBER(ShareTypeSinaWeibo),
-                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
-                                    SHARE_TYPE_NUMBER(ShareTypeTencentWeibo),
-                                    nil]];
-    
-    //显示分享菜单
-    [ShareSDK showShareViewWithType:ShareTypeQQSpace
-                          container:container
-                            content:publishContent
-                      statusBarTips:YES
-                        authOptions:authOptions
-                       shareOptions:[ShareSDK defaultShareOptionsWithTitle:nil
-                                                           oneKeyShareList:[NSArray defaultOneKeyShareList]
-                                                            qqButtonHidden:NO
-                                                     wxSessionButtonHidden:NO
-                                                    wxTimelineButtonHidden:NO
-                                                      showKeyboardOnAppear:NO
-                                                         shareViewDelegate:nil
-                                                       friendsViewDelegate:nil
-                                                     picViewerViewDelegate:nil]
-                             result:^(ShareType type, SSResponseState state, id<ISSPlatformShareInfo> statusInfo, id<ICMErrorInfo> error, BOOL end) {
-                                 [self backInput];
-                                 if (state == SSPublishContentStateSuccess)
-                                 {
-                                     [self backInput];
-                                     [DealJiFen dealJiFenWithID:diaryID];
-                                     NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
-                                 }
-                                 else if (state == SSPublishContentStateFail)
-                                 {
-                                     NSLog(NSLocalizedString(@"TEXT_SHARE_FAI", @"发布失败!error code == %d, error code == %@"), [error errorCode], [error errorDescription]);
-                                 }
-                             }];
-}
-
-/**
- *	@brief	分享到新浪微博
- *
- *	@param 	sender 	事件对象
- */
-- (void)shareToSinaWeiboClickHandler:(UIButton *)sender
-{
-    NSString *content;
-    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"])
-    {
-        if ([[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"] length] > 0)
-        {
-            content = [NSString stringWithFormat:@"%@%@",[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"],ShareUrl];
-        }
-    }
-    
-    
-    NSString *imagePath;
-    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"])
-    {
-        if ([[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] count] > 0)
-        {
-            imagePath = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] firstObject]];
-        }
-    }
-
-    //创建分享内容[ShareSDK imageWithUrl:imagePath]
-    
-     NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
-    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
-                                       defaultContent:@""
-                                                image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
-                                                title:@"班家"
-                                                  url:ShareUrl
-                                          description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
-                                            mediaType:SSPublishContentMediaTypeNews];
-    
-    //创建弹出菜单容器
-    id<ISSContainer> container = [ShareSDK container];
-    [container setIPadContainerWithView:sender arrowDirect:UIPopoverArrowDirectionUp];
-    [container setIPhoneContainerWithViewController:self];
-    
-    id<ISSAuthOptions> authOptions = [ShareSDK authOptionsWithAutoAuth:YES
-                                                         allowCallback:YES
-                                                         authViewStyle:SSAuthViewStyleFullScreenPopup
-                                                          viewDelegate:nil
-                                               authManagerViewDelegate:nil];
-    
-    //在授权页面中添加关注官方微博
-    [authOptions setFollowAccounts:[NSDictionary dictionaryWithObjectsAndKeys:
-                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
-                                    SHARE_TYPE_NUMBER(ShareTypeSinaWeibo),
-                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
-                                    SHARE_TYPE_NUMBER(ShareTypeTencentWeibo),
-                                    nil]];
-    
-    //显示分享菜单
-    [ShareSDK showShareViewWithType:ShareTypeSinaWeibo
-                          container:container
-                            content:publishContent
-                      statusBarTips:YES
-                        authOptions:authOptions
-                       shareOptions:[ShareSDK defaultShareOptionsWithTitle:nil
-                                                           oneKeyShareList:nil
-                                                            qqButtonHidden:NO
-                                                     wxSessionButtonHidden:NO
-                                                    wxTimelineButtonHidden:NO
-                                                      showKeyboardOnAppear:NO
-                                                         shareViewDelegate:nil                                                       friendsViewDelegate:nil
-                                                     picViewerViewDelegate:nil]
-                             result:^(ShareType type, SSResponseState state, id<ISSPlatformShareInfo> statusInfo, id<ICMErrorInfo> error, BOOL end) {
-                                 [self backInput];
-                                 if (state == SSPublishContentStateSuccess)
-                                 {
-                                     [self backInput];
-                                     [DealJiFen dealJiFenWithID:diaryID];
-                                     NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
-                                 }
-                                 else if (state == SSPublishContentStateFail)
-                                 {
-                                     NSLog(NSLocalizedString(@"TEXT_SHARE_FAI", @"发布失败!error code == %d, error code == %@"), [error errorCode], [error errorDescription]);
-                                 }
-                             }];
-}
-
-/**
- *	@brief	分享到腾讯微博
- *
- *	@param 	sender 	事件对象
- */
-- (void)shareToTencentWeiboClickHandler:(UIButton *)sender
-{
-    
-    NSString *content;
-    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"])
-    {
-        if ([[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"] length] > 0)
-        {
-            content = [NSString stringWithFormat:@"%@%@",[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"],ShareUrl];
-        }
-    }
-    
-    
-    NSString *imagePath;
-    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"])
-    {
-        if ([[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] count] > 0)
-        {
-            imagePath = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] firstObject]];
-        }
-    }
-    NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
-    //创建分享内容[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
-    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
-                                       defaultContent:@""
-                                                image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
-                                                title:@"班家"
-                                                  url:ShareUrl
-                                          description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
-                                            mediaType:SSPublishContentMediaTypeNews];
-    
-    //创建弹出菜单容器
-    id<ISSContainer> container = [ShareSDK container];
-    [container setIPadContainerWithView:sender arrowDirect:UIPopoverArrowDirectionUp];
-    
-    id<ISSAuthOptions> authOptions = [ShareSDK authOptionsWithAutoAuth:YES
-                                                         allowCallback:YES
-                                                         authViewStyle:SSAuthViewStyleFullScreenPopup
-                                                          viewDelegate:nil
-                                               authManagerViewDelegate:nil];
-    
-    //在授权页面中添加关注官方微博
-    [authOptions setFollowAccounts:[NSDictionary dictionaryWithObjectsAndKeys:
-                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
-                                    SHARE_TYPE_NUMBER(ShareTypeSinaWeibo),
-                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
-                                    SHARE_TYPE_NUMBER(ShareTypeTencentWeibo),
-                                    nil]];
-    
-    //显示分享菜单
-    [ShareSDK showShareViewWithType:ShareTypeTencentWeibo
-                          container:container
-                            content:publishContent
-                      statusBarTips:YES
-                        authOptions:authOptions
-                       shareOptions:[ShareSDK defaultShareOptionsWithTitle:nil
-                                                           oneKeyShareList:nil
-                                                            qqButtonHidden:NO
-                                                     wxSessionButtonHidden:NO
-                                                    wxTimelineButtonHidden:NO
-                                                      showKeyboardOnAppear:NO
-                                                         shareViewDelegate:nil
-                                                       friendsViewDelegate:nil
-                                                     picViewerViewDelegate:nil]
-                             result:^(ShareType type, SSResponseState state, id<ISSPlatformShareInfo> statusInfo, id<ICMErrorInfo> error, BOOL end) {
-                                 [self backInput];
-                                 if (state == SSPublishContentStateSuccess)
-                                 {
-                                     [self backInput];
-                                     [DealJiFen dealJiFenWithID:diaryID];
-                                     NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
-                                 }
-                                 else if (state == SSPublishContentStateFail)
-                                 {
-                                     NSLog(NSLocalizedString(@"TEXT_SHARE_FAI", @"发布失败!error code == %d, error code == %@") , [error errorCode], [error errorDescription]);
-                                 }
-                             }];
-}
-/**
- *	@brief	分享给QQ好友
- *
- *	@param 	sender 	事件对象
- */
-- (void)shareToQQFriendClickHandler:(UIButton *)sender
-{
-    NSString *content;
-    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"])
-    {
-        if ([[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"] length] > 0)
-        {
-            content = [[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"];
-        }
-    }
-    
-    
-    NSString *imagePath;
-    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"])
-    {
-        if ([[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] count] > 0)
-        {
-            imagePath = [NSString stringWithFormat:@"%@%@@150w",IMAGEURL,[[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] firstObject]];
-        }
-    }
-    //创建分享内容
-    NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
-    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
-                                       defaultContent:@""
-                                                image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
-                                                title:@"班家"
-                                                  url:ShareUrl
-                                          description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
-                                            mediaType:SSPublishContentMediaTypeNews];
-    
-    id<ISSAuthOptions> authOptions = [ShareSDK authOptionsWithAutoAuth:YES
-                                                         allowCallback:YES
-                                                         authViewStyle:SSAuthViewStyleFullScreenPopup
-                                                          viewDelegate:nil
-                                               authManagerViewDelegate:nil];
-    
-    //在授权页面中添加关注官方微博
-    [authOptions setFollowAccounts:[NSDictionary dictionaryWithObjectsAndKeys:
-                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
-                                    SHARE_TYPE_NUMBER(ShareTypeSinaWeibo),
-                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
-                                    SHARE_TYPE_NUMBER(ShareTypeTencentWeibo),
-                                    nil]];
-    
-    //显示分享菜单
-    [ShareSDK showShareViewWithType:ShareTypeQQ
-                          container:nil
-                            content:publishContent
-                      statusBarTips:YES
-                        authOptions:authOptions
-                       shareOptions:[ShareSDK defaultShareOptionsWithTitle:nil
-                                                           oneKeyShareList:[NSArray defaultOneKeyShareList]
-                                                            qqButtonHidden:NO
-                                                     wxSessionButtonHidden:NO
-                                                    wxTimelineButtonHidden:NO
-                                                      showKeyboardOnAppear:NO
-                                                         shareViewDelegate:nil
-                                                       friendsViewDelegate:nil
-                                                     picViewerViewDelegate:nil]
-                             result:^(ShareType type, SSResponseState state, id<ISSPlatformShareInfo> statusInfo, id<ICMErrorInfo> error, BOOL end) {
-                                 [self backInput];
-                                 if (state == SSPublishContentStateSuccess)
-                                 {
-                                     [self backInput];
-                                     [DealJiFen dealJiFenWithID:diaryID];
-                                     NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
-                                 }
-                                 else if (state == SSPublishContentStateFail)
-                                 {
-                                     NSLog(NSLocalizedString(@"TEXT_SHARE_FAI", @"发布失败!error code == %d, error code == %@"), [error errorCode], [error errorDescription]);
-                                 }
-                             }];
-}
-
-/**
- *	@brief	分享给微信朋友圈
- *
- *	@param 	sender 	事件对象
- */
-- (void)shareToWeixinTimelineClickHandler:(UIButton *)sender
-{
-    NSString *content;
-    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"])
-    {
-        if ([[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"] length] > 0)
-        {
-            content = [[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"];
-        }
-    }
-    
-    
-    NSString *imagePath;
-    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"])
-    {
-        if ([[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] count] > 0)
-        {
-            imagePath = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] firstObject]];
-        }
-    }
-    
-    NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
-    //创建分享内容
-    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
-                                       defaultContent:@""
-                                                image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
-                                                title:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
-                                                  url:HOST_URL
-                                          description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
-                                            mediaType:SSPublishContentMediaTypeNews];
-    
-    id<ISSAuthOptions> authOptions = [ShareSDK authOptionsWithAutoAuth:YES
-                                                         allowCallback:YES
-                                                         authViewStyle:SSAuthViewStyleFullScreenPopup
-                                                          viewDelegate:nil
-                                               authManagerViewDelegate:nil];
-    
-    //在授权页面中添加关注官方微博
-    [authOptions setFollowAccounts:[NSDictionary dictionaryWithObjectsAndKeys:
-                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
-                                    SHARE_TYPE_NUMBER(ShareTypeSinaWeibo),
-                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
-                                    SHARE_TYPE_NUMBER(ShareTypeTencentWeibo),
-                                    nil]];
-    
-    //显示分享菜单
-    [ShareSDK showShareViewWithType:ShareTypeWeixiTimeline
-                          container:nil
-                            content:publishContent
-                      statusBarTips:YES
-                        authOptions:authOptions
-                       shareOptions:[ShareSDK defaultShareOptionsWithTitle:nil
-                                                           oneKeyShareList:[NSArray defaultOneKeyShareList]
-                                                            qqButtonHidden:NO
-                                                     wxSessionButtonHidden:NO
-                                                    wxTimelineButtonHidden:NO
-                                                      showKeyboardOnAppear:NO
-                                                         shareViewDelegate:nil
-                                                       friendsViewDelegate:nil
-                                                     picViewerViewDelegate:nil]
-                             result:^(ShareType type, SSResponseState state, id<ISSPlatformShareInfo> statusInfo, id<ICMErrorInfo> error, BOOL end) {
-                                 [self backInput];
-                                 if (state == SSPublishContentStateSuccess)
-                                 {
-                                     [DealJiFen dealJiFenWithID:diaryID];
-                                     NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
-                                 }
-                                 else if (state == SSPublishContentStateFail)
-                                 {
-                                     NSLog(NSLocalizedString(@"TEXT_SHARE_FAI", @"发布失败!error code == %d, error code == %@"), [error errorCode], [error errorDescription]);
-                                 }
-                             }];
-}
-
-/**
- *	@brief	分享到人人网
- *
- *	@param 	sender 	事件对象
- */
-- (void)shareToRenRenClickHandler:(UIButton *)sender
-{
-    NSString *content;
-    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"])
-    {
-        if ([[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"] length] > 0)
-        {
-            content = [NSString stringWithFormat:@"%@%@",[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"],ShareUrl];
-        }
-    }
-    
-    
-    NSString *imagePath;
-    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"])
-    {
-        if ([[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] count] > 0)
-        {
-            imagePath = [NSString stringWithFormat:@"%@%@",IMAGEURL,[[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] firstObject]];
-        }
-    }
-    //创建分享内容
-    NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
-    id<ISSContent> publishContent = [ShareSDK content:[content length]>0?content:ShareContent
-                                       defaultContent:@""
-                                                image:(imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath])
-                                                title:@"班家"
-                                                  url:ShareUrl
-                                          description:[content length]>0?[NSString stringWithFormat:@"%@-%@",content,ShareContent]:ShareContent
-                                            mediaType:SSPublishContentMediaTypeNews];
-    
-    //    //创建弹出菜单容器
-    //    id<ISSContainer> container = [ShareSDK container];
-    //    [container setIPadContainerWithView:sender arrowDirect:UIPopoverArrowDirectionUp];
-    //
-    id<ISSAuthOptions> authOptions = [ShareSDK authOptionsWithAutoAuth:YES
-                                                         allowCallback:YES
-                                                         authViewStyle:SSAuthViewStyleFullScreenPopup
-                                                          viewDelegate:nil
-                                               authManagerViewDelegate:nil];
-    
-    //在授权页面中添加关注官方微博
-    [authOptions setFollowAccounts:[NSDictionary dictionaryWithObjectsAndKeys:
-                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
-                                    SHARE_TYPE_NUMBER(ShareTypeSinaWeibo),
-                                    [ShareSDK userFieldWithType:SSUserFieldTypeName value:@"ShareSDK"],
-                                    SHARE_TYPE_NUMBER(ShareTypeTencentWeibo),
-                                    nil]];
-    
-    //显示分享菜单
-    [ShareSDK showShareViewWithType:ShareTypeRenren
-                          container:nil
-                            content:publishContent
-                      statusBarTips:YES
-                        authOptions:authOptions
-                       shareOptions:[ShareSDK defaultShareOptionsWithTitle:nil
-                                                           oneKeyShareList:nil
-                                                            qqButtonHidden:NO
-                                                     wxSessionButtonHidden:NO
-                                                    wxTimelineButtonHidden:NO
-                                                      showKeyboardOnAppear:NO
-                                                         shareViewDelegate:nil
-                                                       friendsViewDelegate:nil
-                                                     picViewerViewDelegate:nil]
-                             result:^(ShareType type, SSResponseState state, id<ISSPlatformShareInfo> statusInfo, id<ICMErrorInfo> error, BOOL end) {
-                                 [self backInput];
-                                 if (state == SSPublishContentStateSuccess)
-                                 {
-                                     [self backInput];
-                                     [DealJiFen dealJiFenWithID:diaryID];
-                                     NSLog(NSLocalizedString(@"TEXT_SHARE_SUC", @"发表成功"));
-                                 }
-                                 else if (state == SSPublishContentStateFail)
-                                 {
-                                     NSLog( @"发布失败!error code == %d, error code == %@", [error errorCode], [error errorDescription]);
-                                 }
-                             }];
-}
-
-
 
 -(void)praiseDiary:(UIButton *)button
 {

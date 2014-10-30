@@ -14,6 +14,7 @@
 @property (nonatomic, strong) NSString *classID;
 @property (nonatomic, assign) id<ClassZoneDelegate> classZoneDelegate;
 @property (nonatomic, assign) BOOL fromCLass;
+//@property (nonatomic, strong) NSMutableArray *selectPhotosArray;
 @end
 
 @protocol ClassZoneDelegate <NSObject>

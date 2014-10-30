@@ -34,11 +34,11 @@ static DBManager *_sharedDBManager;
         int state = [self initializeDBWithName:kDefaultDBName];
         if (state == -1)
         {
-            NSLog(@"db init failed!");
+            DDLOG(@"db init failed!");
         }
         else
         {
-            NSLog(@"db init success!");
+            DDLOG(@"db init success!");
         }
     }
     return self;
@@ -69,7 +69,7 @@ static DBManager *_sharedDBManager;
 		_dataBase = [[FMDatabase alloc] initWithPath:_name];
 	}
 	if (![_dataBase open]) {
-		NSLog(@"can not open db!");
+		DDLOG(@"can not open db!");
 	}
 }
 

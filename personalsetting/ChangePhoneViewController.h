@@ -14,4 +14,5 @@
 @end
 @interface ChangePhoneViewController : XDContentViewController
 @property (nonatomic, assign) id<ChangePhoneNum> changePhoneDel;
+@property (nonatomic, assign) BOOL createSchool;
 @end

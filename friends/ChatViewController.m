@@ -67,6 +67,8 @@ MLEmojiLabelDelegate>
     UIButton*editButton;
     BOOL edittingTableView;
     
+    BOOL inThisGroup;
+    
     InputTableBar *inputTabBar;
     
     OperatDB *db;
@@ -320,7 +322,6 @@ MLEmojiLabelDelegate>
     [inputTabBar setLayout];
 }
 
-
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
     DDLOG_CURRENT_METHOD;
@@ -368,6 +369,7 @@ MLEmojiLabelDelegate>
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(startEditWord) name:UIKeyboardWillShowNotification object:nil];
     
     [MobClick beginLogPageView:@"PageOne"];
+    [self getUnreadChatLog];
 //    [self uploadLastViewTime];
 }
 -(void)viewWillDisappear:(BOOL)animated
@@ -392,6 +394,7 @@ MLEmojiLabelDelegate>
 
 -(void)uploadLastViewTime
 {
+    [self backInput];
     [self uploadLastViewTimeInChatView];
 }
 
@@ -468,6 +471,25 @@ MLEmojiLabelDelegate>
     if (iseditting)
     {
         [self backInput];
+    }
+}
+
+#pragma mark - 获得最新十条消息
+
+-(void)getNewTenMsg
+{
+    [messageArray removeAllObjects];
+    NSArray *cacheChatArray = [db findChatLogWithUid:[Tools user_id]
+                                          andOtherId:toID
+                                        andTableName:CHATTABLE
+                                               start:[messageArray count] count:10];
+    if ([cacheChatArray count] > 0)
+    {
+        for (int i=0; i<[cacheChatArray count]; i++)
+        {
+            [messageArray insertObject:[cacheChatArray objectAtIndex:i] atIndex:0];
+        }
+        [self reloadTableView:ReloadTableViewTypeGetNew];
     }
 }
 
@@ -623,40 +645,41 @@ MLEmojiLabelDelegate>
                         [db deleteRecordWithDict:@{@"userid":[Tools user_id],@"mid":[dict objectForKey:@"_id"]} andTableName:CHATTABLE];
                         [db insertRecord:chatDict andTableName:CHATTABLE];
                     }
-                    if ([array count] > 0 && [messageArray count] > 0 && ![timeStr isEqualToString:@"0"])
-                    {
-                        if (![self haveThisMsg:[chatDict objectForKey:@"mid"]])
-                        {
-                            [messageArray insertObject:chatDict atIndex:0];
-                        }
-                        [self reloadTableView:ReloadTableViewTypeGetMore];
-                    }
-                    else if([timeStr isEqualToString:@"0"])
-                    {
-                        if (![self haveThisMsg:[chatDict objectForKey:@"mid"]])
-                        {
-                            [messageArray insertObject:chatDict atIndex:[messageArray count]-i];
-                        }
-                        [self reloadTableView:ReloadTableViewTypeGetNew];
-                    }
-                    else
-                    {
-                        if (![self haveThisMsg:[chatDict objectForKey:@"mid"]])
-                        {
-                            [messageArray insertObject:chatDict atIndex:[messageArray count]];
-                        }
-                        [self reloadTableView:ReloadTableViewTypeGetNew];
-                    }
+//                    [self getNewTenMsg];
+//                    if ([array count] > 0 && [messageArray count] > 0 && ![timeStr isEqualToString:@"0"])
+//                    {
+//                        if (![self haveThisMsg:[chatDict objectForKey:@"mid"]])
+//                        {
+//                            [messageArray insertObject:chatDict atIndex:0];
+//                        }
+//                        [self reloadTableView:ReloadTableViewTypeGetMore];
+//                    }
+//                    else if([timeStr isEqualToString:@"0"])
+//                    {
+//                        if (![self haveThisMsg:[chatDict objectForKey:@"mid"]])
+//                        {
+//                            [messageArray insertObject:chatDict atIndex:[messageArray count]-i];
+//                        }
+//                        [self reloadTableView:ReloadTableViewTypeGetNew];
+//                    }
+//                    else
+//                    {
+//                        if (![self haveThisMsg:[chatDict objectForKey:@"mid"]])
+//                        {
+//                            [messageArray insertObject:chatDict atIndex:[messageArray count]];
+//                        }
+//                        [self reloadTableView:ReloadTableViewTypeGetNew];
+//                    }
                 }
-                if ([array count] > 0 && [messageArray count] > 0 && ![timeStr isEqualToString:@"0"])
-                {
-                    [self reloadTableView:ReloadTableViewTypeGetMore];
-                }
-                else
-                {
-                    [self reloadTableView:ReloadTableViewTypeGetNew];
-                }
-
+//                if ([array count] > 0 && [messageArray count] > 0 && ![timeStr isEqualToString:@"0"])
+//                {
+//                    [self reloadTableView:ReloadTableViewTypeGetMore];
+//                }
+//                else
+//                {
+//                    [self reloadTableView:ReloadTableViewTypeGetNew];
+//                }
+                [self getNewTenMsg];
             }
             else
             {
@@ -808,12 +831,12 @@ MLEmojiLabelDelegate>
                     {
                         DDLOG(@"delete chat log  success");
                     }
-                    
                     return ;
                 }
                 users = [[responseDict objectForKey:@"data"] objectForKey:@"users"];
                 self.titleLabel.text = [[responseDict objectForKey:@"data"] objectForKey:@"name"];
-
+                
+                inThisGroup = NO;
                 
                 NSString *fname = [[responseDict objectForKey:@"data"] objectForKey:@"name"];
                 if (![fname isEqual:[NSNull null]])
@@ -833,6 +856,10 @@ MLEmojiLabelDelegate>
                 for(NSDictionary *dict in users)
                 {
                     NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithCapacity:0];
+                    if ([[dict objectForKey:@"_id"] isEqualToString:[Tools user_id]])
+                    {
+                        inThisGroup = YES;
+                    }
                     [tmpDict setObject:[dict objectForKey:@"_id"]forKey:@"uid"];
                     if ([dict objectForKey:@"img_icon"])
                     {
@@ -855,6 +882,19 @@ MLEmojiLabelDelegate>
                     {
                         [db insertRecord:tmpDict andTableName:USERICONTABLE];
                     }
+                }
+                
+                if (!inThisGroup)
+                {
+                    UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"您已经不再该群中了！" delegate:self cancelButtonTitle:@"知道了" otherButtonTitles: nil];
+                    al.tag = 77777;
+                    [al show];
+                    if ([db deleteRecordWithDict:@{@"userid":[Tools user_id],@"fid":toID,@"direct":@"f"} andTableName:CHATTABLE] &&
+                        [db deleteRecordWithDict:@{@"userid":[Tools user_id],@"tid":toID,@"direct":@"t"} andTableName:CHATTABLE])
+                    {
+                        DDLOG(@"delete chat log  success");
+                    }
+                    return ;
                 }
                 if (![[[responseDict objectForKey:@"data"] objectForKey:@"builder"] isEqual:[NSNull null]])
                 {
@@ -1108,150 +1148,48 @@ MLEmojiLabelDelegate>
 {
     if (dict && [dict count] > 0)
     {
-        if ([[dict objectForKey:@"fid"] length] == [[dict objectForKey:@"mid"] length])
-        {
-            //群聊消息
-            if (![[dict objectForKey:@"fid"] isEqualToString:toID])
-            {
-                return ;
-            }
-        }
-        else
-        {
-            //个人私聊
-            NSArray *usericonArray = [db findSetWithDictionary:@{@"unum":[dict objectForKey:@"fid"],@"uid":toID} andTableName:USERICONTABLE];
-            if ([usericonArray count] == 0 && [[dict objectForKey:@"fid"] length] == [[Tools user_id]length] && [[dict objectForKey:DIRECT] isEqualToString:@"f"])
-            {
-                return ;
-            }
-        }
         
-        if ([[dict objectForKey:DIRECT] isEqualToString:@"t"])
-        {
-            NSString *dictMid = [dict objectForKey:@"mid"];
-            for (int i=0;i<[messageArray count];i++)
-            {
-                
-                NSDictionary *tmpDict = [messageArray objectAtIndex:i];
-                NSString *msgMid = [tmpDict objectForKey:@"mid"];
-                DDLOG(@"dict mid =%@,cache min = %@",dictMid,msgMid);
-                if ([msgMid compare:dictMid] > 0)
-                {
-                    [messageArray insertObject:dict atIndex:i-1];
-                    break;
-                }
-            }
-            if (![messageArray containsObject:dict])
-            {
-                [messageArray addObject:dict];
-            }
-            
-//            [messageArray replaceObjectAtIndex:[messageArray count]-1 withObject:dict];
-            [self reloadTableView:ReloadTableViewTypeGetNew];
-            return ;
-        }
-        if ([[dict objectForKey:@"l"] intValue] == 1)
+        /*
+         收到一条消息，更新数据库，取出数据库最新十条，刷新列表
+         */
+        if ([[dict objectForKey:@"l"] isEqualToString:@"1"])
         {
             [self getMsgContentWithMid:[dict objectForKey:@"mid"]];
-            return;
+            return ;
         }
-        if (isGroup)
+        if(isGroup && [[dict objectForKey:@"fid"] isEqualToString:toID])
         {
-            NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithDictionary:dict];
-            if ([dict objectForKey:@"by"])
+            NSArray *usericonArray = [db findSetWithDictionary:@{@"unum":[dict objectForKey:@"by"]} andTableName:USERICONTABLE];
+            if ([usericonArray count] > 0)
             {
-                NSArray *usericonArray = [db findSetWithDictionary:@{@"unum":[dict objectForKey:@"by"]} andTableName:USERICONTABLE];
-                if ([usericonArray count] > 0)
+                NSDictionary *userIcon = [usericonArray firstObject];
+                if([db updeteKey:@"by" toValue:[userIcon objectForKey:@"uid"] withParaDict:@{@"userid":[Tools user_id],@"mid":[dict objectForKey:@"mid"]} andTableName:CHATTABLE] &&
+                   [db updeteKey:@"tid" toValue:[Tools user_id] withParaDict:@{@"userid":[Tools user_id],@"mid":[dict objectForKey:@"mid"]} andTableName:CHATTABLE] &&
+                   [db updeteKey:@"readed" toValue:@"1" withParaDict:@{@"userid":[Tools user_id],@"mid":[dict objectForKey:@"mid"]} andTableName:CHATTABLE])
                 {
-                    NSDictionary *userIcon = [usericonArray firstObject];
-                    [tmpDict setObject:[userIcon objectForKey:@"uid"] forKey:@"by"];
-                    [tmpDict setObject:[Tools user_id] forKey:[Tools user_id]];
-                    if([db updeteKey:@"by" toValue:[userIcon objectForKey:@"uid"] withParaDict:@{@"userid":[Tools user_id],@"mid":[dict objectForKey:@"mid"]} andTableName:CHATTABLE] &&
-                       [db updeteKey:@"tid" toValue:[Tools user_id] withParaDict:@{@"userid":[Tools user_id],@"mid":[dict objectForKey:@"mid"]} andTableName:CHATTABLE] &&
-                       [db updeteKey:@"readed" toValue:@"1" withParaDict:@{@"userid":[Tools user_id],@"mid":[dict objectForKey:@"mid"]} andTableName:CHATTABLE])
-                    {
-                        DDLOG(@"update full chat log success!");
-                    }
+                    DDLOG(@"update full chat log success!");
                 }
-                NSString *dictMid = [tmpDict objectForKey:@"mid"];
-                for (int i=0;i<[messageArray count];i++)
-                {
-                    
-                    NSDictionary *tmpDict1 = [messageArray objectAtIndex:i];
-                    NSString *msgMid = [tmpDict1 objectForKey:@"mid"];
-                    DDLOG(@"dict mid =%@,cache min = %@",dictMid,msgMid);
-                    if ([msgMid compare:dictMid] > 0)
-                    {
-                        [messageArray insertObject:tmpDict atIndex:i-1];
-                        break;
-                    }
-                }
-                if (![messageArray containsObject:tmpDict])
-                {
-                    [messageArray addObject:tmpDict];
-                }
-                
-                [self reloadTableView:ReloadTableViewTypeGetNew];
             }
-            return;
         }
-        else
+        else if([dict objectForKey:@"fid"] &&
+                ![[dict objectForKey:@"fid"] isEqual:[NSNull null]] &&
+                [[dict objectForKey:@"fid"] length] < 8 &&
+                [[UserIconTools uidFromNum:[dict objectForKey:@"fid"]] length] > 7 &&
+                [[UserIconTools uidFromNum:[dict objectForKey:@"fid"]] isEqual:toID])
         {
-            NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithDictionary:dict];
             NSArray *usericonArray = [db findSetWithDictionary:@{@"unum":[dict objectForKey:@"fid"]} andTableName:USERICONTABLE];
             if ([usericonArray count] > 0)
             {
                 NSDictionary *userIcon = [usericonArray firstObject];
-                [tmpDict setObject:[userIcon objectForKey:@"uid"] forKey:@"fid"];
-                [tmpDict setObject:[Tools user_id] forKey:@"tid"];
-                [tmpDict setObject:[Tools user_id] forKey:@"tid"];
-                [tmpDict setObject:@"1" forKey:@"readed"];
-                
-                
                 if([db updeteKey:@"fid" toValue:[userIcon objectForKey:@"uid"] withParaDict:@{@"userid":[Tools user_id],@"mid":[dict objectForKey:@"mid"]} andTableName:CHATTABLE] &&
                    [db updeteKey:@"tid" toValue:[Tools user_id] withParaDict:@{@"userid":[Tools user_id],@"mid":[dict objectForKey:@"mid"]} andTableName:CHATTABLE] &&
                    [db updeteKey:@"readed" toValue:@"1" withParaDict:@{@"userid":[Tools user_id],@"mid":[dict objectForKey:@"mid"]} andTableName:CHATTABLE])
                 {
                     DDLOG(@"update full chat log success!");
                 }
-                
-            }
-            NSString *dictMid = [tmpDict objectForKey:@"mid"];
-            for (int i=0;i<[messageArray count];i++)
-            {
-                
-                NSDictionary *tmpDict1 = [messageArray objectAtIndex:i];
-                NSString *msgMid = [tmpDict1 objectForKey:@"mid"];
-                DDLOG(@"dict mid =%@,cache min = %@",dictMid,msgMid);
-                if ([msgMid compare:dictMid] > 0)
-                {
-                    [messageArray insertObject:tmpDict atIndex:i-1];
-                    break;
-                }
-            }
-            if (![messageArray containsObject:tmpDict])
-            {
-                [messageArray insertObject:tmpDict atIndex:[messageArray count]];
             }
         }
-        
-        [self reloadTableView:ReloadTableViewTypeGetNew];
-        return;
-    }
-    else if ([[Tools user_id] length] > 0)
-    {
-        NSArray *tmpArray = [db findChatLogWithUid:[Tools user_id] andOtherId:toID andTableName:CHATTABLE];
-        if ([tmpArray count] > 0)
-        {
-            [messageArray addObjectsFromArray:tmpArray];
-            [self reloadTableView:ReloadTableViewTypeGetNew];
-            return ;
-        }
-    }
-    
-    if (dict && ![[dict objectForKey:@"fid"] isEqualToString:toID])
-    {
-        return ;
+        [self getNewTenMsg];
     }
 }
 

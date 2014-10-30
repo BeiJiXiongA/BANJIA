@@ -98,7 +98,7 @@
     
     int err = sqlite3_open([self sqlitePath], &_db );
     if(err != SQLITE_OK) {
-        NSLog(@"error opening!: %d", err);
+        DDLOG(@"error opening!: %d", err);
         return NO;
     }
     
@@ -114,7 +114,7 @@
 - (BOOL)openWithFlags:(int)flags {
     int err = sqlite3_open_v2([self sqlitePath], &_db, flags, NULL /* Name of VFS module to use */);
     if(err != SQLITE_OK) {
-        NSLog(@"error opening!: %d", err);
+        DDLOG(@"error opening!: %d", err);
         return NO;
     }
     
@@ -148,14 +148,14 @@
                 triedFinalizingOpenStatements = YES;
                 sqlite3_stmt *pStmt;
                 while ((pStmt = sqlite3_next_stmt(_db, nil)) !=0) {
-                    NSLog(@"Closing leaked statement");
+                    DDLOG(@"Closing leaked statement");
                     sqlite3_finalize(pStmt);
                     retry = YES;
                 }
             }
         }
         else if (SQLITE_OK != rc) {
-            NSLog(@"error closing!: %d", rc);
+            DDLOG(@"error closing!: %d", rc);
         }
     }
     while (retry);
@@ -181,14 +181,14 @@
 // but for folks who don't bother noticing that the interface to FMDatabase changed,
 // we'll still implement the method so they don't get suprise crashes
 - (int)busyRetryTimeout {
-    NSLog(@"%s:%d", __FUNCTION__, __LINE__);
-    NSLog(@"FMDB: busyRetryTimeout no longer works, please use retryTimeout");
+    DDLOG(@"%s:%d", __FUNCTION__, __LINE__);
+    DDLOG(@"FMDB: busyRetryTimeout no longer works, please use retryTimeout");
     return -1;
 }
 
 - (void)setBusyRetryTimeout:(int)i {
-    NSLog(@"%s:%d", __FUNCTION__, __LINE__);
-    NSLog(@"FMDB: setBusyRetryTimeout does nothing, please use setRetryTimeout:");
+    DDLOG(@"%s:%d", __FUNCTION__, __LINE__);
+    DDLOG(@"FMDB: setBusyRetryTimeout does nothing, please use setRetryTimeout:");
 }
 
 
@@ -272,8 +272,8 @@
     int rc = sqlite3_rekey(_db, [keyData bytes], (int)[keyData length]);
     
     if (rc != SQLITE_OK) {
-        NSLog(@"error on rekey: %d", rc);
-        NSLog(@"%@", [self lastErrorMessage]);
+        DDLOG(@"error on rekey: %d", rc);
+        DDLOG(@"%@", [self lastErrorMessage]);
     }
     
     return (rc == SQLITE_OK);
@@ -347,7 +347,7 @@
 }
 
 - (void)warnInUse {
-    NSLog(@"The FMDatabase %@ is currently in use.", self);
+    DDLOG(@"The FMDatabase %@ is currently in use.", self);
     
 #ifndef NS_BLOCK_ASSERTIONS
     if (_crashOnErrors) {
@@ -361,7 +361,7 @@
     
     if (!_db) {
             
-        NSLog(@"The FMDatabase %@ is not open.", self);
+        DDLOG(@"The FMDatabase %@ is not open.", self);
         
     #ifndef NS_BLOCK_ASSERTIONS
         if (_crashOnErrors) {
@@ -647,7 +647,7 @@
     FMResultSet *rs         = 0x00;
     
     if (_traceExecution && sql) {
-        NSLog(@"%@ executeQuery: %@", self, sql);
+        DDLOG(@"%@ executeQuery: %@", self, sql);
     }
     
     if (_shouldCacheStatements) {
@@ -663,9 +663,9 @@
         if (SQLITE_OK != rc) {
             
             if (_logsErrors) {
-//                NSLog(@"DB Error: %d \"%@\"", [self lastErrorCode], [self lastErrorMessage]);
-//                NSLog(@"DB Query: %@", sql);
-//                NSLog(@"DB Path: %@", _databasePath);
+//                DDLOG(@"DB Error: %d \"%@\"", [self lastErrorCode], [self lastErrorMessage]);
+//                DDLOG(@"DB Query: %@", sql);
+//                DDLOG(@"DB Path: %@", _databasePath);
 #ifndef NS_BLOCK_ASSERTIONS
                 if (_crashOnErrors) {
                     abort();
@@ -704,7 +704,7 @@
                 idx++;
             }
             else {
-                NSLog(@"Could not find index for %@", dictionaryKey);
+                DDLOG(@"Could not find index for %@", dictionaryKey);
             }
         }
     }
@@ -725,10 +725,10 @@
             
             if (_traceExecution) {
                 if ([obj isKindOfClass:[NSData class]]) {
-                    NSLog(@"data: %ld bytes", (unsigned long)[(NSData*)obj length]);
+                    DDLOG(@"data: %ld bytes", (unsigned long)[(NSData*)obj length]);
                 }
                 else {
-                    NSLog(@"obj: %@", obj);
+                    DDLOG(@"obj: %@", obj);
                 }
             }
             
@@ -739,7 +739,7 @@
     }
     
     if (idx != queryCount) {
-        NSLog(@"Error: the bind count is not correct for the # of variables (executeQuery)");
+        DDLOG(@"Error: the bind count is not correct for the # of variables (executeQuery)");
         sqlite3_finalize(pStmt);
         _isExecutingStatement = NO;
         return nil;
@@ -821,7 +821,7 @@
     FMStatement *cachedStmt  = 0x00;
     
     if (_traceExecution && sql) {
-        NSLog(@"%@ executeUpdate: %@", self, sql);
+        DDLOG(@"%@ executeUpdate: %@", self, sql);
     }
     
     if (_shouldCacheStatements) {
@@ -836,9 +836,9 @@
         if (SQLITE_OK != rc) {
             
             if (_logsErrors) {
-//                NSLog(@"DB Error: %d \"%@\"", [self lastErrorCode], [self lastErrorMessage]);
-//                NSLog(@"DB Query: %@", sql);
-//                NSLog(@"DB Path: %@", _databasePath);
+//                DDLOG(@"DB Error: %d \"%@\"", [self lastErrorCode], [self lastErrorMessage]);
+//                DDLOG(@"DB Query: %@", sql);
+//                DDLOG(@"DB Path: %@", _databasePath);
 #ifndef NS_BLOCK_ASSERTIONS
                 if (_crashOnErrors) {
                     abort();
@@ -883,7 +883,7 @@
                 idx++;
             }
             else {
-                NSLog(@"Could not find index for %@", dictionaryKey);
+                DDLOG(@"Could not find index for %@", dictionaryKey);
             }
         }
     }
@@ -904,10 +904,10 @@
             
             if (_traceExecution) {
                 if ([obj isKindOfClass:[NSData class]]) {
-                    NSLog(@"data: %ld bytes", (unsigned long)[(NSData*)obj length]);
+                    DDLOG(@"data: %ld bytes", (unsigned long)[(NSData*)obj length]);
                 }
                 else {
-                    NSLog(@"obj: %@", obj);
+                    DDLOG(@"obj: %@", obj);
                 }
             }
             
@@ -919,7 +919,7 @@
     
     
     if (idx != queryCount) {
-        NSLog(@"Error: the bind count (%d) is not correct for the # of variables in the query (%d) (%@) (executeUpdate)", idx, queryCount, sql);
+        DDLOG(@"Error: the bind count (%d) is not correct for the # of variables in the query (%d) (%@) (executeUpdate)", idx, queryCount, sql);
         sqlite3_finalize(pStmt);
         _isExecutingStatement = NO;
         return NO;
@@ -936,22 +936,22 @@
     }
     else if (SQLITE_ERROR == rc) {
         if (_logsErrors) {
-            NSLog(@"Error calling sqlite3_step (%d: %s) SQLITE_ERROR", rc, sqlite3_errmsg(_db));
-            NSLog(@"DB Query: %@", sql);
+            DDLOG(@"Error calling sqlite3_step (%d: %s) SQLITE_ERROR", rc, sqlite3_errmsg(_db));
+            DDLOG(@"DB Query: %@", sql);
         }
     }
     else if (SQLITE_MISUSE == rc) {
         // uh oh.
         if (_logsErrors) {
-            NSLog(@"Error calling sqlite3_step (%d: %s) SQLITE_MISUSE", rc, sqlite3_errmsg(_db));
-            NSLog(@"DB Query: %@", sql);
+            DDLOG(@"Error calling sqlite3_step (%d: %s) SQLITE_MISUSE", rc, sqlite3_errmsg(_db));
+            DDLOG(@"DB Query: %@", sql);
         }
     }
     else {
         // wtf?
         if (_logsErrors) {
-            NSLog(@"Unknown error calling sqlite3_step (%d: %s) eu", rc, sqlite3_errmsg(_db));
-            NSLog(@"DB Query: %@", sql);
+            DDLOG(@"Unknown error calling sqlite3_step (%d: %s) eu", rc, sqlite3_errmsg(_db));
+            DDLOG(@"DB Query: %@", sql);
         }
     }
     
@@ -984,8 +984,8 @@
     
     if (closeErrorCode != SQLITE_OK) {
         if (_logsErrors) {
-            NSLog(@"Unknown error finalizing or resetting statement (%d: %s)", closeErrorCode, sqlite3_errmsg(_db));
-            NSLog(@"DB Query: %@", sql);
+            DDLOG(@"Unknown error finalizing or resetting statement (%d: %s)", closeErrorCode, sqlite3_errmsg(_db));
+            DDLOG(@"DB Query: %@", sql);
         }
     }
     

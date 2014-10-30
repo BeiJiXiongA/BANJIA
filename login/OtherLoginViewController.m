@@ -13,7 +13,7 @@
 #import "HomeViewController.h"
 #import "KKNavigationController.h"
 
-@interface OtherLoginViewController ()
+@interface OtherLoginViewController ()<WeiChatDelegate>
 {
     NSMutableDictionary *accountDict;
     int reg;
@@ -37,6 +37,8 @@
     // Do any additional setup after loading the view.
     
     self.titleLabel.text = @"其他方式登录";
+    
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).weiChatDel = self;
     
     reg = 0;
     UIButton *sinaLoginButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -62,6 +64,44 @@
     [renrenLoginButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
     renrenLoginButton.tag=102;
     [self.bgView addSubview:renrenLoginButton];
+    
+//    UIButton *wxLoginButton = [UIButton buttonWithType:UIButtonTypeCustom];
+//    wxLoginButton.backgroundColor = [UIColor clearColor];
+//    wxLoginButton.frame = CGRectMake(40, UI_NAVIGATION_BAR_HEIGHT+37+57+55+57, SCREEN_WIDTH-80, 43);
+//    [wxLoginButton setImage:[UIImage imageNamed:@"wx"] forState:UIControlStateNormal];
+//    [wxLoginButton addTarget:self action:@selector(sendAuthRequest) forControlEvents:UIControlEventTouchUpInside];
+//    wxLoginButton.tag=103;
+//    if ([WXApi isWXAppInstalled])
+//    {
+//        [self.bgView addSubview:wxLoginButton];
+//    }
+    
+}
+
+-(void)sendAuthRequest
+{
+    //构造SendAuthReq结构体
+    SendAuthReq* req =[[SendAuthReq alloc ] init];
+    req.scope = @"snsapi_userinfo" ;
+    req.state = @"123" ;
+    //第三方向微信终端发送一个SendAuthReq消息结构
+    [WXApi sendReq:req];
+}
+
+-(void)dealloc
+{
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).weiChatDel = nil;
+}
+
+-(void)loginWithWeiChatId:(NSString *)userid andHeaderIcon:(NSString *)headerUrl andUserName:(NSString *)userName andSex:(NSString *)sex
+{
+    accountDict = [[NSMutableDictionary alloc] initWithCapacity:0];
+    [accountDict setObject:userid forKey:@"a_id"];
+    [accountDict setObject:@"" forKey:@"nickname"];
+    [accountDict setObject:headerUrl forKey:@"header_icon"];
+    [accountDict setObject:@"wx" forKey:@"a_type"];
+    return ;
+    [self loginWithName:userName];
 }
 
 - (void)didReceiveMemoryWarning
@@ -82,15 +122,15 @@ static int loginID;
     switch (button.tag-100) {
         case 0:
             
-            loginID=1;
+            loginID=ShareTypeSinaWeibo;
             
             break;
         case 1:
-            loginID=6;
+            loginID=ShareTypeQQSpace;
             
             break;
         case 2:
-            loginID=7;
+            loginID=ShareTypeRenren;
             break;
             
         default:
@@ -148,6 +188,17 @@ static int loginID;
                                }
                                else
                                {
+                                   if (loginID == ShareTypeQQSpace && [[error errorDescription] isEqualToString:@"ERROR_DESC_QZONE_NOT_INSTALLED"])
+                                   {
+                                       [Tools showAlertView:@"尚未安装QQ或者QQ空间客户端，请安装后重试！" delegateViewController:nil];
+                                       return  ;
+                                   }
+                                   else if (loginID == ShareTypeQQ)
+                                   {
+                                       [Tools showAlertView:@"尚未安装QQ，请安装后重试！" delegateViewController:nil];
+                                       return ;
+                                   }
+                                   [ShareSDK cancelAuthWithType:loginID];
                                    DDLOG(@"faile==%@==%ld==%d",[error errorDescription],(long)[error errorCode],[error errorLevel]);
                                }
                            }];

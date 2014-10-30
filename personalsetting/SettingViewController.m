@@ -627,6 +627,7 @@ MFMailComposeViewControllerDelegate>
                 [Tools exit];
                 WelcomeViewController *welcomeViewCOntroller = [[WelcomeViewController alloc]init];
                 KKNavigationController *welNav = [[KKNavigationController alloc] initWithRootViewController:welcomeViewCOntroller];
+//                [UIApplication sharedApplication].keyWindow.rootViewController = welNav;
                 [self.navigationController presentViewController:welNav animated:YES completion:nil];
             }
             else

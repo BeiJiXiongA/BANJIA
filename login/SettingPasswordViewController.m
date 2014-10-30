@@ -296,7 +296,7 @@
             }
             else
             {
-                [Tools dealRequestError:responseDict fromViewController:nil];
+                [Tools showAlertView:@"手机号不存在！" delegateViewController:nil];
             }
             
         }];

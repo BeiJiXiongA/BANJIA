@@ -90,9 +90,7 @@ ChatVCDelegate>
     [[self.bgView layer] setShadowRadius:3.0f];
     self.returnImageView.hidden = YES;
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dealNewChatMsgNotification:) name:RECEIVENEWMSG object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getChatList) name:UPDATE_MSG_LIST object:nil];
-    
     
     db = [[OperatDB alloc] init];
     
@@ -148,10 +146,6 @@ ChatVCDelegate>
     [[NSUserDefaults standardUserDefaults] synchronize];
     
     currentId = @"";
-    
-    [self dealNewChatMsg:nil];
-    [self dealNewMsg:nil];
-
 }
 
 -(void)viewWillDisappear:(BOOL)animated
@@ -162,7 +156,6 @@ ChatVCDelegate>
 
 -(void)dealloc
 {
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:RECEIVENEWMSG object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UPDATE_MSG_LIST object:nil];
 }
 
@@ -290,11 +283,11 @@ ChatVCDelegate>
                             }
                         }
                     }
-                    [self dealNewChatMsg:nil];
+                    [self manageChatList];
                 }
                 else
                 {
-                    [self dealNewChatMsg:nil];
+                    [self manageChatList];
                 }
                 
                 _reloading = NO;
@@ -339,49 +332,36 @@ ChatVCDelegate>
     }
 }
 
--(void)dealNewChatMsg:(NSDictionary *)dict
-{
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:NewClassNum] integerValue]>0 ||
-        [[[NSUserDefaults standardUserDefaults] objectForKey:UCFRIENDSUM] integerValue] > 0)
-    {
-        self.unReadLabel.hidden = NO;
-    }
-    else
-    {
-        self.unReadLabel.hidden = YES;
-    }
-    
-    if ([[Tools user_id] length] == 0)
-    {
-        return ;
-    }
-    if(dict && [dict isKindOfClass:[NSDictionary class]] && [dict count] > 0)
-    {
-        if ([Tools NetworkReachable])
-        {
-            [self getChatList];
-        }
-        else
-        {
-            [self manageChatList];
-        }
-    }
-    else
-    {
-        [self manageChatList];
-    }
-}
-
--(void)dealNewChatMsgNotification:(NSNotification *)noti
-{
-    [self dealNewChatMsg:noti.object];
-}
-
 -(void)manageChatList
 {
     [newMessageArray removeAllObjects];
     [newMessageArray addObjectsFromArray:[db findChatUseridWithTableName:CHATTABLE]];
-
+    DDLOG(@"%@",newMessageArray);
+    
+    for(int i = 0;i<[newMessageArray count];i++)
+    {
+        NSDictionary *dict = [newMessageArray objectAtIndex:i];
+        NSString *fid = [dict objectForKey:@"fid"];
+        if ([fid length] < 8)
+        {
+            if ([[UserIconTools uidFromNum:fid] length] > 7)
+            {
+                [newMessageArray replaceObjectAtIndex:i withObject:@{@"fid":[UserIconTools uidFromNum:fid]}];
+            }
+        }
+    }
+    
+    NSArray *array = [[NSArray alloc] initWithArray:newMessageArray];
+    [newMessageArray removeAllObjects];
+    for (int i = 0; i <[array count]; i++)
+    {
+        if (![newMessageArray containsObject:[array objectAtIndex:i]])
+        {
+            [newMessageArray addObject:[array objectAtIndex:i]];
+        }
+    }
+    DDLOG(@"%@",newMessageArray);
+    
     
     //时间由大到小排序
     if ([newMessageArray count] > 0)

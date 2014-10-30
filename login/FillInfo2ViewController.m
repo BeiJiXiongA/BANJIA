@@ -365,6 +365,7 @@
             {
                 [[NSUserDefaults standardUserDefaults] setObject:nameTextField.text forKey:USERNAME];
                 [[NSUserDefaults standardUserDefaults] setObject:sex forKey:USERSEX];
+                [[NSUserDefaults standardUserDefaults] setObject:[[responseDict objectForKey:@"data"] objectForKey:@"number"] forKey:BANJIANUM];
                 if ([accountID length]>0)
                 {
                     [[NSUserDefaults standardUserDefaults] setObject:[[responseDict objectForKey:@"data"] objectForKey:@"token"] forKey:CLIENT_TOKEN];

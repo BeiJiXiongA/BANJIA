@@ -286,7 +286,6 @@
                 [cell.contentView addSubview:deleteButton];
             }
         }
-        
         if ([cell respondsToSelector:@selector(setSeparatorInset:)])
         {
             [cell setSeparatorInset:UIEdgeInsetsZero];
@@ -310,6 +309,10 @@
         qrImageView.frame = CGRectMake((SCREEN_WIDTH-240)/2, 0, 240, 240);
         [qrImageView setImage:image];
         [cell.contentView addSubview:qrImageView];
+        
+        UILongPressGestureRecognizer *longPressTgr = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(SaveGroupQRImage)];
+        qrImageView.userInteractionEnabled = YES;
+        [qrImageView addGestureRecognizer:longPressTgr];
         
         UILabel *tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, qrImageView.frame.size.height+qrImageView.frame.origin.y-5, SCREEN_WIDTH-40, 25)];
         tipLabel.text = @"让你的好友扫一扫二维码即可加入群聊";
@@ -411,6 +414,9 @@
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
 }
+
+#pragma mark - 保存群聊二维码
+
 
 -(void)switchViewChange:(KLSwitch *)sw
 {

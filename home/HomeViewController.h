@@ -8,6 +8,6 @@
 
 #import "XDContentViewController.h"
 
-@interface HomeViewController : XDContentViewController<UINavigationControllerDelegate>
+@interface HomeViewController : XDContentViewController<UINavigationControllerDelegate,UIImagePickerControllerDelegate>
 -(void)getData;
 @end

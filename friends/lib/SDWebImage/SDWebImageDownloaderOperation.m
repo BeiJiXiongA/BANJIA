@@ -80,7 +80,7 @@
         // Note: we use a timeout to work around an issue with NSURLConnection cancel under iOS 5
         //       not waking up the runloop, leading to dead threads (see https://github.com/rs/SDWebImage/issues/466)
         CFRunLoopRunInMode(kCFRunLoopDefaultMode, 10, false);
-        DDLOG(@"self time out %f",self.request.timeoutInterval);
+//        DDLOG(@"self time out %f",self.request.timeoutInterval);
         if (!self.isFinished)
         {
             [self.connection cancel];

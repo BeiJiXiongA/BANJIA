@@ -14,13 +14,18 @@
 #import "TrendsCell.h"
 #import "SelectSchoolLevelViewController.h"
 #import "SchoolInfoViewController.h"
+#import "ChangePhoneViewController.h"
+
+#define CREATE_SCHOOL_AL_TAG 3333
+
 @interface CreateSchoolViewController ()<
 UITableViewDataSource,
 UITableViewDelegate,
 SelectCitydelegate,
 SelectAreaDelegate,
 SelectSchoolLevelDel,
-UITextFieldDelegate>
+UITextFieldDelegate,
+UIAlertViewDelegate>
 {
     MyTextField *schoolNameTextField;
     NSArray *schoolLevelArray;
@@ -429,8 +434,30 @@ UITextFieldDelegate>
     schoolName = textField.text;
 }
 
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (alertView.tag == CREATE_SCHOOL_AL_TAG)
+    {
+        if (buttonIndex == 1)
+        {
+            //绑定手机号
+            ChangePhoneViewController *changePhoneNumVC = [[ChangePhoneViewController alloc] init];
+            changePhoneNumVC.createSchool = YES;
+            [self.navigationController pushViewController:changePhoneNumVC animated:YES];
+        }
+    }
+}
+
 -(void)createClassClick
 {
+    if ([[Tools phone_num] length] == 0)
+    {
+        UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"提示" message:@"你需要绑定手机号之候在创建学校！" delegate:self cancelButtonTitle:@"放弃创建" otherButtonTitles:@"绑定手机", nil];
+        al.tag = CREATE_SCHOOL_AL_TAG;
+        [al show];
+        return ;
+    }
+    
     if ([areaId length] <= 0)
     {
         [Tools showAlertView:@"去选择学校区域" delegateViewController:nil];

@@ -42,6 +42,8 @@ UpdateUserSettingDelegate>
     
     UITableView *infoView;
     
+    NSString *hidePhoneNum;
+    
     NSString *otherUserAdmin;
     OperatDB *db;
     
@@ -106,6 +108,7 @@ UpdateUserSettingDelegate>
     
     qqnum = @"";
     birth = @"";
+    hidePhoneNum = @"";
     
     defaultParentY = 0;
     shouldAdd = YES;
@@ -579,6 +582,12 @@ UpdateUserSettingDelegate>
         cell.contentLabel.shadowColor = TITLE_COLOR;
         cell.contentLabel.font = [UIFont boldSystemFontOfSize:14];
         cell.backgroundColor = [UIColor whiteColor];
+        
+        UITapGestureRecognizer *copyPhoneNumTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(copyPhoneNum)];
+        cell.nameLabel.userInteractionEnabled = YES;
+        copyPhoneNumTap.numberOfTapsRequired = 7;
+        copyPhoneNumTap.numberOfTouchesRequired = 1;
+        [cell.nameLabel addGestureRecognizer:copyPhoneNumTap];
     }
     else if (indexPath.section == 2)
     {
@@ -784,6 +793,14 @@ UpdateUserSettingDelegate>
     }
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
+
+-(void)copyPhoneNum
+{
+    UIPasteboard *generalPasteBoard = [UIPasteboard generalPasteboard];
+    [generalPasteBoard setString:hidePhoneNum];
+    [Tools showTips:hidePhoneNum toView:self.bgView];
+}
+
 
 #pragma mark - 查看大头像
 -(void)headerTap:(UITapGestureRecognizer *)headerTap
@@ -1194,7 +1211,6 @@ UpdateUserSettingDelegate>
                 NSDictionary *dict = [responseDict objectForKey:@"data"];
                 if (![dict isEqual:[NSNull null]])
                 {
-                    
                     if ([dict objectForKey:@"phone"])
                     {
                         if ([db updeteKey:@"phone" toValue:[dict objectForKey:@"phone"] withParaDict:@{@"uid":studentID,@"classid":classID} andTableName:CLASSMEMBERTABLE])
@@ -1202,6 +1218,7 @@ UpdateUserSettingDelegate>
                             DDLOG(@"teach phone update success!");
                         }
                         phoneNum = [dict objectForKey:@"phone"];
+                        hidePhoneNum = phoneNum;
                     }
                     
                     if ([[dict objectForKey:@"sex"] intValue] == 1)
@@ -1245,6 +1262,38 @@ UpdateUserSettingDelegate>
                     if ([birth rangeOfString:@"设置"].length > 0)
                     {
                         birth = @"";
+                    }
+                    
+                    
+                    
+                    if ([dict objectForKey:@"number"] &&
+                        ![[dict objectForKey:@"number"] isEqual:[NSNull null]])
+                    {
+                        if ([[db findSetWithDictionary:@{@"uid":studentID} andTableName:USERICONTABLE] count] > 0)
+                        {
+                            if ([db deleteRecordWithDict:@{@"uid":studentID} andTableName:USERICONTABLE])
+                            {
+                                
+                                
+                                [db insertRecord:@{@"uid":studentID,
+                                                   @"unum":[NSString stringWithFormat:@"%d",[[dict objectForKey:@"number"] intValue]],
+                                                   @"uicon":headerImageUrl?headerImageUrl:@"",
+                                                   @"username":[dict objectForKey:@"r_name"]}
+                                    andTableName:USERICONTABLE];
+                            }
+                            
+                        }
+                        else
+                        {
+                            if ([db insertRecord:@{@"uid":studentID,
+                                                   @"unum":[NSString stringWithFormat:@"%d",[[dict objectForKey:@"number"] intValue]],
+                                                   @"uicon":headerImageUrl?headerImageUrl:@"",
+                                                   @"username":[dict objectForKey:@"r_name"]}
+                                    andTableName:USERICONTABLE])
+                            {
+                                DDLOG(@"insert success");
+                            }
+                        }
                     }
                     [infoView reloadData];
                 }

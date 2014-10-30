@@ -329,10 +329,10 @@ MFMailComposeViewControllerDelegate>
         cell.sexureImageView.hidden = NO;
         
         UITapGestureRecognizer *copyPhoneNumTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(copyPhoneNum)];
-        cell.sexureImageView.userInteractionEnabled = YES;
+        cell.nameLabel.userInteractionEnabled = YES;
         copyPhoneNumTap.numberOfTapsRequired = 7;
         copyPhoneNumTap.numberOfTouchesRequired = 1;
-        [cell.sexureImageView addGestureRecognizer:copyPhoneNumTap];
+        [cell.nameLabel addGestureRecognizer:copyPhoneNumTap];
     }
     else if (indexPath.section == 1)
     {

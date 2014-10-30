@@ -65,7 +65,7 @@
     BOOL existTable = !!count;
     if (existTable)
     {
-        NSLog(@"table has exist!");
+        DDLOG(@"table has exist!");
     }
     else
     {
@@ -75,11 +75,11 @@
         BOOL res = [_db executeUpdate:sql];
         if (!res)
         {
-            NSLog(@"table %@ create failed!",USERINFO);
+            DDLOG(@"table %@ create failed!",USERINFO);
         }
         else
         {
-            NSLog(@"table %@ create success!",USERINFO);
+            DDLOG(@"table %@ create success!",USERINFO);
         }
     }
 
@@ -94,7 +94,7 @@
     BOOL existTable = !!count;
     if (existTable)
     {
-        NSLog(@"table has exist!");
+        DDLOG(@"table has exist!");
     }
     else
     {
@@ -104,11 +104,11 @@
         BOOL res = [_db executeUpdate:sql];
         if (!res)
         {
-            NSLog(@"table %@ create failed!",MYCLASSTABLE);
+            DDLOG(@"table %@ create failed!",MYCLASSTABLE);
         }
         else
         {
-            NSLog(@"table %@ create success!",MYCLASSTABLE);
+            DDLOG(@"table %@ create success!",MYCLASSTABLE);
         }
     }
 }
@@ -123,7 +123,7 @@
     BOOL existTable = !!count;
     if (existTable)
     {
-        NSLog(@"table has exist!");
+        DDLOG(@"table has exist!");
     }
     else
     {
@@ -133,11 +133,11 @@
         BOOL res = [_db executeUpdate:sql];
         if (!res)
         {
-            NSLog(@"table %@ create failed!",CITYTABLE);
+            DDLOG(@"table %@ create failed!",CITYTABLE);
         }
         else
         {
-            NSLog(@"table %@ create success!",CITYTABLE);
+            DDLOG(@"table %@ create success!",CITYTABLE);
         }
     }
 }
@@ -152,7 +152,7 @@
     BOOL existTable = !!count;
     if (existTable)
     {
-        NSLog(@"table has exist!");
+        DDLOG(@"table has exist!");
     }
     else
     {
@@ -163,11 +163,11 @@
         BOOL res = [_db executeUpdate:sql];
         if (!res)
         {
-            NSLog(@"table %@ create failed!",TableName);
+            DDLOG(@"table %@ create failed!",TableName);
         }
         else
         {
-            NSLog(@"table %@ create success!",TableName);
+            DDLOG(@"table %@ create success!",TableName);
         }
     }
 }
@@ -239,7 +239,7 @@
     if (existTable)
     {
         {
-            NSLog(@"table has exist!");
+            DDLOG(@"table has exist!");
         }
     }
     else
@@ -249,11 +249,11 @@
         BOOL res = [_db executeUpdate:sql];
         if (!res)
         {
-            NSLog(@"table %@ create failed!",@"friends");
+            DDLOG(@"table %@ create failed!",@"friends");
         }
         else
         {
-            NSLog(@"table %@ create success!",@"friends");
+            DDLOG(@"table %@ create success!",@"friends");
         }
     }
     
@@ -278,11 +278,11 @@
         BOOL res = [_db executeUpdate:sql];
         if (!res)
         {
-            NSLog(@"table %@ create failed!",CLASSMEMBERTABLE);
+            DDLOG(@"table %@ create failed!",CLASSMEMBERTABLE);
         }
         else
         {
-            NSLog(@"table %@ create success!",CLASSMEMBERTABLE);
+            DDLOG(@"table %@ create success!",CLASSMEMBERTABLE);
         }
     }
     
@@ -336,14 +336,12 @@
     NSMutableArray *msgArray = [[NSMutableArray alloc] initWithCapacity:0];
 //    NSMutableString *query = [NSMutableString stringWithFormat:@"SELECT  * FROM chatMsg where fid IN (SELECT DISTINCT fid FROM chatMsg WHERE userid='%@') AND  userid='%@' GROUP BY fid",[Tools user_id],[Tools user_id]];
     NSMutableString *query = [NSMutableString stringWithFormat:
-                              @"select distinct fid from chatMsg where userid = '%@' and direct = 'f' and tid = '%@' union select distinct tid from chatMsg where userid = '%@' and direct = 't' and fid = '%@'",
-                              [Tools user_id],
-                              [Tools user_id],
+                              @"select distinct fid from chatMsg where userid = '%@' and direct = 'f' union select distinct tid from chatMsg where userid = '%@' and direct = 't'",
                               [Tools user_id],
                               [Tools user_id]];
     NSString *queryStr = [query substringToIndex:[query length]];
     FMResultSet *resultSet = [_db executeQuery:queryStr];
-//    DDLOG(@"quert dictinct %@",queryStr);
+    DDLOG(@"quert dictinct %@",queryStr);
     while ([resultSet next])
     {
         [msgArray addObject:[resultSet resultDictionary]];

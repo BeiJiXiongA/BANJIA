@@ -110,6 +110,8 @@ UIActionSheetDelegate>
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewWillAppear:) name:RELOAD_MENU_BUTTON object:nil];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getClassesByUser) name:UPDATECLASSNUMBER object:nil];
+    
     [[self.bgView layer] setShadowOffset:CGSizeMake(-5.0f, 5.0f)];
     [[self.bgView layer] setShadowColor:[UIColor darkGrayColor].CGColor];
     [[self.bgView layer] setShadowOpacity:1.0f];
@@ -793,8 +795,9 @@ UIActionSheetDelegate>
         cell.contentLable.hidden = NO;
         cell.contentLable.text = [NSString stringWithFormat:@"%d",num];
     }
-    else if(([classDict objectForKey:UCDIARY] && [[classDict objectForKey:UCDIARY] integerValue] > 0)
-            || ([classDict objectForKey:DIARY] && [[classDict objectForKey:DIARY] integerValue] > 0))
+    else if((([classDict objectForKey:UCDIARY] && [[classDict objectForKey:UCDIARY] integerValue] > 0)
+             || ([classDict objectForKey:DIARY] && [[classDict objectForKey:DIARY] integerValue] > 0)) &&
+            [[[NSUserDefaults standardUserDefaults] objectForKey:NewDiaryAlert] intValue] == 1)
     {
         cell.contentLable.frame = CGRectMake(SCREEN_WIDTH-60, 30, 10, 10);
         cell.contentLable.layer.cornerRadius = 5;

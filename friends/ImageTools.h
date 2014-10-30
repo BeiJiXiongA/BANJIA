@@ -24,4 +24,6 @@
 
 +(UIImage *)getImageFromALAssesst:(ALAsset *)asset;
 
++(void)setImageView:(UIImageView *)imageView withAsset:(ALAsset *)asset andDefault:(NSString *)defaultName;
+
 @end

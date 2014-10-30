@@ -12,11 +12,13 @@
 #import "APService.h"
 #import "StatusBarTips.h"
 #import "SideMenuViewController.h"
+#import "WXApi.h"
 
 @protocol ChatDelegate;
 @protocol MsgDelegate;
+@protocol WeiChatDelegate;
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate,UIAlertViewDelegate,TipsDelegate>
+@interface AppDelegate : UIResponder <UIApplicationDelegate,UIAlertViewDelegate,TipsDelegate,WXApiDelegate>
 {
     NSString *updateUrl;
     BMKMapManager* _mapManager;
@@ -31,6 +33,7 @@
 @property (readonly, strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
 @property (nonatomic, assign) id<ChatDelegate> chatDelegate;
 @property (nonatomic, assign) id<MsgDelegate> msgDelegate;
+@property (nonatomic, assign) id<WeiChatDelegate> weiChatDel;
 @property (strong ,nonatomic) OperatDB *db;
 
 
@@ -40,13 +43,20 @@
 @end
 
 @protocol ChatDelegate <NSObject>
-
+@optional
 -(void)dealNewChatMsg:(NSDictionary *)dict;
 -(void)uploadLastViewTime;
 
 @end
 @protocol MsgDelegate <NSObject>
-
+@optional
 -(void)dealNewMsg:(NSDictionary *)dict;
+@end
 
+@protocol WeiChatDelegate <NSObject>
+
+-(void)loginWithWeiChatId:(NSString *)userid
+            andHeaderIcon:(NSString *)headerUrl
+              andUserName:(NSString *)userName
+                   andSex:(NSString *)sex;
 @end

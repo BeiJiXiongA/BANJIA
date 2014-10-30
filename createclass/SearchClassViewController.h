@@ -8,6 +8,6 @@
 
 #import "XDContentViewController.h"
 
-@interface SearchClassViewController : XDContentViewController
+@interface SearchClassViewController : XDContentViewController<UINavigationControllerDelegate,UIImagePickerControllerDelegate>
 
 @end

@@ -315,7 +315,7 @@ UIActionSheetDelegate>
     relateButton.frame = CGRectMake(relateLabel.frame.origin.x+relateLabel.frame.size.width+10, relateLabel.frame.origin.y - 6, SCREEN_WIDTH-145, 42);
     [relateButton setTitleColor:COMMENTCOLOR forState:UIControlStateNormal];
     relateButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
-    [relateButton setTitle:[relateArray firstObject] forState:UIControlStateNormal];
+    [relateButton setTitle:[NSString stringWithFormat:@"  %@",[relateArray firstObject]] forState:UIControlStateNormal];
     [relateButton addTarget:self action:@selector(selectRelate) forControlEvents:UIControlEventTouchUpInside];
     [childInfoView addSubview:relateButton];
     
@@ -758,22 +758,12 @@ UIActionSheetDelegate>
 
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-//    if (buttonIndex == 4)
-//    {
-//        [mySearchBar resignFirstResponder];
-//        UIAlertView *stunumal = [[UIAlertView alloc] initWithTitle:@"" message:@"你是孩子的:" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
-//        stunumal.alertViewStyle = UIAlertViewStylePlainTextInput;
-//        stunumal.tag = STUDENTALTERTAG;
-//        [stunumal show];
-//        childInfoView.frame = CGRectMake(0, mySearchBar.frame.size.height+mySearchBar.frame.origin.y+20, SCREEN_WIDTH, 120);
-//    }
-//    else if(buttonIndex < 5)
+
+    if(buttonIndex < 7)
     {
-        childInfoView.frame = CGRectMake(0, mySearchBar.frame.size.height+mySearchBar.frame.origin.y+20, SCREEN_WIDTH, 50);
         relateStr = [relateArray objectAtIndex:buttonIndex];
         [relateButton setTitle:[NSString stringWithFormat:@"  %@",relateStr] forState:UIControlStateNormal];
     }
-
 }
 
 -(void)textFieldDidEndEditing:(UITextField *)textField
@@ -914,32 +904,7 @@ UIActionSheetDelegate>
 }
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (tableView.tag == RelateTableViewTag)
-    {
-        static NSString *relateCell = @"relateCell";
-        UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:relateCell];
-        if (cell == nil)
-        {
-            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:relateCell];
-        }
-        cell.textLabel.textColor = COMMENTCOLOR;
-        cell.textLabel.font = [UIFont systemFontOfSize:17];
-        cell.textLabel.textAlignment = NSTextAlignmentCenter;
-        cell.textLabel.text = [relateArray objectAtIndex:indexPath.row];
-        cell.textLabel.backgroundColor = [UIColor clearColor];
-        cell.textLabel.textAlignment = NSTextAlignmentLeft;
-        
-        DDLOG(@"label ====%@",NSStringFromCGRect(cell.textLabel.frame));
-        
-        CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
-        UIImageView *lineImageView = [[UIImageView alloc] init];
-        lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
-        lineImageView.backgroundColor = LineBackGroudColor;
-        [cell.contentView addSubview:lineImageView];
-        cell.contentView.backgroundColor = [UIColor whiteColor];
-        return  cell;
-    }
-    else if(tableView.tag == ChildTableViewTag)
+    if(tableView.tag == ChildTableViewTag)
     {
         static NSString *childider = @"childider";
         NotificationDetailCell *cell = [tableView dequeueReusableCellWithIdentifier:childider];
@@ -955,21 +920,19 @@ UIActionSheetDelegate>
         
         cell.nameLabel.frame = CGRectMake(60, 5, 200, 30);
         CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
-        UIImageView *lineImageView = [[UIImageView alloc] init];
-        lineImageView.backgroundColor = LineBackGroudColor;
-        [cell.contentView addSubview:lineImageView];
+        cell.lineImageView.backgroundColor = LineBackGroudColor;
         cell.contentView.backgroundColor = [UIColor whiteColor];
-        lineImageView.frame = CGRectMake(0, cellHeight-0.5, 0, 0);
+        cell.lineImageView.frame = CGRectMake(0, cellHeight-0.5, 0, 0);
         if (indexPath.row < [childArray count])
         {
             
             if (indexPath.row < [childArray count]-1)
             {
-                lineImageView.frame = CGRectMake(60, cellHeight-0.5, cell.frame.size.width, 0.5);
+                cell.lineImageView.frame = CGRectMake(60, cellHeight-0.5, cell.frame.size.width, 0.5);
             }
             else
             {
-                lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
+                cell.lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
             }
             cell.headerImageView.hidden = NO;
             cell.nameLabel.hidden = NO;

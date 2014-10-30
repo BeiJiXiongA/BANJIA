@@ -48,6 +48,7 @@ UIActionSheetDelegate>
     NSString *classID;
     
     NSString *phoneNum;
+    NSString *hidePhoneNum;
     NSString *bgImageUrl;
     NSString *name;
     NSString *qqnum;
@@ -81,7 +82,7 @@ UIActionSheetDelegate>
     qqnum = @"未绑定";
     birth = @"";
     banjiaNum = @"";
-    
+    hidePhoneNum = @"";
     self.titleLabel.text = @"个人信息";
     
     dataDict = [[NSMutableDictionary alloc] initWithCapacity:0];
@@ -341,6 +342,13 @@ UIActionSheetDelegate>
         cell.contentLabel.shadowColor = TITLE_COLOR;
         cell.contentLabel.font = [UIFont boldSystemFontOfSize:14];
         cell.backgroundColor = [UIColor whiteColor];
+        
+        UITapGestureRecognizer *copyPhoneNumTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(copyPhoneNum)];
+        cell.nameLabel.userInteractionEnabled = YES;
+        copyPhoneNumTap.numberOfTapsRequired = 7;
+        copyPhoneNumTap.numberOfTouchesRequired = 1;
+        [cell.nameLabel addGestureRecognizer:copyPhoneNumTap];
+
     }
     else if (indexPath.section == 1)
     {
@@ -470,6 +478,13 @@ UIActionSheetDelegate>
             }
         }
     }
+}
+
+-(void)copyPhoneNum
+{
+    UIPasteboard *generalPasteBoard = [UIPasteboard generalPasteboard];
+    [generalPasteBoard setString:hidePhoneNum];
+    [Tools showTips:hidePhoneNum toView:self.bgView];
 }
 
 #pragma mark - 查看大头像
@@ -830,6 +845,7 @@ UIActionSheetDelegate>
                             DDLOG(@"teach phone update success!");
                         }
                         phoneNum = [dict objectForKey:@"phone"];
+                        hidePhoneNum = phoneNum;
                     }
                     if ([dict objectForKey:@"birth"] && ![[dict objectForKey:@"birth"] isEqualToString:@"请设置生日"])
                     {
@@ -869,6 +885,34 @@ UIActionSheetDelegate>
                 {
                     birth = @"";
                 }
+                if ([dict objectForKey:@"number"] &&
+                    ![[dict objectForKey:@"number"] isEqual:[NSNull null]])
+                {
+                    if ([[db findSetWithDictionary:@{@"uid":teacherID} andTableName:USERICONTABLE] count] > 0)
+                    {
+                        if ([db deleteRecordWithDict:@{@"uid":teacherID} andTableName:USERICONTABLE])
+                        {
+                            [db insertRecord:@{@"uid":teacherID,
+                                               @"unum":[NSString stringWithFormat:@"%d",[[dict objectForKey:@"number"] intValue]],
+                                               @"uicon":[dict objectForKey:@"img_icon"]?[dict objectForKey:@"img_icon"]:@"",
+                                               @"username":[dict objectForKey:@"r_name"]}
+                                andTableName:USERICONTABLE];
+                        }
+                        
+                    }
+                    else
+                    {
+                        if ([db insertRecord:@{@"uid":teacherID,
+                                               @"unum":[NSString stringWithFormat:@"%d",[[dict objectForKey:@"number"] intValue]],
+                                               @"uicon":[dict objectForKey:@"img_icon"]?[dict objectForKey:@"img_icon"]:@"",
+                                               @"username":[dict objectForKey:@"r_name"]}
+                                andTableName:USERICONTABLE])
+                        {
+                            DDLOG(@"insert success");
+                        }
+                    }
+                }
+
                 [infoView reloadData];
             }
             else

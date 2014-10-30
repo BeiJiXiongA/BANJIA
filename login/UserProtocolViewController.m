@@ -8,7 +8,7 @@
 
 #import "UserProtocolViewController.h"
 
-@interface UserProtocolViewController ()
+@interface UserProtocolViewController ()<UIWebViewDelegate>
 
 @end
 
@@ -30,8 +30,18 @@
     
     NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",HOST_URL,USER_PROTOCOL]];
     UIWebView *webView = [[UIWebView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT)];
+    webView.delegate = self;
     [webView loadRequest:[NSURLRequest requestWithURL:url]];
     [self.bgView addSubview:webView];
+}
+
+- (void)webViewDidStartLoad:(UIWebView *)webView
+{
+    [Tools showProgress:self.bgView];
+}
+- (void)webViewDidFinishLoad:(UIWebView *)webView
+{
+    [Tools hideProgress:self.bgView];
 }
 
 - (void)didReceiveMemoryWarning
