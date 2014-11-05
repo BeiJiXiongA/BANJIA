@@ -18,6 +18,10 @@ andShareContent:(NSString *)shareContent
         andUrl:(NSString *)url
 {
     
+    if (shareType == ShareTypeWeixiTimeline)
+    {
+        mediaType = SSPublishContentMediaTypeApp;
+    }
     id<ISSContent> publishContent = [ShareSDK content:[NSString stringWithFormat:@"%@-%@",shareContent,ShareUrl]
                                        defaultContent:shareContent
                                                 image:attachment
