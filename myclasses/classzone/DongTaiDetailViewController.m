@@ -26,7 +26,9 @@
 UITableViewDelegate,
 UITextFieldDelegate,
 ReturnFunctionDelegate,
-UIActionSheetDelegate,NameButtonDel>
+UIActionSheetDelegate,
+NameButtonDel,
+ShareContentDelegate>
 {
     UITableView *diaryDetailTableView;
     NSDictionary *diaryDetailDict;
@@ -409,12 +411,15 @@ UIActionSheetDelegate,NameButtonDel>
     cell.locationLabel.lineBreakMode = NSLineBreakByWordWrapping | NSLineBreakByTruncatingTail;
     
     cell.headerImageView.hidden = NO;
-    cell.contentLabel.hidden = YES;
     cell.nameLabel.hidden = NO;
     cell.locationLabel.hidden = NO;
     cell.timeLabel.hidden = NO;
     cell.praiseButton.hidden = NO;
     cell.commentButton.hidden = NO;
+    
+    cell.contentLabel.font = DONGTAI_CONTENT_FONT;
+    
+    [cell setContent];
     
     for(UIView *v in cell.imagesView.subviews)
     {
@@ -423,21 +428,25 @@ UIActionSheetDelegate,NameButtonDel>
     if (([[[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"] length] > 0))
     {
         //有文字
-        cell.contentTextField.hidden = NO;
+        cell.contentLabel.hidden = NO;
         
-        NSString *content = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"];
+        NSString *content = [[[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"] emojizedString];
         
-        CGSize contentSize = [Tools getSizeWithString:content andWidth:SCREEN_WIDTH-DongTaiHorizantolSpace*2-16 andFont:DONGTAI_CONTENT_FONT];
+        CGSize contentSize = [SizeTools getSizeWithString:content andWidth:SCREEN_WIDTH-15 andFont:DONGTAI_CONTENT_FONT];
         
-        cell.contentTextField.text = [[[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"] emojizedString];
+        cell.contentLabel.text = content;
         
-        cell.contentTextField.textColor = CONTENTCOLOR;
+        cell.contentLabel.numberOfLines = 1000;
         
-        cell.contentTextField.frame = CGRectMake(6, cell.headerImageView.frame.size.height+cell.headerImageView.frame.origin.y+DongTaiSpace, SCREEN_WIDTH-15, contentSize.height+18);
+        cell.contentLabel.lineBreakMode = NSLineBreakByCharWrapping;
+        
+        cell.contentLabel.textColor = CONTENTCOLOR;
+        
+        cell.contentLabel.frame = CGRectMake(6, cell.headerImageView.frame.size.height+cell.headerImageView.frame.origin.y+DongTaiSpace, SCREEN_WIDTH-15, contentSize.height);
     }
     else
     {
-        cell.contentTextField.frame = CGRectMake(6, cell.headerImageView.frame.size.height+cell.headerImageView.frame.origin.y, 0, 0);
+        cell.contentLabel.frame = CGRectMake(6, cell.headerImageView.frame.size.height+cell.headerImageView.frame.origin.y, 0, 0);
     }
     
     CGFloat imageViewHeight = 67.5f;
@@ -460,8 +469,8 @@ UIActionSheetDelegate,NameButtonDel>
         if (([[[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"] length] > 0))
         {
             cell.imagesView.frame = CGRectMake(12,
-                                               cell.contentTextField.frame.size.height +
-                                               cell.contentTextField.frame.origin.y+DongTaiSpace,
+                                               cell.contentLabel.frame.size.height +
+                                               cell.contentLabel.frame.origin.y+DongTaiSpace,
                                                SCREEN_WIDTH-20, (imageViewHeight+5) * row);
         }
         else
@@ -492,7 +501,7 @@ UIActionSheetDelegate,NameButtonDel>
     }
     else
     {
-        cell.imagesView.frame = CGRectMake(5, cell.contentTextField.frame.size.height+cell.contentTextField.frame.origin.y, SCREEN_WIDTH-10, 0);
+        cell.imagesView.frame = CGRectMake(5, cell.contentLabel.frame.size.height+cell.contentLabel.frame.origin.y, SCREEN_WIDTH-10, 0);
     }
     
     CGFloat buttonHeight = 37;
@@ -502,7 +511,7 @@ UIActionSheetDelegate,NameButtonDel>
     CGFloat buttonY = 0;
     if ([[[diaryDetailDict objectForKey:@"detail"] objectForKey:@"img"] count] == 0)
     {
-        buttonY = cell.contentTextField.frame.size.height+cell.contentTextField.frame.origin.y+DongTaiSpace;
+        buttonY = cell.contentLabel.frame.size.height+cell.contentLabel.frame.origin.y+DongTaiSpace;
     }
     else
     {
@@ -975,6 +984,7 @@ UIActionSheetDelegate,NameButtonDel>
                 break;
         }
         ShareTools *shareTools = [[ShareTools alloc] init];
+        shareTools.shareContentDel = self;
         [shareTools shareTo:shareType andShareContent:content andImage:attchment andMediaType:SSPublishContentMediaTypeNews description:content andUrl:url];
     }
     else if (actionSheet.tag == 3333)
@@ -992,7 +1002,7 @@ UIActionSheetDelegate,NameButtonDel>
                 ReportViewController *reportVC = [[ReportViewController alloc] init];
                 reportVC.reportUserid = [[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"];
                 reportVC.reportContentID = dongtaiId;
-                reportVC.reportType = @"content";
+                reportVC.reportType = @"diary";
                 [self.navigationController pushViewController:reportVC animated:YES];
             }
         }
@@ -1008,6 +1018,11 @@ UIActionSheetDelegate,NameButtonDel>
             }
         }
     }
+}
+
+-(void)shareSuccess
+{
+    [Tools showTips:@"分享成功！" toView:self.bgView];
 }
 
 @end

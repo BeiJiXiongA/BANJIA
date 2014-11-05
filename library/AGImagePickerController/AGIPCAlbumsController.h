@@ -17,8 +17,8 @@
 @interface AGIPCAlbumsController : UITableViewController<UITableViewDataSource, UITableViewDelegate>
 
 @property (strong) AGImagePickerController *imagePickerController;
-@property (nonatomic, strong) NSMutableArray *alreadySelectedAssets;
+@property (nonatomic, strong) NSMutableDictionary *alreadySelectedAssets;
 
-- (id)initWithImagePickerController:(AGImagePickerController *)imagePickerController andAlreadySelect:(NSArray *)alreadySelected;
+- (id)initWithImagePickerController:(AGImagePickerController *)imagePickerController andAlreadySelect:(NSDictionary *)alreadySelected;
 
 @end

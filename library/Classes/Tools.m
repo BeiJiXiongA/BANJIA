@@ -419,7 +419,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     [request setRequestMethod:@"POST"];
     [request setTimeOutSeconds:12];
     [request setRequestHeaders:[[NSMutableDictionary alloc] initWithObjectsAndKeys:[Tools client_ver],@"current_version", nil]];
-    DDLOG(@"request header+++++ %@",request.requestHeaders);
+    DDLOG(@"request url+++++ %@",request.url);
     [postDataStr insertString:[NSString stringWithFormat:@"%@%@?",HOST_URL,subUrl] atIndex:[postDataStr length]];
     for (id keys in parameterDict)
     {

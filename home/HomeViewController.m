@@ -69,7 +69,8 @@ ChatDelegate,
 MsgDelegate,
 DongTaiDetailAddCommentDelegate,
 ZBarReaderDelegate,
-headerDelegate>
+headerDelegate,
+ShareContentDelegate>
 {
     int page;
     
@@ -1837,7 +1838,6 @@ headerDelegate>
             nameStr = name;
         }
         
-        
         cell.headerImageView.hidden = NO;
         cell.nameLabel.hidden = NO;
         cell.timeLabel.hidden = NO;
@@ -1845,7 +1845,6 @@ headerDelegate>
         cell.praiseButton.hidden = NO;
         cell.commentButton.hidden = NO;
         cell.transmitButton.hidden = NO;
-        cell.contentTextField.hidden = YES;
         
         cell.headerImageView.tag = SectionTag * indexPath.section + indexPath.row;
         cell.headerImageView.frame = CGRectMake(12, 12, 31, 31);
@@ -2628,9 +2627,13 @@ headerDelegate>
             break;
     }
     ShareTools *shareTools = [[ShareTools alloc] init];
+    shareTools.shareContentDel = self;
     [shareTools shareTo:shareType andShareContent:content andImage:attchment andMediaType:SSPublishContentMediaTypeNews description:content andUrl:url];
 }
-
+-(void)shareSuccess
+{
+    [Tools showTips:@"分享成功！" toView:self.bgView];
+}
 
 /*
 #pragma mark - Navigation

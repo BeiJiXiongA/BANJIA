@@ -21,7 +21,6 @@
 nameLabel,
 timeLabel,
 locationLabel,
-contentTextField,
 contentLabel,
 imagesView,
 transmitButton,
@@ -100,16 +99,6 @@ diaryIndexPath;
         contentLabel.font = [UIFont systemFontOfSize:14];
         contentLabel.backgroundColor = [UIColor clearColor];
         [bgView addSubview:contentLabel];
-        
-        contentTextField = [[UITextView alloc] init];
-        contentTextField.scrollEnabled = NO;
-        contentTextField.showsVerticalScrollIndicator = NO;
-        contentTextField.editable = NO;
-        contentTextField.hidden = YES;
-        contentTextField.textColor = CONTENTCOLOR;
-        contentTextField.font = [UIFont systemFontOfSize:15];
-        contentTextField.backgroundColor = [UIColor clearColor];
-        [bgView addSubview:contentTextField];
         
         imagesView = [[UIView alloc] init];
         imagesView.backgroundColor = [UIColor clearColor];
@@ -195,6 +184,50 @@ diaryIndexPath;
 
     // Configure the view for the selected state
 }
+
+-(void)setContent
+{
+    UILongPressGestureRecognizer *longTgr = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(msgLongTgr:)];
+    self.contentLabel.userInteractionEnabled = YES;
+    [self.contentLabel addGestureRecognizer:longTgr];
+}
+
+#pragma mark - 复制文本
+
+-(void)msgLongTgr:(UILongPressGestureRecognizer *)longTgr
+{
+    DDLOG(@"%d---%d",longTgr.state,[self becomeFirstResponder]);
+    if (longTgr.state != UIGestureRecognizerStateBegan ||
+        ![self becomeFirstResponder])
+        return;
+    CGRect viewRect = longTgr.view.frame;
+    CGFloat menuX = 0;
+    menuX = viewRect.origin.x+viewRect.size.width/2-22;
+    
+    
+    UIMenuController *menu = [UIMenuController sharedMenuController];
+    UIMenuItem *menuItem = [[UIMenuItem alloc] initWithTitle:@"复制" action:@selector(copytext)];
+    menu.menuItems = [NSArray arrayWithObjects:menuItem, nil];
+    [menu setTargetRect:CGRectMake(menuX, viewRect.origin.y+10, 50, 50) inView:self];
+    [menu setMenuVisible:YES animated:YES];
+}
+
+-(BOOL)canBecomeFirstResponder
+{
+    return YES;
+}
+
+-(BOOL)canPerformAction:(SEL)action withSender:(id)sender
+{
+    return (action == @selector(copytext));
+}
+
+-(void)copytext
+{
+    UIPasteboard *generalPasteBoard = [UIPasteboard generalPasteboard];
+    [generalPasteBoard setString:contentLabel.text];
+}
+
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
@@ -413,6 +446,7 @@ diaryIndexPath;
                 [cell.nameButton setTitleColor:RGB(64, 196, 110, 1) forState:UIControlStateNormal];
                 
                 NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row];
+                cell.commentDict = commitDict;
                 NSString *name = [NSString stringWithFormat:@"%@",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
                 NSString *content = [[commitDict objectForKey:@"content"] emojizedString];
                 CGSize s = [Tools getSizeWithString:content andWidth:MaxCommentWidth-30 andFont:CommentFont];
@@ -455,6 +489,9 @@ diaryIndexPath;
 
             
             NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row-1];
+            
+            cell.commentDict = commitDict;
+            
             NSString *name = [NSString stringWithFormat:@"%@",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
             NSString *content = [[commitDict objectForKey:@"content"] emojizedString];
             CGSize s = [Tools getSizeWithString:content andWidth:MaxCommentWidth-30 andFont:CommentFont];
@@ -567,6 +604,8 @@ diaryIndexPath;
                 [cell.nameButton setTitleColor:RGB(64, 196, 110, 1) forState:UIControlStateNormal];
                 
                 NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row];
+                cell.commentDict = commitDict;
+                
                 NSString *name = [NSString stringWithFormat:@"%@ : ",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
                 
                 CGSize nameSize;
@@ -608,6 +647,7 @@ diaryIndexPath;
             {
                 cell.nameButton.hidden = YES;
                 NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row-1];
+                cell.commentDict = commitDict;
                 NSString *name = [NSString stringWithFormat:@"%@ : ",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
                 
                 CGSize nameSize;

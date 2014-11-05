@@ -331,7 +331,7 @@ UIActionSheetDelegate>
                     ReportViewController *reportVC = [[ReportViewController alloc] init];
                     reportVC.reportUserid = byID;
                     reportVC.reportContentID = noticeID;
-                    reportVC.reportType = @"content";
+                    reportVC.reportType = @"notice";
                     [self.navigationController pushViewController:reportVC animated:YES];
                 }
             }
@@ -342,7 +342,7 @@ UIActionSheetDelegate>
                     ReportViewController *reportVC = [[ReportViewController alloc] init];
                     reportVC.reportUserid = byID;
                     reportVC.reportContentID = noticeID;
-                    reportVC.reportType = @"content";
+                    reportVC.reportType = @"notice";
                     [self.navigationController pushViewController:reportVC animated:YES];
                 }
             }
@@ -360,7 +360,7 @@ UIActionSheetDelegate>
                     ReportViewController *reportVC = [[ReportViewController alloc] init];
                     reportVC.reportUserid = byID;
                     reportVC.reportContentID = noticeID;
-                    reportVC.reportType = @"content";
+                    reportVC.reportType = @"notice";
                     [self.navigationController pushViewController:reportVC animated:YES];
                 }
             }

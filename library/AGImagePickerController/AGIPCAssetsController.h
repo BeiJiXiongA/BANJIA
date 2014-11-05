@@ -21,11 +21,11 @@
 @interface AGIPCAssetsController : UITableViewController<UITableViewDataSource, UITableViewDelegate, AGIPCGridItemDelegate>
 
 @property (strong) ALAssetsGroup *assetsGroup;
-@property (nonatomic, strong) NSMutableArray *selectedAssetsVar;
+@property (nonatomic, strong) NSMutableDictionary *selectImageDict;
 @property (strong) AGImagePickerController *imagePickerController;
 @property (nonatomic, assign) id<SelectAssetsDone> selectAssetsDoneDel;
 
-- (id)initWithImagePickerController:(AGImagePickerController *)imagePickerController andAssetsGroup:(ALAssetsGroup *)assetsGroup andAlreadyAssets:(NSArray *)alreadySssets;
+- (id)initWithImagePickerController:(AGImagePickerController *)imagePickerController andAssetsGroup:(ALAssetsGroup *)assetsGroup andAlreadyAssets:(NSDictionary *)alreadySssets;
 
 @end
 

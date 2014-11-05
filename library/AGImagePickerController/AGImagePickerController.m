@@ -19,7 +19,7 @@
     
 }
 
-- (void)didFinishPickingAssets:(NSArray *)selectedAssets;
+
 - (void)didCancelPickingAssets;
 - (void)didFail:(NSError *)error;
 
@@ -92,21 +92,10 @@
 
 #pragma mark - Object Lifecycle
 
-- (id)init
-{
-    return [self initWithDelegate:nil failureBlock:nil successBlock:nil maximumNumberOfPhotosToBeSelected:0 shouldChangeStatusBarStyle:SHOULD_CHANGE_STATUS_BAR_STYLE toolbarItemsForManagingTheSelection:nil andShouldShowSavedPhotosOnTop:SHOULD_SHOW_SAVED_PHOTOS_ON_TOP];
-}
-
-- (id)initWithDelegate:(id)delegate andAlreadySelect:(NSArray *)alreadySelected
+- (id)initWithDelegate:(id)delegate andAlreadySelect:(NSDictionary *)alreadySelected
 {
     return [self initWithDelegate:delegate failureBlock:nil successBlock:nil maximumNumberOfPhotosToBeSelected:0 shouldChangeStatusBarStyle:SHOULD_CHANGE_STATUS_BAR_STYLE toolbarItemsForManagingTheSelection:nil andShouldShowSavedPhotosOnTop:SHOULD_SHOW_SAVED_PHOTOS_ON_TOP
             andAlreadySelect:alreadySelected];
-}
-
-- (id)initWithFailureBlock:(AGIPCDidFail)failureBlock
-           andSuccessBlock:(AGIPCDidFinish)successBlock
-{
-    return [self initWithDelegate:nil failureBlock:failureBlock successBlock:successBlock maximumNumberOfPhotosToBeSelected:0 shouldChangeStatusBarStyle:SHOULD_CHANGE_STATUS_BAR_STYLE toolbarItemsForManagingTheSelection:nil andShouldShowSavedPhotosOnTop:SHOULD_SHOW_SAVED_PHOTOS_ON_TOP];
 }
 
 - (id)initWithDelegate:(id)delegate
@@ -116,7 +105,7 @@ maximumNumberOfPhotosToBeSelected:(NSUInteger)maximumNumberOfPhotosToBeSelected
 shouldChangeStatusBarStyle:(BOOL)shouldChangeStatusBarStyle
 toolbarItemsForManagingTheSelection:(NSArray *)toolbarItemsForManagingTheSelection
 andShouldShowSavedPhotosOnTop:(BOOL)shouldShowSavedPhotosOnTop
-andAlreadySelect:(NSArray *)alreadySelected
+andAlreadySelect:(NSDictionary *)alreadySelected
 {
     self = [super init];
     if (self)
@@ -152,7 +141,6 @@ andAlreadySelect:(NSArray *)alreadySelected
         self.didFailBlock = failureBlock;
         self.didFinishBlock = successBlock;
         
-        
         self.viewControllers = @[[[AGIPCAlbumsController alloc] initWithImagePickerController:self andAlreadySelect:alreadySelected]];
     }
     
@@ -168,21 +156,17 @@ andAlreadySelect:(NSArray *)alreadySelected
 
 #pragma mark - Private
 
-- (void)didFinishPickingAssets:(NSArray *)selectedAssets
+- (void)didFinishPickingAssets:(NSDictionary *)selectedAssets
 {
     [self popToRootViewControllerAnimated:NO];
     
     // Reset the number of selections
     [AGIPCGridItem performSelector:@selector(resetNumberOfSelections)];
     
-    if (self.didFinishBlock)
-        self.didFinishBlock(selectedAssets);
-    
-	if (_pickerFlags.delegateDidFinishPickingMediaWithInfo)
+    if (_pickerFlags.delegateDidFinishPickingMediaWithInfo)
     {
-		[self.delegate performSelector:@selector(agImagePickerController:didFinishPickingMediaWithInfo:) withObject:self withObject:selectedAssets];
-        
-	}
+        [self.delegate performSelector:@selector(agImagePickerController:didFinishPickingMediaWithInfo:) withObject:selectedAssets];
+    }
 }
 -(void)resetNumberOfSelections
 {

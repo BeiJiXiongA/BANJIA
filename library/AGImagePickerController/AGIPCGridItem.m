@@ -189,7 +189,7 @@ static NSUInteger numberOfSelectedGridItems = 0;
 - (void)loadImageFromAsset
 {
     self.thumbnailImageView.image = [UIImage imageWithCGImage:_asset.thumbnail];
-    if ([self.imagePickerController.selection containsObject:self]) {
+    if ([self.imagePickerController.selection objectForKey:[self.asset valueForProperty:ALAssetPropertyAssetURL]]) {
         self.selected = YES;
     }
 }

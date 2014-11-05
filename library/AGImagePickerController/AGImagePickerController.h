@@ -35,7 +35,8 @@ shouldDisplaySelectionInformationInSelectionMode:(AGImagePickerControllerSelecti
 shouldShowToolbarForManagingTheSelectionInSelectionMode:(AGImagePickerControllerSelectionMode)selectionMode;
 
 #pragma mark - Managing Selections
-- (void)agImagePickerController:(AGImagePickerController *)picker didFinishPickingMediaWithInfo:(NSArray *)info;
+- (void)agImagePickerController:(AGImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info;
+
 - (void)agImagePickerController:(AGImagePickerController *)picker didFail:(NSError *)error;
 
 @end
@@ -63,7 +64,7 @@ shouldShowToolbarForManagingTheSelectionInSelectionMode:(AGImagePickerController
     NSUInteger _maximumNumberOfPhotosToBeSelected;
     
     NSArray *_toolbarItemsForManagingTheSelection;
-    NSArray *_selection;
+    NSDictionary *_selection;
 }
 
 @property (nonatomic) BOOL shouldChangeStatusBarStyle;
@@ -77,23 +78,18 @@ shouldShowToolbarForManagingTheSelectionInSelectionMode:(AGImagePickerController
 @property (nonatomic, copy) AGIPCDidFinish didFinishBlock;
 
 @property (nonatomic, strong) NSArray *toolbarItemsForManagingTheSelection;
-@property (nonatomic, strong) NSArray *selection;
+@property (nonatomic, strong) NSDictionary *selection;
 
 @property (nonatomic, readonly) AGImagePickerControllerSelectionMode selectionMode;
 
 + (ALAssetsLibrary *)defaultAssetsLibrary;
 
-- (id)initWithDelegate:(id)delegate andAlreadySelect:(NSArray *)alreadySelected;
+- (id)initWithDelegate:(id)delegate andAlreadySelect:(NSDictionary *)alreadySelected;
 
-- (id)initWithFailureBlock:(AGIPCDidFail)failureBlock
-           andSuccessBlock:(AGIPCDidFinish)successBlock;
-- (id)initWithDelegate:(id)delegate
-          failureBlock:(AGIPCDidFail)failureBlock
-          successBlock:(AGIPCDidFinish)successBlock
-maximumNumberOfPhotosToBeSelected:(NSUInteger)maximumNumberOfPhotosToBeSelected
-shouldChangeStatusBarStyle:(BOOL)shouldChangeStatusBarStyle
-toolbarItemsForManagingTheSelection:(NSArray *)toolbarItemsForManagingTheSelection
-andShouldShowSavedPhotosOnTop:(BOOL)shouldShowSavedPhotosOnTop;
+
+- (void)didFinishPickingAssets:(NSDictionary *)selectedAssets;
+//- (id)initWithFailureBlock:(AGIPCDidFail)failureBlock
+//           andSuccessBlock:(AGIPCDidFinish)successBlock;
 
 @end
 

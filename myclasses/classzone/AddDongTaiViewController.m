@@ -67,7 +67,7 @@ UIAlertViewDelegate
     NSMutableArray *selectPhotosArray;
     NSMutableArray *normalPhotosArray;
     NSMutableArray *thunImageArray;
-    NSMutableArray *alreadySelectAssets;
+    NSMutableDictionary *alreadySelectAssets;
     
     NSMutableArray *latelyAssetArray;
     
@@ -151,7 +151,7 @@ int count = 0;
         latelyImageNumArray = [[NSMutableArray alloc] initWithCapacity:0];
         normalPhotosArray = [[NSMutableArray alloc] initWithCapacity:0];
         originalLatelyImageArray = [[NSMutableArray alloc] initWithCapacity:0];
-        alreadySelectAssets = [[NSMutableArray alloc] initWithCapacity:0];
+        alreadySelectAssets = [[NSMutableDictionary alloc] initWithCapacity:0];
         latelyAssetArray = [[NSMutableArray alloc] initWithCapacity:0];
     }
     return self;
@@ -641,29 +641,29 @@ int count = 0;
 
 -(void)updateLately
 {
-    ALAsset *asset = [latelyAssetArray lastObject];
-    [alreadySelectAssets addObject:asset];
-    [self reloadImages];
+//    ALAsset *asset = [latelyAssetArray lastObject];
+//    [alreadySelectAssets addObject:asset];
+//    [self reloadImages];
 }
 
 -(void)addLatelyImage:(UITapGestureRecognizer *)tap
 {
-    ALAsset *asset = [latelyAssetArray objectAtIndex:tap.view.tag-ImageTag];
-    if (![self hasThisLatelyImage:asset])
-    {
-        [alreadySelectAssets addObject:asset];
-    }
-    else
-    {
-        for(ALAsset *item in alreadySelectAssets)
-        {
-            if ([item isEqual:asset])
-            {
-                [alreadySelectAssets removeObject:item];
-            }
-        }
-    }
-    [self reloadImages];
+//    ALAsset *asset = [latelyAssetArray objectAtIndex:tap.view.tag-ImageTag];
+//    if (![self hasThisLatelyImage:asset])
+//    {
+//        [alreadySelectAssets addObject:asset];
+//    }
+//    else
+//    {
+//        for(ALAsset *item in alreadySelectAssets)
+//        {
+//            if ([item isEqual:asset])
+//            {
+//                [alreadySelectAssets removeObject:item];
+//            }
+//        }
+//    }
+//    [self reloadImages];
 }
 
 -(void)reloadImages
@@ -694,10 +694,9 @@ int count = 0;
         {
             imageTipLabel.hidden = NO;
         }
-        for (int i=0; i<[alreadySelectAssets count]; ++i)
+        for (int i = 0;i<[[alreadySelectAssets allKeys] count];i++)
         {
-            ALAsset *item = [alreadySelectAssets objectAtIndex:i];
-            
+            UIImage *image = [alreadySelectAssets objectForKey:[[alreadySelectAssets allKeys] objectAtIndex:i]];
             UIImageView *imageView = [[UIImageView alloc] init];
             imageView.layer.contentsGravity = kCAGravityResizeAspectFill;
             imageView.frame = CGRectMake(10+(imageW+5)*(i%4), 11.5+(imageH+5)*(i/4), imageW, imageH);
@@ -705,12 +704,9 @@ int count = 0;
             imageView.layer.cornerRadius = 5;
             imageView.clipsToBounds = YES;
             [imageScrollView addSubview:imageView];
-
-            [ImageTools setImageView:imageView withAsset:item andDefault:@"3100"];
             
-            UIImage *normalImage = [ImageTools getImageFromALAssesst:item];
-            [normalPhotosArray addObject:normalImage];
-//            [imageView setImage:normalImage];
+            [normalPhotosArray addObject:image];
+            [imageView setImage:image];
             
             UIButton *deleteButton = [UIButton buttonWithType:UIButtonTypeCustom];
             deleteButton.frame = CGRectMake(10+(imageW+5)*(i%4), 5+(imageH+5)*(i/4), imageW, 20);
@@ -769,7 +765,8 @@ int count = 0;
 
 -(void)deleteImage:(UIButton *)button
 {
-    [alreadySelectAssets removeObjectAtIndex:button.tag-DeleteButtonTag];
+    NSString *key = [[alreadySelectAssets allKeys] objectAtIndex:button.tag-DeleteButtonTag];
+    [alreadySelectAssets removeObjectForKey:key];
     [normalPhotosArray removeObjectAtIndex:button.tag - DeleteButtonTag];
     
     for(UIView *v in imageScrollView.subviews)
@@ -868,7 +865,6 @@ int count = 0;
 
 -(void)selectClasses:(NSArray *)selectClassesArray
 {
-    DDLOG(@"selected classes %@",selectClassesArray);
     [self submitDongTai:[selectClassesArray firstObject]];
 }
 
@@ -1076,11 +1072,6 @@ int count = 0;
 - (void)openAction:(id)sender
 {
     // Show saved photos on top
-    
-    for (int i = 0; i<[alreadySelectAssets count]; i++)
-    {
-        DDLOG(@"asset %@",[alreadySelectAssets objectAtIndex:i]);
-    }
 
     imagePickerController = [[AGImagePickerController alloc] initWithDelegate:self andAlreadySelect:alreadySelectAssets];
     imagePickerController.shouldShowSavedPhotosOnTop = YES;
@@ -1115,6 +1106,7 @@ int count = 0;
         double delayInSeconds = 0.5;
         dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
         dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+            
             [self dismissViewControllerAnimated:YES completion:^{
                 
             }];
@@ -1124,19 +1116,15 @@ int count = 0;
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:YES];
 }
 
-- (void)agImagePickerController:(AGImagePickerController *)picker didFinishPickingMediaWithInfo:(NSArray *)info
+- (void)agImagePickerController:(AGImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
     [alreadySelectAssets removeAllObjects];
-    for (int i= 0; i<[info count]; i++)
-    {
-        ALAsset *asset = [info objectAtIndex:i];
-        DDLOG(@"%@",asset);
-        [alreadySelectAssets addObject:asset];
-    }
+    alreadySelectAssets = [[NSMutableDictionary alloc] initWithDictionary:info];
     [self reloadImages];
     
+    DDLOG(@"all keys%@",[info allKeys]);
+    
     [self dismissViewControllerAnimated:YES completion:^{
-        DDLOG(@"album info %@",info);
     }];
 }
 
@@ -1192,7 +1180,7 @@ int count = 0;
              }
              if (index == [assetsGroup numberOfAssets]-1)
              {
-                 [alreadySelectAssets addObject:result];
+                 [alreadySelectAssets setObject:[ImageTools getImageFromALAssesst:result] forKey:[result valueForProperty:ALAssetPropertyAssetURL]];
                  dispatch_async(dispatch_get_main_queue(), ^{
                      [sysImagePickerController dismissViewControllerAnimated:YES completion:^{
                          [Tools hideProgress:sysImagePickerController.view];
@@ -1230,7 +1218,6 @@ int count = 0;
              [[AGImagePickerController defaultAssetsLibrary] enumerateGroupsWithTypes:ALAssetsGroupAll
                                                                            usingBlock:assetGroupEnumerator
                                                                          failureBlock:assetGroupEnumberatorFailure];
- 
          }
  
      });

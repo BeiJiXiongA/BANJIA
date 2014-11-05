@@ -32,7 +32,8 @@ UITextFieldDelegate,
 ChangePhoneNum,
 UIAlertViewDelegate,
 UIActionSheetDelegate,
-AuthImageDone>
+AuthImageDone,
+ShareContentDelegate>
 {
     UITableView *personalSettiongTableView;
     BOOL isAuth;
@@ -1190,7 +1191,13 @@ static int loginID;
     NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
     id<ISSCAttachment> attchment = [ShareSDK imageWithPath:tmpImagePath];
     ShareTools *shareTools = [[ShareTools alloc] init];
+    shareTools.shareContentDel = self;
     [shareTools shareTo:shareType andShareContent:ShareContent andImage:attchment andMediaType:SSPublishContentMediaTypeNews description:ShareContent andUrl:ShareUrl];
+}
+
+-(void)shareSuccess
+{
+    [Tools showTips:@"分享成功！" toView:self.bgView];
 }
 
 - (void)keyBoardWillHide:(NSNotification *)aNotification

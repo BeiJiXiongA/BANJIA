@@ -12,10 +12,9 @@
 
 +(CGSize)getSizeWithString:(NSString *)content andWidth:(CGFloat)width andFont:(UIFont *)font
 {
-    
     if ([content length]>=11)
     {
-        CGSize labsize = [content sizeWithFont:[UIFont systemFontOfSize:17] constrainedToSize:CGSizeMake(SCREEN_WIDTH-130, 9999) lineBreakMode:NSLineBreakByWordWrapping];
+        CGSize labsize = [content sizeWithFont:font constrainedToSize:CGSizeMake(width, 9999) lineBreakMode:NSLineBreakByCharWrapping];
         return labsize;
     }
     else

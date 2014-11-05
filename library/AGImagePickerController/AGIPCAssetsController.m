@@ -24,6 +24,10 @@ static NSMutableArray *_assets;
     ALAssetsGroup *_assetsGroup;
     
     AGImagePickerController *_imagePickerController;
+    
+    dispatch_group_t group;
+    
+    UIBarButtonItem *doneButtonItem;
 }
 
 @property (nonatomic, strong) NSMutableArray *assets;
@@ -119,7 +123,7 @@ static NSMutableArray *_assets;
 
 #pragma mark - Object Lifecycle
 
-- (id)initWithImagePickerController:(AGImagePickerController *)imagePickerController andAssetsGroup:(ALAssetsGroup *)assetsGroup andAlreadyAssets:(NSArray *)alreadySssets;
+- (id)initWithImagePickerController:(AGImagePickerController *)imagePickerController andAssetsGroup:(ALAssetsGroup *)assetsGroup andAlreadyAssets:(NSDictionary *)alreadySssets;
 {
     self = [super initWithStyle:UITableViewStylePlain];
     if (self)
@@ -130,16 +134,15 @@ static NSMutableArray *_assets;
         self.title = NSLocalizedStringWithDefaultValue(@"AGIPC.Loading", nil, [NSBundle mainBundle], @"Loading...", nil);
         self.title = [self.assetsGroup valueForProperty:ALAssetsGroupPropertyName];
         
-        self.selectedAssetsVar = [[NSMutableArray alloc] initWithArray:alreadySssets];
-        
+        self.selectImageDict = [[NSMutableDictionary alloc] initWithDictionary:alreadySssets];
         
         self.tableView.allowsMultipleSelection = NO;
         self.tableView.allowsSelection = NO;
         self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
         
         // Navigation Bar Items
-        UIBarButtonItem *doneButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneAction:)];
-        doneButtonItem.enabled = YES;
+        doneButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneAction:)];
+        doneButtonItem.enabled = NO;
         self.navigationItem.rightBarButtonItem = doneButtonItem;
         
         // Setup toolbar items
@@ -181,7 +184,7 @@ static NSMutableArray *_assets;
         for (NSUInteger i = startIndex; i <= endIndex; i++)
         {
             ALAsset *asset = ((AGIPCGridItem *)(self.assets)[i]).asset;
-            if ([self.selectedAssetsVar containsObject:asset])
+            if ([self.selectImageDict objectForKey:[asset valueForProperty:ALAssetPropertyAssetURL]])
             {
                 ((AGIPCGridItem *)(self.assets)[i]).selected = YES;
             }
@@ -248,6 +251,8 @@ static NSMutableArray *_assets;
     if (self.imagePickerController.shouldChangeStatusBarStyle) {
         self.wantsFullScreenLayout = YES;
     }
+    
+    group = dispatch_group_create();
     
     // Setup Notifications
     [self registerForNotifications];
@@ -316,14 +321,10 @@ static NSMutableArray *_assets;
     [self changeSelectionInformation];
     
 }
-
+//- (void)didFinishPickingAssets:(NSArray *)selectedAssets andImageArray:(NSArray *)imageArray
 - (void)doneAction:(id)sender
 {
-    [self.imagePickerController performSelector:@selector(didFinishPickingAssets:) withObject:self.selectedAssetsVar];
-}
--(void)didFinishPickingAssets:(id)sender
-{
-    
+    [self.imagePickerController performSelector:@selector(didFinishPickingAssets:) withObject:self.selectImageDict];
 }
 
 - (void)selectAllAction:(id)sender
@@ -364,44 +365,59 @@ static NSMutableArray *_assets;
 - (void)changeSelectionInformation
 {
     if (self.imagePickerController.shouldDisplaySelectionInformation ) {
-        if (0 == [self.selectedAssetsVar count] ) {
+        if (0 == [self.selectImageDict count] ) {
             self.navigationController.navigationBar.topItem.prompt = nil;
         } else {
             //self.navigationController.navigationBar.topItem.prompt = [NSString stringWithFormat:@"(%d/%d)", [AGIPCGridItem numberOfSelections], self.assets.count];
             // Display supports up to select several photos at the same time, springox(20131220)
             NSInteger maxNumber = _imagePickerController.maximumNumberOfPhotosToBeSelected;
             if (0 < maxNumber) {
-                self.navigationController.navigationBar.topItem.prompt = [NSString stringWithFormat:@"(%d/%d)", [self.selectedAssetsVar count], maxNumber];
+                self.navigationController.navigationBar.topItem.prompt = [NSString stringWithFormat:@"(%d/%d)", [self.selectImageDict count], maxNumber];
             } else {
-                self.navigationController.navigationBar.topItem.prompt = [NSString stringWithFormat:@"(%d/%d)", [self.selectedAssetsVar count], self.assets.count];
+                self.navigationController.navigationBar.topItem.prompt = [NSString stringWithFormat:@"(%d/%d)", [self.selectImageDict count], self.assets.count];
             }
         }
     }
 }
 
+
 #pragma mark - AGGridItemDelegate Methods
 
 - (void)agGridItem:(AGIPCGridItem *)gridItem didChangeNumberOfSelections:(NSNumber *)numberOfSelections
 {
-//    self.navigationItem.rightBarButtonItem.enabled = (numberOfSelections.unsignedIntegerValue > 0);
     if (gridItem.selected)
     {
-        if (![self.selectedAssetsVar containsObject:gridItem.asset])
+        if (![self.selectImageDict objectForKey:[gridItem.asset valueForProperty:ALAssetPropertyAssetURL]])
         {
-            [self.selectedAssetsVar addObject:gridItem.asset];
+            [self.selectImageDict setObject:[UIImage imageNamed:@"3100"] forKey:[gridItem.asset valueForProperty:ALAssetPropertyAssetURL]];
+            
+            dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+            
+            dispatch_group_async(group, concurrentQueue, ^{
+                
+                doneButtonItem.enabled = NO;
+                
+                UIImage *image = [ImageTools getImageFromALAssesst:gridItem.asset];
+                
+                dispatch_sync(dispatch_get_main_queue(), ^{
+                    
+                    [self.selectImageDict setObject:image forKey:[gridItem.asset valueForProperty:ALAssetPropertyAssetURL]];
+                    
+                });
+            });
         }
+        
+        dispatch_group_notify(group, dispatch_get_main_queue(), ^{
+            doneButtonItem.enabled = YES;
+        });
     }
     else
     {
-        if ([self.selectedAssetsVar containsObject:gridItem.asset])
+        if ([self.selectImageDict objectForKey:[gridItem.asset valueForProperty:ALAssetPropertyAssetURL]])
         {
-            [self.selectedAssetsVar removeObject:gridItem.asset];
+            [self.selectImageDict removeObjectForKey:[gridItem.asset valueForProperty:ALAssetPropertyAssetURL]];
         }
     }
-//    if ([self.selectAssetsDoneDel respondsToSelector:@selector(selectedChanged:selected:)])
-//    {
-//        [self.selectAssetsDoneDel selectedChanged:gridItem.asset selected:gridItem.selected];
-//    }
     [[NSNotificationCenter defaultCenter] postNotificationName:@"photochanged" object:gridItem];
     [self changeSelectionInformation];
 }

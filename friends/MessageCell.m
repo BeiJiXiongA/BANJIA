@@ -917,7 +917,6 @@
     {
         [generalPasteBoard setString:msgContent];
     }
-    
 }
 
 -(void)headerImageViewTap:(id)sender

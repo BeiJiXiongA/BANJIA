@@ -18,7 +18,7 @@ andShareContent:(NSString *)shareContent
         andUrl:(NSString *)url
 {
     
-    id<ISSContent> publishContent = [ShareSDK content:shareContent
+    id<ISSContent> publishContent = [ShareSDK content:[NSString stringWithFormat:@"%@-%@",shareContent,ShareUrl]
                                        defaultContent:shareContent
                                                 image:attachment
                                                 title:@"班家"
@@ -61,11 +61,16 @@ andShareContent:(NSString *)shareContent
                                                      picViewerViewDelegate:nil]
                              result:^(ShareType type, SSResponseState state, id<ISSPlatformShareInfo> statusInfo, id<ICMErrorInfo> error, BOOL end) {
                                  DDLOG(@"%@",statusInfo);
-                                 if (state == SSPublishContentStateSuccess)
+                                 if (state == SSResponseStateSuccess)
                                  {
-//                                     [DealJiFen dealJiFenWithID:waitDiaryID];
+                                     DDLOG(@"share success!");
+                                     
+                                     if ([self.shareContentDel respondsToSelector:@selector(shareSuccess)])
+                                     {
+                                         [self.shareContentDel shareSuccess];
+                                     }
                                  }
-                                 else if (state == SSPublishContentStateFail)
+                                 else if (state == SSResponseStateFail)
                                  {
                                      if (shareType == ShareTypeQQSpace && [[error errorDescription] isEqualToString:@"ERROR_DESC_QZONE_NOT_INSTALLED"])
                                      {

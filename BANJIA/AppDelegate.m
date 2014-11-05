@@ -59,7 +59,6 @@
     [[NSUserDefaults standardUserDefaults] setObject:@"1" forKey:@"showad"];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
-    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getNewClass) name:UPDATECLASSNUMBER object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getNewChat) name:UPDATECHATSNUMBER object:nil];
     

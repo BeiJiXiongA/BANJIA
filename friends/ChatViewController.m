@@ -118,6 +118,8 @@ MLEmojiLabelDelegate>
     UIImage *selfHeaderImage;
     
     NSString *openStr; //点击的电话号码或者网址
+    
+    ReloadTableViewType reloadTabelViewType;
 }
 @end
 
@@ -180,11 +182,12 @@ MLEmojiLabelDelegate>
     db = [[OperatDB alloc] init];
     
 //    [db deleteRecordWithDict:@{@"userid":[Tools user_id]} andTableName:CHATTABLE];
-    timeStr = @"0";
+    timeStr = @"";
     currentSec = 0;
     iseditting = NO;
     page = 0;
     faceViewHeight = 0;
+    reloadTabelViewType = ReloadTableViewTypeGetNew;
     
     showTimesArray = [[NSMutableArray alloc] initWithCapacity:0];
     
@@ -264,7 +267,7 @@ MLEmojiLabelDelegate>
         {
             [messageArray insertObject:[cacheChatArray objectAtIndex:i] atIndex:0];
         }
-        [self reloadTableView:ReloadTableViewTypeGetNew];
+        [self reloadTableView];
     }
     
     if ([Tools NetworkReachable])
@@ -276,7 +279,7 @@ MLEmojiLabelDelegate>
         else
         {
             
-            [self getChatLog];
+            [self getUnreadChatLog];
         }
     }
     else
@@ -370,7 +373,6 @@ MLEmojiLabelDelegate>
     
     [MobClick beginLogPageView:@"PageOne"];
     [self getUnreadChatLog];
-//    [self uploadLastViewTime];
 }
 -(void)viewWillDisappear:(BOOL)animated
 {
@@ -420,6 +422,7 @@ MLEmojiLabelDelegate>
 #pragma mark - 下拉刷新
 -(void)egoRefreshTableHeaderDidTriggerRefresh:(EGORefreshTableHeaderView *)view
 {
+    reloadTabelViewType = ReloadTableViewTypeGetMore;
     if ([messageArray count] > 0)
     {
         NSArray *cacheChatArray = [db findChatLogWithUid:[Tools user_id]
@@ -428,21 +431,25 @@ MLEmojiLabelDelegate>
                                                    start:[messageArray count] count:10];
         if ([cacheChatArray count] > 0)
         {
+            //取出本地的十条历史消息并且显示
             for (int i=0; i<[cacheChatArray count]; i++)
             {
                 [messageArray insertObject:[cacheChatArray objectAtIndex:i] atIndex:0];
             }
-            [self reloadTableView:ReloadTableViewTypeGetMore];
+            [self reloadTableView];
         }
         else
         {
+            //本地的消息已经全部显示了，根据本地消息时间戳获取历史消息
             NSDictionary *firstDict = [messageArray firstObject];
+            DDLOG(@"content===%@",[firstDict objectForKey:@"content"]);
             timeStr = [firstDict objectForKey:@"time"];
             [self getChatLog];
         }
     }
     else
     {
+        //本地没有消息时
         timeStr = @"9999999999";
         [self getChatLog];
     }
@@ -474,11 +481,14 @@ MLEmojiLabelDelegate>
     }
 }
 
-#pragma mark - 获得最新十条消息
+#pragma mark - 获得十条消息
 
--(void)getNewTenMsg
+-(void)getTenMsg
 {
-    [messageArray removeAllObjects];
+    if (reloadTabelViewType == ReloadTableViewTypeGetNew)
+    {
+        [messageArray removeAllObjects];
+    }
     NSArray *cacheChatArray = [db findChatLogWithUid:[Tools user_id]
                                           andOtherId:toID
                                         andTableName:CHATTABLE
@@ -489,12 +499,12 @@ MLEmojiLabelDelegate>
         {
             [messageArray insertObject:[cacheChatArray objectAtIndex:i] atIndex:0];
         }
-        [self reloadTableView:ReloadTableViewTypeGetNew];
+        [self reloadTableView];
     }
 }
 
 #pragma mark - 刷新消息列表
--(void)reloadTableView:(ReloadTableViewType)reloadTabelViewType
+-(void)reloadTableView
 {
     [showTimesArray removeAllObjects];
     for (int i=0; i<[messageArray count]; ++i)
@@ -563,8 +573,11 @@ MLEmojiLabelDelegate>
 
 -(void)getUnreadChatLog
 {
-    timeStr = @"0";
-    [self getChatLog];
+    if (![timeStr isEqualToString:@"0"])
+    {
+        timeStr = @"0";
+        [self getChatLog];
+    }
 }
 
 -(void)getChatLog
@@ -645,41 +658,13 @@ MLEmojiLabelDelegate>
                         [db deleteRecordWithDict:@{@"userid":[Tools user_id],@"mid":[dict objectForKey:@"_id"]} andTableName:CHATTABLE];
                         [db insertRecord:chatDict andTableName:CHATTABLE];
                     }
-//                    [self getNewTenMsg];
-//                    if ([array count] > 0 && [messageArray count] > 0 && ![timeStr isEqualToString:@"0"])
-//                    {
-//                        if (![self haveThisMsg:[chatDict objectForKey:@"mid"]])
-//                        {
-//                            [messageArray insertObject:chatDict atIndex:0];
-//                        }
-//                        [self reloadTableView:ReloadTableViewTypeGetMore];
-//                    }
-//                    else if([timeStr isEqualToString:@"0"])
-//                    {
-//                        if (![self haveThisMsg:[chatDict objectForKey:@"mid"]])
-//                        {
-//                            [messageArray insertObject:chatDict atIndex:[messageArray count]-i];
-//                        }
-//                        [self reloadTableView:ReloadTableViewTypeGetNew];
-//                    }
-//                    else
-//                    {
-//                        if (![self haveThisMsg:[chatDict objectForKey:@"mid"]])
-//                        {
-//                            [messageArray insertObject:chatDict atIndex:[messageArray count]];
-//                        }
-//                        [self reloadTableView:ReloadTableViewTypeGetNew];
-//                    }
                 }
-//                if ([array count] > 0 && [messageArray count] > 0 && ![timeStr isEqualToString:@"0"])
-//                {
-//                    [self reloadTableView:ReloadTableViewTypeGetMore];
-//                }
-//                else
-//                {
-//                    [self reloadTableView:ReloadTableViewTypeGetNew];
-//                }
-                [self getNewTenMsg];
+                /*
+                  收到一条新消息，getnewtenmsg
+                  上拉十条应该是 more
+                 */
+                
+                [self getTenMsg];
             }
             else
             {
@@ -742,6 +727,7 @@ MLEmojiLabelDelegate>
                     NSArray *chatLogArray = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"mid":[[responseDict objectForKey:@"data"] objectForKey:@"_id"]} andTableName:CHATTABLE];
                     if ([chatLogArray count] > 0)
                     {
+                        
                         NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithDictionary:[chatLogArray firstObject]];
                         if (isGroup)
                         {
@@ -760,7 +746,7 @@ MLEmojiLabelDelegate>
                                 DDLOG(@"update full chat log success!");
                             }
                             [messageArray insertObject:tmpDict atIndex:[messageArray count]];
-                            [self reloadTableView:ReloadTableViewTypeGetNew];
+                            [self reloadTableView];
                         }
                         else
                         {
@@ -778,7 +764,7 @@ MLEmojiLabelDelegate>
                                 DDLOG(@"update full chat log success!");
                             }
                             [messageArray insertObject:tmpDict atIndex:[messageArray count]];
-                            [self reloadTableView:ReloadTableViewTypeGetNew];
+                            [self reloadTableView];
                         }
                     }
                 }
@@ -938,7 +924,7 @@ MLEmojiLabelDelegate>
                     {
                         [messageArray insertObject:[cacheChatArray objectAtIndex:i] atIndex:0];
                     }
-                    [self reloadTableView:ReloadTableViewTypeGetNew];
+                    [self reloadTableView];
                 }
                 else
                 {
@@ -1148,7 +1134,7 @@ MLEmojiLabelDelegate>
 {
     if (dict && [dict count] > 0)
     {
-        
+        reloadTabelViewType = ReloadTableViewTypeGetNew;
         /*
          收到一条消息，更新数据库，取出数据库最新十条，刷新列表
          */
@@ -1189,7 +1175,7 @@ MLEmojiLabelDelegate>
                 }
             }
         }
-        [self getNewTenMsg];
+        [self getTenMsg];
     }
 }
 
@@ -1825,7 +1811,8 @@ MLEmojiLabelDelegate>
     [tmpChatDict setObject:toID forKey:@"tid"];
     [tmpChatDict setObject:@"1" forKey:@"readed"];
     [messageArray insertObject:tmpChatDict atIndex:[messageArray count]];
-    [self reloadTableView:ReloadTableViewTypeGetNew];
+    reloadTabelViewType = ReloadTableViewTypeGetNew;
+    [self reloadTableView];
     
     if ([Tools NetworkReachable])
     {

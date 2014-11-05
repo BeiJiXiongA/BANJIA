@@ -59,13 +59,13 @@
 
 #pragma mark - Object Lifecycle
 
-- (id)initWithImagePickerController:(AGImagePickerController *)imagePickerController andAlreadySelect:(NSArray *)alreadySelected
+- (id)initWithImagePickerController:(AGImagePickerController *)imagePickerController andAlreadySelect:(NSDictionary *)alreadySelected
 {
     self = [super initWithStyle:UITableViewStylePlain];
     if (self)
     {
         self.imagePickerController = imagePickerController;
-        self.alreadySelectedAssets = [[NSMutableArray alloc] initWithArray:alreadySelected];
+        self.alreadySelectedAssets = [[NSMutableDictionary alloc] initWithDictionary:alreadySelected];
         [self selectedAssets:alreadySelected];
     }
     
@@ -109,21 +109,14 @@
 
 -(void)selectedChanged:(NSNotification *)notification
 {
-    DDLOG(@"selectedChanged %@",notification.object);
     AGIPCGridItem *item = [notification object];
     if (item.selected)
     {
-        if (![self.alreadySelectedAssets containsObject:item.asset])
-        {
-            [self.alreadySelectedAssets addObject:item.asset];
-        }
+        [self.alreadySelectedAssets setObject:[ImageTools getImageFromALAssesst:item.asset] forKey:[item.asset valueForProperty:ALAssetPropertyAssetURL]];
     }
     else
     {
-        if ([self.alreadySelectedAssets containsObject:item.asset])
-        {
-            [self.alreadySelectedAssets removeObject:item.asset];
-        }
+        [self.alreadySelectedAssets removeObjectForKey:[item.asset valueForProperty:ALAssetPropertyAssetURL]];
     }
     
     if (0 == [self.alreadySelectedAssets count] )
@@ -207,20 +200,16 @@
 	return 57;
 }
 
--(BOOL)containThisAsset:(ALAsset *)alasset
+-(BOOL)containThisUrl:(NSString *)alassetUrl
 {
-    for (int i=0; i<[self.alreadySelectedAssets count]; i++)
+    if ([self.alreadySelectedAssets objectForKey:alassetUrl])
     {
-        ALAsset *asset = [self.alreadySelectedAssets objectAtIndex:i];
-        if ([asset isEqual:alasset])
-        {
-            return YES;
-        }
+        return YES;
     }
     return NO;
 }
 
--(void)selectedAssets:(NSArray *)alreadySelectAssets
+-(void)selectedAssets:(NSDictionary *)alreadySelectAssets
 {
     if (0 == [self.alreadySelectedAssets count] )
     {
@@ -242,17 +231,11 @@
 {
     if (isSelected)
     {
-        if (![self.alreadySelectedAssets containsObject:alasset])
-        {
-            [self.alreadySelectedAssets addObject:alasset];
-        }
+        [self.alreadySelectedAssets setObject:[ImageTools getImageFromALAssesst:alasset] forKey:[alasset valueForProperty:ALAssetPropertyAssetURL]];
     }
     else
     {
-        if ([self.alreadySelectedAssets containsObject:alasset])
-        {
-            [self.alreadySelectedAssets removeObject:alasset];
-        }
+        [self.alreadySelectedAssets removeObjectForKey:[alasset valueForProperty:ALAssetPropertyAssetURL]];
     }
     
     if (0 == [self.alreadySelectedAssets count] )

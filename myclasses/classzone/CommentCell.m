@@ -36,6 +36,10 @@
         [self.contentView addSubview:commentContentLabel];
         commentContentLabel.textColor = COMMENTCOLOR;
         
+        UILongPressGestureRecognizer *longTgr = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(msgLongTgr:)];
+        commentContentLabel.userInteractionEnabled = YES;
+        [commentContentLabel addGestureRecognizer:longTgr];
+        
         praiseView  = [[UIView alloc] init];
         praiseView.backgroundColor = RGB(252, 252, 252, 0);
         [self.contentView addSubview:praiseView];
@@ -60,6 +64,51 @@
     }
     return self;
 }
+
+
+#pragma mark - 复制文本
+
+-(void)msgLongTgr:(UILongPressGestureRecognizer *)longTgr
+{
+    DDLOG(@"%d---%d",longTgr.state,[self becomeFirstResponder]);
+    if (longTgr.state != UIGestureRecognizerStateBegan ||
+        ![self becomeFirstResponder])
+        return;
+    CGRect viewRect = longTgr.view.frame;
+    CGFloat menuX = 0;
+    menuX = viewRect.origin.x+viewRect.size.width/2-52;
+    
+    
+    UIMenuController *menu = [UIMenuController sharedMenuController];
+    UIMenuItem *menuItem = [[UIMenuItem alloc] initWithTitle:@"复制" action:@selector(copytext)];
+    UIMenuItem *menuItem1 = [[UIMenuItem alloc] initWithTitle:@"删除" action:@selector(deleteComment)];
+    menu.menuItems = [NSArray arrayWithObjects:menuItem, menuItem1, nil];
+    [menu setTargetRect:CGRectMake(menuX, viewRect.origin.y+10, 100, 50) inView:self];
+    [menu setMenuVisible:YES animated:YES];
+}
+
+-(void)deleteComment
+{
+    DDLOG(@"delete comment! %@",commentDict);
+    
+}
+
+-(BOOL)canBecomeFirstResponder
+{
+    return YES;
+}
+
+-(BOOL)canPerformAction:(SEL)action withSender:(id)sender
+{
+    return (action == @selector(copytext)) || (action == @selector(deleteComment));
+}
+
+-(void)copytext
+{
+    UIPasteboard *generalPasteBoard = [UIPasteboard generalPasteboard];
+    [generalPasteBoard setString:commentContentLabel.text];
+}
+
 
 - (void)awakeFromNib
 {

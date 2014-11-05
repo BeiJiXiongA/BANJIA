@@ -47,7 +47,8 @@ DongTaiDetailAddCommentDelegate,
 EGORefreshTableDelegate,
 UIActionSheetDelegate,
 ReturnFunctionDelegate,
-NameButtonDel>
+NameButtonDel,
+ShareContentDelegate>
 {
     UITableView *classZoneTableView;
     NSMutableArray *DongTaiArray;
@@ -797,6 +798,23 @@ NameButtonDel>
     [inputTabBar.inputTextView becomeFirstResponder];
 }
 
+-(void)showAllDiary
+{
+    if (isApply)
+    {
+        [Tools showTips:@"已经切换" toView:self.bgView];
+        isApply = NO;
+        [self getDongTaiList];
+    }
+}
+
+-(void)copyC_id
+{
+    UIPasteboard *generalPasteBoard = [UIPasteboard generalPasteboard];
+    [generalPasteBoard setString:classID];
+    [Tools showTips:@"copy c_id success!" toView:self.bgView];
+}
+
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (indexPath.section == 0)
@@ -816,6 +834,15 @@ NameButtonDel>
             cell.nameButtonDel = self;
             
             cell.topImageView.frame = CGRectMake(0, 0, SCREEN_WIDTH, bgImageViewHeight);
+            
+            if (isApply)
+            {
+                UITapGestureRecognizer *navtap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showAllDiary)];
+                cell.nameLabel.userInteractionEnabled = YES;
+                navtap.numberOfTapsRequired = 10;
+                [cell.nameLabel addGestureRecognizer:navtap];
+            }
+            
             NSString *topurlstring = [[NSUserDefaults standardUserDefaults] objectForKey:@"classkbimage"];
             if ([topurlstring length] >10)
             {
@@ -837,10 +864,7 @@ NameButtonDel>
             
             
             cell.headerImageView.tag = SectionTag * indexPath.section + indexPath.row;
-            
-            UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(headerImageViewClicked:)];
-            cell.headerImageView.userInteractionEnabled = YES;
-            [cell.headerImageView addGestureRecognizer:tap];
+
             
             CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
             UIView *verticalLineView = [[UIView alloc] init];
@@ -873,6 +897,8 @@ NameButtonDel>
                 [cell.headerImageView setImage:[UIImage imageNamed:@"headpic.jpg"]];
             }
             
+            cell.locationLabel.text = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
+            
             cell.locationLabel.frame = CGRectMake(cell.headerImageView.frame.size.width+cell.headerImageView.frame.origin.x+7, cell.headerImageView.frame.origin.y+5, 190, 20);
             cell.locationLabel.font = [UIFont systemFontOfSize:18];
             cell.locationLabel.shadowColor = TITLE_COLOR;
@@ -881,6 +907,11 @@ NameButtonDel>
             cell.locationLabel.textColor = [UIColor whiteColor];
             cell.locationLabel.layer.shadowColor = [UIColor grayColor].CGColor;
             cell.locationLabel.layer.shadowOffset = CGSizeMake(5, 5);
+            
+            UITapGestureRecognizer *headertap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(copyC_id)];
+            cell.locationLabel.userInteractionEnabled = YES;
+            headertap.numberOfTapsRequired = 10;
+            [cell.locationLabel addGestureRecognizer:headertap];
 
             
             cell.nameLabel.textAlignment = NSTextAlignmentLeft;
@@ -898,7 +929,7 @@ NameButtonDel>
                 cell.nameLabel.backgroundColor = [UIColor clearColor];
                 cell.locationLabel.backgroundColor = [UIColor clearColor];
             }
-            cell.locationLabel.text = [[NSUserDefaults standardUserDefaults] objectForKey:@"schoolname"];
+            
             cell.backgroundColor = [UIColor clearColor];
             if (isApply)
             {
@@ -1268,7 +1299,15 @@ NameButtonDel>
     personDetail.personID = [[dict objectForKey:@"by"] objectForKey:@"_id"];
     personDetail.personName = [[dict objectForKey:@"by"] objectForKey:@"name"];
     personDetail.headerImg = [[dict objectForKey:@"by"] objectForKey:@"img_icon"];
-    [[XDTabViewController sharedTabViewController].navigationController pushViewController:personDetail animated:YES];
+    if (![[[NSUserDefaults standardUserDefaults] objectForKey:@"opt"] isKindOfClass:[NSDictionary class]])
+    {
+        [self.navigationController pushViewController:personDetail animated:YES];
+    }
+    else
+    {
+        [[XDTabViewController sharedTabViewController].navigationController pushViewController:personDetail animated:YES];
+    }
+    
 }
 
 -(void)toDetail:(UITapGestureRecognizer *)tap
@@ -1288,8 +1327,14 @@ NameButtonDel>
     dongtaiDetailViewController.fromclass = NO;
     dongtaiDetailViewController.addComDel = self;
     
-    //        dongtaiDetailViewController.addComDel = self;
-    [self.navigationController pushViewController:dongtaiDetailViewController animated:YES];
+    if (![[[NSUserDefaults standardUserDefaults] objectForKey:@"opt"] isKindOfClass:[NSDictionary class]])
+    {
+        [self.navigationController pushViewController:dongtaiDetailViewController animated:YES];
+    }
+    else
+    {
+        [[XDTabViewController sharedTabViewController].navigationController pushViewController:dongtaiDetailViewController animated:YES];
+    }
 }
 
 
@@ -1380,22 +1425,22 @@ NameButtonDel>
     diaryID = [waitTransmitDict objectForKey:@"_id"];
     
     NSString *content;
-    if ([waitTransmitDict objectForKey:@"content"])
+    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"])
     {
-        if ([[waitTransmitDict objectForKey:@"content"] length] > 0)
+        if ([[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"] length] > 0)
         {
-            content = [waitTransmitDict objectForKey:@"content"];
+            content = [[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"];
         }
     }
     
     
     NSString *imagePath;
-    if ([waitTransmitDict objectForKey:@"img"])
+    if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"])
     {
-        NSArray *imageTmpArray = [waitTransmitDict objectForKey:@"img"];
+        NSArray *imageTmpArray = [[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"];
         if ([imageTmpArray count] > 0)
         {
-            imagePath = [NSString stringWithFormat:@"%@%@@150w",IMAGEURL,[[waitTransmitDict objectForKey:@"img"] firstObject]];
+            imagePath = [NSString stringWithFormat:@"%@%@@150w",IMAGEURL,[[[waitTransmitDict objectForKey:@"detail"] objectForKey:@"img"] firstObject]];
         }
     }
     content = [content length]>0?content:ShareContent;
@@ -1427,8 +1472,15 @@ NameButtonDel>
             break;
     }
     ShareTools *shareTools = [[ShareTools alloc] init];
+    shareTools.shareContentDel = self;
     [shareTools shareTo:shareType andShareContent:content andImage:attchment andMediaType:SSPublishContentMediaTypeNews description:content andUrl:url];
 }
+
+-(void)shareSuccess
+{
+    [Tools showTips:@"分享成功！" toView:self.bgView];
+}
+
 
 -(void)praiseDiary:(UIButton *)button
 {
@@ -1436,6 +1488,10 @@ NameButtonDel>
     if (isApply)
     {
         [Tools showAlertView:@"游客不能赞班级日志,赶快加入吧!" delegateViewController:nil];
+        return ;
+    }
+    if (![[[NSUserDefaults standardUserDefaults] objectForKey:@"opt"] isKindOfClass:[NSDictionary class]])
+    {
         return ;
     }
     if ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"opt"] objectForKey:UserSendLike] intValue] == 0)
@@ -1488,6 +1544,10 @@ NameButtonDel>
     if (isApply)
     {
         [Tools showAlertView:@"游客不能评论班级日志,赶快加入吧!" delegateViewController:nil];
+        return ;
+    }
+    if (![[[NSUserDefaults standardUserDefaults] objectForKey:@"opt"] isKindOfClass:[NSDictionary class]])
+    {
         return ;
     }
     
@@ -1595,7 +1655,7 @@ NameButtonDel>
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (isApply)
+    if (isApply && indexPath.section != 0 )
     {
         [Tools showAlertView:@"请您先申请加入班级！" delegateViewController:nil];
         return ;
@@ -1623,9 +1683,9 @@ NameButtonDel>
     }
 }
 
--(BOOL)havePraisedThisDiary:(NSDictionary *)diaryDict
+-(BOOL)havePraisedThisDiary:(NSDictionary *)diaryDict1
 {
-    NSArray *praiseArray = [[diaryDict objectForKey:@"detail"] objectForKey:@"likes"];
+    NSArray *praiseArray = [[diaryDict1 objectForKey:@"detail"] objectForKey:@"likes"];
     for (int i = 0; i < [praiseArray count]; i++)
     {
         NSDictionary *dict = [praiseArray objectAtIndex:i];

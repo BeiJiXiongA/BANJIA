@@ -8,10 +8,11 @@
 
 #import "SendAdviseViewController.h"
 
-@interface SendAdviseViewController ()<UITextViewDelegate>
+@interface SendAdviseViewController ()<UITextViewDelegate,UITextFieldDelegate>
 {
     UITextView *adviseTextView;
     UITextView *holderTextView;
+    MyTextField *contactTextField;
 }
 @end
 
@@ -64,6 +65,18 @@
     adviseTextView.backgroundColor = [UIColor clearColor];
     [self.bgView addSubview:adviseTextView];
     
+    contactTextField = [[MyTextField alloc] init];
+    contactTextField.frame = CGRectMake(adviseTextView.frame.origin.x-10, adviseTextView.frame.size.height+adviseTextView.frame.origin.y+20, adviseTextView.frame.size.width+20, 40);
+    contactTextField.layer.cornerRadius = 2;
+    contactTextField.delegate = self;
+    contactTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
+    contactTextField.clipsToBounds = YES;
+    contactTextField.textColor = TITLE_COLOR;
+    contactTextField.text = [Tools phone_num];
+    contactTextField.backgroundColor = [UIColor whiteColor];
+    contactTextField.placeholder = @"联系方式";
+    [self.bgView addSubview:contactTextField];
+    
 }
 
 - (void)didReceiveMemoryWarning
@@ -74,6 +87,11 @@
 -(void)unShowSelfViewController
 {
     [self.navigationController popViewControllerAnimated:YES];
+}
+
+-(BOOL)textFieldShouldClear:(UITextField *)textField
+{
+    return YES;
 }
 
 -(void)textViewDidChange:(UITextView *)textView
@@ -113,7 +131,8 @@
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
-                                                                      @"content":adviseTextView.text}
+                                                                      @"content":adviseTextView.text,
+                                                                      @"phone":contactTextField.text}
                                                                 API:MB_ADVISE];
         
         [request setCompletionBlock:^{
