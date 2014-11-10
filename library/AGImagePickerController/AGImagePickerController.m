@@ -92,10 +92,10 @@
 
 #pragma mark - Object Lifecycle
 
-- (id)initWithDelegate:(id)delegate andAlreadySelect:(NSDictionary *)alreadySelected
+- (id)initWithDelegate:(id)delegate andAlreadySelect:(NSDictionary *)alreadySelected andAlreadyKeyArray:(NSArray *)keyArray
 {
     return [self initWithDelegate:delegate failureBlock:nil successBlock:nil maximumNumberOfPhotosToBeSelected:0 shouldChangeStatusBarStyle:SHOULD_CHANGE_STATUS_BAR_STYLE toolbarItemsForManagingTheSelection:nil andShouldShowSavedPhotosOnTop:SHOULD_SHOW_SAVED_PHOTOS_ON_TOP
-            andAlreadySelect:alreadySelected];
+            andAlreadySelect:alreadySelected andAlreadyKeyArray:keyArray];
 }
 
 - (id)initWithDelegate:(id)delegate
@@ -106,6 +106,7 @@ shouldChangeStatusBarStyle:(BOOL)shouldChangeStatusBarStyle
 toolbarItemsForManagingTheSelection:(NSArray *)toolbarItemsForManagingTheSelection
 andShouldShowSavedPhotosOnTop:(BOOL)shouldShowSavedPhotosOnTop
 andAlreadySelect:(NSDictionary *)alreadySelected
+    andAlreadyKeyArray:(NSArray *)alreadyKeyArray
 {
     self = [super init];
     if (self)
@@ -141,7 +142,7 @@ andAlreadySelect:(NSDictionary *)alreadySelected
         self.didFailBlock = failureBlock;
         self.didFinishBlock = successBlock;
         
-        self.viewControllers = @[[[AGIPCAlbumsController alloc] initWithImagePickerController:self andAlreadySelect:alreadySelected]];
+        self.viewControllers = @[[[AGIPCAlbumsController alloc] initWithImagePickerController:self andAlreadySelect:alreadySelected andKeyArray:alreadyKeyArray]];
     }
     
     return self;
@@ -156,16 +157,20 @@ andAlreadySelect:(NSDictionary *)alreadySelected
 
 #pragma mark - Private
 
-- (void)didFinishPickingAssets:(NSDictionary *)selectedAssets
+- (void)didFinishPickingAssets:(NSDictionary *)selectedAssets andKeyArray:(NSArray *)keyArray
 {
     [self popToRootViewControllerAnimated:NO];
     
     // Reset the number of selections
     [AGIPCGridItem performSelector:@selector(resetNumberOfSelections)];
     
-    if (_pickerFlags.delegateDidFinishPickingMediaWithInfo)
+//    if (_pickerFlags.delegateDidFinishPickingMediaWithInfo)
     {
-        [self.delegate performSelector:@selector(agImagePickerController:didFinishPickingMediaWithInfo:) withObject:selectedAssets];
+//        [self.delegate performSelector:@selector(agImagePickerController:didFinishPickingMediaWithInfo:andKeyArray:) withObject:selectedAssets withObject:keyArray];
+        if ([self.delegate respondsToSelector:@selector(agImagePickerController:didFinishPickingMediaWithInfo:andKeyArray:)])
+        {
+            [self.delegate agImagePickerController:nil didFinishPickingMediaWithInfo:selectedAssets andKeyArray:keyArray];
+        }
     }
 }
 -(void)resetNumberOfSelections

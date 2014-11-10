@@ -45,7 +45,7 @@
 #pragma mark - Properties
 
 @synthesize imagePickerController = _imagePickerController;
-@synthesize alreadySelectedAssets;
+@synthesize alreadySelectedAssets,alreadyKeyArray;
 - (NSMutableArray *)assetsGroups
 {
     if (_assetsGroups == nil)
@@ -59,14 +59,15 @@
 
 #pragma mark - Object Lifecycle
 
-- (id)initWithImagePickerController:(AGImagePickerController *)imagePickerController andAlreadySelect:(NSDictionary *)alreadySelected
+- (id)initWithImagePickerController:(AGImagePickerController *)imagePickerController andAlreadySelect:(NSDictionary *)alreadySelected andKeyArray:(NSArray *)keyArray
 {
     self = [super initWithStyle:UITableViewStylePlain];
     if (self)
     {
         self.imagePickerController = imagePickerController;
         self.alreadySelectedAssets = [[NSMutableDictionary alloc] initWithDictionary:alreadySelected];
-        [self selectedAssets:alreadySelected];
+        self.alreadyKeyArray = [[NSMutableArray alloc] initWithArray:keyArray];
+        [self selectedAssets:keyArray];
     }
     
     return self;
@@ -188,7 +189,7 @@
 {
     [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
     
-	AGIPCAssetsController *controller = [[AGIPCAssetsController alloc] initWithImagePickerController:self.imagePickerController andAssetsGroup:self.assetsGroups[indexPath.row] andAlreadyAssets:self.alreadySelectedAssets];
+	AGIPCAssetsController *controller = [[AGIPCAssetsController alloc] initWithImagePickerController:self.imagePickerController andAssetsGroup:self.assetsGroups[indexPath.row] andAlreadyAssets:self.alreadySelectedAssets andKeyArray:self.alreadyKeyArray];
     controller.selectAssetsDoneDel = self;
 	[self.navigationController pushViewController:controller animated:YES];
 }
@@ -200,16 +201,16 @@
 	return 57;
 }
 
--(BOOL)containThisUrl:(NSString *)alassetUrl
-{
-    if ([self.alreadySelectedAssets objectForKey:alassetUrl])
-    {
-        return YES;
-    }
-    return NO;
-}
+//-(BOOL)containThisUrl:(NSString *)alassetUrl
+//{
+//    if ([self.alreadySelectedAssets objectForKey:alassetUrl])
+//    {
+//        return YES;
+//    }
+//    return NO;
+//}
 
--(void)selectedAssets:(NSDictionary *)alreadySelectAssets
+-(void)selectedAssets:(NSArray *)alreadySelectAssets
 {
     if (0 == [self.alreadySelectedAssets count] )
     {
@@ -232,10 +233,12 @@
     if (isSelected)
     {
         [self.alreadySelectedAssets setObject:[ImageTools getImageFromALAssesst:alasset] forKey:[alasset valueForProperty:ALAssetPropertyAssetURL]];
+        [self.alreadyKeyArray addObject:[alasset valueForProperty:ALAssetPropertyAssetURL]];
     }
     else
     {
         [self.alreadySelectedAssets removeObjectForKey:[alasset valueForProperty:ALAssetPropertyAssetURL]];
+        [self.alreadyKeyArray removeObject:[alasset valueForProperty:ALAssetPropertyAssetURL]];
     }
     
     if (0 == [self.alreadySelectedAssets count] )
@@ -249,7 +252,7 @@
         NSInteger maxNumber = _imagePickerController.maximumNumberOfPhotosToBeSelected;
         if (0 < maxNumber)
         {
-            self.navigationController.navigationBar.topItem.prompt = [NSString stringWithFormat:@"(%d/%d)", [self.alreadySelectedAssets count], maxNumber];
+            self.navigationController.navigationBar.topItem.prompt = [NSString stringWithFormat:@"(%d/%d)", [self.alreadyKeyArray count], maxNumber];
         }
     }
 }
@@ -318,6 +321,7 @@
 - (void)cancelAction:(id)sender
 {
     [self.alreadySelectedAssets removeAllObjects];
+    [self.alreadyKeyArray removeAllObjects];
     [self.imagePickerController performSelector:@selector(didCancelPickingAssets)];
 }
 

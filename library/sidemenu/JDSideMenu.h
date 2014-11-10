@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 #import "XDContentViewController.h"
+#import "MyPanGestureRecognizer.h"
+
 
 @protocol SideMenuDelegate;
 
@@ -22,7 +24,7 @@
 @property (nonatomic, assign) id<SideMenuDelegate> sideMenuDelegate;
 
 @property (nonatomic, strong) UITapGestureRecognizer *tapRecognizer;
-@property (nonatomic, strong) UIPanGestureRecognizer *panRecognizer;
+@property (nonatomic, strong) MyPanGestureRecognizer *panRecognizer;
 
 - (id)initWithContentController:(UIViewController*)contentController
                  menuController:(UIViewController*)menuController;
@@ -35,6 +37,7 @@
 // show / hide manually
 - (void)showMenuAnimated:(BOOL)animated;
 - (void)hideMenuAnimated:(BOOL)animated;
+
 - (BOOL)isMenuVisible;
 
 // background

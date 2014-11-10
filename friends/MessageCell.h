@@ -55,4 +55,6 @@
 -(void)joinClassWithMsgContent:(NSString *)msgContent;
 -(void)soundTap:(NSString *)msgContent andImageView:(UIImageView *)soundImageView;
 -(void)stopPlay:(NSString *)soundPath;
+
+-(void)bindPhone;
 @end

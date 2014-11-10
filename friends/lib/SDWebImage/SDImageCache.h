@@ -134,6 +134,8 @@ typedef enum SDImageCacheType SDImageCacheType;
  */
 - (void)clearMemory;
 
+-(NSString *)cachePath;
+
 /**
  * Clear all disk cached images
  */

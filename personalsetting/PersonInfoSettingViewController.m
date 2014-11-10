@@ -225,6 +225,19 @@ EditNameDone>
         birth = @"";
     }
     
+    if ([userName length] < 2)
+    {
+        [Tools showAlertView:@"名字的长度应该大于1个字符" delegateViewController:nil];
+        return;
+    }
+    
+    if ([userName length] > 15)
+    {
+        [Tools showAlertView:@"名字的长度应该小于15个字符" delegateViewController:nil];
+        return;
+    }
+
+    
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
@@ -302,11 +315,11 @@ EditNameDone>
     cell.contentLabel.textColor = TITLE_COLOR;
     if (indexPath.row == 0)
     {
-         cell.contentLabel.frame = CGRectMake(10, 12, 100, 30);
+         cell.contentLabel.frame = CGRectMake(10, 12, 80, 30);
     }
     else
     {
-         cell.contentLabel.frame = CGRectMake(10, 9, 100, 30);
+         cell.contentLabel.frame = CGRectMake(10, 9, 80, 30);
     }
     
     
@@ -317,7 +330,7 @@ EditNameDone>
     cell.iconImageView.hidden = YES;
     cell.nametf.hidden = YES;
     
-    cell.nametf.frame = CGRectMake(SCREEN_WIDTH - 200, 10, 180, 28);
+    cell.nametf.frame = CGRectMake(SCREEN_WIDTH - 270, 10, 250, 28);
     cell.nametf.textColor = TITLE_COLOR;
     cell.nametf.textAlignment = NSTextAlignmentRight;
     cell.nametf.font = [UIFont systemFontOfSize:16];

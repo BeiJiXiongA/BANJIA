@@ -334,8 +334,10 @@ ShareContentDelegate>
             {
                 cell = [[PersonalSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:firstCell];
             }
-            cell.nameLabel.frame = CGRectMake(90, 35, 18*[[Tools user_name] length], 20);
-            cell.nameLabel.text = [Tools user_name];
+            NSString *userName = [Tools user_name];
+            CGFloat nameLength = ([userName length]*18>(SCREEN_WIDTH-130))?(SCREEN_WIDTH-130):([userName length]*18);
+            cell.nameLabel.frame = CGRectMake(90, 35, nameLength, 20);
+            cell.nameLabel.text = userName;
             cell.nameLabel.font = [UIFont systemFontOfSize:18];
             cell.nameLabel.textColor = USER_NAME_COLOR;
             
@@ -846,19 +848,7 @@ static int loginID;
          }
          else
          {
-             if (loginID == ShareTypeQQSpace && [[error errorDescription] isEqualToString:@"ERROR_DESC_QZONE_NOT_INSTALLED"])
-             {
-                 [Tools showAlertView:@"尚未安装QQ或者QQ空间客户端，请安装后重试！" delegateViewController:nil];
-                 return  ;
-             }
-             else if (loginID == ShareTypeQQ)
-             {
-                 [Tools showAlertView:@"尚未安装QQ，请安装后重试！" delegateViewController:nil];
-                 return ;
-             }
-             DDLOG(@"%@",[error errorDescription]);
-             NSLog(NSLocalizedString(@"TEXT_SHARE_FAI", @"发布失败!error code == %d, error code == %@"), [error errorCode], [error errorDescription]);
-             DDLOG(@"faile==%@",[error errorDescription]);
+             NSLog(NSLocalizedString(@"TEXT_SHARE_FAI", @"失败!error code == %d, error code == %@"), [error errorCode], [error errorDescription]);
              [ShareSDK cancelAuthWithType:loginID];
          }
      }];
@@ -883,28 +873,26 @@ static int loginID;
             {
                 loginID = ShareTypeQQSpace;
                 acctype = @"qq";
-                [[NSUserDefaults standardUserDefaults] removeObjectForKey:QQNICKNAME];
+                
                 break;
             }
             case 2:
             {
                 loginID = ShareTypeSinaWeibo;
                 acctype = @"sw";
-                [[NSUserDefaults standardUserDefaults] removeObjectForKey:SINANICKNAME];
+                
                 break;
             }
             case 3:
             {
                 loginID = ShareTypeRenren;
                 acctype = @"rr";
-                [[NSUserDefaults standardUserDefaults] removeObjectForKey:RRNICKNAME];
                 break;
             }
             default:
                 break;
         }
-        [[NSUserDefaults standardUserDefaults] synchronize];
-        [ShareSDK cancelAuthWithType:loginID];
+    
         [self unBindAccount:acctype];
     }
 }
@@ -925,6 +913,21 @@ static int loginID;
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
                 [Tools showTips:@"成功解绑" toView:self.bgView];
+                if (loginID == ShareTypeRenren)
+                {
+                    [[NSUserDefaults standardUserDefaults] removeObjectForKey:RRNICKNAME];
+                }
+                else if(loginID == ShareTypeSinaWeibo)
+                {
+                    [[NSUserDefaults standardUserDefaults] removeObjectForKey:SINANICKNAME];
+                }
+                else if(loginID == ShareTypeQQSpace)
+                {
+                    [[NSUserDefaults standardUserDefaults] removeObjectForKey:QQNICKNAME];
+                }
+                [[NSUserDefaults standardUserDefaults] synchronize];
+                [ShareSDK cancelAuthWithType:loginID];
+                
                 [personalSettiongTableView reloadData];
             }
             else
@@ -1158,36 +1161,73 @@ static int loginID;
 #pragma mark - shareAPP
 -(void)shareAPP:(UIButton *)sender
 {
-    UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"分享到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"QQ空间",@"腾讯微博",@"QQ好友",@"微信朋友圈",@"人人网", nil];
-    [actionSheet showInView:self.bgView];
+    if ([WXApi isWXAppInstalled] && [QQApi isQQInstalled])
+    {
+        UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"转发到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"腾讯微博",@"人人网",@"微信朋友圈",@"QQ好友",@"QQ空间", nil];
+        [actionSheet showInView:self.bgView];
+    }
+    else if([WXApi isWXAppInstalled] && ![QQApi isQQInstalled])
+    {
+        UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"转发到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"腾讯微博",@"人人网",@"微信朋友圈", nil];
+        [actionSheet showInView:self.bgView];
+    }
+    else if(![WXApi isWXAppInstalled] && [QQApi isQQInstalled])
+    {
+        UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"转发到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"腾讯微博",@"人人网",@"QQ好友",@"QQ空间", nil];
+        [actionSheet showInView:self.bgView];
+    }
+    else if (![WXApi isWXAppInstalled] && ![QQApi isQQInstalled])
+    {
+        UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"转发到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"腾讯微博",@"人人网", nil];
+        [actionSheet showInView:self.bgView];
+    }
 }
 
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
     ShareType shareType;
+    if (buttonIndex == [actionSheet numberOfButtons]-1)
+    {
+        return;
+    }
     switch (buttonIndex)
     {
         case 0:
             shareType = ShareTypeSinaWeibo;
             break;
         case 1:
-            shareType = ShareTypeQQSpace;
-            break;
-        case 2:
             shareType = ShareTypeTencentWeibo;
             break;
+        case 2:
+            shareType = ShareTypeRenren;
+            break;
         case 3:
-            shareType = ShareTypeQQ;
+            if ([WXApi isWXAppInstalled])
+            {
+                shareType = ShareTypeWeixiTimeline;
+            }
+            else if(![WXApi isWXAppInstalled] && [QQApi isQQInstalled])
+            {
+                shareType = ShareTypeQQ;
+            }
             break;
         case 4:
-            shareType = ShareTypeWeixiTimeline;
+            if ([WXApi isWXAppInstalled])
+            {
+                shareType = ShareTypeQQ;
+            }
+            else if(![WXApi isWXAppInstalled] && [QQApi isQQInstalled])
+            {
+                shareType = ShareTypeQQSpace;
+            }
             break;
         case 5:
-            shareType = ShareTypeRenren;
+            shareType = ShareTypeQQSpace;
             break;
         default:
             break;
     }
+
     NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
     id<ISSCAttachment> attchment = [ShareSDK imageWithPath:tmpImagePath];
     ShareTools *shareTools = [[ShareTools alloc] init];

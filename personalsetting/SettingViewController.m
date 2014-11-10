@@ -595,6 +595,7 @@ MFMailComposeViewControllerDelegate>
     {
         if (buttonIndex == 1)
         {
+            DDLOG(@"path:%@",[[SDImageCache sharedImageCache] cachePath]);
             //清楚缓存
             [[SDImageCache sharedImageCache] clearDisk];
             [settingTableView reloadData];

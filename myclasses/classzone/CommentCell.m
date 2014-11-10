@@ -36,9 +36,9 @@
         [self.contentView addSubview:commentContentLabel];
         commentContentLabel.textColor = COMMENTCOLOR;
         
-        UILongPressGestureRecognizer *longTgr = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(msgLongTgr:)];
-        commentContentLabel.userInteractionEnabled = YES;
-        [commentContentLabel addGestureRecognizer:longTgr];
+//        UILongPressGestureRecognizer *longTgr = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(msgLongTgr:)];
+//        commentContentLabel.userInteractionEnabled = YES;
+//        [commentContentLabel addGestureRecognizer:longTgr];
         
         praiseView  = [[UIView alloc] init];
         praiseView.backgroundColor = RGB(252, 252, 252, 0);

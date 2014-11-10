@@ -35,9 +35,11 @@ shouldDisplaySelectionInformationInSelectionMode:(AGImagePickerControllerSelecti
 shouldShowToolbarForManagingTheSelectionInSelectionMode:(AGImagePickerControllerSelectionMode)selectionMode;
 
 #pragma mark - Managing Selections
-- (void)agImagePickerController:(AGImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info;
+//- (void)agImagePickerController:(AGImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info;
 
 - (void)agImagePickerController:(AGImagePickerController *)picker didFail:(NSError *)error;
+
+- (void)agImagePickerController:(AGImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info andKeyArray:(NSArray *)keyArray;
 
 @end
 
@@ -79,15 +81,16 @@ shouldShowToolbarForManagingTheSelectionInSelectionMode:(AGImagePickerController
 
 @property (nonatomic, strong) NSArray *toolbarItemsForManagingTheSelection;
 @property (nonatomic, strong) NSDictionary *selection;
+@property (nonatomic, strong) NSArray *selectKeyArray;
 
 @property (nonatomic, readonly) AGImagePickerControllerSelectionMode selectionMode;
 
 + (ALAssetsLibrary *)defaultAssetsLibrary;
 
-- (id)initWithDelegate:(id)delegate andAlreadySelect:(NSDictionary *)alreadySelected;
+//- (id)initWithDelegate:(id)delegate andAlreadySelect:(NSDictionary *)alreadySelected;
+- (id)initWithDelegate:(id)delegate andAlreadySelect:(NSDictionary *)alreadySelected andAlreadyKeyArray:(NSArray *)keyArray;
 
-
-- (void)didFinishPickingAssets:(NSDictionary *)selectedAssets;
+- (void)didFinishPickingAssets:(NSDictionary *)selectedAssets andKeyArray:(NSArray *)keyArray;
 //- (id)initWithFailureBlock:(AGIPCDidFail)failureBlock
 //           andSuccessBlock:(AGIPCDidFinish)successBlock;
 

@@ -9,7 +9,7 @@
 
 #import <QuartzCore/QuartzCore.h>
 #import <ShareSDK/ShareSDK.h>
-
+#import <TencentOpenAPI/QQApi.h>
 
 #import "Color.h"
 #import "Font.h"

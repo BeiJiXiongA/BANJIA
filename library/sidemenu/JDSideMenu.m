@@ -8,6 +8,7 @@
 
 #import "JDSideMenu.h"
 
+
 // constants
 const CGFloat JDSideMenuMinimumRelativePanDistanceToOpen = 0.25;
 const CGFloat JDSideMenuDefaultMenuWidth = 180.0;
@@ -63,7 +64,8 @@ const CGFloat JDSideMenuDefaultCloseAnimationTime = 0.2;
     
     // setup gesture recognizers
     self.tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapRecognized:)];
-    self.panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panRecognized:)];
+    self.panRecognizer = [[MyPanGestureRecognizer alloc] initWithTarget:self action:@selector(panRecognized:)];
+    self.panRecognizer.responseFrame = CGRectMake(0, 0, 50, SCREEN_HEIGHT);
     [self.containerView addGestureRecognizer:self.panRecognizer];
 }
 
@@ -162,6 +164,9 @@ const CGFloat JDSideMenuDefaultCloseAnimationTime = 0.2;
                 CGFloat transformedVelocity = velocity.x/ABS(self.menuWidth - translation.x);
                 CGFloat duration = JDSideMenuDefaultOpenAnimationTime * 0.66;
                 [self showMenuAnimated:YES duration:duration initialVelocity:transformedVelocity];
+                
+                
+                
             } else {
                 [self hideMenuAnimated:YES];
             }
@@ -197,6 +202,8 @@ const CGFloat JDSideMenuDefaultCloseAnimationTime = 0.2;
     [self.containerView addGestureRecognizer:self.tapRecognizer];
     [self addMenuControllerView];
     [self.containerView addGestureRecognizer:self.tapRecognizer];
+    
+    self.tapGestureEnabled = YES;
     // animate
     __weak typeof(self) blockSelf = self;
     [UIView animateWithDuration:animated ? duration : 0.0 animations:^{

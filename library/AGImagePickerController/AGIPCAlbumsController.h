@@ -18,7 +18,8 @@
 
 @property (strong) AGImagePickerController *imagePickerController;
 @property (nonatomic, strong) NSMutableDictionary *alreadySelectedAssets;
+@property (nonatomic, strong) NSMutableArray *alreadyKeyArray;
 
-- (id)initWithImagePickerController:(AGImagePickerController *)imagePickerController andAlreadySelect:(NSDictionary *)alreadySelected;
+- (id)initWithImagePickerController:(AGImagePickerController *)imagePickerController andAlreadySelect:(NSDictionary *)alreadySelected andKeyArray:(NSArray *)keyArray;
 
 @end

@@ -37,7 +37,7 @@
     [inviteButton addTarget:self action:@selector(editDone) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:inviteButton];
     
-    nameTextField = [[MyTextField alloc] initWithFrame:CGRectMake(40, UI_NAVIGATION_BAR_HEIGHT+40, SCREEN_WIDTH-80, 42)];
+    nameTextField = [[MyTextField alloc] initWithFrame:CGRectMake(20, UI_NAVIGATION_BAR_HEIGHT+40, SCREEN_WIDTH-40, 42)];
     nameTextField.background = nil;
     nameTextField.layer.cornerRadius = 5;
     nameTextField.clipsToBounds = YES;
@@ -69,13 +69,13 @@
         [Tools showAlertView:@"请输入您的姓名！" delegateViewController:nil];
         return;
     }
-    if ([nameTextField.text lengthOfBytesUsingEncoding:NSUTF8StringEncoding] < 2)
+    if ([nameTextField.text length] < 2)
     {
         [Tools showAlertView:@"名字的长度应该大于1个字符" delegateViewController:nil];
         return;
     }
     
-    if ([nameTextField.text lengthOfBytesUsingEncoding:NSUTF8StringEncoding] > 15)
+    if ([nameTextField.text length] > 15)
     {
         [Tools showAlertView:@"名字的长度应该小于15个字符" delegateViewController:nil];
         return;

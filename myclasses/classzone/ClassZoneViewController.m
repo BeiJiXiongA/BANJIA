@@ -1415,14 +1415,38 @@ ShareContentDelegate>
 #pragma mark - shareAPP
 -(void)shareAPP:(UIButton *)sender
 {
-    UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"转发到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"QQ空间",@"腾讯微博",@"QQ好友",@"微信朋友圈",@"人人网", nil];
-    [actionSheet showInView:self.bgView];
+    if ([WXApi isWXAppInstalled] && [QQApi isQQInstalled])
+    {
+        UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"转发到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"腾讯微博",@"人人网",@"微信朋友圈",@"QQ好友",@"QQ空间", nil];
+        [actionSheet showInView:self.bgView];
+    }
+    else if([WXApi isWXAppInstalled] && ![QQApi isQQInstalled])
+    {
+        UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"转发到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"腾讯微博",@"人人网",@"微信朋友圈", nil];
+        [actionSheet showInView:self.bgView];
+    }
+    else if(![WXApi isWXAppInstalled] && [QQApi isQQInstalled])
+    {
+        UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"转发到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"腾讯微博",@"人人网",@"QQ好友",@"QQ空间", nil];
+        [actionSheet showInView:self.bgView];
+    }
+    else if (![WXApi isWXAppInstalled] && [QQApi isQQInstalled])
+    {
+        UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"转发到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"腾讯微博",@"人人网", nil];
+        [actionSheet showInView:self.bgView];
+    }
 }
 
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
     DDLOG(@"waittransdict %@",waitTransmitDict);
     diaryID = [waitTransmitDict objectForKey:@"_id"];
+    
+    
+    if (buttonIndex == [actionSheet numberOfButtons]-1)
+    {
+        return;
+    }
     
     NSString *content;
     if ([[waitTransmitDict objectForKey:@"detail"] objectForKey:@"content"])
@@ -1454,23 +1478,38 @@ ShareContentDelegate>
             shareType = ShareTypeSinaWeibo;
             break;
         case 1:
-            shareType = ShareTypeQQSpace;
-            break;
-        case 2:
             shareType = ShareTypeTencentWeibo;
             break;
+        case 2:
+            shareType = ShareTypeRenren;
+            break;
         case 3:
-            shareType = ShareTypeQQ;
+            if ([WXApi isWXAppInstalled])
+            {
+                shareType = ShareTypeWeixiTimeline;
+            }
+            else if(![WXApi isWXAppInstalled] && [QQApi isQQInstalled])
+            {
+                shareType = ShareTypeQQ;
+            }
             break;
         case 4:
-            shareType = ShareTypeWeixiTimeline;
+            if ([WXApi isWXAppInstalled])
+            {
+                shareType = ShareTypeQQ;
+            }
+            else if(![WXApi isWXAppInstalled] && [QQApi isQQInstalled])
+            {
+                shareType = ShareTypeQQSpace;
+            }
             break;
         case 5:
-            shareType = ShareTypeRenren;
+            shareType = ShareTypeQQSpace;
             break;
         default:
             break;
     }
+
     ShareTools *shareTools = [[ShareTools alloc] init];
     shareTools.shareContentDel = self;
     [shareTools shareTo:shareType andShareContent:content andImage:attchment andMediaType:SSPublishContentMediaTypeNews description:content andUrl:url];

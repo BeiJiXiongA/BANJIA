@@ -17,15 +17,15 @@ andShareContent:(NSString *)shareContent
    description:(NSString *)description
         andUrl:(NSString *)url
 {
-    
+    NSString *title = @"班家";
     if (shareType == ShareTypeWeixiTimeline)
     {
-        mediaType = SSPublishContentMediaTypeApp;
+        title = [NSString stringWithFormat:@"%@",shareContent];
     }
     id<ISSContent> publishContent = [ShareSDK content:[NSString stringWithFormat:@"%@-%@",shareContent,ShareUrl]
                                        defaultContent:shareContent
                                                 image:attachment
-                                                title:@"班家"
+                                                title:title
                                                   url:ShareUrl
                                           description:description
                                             mediaType:mediaType];
@@ -76,16 +76,6 @@ andShareContent:(NSString *)shareContent
                                  }
                                  else if (state == SSResponseStateFail)
                                  {
-                                     if (shareType == ShareTypeQQSpace && [[error errorDescription] isEqualToString:@"ERROR_DESC_QZONE_NOT_INSTALLED"])
-                                     {
-                                         [Tools showAlertView:@"尚未安装QQ或者QQ空间客户端，请安装后重试！" delegateViewController:nil];
-                                         return  ;
-                                     }
-                                     else if (shareType == ShareTypeQQ)
-                                     {
-                                         [Tools showAlertView:@"尚未安装QQ，请安装后重试！" delegateViewController:nil];
-                                         return ;
-                                     }
                                      DDLOG(@"%@",[error errorDescription]);
                                      NSLog(NSLocalizedString(@"TEXT_SHARE_FAI", @"发布失败!error code == %d, error code == %@"), [error errorCode], [error errorDescription]);
                                      

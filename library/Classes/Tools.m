@@ -720,7 +720,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
             for (int j = 0; j < [sourceArray count]; ++j)
             {
                 NSDictionary *dict = [sourceArray objectAtIndex:j];
-                NSString *first = [NSString stringWithFormat:@"%c",[[ChineseToPinyin jianPinFromChiniseString:[dict objectForKey:key]] characterAtIndex:0]];
+                NSString *first = [NSString stringWithFormat:@"%c",[[ChineseToPinyin pinyinFromChiniseString:[dict objectForKey:key]] characterAtIndex:0]];
                 if (![letters containsObject:first] && ![letters1 containsObject:first])
                 {
                     [array addObject:dict];
@@ -736,7 +736,7 @@ extern NSString *CTSettingCopyMyPhoneNumber();
             for (int j = 0; j < [sourceArray count]; ++j)
             {
                 NSDictionary *dict = [sourceArray objectAtIndex:j];
-                NSString *first = [NSString stringWithFormat:@"%c",[[ChineseToPinyin jianPinFromChiniseString:[dict objectForKey:key]] characterAtIndex:0]];
+                NSString *first = [NSString stringWithFormat:@"%c",[[ChineseToPinyin pinyinFromChiniseString:[dict objectForKey:key]] characterAtIndex:0]];
                 char ch1 = [first characterAtIndex:0];
                 char ch2 = [[letters objectAtIndex:i] characterAtIndex:0];
                 if ([[letters objectAtIndex:i]isEqualToString:first] ||

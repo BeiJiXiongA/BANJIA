@@ -21,6 +21,7 @@
 #import "ScoreMemListViewController.h"
 #import "EGORefreshTableHeaderView.h"
 #import "Downloader.h"
+#import "ChangePhoneViewController.h"
 
 
 #define DIRECT  @"direct"
@@ -191,23 +192,6 @@ MLEmojiLabelDelegate>
     
     showTimesArray = [[NSMutableArray alloc] initWithCapacity:0];
     
-    if (toID && name)
-    {
-        NSDictionary *userDict = [[NSDictionary alloc] initWithObjectsAndKeys:toID,@"uid",name,@"username",imageUrl,@"uicon", nil];
-        if ([[db findSetWithDictionary:userDict andTableName:USERICONTABLE] count] == 0)
-        {
-            [db insertRecord:userDict andTableName:USERICONTABLE];
-        }
-        else
-        {
-            if ([db deleteRecordWithDict:@{toID:@"uid"} andTableName:USERICONTABLE])
-            {
-                [db insertRecord:userDict andTableName:USERICONTABLE];
-            }
-        }
-    }
-    
-    
     moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
     moreButton.frame = CGRectMake(SCREEN_WIDTH-CORNERMORERIGHT, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     if (![toID isEqualToString:OurTeamID])
@@ -265,7 +249,20 @@ MLEmojiLabelDelegate>
     {
         for (int i=0; i<[cacheChatArray count]; i++)
         {
-            [messageArray insertObject:[cacheChatArray objectAtIndex:i] atIndex:0];
+            NSDictionary *dict = [cacheChatArray objectAtIndex:i];
+            if ([[dict objectForKey:@"readed"] intValue] == 0 &&
+                [dict objectForKey:@"l"] && ![[dict objectForKey:@"l"] isEqual:[NSNull null]] &&
+                [[dict objectForKey:@"l"] intValue] == 1 &&
+                ([[dict objectForKey:@"fid"] isEqualToString:@"6180000"] ||
+                 [[dict objectForKey:@"fid"] isEqualToString:OurTeamID]))
+            {
+                [self getMsgContentWithMid:[dict objectForKey:@"mid"]];
+            }
+            else
+            {
+                [messageArray insertObject:[cacheChatArray objectAtIndex:i] atIndex:0];
+            }
+            
         }
         [self reloadTableView];
     }
@@ -373,6 +370,8 @@ MLEmojiLabelDelegate>
     
     [MobClick beginLogPageView:@"PageOne"];
     [self getUnreadChatLog];
+    
+    [self backInput];
 }
 -(void)viewWillDisappear:(BOOL)animated
 {
@@ -631,6 +630,7 @@ MLEmojiLabelDelegate>
                     [chatDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"t"] integerValue]] forKey:@"time"];
                     [chatDict setObject:imageUrl?imageUrl:@"" forKey:@"ficon"];
                     [chatDict setObject:@"1" forKey:@"readed"];
+                    [chatDict setObject:@"0" forKey:@"l"];
                     [chatDict setObject:TEXTMEG forKey:@"msgType"];
                     if ([[dict objectForKey:@"by"] isEqualToString:[Tools user_id]])
                     {
@@ -757,6 +757,9 @@ MLEmojiLabelDelegate>
                                   withParaDict:@{@"userid":[Tools user_id],@"mid":[[responseDict objectForKey:@"data"] objectForKey:@"_id"]}
                                   andTableName:CHATTABLE])&&
                                 ([db updeteKey:@"fid" toValue:toID
+                                  withParaDict:@{@"userid":[Tools user_id],@"mid":[[responseDict objectForKey:@"data"] objectForKey:@"_id"]}
+                                  andTableName:CHATTABLE]) &&
+                                ([db updeteKey:@"tid" toValue:[Tools user_id]
                                   withParaDict:@{@"userid":[Tools user_id],@"mid":[[responseDict objectForKey:@"data"] objectForKey:@"_id"]}
                                   andTableName:CHATTABLE]) &&
                                 ([db updeteKey:@"readed" toValue:@"1" withParaDict:@{@"userid":[Tools user_id],@"mid":[[responseDict objectForKey:@"data"] objectForKey:@"_id"]} andTableName:CHATTABLE]))
@@ -1708,6 +1711,19 @@ MLEmojiLabelDelegate>
         return YES;
     }
     return NO;
+}
+
+-(void)bindPhone
+{
+    if ([[Tools phone_num] length] == 0)
+    {
+        ChangePhoneViewController *changePhoneNumVC = [[ChangePhoneViewController alloc] init];
+        [self.navigationController pushViewController:changePhoneNumVC animated:YES];
+    }
+    else
+    {
+        [Tools showAlertView:[NSString stringWithFormat:@"您已绑定手机号%@",[Tools phone_num]] delegateViewController:nil];
+    }
 }
 
 -(void)joinClassWithMsgContent:(NSString *)msgContent

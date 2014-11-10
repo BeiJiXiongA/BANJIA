@@ -22,10 +22,12 @@
 
 @property (strong) ALAssetsGroup *assetsGroup;
 @property (nonatomic, strong) NSMutableDictionary *selectImageDict;
+@property (nonatomic, strong) NSMutableArray *selectKeyArray;
+
 @property (strong) AGImagePickerController *imagePickerController;
 @property (nonatomic, assign) id<SelectAssetsDone> selectAssetsDoneDel;
 
-- (id)initWithImagePickerController:(AGImagePickerController *)imagePickerController andAssetsGroup:(ALAssetsGroup *)assetsGroup andAlreadyAssets:(NSDictionary *)alreadySssets;
+- (id)initWithImagePickerController:(AGImagePickerController *)imagePickerController andAssetsGroup:(ALAssetsGroup *)assetsGroup andAlreadyAssets:(NSDictionary *)alreadySssets andKeyArray:(NSArray *)keyArray;
 
 @end
 

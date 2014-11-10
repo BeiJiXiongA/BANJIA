@@ -333,6 +333,11 @@ static const NSInteger kDefaultCacheMaxCacheAge = 60 * 60 * 24 * 7; // 1 week
     });
 }
 
+-(NSString *)cachePath
+{
+    return self.diskCachePath;
+}
+
 - (void)cleanDisk
 {
     dispatch_async(self.ioQueue, ^

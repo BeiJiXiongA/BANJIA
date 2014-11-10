@@ -112,7 +112,7 @@
     nameTextField.background = nil;
     nameTextField.layer.cornerRadius = 5;
     nameTextField.clipsToBounds = YES;
-    nameTextField.placeholder = @"15个汉字以内";
+    nameTextField.placeholder = @"15个字符以内";
     nameTextField.backgroundColor = [UIColor whiteColor];
     nameTextField.textColor = COMMENTCOLOR;
     nameTextField.font = [UIFont systemFontOfSize:16];
@@ -260,13 +260,13 @@
         [Tools showAlertView:@"请输入您的姓名！" delegateViewController:nil];
         return;
     }
-    if ([nameTextField.text lengthOfBytesUsingEncoding:NSUTF8StringEncoding] < 2)
+    if ([nameTextField.text length] < 2)
     {
         [Tools showAlertView:@"名字的长度应该大于1个字符" delegateViewController:nil];
         return;
     }
     
-    if ([nameTextField.text lengthOfBytesUsingEncoding:NSUTF8StringEncoding] > 15)
+    if ([nameTextField.text length] > 15)
     {
         [Tools showAlertView:@"名字的长度应该小于15个字符" delegateViewController:nil];
         return;

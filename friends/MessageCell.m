@@ -298,7 +298,24 @@
                 self.messageContentLabel.userInteractionEnabled = YES;
                 
                 self.joinlable.frame = CGRectMake(15, size.height+10, size.width, 30);
-                self.joinlable.text = @"点击查看详情";
+                NSDictionary *subDict = [Tools JSonFromString:[msgContent substringToIndex:range.location]];
+                DDLOG(@"[subDict objectForKey:] %@",[subDict objectForKey:@"t"]);
+                if ([subDict isKindOfClass:[NSDictionary class]])
+                {
+                    if ([[subDict objectForKey:@"t"] isEqualToString:@"noPone"])
+                    {
+                        self.joinlable.text = @"绑定手机号";
+                    }
+                    else
+                    {
+                        self.joinlable.text = @"点击查看详情";
+                    }
+                }
+                else
+                {
+                    self.joinlable.text = @"点击查看详情";
+                }
+                
                 self.joinlable.backgroundColor = [UIColor clearColor];
                 self.joinlable.hidden = NO;
                 
@@ -1048,7 +1065,23 @@
 -(void)joinClass:(UITapGestureRecognizer *)tap
 {
     NSString *msgContent = [msgDict objectForKey:@"content"];
-    if ([self.msgDelegate respondsToSelector:@selector(joinClassWithMsgContent:)])
+    NSRange range = [msgContent rangeOfString:@"$!#"];
+    NSDictionary *subDict = [Tools JSonFromString:[msgContent substringToIndex:range.location]];
+    if ([subDict isKindOfClass:[NSDictionary class]])
+    {
+        if ([[subDict objectForKey:@"t"] isEqualToString:@"noPone"])
+        {
+            if ([self.msgDelegate respondsToSelector:@selector(bindPhone)])
+            {
+                [self.msgDelegate bindPhone];
+            }
+        }
+        else if ([self.msgDelegate respondsToSelector:@selector(joinClassWithMsgContent:)])
+        {
+            [self.msgDelegate joinClassWithMsgContent:msgContent];
+        }
+    }
+    else if ([self.msgDelegate respondsToSelector:@selector(joinClassWithMsgContent:)])
     {
         [self.msgDelegate joinClassWithMsgContent:msgContent];
     }

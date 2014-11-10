@@ -123,7 +123,7 @@ static NSMutableArray *_assets;
 
 #pragma mark - Object Lifecycle
 
-- (id)initWithImagePickerController:(AGImagePickerController *)imagePickerController andAssetsGroup:(ALAssetsGroup *)assetsGroup andAlreadyAssets:(NSDictionary *)alreadySssets;
+- (id)initWithImagePickerController:(AGImagePickerController *)imagePickerController andAssetsGroup:(ALAssetsGroup *)assetsGroup andAlreadyAssets:(NSDictionary *)alreadySssets andKeyArray:(NSArray *)keyArray;
 {
     self = [super initWithStyle:UITableViewStylePlain];
     if (self)
@@ -135,6 +135,7 @@ static NSMutableArray *_assets;
         self.title = [self.assetsGroup valueForProperty:ALAssetsGroupPropertyName];
         
         self.selectImageDict = [[NSMutableDictionary alloc] initWithDictionary:alreadySssets];
+        self.selectKeyArray = [[NSMutableArray alloc] initWithArray:keyArray];
         
         self.tableView.allowsMultipleSelection = NO;
         self.tableView.allowsSelection = NO;
@@ -324,7 +325,7 @@ static NSMutableArray *_assets;
 //- (void)didFinishPickingAssets:(NSArray *)selectedAssets andImageArray:(NSArray *)imageArray
 - (void)doneAction:(id)sender
 {
-    [self.imagePickerController performSelector:@selector(didFinishPickingAssets:) withObject:self.selectImageDict];
+    [self.imagePickerController didFinishPickingAssets:self.selectImageDict andKeyArray:self.selectKeyArray];
 }
 
 - (void)selectAllAction:(id)sender
@@ -402,6 +403,7 @@ static NSMutableArray *_assets;
                 dispatch_sync(dispatch_get_main_queue(), ^{
                     
                     [self.selectImageDict setObject:image forKey:[gridItem.asset valueForProperty:ALAssetPropertyAssetURL]];
+                    [self.selectKeyArray addObject:[gridItem.asset valueForProperty:ALAssetPropertyAssetURL]];
                     
                 });
             });
@@ -416,6 +418,7 @@ static NSMutableArray *_assets;
         if ([self.selectImageDict objectForKey:[gridItem.asset valueForProperty:ALAssetPropertyAssetURL]])
         {
             [self.selectImageDict removeObjectForKey:[gridItem.asset valueForProperty:ALAssetPropertyAssetURL]];
+            [self.selectKeyArray removeObject:[gridItem.asset valueForProperty:ALAssetPropertyAssetURL]];
         }
     }
     [[NSNotificationCenter defaultCenter] postNotificationName:@"photochanged" object:gridItem];

@@ -81,8 +81,10 @@ UISearchBarDelegate>
     NSString *className;
     NSString *classID;
     
-    NSArray *iconOnArray;
-    NSArray *iconArray;
+    NSMutableArray *iconOnArray;
+    NSMutableArray *iconArray;
+    
+    
     UIScrollView *buttonScrollView;
     
     NSMutableArray *selectedUsers;
@@ -197,16 +199,28 @@ UISearchBarDelegate>
     buttonScrollView.showsHorizontalScrollIndicator = NO;
     [self.bgView addSubview:buttonScrollView];
     
+    iconArray = [[NSMutableArray alloc] initWithCapacity:0];
+    iconOnArray = [[NSMutableArray alloc] initWithCapacity:0];
     
     if (fromClass)
     {
-        iconOnArray = @[@"Invite_banjia_friend_on",@"invite_phone_on",@"invite_QQ_on",@"invite_weichat_on"];
-        iconArray = @[@"Invite_banjia_friend",@"invite_phone",@"invite_QQ",@"invite_weichat"];
+        [iconOnArray addObjectsFromArray:@[@"Invite_banjia_friend_on",@"invite_phone_on"]];
+        [iconArray addObjectsFromArray:@[@"Invite_banjia_friend",@"invite_phone"]];
     }
     else
     {
-        iconOnArray = @[@"invite_phone_on",@"invite_QQ_on",@"invite_weichat_on"];
-        iconArray = @[@"invite_phone",@"invite_QQ",@"invite_weichat"];
+        [iconOnArray addObjectsFromArray:@[@"invite_phone_on"]];
+        [iconArray addObjectsFromArray:@[@"invite_phone"]];
+    }
+    if ([WXApi isWXAppInstalled])
+    {
+        [iconArray addObject:@"invite_weichat"];
+        [iconOnArray addObject:@"invite_weichat_on"];
+    }
+    if ([QQApi isQQInstalled])
+    {
+        [iconArray addObject:@"invite_QQ"];
+        [iconOnArray addObject:@"invite_QQ_on"];
     }
     
     for (int i=0; i<[iconOnArray count]; i++)
@@ -1241,7 +1255,7 @@ UISearchBarDelegate>
     [UIView animateWithDuration:0.2 animations:^{
         
     }];
-    for (int i = 0; i < (4- fromClassTableViewIndex); i++)
+    for (int i = 0; i < ([iconArray count]- fromClassTableViewIndex); i++)
     {
         if (i == button.tag - tableViewTagBase)
         {

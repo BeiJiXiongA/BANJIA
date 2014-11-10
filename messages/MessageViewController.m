@@ -101,7 +101,7 @@ ChatVCDelegate>
     editButton.backgroundColor = [UIColor clearColor];
     [editButton setTitleColor:RightCornerTitleColor forState:UIControlStateNormal];
     [editButton addTarget:self action:@selector(editTableView) forControlEvents:UIControlEventTouchUpInside];
-    [self.navigationBarView addSubview:editButton];
+//    [self.navigationBarView addSubview:editButton];
     
     [self.backButton setHidden:YES];
     
@@ -436,7 +436,7 @@ ChatVCDelegate>
     }
     
     NSArray *array = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"fid":fid,@"readed":@"0"} andTableName:CHATTABLE];
-    NSArray *array1 = [db findSetWithDictionary:@{@"fid":uNumber} andTableName:CHATTABLE];
+    NSArray *array1 = [db findSetWithDictionary:@{@"userid":[Tools user_id],@"fid":uNumber} andTableName:CHATTABLE];
     for (NSDictionary *dbDict in array1)
     {
         if ([db updeteKey:@"fid" toValue:fid withParaDict:@{@"mid":[dbDict objectForKey:@"mid"],@"userid":[Tools user_id]} andTableName:CHATTABLE] &&

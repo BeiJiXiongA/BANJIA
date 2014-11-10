@@ -1976,8 +1976,10 @@ ShareContentDelegate>
                 imageView.userInteractionEnabled = YES;
                 imageView.tag = (indexPath.section-[noticeArray count]-2)*SectionTag+indexPath.row*RowTag+i+333;
                 
+                UITapGestureRecognizer *imageTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapImage:)];
+                
                 imageView.userInteractionEnabled = YES;
-                [imageView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapImage:)]];
+                [imageView addGestureRecognizer:imageTap];
                 
                 // 内容模式
                 imageView.clipsToBounds = YES;
@@ -2116,6 +2118,12 @@ ShareContentDelegate>
 #pragma mark - 点击幻灯片
 -(void)headerImageClick
 {
+    if ([self.navigationController.sideMenuController isMenuVisible])
+    {
+        [self.sideMenuController hideMenuAnimated:YES];
+        [self.navigationController.sideMenuController hideMenuAnimated:YES];
+        return ;
+    }
     NSDictionary *dict = [adArray objectAtIndex:((UIScrollView *)[classTableView viewWithTag:AdScrollViewTag]).contentOffset.x/SCREEN_WIDTH];
     NSURL *url = [NSURL URLWithString:[dict objectForKey:@"href"]];
     TOWebViewController *webViewController = [[TOWebViewController alloc] initWithURL:url];
@@ -2128,6 +2136,12 @@ ShareContentDelegate>
 
 -(void)headerImageViewClicked:(UITapGestureRecognizer *)tap
 {
+    if ([self.navigationController.sideMenuController isMenuVisible])
+    {
+        [self.sideMenuController hideMenuAnimated:YES];
+        [self.navigationController.sideMenuController hideMenuAnimated:YES];
+        return ;
+    }
     int section = ((tap.view.tag)/SectionTag-1)-[noticeArray count];
     int row = (tap.view.tag)%SectionTag;
     NSDictionary *groupDict = [groupDiaries objectAtIndex:section-1];
@@ -2142,6 +2156,12 @@ ShareContentDelegate>
 
 -(void)toDetail:(UITapGestureRecognizer *)tap
 {
+    if ([self.navigationController.sideMenuController isMenuVisible])
+    {
+        [self.sideMenuController hideMenuAnimated:YES];
+        [self.navigationController.sideMenuController hideMenuAnimated:YES];
+        return ;
+    }
     int section = ((tap.view.tag)/SectionTag-1)-[noticeArray count];
     int row = (tap.view.tag)%SectionTag;
     NSDictionary *groupDict = [groupDiaries objectAtIndex:section-1];
@@ -2222,6 +2242,12 @@ ShareContentDelegate>
 
 - (void)tapImage:(UITapGestureRecognizer *)tap
 {
+    if ([self.navigationController.sideMenuController isMenuVisible])
+    {
+        [self.sideMenuController hideMenuAnimated:YES];
+        [self.navigationController.sideMenuController hideMenuAnimated:YES];
+        return ;
+    }
     if ([inputTabBar.inputTextView isFirstResponder])
     {
         [self backInput];
@@ -2275,6 +2301,12 @@ ShareContentDelegate>
 
 -(void)praiseDiary:(UIButton *)button
 {
+    if ([self.navigationController.sideMenuController isMenuVisible])
+    {
+        [self.sideMenuController hideMenuAnimated:YES];
+        [self.navigationController.sideMenuController hideMenuAnimated:YES];
+        return ;
+    }
     [self backInput];
     NSDictionary *groupDict = [groupDiaries objectAtIndex:button.tag/SectionTag];
     NSArray *tmpArray = [groupDict objectForKey:@"diaries"];
@@ -2319,6 +2351,12 @@ ShareContentDelegate>
 #pragma mark - 评论按钮评论日志
 -(void)commentDiary:(UIButton *)button
 {
+    if ([self.navigationController.sideMenuController isMenuVisible])
+    {
+        [self.sideMenuController hideMenuAnimated:YES];
+        [self.navigationController.sideMenuController hideMenuAnimated:YES];
+        return ;
+    }
     NSDictionary *groupDict = [groupDiaries objectAtIndex:button.tag/SectionTag];
     NSArray *tmpArray = [groupDict objectForKey:@"diaries"];
     waitCommentDict = [tmpArray objectAtIndex:button.tag%SectionTag];
@@ -2524,20 +2562,15 @@ ShareContentDelegate>
     waitTransmitDict = [[array objectAtIndex:button.tag%SectionTag] objectForKey:@"detail"];
     [self shareAPP:nil];
 }
-//-(void)nameButtonClick:(NSDictionary *)dict
-//{
-//    DDLOG(@"person dict %@",dict);
-//    PersonDetailViewController *personDetailVC = [[PersonDetailViewController alloc] init];
-//    personDetailVC.personName = [[dict objectForKey:@"by"] objectForKey:@"name"];
-//    personDetailVC.personID = [[dict objectForKey:@"by"] objectForKey:@"_id"];
-//    [self.sideMenuController hideMenuAnimated:YES];
-//    [self.navigationController pushViewController:personDetailVC animated:YES];
-//}
 
 -(void)nameButtonClick:(NSDictionary *)dict
 {
-    
-    DDLOG(@"home %@",dict);
+    if ([self.navigationController.sideMenuController isMenuVisible])
+    {
+        [self.sideMenuController hideMenuAnimated:YES];
+        [self.navigationController.sideMenuController hideMenuAnimated:YES];
+        return ;
+    }
     DongTaiDetailViewController *dongtaiDetailViewController = [[DongTaiDetailViewController alloc] init];
     dongtaiDetailViewController.dongtaiId = [dict objectForKey:@"_id"];
     dongtaiDetailViewController.fromclass = NO;
@@ -2567,15 +2600,45 @@ ShareContentDelegate>
 #pragma mark - shareAPP
 -(void)shareAPP:(UIButton *)sender
 {
+    if ([self.navigationController.sideMenuController isMenuVisible])
+    {
+        [self.sideMenuController hideMenuAnimated:YES];
+        [self.navigationController.sideMenuController hideMenuAnimated:YES];
+        return ;
+    }
     [self backInput];
-    UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"转发到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"QQ空间",@"腾讯微博",@"QQ好友",@"微信朋友圈",@"人人网", nil];
-    [actionSheet showInView:self.bgView];
+    
+    if ([WXApi isWXAppInstalled] && [QQApi isQQInstalled])
+    {
+        UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"转发到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"腾讯微博",@"人人网",@"微信朋友圈",@"QQ好友",@"QQ空间", nil];
+        [actionSheet showInView:self.bgView];
+    }
+    else if([WXApi isWXAppInstalled] && ![QQApi isQQInstalled])
+    {
+        UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"转发到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"腾讯微博",@"人人网",@"微信朋友圈", nil];
+        [actionSheet showInView:self.bgView];
+    }
+    else if(![WXApi isWXAppInstalled] && [QQApi isQQInstalled])
+    {
+        UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"转发到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"腾讯微博",@"人人网",@"QQ好友",@"QQ空间", nil];
+        [actionSheet showInView:self.bgView];
+    }
+    else if (![WXApi isWXAppInstalled] && ![QQApi isQQInstalled])
+    {
+        UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"转发到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"腾讯微博",@"人人网", nil];
+        [actionSheet showInView:self.bgView];
+    }
 }
 
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    DDLOG(@"waittransdict %@",waitTransmitDict);
+    DDLOG(@"waittransdict %@ ==%d",waitTransmitDict,buttonIndex);
     [self backInput];
+    
+    if (buttonIndex == [actionSheet numberOfButtons]-1)
+    {
+        return;
+    }
     
     waitDiaryID = [diaryDict objectForKey:@"_id"];
     
@@ -2609,19 +2672,33 @@ ShareContentDelegate>
             shareType = ShareTypeSinaWeibo;
             break;
         case 1:
-            shareType = ShareTypeQQSpace;
-            break;
-        case 2:
             shareType = ShareTypeTencentWeibo;
             break;
+        case 2:
+            shareType = ShareTypeRenren;
+            break;
         case 3:
-            shareType = ShareTypeQQ;
+            if ([WXApi isWXAppInstalled])
+            {
+                shareType = ShareTypeWeixiTimeline;
+            }
+            else if(![WXApi isWXAppInstalled] && [QQApi isQQInstalled])
+            {
+                shareType = ShareTypeQQ;
+            }
             break;
         case 4:
-             shareType = ShareTypeWeixiTimeline;
+            if ([WXApi isWXAppInstalled])
+            {
+                shareType = ShareTypeQQ;
+            }
+            else if(![WXApi isWXAppInstalled] && [QQApi isQQInstalled])
+            {
+                shareType = ShareTypeQQSpace;
+            }
             break;
         case 5:
-            shareType = ShareTypeRenren;
+            shareType = ShareTypeQQSpace;
             break;
         default:
             break;

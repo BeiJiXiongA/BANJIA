@@ -64,10 +64,15 @@ UIAlertViewDelegate
     AGImagePickerController *imagePickerController;
     UIImagePickerController *sysImagePickerController;
     
+    UIActivityIndicatorView *locationProgressView;
+    
     NSMutableArray *selectPhotosArray;
     NSMutableArray *normalPhotosArray;
     NSMutableArray *thunImageArray;
+    
+    //已经选择的照片
     NSMutableDictionary *alreadySelectAssets;
+    NSMutableArray *alreadySelectArray;
     
     NSMutableArray *latelyAssetArray;
     
@@ -152,6 +157,7 @@ int count = 0;
         normalPhotosArray = [[NSMutableArray alloc] initWithCapacity:0];
         originalLatelyImageArray = [[NSMutableArray alloc] initWithCapacity:0];
         alreadySelectAssets = [[NSMutableDictionary alloc] initWithCapacity:0];
+        alreadySelectArray = [[NSMutableArray alloc] initWithCapacity:0];
         latelyAssetArray = [[NSMutableArray alloc] initWithCapacity:0];
     }
     return self;
@@ -176,6 +182,7 @@ int count = 0;
                 CGSize nameSize = [Tools getSizeWithString:name andWidth:200 andFont:[UIFont systemFontOfSize:14]];
                 locationTextView.frame = CGRectMake(locationButton.frame.size.width+locationButton.frame.origin.x, locationButton.frame.origin.y-3, nameSize.width+60,35);
             }];
+            [locationProgressView stopAnimating];
             locationTextView.text = name;
             latitude = newLocation.coordinate.latitude;
             longitude = newLocation.coordinate.longitude;
@@ -199,6 +206,7 @@ int count = 0;
             errorString = @"位置错误";
             break;
     }
+    [locationProgressView stopAnimating];
     [Tools showAlertView:errorString delegateViewController:nil];
 }
 
@@ -219,6 +227,10 @@ int count = 0;
                 locationManager.distanceFilter = 200;
                 locationManager.desiredAccuracy = kCLLocationAccuracyBest;
                 [locationManager startUpdatingLocation];
+        locationProgressView = [[UIActivityIndicatorView alloc] init];
+        locationProgressView.frame = CGRectMake(locationTextView.frame.origin.x+10, locationTextView.frame.origin.y, 30, 30);
+        locationProgressView.activityIndicatorViewStyle = UIActivityIndicatorViewStyleGray;
+        [locationProgressView startAnimating];
     }
 }
 
@@ -694,9 +706,9 @@ int count = 0;
         {
             imageTipLabel.hidden = NO;
         }
-        for (int i = 0;i<[[alreadySelectAssets allKeys] count];i++)
+        for (int i = 0;i<[alreadySelectArray count];i++)
         {
-            UIImage *image = [alreadySelectAssets objectForKey:[[alreadySelectAssets allKeys] objectAtIndex:i]];
+            UIImage *image = [alreadySelectAssets objectForKey:[alreadySelectArray objectAtIndex:i]];
             UIImageView *imageView = [[UIImageView alloc] init];
             imageView.layer.contentsGravity = kCAGravityResizeAspectFill;
             imageView.frame = CGRectMake(10+(imageW+5)*(i%4), 11.5+(imageH+5)*(i/4), imageW, imageH);
@@ -767,6 +779,7 @@ int count = 0;
 {
     NSString *key = [[alreadySelectAssets allKeys] objectAtIndex:button.tag-DeleteButtonTag];
     [alreadySelectAssets removeObjectForKey:key];
+    [alreadySelectArray removeObject:key];
     [normalPhotosArray removeObjectAtIndex:button.tag - DeleteButtonTag];
     
     for(UIView *v in imageScrollView.subviews)
@@ -1073,7 +1086,7 @@ int count = 0;
 {
     // Show saved photos on top
 
-    imagePickerController = [[AGImagePickerController alloc] initWithDelegate:self andAlreadySelect:alreadySelectAssets];
+    imagePickerController = [[AGImagePickerController alloc] initWithDelegate:self andAlreadySelect:alreadySelectAssets andAlreadyKeyArray:alreadySelectArray];
     imagePickerController.shouldShowSavedPhotosOnTop = YES;
     imagePickerController.shouldShowSavedPhotosOnTop = NO;
     imagePickerController.shouldChangeStatusBarStyle = YES;
@@ -1081,6 +1094,7 @@ int count = 0;
     if ([alreadySelectAssets count] > 0)
     {
         imagePickerController.selection = alreadySelectAssets;
+        imagePickerController.selectKeyArray = alreadySelectArray;
     }
     
     imagePickerController.maximumNumberOfPhotosToBeSelected = 12;
@@ -1116,10 +1130,12 @@ int count = 0;
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:YES];
 }
 
-- (void)agImagePickerController:(AGImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
+- (void)agImagePickerController:(AGImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info andKeyArray:(NSMutableArray *)keyArray
 {
     [alreadySelectAssets removeAllObjects];
+    [alreadySelectArray removeAllObjects];
     alreadySelectAssets = [[NSMutableDictionary alloc] initWithDictionary:info];
+    alreadySelectArray = [[NSMutableArray alloc] initWithArray:keyArray];
     [self reloadImages];
     
     DDLOG(@"all keys%@",[info allKeys]);
@@ -1181,6 +1197,7 @@ int count = 0;
              if (index == [assetsGroup numberOfAssets]-1)
              {
                  [alreadySelectAssets setObject:[ImageTools getImageFromALAssesst:result] forKey:[result valueForProperty:ALAssetPropertyAssetURL]];
+                 [alreadySelectArray addObject:[result valueForProperty:ALAssetPropertyAssetURL]];
                  dispatch_async(dispatch_get_main_queue(), ^{
                      [sysImagePickerController dismissViewControllerAnimated:YES completion:^{
                          [Tools hideProgress:sysImagePickerController.view];

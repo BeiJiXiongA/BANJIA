@@ -12,6 +12,7 @@
 #import "MyClassesViewController.h"
 #import "HomeViewController.h"
 #import "KKNavigationController.h"
+#import "WXApi.h"
 
 @interface OtherLoginViewController ()<WeiChatDelegate>
 {
@@ -190,6 +191,7 @@ static int loginID;
                                {
                                    if (loginID == ShareTypeQQSpace && [[error errorDescription] isEqualToString:@"ERROR_DESC_QZONE_NOT_INSTALLED"])
                                    {
+                                       
                                        [Tools showAlertView:@"尚未安装QQ或者QQ空间客户端，请安装后重试！" delegateViewController:nil];
                                        return  ;
                                    }

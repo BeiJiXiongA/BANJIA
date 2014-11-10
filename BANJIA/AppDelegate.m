@@ -27,6 +27,7 @@
 
 #import <ShareSDK/ShareSDK.h>
 #import <RennSDK/RennSDK.h>
+#import <QZoneConnection/QZoneConnection.h>
 #import <TencentOpenAPI/QQApi.h>
 #import <TencentOpenAPI/QQApiInterface.h>
 #import <TencentOpenAPI/TencentOAuth.h>
@@ -176,6 +177,9 @@
     
     [ShareSDK registerApp:@"182899e1ea92"];
     [self shareAppKeysForEvery];
+    
+    id<ISSQZoneApp> app =(id<ISSQZoneApp>)[ShareSDK getClientWithType:ShareTypeQQSpace];
+    [app setIsAllowWebAuthorize:YES];
 
     
      //Required

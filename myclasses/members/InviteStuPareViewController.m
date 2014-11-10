@@ -50,8 +50,8 @@ UIAlertViewDelegate>
     
     UITableView *inviteWayTableview;
     
-    NSArray *waynames;
-    NSArray *iconsArray;
+    NSMutableArray *waynames;
+    NSMutableArray *iconsArray;
     
     UIImageView *arrowImageView;
 }
@@ -132,10 +132,21 @@ UIAlertViewDelegate>
     parentTextField.userInteractionEnabled = YES;
     [parentTextField addGestureRecognizer:tgr];
     
-    waynames = [[NSArray alloc] initWithObjects:@"微信",@"QQ好友",@"手机短信",@"邀请好友", nil];
-    iconsArray = @[@"weichat",@"QQicon",@"mesginviteicon",@"invitefriendicon"];
+    waynames = [[NSMutableArray alloc] initWithObjects:@"手机短信", nil];
+    iconsArray = [[NSMutableArray alloc] initWithObjects:@"mesginviteicon", nil];
+    if ([WXApi isWXAppInstalled])
+    {
+        [waynames addObject:@"微信"];
+        [iconsArray addObject:@"weichat"];
+    }
     
-    inviteWayTableview = [[UITableView alloc] initWithFrame:CGRectMake(0, parentView.frame.size.height + parentView.frame.origin.y, SCREEN_WIDTH, 200) style:UITableViewStylePlain];
+    if ([QQApi isQQInstalled])
+    {
+        [waynames addObject:@"QQ好友"];
+        [iconsArray addObject:@"QQicon"];
+    }
+    
+    inviteWayTableview = [[UITableView alloc] initWithFrame:CGRectMake(0, parentView.frame.size.height + parentView.frame.origin.y, SCREEN_WIDTH, ([iconsArray count]+1)*50) style:UITableViewStylePlain];
     inviteWayTableview.tag = InviteWayTag;
     inviteWayTableview.delegate = self;
     inviteWayTableview.dataSource = self;
@@ -208,7 +219,7 @@ UIAlertViewDelegate>
     }
     else
     {
-        return 3;
+        return [iconsArray count];
     }
 }
 
@@ -315,21 +326,17 @@ UIAlertViewDelegate>
     }
     else if(tableView.tag == InviteWayTag)
     {
-        if(indexPath.row == 0)
+        if(indexPath.row == 1)
         {
             [self inviteWeiXin];
         }
-        else if(indexPath.row == 1)
+        else if(indexPath.row == 2)
         {
             [self shareToQQFriendClickHandler:nil];
         }
-        else if(indexPath.row == 2)
+        else if(indexPath.row == 0)
         {
             [self showMessageView];
-        }
-        else if(indexPath.row == 3)
-        {
-            
         }
     }
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
