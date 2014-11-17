@@ -8,10 +8,10 @@
 
 #import "SearchSchoolViewController.h"
 #import "TrendsCell.h"
+#import <CoreLocation/CoreLocation.h>
 //#import "DemoViewController.h"
 #import "SelectSchoolLevelViewController.h"
 #import "SchoolListViewController.h"
-#import "NearbySchoolListViewController.h"
 #import "SelectCityViewController.h"
 #import "AreasViewController.h"
 
@@ -494,12 +494,6 @@ CLLocationManagerDelegate>
     }
 }
 
--(void)getNearbySchool
-{
-    [((MyTextField *)[searchSchoolTableView viewWithTag:3333]) resignFirstResponder];
-    NearbySchoolListViewController *nearbySchool = [[NearbySchoolListViewController alloc] init];
-    [self.navigationController pushViewController:nearbySchool animated:YES];
-}
 
 -(void)textFieldDidBeginEditing:(UITextField *)textField
 {

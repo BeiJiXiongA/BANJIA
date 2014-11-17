@@ -20,7 +20,7 @@
     int reg;
 }
 @end
-
+//281901394
 @implementation OtherLoginViewController
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -58,35 +58,25 @@
     [qqLoginButton setImage:[UIImage imageNamed:@"qq"] forState:UIControlStateNormal];
     [self.bgView addSubview:qqLoginButton];
     
-    UIButton *renrenLoginButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    renrenLoginButton.backgroundColor = [UIColor clearColor];
-    renrenLoginButton.frame = CGRectMake(40, UI_NAVIGATION_BAR_HEIGHT+37+57+55, SCREEN_WIDTH-80, 43);
-    [renrenLoginButton setImage:[UIImage imageNamed:@"rr"] forState:UIControlStateNormal];
-    [renrenLoginButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
-    renrenLoginButton.tag=102;
-    [self.bgView addSubview:renrenLoginButton];
+//    UIButton *renrenLoginButton = [UIButton buttonWithType:UIButtonTypeCustom];
+//    renrenLoginButton.backgroundColor = [UIColor clearColor];
+//    renrenLoginButton.frame = CGRectMake(40, UI_NAVIGATION_BAR_HEIGHT+37+57+55, SCREEN_WIDTH-80, 43);
+//    [renrenLoginButton setImage:[UIImage imageNamed:@"rr"] forState:UIControlStateNormal];
+//    [renrenLoginButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
+//    renrenLoginButton.tag=102;
+//    [self.bgView addSubview:renrenLoginButton];
     
-//    UIButton *wxLoginButton = [UIButton buttonWithType:UIButtonTypeCustom];
-//    wxLoginButton.backgroundColor = [UIColor clearColor];
-//    wxLoginButton.frame = CGRectMake(40, UI_NAVIGATION_BAR_HEIGHT+37+57+55+57, SCREEN_WIDTH-80, 43);
-//    [wxLoginButton setImage:[UIImage imageNamed:@"wx"] forState:UIControlStateNormal];
-//    [wxLoginButton addTarget:self action:@selector(sendAuthRequest) forControlEvents:UIControlEventTouchUpInside];
-//    wxLoginButton.tag=103;
-//    if ([WXApi isWXAppInstalled])
-//    {
-//        [self.bgView addSubview:wxLoginButton];
-//    }
+    UIButton *wxLoginButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    wxLoginButton.backgroundColor = [UIColor clearColor];
+    wxLoginButton.frame = CGRectMake(40, UI_NAVIGATION_BAR_HEIGHT+37+57+55, SCREEN_WIDTH-80, 43);
+    [wxLoginButton setImage:[UIImage imageNamed:@"wx"] forState:UIControlStateNormal];
+    [wxLoginButton addTarget:self action:@selector(clickedThirdLoginButton:) forControlEvents:UIControlEventTouchUpInside];
+    wxLoginButton.tag=103;
+    if ([WXApi isWXAppInstalled])
+    {
+        [self.bgView addSubview:wxLoginButton];
+    }
     
-}
-
--(void)sendAuthRequest
-{
-    //构造SendAuthReq结构体
-    SendAuthReq* req =[[SendAuthReq alloc ] init];
-    req.scope = @"snsapi_userinfo" ;
-    req.state = @"123" ;
-    //第三方向微信终端发送一个SendAuthReq消息结构
-    [WXApi sendReq:req];
 }
 
 -(void)dealloc
@@ -122,18 +112,16 @@ static int loginID;
     
     switch (button.tag-100) {
         case 0:
-            
-            loginID=ShareTypeSinaWeibo;
-            
+            loginID = ShareTypeSinaWeibo;
             break;
         case 1:
-            loginID=ShareTypeQQSpace;
-            
+            loginID = ShareTypeQQSpace;
             break;
         case 2:
-            loginID=ShareTypeRenren;
+            loginID = ShareTypeRenren;
             break;
-            
+        case 3:
+            loginID = ShareTypeWeixiTimeline;
         default:
             break;
     }
@@ -166,15 +154,12 @@ static int loginID;
                                    if (loginID == ShareTypeSinaWeibo)
                                    {
                                        //sina
-                                       
                                        [accountDict setObject:@"sw" forKey:@"a_type"];
-                                       
                                        [self loginWithName:[userInfo nickname]];
                                    }
                                    else if(loginID == ShareTypeQQSpace)
                                    {
                                        //qq
-                                       
                                        [accountDict setObject:@"qq" forKey:@"a_type"];
                                        [self loginWithName:[userInfo nickname]];
                                    }
@@ -186,20 +171,15 @@ static int loginID;
                                        [accountDict setObject:@"rr" forKey:@"a_type"];
                                        [self loginWithName:[userInfo nickname]];
                                    }
+                                   else if (loginID == ShareTypeWeixiTimeline)
+                                   {
+                                       DDLOG(@"wxnickname  %@",WXNICKNAME);
+                                       [accountDict setObject:@"wx" forKey:@"a_type"];
+                                       [self loginWithName:[userInfo nickname]];
+                                   }
                                }
                                else
                                {
-                                   if (loginID == ShareTypeQQSpace && [[error errorDescription] isEqualToString:@"ERROR_DESC_QZONE_NOT_INSTALLED"])
-                                   {
-                                       
-                                       [Tools showAlertView:@"尚未安装QQ或者QQ空间客户端，请安装后重试！" delegateViewController:nil];
-                                       return  ;
-                                   }
-                                   else if (loginID == ShareTypeQQ)
-                                   {
-                                       [Tools showAlertView:@"尚未安装QQ，请安装后重试！" delegateViewController:nil];
-                                       return ;
-                                   }
                                    [ShareSDK cancelAuthWithType:loginID];
                                    DDLOG(@"faile==%@==%ld==%d",[error errorDescription],(long)[error errorCode],[error errorLevel]);
                                }
@@ -266,6 +246,10 @@ static int loginID;
                 else if([a_type isEqualToString:@"sw"])
                 {
                     [ud setObject:name forKey:SINANICKNAME];
+                }
+                else if([a_type isEqualToString:@"wx"])
+                {
+                    [ud setObject:name forKey:WXNICKNAME];
                 }
                 
                 [ud synchronize];

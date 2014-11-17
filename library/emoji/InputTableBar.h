@@ -45,7 +45,7 @@
     UIButton *sendButton;
 }
 @property (nonatomic, strong) NSString *originWav;
-@property (nonatomic, strong) UITextView *inputTextView;
+@property (nonatomic, strong) PlaceHolderTextView *inputTextView;
 @property (nonatomic, strong) UIView *inputBgView;
 @property (nonatomic, assign) BOOL face;
 @property (nonatomic, assign) BOOL more;

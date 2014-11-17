@@ -55,9 +55,20 @@
 {
     [Tools exit];
     DDLOG_CURRENT_METHOD;
+    
     WelcomeViewController *login = [[WelcomeViewController alloc] init];
     KKNavigationController *loginNav = [[KKNavigationController alloc] initWithRootViewController:login];
-    [self.navigationController presentViewController:loginNav animated:YES completion:nil];
+    [[self topViewControllerName] presentViewController:loginNav animated:YES completion:nil];
+}
+
+-(UIViewController *)topViewControllerName
+{
+    UIViewController *topViewController = [UIApplication sharedApplication].keyWindow.rootViewController;
+    while (topViewController.presentedViewController)
+    {
+        topViewController = topViewController.presentedViewController;
+    }
+    return topViewController;
 }
 
 - (void)viewDidLoad

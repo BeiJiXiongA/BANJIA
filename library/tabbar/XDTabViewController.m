@@ -78,6 +78,7 @@ static XDTabViewController *_tabViewController = nil;
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = self;
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = self;
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewWillAppear:) name:UPDATE_TABBAR_NUMBER object:nil];
 
     label0 = [[UILabel alloc] initWithFrame:CGRectMake(50, SCREEN_HEIGHT-50, 20, 20)];
     label0.layer.cornerRadius = 10;
@@ -150,12 +151,17 @@ static XDTabViewController *_tabViewController = nil;
     {
         [XDTabViewController sharedTabViewController].label2.hidden = YES;
     }
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:RELOAD_MENU_BUTTON object:nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:RELOAD_SIDE_MENU object:nil];
 }
 
 -(void)dealloc
 {
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
     ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = nil;
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UPDATE_TABBAR_NUMBER object:nil];
 }
 
 - (void)viewDidUnload

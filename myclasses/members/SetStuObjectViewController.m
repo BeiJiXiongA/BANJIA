@@ -165,8 +165,8 @@ AddObjectDel>
                 {
                     DDLOG(@"title updata success!");
                 }
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"updatememlist" object:nil];
-                [self.navigationController popViewControllerAnimated:YES];
+                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
+                [self.navigationController popToRootViewControllerAnimated:YES];
             }
             else
             {

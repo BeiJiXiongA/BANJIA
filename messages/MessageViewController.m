@@ -203,6 +203,7 @@ ChatVCDelegate>
                         [tmpDict setObject:[msgDict objectForKey:@"_id"] forKey:@"mid"];
                         [tmpDict setObject:@"f" forKey:@"direct"];
                         [tmpDict setObject:@"0" forKey:@"readed"];
+                        [tmpDict setObject:@"0" forKey:@"l"];
                         if([[dict objectForKey:@"cgroup"] integerValue] == 1)
                         {
                             

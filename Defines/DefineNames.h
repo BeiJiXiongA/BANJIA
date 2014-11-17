@@ -38,10 +38,15 @@
 //pragma mark - 刷新班级列表
 #define UPDATECLASSMEMBERLIST   @"updateclassmemberlist"
 
+//pargma mark - 处理班级申请
+#define DEALCLASSMEMBERAPPLY   @"dealclassmemberapply"
+
 //pragma mark - 刷新消息记录列表
 #define UPDATE_MSG_LIST   @"updatemsglist"
 
 #define UPDATEGROUPCHATLIST   @"updategroupchatlist"
+
+#define UPDATE_TABBAR_NUMBER @"updatetbabbarnumber"
 
 //获取未读消息聊天页面
 #define GET_UNREAD_CHATLOG     @"getunreadchatlog"

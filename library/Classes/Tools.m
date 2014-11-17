@@ -48,6 +48,13 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     [imageView setImageWithURL:imageURL placeholderImage:[UIImage imageNamed:defaultName]];
 }
 
++ (void) fillImageView:(UIImageView *)imageView withImageFromFullURL:(NSString*)URL andDefault:(NSString *)defaultName
+{
+    NSString *urlStr = [NSString stringWithFormat:@"%@",URL];
+    NSURL *imageURL = [NSURL URLWithString:urlStr];
+    [imageView setImageWithURL:imageURL placeholderImage:[UIImage imageNamed:defaultName]];
+}
+
 //+(void)setHeaderImageView;
 
 + (void) fillImageView:(UIImageView *)imageView withImageFromURL:(NSString*)URL imageWidth:(CGFloat)imageWidth andDefault:(NSString *)defaultName

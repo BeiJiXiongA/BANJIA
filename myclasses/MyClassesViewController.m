@@ -484,11 +484,19 @@ UIActionSheetDelegate>
                     classTableView.hidden = NO;
                     NSArray *array = [dict1 objectForKey:@"classes"];
                     [self updateDataBase:array];
-                    
+                    int newClassNumber = 0;
                     for (int i=0; i<[array count]; ++i)
                     {
                         NSDictionary *dict2 = [array objectAtIndex:i];
                         NSString *s_id = [dict2 objectForKey:@"s_id"];
+                        if ([dict2 objectForKey:@"ucmember"] && [[dict2 objectForKey:@"ucmember"] intValue] > 0)
+                        {
+                            newClassNumber += [[dict2 objectForKey:@"ucmember"] intValue];
+                        }
+                        if ([dict2 objectForKey:@"notice"] && [[dict2 objectForKey:@"notice"] intValue] > 0)
+                        {
+                            newClassNumber += [[dict2 objectForKey:@"notice"] intValue];
+                        }
                         
                         if ([s_id isEqual:[NSNull null]])
                         {
@@ -546,6 +554,10 @@ UIActionSheetDelegate>
                             [tmpArray addObject:dict];
                         }
                     }
+                    
+                    [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",newClassNumber] forKey:NewClassNum];
+                    [[NSUserDefaults standardUserDefaults] synchronize];
+                    
                     NSString *requestUrlStr = [NSString stringWithFormat:@"%@==%@",GETCLASSESBYUSER,[Tools user_id]];
                     NSString *key = [requestUrlStr MD5Hash];
                     [FTWCache setObject:[responseString dataUsingEncoding:NSUTF8StringEncoding] forKey:key];

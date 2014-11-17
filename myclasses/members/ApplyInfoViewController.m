@@ -734,6 +734,7 @@
             DDLOG(@"memberByClass responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
+//                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATE_TABBAR_NUMBER object:nil];
                 if ([db updeteKey:@"checked" toValue:@"1" withParaDict:@{@"uid":j_id,@"classid":classID,@"checked":@"0"} andTableName:CLASSMEMBERTABLE])
                 {
                     DDLOG(@"c_apply %@ delete success!",[Tools user_id]);
@@ -745,6 +746,15 @@
                             if ([db updeteKey:@"checked" toValue:@"1" withParaDict:@{@"classid":classID,@"name":[applyDict objectForKey:@"re_name"],@"sn":re_sn} andTableName:CLASSMEMBERTABLE])
                             {
                                 DDLOG(@"allow parent update student checked success!");
+                                [Tools showTips:[NSString stringWithFormat:@"您已经同意%@的申请",applyName] toView:self.bgView];
+                                [[NSNotificationCenter defaultCenter] postNotificationName:DEALCLASSMEMBERAPPLY object:nil];
+                                [self.navigationController popToRootViewControllerAnimated:YES];
+                            }
+                            else
+                            {
+                                [Tools showTips:[NSString stringWithFormat:@"您已经同意%@的申请",applyName] toView:self.bgView];
+                                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
+                                [self.navigationController popToRootViewControllerAnimated:YES];
                             }
                         }
                     }
@@ -752,12 +762,21 @@
                     {
                         if ([db updeteKey:@"admin" toValue:@"1" withParaDict:@{@"uid":j_id,@"classid":classID} andTableName:CLASSMEMBERTABLE])
                         {
-                            DDLOG(@"update teacher admin");
+                            DDLOG(@"allow parent update student checked success!");
+                            [Tools showTips:[NSString stringWithFormat:@"您已经同意%@的申请",applyName] toView:self.bgView];
+                            [[NSNotificationCenter defaultCenter] postNotificationName:DEALCLASSMEMBERAPPLY object:nil];
+                            [self.navigationController popToRootViewControllerAnimated:YES];
+                        }
+                        else
+                        {
+                            [Tools showTips:[NSString stringWithFormat:@"您已经同意%@的申请",applyName] toView:self.bgView];
+                            [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
+                            [self.navigationController popToRootViewControllerAnimated:YES];
                         }
                     }
                     else if([[applyDict objectForKey:@"role"] isEqualToString:@"students"] )
                     {
-                        if ([db deleteRecordWithDict:@{@"classid":classID,@"name":applyName,@"sn":studentNum} andTableName:CLASSMEMBERTABLE])
+                        if ([db deleteRecordWithDict:@{@"classid":classID,@"uid":j_id,@"sn":studentNum} andTableName:CLASSMEMBERTABLE])
                         {
                             NSDictionary *dict = @{@"classid":classID,
                                                    @"name":applyName,
@@ -777,18 +796,19 @@
                             if ([db insertRecord:dict andTableName:CLASSMEMBERTABLE])
                             {
                                 DDLOG(@"update students success");
+                                [Tools showTips:[NSString stringWithFormat:@"您已经同意%@的申请",applyName] toView:self.bgView];
+                                [[NSNotificationCenter defaultCenter] postNotificationName:DEALCLASSMEMBERAPPLY object:nil];
+                                [self.navigationController popToRootViewControllerAnimated:YES];
+                            }
+                            else
+                            {
+                                [Tools showTips:[NSString stringWithFormat:@"您已经同意%@的申请",applyName] toView:self.bgView];
+                                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
+                                [self.navigationController popToRootViewControllerAnimated:YES];
                             }
                         }
-//                        if ([db updeteKey:@"admin" toValue:@"1" withParaDict:@{@"uid":j_id,@"classid":classID} andTableName:CLASSMEMBERTABLE])
-//                        {
-//                            DDLOG(@"update students admin");
-//                        }
                     }
                 }
-                [Tools showTips:[NSString stringWithFormat:@"您已经同意%@的申请",applyName] toView:self.bgView];
-                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
-                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSNUMBER object:nil];
-                [self.navigationController popToRootViewControllerAnimated:YES];
             }
             else
             {
@@ -829,11 +849,15 @@
                 if ([db deleteRecordWithDict:@{@"uid":j_id,@"classid":classID,@"checked":@"0"} andTableName:CLASSMEMBERTABLE])
                 {
                     DDLOG(@"c_apply %@ delete success!",[Tools user_id]);
+                    [[NSNotificationCenter defaultCenter] postNotificationName:DEALCLASSMEMBERAPPLY object:nil];
+                    [self.navigationController popToRootViewControllerAnimated:YES];
                 }
-                
-                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
-                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSNUMBER object:nil];
-                [self.navigationController popToRootViewControllerAnimated:YES];
+                else
+                {
+                    [Tools showTips:[NSString stringWithFormat:@"您已经同意%@的申请",applyName] toView:self.bgView];
+                    [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
+                    [self.navigationController popToRootViewControllerAnimated:YES];
+                }
             }
             else
             {

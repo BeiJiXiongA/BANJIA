@@ -22,6 +22,7 @@
 #import "DefineNames.h"
 #import "ShareTools.h"
 #import "UserIconTools.h"
+#import "PlaceHolderTextView.h"
 
 #define FaceViewHeight  200
 

@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
+@protocol CommentDelegate;
+
 @interface CommentCell : UITableViewCell
 
 @property (nonatomic, strong) UIButton *nameButton;
@@ -19,5 +21,16 @@
 @property (nonatomic, strong) UIImageView *headerImageView;
 @property (nonatomic, strong) UILabel *timeLabel;
 @property (nonatomic, strong) UIImageView *lineImageView;
+
+@property (nonatomic, assign) id<CommentDelegate> commentDel;
+
+@end
+
+
+@protocol CommentDelegate <NSObject>
+
+@optional
+
+-(void)deleteCommentWithDict:(NSDictionary *)commentDict;
 
 @end

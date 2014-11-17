@@ -17,6 +17,8 @@
 #import "ReportViewController.h"
 #import "DiaryTools.h"
 
+#import "UIActionSheet+Blocks.h"
+
 #define additonalH  90
 #define PraiseW   31
 
@@ -350,6 +352,8 @@ ShareContentDelegate>
     
     cell.showAllComments = YES;
     cell.nameButtonDel = self;
+    cell.diaryDetailDict = diaryDetailDict;
+    cell.diaryIndexPath = indexPath;
     
     NSString *name = [[diaryDetailDict objectForKey:@"by"] objectForKey:@"name"];
     NSString *role = [[diaryDetailDict objectForKey:@"by"] objectForKey:@"role"];
@@ -714,6 +718,69 @@ ShareContentDelegate>
 //    [self.sideMenuController hideMenuAnimated:YES];
 //    [self.navigationController pushViewController:personDetailVC animated:YES];
 }
+
+#pragma mark - 删除日志评论
+
+-(void)deleteCommentWithDiary:(NSDictionary *)diaryDetailDict andCommentDict:(NSDictionary *)commentDict andIndexPath:(NSIndexPath *)indexPath
+{
+    NSString *diaryId = [diaryDetailDict objectForKey:@"_id"];
+    
+    [UIActionSheet showInView:self.bgView withTitle:nil cancelButtonTitle:@"取消" destructiveButtonTitle:@"删除" otherButtonTitles:nil tapBlock:^(UIActionSheet *actionSheet, NSInteger buttonIndex) {
+        if (buttonIndex == 0)
+        {
+            DDLOG(@"%@--%d--%d",diaryId,indexPath.section,indexPath.row);
+//            [self deleteCommentWithDiaryId:diaryID andCommentDict:commentDict inSection:indexPath.section index:indexPath.row];
+        }
+    }];
+}
+
+-(void)deleteCommentWithDiaryId:(NSString *)diaryId
+                 andCommentDict:(NSDictionary *)commentDict
+                      inSection:(NSInteger)section
+                          index:(NSInteger)index
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"p_id":diaryId
+                                                                      } API:GETDIARY_DETAIL];
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"diary detail responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                [Tools showTips:@"评论删除成功" toView:self.bgView];
+                [self getDiaryDetail];
+
+                if ([self.addComDel respondsToSelector:@selector(addComment:)])
+                {
+                    [self.addComDel addComment:YES];
+                }
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools showAlertView:@"连接错误" delegateViewController:nil];
+        }];
+        [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
+}
+
+
+
+#pragma mark - 评论日志
 -(void)cellCommentDiary:(NSDictionary *)dict
 {
     [inputTabBar.inputTextView becomeFirstResponder];

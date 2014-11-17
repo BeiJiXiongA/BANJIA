@@ -111,7 +111,7 @@ EditNameDone>
     imagePickerController = [[UIImagePickerController alloc] init];
     imagePickerController.delegate = self;
     
-    personInfoTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT+14, SCREEN_WIDTH, 243) style:UITableViewStylePlain];
+    personInfoTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT+14, SCREEN_WIDTH, 195) style:UITableViewStylePlain];
     personInfoTableView.delegate = self;
     personInfoTableView.dataSource = self;
     personInfoTableView.backgroundColor = [UIColor whiteColor];
@@ -287,7 +287,7 @@ EditNameDone>
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return 5;
+    return 4;
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -379,7 +379,7 @@ EditNameDone>
         }
         
     }
-    else if(indexPath.row == 2)
+    else if(indexPath.row == 3)
     {
         cell.nametf.hidden = NO;
         if ([birth length] == 0)
@@ -391,7 +391,7 @@ EditNameDone>
             cell.nametf.text = birth;
         }
     }
-    else if (indexPath.row == 3)
+    else if (indexPath.row == 2)
     {
         cell.nametf.hidden = NO;
         if ([sex integerValue] == 1)
@@ -405,18 +405,6 @@ EditNameDone>
         else if([sex integerValue] == -1)
         {
             cell.nametf.text = @"保密";
-        }
-    }
-    else if (indexPath.row == 4)
-    {
-        cell.nametf.hidden = NO;
-        if ([Tools phone_num] && [[Tools phone_num] length] > 0)
-        {
-            cell.nametf.text = [Tools phone_num];
-        }
-        else
-        {
-            cell.nametf.text = @"尚未绑定";
         }
     }
     cell.relateButton.frame = CGRectMake(45, 15, 40, 26);
@@ -459,24 +447,18 @@ EditNameDone>
         [self.navigationController pushViewController:editNameViewController animated:YES];
         
     }
-    else if (indexPath.row == 2)
+    else if (indexPath.row == 3)
     {
         //生日
         [self editInfo1:indexPath.row+333];
     }
-    else if (indexPath.row == 3)
+    else if (indexPath.row == 2)
     {
         //性别
         UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"性别选择" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"男", @"女", @"保密",nil];
         ac.tag = SEXTAG;
         [ac showInView:self.bgView];
     }
-    else if (indexPath.row == 3)
-    {
-        //手机号
-        
-    }
-    
 }
 
 -(void)editNameDone:(NSString *)name

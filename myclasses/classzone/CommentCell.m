@@ -90,6 +90,10 @@
 -(void)deleteComment
 {
     DDLOG(@"delete comment! %@",commentDict);
+    if ([self.commentDel respondsToSelector:@selector(deleteCommentWithDict:)])
+    {
+        [self.commentDel deleteCommentWithDict:commentDict];
+    }
     
 }
 

@@ -32,6 +32,8 @@ EGORefreshTableDelegate>
     FooterView *footerView;
     BOOL _reloading;
     
+    BOOL haveMore;
+    
     NSString *month;
     
     OperatDB *db;
@@ -66,6 +68,7 @@ EGORefreshTableDelegate>
     page = 0;
     currentReadNoticeIndex = -1;
     month = @"";
+    haveMore = YES;
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receiveNewNotice) name:RECEIVENEWNOTICE object:nil];
@@ -225,19 +228,25 @@ EGORefreshTableDelegate>
 //    [self getNotifications:NO];
     
     BOOL isNew = ([[noticeDict objectForKey:@"new"] intValue]==1)?YES:NO;
+    
+    if (isNew)
+    {
+        [[NSNotificationCenter defaultCenter] postNotificationName:UPDATE_TABBAR_NUMBER object:nil];
+    }
     if (deleted && isNew)
     {
-        [unreadedArray removeObjectAtIndex:currentReadNoticeIndex];
+        [unreadedArray removeObject:noticeDict];
         [notificationTableView reloadData];
     }
     else if(deleted && !isNew)
     {
-        [readedArray removeObjectAtIndex:currentReadNoticeIndex];
+        [readedArray removeObject:noticeDict];
         [notificationTableView reloadData];
     }
     else if(!deleted && isNew)
     {
-        [unreadedArray removeObjectAtIndex:currentReadNoticeIndex];
+        [unreadedArray removeObject:noticeDict];
+        [readedArray insertObject:noticeDict atIndex:0];
         NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithDictionary:noticeDict];
         [tmpDict setObject:@"0" forKey:@"new"];
         for (int i=0; i<[readedArray count]; i++)
@@ -320,6 +329,7 @@ EGORefreshTableDelegate>
 {
     [[XDTabViewController sharedTabViewController] dismissViewControllerAnimated:YES completion:nil];
     [[NSUserDefaults standardUserDefaults] setObject:NOTFROMCLASS forKey:FROMWHERE];
+    [[NSUserDefaults standardUserDefaults] objectForKey:@"admin"];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
@@ -450,7 +460,7 @@ EGORefreshTableDelegate>
     }
     cell.contentLabel.hidden = YES;
     cell.nameLabel.hidden = YES;
-    cell.contentLabel.backgroundColor = [UIColor whiteColor];
+    cell.contentLabel.backgroundColor = [UIColor clearColor];
     
     if (indexPath.section == 0)
     {
@@ -487,20 +497,6 @@ EGORefreshTableDelegate>
         }
         else if(indexPath.row == 1)
         {
-//            if ([unreadedArray count] > 0 || [readedArray count] > 0)
-//            {
-//                cell.contentLabel.hidden = NO;
-//                cell.nameLabel.hidden = NO;
-//                cell.contentLabel.frame = CGRectMake(0, 0, SCREEN_WIDTH, 32);
-//                cell.contentLabel.backgroundColor = HEADER_GREEN;
-//                cell.contentLabel.font = [UIFont systemFontOfSize:18];
-//                cell.contentLabel.textColor = [UIColor whiteColor];
-//                NSString *classname = [NSString stringWithFormat:@"   %@",[[NSUserDefaults standardUserDefaults] objectForKey:@"classname"]];
-//                cell.contentLabel.text = classname;
-////                cell.iconImageView.hidden = YES;
-//            }
-//            else
-            
                 cell.contentLabel.hidden = YES;
                 cell.nameLabel.hidden = YES;
         }
@@ -530,7 +526,7 @@ EGORefreshTableDelegate>
         cell.contentLabel.hidden = NO;
         cell.nameLabel.hidden = NO;
         cell.contentLabel.backgroundColor = [UIColor whiteColor];
-        cell.nameLabel.backgroundColor = [UIColor whiteColor];
+        cell.nameLabel.backgroundColor = [UIColor clearColor];
         
         NSString *byName = [[dict objectForKey:@"by"] objectForKey:@"name"];
         
@@ -603,9 +599,9 @@ EGORefreshTableDelegate>
 }
 -(void)getMoreNotifications
 {
-    if (page == -1)
+    if (!haveMore)
     {
-        [Tools showAlertView:@"没有更多公告了！" delegateViewController:nil];
+        [Tools showTips:@"没有更多公告了！" toView:self.bgView];
         return ;
     }
     page++;
@@ -704,13 +700,6 @@ EGORefreshTableDelegate>
                             }
                         }
                     }
-                    page = [[[responseDict objectForKey:@"data"] objectForKey:@"page"] intValue];
-                    month = [NSString stringWithFormat:@"%@",[[responseDict objectForKey:@"data"] objectForKey:@"month"]];
-                    
-                    if (page == 0 && [month intValue] == 0)
-                    {
-                        page = -1;
-                    }
                     
                     [db deleteRecordWithDict:@{@"uid":[Tools user_id],@"type":@"notice"} andTableName:@"notice"];
                     
@@ -742,31 +731,29 @@ EGORefreshTableDelegate>
                         [[XDTabViewController sharedTabViewController] viewWillAppear:NO];
                     }
                 }
-                else
+                
+                page = [[[responseDict objectForKey:@"data"] objectForKey:@"page"] intValue];
+                month = [NSString stringWithFormat:@"%@",[[responseDict objectForKey:@"data"] objectForKey:@"month"]];
+                if (page == 0 && [month length] > 0 && [month intValue] == 0)
                 {
-                    
-                    if (page ==0 && month == 0)
+                    haveMore = NO;
+                }
+                if(page == 0)
+                {
+                    if ([readedArray count] > 0 || [unreadedArray count] > 0)
                     {
-                        [Tools showAlertView:@"没有更多公告了！" delegateViewController:nil];
-                        page = -1;
+                        tipLabel.hidden = YES;
                     }
-                    else if(page == 0)
+                    else
                     {
-                        if ([readedArray count] > 0 || [unreadedArray count] > 0)
-                        {
-                            tipLabel.hidden = YES;
-                        }
-                        else
-                        {
-                            tipLabel.hidden = NO;
-                        }
+                        tipLabel.hidden = NO;
                     }
-                    
-                    if (page == 0 && [month length] == 0)
-                    {
-                        [readedArray removeAllObjects];
-                        [unreadedArray removeAllObjects];
-                    }
+                }
+                
+                if (page == 0 && [month length] == 0)
+                {
+                    [readedArray removeAllObjects];
+                    [unreadedArray removeAllObjects];
                 }
                 [notificationTableView reloadData];
                 if (footerView)

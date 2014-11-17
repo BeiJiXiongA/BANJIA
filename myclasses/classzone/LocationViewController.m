@@ -7,7 +7,6 @@
 //
 
 #import "LocationViewController.h"
-#import "BMapKit.h"
 
 @implementation LocationViewController
 -(void)viewDidLoad

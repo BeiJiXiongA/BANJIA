@@ -117,7 +117,8 @@
             DDLOG(@"commit diary responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                [self unShowSelfViewController];
+                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
+                [self.navigationController popToRootViewControllerAnimated:YES];
             }
             else
             {

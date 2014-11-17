@@ -854,23 +854,26 @@ MFMailComposeViewControllerDelegate>
                 
                 userNumber = [dict objectForKey:@"number"];
                 
-                NSDictionary *userIconDict = @{@"uid":[dict objectForKey:@"_id"],
-                                               @"uicon":[dict objectForKey:@"img_icon"]?[dict objectForKey:@"img_icon"]:@"",
-                                               @"username":[dict objectForKey:@"r_name"],
-                                               @"unum":userNumber};
-                
-                if ([[db findSetWithDictionary:@{@"unum":[userIconDict objectForKey:@"unum"]} andTableName:USERICONTABLE] count] > 0)
+                if ([dict objectForKey:@"r_name"] && [dict objectForKey:@"img_icon"])
                 {
-                    if ([db deleteRecordWithDict:@{@"unum":[userIconDict objectForKey:@"unum"]} andTableName:USERICONTABLE])
+                    NSDictionary *userIconDict = @{@"uid":[dict objectForKey:@"_id"],
+                                                   @"uicon":[dict objectForKey:@"img_icon"]?[dict objectForKey:@"img_icon"]:@"",
+                                                   @"username":[dict objectForKey:@"r_name"],
+                                                   @"unum":userNumber};
+                    
+                    if ([[db findSetWithDictionary:@{@"unum":[userIconDict objectForKey:@"unum"]} andTableName:USERICONTABLE] count] > 0)
+                    {
+                        if ([db deleteRecordWithDict:@{@"unum":[userIconDict objectForKey:@"unum"]} andTableName:USERICONTABLE])
+                        {
+                            [db insertRecord:userIconDict andTableName:USERICONTABLE];
+                        }
+                    }
+                    else
                     {
                         [db insertRecord:userIconDict andTableName:USERICONTABLE];
                     }
-                }
-                else
-                {
-                    [db insertRecord:userIconDict andTableName:USERICONTABLE];
-                }
 
+                }
                 
                 if (![personID isEqualToString:[Tools user_id]])
                 {

@@ -212,16 +212,19 @@ UISearchBarDelegate>
         [iconOnArray addObjectsFromArray:@[@"invite_phone_on"]];
         [iconArray addObjectsFromArray:@[@"invite_phone"]];
     }
-    if ([WXApi isWXAppInstalled])
-    {
-        [iconArray addObject:@"invite_weichat"];
-        [iconOnArray addObject:@"invite_weichat_on"];
-    }
+    
     if ([QQApi isQQInstalled])
     {
         [iconArray addObject:@"invite_QQ"];
         [iconOnArray addObject:@"invite_QQ_on"];
     }
+    
+    if ([WXApi isWXAppInstalled])
+    {
+        [iconArray addObject:@"invite_weichat"];
+        [iconOnArray addObject:@"invite_weichat_on"];
+    }
+    
     
     for (int i=0; i<[iconOnArray count]; i++)
     {
@@ -240,6 +243,7 @@ UISearchBarDelegate>
         }
         [buttonScrollView addSubview:button];
     }
+    
     buttonScrollView.contentSize = CGSizeMake(35+103*[iconArray count], 70);
     
     bgScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, buttonScrollView.frame.size.height+buttonScrollView.frame.origin.y, SCREEN_WIDTH, SCREEN_HEIGHT - buttonScrollView.frame.origin.y-buttonScrollView.frame.size.height)];
@@ -249,7 +253,7 @@ UISearchBarDelegate>
     bgScrollView.pagingEnabled = YES;
     bgScrollView.showsHorizontalScrollIndicator = NO;
     bgScrollView.scrollEnabled = NO;
-    bgScrollView.contentSize = CGSizeMake(SCREEN_WIDTH*(4-fromClassTableViewIndex), bgScrollView.frame.size.height);
+    bgScrollView.contentSize = CGSizeMake(SCREEN_WIDTH*([iconArray count]), bgScrollView.frame.size.height);
     [self.bgView addSubview:bgScrollView];
     
     
@@ -355,14 +359,29 @@ UISearchBarDelegate>
     inviteTencentButton.frame = CGRectMake(CENTER_POINT.x-80+SCREEN_WIDTH*((TencentTableViewTag-fromClassTableViewIndex)%tableViewTagBase), bgScrollView.frame.size.height/2-35, 160, 42);
     [inviteTencentButton setTitle:@"邀请QQ好友" forState:UIControlStateNormal];
     [inviteTencentButton addTarget:self action:@selector(shareToQQFriendClickHandler:) forControlEvents:UIControlEventTouchUpInside];
-    [bgScrollView addSubview:inviteTencentButton];
+    
     
     UIButton *inviteWeiXinButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [inviteWeiXinButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
     inviteWeiXinButton.frame = CGRectMake(CENTER_POINT.x-80+SCREEN_WIDTH*((WeiXinTag-fromClassTableViewIndex)%tableViewTagBase), bgScrollView.frame.size.height/2-35, 160, 42);
     [inviteWeiXinButton setTitle:@"邀请微信好友" forState:UIControlStateNormal];
     [inviteWeiXinButton addTarget:self action:@selector(inviteWeiXin) forControlEvents:UIControlEventTouchUpInside];
-    [bgScrollView addSubview:inviteWeiXinButton];
+    
+    if([QQApi isQQInstalled])
+    {
+        [bgScrollView addSubview:inviteTencentButton];
+    }
+    else
+    {
+        inviteWeiXinButton.frame = CGRectMake(CENTER_POINT.x-80+SCREEN_WIDTH*((WeiXinTag-fromClassTableViewIndex-1)%tableViewTagBase), bgScrollView.frame.size.height/2-35, 160, 42);
+    }
+    
+    if ([WXApi isWXAppInstalled])
+    {
+        [bgScrollView addSubview:inviteWeiXinButton];
+    }
+    
+    
     
     if (fromClass)
     {
@@ -1255,7 +1274,7 @@ UISearchBarDelegate>
     [UIView animateWithDuration:0.2 animations:^{
         
     }];
-    for (int i = 0; i < ([iconArray count]- fromClassTableViewIndex); i++)
+    for (int i = 0; i < [iconArray count]; i++)
     {
         if (i == button.tag - tableViewTagBase)
         {
@@ -1528,7 +1547,7 @@ UISearchBarDelegate>
                         {
                             [waitRemoveArray addObject:alreadyDict];
                         }
-                        else if([[alreadyDict objectForKey:@"_id"] isEqualToString:[Tools user_id]])
+                        else if([[alreadyDict objectForKey:@"_id"] isKindOfClass:[NSString class]] && [[alreadyDict objectForKey:@"_id"] isEqualToString:[Tools user_id]])
                         {
                             [waitRemoveArray addObject:alreadyDict];
                         }

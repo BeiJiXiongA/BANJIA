@@ -77,7 +77,7 @@ voiceView;
     inputWidth = SCREEN_WIDTH-50;
     left = 5;
     
-    inputTextView = [[UITextView alloc] initWithFrame:CGRectMake(left, INPUTBUTTONT,inputWidth, DEFAULTTEXTHEIGHT)];
+    inputTextView = [[PlaceHolderTextView alloc] initWithFrame:CGRectMake(left, INPUTBUTTONT,inputWidth, DEFAULTTEXTHEIGHT) placeHolder:@"请输入内容"];
     inputTextView .backgroundColor = [UIColor whiteColor];
     inputTextView.returnKeyType = UIReturnKeySend;
     inputTextView.autoresizingMask = YES;
@@ -464,7 +464,7 @@ voiceView;
 {
     if ([inputTextView.text length] > 0)
     {
-        inputTextView.text = [[inputTextView.text substringToIndex:[inputTextView.text length]-1] emojizedString];
+        inputTextView.text = [[[inputTextView.text emojizedString] substringToIndex:[[inputTextView.text emojizedString] length]-1] emojizedString];
         CGSize size = inputTextView.contentSize;
         inputTextViewSize = size;
         [self inputChange];
@@ -472,6 +472,14 @@ voiceView;
         {
             [self.returnFunDel changeInputViewSize:size];
         }
+    }
+    if (self.inputTextView.text.length == 0)
+    {
+        self.inputTextView.textView.hidden = NO;
+    }
+    else
+    {
+        self.inputTextView.textView.hidden = YES;
     }
 }
 
@@ -660,6 +668,14 @@ voiceView;
             [self.returnFunDel changeInputViewSize:size];
         }
     }
+    if (self.inputTextView.text.length == 0)
+    {
+        self.inputTextView.textView.hidden = NO;
+    }
+    else
+    {
+        self.inputTextView.textView.hidden = YES;
+    }
 }
 
 -(void)soundButtonClick
@@ -751,14 +767,17 @@ voiceView;
 }
 -(void)textViewDidChange:(UITextView *)textView
 {
-    
-//    CGFloat width = textView.contentSize.width;
-//    CGSize size = [SizeTools getSizeWithString:textView.text andWidth:inputWidth andFont:[UIFont systemFontOfSize:16]];
+    if (textView.text.length == 0)
+    {
+        self.inputTextView.textView.hidden = NO;
+    }
+    else
+    {
+        self.inputTextView.textView.hidden = YES;
+    }
     CGSize size = textView.contentSize;
     if(size.height >= 93)
     {
-        DDLOG(@"%@==%@==%@",NSStringFromCGSize(textView.contentSize),NSStringFromCGPoint(textView.contentOffset),NSStringFromCGSize(textView.frame.size));
-//        textView.contentOffset = CGPointMake(0, (textView.contentSize.height-60)/2+93);
         size = CGSizeMake(inputWidth, 93);
     }
     else if(size.height < DEFAULTTEXTHEIGHT)

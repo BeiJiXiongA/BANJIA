@@ -9,7 +9,7 @@
 #import "TrendsCell.h"
 #import "Header.h"
 #import "UIButton+WebCache.h"
-#import "CommentCell.h"
+
 #import "NSString+Emojize.h"
 
 #import "PersonDetailViewController.h"
@@ -229,6 +229,17 @@ diaryIndexPath;
 }
 
 
+#pragma mark - commentdelegate
+
+-(void)deleteCommentWithDict:(NSDictionary *)commentDict
+{
+    if ([self.nameButtonDel respondsToSelector:@selector(deleteCommentWithDiary:andCommentDict:andIndexPath:)])
+    {
+        [self.nameButtonDel deleteCommentWithDiary:diaryDetailDict andCommentDict:commentDict andIndexPath:diaryIndexPath];
+    }
+}
+#pragma mark - tableview
+
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     if (commentsArray && praiseArray)
@@ -385,6 +396,8 @@ diaryIndexPath;
     
     cell.lineImageView.frame = CGRectMake(0, cellHeight-0.5, cell.frame.size.width, 0.5);
     cell.lineImageView.hidden = NO;
+    
+    cell.commentDel = self;
     if (showAllComments)
     {
         if (praiseArray && commentsArray)
@@ -701,15 +714,7 @@ diaryIndexPath;
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-//    NSDictionary *dict;
-//    if ([praiseArray count] > 0)
-//    {
-//        dict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row];
-//    }
-//    else
-//    {
-//        dict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row-1];
-//    }
+
     if (praiseArray && commentsArray)
     {
         if (indexPath.row == 0)
@@ -718,9 +723,22 @@ diaryIndexPath;
         }
         else
         {
-            if ([self.nameButtonDel respondsToSelector:@selector(cellCommentDiary:andIndexPath:)])
+            NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row];
+            NSString *byId = [[commitDict objectForKey:@"by"] objectForKey:@"_id"];
+            if ([byId isEqualToString:[Tools user_id]])
             {
-                [self.nameButtonDel cellCommentDiary:diaryDetailDict andIndexPath:diaryIndexPath];
+                //删除评论
+                if ([self.nameButtonDel respondsToSelector:@selector(deleteCommentWithDiary:andCommentDict:andIndexPath:)])
+                {
+                    [self.nameButtonDel deleteCommentWithDiary:diaryDetailDict andCommentDict:commitDict andIndexPath:indexPath];
+                }
+            }
+            else
+            {
+                if ([self.nameButtonDel respondsToSelector:@selector(cellCommentDiary:andIndexPath:)])
+                {
+                    [self.nameButtonDel cellCommentDiary:diaryDetailDict andIndexPath:diaryIndexPath];
+                }
             }
         }
     }
@@ -730,9 +748,22 @@ diaryIndexPath;
     }
     else if(!praiseArray && commentsArray)
     {
-        if ([self.nameButtonDel respondsToSelector:@selector(cellCommentDiary:andIndexPath:)])
+        NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row-1];
+        NSString *byId = [[commitDict objectForKey:@"by"] objectForKey:@"_id"];
+        if ([byId isEqualToString:[Tools user_id]])
         {
-            [self.nameButtonDel cellCommentDiary:diaryDetailDict andIndexPath:diaryIndexPath];
+            //删除评论
+            if ([self.nameButtonDel respondsToSelector:@selector(deleteCommentWithDiary:andCommentDict:andIndexPath:)])
+            {
+                [self.nameButtonDel deleteCommentWithDiary:diaryDetailDict andCommentDict:commitDict andIndexPath:indexPath];
+            }
+        }
+        else
+        {
+            if ([self.nameButtonDel respondsToSelector:@selector(cellCommentDiary:andIndexPath:)])
+            {
+                [self.nameButtonDel cellCommentDiary:diaryDetailDict andIndexPath:diaryIndexPath];
+            }
         }
     }
 }
@@ -776,22 +807,3 @@ diaryIndexPath;
     [commentsTableView reloadData];
 }
 @end
-
-//            cell.nameButton.frame = CGRectMake(SCREEN_WIDTH-80, 0, 60, 30);
-//            cell.nameButton.backgroundColor = LIGHT_BLUE_COLOR;
-//            [cell.nameButton addTarget:self action:@selector() forControlEvents:UIControlEventTouchUpInside];
-
-//            for (int i=0; i<[praiseArray count]; ++i)
-//            {
-//                NSDictionary *praiseDict = [praiseArray objectAtIndex:i];
-//                UIButton *headerButton = [UIButton buttonWithType:UIButtonTypeCustom];
-//                headerButton.frame = CGRectMake(45*(i%4), 45*(i/4), 40, 40);
-//                [Tools fillButtonView:headerButton withImageFromURL:[[praiseDict objectForKey:@"by"] objectForKey:@"img_icon"] andDefault:HEADERICON];
-//                headerButton.layer.cornerRadius = 20;
-//                headerButton.tag = 3333+i;
-//                headerButton.clipsToBounds = YES;
-//                [headerButton addTarget:self action:@selector(praiseClick:) forControlEvents:UIControlEventTouchUpInside];
-//                [cell.praiseView addSubview:headerButton];
-//            }
-//            int row = [praiseArray count]%4 == 0 ? ([praiseArray count]/4):([praiseArray count]/4+1);
-//            cell.praiseView.frame = CGRectMake(25, 30, 180, 50*row);

@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "MyButton.h"
 #import "PersonDetailViewController.h"
+#import "CommentCell.h"
 
 #define ColumnPerRow  8
 #define PraiseW   31
@@ -16,7 +17,7 @@
 
 @protocol NameButtonDel;
 
-@interface TrendsCell : UITableViewCell<UITableViewDataSource,UITableViewDelegate>
+@interface TrendsCell : UITableViewCell<UITableViewDataSource,UITableViewDelegate,CommentDelegate>
 @property (nonatomic, strong) UIView *bgView;
 @property (nonatomic, strong) UIImageView *headerImageView;
 @property (nonatomic, strong) UILabel *nameLabel;
@@ -55,4 +56,5 @@
 @optional
 -(void)showPersonDetail:(NSDictionary *)dict;
 -(void)cellCommentDiary:(NSDictionary *)dict andIndexPath:(NSIndexPath *)indexPath;
+-(void)deleteCommentWithDiary:(NSDictionary *)diaryDetailDict andCommentDict:(NSDictionary *)commentDict andIndexPath:(NSIndexPath *)indexPath;
 @end

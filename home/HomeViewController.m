@@ -38,6 +38,8 @@
 
 #import "TOWebViewController.h"
 
+#import "UIActionSheet+Blocks.h"
+
 #define ImageViewTag  9999
 #define HeaderImageTag  7777
 #define CellButtonTag   33333
@@ -49,6 +51,9 @@
 #define AdPageControlTag   55555
 
 #define ImageHeight  65.5f
+
+#define Share_Action_Tag  3333
+#define Delete_Comment_Action_tag 4444
 
 #define ImageCountPerRow  4
 
@@ -1308,6 +1313,9 @@ ShareContentDelegate>
         }
     }
 }
+
+
+
 #pragma mark - getNetdata
 -(void)getDiaryDetail:(NSString *)dongtaiId inSection:(NSInteger)section  index:(NSInteger)index
 {
@@ -1336,6 +1344,60 @@ ShareContentDelegate>
                 
                 waitCommentIndex = 0;
                 waitCommentSection = 0;
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools showAlertView:@"连接错误" delegateViewController:nil];
+        }];
+        [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
+}
+
+#pragma mark - 删除日志评论
+
+-(void)deleteCommentWithDiary:(NSDictionary *)diaryDetailDict andCommentDict:(NSDictionary *)commentDict andIndexPath:(NSIndexPath *)indexPath
+{
+    NSString *diaryId = [diaryDetailDict objectForKey:@"_id"];
+    
+    [UIActionSheet showInView:self.bgView withTitle:nil cancelButtonTitle:@"取消" destructiveButtonTitle:@"删除" otherButtonTitles:nil tapBlock:^(UIActionSheet *actionSheet, NSInteger buttonIndex) {
+        if (buttonIndex == 0)
+        {
+            DDLOG(@"%@--%d--%d",diaryId,indexPath.section,indexPath.row);
+            //            [self deleteCommentWithDiaryId:diaryID andCommentDict:commentDict inSection:indexPath.section index:indexPath.row];
+        }
+    }];
+}
+
+-(void)deleteCommentWithDiaryId:(NSString *)diaryId
+                 andCommentDict:(NSDictionary *)commentDict
+                      inSection:(NSInteger)section
+                          index:(NSInteger)index
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"p_id":diaryId
+                                                                      } API:GETDIARY_DETAIL];
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"diary detail responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                [Tools showTips:@"评论删除成功" toView:self.bgView];
+                [self getDiaryDetail:diaryId inSection:section index:index];
             }
             else
             {
@@ -2606,106 +2668,120 @@ ShareContentDelegate>
         [self.navigationController.sideMenuController hideMenuAnimated:YES];
         return ;
     }
+    
     [self backInput];
     
     if ([WXApi isWXAppInstalled] && [QQApi isQQInstalled])
     {
         UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"转发到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"腾讯微博",@"人人网",@"微信朋友圈",@"QQ好友",@"QQ空间", nil];
+        actionSheet.tag = Share_Action_Tag;
         [actionSheet showInView:self.bgView];
     }
     else if([WXApi isWXAppInstalled] && ![QQApi isQQInstalled])
     {
         UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"转发到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"腾讯微博",@"人人网",@"微信朋友圈", nil];
+        actionSheet.tag = Share_Action_Tag;
         [actionSheet showInView:self.bgView];
     }
     else if(![WXApi isWXAppInstalled] && [QQApi isQQInstalled])
     {
         UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"转发到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"腾讯微博",@"人人网",@"QQ好友",@"QQ空间", nil];
+        actionSheet.tag = Share_Action_Tag;
         [actionSheet showInView:self.bgView];
     }
     else if (![WXApi isWXAppInstalled] && ![QQApi isQQInstalled])
     {
         UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"转发到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"腾讯微博",@"人人网", nil];
+        actionSheet.tag = Share_Action_Tag;
         [actionSheet showInView:self.bgView];
     }
 }
 
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    DDLOG(@"waittransdict %@ ==%d",waitTransmitDict,buttonIndex);
     [self backInput];
     
-    if (buttonIndex == [actionSheet numberOfButtons]-1)
+    if (actionSheet.tag == Delete_Comment_Action_tag)
     {
-        return;
-    }
-    
-    waitDiaryID = [diaryDict objectForKey:@"_id"];
-    
-    NSString *content;
-    if ([waitTransmitDict objectForKey:@"content"])
-    {
-        if ([[waitTransmitDict objectForKey:@"content"] length] > 0)
+        if (buttonIndex == 0)
         {
-            content = [waitTransmitDict objectForKey:@"content"];
+            DDLOG(@"????????delete comment!");
         }
     }
-    
-    
-    NSString *imagePath;
-    if ([waitTransmitDict objectForKey:@"img"])
+    else if (actionSheet.tag == Share_Action_Tag)
     {
-        NSArray *tmpArray = [waitTransmitDict objectForKey:@"img"];
-        if ([tmpArray count] > 0)
+        if (buttonIndex == [actionSheet numberOfButtons]-1)
         {
-            imagePath = [NSString stringWithFormat:@"%@%@@150w",IMAGEURL,[[waitTransmitDict objectForKey:@"img"] firstObject]];
+            return;
         }
-    }
-    content = [content length]>0?content:ShareContent;
-    NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
-    id<ISSCAttachment> attchment= imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath];
-    NSString *url = ShareUrl;
-    ShareType shareType;
-    switch (buttonIndex)
-    {
-        case 0:
-            shareType = ShareTypeSinaWeibo;
-            break;
-        case 1:
-            shareType = ShareTypeTencentWeibo;
-            break;
-        case 2:
-            shareType = ShareTypeRenren;
-            break;
-        case 3:
-            if ([WXApi isWXAppInstalled])
+        
+        waitDiaryID = [diaryDict objectForKey:@"_id"];
+        
+        NSString *content;
+        if ([waitTransmitDict objectForKey:@"content"])
+        {
+            if ([[waitTransmitDict objectForKey:@"content"] length] > 0)
             {
-                shareType = ShareTypeWeixiTimeline;
+                content = [waitTransmitDict objectForKey:@"content"];
             }
-            else if(![WXApi isWXAppInstalled] && [QQApi isQQInstalled])
+        }
+        
+        
+        NSString *imagePath;
+        if ([waitTransmitDict objectForKey:@"img"])
+        {
+            NSArray *tmpArray = [waitTransmitDict objectForKey:@"img"];
+            if ([tmpArray count] > 0)
             {
-                shareType = ShareTypeQQ;
+                imagePath = [NSString stringWithFormat:@"%@%@@150w",IMAGEURL,[[waitTransmitDict objectForKey:@"img"] firstObject]];
             }
-            break;
-        case 4:
-            if ([WXApi isWXAppInstalled])
-            {
-                shareType = ShareTypeQQ;
-            }
-            else if(![WXApi isWXAppInstalled] && [QQApi isQQInstalled])
-            {
+        }
+        content = [content length]>0?content:ShareContent;
+        NSString *tmpImagePath = [[NSBundle mainBundle] pathForResource:@"logo120" ofType:@"png"];
+        id<ISSCAttachment> attchment= imagePath ? [ShareSDK imageWithUrl:imagePath]:[ShareSDK imageWithPath:tmpImagePath];
+        NSString *url = ShareUrl;
+        ShareType shareType;
+        switch (buttonIndex)
+        {
+            case 0:
+                shareType = ShareTypeSinaWeibo;
+                break;
+            case 1:
+                shareType = ShareTypeTencentWeibo;
+                break;
+            case 2:
+                shareType = ShareTypeRenren;
+                break;
+            case 3:
+                if ([WXApi isWXAppInstalled])
+                {
+                    shareType = ShareTypeWeixiTimeline;
+                }
+                else if(![WXApi isWXAppInstalled] && [QQApi isQQInstalled])
+                {
+                    shareType = ShareTypeQQ;
+                }
+                break;
+            case 4:
+                if ([WXApi isWXAppInstalled])
+                {
+                    shareType = ShareTypeQQ;
+                }
+                else if(![WXApi isWXAppInstalled] && [QQApi isQQInstalled])
+                {
+                    shareType = ShareTypeQQSpace;
+                }
+                break;
+            case 5:
                 shareType = ShareTypeQQSpace;
-            }
-            break;
-        case 5:
-            shareType = ShareTypeQQSpace;
-            break;
-        default:
-            break;
+                break;
+            default:
+                break;
+        }
+        ShareTools *shareTools = [[ShareTools alloc] init];
+        shareTools.shareContentDel = self;
+        [shareTools shareTo:shareType andShareContent:content andImage:attchment andMediaType:SSPublishContentMediaTypeNews description:content andUrl:url];
     }
-    ShareTools *shareTools = [[ShareTools alloc] init];
-    shareTools.shareContentDel = self;
-    [shareTools shareTo:shareType andShareContent:content andImage:attchment andMediaType:SSPublishContentMediaTypeNews description:content andUrl:url];
 }
 -(void)shareSuccess
 {

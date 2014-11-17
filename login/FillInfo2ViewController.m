@@ -28,6 +28,8 @@
     
     MyTextField *pwdTextField;
     MyTextField *nameTextField;
+    
+    BOOL defaultHeaderIcon;
 }
 @property (weak, nonatomic) IBOutlet UILabel *headerLabel;
 @property (weak, nonatomic) IBOutlet UILabel *nameLabel;
@@ -95,6 +97,10 @@
         self.titleLabel.text = @"注册成功";
     }
     
+    defaultHeaderIcon = NO;
+    
+    DDLOG(@"%@--%@",nickName,headerIcon);
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
     sex = @"1";
@@ -108,6 +114,14 @@
     self.headerLabel.textColor = COMMENTCOLOR;
     self.nameLabel.textColor = COMMENTCOLOR;
     
+    if ([headerIcon length] > 0)
+    {
+        [Tools fillImageView:self.headerImageView withImageFromFullURL:headerIcon andDefault:@""];
+        defaultHeaderIcon = YES;
+    }
+    
+    
+    
     nameTextField = [[MyTextField alloc] initWithFrame:CGRectMake(102, self.nameLabel.frame.origin.y-10.5, 200, 42)];
     nameTextField.background = nil;
     nameTextField.layer.cornerRadius = 5;
@@ -116,6 +130,7 @@
     nameTextField.backgroundColor = [UIColor whiteColor];
     nameTextField.textColor = COMMENTCOLOR;
     nameTextField.font = [UIFont systemFontOfSize:16];
+    nameTextField.text = nickName;
     
     [self.sexButton setTitleColor:COMMENTCOLOR forState:UIControlStateNormal];
     self.sexButton.layer.cornerRadius = 5;
@@ -378,6 +393,10 @@
                 {
                     [self uploadImage:fullScreenImage];
                 }
+                if (defaultHeaderIcon)
+                {
+                    [self uploadImage:self.headerImageView.image];
+                }
                 
                 SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
                 HomeViewController *homeViewController = [[HomeViewController alloc] init];
@@ -491,7 +510,7 @@
         }
         fullScreenImage = [Tools thumbnailWithImageWithoutScale:fullScreenImage size:CGSizeMake(imageWidth, imageHeight)];
     }
-    
+    defaultHeaderIcon = NO;
     [self.headerImageView setImage:fullScreenImage];
 }
 

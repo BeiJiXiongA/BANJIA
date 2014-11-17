@@ -25,12 +25,13 @@
 #import "UIImageView+WebCache.h"
 #import "InputTableBar.h"
 #import "DiaryTools.h"
+#import "UIActionSheet+Blocks.h"
 
 #define ImageViewTag  9999
 #define HeaderImageTag  7777
-#define CellButtonTag   33333
+#define CellButtonTag   3333
 
-#define SectionTag  10000
+#define SectionTag  1000
 #define RowTag     100
 
 #define ImageHeight  65.5f
@@ -65,6 +66,7 @@ ShareContentDelegate>
     UILabel *noneDongTaiLabel;
     
     BOOL haveNew;
+    BOOL haveMore;
     
     int uncheckedCount;
     
@@ -152,6 +154,7 @@ ShareContentDelegate>
     
     page = 0;
     haveNew = NO;
+    haveMore = YES;
     _reloading = NO;
     
     bgImageViewHeight = 150.0f;
@@ -402,6 +405,7 @@ ShareContentDelegate>
     {
         [[XDTabViewController sharedTabViewController] dismissViewControllerAnimated:YES completion:nil];
         [[NSUserDefaults standardUserDefaults] setObject:NOTFROMCLASS forKey:FROMWHERE];
+        [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"admin"];
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
 }
@@ -784,6 +788,62 @@ ShareContentDelegate>
     dongtaiDetailViewController.addComDel = self;
     [[XDTabViewController sharedTabViewController].navigationController pushViewController:dongtaiDetailViewController animated:YES];
 }
+
+#pragma mark - 删除日志评论
+
+-(void)deleteCommentWithDiary:(NSDictionary *)diaryDetailDict andCommentDict:(NSDictionary *)commentDict andIndexPath:(NSIndexPath *)indexPath
+{
+    NSString *diaryId = [diaryDetailDict objectForKey:@"_id"];
+    
+    [UIActionSheet showInView:self.bgView withTitle:nil cancelButtonTitle:@"取消" destructiveButtonTitle:@"删除" otherButtonTitles:nil tapBlock:^(UIActionSheet *actionSheet, NSInteger buttonIndex) {
+        if (buttonIndex == 0)
+        {
+            DDLOG(@"%@--%d--%d",diaryId,indexPath.section,indexPath.row);
+//            [self deleteCommentWithDiaryId:diaryID andCommentDict:commentDict inSection:indexPath.section index:indexPath.row];
+        }
+    }];
+}
+
+-(void)deleteCommentWithDiaryId:(NSString *)diaryId
+                 andCommentDict:(NSDictionary *)commentDict
+                      inSection:(NSInteger)section
+                          index:(NSInteger)index
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"p_id":diaryId
+                                                                      } API:GETDIARY_DETAIL];
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"diary detail responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                [Tools showTips:@"评论删除成功" toView:self.bgView];
+                [self getDiaryDetail:diaryId inSection:section index:index];
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools showAlertView:@"连接错误" delegateViewController:nil];
+        }];
+        [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
+}
+
+#pragma mark - 评论日志
 
 -(void)cellCommentDiary:(NSDictionary *)dict andIndexPath:(NSIndexPath *)indexPath
 {
@@ -1736,6 +1796,14 @@ ShareContentDelegate>
     return NO;
 }
 
+#pragma mark - 删除日志评论
+
+-(void)deleteCommentWithDiary:(NSDictionary *)diaryDetailDict andIndexPath:(NSIndexPath *)indexPath
+{
+    NSString *diaryId = [diaryDetailDict objectForKey:@"_id"];
+    [self getDiaryDetail:diaryId inSection:indexPath.section index:indexPath.row];
+}
+
 #pragma mark - addCommetnDel
 -(void)addComment:(BOOL)add
 {
@@ -1748,11 +1816,12 @@ ShareContentDelegate>
 
 -(void)getMoreDongTai
 {
-    if (page == -1)
+    if (!haveMore)
     {
-        [Tools showAlertView:@"没有更多动态了" delegateViewController:nil];
+        [Tools showTips:@"没有更多动态了" toView:self.bgView];
         return ;
     }
+
     page ++;
     [self getDongTaiList];
 }
@@ -1806,23 +1875,20 @@ ShareContentDelegate>
                         classZoneTableView.hidden = NO;
                         [DongTaiArray addObjectsFromArray:array];
                     }
-                    page = [[[responseDict objectForKey:@"data"] objectForKey:@"page"] intValue];
-                    monthStr = [NSString stringWithFormat:@"%@",[[responseDict objectForKey:@"data"] objectForKey:@"month"]];
                     
-                    if (page == 0 && [monthStr intValue] == 0)
-                    {
-                        page = -1;
-                    }
                 }
-                else if (page == 0 && [monthStr length]==0 )
+                else if (page == 0 && [monthStr length] == 0 )
                 {
                     noneDongTaiLabel.hidden = NO;
                 }
-                else if([monthStr length] == 0 && page ==0)
+                
+                page = [[[responseDict objectForKey:@"data"] objectForKey:@"page"] intValue];
+                monthStr = [NSString stringWithFormat:@"%@",[[responseDict objectForKey:@"data"] objectForKey:@"month"]];
+                if (page == 0 && [monthStr length] > 0 && [monthStr intValue] == 0)
                 {
-                    [Tools showAlertView:@"没有更多动态了" delegateViewController:nil];
-                    page = -1;
+                    haveMore = NO;
                 }
+                
                 if (!isApply)
                 {
                     [self groupByTime:DongTaiArray];

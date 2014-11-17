@@ -58,6 +58,7 @@
     
     //显示置顶要闻
     [[NSUserDefaults standardUserDefaults] setObject:@"1" forKey:@"showad"];
+    [[NSUserDefaults standardUserDefaults] setObject:@"zw" forKey:WXNICKNAME];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getNewClass) name:UPDATECLASSNUMBER object:nil];
@@ -120,12 +121,12 @@
         });
     }
     
-    _mapManager = [[BMKMapManager alloc]init];
-    BOOL ret = [_mapManager start:@"myqUGnjMNzdgscv8HVTTgWkn"  generalDelegate:nil];
-    if (!ret)
-    {
-        DDLOG(@"manager start failed!");
-    }
+//    _mapManager = [[BMKMapManager alloc]init];
+//    BOOL ret = [_mapManager start:@"myqUGnjMNzdgscv8HVTTgWkn"  generalDelegate:nil];
+//    if (!ret)
+//    {
+//        DDLOG(@"manager start failed!");
+//    }
     
     
     //友盟
@@ -133,8 +134,6 @@
     NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
     [MobClick setAppVersion:version];
     
-    //微信
-    [WXApi registerApp:@"wx480bf9924a52975f"];
     
     if (![[NSUserDefaults standardUserDefaults] objectForKey:@"first"])
     {
@@ -174,6 +173,9 @@
         [[UIApplication sharedApplication] cancelAllLocalNotifications];
         [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
     }
+    
+    
+    //友盟
     
     [ShareSDK registerApp:@"182899e1ea92"];
     [self shareAppKeysForEvery];
@@ -592,9 +594,11 @@
                      qqApiInterfaceCls:[QQApiInterface class]
                        tencentOAuthCls:[TencentOAuth class]];
     
+    [ShareSDK connectWeChatWithAppId:@"wx480bf9924a52975f"
+                           appSecret:@"6e897dc02cf9fe9727c0327574af0632"
+                           wechatCls:[WXApi class]];
     //微信5
-        [ShareSDK connectWeChatWithAppId:@"wx480bf9924a52975f" wechatCls:[WXApi class]];
-    //    [ShareSDK connectWeChatWithAppId:@"wx387c10c2e338aa3c" wechatCls:[WXApi class]];
+    [ShareSDK connectWeChatWithAppId:@"wx480bf9924a52975f" wechatCls:[WXApi class]];
 }
 
 
@@ -619,96 +623,14 @@
 
 - (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url
 {
-//    return  [WXApi handleOpenURL:url delegate:self];
-    if ([[url absoluteString] rangeOfString:@"wx"].length > 0 && [[url absoluteString] rangeOfString:@"state=123"].length > 0)
-    {
-        return [WXApi handleOpenURL:url delegate:self];
-    }
+
     return [ShareSDK handleOpenURL:url wxDelegate:self];
 }
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation{
     
-    DDLOG(@"url %@",url);
-   
-    if ([[url absoluteString] rangeOfString:@"wx"].length > 0 && [[url absoluteString] rangeOfString:@"state=123"].length > 0)
-    {
-        NSString *urlStr = [url absoluteString];
-        NSRange range1 = [urlStr rangeOfString:@":"];
-        NSRange range2 = [urlStr rangeOfString:@"code="];
-        NSRange range3 = [urlStr rangeOfString:@"&"];
-        DDLOG(@"appid=%@ code=%@",[urlStr substringToIndex:range1.location],
-              [urlStr substringWithRange:NSMakeRange(range2.location+range2.length, range3.location-range2.location-range2.length)]);
-        
-        NSString *appid = [urlStr substringToIndex:range1.location];
-        NSString *code = [urlStr substringWithRange:NSMakeRange(range2.location+range2.length, range3.location-range2.location-range2.length)];
-        [self getTokenWithAppID:appid andCode:code];
-        return  [WXApi handleOpenURL:url delegate:self];
-    }
     return [ShareSDK handleOpenURL:url sourceApplication:sourceApplication annotation:annotation wxDelegate:self];
 }
--(void) onResp:(BaseResp*)resp
-{
-    
-}
 
--(void)getTokenWithAppID:(NSString *)appid andCode:(NSString *)code
-{
-    if ([Tools NetworkReachable])
-    {
-        __weak ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://api.weixin.qq.com/sns/oauth2/access_token?appid=%@&secret=6e897dc02cf9fe9727c0327574af0632&code=%@&grant_type=authorization_code",appid,code]]];
-        [request setCompletionBlock:^{
-            NSString *responseString = [request responseString];
-            NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"get weichat responsedict %@",responseDict);
-            if ([responseDict isKindOfClass:[NSDictionary class]])
-            {
-                NSString *openId = [responseDict objectForKey:@"openid"];
-                NSString *accessToken = [responseDict objectForKey:@"access_token"];
-                if (openId && accessToken)
-                {
-                    [self getWeiChatUserInfoWithToken:accessToken andOpenID:openId];
-                }
-            }
-        }];
-        
-        [request setFailedBlock:^{
-        }];
-        [request startAsynchronous];
-    }
-}
-
--(void)getWeiChatUserInfoWithToken:(NSString *)access_token andOpenID:(NSString *)openId
-{
-    if ([Tools NetworkReachable])
-    {
-        __weak ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://api.weixin.qq.com/sns/userinfo?access_token=%@&openid=%@",access_token,openId]]];
-        [request setCompletionBlock:^{
-            NSString *responseString = [request responseString];
-            NSDictionary *responseDict = [Tools JSonFromString:responseString];
-            DDLOG(@"get weichat userinfo responsedict %@",responseString);
-            if ([responseDict isKindOfClass:[NSDictionary class]])
-            {
-                NSString *nickName = [responseDict objectForKey:@"nickname"];
-                NSString *userid = [responseDict objectForKey:@"unionid"];
-                NSString *sex = [NSString stringWithFormat:@"%d",[[responseDict objectForKey:@"sex"] intValue]];
-                NSString *headerUrl = [responseDict objectForKey:@"headimgurl"];
-                DDLOG(@"   %@",nickName);
-                if ([self.weiChatDel respondsToSelector:@selector(loginWithWeiChatId:andHeaderIcon:andUserName:andSex:)])
-                {
-                    [self.weiChatDel loginWithWeiChatId:userid andHeaderIcon:headerUrl andUserName:nickName andSex:sex];
-                }
-            }
-            else
-            {
-                [Tools dealRequestError:responseDict fromViewController:nil];
-            }
-        }];
-        
-        [request setFailedBlock:^{
-        }];
-        [request startAsynchronous];
-    }
-}
 
 -(void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
 {
@@ -718,12 +640,8 @@
         // 点击通知栏
         DDLOG(@"click notification bar");
     }
-//    else
-//    {
-        [self handlePushNotification:userInfo];
-//        DDLOG(@"notification come in backgroud");
-//    }
     
+    [self handlePushNotification:userInfo];
 }
 
 -(void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
@@ -873,7 +791,7 @@
                     [self.msgDelegate dealNewMsg:userInfo];
                 }
             }
-            [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
+            [[NSNotificationCenter defaultCenter] postNotificationName:DEALCLASSMEMBERAPPLY object:nil];
             [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSNUMBER object:nil];
         }
         else if ([[userInfo objectForKey:@"type"] isEqualToString:@"notice"])
@@ -887,6 +805,7 @@
                     AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
                 }
             }
+            DDLOG(@"%@",[[NSUserDefaults standardUserDefaults] objectForKey:NewNoticeAlert]);
             if([[NSUserDefaults standardUserDefaults] objectForKey:NewNoticeAlert])
             {
                 if ([[[NSUserDefaults standardUserDefaults] objectForKey:NewNoticeAlert] integerValue] == 1)

@@ -9,10 +9,8 @@
 #import "NotificationDetailViewController.h"
 #import "Header.h"
 #import "NotificationDetailCell.h"
-#import "MemberDetailViewController.h"
-#import "StudentDetailViewController.h"
-#import "ParentsDetailViewController.h"
-#import "MemberDetailViewController.h"
+#import "PersonDetailViewController.h"
+
 #import "ReportViewController.h"
 #import "ScoreMemListViewController.h"
 #import "ScoreDetailViewController.h"
@@ -136,7 +134,7 @@ UIActionSheetDelegate>
         contentTextView.frame = CGRectMake(8, UI_NAVIGATION_BAR_HEIGHT+8, SCREEN_WIDTH-16, SCREEN_HEIGHT-16-UI_NAVIGATION_BAR_HEIGHT);
         containerScrollView.hidden = YES;
     }
-    else
+    else if([byID isEqualToString:[Tools user_id]] || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] intValue] == 2)
     {
         buttonNamesArray = [[NSMutableArray alloc] initWithCapacity:2];
         
@@ -187,6 +185,10 @@ UIActionSheetDelegate>
         [containerScrollView addSubview:unreadTableView];
         
         containerScrollView.contentSize = CGSizeMake(SCREEN_WIDTH*2, containerScrollView.frame.size.height);
+    }
+    else
+    {
+        self.bgView.backgroundColor = [UIColor whiteColor];
     }
     
     if (isnew)
@@ -635,39 +637,11 @@ UIActionSheetDelegate>
 
 -(void)toUserDetail:(NSDictionary *)dict
 {
-    NSString *role = [dict objectForKey:@"role"];
-    if ([role isEqualToString:@"students"])
-    {
-        StudentDetailViewController *studentDetail = [[StudentDetailViewController alloc] init];
-        studentDetail.studentID = [dict objectForKey:@"_id"];
-        studentDetail.studentName = [dict objectForKey:@"name"];
-        studentDetail.title = [dict objectForKey:@"title"];
-        studentDetail.headerImg = [dict objectForKey:@"img_icon"];
-        studentDetail.role = [dict objectForKey:@"role"];
-        [self.navigationController pushViewController:studentDetail animated:YES];
-    }
-    else if([role isEqualToString:@"parents"])
-    {
-        ParentsDetailViewController *parentDetail = [[ParentsDetailViewController alloc] init];
-        parentDetail.parentID = [dict objectForKey:@"_id"];
-        parentDetail.parentName = [dict objectForKey:@"name"];
-        parentDetail.title = [dict objectForKey:@"title"];
-        parentDetail.headerImg = [dict objectForKey:@"img_icon"];
-        parentDetail.admin = NO;
-        parentDetail.role = [dict objectForKey:@"role"];
-        [self.navigationController pushViewController:parentDetail animated:YES];
-    }
-    else if([role isEqualToString:@"teachers"])
-    {
-        MemberDetailViewController *teacherDetail = [[MemberDetailViewController alloc] init];
-        teacherDetail.teacherID = [dict objectForKey:@"_id"];
-        teacherDetail.teacherName = [dict objectForKey:@"name"];
-        teacherDetail.title = [dict objectForKey:@"title"];
-        teacherDetail.headerImg = [dict objectForKey:@"img_icon"];
-        teacherDetail.admin = NO;
-        teacherDetail.role = [dict objectForKey:@"role"];
-        [self.navigationController pushViewController:teacherDetail animated:YES];
-    }
+    
+    PersonDetailViewController *personDetailVC = [[PersonDetailViewController alloc] init];
+    personDetailVC.personName = [dict objectForKey:@"name"];
+    personDetailVC.personID = [dict objectForKey:@"_id"];
+    [self.navigationController pushViewController:personDetailVC animated:YES];
 }
 
 #pragma mark - scrollview

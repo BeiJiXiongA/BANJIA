@@ -554,18 +554,24 @@ UpdateUserSettingDelegate>
             DDLOG(@"kickuser responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                NSDictionary *studentDict = [[db findSetWithDictionary:@{@"classid":classID,@"name":[parentDict objectForKey:@"re_name"]} andTableName:CLASSMEMBERTABLE] firstObject];
-                if ([[studentDict objectForKey:@"uid"] isEqual:[NSNull null]]
-                    || ([[studentDict objectForKey:@"uid"] length]==0)
-                    || [[studentDict objectForKey:@"role"] isEqualToString:@"unin_students"])
+                NSDictionary *studentDict = [[db findSetWithDictionary:@{@"classid":classID,@"name":[parentDict objectForKey:@"re_name"],@"uid":[parentDict objectForKey:@"re_id"]} andTableName:CLASSMEMBERTABLE] firstObject];
+                DDLOG(@"%@",studentDict);
+                if (studentDict)
                 {
-                    if ([db deleteRecordWithDict:@{@"name":[parentDict objectForKey:@"re_name"],@"classid":classID} andTableName:CLASSMEMBERTABLE])
+                    if ([db deleteRecordWithDict:studentDict andTableName:CLASSMEMBERTABLE])
                     {
                         DDLOG(@"delete student success!");
                         if ([db deleteRecordWithDict:@{@"uid":parentID,@"classid":classID} andTableName:CLASSMEMBERTABLE])
                         {
                             DDLOG(@"delete parent success!");
+                            [[NSNotificationCenter defaultCenter] postNotificationName:DEALCLASSMEMBERAPPLY object:nil];
+                            [self.navigationController popToRootViewControllerAnimated:YES];
                         }
+                    }
+                    else
+                    {
+                        [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
+                        [self.navigationController popToRootViewControllerAnimated:YES];
                     }
                 }
                 else
@@ -573,10 +579,17 @@ UpdateUserSettingDelegate>
                     if ([db deleteRecordWithDict:@{@"uid":parentID,@"classid":classID} andTableName:CLASSMEMBERTABLE])
                     {
                         DDLOG(@"delete parent success!");
+                        [[NSNotificationCenter defaultCenter] postNotificationName:DEALCLASSMEMBERAPPLY object:nil];
+                        [self.navigationController popToRootViewControllerAnimated:YES];
+                    }
+                    else
+                    {
+                        [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
+                        [self.navigationController popToRootViewControllerAnimated:YES];
                     }
                 }
-                [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
-                [self.navigationController popToRootViewControllerAnimated:YES];
+
+                
             }
             else
             {

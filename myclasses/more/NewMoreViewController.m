@@ -205,6 +205,7 @@
 {
     [[XDTabViewController sharedTabViewController] dismissViewControllerAnimated:YES completion:nil];
     [[NSUserDefaults standardUserDefaults] setObject:NOTFROMCLASS forKey:FROMWHERE];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"admin"];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 

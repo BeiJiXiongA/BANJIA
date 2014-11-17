@@ -318,8 +318,12 @@ MLEmojiLabelDelegate>
     }
     inputTabBar.layer.anchorPoint = CGPointMake(0.5, 1);
     messageTableView.frame = CGRectMake(0, UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT-inputTabBarH);
-    [self.bgView addSubview:inputTabBar];
-    [inputTabBar setLayout];
+    if (![toID isEqualToString:AssistantID])
+    {
+        [self.bgView addSubview:inputTabBar];
+        [inputTabBar setLayout];
+    }
+    
 }
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event

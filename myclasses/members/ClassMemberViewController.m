@@ -90,7 +90,10 @@ MsgDelegate>
     
     updateGroup = @"";
     
-    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(getMembersByClass) name:UPDATECLASSMEMBERLIST object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(manageClassMember) name:UPDATECLASSMEMBERLIST object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getAdmins) name:DEALCLASSMEMBERAPPLY object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getAdmins) name:UPDATECLASSMEMBERLIST object:nil];
+    
     
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
@@ -317,6 +320,7 @@ MsgDelegate>
 {
     [[XDTabViewController sharedTabViewController] dismissViewControllerAnimated:YES completion:nil];
     [[NSUserDefaults standardUserDefaults] setObject:NOTFROMCLASS forKey:FROMWHERE];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"admin"];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
@@ -324,35 +328,6 @@ MsgDelegate>
 -(void)dealNewChatMsg:(NSDictionary *)dict
 {
     
-}
-
-#pragma mark - msgDel
--(void)dealNewMsg:(NSDictionary *)dict
-{
-    if ([[Tools user_id] length] == 0)
-    {
-        return ;
-    }
-    [self manageClassMember];
-    [[XDTabViewController sharedTabViewController] viewWillAppear:NO];
-}
-
-#pragma mark - subGroupdelegate
--(void)subGroupUpdate:(BOOL)update
-{
-    if (update)
-    {
-        [self getMembersByClass];
-    }
-}
-#pragma mark - memdel
--(void)updateListWith:(BOOL)update
-{
-    if (update)
-    {
-        [self manageClassMember];
-        [[XDTabViewController sharedTabViewController] viewWillAppear:NO];
-    }
 }
 
 #pragma mark - searchbardelegate
@@ -645,10 +620,6 @@ MsgDelegate>
                     {
                         [memDict setObject:[NSString stringWithFormat:@"%d",[[adminIDDict objectForKey:[dict objectForKey:@"_id"]] intValue]] forKey:@"admin"];
                     }
-                    else if([[dict objectForKey:@"role"] isEqualToString:@"teachers"] && [[dict objectForKey:@"checked"] integerValue] == 1)
-                    {
-                        [memDict setObject:@"1" forKey:@"admin"];
-                    }
                     else
                     {
                         [memDict setObject:@"0" forKey:@"admin"];
@@ -825,22 +796,26 @@ MsgDelegate>
     //新申请
     [newAppleArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"checked":@"0"} andTableName:CLASSMEMBERTABLE]];
     
-    
-    NSMutableArray *waitRemoveArray = [[NSMutableArray alloc] initWithCapacity:0];
-    
-    for (int i=0; i<[newAppleArray count]; i++)
+    if ([newAppleArray count] > 0)
     {
-        NSDictionary *dict = [newAppleArray objectAtIndex:i];
-        if ([[dict objectForKey:@"uid"] isEqual:[NSNull null]])
-        {
-            [waitRemoveArray addObject:dict];
-        }
+        [[XDTabViewController sharedTabViewController] viewWillAppear:NO];
     }
     
-    for (int i=0; i<[waitRemoveArray count]; i++)
-    {
-        [newAppleArray removeObject:[waitRemoveArray objectAtIndex:i]];
-    }
+//    NSMutableArray *waitRemoveArray = [[NSMutableArray alloc] initWithCapacity:0];
+//    
+//    for (int i=0; i<[newAppleArray count]; i++)
+//    {
+//        NSDictionary *dict = [newAppleArray objectAtIndex:i];
+//        if ([[dict objectForKey:@"uid"] isEqual:[NSNull null]])
+//        {
+//            [waitRemoveArray addObject:dict];
+//        }
+//    }
+//    
+//    for (int i=0; i<[waitRemoveArray count]; i++)
+//    {
+//        [newAppleArray removeObject:[waitRemoveArray objectAtIndex:i]];
+//    }
     
     //管理员
     [adminArray addObjectsFromArray:[_db findSetWithDictionary:@{@"classid":classID,@"admin":@"1"} andTableName:CLASSMEMBERTABLE]];
@@ -854,7 +829,6 @@ MsgDelegate>
     for (int i=0; i<[studentArray count]; ++i)
     {
         NSDictionary *stuDict = [studentArray objectAtIndex:i];
-        DDLOG(@"sudict=%@",stuDict);
         if (![[stuDict objectForKey:@"title"] isEqual:[NSNull null]])
         {
             if ([[stuDict objectForKey:@"title"] length] > 0)
@@ -863,6 +837,8 @@ MsgDelegate>
             }
         }
     }
+    
+    [studentArray removeObjectsInArray:classLeadersArray];
     
     self.titleLabel.text = [NSString stringWithFormat:@"班级成员(%d)",(int)[teachersArray count]+(int)[studentArray count]];
     

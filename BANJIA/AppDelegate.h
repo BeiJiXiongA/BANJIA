@@ -8,7 +8,6 @@
 
 #import <UIKit/UIKit.h>
 #import "OperatDB.h"
-#import "BMapKit.h"
 #import "APService.h"
 #import "StatusBarTips.h"
 #import "SideMenuViewController.h"
@@ -21,7 +20,6 @@
 @interface AppDelegate : UIResponder <UIApplicationDelegate,UIAlertViewDelegate,TipsDelegate,WXApiDelegate>
 {
     NSString *updateUrl;
-    BMKMapManager* _mapManager;
     SideMenuViewController *sideMenuViewController;
     
     NSString *newVersionUrl;
