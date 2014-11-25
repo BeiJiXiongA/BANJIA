@@ -10,7 +10,7 @@
 #import "PopView.h"
 
 @implementation CommentCell
-@synthesize nameButton,commentContentLabel,commentDict,praiseView,openPraiseButton,headerImageView,timeLabel,lineImageView,nameLable;
+@synthesize nameButton,commentContentLabel,commentDict,praiseView,openPraiseButton,headerImageView,timeLabel,lineImageView,nameLable,commentIndex;
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
@@ -90,9 +90,9 @@
 -(void)deleteComment
 {
     DDLOG(@"delete comment! %@",commentDict);
-    if ([self.commentDel respondsToSelector:@selector(deleteCommentWithDict:)])
+    if ([self.commentDel respondsToSelector:@selector(deleteCommentWithDict:andCommentIndex:)])
     {
-        [self.commentDel deleteCommentWithDict:commentDict];
+        [self.commentDel deleteCommentWithDict:commentDict andCommentIndex:commentIndex];
     }
     
 }

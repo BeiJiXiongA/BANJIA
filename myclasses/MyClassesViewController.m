@@ -960,9 +960,7 @@ UIActionSheetDelegate>
     [tabViewController selectItemAtIndex:0];
     
     KKNavigationController *tabBarNav = [[KKNavigationController alloc] initWithRootViewController:tabViewController];
-    [self.navigationController presentViewController:tabBarNav animated:YES completion:^{
-
-    }];
+    [self.navigationController presentViewController:tabBarNav animated:YES completion:nil];
     [self.sideMenuController hideMenuAnimated:YES];
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     

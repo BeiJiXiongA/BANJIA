@@ -1528,6 +1528,10 @@ UISearchBarDelegate>
                         {
                             [waitRemoveArray addObject:alreadyDict];
                         }
+                        else if([alreadyDict.description rangeOfString:@"$id"].length > 0)
+                        {
+                            [waitRemoveArray addObject:alreadyDict];
+                        }
                     }
                     
                     for (int i=0; i<[waitRemoveArray count]; i++)
@@ -1548,6 +1552,10 @@ UISearchBarDelegate>
                             [waitRemoveArray addObject:alreadyDict];
                         }
                         else if([[alreadyDict objectForKey:@"_id"] isKindOfClass:[NSString class]] && [[alreadyDict objectForKey:@"_id"] isEqualToString:[Tools user_id]])
+                        {
+                            [waitRemoveArray addObject:alreadyDict];
+                        }
+                        else if([alreadyDict.description rangeOfString:@"$id"].length > 0)
                         {
                             [waitRemoveArray addObject:alreadyDict];
                         }

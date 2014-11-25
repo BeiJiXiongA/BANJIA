@@ -26,6 +26,8 @@
     NSTimer *timer;
     
     int sec;
+    
+    NSString *getCodePhoneNumber;
 }
 @end
 
@@ -46,6 +48,8 @@
 	// Do any additional setup after loading the view.
     self.titleLabel.text = @"注册";
     
+    getCodePhoneNumber = @"";
+    
     sec = 60;
     
 //    UIImage*inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 3, 20, 2.3)];
@@ -63,6 +67,7 @@
     phoneNumTextfield.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
     phoneNumTextfield.textColor = UIColorFromRGB(0x727171);
     phoneNumTextfield.placeholder = @"手机号码";
+    phoneNumTextfield.text = @"";
     phoneNumTextfield.numericFormatter = [AKNumericFormatter formatterWithMask:@"***********" placeholderCharacter:'*'];
     [self.bgView addSubview:phoneNumTextfield];
     
@@ -150,11 +155,29 @@
 
 -(void)verify
 {
+    if ([phoneNumTextfield.text length] == 0)
+    {
+        [Tools showAlertView:@"请输入手机号码！" delegateViewController:nil];
+        return ;
+    }
+    if (![Tools isPhoneNumber:[Tools getPhoneNumFromString:phoneNumTextfield.text]])
+    {
+        [Tools showAlertView:@"手机号格式不正确！" delegateViewController:nil];
+        return ;
+    }
+    
     if ([codeTextField.text length] == 0)
     {
         [Tools showAlertView:@"请您填写验证码" delegateViewController:nil];
         return ;
     }
+    
+    if ([getCodePhoneNumber length] > 0 && ![phoneNumTextfield.text isEqualToString:getCodePhoneNumber])
+    {
+        [Tools showAlertView:@"手机号不正确" delegateViewController:nil];
+        return ;
+    }
+    
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"phone":[Tools getPhoneNumFromString:phoneNumTextfield.text],
@@ -230,6 +253,7 @@
             {
                 codeStr = [responseDict objectForKey:@"data"];
                 codeTextField.text = codeStr;
+                getCodePhoneNumber = phoneNumTextfield.text;
             }
             else
             {

@@ -71,6 +71,8 @@
 -(void)backKeyBoard;
 
 -(void)setLayout;
+
+-(void)setPlaceHolderString:(NSString *)placeHolderString;
 //-(void)layOutWithKeyBoardHeight:(CGFloat)keyBoardHeight;
 @end
 

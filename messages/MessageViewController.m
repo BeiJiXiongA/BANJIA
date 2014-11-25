@@ -92,6 +92,9 @@ ChatVCDelegate>
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getChatList) name:UPDATE_MSG_LIST object:nil];
     
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).ChatDelegate = self;
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = self;
+    
     db = [[OperatDB alloc] init];
     
     edittingTableView = NO;
@@ -146,7 +149,62 @@ ChatVCDelegate>
     [[NSUserDefaults standardUserDefaults] synchronize];
     
     currentId = @"";
+    
+    if ([self haveNewMsg] || [self haveNewNotice])
+    {
+        self.unReadLabel.hidden = NO;
+    }
+    else
+    {
+        self.unReadLabel.hidden = YES;
+    }
 }
+
+-(NSInteger)haveNewClass
+{
+    NSString *classNum = [[NSUserDefaults standardUserDefaults] objectForKey:NewClassNum];
+    return [classNum intValue];
+}
+-(BOOL)haveNewMsg
+{
+    
+    NSArray *friendsArray  =[db findSetWithDictionary:@{@"checked":@"0",@"uid":[Tools user_id]} andTableName:FRIENDSTABLE];
+    if ([friendsArray count] > 0 || [self haveNewClass] > 0 ||
+        [[[NSUserDefaults standardUserDefaults] objectForKey:NewClassNum] integerValue]>0 ||
+        [[[NSUserDefaults standardUserDefaults] objectForKey:UCFRIENDSUM] integerValue] > 0)
+    {
+        return YES;
+    }
+    else
+    {
+        return NO;
+    }
+    return NO;
+}
+
+-(BOOL)haveNewNotice
+{
+    NSMutableArray *array = [db findSetWithDictionary:@{@"readed":@"0",@"uid":[Tools user_id],@"type":@"f_apply"} andTableName:@"notice"];
+    if ([array count] > 0)
+    {
+        return YES;
+    }
+    return NO;
+}
+
+#pragma mark - 代理
+
+-(void)dealNewChatMsg:(NSDictionary *)dict
+{
+    [self viewWillAppear:NO];
+    if ([[dict objectForKey:@"type"] isEqualToString:@"c_apply"] ||
+        [[dict objectForKey:@"type"] isEqualToString:@"f_apply"] ||
+        [[dict objectForKey:@"type"] isEqualToString:@"notice"])
+    {
+        self.unReadLabel.hidden = NO;
+    }
+}
+
 
 -(void)viewWillDisappear:(BOOL)animated
 {
@@ -156,6 +214,9 @@ ChatVCDelegate>
 
 -(void)dealloc
 {
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).chatDelegate = nil;
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).msgDelegate = nil;
+
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UPDATE_MSG_LIST object:nil];
 }
 
@@ -331,6 +392,7 @@ ChatVCDelegate>
             self.unReadLabel.hidden = NO;
         }
     }
+    [self viewWillAppear:NO];
 }
 
 -(void)manageChatList

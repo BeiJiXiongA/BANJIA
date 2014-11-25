@@ -109,12 +109,23 @@ static NSString *const kCompletedCallbackKey = @"completed";
     return _downloadQueue.maxConcurrentOperationCount;
 }
 
-- (id<SDWebImageOperation>)downloadImageWithURL:(NSURL *)url options:(SDWebImageDownloaderOptions)options progress:(void (^)(NSUInteger, long long))progressBlock completed:(void (^)(UIImage *, NSData *, NSError *, BOOL))completedBlock
+- (id<SDWebImageOperation>)downloadImageWithURL:(NSURL *)url
+                                        options:(SDWebImageDownloaderOptions)options
+                                       progress:(void (^)(NSUInteger, long long))progressBlock
+                                      completed:(void (^)(UIImage *, NSData *, NSError *, BOOL))completedBlock
 {
-    return [self downloadImageWithURL:url options:options progress:progressBlock completed:completedBlock dealed:nil];
+    return [self downloadImageWithURL:url
+                              options:options
+                             progress:progressBlock
+                            completed:completedBlock
+                               dealed:nil];
 }
 
-- (id<SDWebImageOperation>)downloadImageWithURL:(NSURL *)url options:(SDWebImageDownloaderOptions)options progress:(void (^)(NSUInteger, long long))progressBlock completed:(void (^)(UIImage *, NSData *, NSError *, BOOL))completedBlock dealed:(MJWebImageDealedBlock)dealedBlock
+- (id<SDWebImageOperation>)downloadImageWithURL:(NSURL *)url
+                                        options:(SDWebImageDownloaderOptions)options
+                                       progress:(void (^)(NSUInteger, long long))progressBlock
+                                      completed:(void (^)(UIImage *, NSData *, NSError *, BOOL))completedBlock
+                                         dealed:(MJWebImageDealedBlock)dealedBlock
 {
     __block SDWebImageDownloaderOperation *operation;
     __weak SDWebImageDownloader *wself = self;
@@ -126,7 +137,6 @@ static NSString *const kCompletedCallbackKey = @"completed";
         NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url];
         request.HTTPShouldHandleCookies = NO;
         request.HTTPShouldUsePipelining = YES;
-        DDLOG(@"%f",request.timeoutInterval);
         request.allHTTPHeaderFields = wself.HTTPHeaders;
         operation = [SDWebImageDownloaderOperation.alloc initWithRequest:request options:options progress:^(NSUInteger receivedSize, long long expectedSize)
         {

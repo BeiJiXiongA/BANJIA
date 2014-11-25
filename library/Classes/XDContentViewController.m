@@ -14,6 +14,8 @@
 #import "WelcomeViewController.h"
 #import "UINavigationController+JDSideMenu.h"
 
+
+@class XDTabViewController;
 //@class WelcomeViewController;
 //@class KKNavigationController;
 
@@ -53,22 +55,48 @@
 
 -(void)postlogOut
 {
-    [Tools exit];
-    DDLOG_CURRENT_METHOD;
     
-    WelcomeViewController *login = [[WelcomeViewController alloc] init];
-    KKNavigationController *loginNav = [[KKNavigationController alloc] initWithRootViewController:login];
-    [[self topViewControllerName] presentViewController:loginNav animated:YES completion:nil];
+    DDLOG_CURRENT_METHOD;
+    DDLOG(@"topViewControllerName++++%@",[self topViewControllerName]);
+//    NSString *topViewControllerName = NSStringFromClass([[self topViewControllerName] class]);
+//    if ([topViewControllerName isEqualToString:@"JDSideMenu"])
+    
+    if ([[Tools user_id] length] > 0)
+    {
+        WelcomeViewController *login = [[WelcomeViewController alloc] init];
+        KKNavigationController *loginNav = [[KKNavigationController alloc] initWithRootViewController:login];
+        [self.navigationController presentViewController:loginNav animated:YES completion:nil];
+    }
 }
 
--(UIViewController *)topViewControllerName
+//-(UIViewController *)topViewControllerName
+//{
+//    UIViewController *topViewController = [UIApplication sharedApplication].keyWindow.rootViewController;
+//    while (topViewController.presentedViewController)
+//    {
+//        topViewController = topViewController.presentedViewController;
+//    }
+//    DDLOG(@"topViewController+++ %@",NSStringFromClass([topViewController class]));
+//    return topViewController;
+//}
+
+-(NSString *)topViewControllerName
 {
     UIViewController *topViewController = [UIApplication sharedApplication].keyWindow.rootViewController;
     while (topViewController.presentedViewController)
     {
         topViewController = topViewController.presentedViewController;
     }
-    return topViewController;
+    NSString *topViewControllerName = @"";
+    if ([NSStringFromClass([topViewController class]) isEqualToString:@"KKNavigationController"])
+    {
+        topViewControllerName = NSStringFromClass([((KKNavigationController *)topViewController).visibleViewController class]);
+    }
+    else if([NSStringFromClass([topViewController class]) isEqualToString:@"JDSideMenu"])
+    {
+        topViewControllerName = NSStringFromClass([((KKNavigationController *)[((JDSideMenu *)topViewController) contentController]).visibleViewController class]);
+    }
+    return topViewControllerName;
 }
 
 - (void)viewDidLoad

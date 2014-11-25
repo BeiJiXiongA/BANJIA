@@ -94,7 +94,10 @@
                 CGSize s = [Tools getSizeWithString:contentString andWidth:MaxCommentWidth-30 andFont:CommentFont];
                 
                 DDLOG(@"diary height in diary tools %@ +++ %@",contentString,NSStringFromCGSize(s));
-                tmpcommentHeight += (s.height+CommentSpace*1+32);
+//                if ([[dict objectForKey:@"del"] intValue] == 0)
+                {
+                    tmpcommentHeight += (s.height+CommentSpace*1+32);
+                }
             }
         }
         else
@@ -105,23 +108,13 @@
             do {
                 NSDictionary *dict = [array objectAtIndex:i];
                 
-               NSString *name = [NSString stringWithFormat:@"%@ : ",[[dict objectForKey:@"by"] objectForKey:@"name"]];
-                CGSize nameSize;
-                if (SYSVERSION >= 7)
-                {
-                    nameSize = [name sizeWithAttributes:[NSDictionary dictionaryWithObjectsAndKeys:CommentFont, NSFontAttributeName, nil]];
-                }
-                else
-                {
-                    nameSize = [Tools getSizeWithString:name andWidth:100 andFont:CommentFont];
-                }
+               NSString *name = [NSString stringWithFormat:@"%@",[[dict objectForKey:@"by"] objectForKey:@"name"]];
                 
-                NSString *content = [[dict objectForKey:@"content"] emojizedString];
+                NSString *content = [NSString stringWithFormat:@"%@：%@",name,[[dict objectForKey:@"content"] emojizedString]];
                 
-                CGSize commentSize = [Tools getSizeWithString:content andWidth:MaxCommentWidth-nameSize.width andFont:CommentFont];
+                CGSize commentSize = [Tools getSizeWithString:content andWidth:MaxCommentWidth andFont:CommentFont];
                 
                 tmpcommentHeight += (commentSize.height + CommentSpace * 2);
-                
                 --i;
             }while (i > commentCount);
             

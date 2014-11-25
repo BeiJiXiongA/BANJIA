@@ -246,7 +246,9 @@ EGORefreshTableDelegate>
     else if(!deleted && isNew)
     {
         [unreadedArray removeObject:noticeDict];
-        [readedArray insertObject:noticeDict atIndex:0];
+//        [readedArray insertObject:noticeDict atIndex:0];
+        
+        
         NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithDictionary:noticeDict];
         [tmpDict setObject:@"0" forKey:@"new"];
         for (int i=0; i<[readedArray count]; i++)

@@ -9,7 +9,6 @@
 #import "PlaceHolderTextView.h"
 
 @implementation PlaceHolderTextView
-
 -(id)initWithFrame:(CGRect)frame placeHolder:(NSString *)placeholder
 {
     self = [super initWithFrame:frame];
@@ -26,6 +25,8 @@
     }
     return self;
 }
+
+
 
 /*
 // Only override drawRect: if you perform custom drawing.

@@ -33,12 +33,21 @@
 @implementation SDWebImageDownloaderOperation
 @synthesize executing,finished;
 
-- (id)initWithRequest:(NSURLRequest *)request options:(SDWebImageDownloaderOptions)options progress:(void (^)(NSUInteger, long long))progressBlock completed:(void (^)(UIImage *, NSData *, NSError *, BOOL))completedBlock cancelled:(void (^)())cancelBlock
+- (id)initWithRequest:(NSURLRequest *)request
+              options:(SDWebImageDownloaderOptions)options
+             progress:(void (^)(NSUInteger, long long))progressBlock
+            completed:(void (^)(UIImage *, NSData *, NSError *, BOOL))completedBlock
+            cancelled:(void (^)())cancelBlock
 {
     return [self initWithRequest:request options:options progress:progressBlock completed:completedBlock cancelled:cancelBlock dealed:nil];
 }
 
-- (id)initWithRequest:(NSURLRequest *)request options:(SDWebImageDownloaderOptions)options progress:(SDWebImageDownloaderProgressBlock)progressBlock completed:(SDWebImageDownloaderCompletedBlock)completedBlock cancelled:(void (^)())cancelBlock dealed:(MJWebImageDealedBlock)dealedBlock
+- (id)initWithRequest:(NSURLRequest *)request
+              options:(SDWebImageDownloaderOptions)options
+             progress:(SDWebImageDownloaderProgressBlock)progressBlock
+            completed:(SDWebImageDownloaderCompletedBlock)completedBlock
+            cancelled:(void (^)())cancelBlock
+               dealed:(MJWebImageDealedBlock)dealedBlock
 {
     if ((self = [super init]))
     {
@@ -325,7 +334,7 @@
     {
         self.completedBlock(nil, nil, error, YES);
     }
-
+    
     [self done];
 }
 
@@ -342,6 +351,5 @@
         return cachedResponse;
     }
 }
-
 
 @end

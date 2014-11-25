@@ -737,7 +737,7 @@ ShareContentDelegate>
         }
         else
         {
-            if (indexPath.row == 1)
+            if (indexPath.row == 3)
             {
                 if ([[[NSUserDefaults standardUserDefaults] objectForKey:QQNICKNAME] length] <= 0)
                 {
@@ -751,9 +751,9 @@ ShareContentDelegate>
                     [self bindThirdAccountWithIndex:indexPath.row];
                 }
             }
-            else if(indexPath.row == 3)
+            else if(indexPath.row == 1)
             {
-                if ([[[NSUserDefaults standardUserDefaults] objectForKey:RRNICKNAME] length] <= 0)
+                if ([[[NSUserDefaults standardUserDefaults] objectForKey:WXNICKNAME] length] <= 0)
                 {
                     [self bindThirdAccountWithIndex:indexPath.row];
                 }
@@ -1144,6 +1144,12 @@ static int loginID;
                 {
                     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
                     [ud setObject:[accountDict objectForKey:@"sw"] forKey:SINANICKNAME];
+                    [ud synchronize];
+                }
+                if (![[accountDict objectForKey:@"wx"] isEqual:[NSNull null]] && [[accountDict objectForKey:@"wx"] length] > 0)
+                {
+                    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+                    [ud setObject:[accountDict objectForKey:@"wx"] forKey:WXNICKNAME];
                     [ud synchronize];
                 }
                 if (![[accountDict objectForKey:@"phone"]isEqual:[NSNull null]] && [[accountDict objectForKey:@"phone"] length] > 0)

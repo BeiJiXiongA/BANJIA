@@ -94,6 +94,7 @@ ShareContentDelegate>
     NSDictionary *waitCommentDict;
     NSString *waitDiaryID;
     DemoVIew *demoView;
+    NSDictionary *commentedDict;
     
     CGFloat tmpheight;
     CGSize inputSize;
@@ -953,8 +954,6 @@ ShareContentDelegate>
     }
 }
 
-#pragma mark - 代理
-
 -(BOOL)haveNewMsg
 {
     NSArray *msgArray = [db findSetWithDictionary:@{@"readed":@"0",@"userid":[Tools user_id]} andTableName:CHATTABLE]; //[msgArray count] > 0 ||
@@ -972,15 +971,7 @@ ShareContentDelegate>
     }
     return NO;
 }
--(void)dealNewChatMsg:(NSDictionary *)dict
-{
-    [self viewWillAppear:NO];
-}
 
--(void)dealNewMsg:(NSDictionary *)dict
-{
-    [self viewWillAppear:NO];
-}
 -(BOOL)haveNewNotice
 {
     NSMutableArray *array = [db findSetWithDictionary:@{@"readed":@"0",@"uid":[Tools user_id],@"type":@"f_apply"} andTableName:@"notice"];
@@ -990,6 +981,19 @@ ShareContentDelegate>
     }
     return NO;
 }
+
+#pragma mark - 代理
+
+-(void)dealNewChatMsg:(NSDictionary *)dict
+{
+    [self viewWillAppear:NO];
+}
+
+-(void)dealNewMsg:(NSDictionary *)dict
+{
+    [self viewWillAppear:NO];
+}
+
 
 #pragma mark - 获得网络数据
 
@@ -1066,13 +1070,16 @@ ShareContentDelegate>
                     [createClassButton addTarget:self action:@selector(addNotice) forControlEvents:UIControlEventTouchUpInside];
                     
                     tipView.hidden = NO;
+                    classTableView.scrollEnabled = NO;
                     if ([adArray count] > 0)
                     {
                         tipView.frame = CGRectMake(10, HeaderCellHeight+UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH-20, 300);
                     }
+                    
                 }
                 else
                 {
+                    classTableView.scrollEnabled = YES;
                     [tipView removeFromSuperview];
                 }
                 [self groupByTime:diariesArray];
@@ -1099,6 +1106,7 @@ ShareContentDelegate>
                     
                     [self loadIntroduceTip];
                     tipView.hidden = NO;
+                    classTableView.scrollEnabled = NO;
                     if ([adArray count] > 0)
                     {
                         tipView.frame = CGRectMake(10, HeaderCellHeight+UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH-20, 300);
@@ -1247,6 +1255,7 @@ ShareContentDelegate>
                 [createClassButton removeTarget:self action:@selector(createClass) forControlEvents:UIControlEventTouchUpInside];
                 [createClassButton addTarget:self action:@selector(addNotice) forControlEvents:UIControlEventTouchUpInside];
                 tipView.hidden = NO;
+                classTableView.scrollEnabled = NO;
                 if ([adArray count] > 0)
                 {
                     tipView.frame = CGRectMake(10, HeaderCellHeight+UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH-20, 300);
@@ -1279,6 +1288,7 @@ ShareContentDelegate>
                     {
                         [self loadIntroduceTip];
                         tipView.hidden = NO;
+                        classTableView.scrollEnabled = NO;
                         if ([adArray count] > 0)
                         {
                             tipView.frame = CGRectMake(10, HeaderCellHeight+UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH-20, 300);
@@ -1366,21 +1376,31 @@ ShareContentDelegate>
 
 #pragma mark - 删除日志评论
 
--(void)deleteCommentWithDiary:(NSDictionary *)diaryDetailDict andCommentDict:(NSDictionary *)commentDict andIndexPath:(NSIndexPath *)indexPath
+-(void)deleteCommentWithDiary:(NSDictionary *)diaryDetailDict
+               andCommentDict:(NSDictionary *)commentDict
+              andCommentIndex:(NSInteger)commentIndex
+                 andIndexPath:(NSIndexPath *)indexPath
 {
     NSString *diaryId = [diaryDetailDict objectForKey:@"_id"];
     
     [UIActionSheet showInView:self.bgView withTitle:nil cancelButtonTitle:@"取消" destructiveButtonTitle:@"删除" otherButtonTitles:nil tapBlock:^(UIActionSheet *actionSheet, NSInteger buttonIndex) {
         if (buttonIndex == 0)
         {
-            DDLOG(@"%@--%d--%d",diaryId,indexPath.section,indexPath.row);
-            //            [self deleteCommentWithDiaryId:diaryID andCommentDict:commentDict inSection:indexPath.section index:indexPath.row];
+            DDLOG(@"%@--%@--%@",diaryId,[diaryDetailDict objectForKey:@"c_id"],commentDict);
+            [self deleteCommentWithDiaryId:diaryId
+                            andCommentDict:commentDict
+                           andCommentIndex:(NSInteger)commentIndex
+                                andClassID:[diaryDetailDict objectForKey:@"c_id"]
+                                 inSection:indexPath.section
+                                     index:indexPath.row];
         }
     }];
 }
 
 -(void)deleteCommentWithDiaryId:(NSString *)diaryId
                  andCommentDict:(NSDictionary *)commentDict
+                andCommentIndex:(NSInteger)commentIndex
+                     andClassID:(NSString *)classid
                       inSection:(NSInteger)section
                           index:(NSInteger)index
 {
@@ -1388,8 +1408,10 @@ ShareContentDelegate>
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
-                                                                      @"p_id":diaryId
-                                                                      } API:GETDIARY_DETAIL];
+                                                                      @"p_id":diaryId,
+                                                                      @"c_id":classid,
+                                                                      @"index":[commentDict objectForKey:@"_id"]
+                                                                      } API:DEL_COMMENT];
         [request setCompletionBlock:^{
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
@@ -1418,6 +1440,54 @@ ShareContentDelegate>
     }
 }
 
+#pragma mark - 回复评论
+-(void)replayComment:(NSDictionary *)commentDict
+        andDiaryDict:(NSDictionary *)diaryDict1
+             content:(NSString *)content
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"p_id":[diaryDict1 objectForKey:@"_id"],
+                                                                      @"c_id":[diaryDict1 objectForKey:@"c_id"],
+                                                                      @"content":content,
+                                                                      @"rp_id":[[commentDict objectForKey:@"by"] objectForKey:@"_id"],
+                                                                      @"rp_name":[[commentDict objectForKey:@"by"] objectForKey:@"name"]
+                                                                      } API:COMMENT_DIARY];
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"diary detail responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                [Tools showTips:@"回复成功！" toView:self.bgView];
+                commentedDict = nil;
+                inputTabBar.inputTextView.text = @"";
+                [self getDiaryDetail:[diaryDict1 objectForKey:@"_id"] inSection:waitCommentSection index:waitCommentIndex];
+                
+                [inputTabBar backKeyBoard];
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools showAlertView:@"连接错误" delegateViewController:nil];
+        }];
+        [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
+}
+
+
 #pragma mark - 评论日志
 -(void)myReturnFunction
 {
@@ -1427,6 +1497,12 @@ ShareContentDelegate>
         [Tools showAlertView:@"请输入评论内容！" delegateViewController:nil];
         return ;
     }
+    if (commentedDict)
+    {
+        [self replayComment:commentedDict andDiaryDict:waitCommentDict content:inputTabBar.inputTextView.text];
+        return ;
+    }
+    
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
@@ -1441,6 +1517,7 @@ ShareContentDelegate>
             DDLOG(@"commit diary responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
+                inputTabBar.inputTextView.text = @"";
                 [self getDiaryDetail:[waitCommentDict objectForKey:@"_id"] inSection:waitCommentSection index:waitCommentIndex];
             }
             else
@@ -2233,7 +2310,7 @@ ShareContentDelegate>
     dongtaiDetailViewController.dongtaiId = [dict objectForKey:@"_id"];
     dongtaiDetailViewController.fromclass = NO;
     dongtaiDetailViewController.addComDel = self;
-    
+    dongtaiDetailViewController.fromHome = YES;
     [[NSUserDefaults standardUserDefaults] setObject:[dict objectForKey:@"c_id"] forKey:@"classid"];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
@@ -2281,6 +2358,10 @@ ShareContentDelegate>
         dongtaiDetailViewController.dongtaiId = [dict objectForKey:@"_id"];
         dongtaiDetailViewController.fromclass = NO;
         dongtaiDetailViewController.addComDel = self;
+        dongtaiDetailViewController.fromHome = YES;
+        waitCommentIndex = indexPath.row;
+        waitCommentSection = indexPath.section-[noticeArray count]-2;
+        waitDiaryID = [dict objectForKey:@"_id"];
         
         [[NSUserDefaults standardUserDefaults] setObject:[dict objectForKey:@"c_id"] forKey:@"classid"];
         [[NSUserDefaults standardUserDefaults] synchronize];
@@ -2294,12 +2375,6 @@ ShareContentDelegate>
 {
     page = 0;
     [self getHomeData];
-//    NSMutableDictionary *tmpNoticeDict = [noticeArray objectAtIndex:currentIndexPath.section-1];
-//    NSMutableArray *tmpArray = [tmpNoticeDict objectForKey:@"news"];
-//    [tmpArray removeObjectAtIndex:currentIndexPath.row];
-//    [tmpNoticeDict setObject:tmpArray  forKey:@"news"];
-//    [noticeArray replaceObjectAtIndex:currentIndexPath.section-1 withObject:tmpNoticeDict];
-//    [classTableView reloadData];
 }
 
 - (void)tapImage:(UITapGestureRecognizer *)tap
@@ -2402,11 +2477,49 @@ ShareContentDelegate>
     }
 }
 
--(void)addComment:(BOOL)add
+-(void)addComment:(NSDictionary *)detailDict
 {
-    if (add)
+    if ([detailDict isKindOfClass:[NSDictionary class]])
     {
-        [self getHomeData];
+        
+        NSMutableDictionary *groupDict = [[NSMutableDictionary alloc] initWithDictionary:[groupDiaries objectAtIndex:waitCommentSection]];
+        NSMutableArray *tmpArray = [[NSMutableArray alloc] initWithArray:[groupDict objectForKey:@"diaries"]];
+        NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithDictionary:detailDict];
+        NSDictionary *oldDiaryDict = [tmpArray objectAtIndex:waitCommentIndex];
+        [tmpDict setObject:[oldDiaryDict objectForKey:@"c_id"] forKey:@"c_id"];
+        [tmpDict setObject:[oldDiaryDict objectForKey:@"c_name"] forKey:@"c_name"];
+        [tmpArray replaceObjectAtIndex:waitCommentIndex withObject:tmpDict];
+        [groupDict setObject:tmpArray forKey:@"diaries"];
+        [groupDiaries replaceObjectAtIndex:waitCommentSection withObject:groupDict];
+        [classTableView reloadData];
+        
+        waitCommentIndex = 0;
+        waitCommentSection = 0;
+    }
+}
+
+-(void)delDiary:(BOOL)del
+{
+    if (del)
+    {
+        NSMutableDictionary *groupDict = [[NSMutableDictionary alloc] initWithDictionary:[groupDiaries objectAtIndex:waitCommentSection]];
+        NSMutableArray *tmpArray = [[NSMutableArray alloc] initWithArray:[groupDict objectForKey:@"diaries"]];
+        [tmpArray removeObjectAtIndex:waitCommentIndex];
+        if ([tmpArray count] > 0)
+        {
+            [groupDict setObject:tmpArray forKey:@"diaries"];
+            [groupDiaries replaceObjectAtIndex:waitCommentSection withObject:groupDict];
+        }
+        else
+        {
+            [groupDiaries removeObjectAtIndex:waitCommentSection];
+        }
+        
+        
+        [classTableView reloadData];
+        
+        waitCommentIndex = 0;
+        waitCommentSection = 0;
     }
 }
 
@@ -2419,9 +2532,11 @@ ShareContentDelegate>
         [self.navigationController.sideMenuController hideMenuAnimated:YES];
         return ;
     }
+    commentedDict = nil;
     NSDictionary *groupDict = [groupDiaries objectAtIndex:button.tag/SectionTag];
     NSArray *tmpArray = [groupDict objectForKey:@"diaries"];
     waitCommentDict = [tmpArray objectAtIndex:button.tag%SectionTag];
+    [inputTabBar setPlaceHolderString:@"请输入评论内容"];
     waitCommentSection = button.tag/SectionTag;
     waitCommentIndex = button.tag%SectionTag;
     [inputTabBar.inputTextView becomeFirstResponder];
@@ -2625,7 +2740,7 @@ ShareContentDelegate>
     [self shareAPP:nil];
 }
 
--(void)nameButtonClick:(NSDictionary *)dict
+-(void)nameButtonClick:(NSDictionary *)dict andIndexPath:(NSIndexPath *)indexPath
 {
     if ([self.navigationController.sideMenuController isMenuVisible])
     {
@@ -2637,20 +2752,28 @@ ShareContentDelegate>
     dongtaiDetailViewController.dongtaiId = [dict objectForKey:@"_id"];
     dongtaiDetailViewController.fromclass = NO;
     dongtaiDetailViewController.addComDel = self;
+    dongtaiDetailViewController.fromHome = YES;
+    waitCommentSection = indexPath.section;
+    waitCommentIndex = indexPath.row;
+    waitDiaryID = [dict objectForKey:@"_id"];
+    
     [[NSUserDefaults standardUserDefaults] setObject:[dict objectForKey:@"c_id"] forKey:@"classid"];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
-    //        dongtaiDetailViewController.addComDel = self;
     [self.navigationController pushViewController:dongtaiDetailViewController animated:YES];
 }
 
 #pragma mark - 点击评论，评论日志
 
--(void)cellCommentDiary:(NSDictionary *)dict andIndexPath:(NSIndexPath *)indexPath
+-(void)cellCommentDiary:(NSDictionary *)dict andIndexPath:(NSIndexPath *)indexPath andCommentDict:(NSDictionary *)commentDict
 {
     waitCommentIndex = indexPath.row;
     waitCommentSection = indexPath.section;
     waitCommentDict = dict;
+    DDLOG(@"%@",commentDict);
+    commentedDict = commentDict;
+    NSString *commentUserName = [[commentDict objectForKey:@"by"] objectForKey:@"name"];
+    [inputTabBar setPlaceHolderString:[NSString stringWithFormat:@"回复%@:",commentUserName]];
     [inputTabBar.inputTextView becomeFirstResponder];
 }
 

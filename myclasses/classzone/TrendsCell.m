@@ -231,11 +231,11 @@ diaryIndexPath;
 
 #pragma mark - commentdelegate
 
--(void)deleteCommentWithDict:(NSDictionary *)commentDict
+-(void)deleteCommentWithDict:(NSDictionary *)commentDict andCommentIndex:(NSInteger)commentIndex
 {
-    if ([self.nameButtonDel respondsToSelector:@selector(deleteCommentWithDiary:andCommentDict:andIndexPath:)])
+    if ([self.nameButtonDel respondsToSelector:@selector(deleteCommentWithDiary:andCommentDict:andCommentIndex:andIndexPath:)])
     {
-        [self.nameButtonDel deleteCommentWithDiary:diaryDetailDict andCommentDict:commentDict andIndexPath:diaryIndexPath];
+        [self.nameButtonDel deleteCommentWithDiary:diaryDetailDict andCommentDict:commentDict andCommentIndex:commentIndex andIndexPath:diaryIndexPath];
     }
 }
 #pragma mark - tableview
@@ -274,8 +274,6 @@ diaryIndexPath;
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UIFont *font = CommentFont;
-    
     if (showAllComments)
     {
         if (commentsArray && praiseArray)
@@ -287,7 +285,7 @@ diaryIndexPath;
             }
             else
             {
-                NSDictionary *commentDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row];
+                NSDictionary *commentDict = [commentsArray objectAtIndex:[commentsArray count]-indexPath.row];
                 NSString *content = [[commentDict objectForKey:@"content"] emojizedString];
                 NSString *contentString = [NSString stringWithFormat:@"%@",content];
                 CGSize s = [Tools getSizeWithString:contentString andWidth:MaxCommentWidth-30 andFont:CommentFont];
@@ -297,7 +295,7 @@ diaryIndexPath;
         }
         else if(commentsArray && !praiseArray)
         {
-            NSDictionary *commentDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row-1];
+            NSDictionary *commentDict = [commentsArray objectAtIndex:[commentsArray count]-indexPath.row-1];
             NSString *name = [[commentDict objectForKey:@"by"] objectForKey:@"name"];
             NSString *content = [[commentDict objectForKey:@"content"] emojizedString];
             NSString *contentString = [NSString stringWithFormat:@"%@:%@",name,content];
@@ -324,19 +322,10 @@ diaryIndexPath;
             }
             else if(indexPath.row < 7)
             {
-                NSDictionary *commentDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row];
-                NSString *name = [NSString stringWithFormat:@"%@ : ",[[commentDict objectForKey:@"by"] objectForKey:@"name"]];
-                CGSize nameSize;
-                if (SYSVERSION >= 7)
-                {
-                    nameSize = [name sizeWithAttributes:[NSDictionary dictionaryWithObjectsAndKeys:CommentFont, NSFontAttributeName, nil]];
-                }
-                else
-                {
-                    nameSize = [Tools getSizeWithString:name andWidth:100 andFont:CommentFont];
-                }
-                NSString *content = [[commentDict objectForKey:@"content"] emojizedString];
-                CGSize commentSize = [Tools getSizeWithString:content andWidth:MaxCommentWidth-nameSize.width andFont:CommentFont];
+                NSDictionary *commentDict = [commentsArray objectAtIndex:[commentsArray count]-indexPath.row];
+                NSString *name = [NSString stringWithFormat:@"%@",[[commentDict objectForKey:@"by"] objectForKey:@"name"]];
+                NSString *content = [NSString stringWithFormat:@"%@：%@",name,[[commentDict objectForKey:@"content"] emojizedString]];
+                CGSize commentSize = [Tools getSizeWithString:content andWidth:MaxCommentWidth andFont:CommentFont];
                 return commentSize.height+CommentSpace*2;
             }
             else if(indexPath.row == 7)
@@ -349,19 +338,10 @@ diaryIndexPath;
         {
             if (indexPath.row < 6)
             {
-                NSDictionary *commentDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row-1];
-                NSString *name = [NSString stringWithFormat:@"%@ : ",[[commentDict objectForKey:@"by"] objectForKey:@"name"]];
-                CGSize nameSize;
-                if (SYSVERSION >= 7)
-                {
-                    nameSize = [name sizeWithAttributes:[NSDictionary dictionaryWithObjectsAndKeys:CommentFont, NSFontAttributeName, nil]];
-                }
-                else
-                {
-                    nameSize = [Tools getSizeWithString:name andWidth:100 andFont:CommentFont];
-                }
-                NSString *content = [[commentDict objectForKey:@"content"] emojizedString];
-                CGSize commentSize = [Tools getSizeWithString:content andWidth:MaxCommentWidth-nameSize.width andFont:font];
+                NSDictionary *commentDict = [commentsArray objectAtIndex:[commentsArray count]-indexPath.row-1];
+                NSString *name = [NSString stringWithFormat:@"%@",[[commentDict objectForKey:@"by"] objectForKey:@"name"]];
+                NSString *content = [NSString stringWithFormat:@"%@：%@",name,[[commentDict objectForKey:@"content"] emojizedString]];
+                CGSize commentSize = [Tools getSizeWithString:content andWidth:MaxCommentWidth andFont:CommentFont];
                 return commentSize.height+CommentSpace*2;
             }
             else if(indexPath.row == 6)
@@ -386,10 +366,11 @@ diaryIndexPath;
     {
         cell = [[CommentCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellName];
     }
-//    cell.nameButton.hidden = YES;
-//    CGFloat c_width = 15;
+
+    
     CGFloat originalY = CommentSpace;
     cell.openPraiseButton.hidden = YES;
+    cell.commentIndex = indexPath.row;
     [cell.nameButton setTitle:@"" forState:UIControlStateNormal];
     [cell.nameButton setImage:nil forState:UIControlStateNormal];
     CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
@@ -410,7 +391,6 @@ diaryIndexPath;
                 cell.headerImageView.hidden = YES;
                 
                 cell.nameButton.frame = CGRectMake(12, CommentSpace, 18, 18);
-//                [cell.nameButton setImage:[UIImage imageNamed:@"praised"] forState:UIControlStateNormal];
                 cell.nameButton.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"praised"]];
                 cell.commentContentLabel.textColor = COMMENTCOLOR;
                 cell.commentContentLabel.frame = CGRectMake(35, cell.nameButton.frame.origin.y, SCREEN_WIDTH-50, PraiseCellHeight);
@@ -419,7 +399,6 @@ diaryIndexPath;
                 
                 cell.openPraiseButton.frame = CGRectMake(SCREEN_WIDTH-70, 3, 130, 130);
                 cell.openPraiseButton.backgroundColor = [UIColor blackColor];
-//                [cell.openPraiseButton addTarget:self action:@selector(openThisPraise) forControlEvents:UIControlEventTouchUpInside];
                 cell.openPraiseButton = NO;
                 
                 for (UIView *v in cell.praiseView.subviews)
@@ -456,12 +435,28 @@ diaryIndexPath;
             else
             {
                 cell.praiseView.hidden = YES;
-                [cell.nameButton setTitleColor:RGB(64, 196, 110, 1) forState:UIControlStateNormal];
                 
-                NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row];
+                NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count]-indexPath.row];
+                
                 cell.commentDict = commitDict;
                 NSString *name = [NSString stringWithFormat:@"%@",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
-                NSString *content = [[commitDict objectForKey:@"content"] emojizedString];
+                
+                NSString *rp_name = @"";
+                if ([commitDict objectForKey:@"rp"])
+                {
+                    rp_name = [[commitDict objectForKey:@"rp"] objectForKey:@"name"];
+                }
+                
+                NSString *content;
+                if ([rp_name length] > 0)
+                {
+                    content = [NSString stringWithFormat:@"回复%@：%@",rp_name,[[commitDict objectForKey:@"content"] emojizedString]];
+                }
+                else
+                {
+                    content = [NSString stringWithFormat:@"%@",[[commitDict objectForKey:@"content"] emojizedString]];
+                }
+
                 CGSize s = [Tools getSizeWithString:content andWidth:MaxCommentWidth-30 andFont:CommentFont];
                 cell.headerImageView.hidden = NO;
                 cell.headerImageView.frame = CGRectMake(12, 10, PraiseW, PraiseW);
@@ -475,14 +470,29 @@ diaryIndexPath;
                 cell.headerImageView.userInteractionEnabled = YES;
                 [cell.headerImageView addGestureRecognizer:tap];
                 
-                cell.nameButton.hidden = NO;
-                cell.nameButton.frame = CGRectMake(48, 7, 100, 20);
-                cell.nameButton.backgroundColor = [UIColor clearColor];
-                cell.nameButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
-                [cell.nameButton setTitle:name forState:UIControlStateNormal];
+                cell.nameLable.hidden = NO;
+                cell.nameLable.frame = CGRectMake(48, 7, 100, 20);
+                cell.nameLable.backgroundColor = [UIColor clearColor];
+                cell.nameLable.text = name;
+                cell.nameLable.textColor = RGB(64, 196, 110, 1);
                 
-                cell.commentContentLabel.frame = CGRectMake(48, cell.nameButton.frame.size.height+cell.nameButton.frame.origin.y, MaxCommentWidth-30, s.height);
-                cell.commentContentLabel.text = content;
+                cell.commentContentLabel.frame = CGRectMake(48, cell.nameLable.frame.size.height+cell.nameLable.frame.origin.y, MaxCommentWidth-30, s.height);
+                
+                NSAttributedString *attributeString;
+                if ([rp_name length] > 0)
+                {
+                    attributeString = [CoreTextTools getAttributedStringWithString:content
+                                                                       andKeyArray:@[rp_name]
+                                                                         textColor:RGB(64, 196, 110, 1)];
+                }
+                else
+                {
+                    attributeString = [CoreTextTools getAttributedStringWithString:content
+                                                                       andKeyArray:@[]
+                                                                         textColor:RGB(64, 196, 110, 1)];
+                }
+                
+                cell.commentContentLabel.attributedText = attributeString;
                 
                 cell.timeLabel.frame = CGRectMake(150, 7, 150, 20);
                 cell.timeLabel.text = [Tools showTime:[[commitDict objectForKey:@"created"] objectForKey:@"sec"]];
@@ -501,12 +511,27 @@ diaryIndexPath;
             [cell.nameButton setTitleColor:RGB(64, 196, 110, 1) forState:UIControlStateNormal];
 
             
-            NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row-1];
+            NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count]-indexPath.row-1];
             
             cell.commentDict = commitDict;
             
             NSString *name = [NSString stringWithFormat:@"%@",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
-            NSString *content = [[commitDict objectForKey:@"content"] emojizedString];
+            NSString *rp_name = @"";
+            if ([commitDict objectForKey:@"rp"])
+            {
+                rp_name = [[commitDict objectForKey:@"rp"] objectForKey:@"name"];
+            }
+            
+            NSString *content;
+            if ([rp_name length] > 0)
+            {
+                content = [NSString stringWithFormat:@"回复%@：%@",rp_name,[[commitDict objectForKey:@"content"] emojizedString]];
+            }
+            else
+            {
+                content = [NSString stringWithFormat:@"%@",[[commitDict objectForKey:@"content"] emojizedString]];
+            }
+
             CGSize s = [Tools getSizeWithString:content andWidth:MaxCommentWidth-30 andFont:CommentFont];
             
             
@@ -522,21 +547,42 @@ diaryIndexPath;
             cell.headerImageView.userInteractionEnabled = YES;
             [cell.headerImageView addGestureRecognizer:tap];
             
-            cell.nameButton.hidden = NO;
-            cell.nameButton.frame = CGRectMake(48, 7, 100, 20);
-            cell.nameButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
-            [cell.nameButton setTitle:name forState:UIControlStateNormal];
-            cell.nameButton.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"clearimage"]];
             
-            cell.commentContentLabel.frame = CGRectMake(48, cell.nameButton.frame.size.height+cell.nameButton.frame.origin.y, MaxCommentWidth-30, s.height);
-            cell.commentContentLabel.text = content;
+            cell.nameLable.hidden = NO;
+            cell.nameLable.frame = CGRectMake(48, 7, 100, 20);
+            cell.nameLable.backgroundColor = [UIColor clearColor];
+            cell.nameLable.text = name;
+            cell.nameLable.textColor = RGB(64, 196, 110, 1);
+            
+//            cell.nameButton.hidden = NO;
+//            cell.nameButton.frame = CGRectMake(48, 7, 100, 20);
+//            cell.nameButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
+//            [cell.nameButton setTitle:name forState:UIControlStateNormal];
+//            cell.nameButton.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"clearimage"]];
+            
+            cell.commentContentLabel.frame = CGRectMake(48, cell.nameLable.frame.size.height+cell.nameLable.frame.origin.y, MaxCommentWidth-30, s.height);
+            NSAttributedString *attributeString;
+            if ([rp_name length] > 0)
+            {
+                attributeString = [CoreTextTools getAttributedStringWithString:content
+                                                                   andKeyArray:@[rp_name]
+                                                                     textColor:RGB(64, 196, 110, 1)];
+            }
+            else
+            {
+                attributeString = [CoreTextTools getAttributedStringWithString:content
+                                                                   andKeyArray:@[]
+                                                                     textColor:RGB(64, 196, 110, 1)];
+            }
+            
+            cell.commentContentLabel.attributedText = attributeString;
             
             cell.timeLabel.frame = CGRectMake(150, 7, 150, 20);
             cell.timeLabel.text = [Tools showTime:[[commitDict objectForKey:@"created"] objectForKey:@"sec"]];
             cell.timeLabel.textColor = TIMECOLOR;
             cell.timeLabel.textAlignment = NSTextAlignmentRight;
             cell.timeLabel.font = [UIFont systemFontOfSize:12];
-
+            
             return cell;
         }
         else if(!commentsArray && praiseArray)
@@ -616,31 +662,45 @@ diaryIndexPath;
                 cell.nameButton.hidden = NO;
                 [cell.nameButton setTitleColor:RGB(64, 196, 110, 1) forState:UIControlStateNormal];
                 
-                NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row];
+                NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count]-indexPath.row];
                 cell.commentDict = commitDict;
-                
-                NSString *name = [NSString stringWithFormat:@"%@ : ",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
-                
-                CGSize nameSize;
-                if (SYSVERSION >= 7)
+                NSString *name = [NSString stringWithFormat:@"%@",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
+                NSString *rp_name = @"";
+                if ([commitDict objectForKey:@"rp"])
                 {
-                    nameSize = [name sizeWithAttributes:[NSDictionary dictionaryWithObjectsAndKeys:CommentFont, NSFontAttributeName, nil]];
+                    rp_name = [[commitDict objectForKey:@"rp"] objectForKey:@"name"];
+                }
+                
+                NSString *content;
+                if ([rp_name length] > 0)
+                {
+                   content = [NSString stringWithFormat:@"%@回复%@：%@",name,rp_name,[[commitDict objectForKey:@"content"] emojizedString]];
                 }
                 else
                 {
-                    nameSize = [Tools getSizeWithString:name andWidth:100 andFont:CommentFont];
+                   content = [NSString stringWithFormat:@"%@：%@",name,[[commitDict objectForKey:@"content"] emojizedString]];
                 }
-                cell.nameLable.hidden = NO;
-                cell.nameLable.text = name;
-                cell.nameLable.frame = CGRectMake(12, originalY, nameSize.width, nameSize.height);
                 
-                NSString *content = [[commitDict objectForKey:@"content"] emojizedString];
+                CGSize commentSize = [Tools getSizeWithString:content andWidth:MaxCommentWidth andFont:CommentFont];
+                NSAttributedString *attributeString;
+                if ([rp_name length] > 0)
+                {
+                    attributeString = [CoreTextTools getAttributedStringWithString:content
+                                                                       andKeyArray:@[name,rp_name]
+                                                                         textColor:RGB(64, 196, 110, 1)];
+                }
+                else
+                {
+                    attributeString = [CoreTextTools getAttributedStringWithString:content
+                                                                       andKeyArray:@[name]
+                                                                         textColor:RGB(64, 196, 110, 1)];
+                }
                 
-                CGSize commentSize = [Tools getSizeWithString:content andWidth:MaxCommentWidth-cell.nameLable.frame.size.width andFont:CommentFont];
-                cell.commentContentLabel.text = content;
+                cell.commentContentLabel.attributedText = attributeString;
                 cell.commentContentLabel.lineBreakMode = NSLineBreakByCharWrapping;
                 cell.commentContentLabel.numberOfLines = 1000;
-                cell.commentContentLabel.frame = CGRectMake(cell.nameLable.frame.size.width+12, originalY, MaxCommentWidth-cell.nameLable.frame.size.width, commentSize.height);
+                cell.commentContentLabel.frame = CGRectMake(12, originalY, MaxCommentWidth, commentSize.height);
+                
                 return cell;
             }
             else
@@ -659,28 +719,43 @@ diaryIndexPath;
             if (indexPath.row < 6)
             {
                 cell.nameButton.hidden = YES;
-                NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row-1];
+                NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count]-indexPath.row-1];
                 cell.commentDict = commitDict;
-                NSString *name = [NSString stringWithFormat:@"%@ : ",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
-                
-                CGSize nameSize;
-                if (SYSVERSION >= 7)
+                NSString *name = [NSString stringWithFormat:@"%@",[[commitDict objectForKey:@"by"] objectForKey:@"name"]];
+                NSString *rp_name = @"";
+                if ([commitDict objectForKey:@"rp"])
                 {
-                    nameSize = [name sizeWithAttributes:[NSDictionary dictionaryWithObjectsAndKeys:CommentFont, NSFontAttributeName, nil]];
+                    rp_name = [[commitDict objectForKey:@"rp"] objectForKey:@"name"];
+                }
+                
+                NSString *content;
+                if ([rp_name length] > 0)
+                {
+                    content = [NSString stringWithFormat:@"%@回复%@：%@",name,rp_name,[[commitDict objectForKey:@"content"] emojizedString]];
                 }
                 else
                 {
-                    nameSize = [Tools getSizeWithString:name andWidth:100 andFont:CommentFont];
+                    content = [NSString stringWithFormat:@"%@：%@",name,[[commitDict objectForKey:@"content"] emojizedString]];
                 }
                 
-                cell.nameLable.hidden = NO;
-                cell.nameLable.text = name;
-                cell.nameLable.frame = CGRectMake(12, originalY, nameSize.width, nameSize.height);
+                CGSize commentSize = [Tools getSizeWithString:content andWidth:MaxCommentWidth andFont:CommentFont];
+                NSAttributedString *attributeString;
                 
-                NSString *content = [[commitDict objectForKey:@"content"] emojizedString];
-                CGSize commentSize = [Tools getSizeWithString:content andWidth:MaxCommentWidth-nameSize.width andFont:CommentFont];
-                cell.commentContentLabel.text = content;
-                cell.commentContentLabel.frame = CGRectMake(cell.nameLable.frame.size.width+12, originalY, MaxCommentWidth-nameSize.width, commentSize.height);
+                if ([rp_name length] > 0)
+                {
+                    attributeString = [CoreTextTools getAttributedStringWithString:content
+                                                                       andKeyArray:@[name,rp_name]
+                                                                         textColor:RGB(64, 196, 110, 1)];
+                }
+                else
+                {
+                    attributeString = [CoreTextTools getAttributedStringWithString:content
+                                                                       andKeyArray:@[name]
+                                                                         textColor:RGB(64, 196, 110, 1)];
+                }
+                
+                cell.commentContentLabel.attributedText = attributeString;
+                cell.commentContentLabel.frame = CGRectMake(12, originalY, MaxCommentWidth, commentSize.height);
                 
                 return cell;
             }
@@ -723,21 +798,21 @@ diaryIndexPath;
         }
         else
         {
-            NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row];
+            NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count]-indexPath.row];
             NSString *byId = [[commitDict objectForKey:@"by"] objectForKey:@"_id"];
             if ([byId isEqualToString:[Tools user_id]])
             {
                 //删除评论
-                if ([self.nameButtonDel respondsToSelector:@selector(deleteCommentWithDiary:andCommentDict:andIndexPath:)])
+                if ([self.nameButtonDel respondsToSelector:@selector(deleteCommentWithDiary:andCommentDict:andCommentIndex:andIndexPath:)])
                 {
-                    [self.nameButtonDel deleteCommentWithDiary:diaryDetailDict andCommentDict:commitDict andIndexPath:indexPath];
+                    [self.nameButtonDel deleteCommentWithDiary:diaryDetailDict andCommentDict:commitDict andCommentIndex:indexPath.row-1 andIndexPath:diaryIndexPath];
                 }
             }
             else
             {
-                if ([self.nameButtonDel respondsToSelector:@selector(cellCommentDiary:andIndexPath:)])
+                if ([self.nameButtonDel respondsToSelector:@selector(cellCommentDiary:andIndexPath:andCommentDict:)])
                 {
-                    [self.nameButtonDel cellCommentDiary:diaryDetailDict andIndexPath:diaryIndexPath];
+                    [self.nameButtonDel cellCommentDiary:diaryDetailDict andIndexPath:diaryIndexPath andCommentDict:commitDict];
                 }
             }
         }
@@ -748,21 +823,21 @@ diaryIndexPath;
     }
     else if(!praiseArray && commentsArray)
     {
-        NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count] - indexPath.row-1];
+        NSDictionary *commitDict = [commentsArray objectAtIndex:[commentsArray count]-indexPath.row-1];
         NSString *byId = [[commitDict objectForKey:@"by"] objectForKey:@"_id"];
         if ([byId isEqualToString:[Tools user_id]])
         {
             //删除评论
-            if ([self.nameButtonDel respondsToSelector:@selector(deleteCommentWithDiary:andCommentDict:andIndexPath:)])
+            if ([self.nameButtonDel respondsToSelector:@selector(deleteCommentWithDiary:andCommentDict:andCommentIndex:andIndexPath:)])
             {
-                [self.nameButtonDel deleteCommentWithDiary:diaryDetailDict andCommentDict:commitDict andIndexPath:indexPath];
+                [self.nameButtonDel deleteCommentWithDiary:diaryDetailDict andCommentDict:commitDict andCommentIndex:indexPath.row andIndexPath:diaryIndexPath];
             }
         }
         else
         {
-            if ([self.nameButtonDel respondsToSelector:@selector(cellCommentDiary:andIndexPath:)])
+            if ([self.nameButtonDel respondsToSelector:@selector(cellCommentDiary:andIndexPath:andCommentDict:)])
             {
-                [self.nameButtonDel cellCommentDiary:diaryDetailDict andIndexPath:diaryIndexPath];
+                [self.nameButtonDel cellCommentDiary:diaryDetailDict andIndexPath:diaryIndexPath andCommentDict:commitDict];
             }
         }
     }
@@ -786,9 +861,9 @@ diaryIndexPath;
 }
 -(void)showDiaryDetail
 {
-    if ([self.nameButtonDel respondsToSelector:@selector(nameButtonClick:)])
+    if ([self.nameButtonDel respondsToSelector:@selector(nameButtonClick:andIndexPath:)])
     {
-        [self.nameButtonDel nameButtonClick:diaryDetailDict];
+        [self.nameButtonDel nameButtonClick:diaryDetailDict andIndexPath:diaryIndexPath];
     }
 }
 

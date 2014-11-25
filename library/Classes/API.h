@@ -120,6 +120,7 @@
 #define IGNORE_DIARY    @"/Diaries/mbRefuseDiary"
 #define GETNEWDIARIES   @"/Diaries/mbGetUnckeckedList"  //c_id
 #define DELETEDIARY     @"/Diaries/mbDelDiary"
+#define DEL_COMMENT     @"/Diaries/mbDelComment"
 
 #pragma mark - notices
 #define GETNOTIFICATIONS @"/notices/mbGetNoticesList"

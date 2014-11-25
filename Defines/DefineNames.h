@@ -51,6 +51,9 @@
 //获取未读消息聊天页面
 #define GET_UNREAD_CHATLOG     @"getunreadchatlog"
 
+//清楚图片缓存通知
+#define CLEAR_IMAGE_CACHE  @"clearimagecache"
+
 
 #pragma mark - 是否聊天列表界面
 

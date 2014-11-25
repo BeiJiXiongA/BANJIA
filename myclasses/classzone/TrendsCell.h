@@ -52,9 +52,16 @@
 
 @protocol NameButtonDel <NSObject>
 
--(void)nameButtonClick:(NSDictionary *)dict;
 @optional
+
+-(void)nameButtonClick:(NSDictionary *)dict andIndexPath:(NSIndexPath *)indexPath;
+
 -(void)showPersonDetail:(NSDictionary *)dict;
--(void)cellCommentDiary:(NSDictionary *)dict andIndexPath:(NSIndexPath *)indexPath;
--(void)deleteCommentWithDiary:(NSDictionary *)diaryDetailDict andCommentDict:(NSDictionary *)commentDict andIndexPath:(NSIndexPath *)indexPath;
+
+-(void)cellCommentDiary:(NSDictionary *)dict andIndexPath:(NSIndexPath *)indexPath andCommentDict:(NSDictionary *)commentDict;
+
+-(void)deleteCommentWithDiary:(NSDictionary *)diaryDetailDict
+               andCommentDict:(NSDictionary *)commentDict
+              andCommentIndex:(NSInteger)commentIndex
+                 andIndexPath:(NSIndexPath *)indexPath;
 @end

@@ -22,6 +22,8 @@
 @property (nonatomic, strong) UILabel *timeLabel;
 @property (nonatomic, strong) UIImageView *lineImageView;
 
+@property (nonatomic, assign) NSInteger commentIndex;
+
 @property (nonatomic, assign) id<CommentDelegate> commentDel;
 
 @end
@@ -31,6 +33,6 @@
 
 @optional
 
--(void)deleteCommentWithDict:(NSDictionary *)commentDict;
+-(void)deleteCommentWithDict:(NSDictionary *)commentDict andCommentIndex:(NSInteger)commentIndex;
 
 @end

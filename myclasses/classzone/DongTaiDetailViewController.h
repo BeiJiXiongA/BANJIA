@@ -10,7 +10,9 @@
 
 @protocol DongTaiDetailAddCommentDelegate <NSObject>
 
--(void)addComment:(BOOL)add;
+-(void)addComment:(NSDictionary *)detailDict;
+
+-(void)delDiary:(BOOL)del;
 
 @end
 
@@ -18,4 +20,5 @@
 @property (nonatomic, strong) NSString *dongtaiId;
 @property (nonatomic, assign) id<DongTaiDetailAddCommentDelegate> addComDel;
 @property (nonatomic, assign) BOOL fromclass;
+@property (nonatomic, assign) BOOL fromHome;
 @end

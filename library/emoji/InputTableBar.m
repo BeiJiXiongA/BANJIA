@@ -45,6 +45,20 @@ voiceView;
     return self;
 }
 
+-(void)setPlaceHolderString:(NSString *)placeHolderString
+{
+    if ([self.inputTextView.text length] == 0)
+    {
+        self.inputTextView.textView.hidden = NO;
+        self.inputTextView.textView.text = placeHolderString;
+    }
+    else
+    {
+        self.inputTextView.textView.hidden = YES;
+        self.inputTextView.textView.text = @"";
+    }
+}
+
 -(void)setLayout
 {
     sendString = [[NSMutableString alloc] initWithCapacity:0];

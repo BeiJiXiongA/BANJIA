@@ -61,7 +61,8 @@ MFMailComposeViewControllerDelegate>
     
     ud = [NSUserDefaults standardUserDefaults];
     
-    DDLOG(@"NewNoticeAlert=%@++NewChatAlert=%@++NewNoticeMotion=%@++NewDiaryAlert=%@",[ud objectForKey:NewNoticeAlert],[ud objectForKey:NewChatAlert],[ud objectForKey:NewNoticeMotion],[ud objectForKey:NewDiaryAlert]);
+//    [[NSNotificationCenter defaultCenter] addn]
+    
     
     if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"useropt"] count] > 0)
     {
@@ -598,6 +599,9 @@ MFMailComposeViewControllerDelegate>
             DDLOG(@"path:%@",[[SDImageCache sharedImageCache] cachePath]);
             //清楚缓存
             [[SDImageCache sharedImageCache] clearDisk];
+            
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(clearDisk) name:CLEAR_IMAGE_CACHE object:nil];
+            [Tools showProgress:self.bgView];
             [settingTableView reloadData];
         }
     }
@@ -608,6 +612,12 @@ MFMailComposeViewControllerDelegate>
             [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@",_trackViewUrl]]];
         }
     }
+}
+
+-(void)clearDisk
+{
+    [Tools hideProgress:self.bgView];
+    [settingTableView reloadData];
 }
 
 -(void)logOut

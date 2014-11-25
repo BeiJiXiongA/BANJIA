@@ -330,6 +330,9 @@ static const NSInteger kDefaultCacheMaxCacheAge = 60 * 60 * 24 * 7; // 1 week
                                   withIntermediateDirectories:YES
                                                    attributes:nil
                                                         error:NULL];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[NSNotificationCenter defaultCenter] postNotificationName:CLEAR_IMAGE_CACHE object:nil];
+        });
     });
 }
 

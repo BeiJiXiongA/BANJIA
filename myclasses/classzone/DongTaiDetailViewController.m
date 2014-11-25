@@ -35,7 +35,8 @@ ShareContentDelegate>
     UITableView *diaryDetailTableView;
     NSDictionary *diaryDetailDict;
     NSDictionary *waitTransDict;
-    NSString *diaryID;
+    
+    NSDictionary *commentedDict;
     
     UIView *commitView;
     UITextField *commitTextField;
@@ -61,7 +62,7 @@ ShareContentDelegate>
 @end
 
 @implementation DongTaiDetailViewController
-@synthesize dongtaiId,addComDel,fromclass;
+@synthesize dongtaiId,addComDel,fromclass,fromHome;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -152,7 +153,7 @@ ShareContentDelegate>
     faceButton.backgroundColor = [UIColor clearColor];
     [commitView addSubview:faceButton];
     
-    [self getDiaryDetail];
+    [self getDiaryDetail:NO];
 }
 
 - (void)didReceiveMemoryWarning
@@ -290,7 +291,6 @@ ShareContentDelegate>
     [self backInput];
     [inputTabBar backKeyBoard];
 }
-
 
 #pragma mark - tableview
 
@@ -721,15 +721,18 @@ ShareContentDelegate>
 
 #pragma mark - 删除日志评论
 
--(void)deleteCommentWithDiary:(NSDictionary *)diaryDetailDict andCommentDict:(NSDictionary *)commentDict andIndexPath:(NSIndexPath *)indexPath
+-(void)deleteCommentWithDiary:(NSDictionary *)diaryDetailDict
+               andCommentDict:(NSDictionary *)commentDict
+              andCommentIndex:(NSInteger)commentIndex
+                 andIndexPath:(NSIndexPath *)indexPath
 {
-    NSString *diaryId = [diaryDetailDict objectForKey:@"_id"];
-    
     [UIActionSheet showInView:self.bgView withTitle:nil cancelButtonTitle:@"取消" destructiveButtonTitle:@"删除" otherButtonTitles:nil tapBlock:^(UIActionSheet *actionSheet, NSInteger buttonIndex) {
         if (buttonIndex == 0)
         {
-            DDLOG(@"%@--%d--%d",diaryId,indexPath.section,indexPath.row);
-//            [self deleteCommentWithDiaryId:diaryID andCommentDict:commentDict inSection:indexPath.section index:indexPath.row];
+            [self deleteCommentWithDiaryId:dongtaiId
+                            andCommentDict:commentDict
+                                 inSection:indexPath.section
+                                     index:indexPath.row];
         }
     }];
 }
@@ -743,21 +746,17 @@ ShareContentDelegate>
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
-                                                                      @"p_id":diaryId
-                                                                      } API:GETDIARY_DETAIL];
+                                                                      @"p_id":diaryId,
+                                                                      @"c_id":classID,
+                                                                      @"index":[commentDict objectForKey:@"_id"]
+                                                                      } API:DEL_COMMENT];
         [request setCompletionBlock:^{
             NSString *responseString = [request responseString];
             NSDictionary *responseDict = [Tools JSonFromString:responseString];
             DDLOG(@"diary detail responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                [Tools showTips:@"评论删除成功" toView:self.bgView];
-                [self getDiaryDetail];
-
-                if ([self.addComDel respondsToSelector:@selector(addComment:)])
-                {
-                    [self.addComDel addComment:YES];
-                }
+                [self getDiaryDetail:YES];
             }
             else
             {
@@ -778,11 +777,78 @@ ShareContentDelegate>
     }
 }
 
-
+#pragma mark - 回复评论
+-(void)replayComment:(NSDictionary *)commentDict
+        andDiaryDict:(NSDictionary *)diaryDict1
+             content:(NSString *)content
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"p_id":dongtaiId,
+                                                                      @"c_id":classID,
+                                                                      @"content":content,
+                                                                      @"rp_id":[[commentDict objectForKey:@"by"] objectForKey:@"_id"],
+                                                                      @"rp_name":[[commentDict objectForKey:@"by"] objectForKey:@"name"]
+                                                                      } API:COMMENT_DIARY];
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"diary detail responsedict %@",responseDict);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                commentedDict = nil;
+                inputTabBar.inputTextView.text = @"";
+                [self getDiaryDetail:YES];
+                if ([self.addComDel respondsToSelector:@selector(addComment:)])
+                {
+                    [self.addComDel addComment:[responseDict objectForKey:@"data"]];
+                }
+                [inputTabBar backKeyBoard];
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+            NSError *error = [request error];
+            DDLOG(@"error %@",error);
+            [Tools showAlertView:@"连接错误" delegateViewController:nil];
+        }];
+        [request startAsynchronous];
+    }
+    else
+    {
+        [Tools showAlertView:NOT_NETWORK delegateViewController:nil];
+    }
+}
 
 #pragma mark - 评论日志
--(void)cellCommentDiary:(NSDictionary *)dict
+-(void)cellCommentDiary:(NSDictionary *)dict andIndexPath:(NSIndexPath *)indexPath andCommentDict:(NSDictionary *)commentDict
 {
+    if (!fromHome)
+    {
+        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"parents"] &&
+            [[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] isKindOfClass:[NSDictionary class]] &&
+            [[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:ParentComment] intValue] == 0)
+        {
+            [Tools showAlertView:@"不好意思，这个班级不允许家长评论班级日志!" delegateViewController:nil];
+            return ;
+        }
+        
+        if([[[[NSUserDefaults standardUserDefaults] objectForKey:@"opt"] objectForKey:UserSendComment] integerValue] == 0)
+        {
+            [Tools showAlertView:@"您没有回复权限！" delegateViewController:nil];
+            return ;
+        }
+    }
+    
+    commentedDict = commentDict;
+    NSString *commentUserName = [[commentDict objectForKey:@"by"] objectForKey:@"name"];
+    [inputTabBar setPlaceHolderString:[NSString stringWithFormat:@"回复%@:",commentUserName]];
     [inputTabBar.inputTextView becomeFirstResponder];
 }
 
@@ -790,14 +856,25 @@ ShareContentDelegate>
 
 -(void)startCommit
 {
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"parents"])
+    if (!fromHome)
     {
-        if ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:ParentComment] integerValue] == 0)
+        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"parents"] &&
+            [[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] isKindOfClass:[NSDictionary class]] &&
+            [[[[NSUserDefaults standardUserDefaults] objectForKey:@"set"] objectForKey:ParentComment] intValue] == 0)
         {
-            [Tools showAlertView:@"本班日志不允许家长发表评论" delegateViewController:nil];
+            [Tools showAlertView:@"不好意思，这个班级不允许家长评论班级日志!" delegateViewController:nil];
+            return ;
+        }
+        
+        if ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"opt"] objectForKey:UserSendComment] intValue] != 1)
+        {
+            [Tools showAlertView:@"您不能赞这个班的班级日志。" delegateViewController:nil];
             return ;
         }
     }
+    
+    commentedDict = nil;
+    [inputTabBar setPlaceHolderString:@"请输入评论内容"];
     [inputTabBar.inputTextView becomeFirstResponder];
 }
 
@@ -808,6 +885,12 @@ ShareContentDelegate>
         [Tools showAlertView:@"请输入评论内容！" delegateViewController:nil];
         return ;
     }
+    if (commentedDict)
+    {
+        [self replayComment:commentedDict andDiaryDict:diaryDetailDict content:inputTabBar.inputTextView.text];
+        return ;
+    }
+    
     if ([Tools NetworkReachable])
     {
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
@@ -822,11 +905,11 @@ ShareContentDelegate>
             DDLOG(@"commit diary responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                [self getDiaryDetail];
+                [self getDiaryDetail:YES];
                 
                 if ([self.addComDel respondsToSelector:@selector(addComment:)])
                 {
-                    [self.addComDel addComment:YES];
+                    [self.addComDel addComment:[responseDict objectForKey:@"data"]];
                 }
             }
             else
@@ -849,6 +932,20 @@ ShareContentDelegate>
 
 -(void)praiseDiary
 {
+    if (!fromHome)
+    {
+        if (![[[NSUserDefaults standardUserDefaults] objectForKey:@"opt"] isKindOfClass:[NSDictionary class]])
+        {
+            return ;
+        }
+        if ([[[[NSUserDefaults standardUserDefaults] objectForKey:@"opt"] objectForKey:UserSendLike] intValue] == 0)
+        {
+            [Tools showAlertView:@"您不能赞这个班的班级日志。" delegateViewController:nil];
+            return ;
+        }
+    }
+    
+    
     [self backInput];
     if ([Tools NetworkReachable])
     {
@@ -863,11 +960,11 @@ ShareContentDelegate>
             DDLOG(@"commit diary responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                [self getDiaryDetail];
+                [self getDiaryDetail:YES];
                 
                 if ([self.addComDel respondsToSelector:@selector(addComment:)])
                 {
-                    [self.addComDel addComment:YES];
+                    [self.addComDel addComment:[responseDict objectForKey:@"data"]];
                 }
             }
             else
@@ -899,10 +996,9 @@ ShareContentDelegate>
             DDLOG(@"delete diary responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                [Tools showTips:@"日志删除成功" toView:diaryDetailTableView];
                 if ([self.addComDel respondsToSelector:@selector(addComment:)])
                 {
-                    [self.addComDel addComment:YES];
+                    [self.addComDel delDiary:YES];
                 }
                 [self.navigationController popViewControllerAnimated:YES];
             }
@@ -922,7 +1018,7 @@ ShareContentDelegate>
 }
 
 #pragma mark - getNetdata
--(void)getDiaryDetail
+-(void)getDiaryDetail:(BOOL)update
 {
     if ([Tools NetworkReachable])
     {
@@ -962,6 +1058,11 @@ ShareContentDelegate>
                 [commentsArray removeAllObjects];
                 [commentsArray addObjectsFromArray:[[[responseDict objectForKey:@"data"] objectForKey:@"detail"] objectForKey:@"comments"]];
                 [diaryDetailTableView reloadData];
+                
+                if ([self.addComDel respondsToSelector:@selector(addComment:)] && update)
+                {
+                    [self.addComDel addComment:[responseDict objectForKey:@"data"]];
+                }
             }
             else
             {
@@ -994,21 +1095,25 @@ ShareContentDelegate>
     if ([WXApi isWXAppInstalled] && [QQApi isQQInstalled])
     {
         UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"转发到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"腾讯微博",@"人人网",@"微信朋友圈",@"QQ好友",@"QQ空间", nil];
+        actionSheet.tag = 4444;
         [actionSheet showInView:self.bgView];
     }
     else if([WXApi isWXAppInstalled] && ![QQApi isQQInstalled])
     {
         UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"转发到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"腾讯微博",@"人人网",@"微信朋友圈", nil];
+        actionSheet.tag = 4444;
         [actionSheet showInView:self.bgView];
     }
     else if(![WXApi isWXAppInstalled] && [QQApi isQQInstalled])
     {
         UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"转发到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"腾讯微博",@"人人网",@"QQ好友",@"QQ空间", nil];
+        actionSheet.tag = 4444;
         [actionSheet showInView:self.bgView];
     }
     else if (![WXApi isWXAppInstalled] && ![QQApi isQQInstalled])
     {
         UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"转发到" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"新浪微博",@"腾讯微博",@"人人网", nil];
+        actionSheet.tag = 4444;
         [actionSheet showInView:self.bgView];
     }
 
@@ -1019,30 +1124,29 @@ ShareContentDelegate>
 {
     if (actionSheet.tag == 4444)
     {
-        DDLOG(@"waittransdict %@",waitTransDict);
+        DDLOG(@"waittransdict %@",diaryDetailDict);
         
         if (buttonIndex == [actionSheet numberOfButtons]-1)
         {
             return;
         }
-        diaryID = [diaryDetailDict objectForKey:@"_id"];
         NSString *content;
-        if ([diaryDetailDict objectForKey:@"content"])
+        if ([[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"])
         {
-            if ([[diaryDetailDict objectForKey:@"content"] length] > 0)
+            if ([[[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"] length] > 0)
             {
-                content = [diaryDetailDict objectForKey:@"content"];
+                content = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"content"];
             }
         }
         
         
         NSString *imagePath;
-        if ([diaryDetailDict objectForKey:@"img"])
+        if ([[diaryDetailDict objectForKey:@"detail"] objectForKey:@"img"])
         {
-            NSArray *tmpArray = [diaryDetailDict objectForKey:@"img"];
+            NSArray *tmpArray = [[diaryDetailDict objectForKey:@"detail"] objectForKey:@"img"];
             if ([tmpArray count] > 0)
             {
-                imagePath = [NSString stringWithFormat:@"%@%@@150w",IMAGEURL,[[diaryDetailDict objectForKey:@"img"] firstObject]];
+                imagePath = [NSString stringWithFormat:@"%@%@@150w",IMAGEURL,[[[diaryDetailDict objectForKey:@"detail"] objectForKey:@"img"] firstObject]];
             }
         }
         content = [content length]>0?content:ShareContent;

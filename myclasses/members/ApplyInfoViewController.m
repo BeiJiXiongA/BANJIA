@@ -757,6 +757,12 @@
                                 [self.navigationController popToRootViewControllerAnimated:YES];
                             }
                         }
+                        else
+                        {
+                            [Tools showTips:[NSString stringWithFormat:@"您已经同意%@的申请",applyName] toView:self.bgView];
+                            [[NSNotificationCenter defaultCenter] postNotificationName:UPDATECLASSMEMBERLIST object:nil];
+                            [self.navigationController popToRootViewControllerAnimated:YES];
+                        }
                     }
                     else if([[applyDict objectForKey:@"role"] isEqualToString:@"teachers"])
                     {
@@ -774,7 +780,8 @@
                             [self.navigationController popToRootViewControllerAnimated:YES];
                         }
                     }
-                    else if([[applyDict objectForKey:@"role"] isEqualToString:@"students"] )
+                    else if([[applyDict objectForKey:@"role"] isEqualToString:@"students"] ||
+                            [[applyDict objectForKey:@"role"] isEqualToString:@"unin_students"])
                     {
                         if ([db deleteRecordWithDict:@{@"classid":classID,@"uid":j_id,@"sn":studentNum} andTableName:CLASSMEMBERTABLE])
                         {

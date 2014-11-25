@@ -125,6 +125,7 @@ static XDTabViewController *_tabViewController = nil;
 
 - (void)viewWillAppear:(BOOL)animated
 {
+    
     [self selectItemAtIndex:_preItemIndex];
     
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
@@ -154,6 +155,11 @@ static XDTabViewController *_tabViewController = nil;
     
     [[NSNotificationCenter defaultCenter] postNotificationName:RELOAD_MENU_BUTTON object:nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:RELOAD_SIDE_MENU object:nil];
+}
+
+-(void)viewWillDisappear:(BOOL)animated
+{
+    
 }
 
 -(void)dealloc
