@@ -16,7 +16,7 @@
 	
 	CC_MD5_CTX md5;
 	CC_MD5_Init (&md5);
-	CC_MD5_Update (&md5, [self UTF8String], [self length]);
+	CC_MD5_Update (&md5, [self UTF8String], (int)[self length]);
 	
 	unsigned char digest[CC_MD5_DIGEST_LENGTH];
 	CC_MD5_Final (digest, &md5);
@@ -38,7 +38,7 @@
 	
 	CC_MD5_CTX md5;
 	CC_MD5_Init (&md5);
-	CC_MD5_Update (&md5, [self UTF8String], [self length]);
+	CC_MD5_Update (&md5, [self UTF8String], (int)[self length]);
 	
 	unsigned char digest[CC_MD5_DIGEST_LENGTH];
 	CC_MD5_Final (digest, &md5);
@@ -58,7 +58,7 @@
 - (NSString *)urlencode {
     NSMutableString *output = [NSMutableString string];
     const unsigned char *source = (const unsigned char *)[self UTF8String];
-    int sourceLen = strlen((const char *)source);
+    int sourceLen = (int)strlen((const char *)source);
     for (int i = 0; i < sourceLen; ++i) {
         const unsigned char thisChar = source[i];
         if (thisChar == ' '){

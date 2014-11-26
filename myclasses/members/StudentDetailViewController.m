@@ -930,7 +930,7 @@ UpdateUserSettingDelegate>
 -(void)moreClick
 {
     NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
-    int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+    int userAdmin = [[dict objectForKey:@"admin"] intValue];
     if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
     {
         if ([otherUserAdmin integerValue] == 0)
@@ -960,7 +960,7 @@ UpdateUserSettingDelegate>
     if (actionSheet.tag == 3333)
     {
         NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
-        int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+        int userAdmin = [[dict objectForKey:@"admin"] intValue];
         if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
         {
             if (buttonIndex == 0)
@@ -1245,14 +1245,14 @@ UpdateUserSettingDelegate>
                         }
                         birth = [dict objectForKey:@"birth"];
                     }
-                    otherUserAdmin = [NSString stringWithFormat:@"%d",[[[dict objectForKey:@"classInfo"] objectForKey:@"admin"] integerValue]];
+                    otherUserAdmin = [NSString stringWithFormat:@"%ld",(long)[[[dict objectForKey:@"classInfo"] objectForKey:@"admin"] integerValue]];
                     headerImageUrl = [dict objectForKey:@"img_icon"];
                     if ([[[dict objectForKey:@"classInfo"] objectForKey:@"opt"] isKindOfClass:[NSDictionary class]])
                     {
                         NSDictionary *tmpDict = [[dict objectForKey:@"classInfo"] objectForKey:@"opt"];
                         for(NSString *key in [tmpDict allKeys])
                         {
-                            [userOptDict setObject:[NSString stringWithFormat:@"%d",[[tmpDict objectForKey:key] integerValue]] forKey:key];
+                            [userOptDict setObject:[NSString stringWithFormat:@"%ld",(long)[[tmpDict objectForKey:key] integerValue]] forKey:key];
                         }
                     }
                     if (![self showPhoneNum])

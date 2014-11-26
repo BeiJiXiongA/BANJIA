@@ -103,8 +103,8 @@
         else
         {
             //动态列表
-            int commentCount = [array count] > 6 ? ([array count] - 7) : -1;
-            int i = [array count]-1;
+            int commentCount = (int)[array count] > 6 ? ((int)[array count] - 7) : -1;
+            int i = (int)[array count]-1;
             do {
                 NSDictionary *dict = [array objectAtIndex:i];
                 
@@ -130,7 +130,7 @@
         
         if (showAll)
         {
-            int likes_num = [[dict objectForKey:@"likes_num"] integerValue];
+            int likes_num = [[dict objectForKey:@"likes_num"] intValue];
             int row = likes_num % ColumnPerRow == 0 ? (likes_num/ColumnPerRow):(likes_num/ColumnPerRow+1);
             tmpcommentHeight += ((30+(PraiseW+5)*row) + DongTaiSpace*3);
         }

@@ -451,7 +451,7 @@ UISearchBarDelegate>
                     }
                     
                     [memDict setObject:classID forKey:@"classid"];
-                    [memDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"checked"] integerValue]] forKey:@"checked"];
+                    [memDict setObject:[NSString stringWithFormat:@"%ld",(long)[[dict objectForKey:@"checked"] integerValue]] forKey:@"checked"];
                     
                     [memDict setObject:@"0" forKey:@"admin"];
                     
@@ -735,7 +735,7 @@ UISearchBarDelegate>
 //    {
 //        [searchResultArray removeObject:dict];
 //    }
-    DDLOG(@"search result count %d",[searchResultArray count]);
+    DDLOG(@"search result count %lu",(unsigned long)[searchResultArray count]);
     [self updateSelect:nil];
     [searchTableView reloadData];
 }
@@ -1018,7 +1018,7 @@ UISearchBarDelegate>
         
         [UIView animateWithDuration:0.2 animations:^{
             buttomView.frame = CGRectMake(0, SCREEN_HEIGHT-buttomH-keyBoardHeight, SCREEN_WIDTH, buttomH);
-            [submitButton setTitle:[NSString stringWithFormat:@"提交(%d)",[selectedArray count]] forState:UIControlStateNormal];
+            [submitButton setTitle:[NSString stringWithFormat:@"提交(%lu)",(unsigned long)[selectedArray count]] forState:UIControlStateNormal];
             memberTableView.frame = CGRectMake(0, mySearchBar.frame.size.height+mySearchBar.frame.origin.y, SCREEN_WIDTH, SCREEN_HEIGHT-UI_NAVIGATION_BAR_HEIGHT-buttomH-chedkViewH-mySearchBar.frame.size.height);
             chatMemberScrollView.contentSize = CGSizeMake([selectedArray count] * 50, 50);
             if (chatMemberScrollView.contentSize.width > chatMemberScrollView.frame.size.width)

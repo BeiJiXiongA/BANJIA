@@ -761,7 +761,7 @@ voiceView;
     {
         if (textView.text.length > maxTextLength)
         {
-            [Tools showAlertView:[NSString stringWithFormat:@"字数不能超过%d",maxTextLength] delegateViewController:nil];
+            [Tools showAlertView:[NSString stringWithFormat:@"字数不能超过%ld",(long)maxTextLength] delegateViewController:nil];
         }
         else
         {

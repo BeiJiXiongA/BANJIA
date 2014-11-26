@@ -508,7 +508,7 @@ ChatVCDelegate>
             DDLOG(@"updata fid and tid success!");
         }
     }
-    return [array count] + [array1 count];
+    return (int)[array count] + (int)[array1 count];
 }
 
 #pragma mark - egodelegate

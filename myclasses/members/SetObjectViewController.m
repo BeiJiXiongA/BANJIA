@@ -136,7 +136,7 @@ AddObjectDel>
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     CGFloat maxhei = SCREEN_HEIGHT-100-UI_NAVIGATION_BAR_HEIGHT;
-    int row = ([objectArray count]+1)%2 == 0 ? (([objectArray count]+1)/2):(([objectArray count]+1)/2+1);
+    int row = ([objectArray count]+1)%2 == 0 ? (((int)[objectArray count]+1)/2):(((int)[objectArray count]+1)/2+1);
     CGFloat height = 58.5 * row > maxhei ? maxhei : (58.5*row);
     objectTabelView.frame = CGRectMake(objectTabelView.frame.origin.x, objectTabelView.frame.origin.y, SCREEN_WIDTH, height);
     if (([objectArray count]+1)%2 == 0)
@@ -168,7 +168,7 @@ AddObjectDel>
     cell.button1.clipsToBounds = YES;
     cell.button1.tag = indexPath.row*2;
     [cell.button1 addTarget:self action:@selector(cellButtonClick:) forControlEvents:UIControlEventTouchUpInside];
-    DDLOG(@"setstu object row %d",indexPath.row);
+    DDLOG(@"setstu object row %ld",(long)indexPath.row);
     
     if (indexPath.row * 2 > [objectArray count]-1)
     {

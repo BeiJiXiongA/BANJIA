@@ -57,7 +57,7 @@
 {
     
     DDLOG_CURRENT_METHOD;
-    DDLOG(@"topViewControllerName++++%@",[self topViewControllerName]);
+    DDLOG(@"topViewControllerName++++%@",NSStringFromClass([[UIApplication sharedApplication].keyWindow.rootViewController class]));
 //    NSString *topViewControllerName = NSStringFromClass([[self topViewControllerName] class]);
 //    if ([topViewControllerName isEqualToString:@"JDSideMenu"])
     
@@ -65,7 +65,7 @@
     {
         WelcomeViewController *login = [[WelcomeViewController alloc] init];
         KKNavigationController *loginNav = [[KKNavigationController alloc] initWithRootViewController:login];
-        [self.navigationController presentViewController:loginNav animated:YES completion:nil];
+        [[UIApplication sharedApplication].keyWindow setRootViewController:loginNav];
     }
 }
 
@@ -213,9 +213,9 @@
         }
     }
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
-    int subNum = [[ud objectForKey:NewChatMsgNum] integerValue]+
-    [[ud objectForKey:NewClassNum] integerValue]+
-    [[ud objectForKey:UCFRIENDSUM] integerValue];
+    int subNum = [[ud objectForKey:NewChatMsgNum] intValue]+
+    [[ud objectForKey:NewClassNum] intValue]+
+    [[ud objectForKey:UCFRIENDSUM] intValue];
     if (subNum == 0)
     {
         [[UIApplication sharedApplication] cancelAllLocalNotifications];

@@ -521,12 +521,12 @@ didSelectLinkWithTextCheckingResult:(NSTextCheckingResult *)result;
     NSMutableDictionary *testDict = [NSMutableDictionary dictionary];
     [kSlashEmojiRegularExpression() enumerateMatchesInString:testString options:0 range:NSMakeRange(0, testString.length) usingBlock:^(NSTextCheckingResult *result, __unused NSMatchingFlags flags, __unused BOOL *stop) {
         [testArray addObject:[testString substringWithRange:result.range]];
-        [testDict setObject:[NSString stringWithFormat:@"Expression_%lu",testArray.count] forKey:[testString substringWithRange:result.range]];
+        [testDict setObject:[NSString stringWithFormat:@"Expression_%lu",(unsigned long)testArray.count] forKey:[testString substringWithRange:result.range]];
     }];
     
     NSString *documentDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     NSString *doc = [NSString stringWithFormat:@"%@/expression.plist",documentDir];
-    NSLog(@"%@,length:%lu",doc,testArray.count);
+    NSLog(@"%@,length:%lu",doc,(unsigned long)testArray.count);
     if ([testArray writeToFile:doc atomically:YES]) {
         NSLog(@"归档expression.plist成功");
     }

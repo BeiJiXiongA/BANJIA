@@ -203,7 +203,7 @@
         if ([self haveNewClass] > 0)
         {
             cell.contentLable.hidden = NO;
-            cell.contentLable.text = [NSString stringWithFormat:@"%d",[self haveNewClass]];
+            cell.contentLable.text = [NSString stringWithFormat:@"%ld",(long)[self haveNewClass]];
         }
     }
     else if (indexPath.row == 2)
@@ -219,7 +219,7 @@
         if ([self haveNewChat] > 0)
         {
             cell.contentLable.hidden = NO;
-            cell.contentLable.text = [NSString stringWithFormat:@"%d",[self haveNewChat]];
+            cell.contentLable.text = [NSString stringWithFormat:@"%ld",(long)[self haveNewChat]];
         }
     }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;

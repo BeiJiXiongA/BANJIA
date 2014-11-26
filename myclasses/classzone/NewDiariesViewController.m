@@ -208,7 +208,7 @@
     cell.nameLabel.text = name;
     cell.timeLabel.frame = CGRectMake(cell.nameLabel.frame.size.width+cell.nameLabel.frame.origin.x+10, 5, SCREEN_WIDTH-cell.nameLabel.frame.origin.x-cell.nameLabel.frame.size.width-20, 30);
     cell.timeLabel.textAlignment = NSTextAlignmentRight;
-    cell.timeLabel.text = [Tools showTime:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]];
+    cell.timeLabel.text = [Tools showTime:[NSString stringWithFormat:@"%ld",(long)[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]];
     cell.headerImageView.layer.cornerRadius = cell.headerImageView.frame.size.width/2;
     cell.headerImageView.clipsToBounds = YES;
     [Tools fillImageView:cell.headerImageView withImageFromURL:@"" andDefault:HEADERDEFAULT];

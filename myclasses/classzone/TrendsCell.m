@@ -196,7 +196,6 @@ diaryIndexPath;
 
 -(void)msgLongTgr:(UILongPressGestureRecognizer *)longTgr
 {
-    DDLOG(@"%d---%d",longTgr.state,[self becomeFirstResponder]);
     if (longTgr.state != UIGestureRecognizerStateBegan ||
         ![self becomeFirstResponder])
         return;
@@ -280,7 +279,7 @@ diaryIndexPath;
         {
             if (indexPath.row == 0)
             {
-                int row = [praiseArray count]%ColumnPerRow == 0 ? ([praiseArray count]/ColumnPerRow):([praiseArray count]/ColumnPerRow+1);
+                int row = (int)[praiseArray count]%ColumnPerRow == 0 ? ((int)[praiseArray count]/ColumnPerRow):((int)[praiseArray count]/ColumnPerRow+1);
                 return (PraiseH+5)*row+PraiseCellHeight+CommentSpace*2;
             }
             else
@@ -307,7 +306,7 @@ diaryIndexPath;
         {
             if (openPraise)
             {
-                int row = [praiseArray count]%ColumnPerRow == 0 ? ([praiseArray count]/ColumnPerRow):([praiseArray count]/ColumnPerRow+1);
+                int row = (int)[praiseArray count]%ColumnPerRow == 0 ? ((int)[praiseArray count]/ColumnPerRow):((int)[praiseArray count]/ColumnPerRow+1);
                 return (PraiseH+5)*row+PraiseCellHeight+CommentSpace*2;
             }
         }
@@ -394,12 +393,12 @@ diaryIndexPath;
                 cell.nameButton.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"praised"]];
                 cell.commentContentLabel.textColor = COMMENTCOLOR;
                 cell.commentContentLabel.frame = CGRectMake(35, cell.nameButton.frame.origin.y, SCREEN_WIDTH-50, PraiseCellHeight);
-                cell.commentContentLabel.text = [NSString stringWithFormat:@"%d人觉得很赞",[praiseArray count]];
+                cell.commentContentLabel.text = [NSString stringWithFormat:@"%d人觉得很赞",(int)[praiseArray count]];
                 cell.selectionStyle = UITableViewCellSelectionStyleNone;
                 
                 cell.openPraiseButton.frame = CGRectMake(SCREEN_WIDTH-70, 3, 130, 130);
                 cell.openPraiseButton.backgroundColor = [UIColor blackColor];
-                cell.openPraiseButton = NO;
+                cell.openPraiseButton.hidden = NO;
                 
                 for (UIView *v in cell.praiseView.subviews)
                 {
@@ -427,7 +426,7 @@ diaryIndexPath;
                     [headerButton addTarget:self action:@selector(praiseClick:) forControlEvents:UIControlEventTouchUpInside];
                     [cell.praiseView addSubview:headerButton];
                 }
-                int row = [praiseArray count]%ColumnPerRow == 0 ? ([praiseArray count]/ColumnPerRow):([praiseArray count]/ColumnPerRow+1);
+                int row = (int)[praiseArray count]%ColumnPerRow == 0 ? ((int)[praiseArray count]/ColumnPerRow):((int)[praiseArray count]/ColumnPerRow+1);
                 cell.praiseView.frame = CGRectMake(12, cell.commentContentLabel.frame.size.height+cell.commentContentLabel.frame.origin.y+CommentSpace, SCREEN_WIDTH-24, (PraiseH+9)*row);
                 
                 return cell;
@@ -595,14 +594,14 @@ diaryIndexPath;
 //            [cell.nameButton setImage:[UIImage imageNamed:@"praised"] forState:UIControlStateNormal];
             cell.nameButton.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"praised"]];
             cell.commentContentLabel.frame = CGRectMake(35, cell.nameButton.frame.origin.y, SCREEN_WIDTH-50, PraiseCellHeight);
-            cell.commentContentLabel.text = [NSString stringWithFormat:@"%d人觉得很赞",[praiseArray count]];
+            cell.commentContentLabel.text = [NSString stringWithFormat:@"%d人觉得很赞",(int)[praiseArray count]];
             cell.commentContentLabel.textColor = COMMENTCOLOR;
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
             
             cell.openPraiseButton.frame = CGRectMake(SCREEN_WIDTH-70, 3, 30, 30);
             cell.openPraiseButton.backgroundColor = [UIColor greenColor];
             [cell.openPraiseButton addTarget:self action:@selector(openThisPraise) forControlEvents:UIControlEventTouchUpInside];
-            cell.openPraiseButton = NO;
+            cell.openPraiseButton.hidden = NO;
             
             for (UIView *v in cell.praiseView.subviews)
             {
@@ -631,7 +630,7 @@ diaryIndexPath;
                     [cell.praiseView addSubview:headerButton];
                 }
             }
-            int row = [praiseArray count] % ColumnPerRow == 0 ? ([praiseArray count]/ColumnPerRow):([praiseArray count]/ColumnPerRow+1);
+            int row = (int)[praiseArray count] % ColumnPerRow == 0 ? ((int)[praiseArray count]/ColumnPerRow):((int)[praiseArray count]/ColumnPerRow+1);
             cell.praiseView.frame = CGRectMake(12, cell.commentContentLabel.frame.size.height+cell.commentContentLabel.frame.origin.y+CommentSpace, SCREEN_WIDTH-24, 40*row);
 
             return cell;
@@ -652,7 +651,7 @@ diaryIndexPath;
                 cell.nameButton.frame = CGRectMake(12, CommentSpace+0.5, 18, 18);
                 [cell.nameButton setImage:[UIImage imageNamed:@"praised"] forState:UIControlStateNormal];
                 
-                cell.commentContentLabel.text = [NSString stringWithFormat:@"%d人觉得很赞",[praiseArray count]];
+                cell.commentContentLabel.text = [NSString stringWithFormat:@"%d人觉得很赞",(int)[praiseArray count]];
                 cell.commentContentLabel.frame = CGRectMake(35, cell.nameButton.frame.origin.y, SCREEN_WIDTH-50, PraiseCellHeight);
                 cell.selectionStyle = UITableViewCellSelectionStyleNone;
                 return cell;
@@ -778,7 +777,7 @@ diaryIndexPath;
             [cell.nameButton setTitle:@"" forState:UIControlStateNormal];
             
             cell.nameLable.hidden = YES;
-            cell.commentContentLabel.text = [NSString stringWithFormat:@"%d人觉得很赞",[praiseArray count]];
+            cell.commentContentLabel.text = [NSString stringWithFormat:@"%lu人觉得很赞",(unsigned long)[praiseArray count]];
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
             return cell;
         }

@@ -176,7 +176,7 @@
     NSUInteger numberOfAssets = group.numberOfAssets;
     
     cell.textLabel.text = [NSString stringWithFormat:@"%@", [group valueForProperty:ALAssetsGroupPropertyName]];
-    cell.detailTextLabel.text = [NSString stringWithFormat:@"%d", numberOfAssets];
+    cell.detailTextLabel.text = [NSString stringWithFormat:@"%lu", (unsigned long)numberOfAssets];
     [cell.imageView setImage:[UIImage imageWithCGImage:[(ALAssetsGroup *)self.assetsGroups[indexPath.row] posterImage]]];
 	[cell setAccessoryType:UITableViewCellAccessoryDisclosureIndicator];
 	
@@ -223,7 +223,7 @@
         NSInteger maxNumber = _imagePickerController.maximumNumberOfPhotosToBeSelected;
         if (0 < maxNumber)
         {
-            self.navigationController.navigationBar.topItem.prompt = [NSString stringWithFormat:@"(%d/%d)", [self.alreadySelectedAssets count], maxNumber];
+            self.navigationController.navigationBar.topItem.prompt = [NSString stringWithFormat:@"(%lu/%d)", (unsigned long)[self.alreadySelectedAssets count], maxNumber];
         }
     }
 }

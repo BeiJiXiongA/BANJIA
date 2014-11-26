@@ -131,7 +131,7 @@ static XDTabViewController *_tabViewController = nil;
     classID = [[NSUserDefaults standardUserDefaults] objectForKey:@"classid"];
     
     OperatDB *db = [[OperatDB alloc] init];
-    int newNoticeNum = [[[NSUserDefaults standardUserDefaults] objectForKey:[NSString stringWithFormat:@"%@-notice",classID]] integerValue];
+    int newNoticeNum = [[[NSUserDefaults standardUserDefaults] objectForKey:[NSString stringWithFormat:@"%@-notice",classID]] intValue];
     if (newNoticeNum > 0)
     {
         [XDTabViewController sharedTabViewController].label1.hidden = NO;

@@ -110,7 +110,7 @@
     {
         text = @"";
     }
-    int len = [text length];
+    int len = (int)[text length];
     //创建一个可变的属性字符串
     NSMutableAttributedString *mutaString = [[[NSMutableAttributedString alloc] initWithString:text] autorelease];
     //改变字符串 从1位 长度为1 这一段的前景色，即字的颜色。

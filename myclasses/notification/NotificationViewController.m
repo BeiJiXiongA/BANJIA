@@ -121,7 +121,7 @@ EGORefreshTableDelegate>
         [ud removeObjectForKey:@"classnoticetip2"];
         [ud synchronize];
     }
-    if (![ud objectForKey:@"classnoticetip1"])
+    if (![ud objectForKey:@"classnoticetip1"] && [[ud objectForKey:@"admin"] intValue] > 0)
     {
         self.unReadLabel.hidden = YES;
         
@@ -246,21 +246,8 @@ EGORefreshTableDelegate>
     else if(!deleted && isNew)
     {
         [unreadedArray removeObject:noticeDict];
-//        [readedArray insertObject:noticeDict atIndex:0];
-        
-        
-        NSMutableDictionary *tmpDict = [[NSMutableDictionary alloc] initWithDictionary:noticeDict];
-        [tmpDict setObject:@"0" forKey:@"new"];
-        for (int i=0; i<[readedArray count]; i++)
-        {
-            NSDictionary *readDict = [readedArray objectAtIndex:i];
-            if ([[[noticeDict objectForKey:@"created"] objectForKey:@"sec"] intValue] >= [[[readDict objectForKey:@"created"] objectForKey:@"sec"] intValue])
-            {
-                [readedArray insertObject:tmpDict atIndex:i];
-                [notificationTableView reloadData];
-                break;
-            }
-        }
+        [readedArray insertObject:noticeDict atIndex:0];
+        [notificationTableView reloadData];
     }
 }
 
@@ -632,7 +619,7 @@ EGORefreshTableDelegate>
     notificationDetailViewController.fromClass = YES;
     if ([[dict objectForKey:@"new"] integerValue] == 1)
     {
-        int newNoticeNum = [[[NSUserDefaults standardUserDefaults] objectForKey:[NSString stringWithFormat:@"%@-notice",classID]] integerValue];
+        int newNoticeNum = [[[NSUserDefaults standardUserDefaults] objectForKey:[NSString stringWithFormat:@"%@-notice",classID]] intValue];
         if (newNoticeNum > 0)
         {
             [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",newNoticeNum-1] forKey:[NSString stringWithFormat:@"%@-notice",classID]];
@@ -724,7 +711,7 @@ EGORefreshTableDelegate>
                     }
                     if (receive)
                     {
-                        int newNoticeNum = [unreadedArray count];
+                        int newNoticeNum = (int)[unreadedArray count];
                         if (newNoticeNum > 0)
                         {
                             [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",newNoticeNum] forKey:[NSString stringWithFormat:@"%@-notice",classID]];

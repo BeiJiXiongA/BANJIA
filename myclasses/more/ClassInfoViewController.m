@@ -709,7 +709,7 @@ SetClassInfoDel>
                 if ([[responseDict objectForKey:@"data"]objectForKey:@"number"] &&
                     ![[[responseDict objectForKey:@"data"]objectForKey:@"number"] isEqual:[NSNull null]])
                 {
-                    NSString *tmpclassnumber = [NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"]objectForKey:@"number"] integerValue]];
+                    NSString *tmpclassnumber = [NSString stringWithFormat:@"%ld",(long)[[[responseDict objectForKey:@"data"]objectForKey:@"number"] integerValue]];
                     if ([tmpclassnumber isEqualToString:@"0"])
                     {
                         classNumber = @"未获取到";
@@ -725,9 +725,9 @@ SetClassInfoDel>
                 }
                 
                 if ([[responseDict objectForKey:@"data"] objectForKey:@"enter_t"] &&
-                    [[NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"] objectForKey:@"enter_t"] integerValue]] length] == 4)
+                    [[NSString stringWithFormat:@"%ld",(long)[[[responseDict objectForKey:@"data"] objectForKey:@"enter_t"] integerValue]] length] == 4)
                 {
-                    joinYear = [NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"] objectForKey:@"enter_t"] integerValue]];
+                    joinYear = [NSString stringWithFormat:@"%ld",(long)[[[responseDict objectForKey:@"data"] objectForKey:@"enter_t"] integerValue]];
                 }
                 else
                 {

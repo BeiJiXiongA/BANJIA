@@ -1170,7 +1170,7 @@ ShareContentDelegate>
         cell.nameLabel.font = NAMEFONT;
         cell.nameLabel.textColor = DongTaiNameColor;
         
-        NSString *timeStr = [Tools showTimeOfToday:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]];
+        NSString *timeStr = [Tools showTimeOfToday:[NSString stringWithFormat:@"%ld",(long)[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]];
         NSString *c_name = [dict objectForKey:@"c_name"];
         cell.timeLabel.text = c_name;
         cell.timeLabel.frame = CGRectMake(SCREEN_WIDTH-[c_name length]*18-30, 2, [c_name length]*18, 35);
@@ -1337,7 +1337,7 @@ ShareContentDelegate>
         
         if ([[dict objectForKey:@"likes_num"] integerValue] > 0)
         {
-            [cell.praiseButton setTitle:[NSString stringWithFormat:@"      %d",[[dict objectForKey:@"likes_num"] integerValue]] forState:UIControlStateNormal];
+            [cell.praiseButton setTitle:[NSString stringWithFormat:@"      %ld",(long)[[dict objectForKey:@"likes_num"] integerValue]] forState:UIControlStateNormal];
         }
         else
         {
@@ -1362,7 +1362,7 @@ ShareContentDelegate>
         
         if ([[dict objectForKey:@"comments_num"] integerValue] > 0)
         {
-            [cell.commentButton setTitle:[NSString stringWithFormat:@"      %d",[[dict objectForKey:@"comments_num"] integerValue]] forState:UIControlStateNormal];
+            [cell.commentButton setTitle:[NSString stringWithFormat:@"      %ld",(long)[[dict objectForKey:@"comments_num"] integerValue]] forState:UIControlStateNormal];
             cell.commentButton.iconImageView.frame = CGRectMake(31, iconTop, iconH, iconH);
         }
         else
@@ -1779,7 +1779,7 @@ ShareContentDelegate>
             DDLOG(@"diary detail responsedict %@",responseDict);
             if ([[responseDict objectForKey:@"code"] intValue]== 1)
             {
-                DDLOG(@"%d+++%d",section,index);
+                DDLOG(@"%ld+++%ld",(long)section,(long)index);
                 NSMutableDictionary *groupDict = [[NSMutableDictionary alloc] initWithDictionary:[tmpArray objectAtIndex:section]];
                 NSMutableArray *newArray = [[NSMutableArray alloc] initWithArray:[groupDict objectForKey:@"diaries"]];
                 NSMutableDictionary *newDict = [[NSMutableDictionary alloc] initWithDictionary:[responseDict objectForKey:@"data"]];

@@ -319,7 +319,7 @@
     if (sec > 0)
     {
         sec--;
-        [getCodeButton setTitle:[NSString stringWithFormat:@"等待%d",sec] forState:UIControlStateNormal];
+        [getCodeButton setTitle:[NSString stringWithFormat:@"等待%ld",(long)sec] forState:UIControlStateNormal];
     }
     else
     {

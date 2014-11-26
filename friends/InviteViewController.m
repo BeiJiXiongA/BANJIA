@@ -613,8 +613,8 @@ UISearchBarDelegate>
                 selectScrollView.contentOffset = CGPointMake((10+40*[addedContactArray count])-SCREEN_WIDTH+80, 0);
             }
             
-            [selectButton setTitle:[NSString stringWithFormat:@"邀请(%d)",[addedContactArray count]] forState:UIControlStateNormal];
-            [inviteButton setTitle:[NSString stringWithFormat:@"邀请(%d)",[addedContactArray count]] forState:UIControlStateNormal];
+            [selectButton setTitle:[NSString stringWithFormat:@"邀请(%lu)",(unsigned long)[addedContactArray count]] forState:UIControlStateNormal];
+            [inviteButton setTitle:[NSString stringWithFormat:@"邀请(%lu)",(unsigned long)[addedContactArray count]] forState:UIControlStateNormal];
         }
         else
         {
@@ -954,7 +954,7 @@ UISearchBarDelegate>
             {
                 cell = [[FriendsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellName];
             }
-            DDLOG(@"current section %d",indexPath.section);
+            DDLOG(@"current section %ld",(long)indexPath.section);
             if ([groupContactArray count] > 0)
             {
                 NSDictionary *groupDict = [groupContactArray objectAtIndex:indexPath.section-1];
@@ -1000,7 +1000,7 @@ UISearchBarDelegate>
         {
             cell = [[FriendsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellName];
         }
-        DDLOG(@"current section %d",indexPath.section);
+        DDLOG(@"current section %ld",(long)indexPath.section);
         cell.nameLabel.frame = CGRectMake(10, 10, SCREEN_WIDTH - 80, 30);
         cell.nameLabel.font = [UIFont systemFontOfSize:16];
             
@@ -1045,7 +1045,7 @@ UISearchBarDelegate>
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    DDLOG(@"table view tag %d== %d",ContactTableViewTag-fromClassTableViewIndex,tableView.tag);
+    DDLOG(@"table view tag %d== %ld",ContactTableViewTag-fromClassTableViewIndex,(long)tableView.tag);
     if (tableView.tag == BanJiaFriendsTableViewTag)
     {
         if (indexPath.section == 0)
@@ -1486,7 +1486,7 @@ UISearchBarDelegate>
         [tmpStr replaceOccurrencesOfString:@"}" withString:@"" options:NSRegularExpressionSearch range:NSMakeRange(0, [tmpStr length])];
         [tmpStr replaceOccurrencesOfString:@" " withString:@"" options:NSRegularExpressionSearch range:NSMakeRange(0, [tmpStr length])];
         [tmpStr replaceOccurrencesOfString:@"\n" withString:@"" options:NSRegularExpressionSearch range:NSMakeRange(0, [tmpStr length])];
-        DDLOG(@"tmpstr length=%d",[tmpStr length]);
+        DDLOG(@"tmpstr length=%lu",(unsigned long)[tmpStr length]);
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
                                                                       @"contacts":[tmpStr substringWithRange:NSMakeRange(1, [tmpStr length]-2)]
@@ -1910,7 +1910,7 @@ UISearchBarDelegate>
                 [chatDict setObject:[Tools user_id] forKey:@"fid"];
                 [chatDict setObject:[Tools user_name] forKey:@"fname"];
                 [chatDict setObject:@"null" forKey:@"ficon"];
-                [chatDict setObject:[NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"] objectForKey:@"time"] integerValue]] forKey:@"time"];
+                [chatDict setObject:[NSString stringWithFormat:@"%ld",(long)[[[responseDict objectForKey:@"data"] objectForKey:@"time"] integerValue]] forKey:@"time"];
                 [chatDict setObject:@"t" forKey:@"direct"];
                 [chatDict setObject:@"text" forKey:@"msgType"];
                 [chatDict setObject:uid forKey:@"tid"];

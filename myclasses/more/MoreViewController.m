@@ -69,7 +69,7 @@ UIActionSheetDelegate>
 
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    DDLOG(@"button index %d",buttonIndex);
+    DDLOG(@"button index %ld",(long)buttonIndex);
     if (actionSheet.tag == ParentSendDiaryTag)
     {
         if (buttonIndex == 0)
@@ -96,14 +96,14 @@ UIActionSheetDelegate>
     {
         if (buttonIndex == 0 || buttonIndex == 1 || buttonIndex == 2)
         {
-            [self settingValue:[NSString stringWithFormat:@"%d",buttonIndex] forKay:StudentVisiteTime];
+            [self settingValue:[NSString stringWithFormat:@"%ld",(long)buttonIndex] forKay:StudentVisiteTime];
         }
     }
     else if(actionSheet.tag == VisitorAccessTimeTag)
     {
         if (buttonIndex == 0 || buttonIndex == 1)
         {
-            [self settingValue:[NSString stringWithFormat:@"%d",buttonIndex] forKay:VisitorAccess];
+            [self settingValue:[NSString stringWithFormat:@"%d",(int)buttonIndex] forKay:VisitorAccess];
         }
         
     }
@@ -348,7 +348,7 @@ UIActionSheetDelegate>
         cell = [[ClassMoreCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellName];
     }
     int row = 0;
-    int section = indexPath.section;
+    int section = (int)indexPath.section;
     while (section > 0)
     {
         row += [[[sectionArray objectAtIndex:section-1] objectForKey:@"count"] intValue];
@@ -566,7 +566,7 @@ UIActionSheetDelegate>
 
 -(void)switchViewChange:(KLSwitch *)switchItem
 {
-    DDLOG(@"row %d",switchItem.tag);
+    DDLOG(@"row %ld",(long)switchItem.tag);
     if (switchItem.tag == 0)
     {
         if ([[settingDict objectForKey:ParentComment] intValue] == 0)

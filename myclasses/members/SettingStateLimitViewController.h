@@ -9,7 +9,7 @@
 #import "XDContentViewController.h"
 
 @protocol UpdateUserSettingDelegate <NSObject>
-
+@optional
 -(void)updateUserSeting;
 
 @end

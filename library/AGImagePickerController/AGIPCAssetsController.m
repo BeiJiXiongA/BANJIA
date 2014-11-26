@@ -373,9 +373,9 @@ static NSMutableArray *_assets;
             // Display supports up to select several photos at the same time, springox(20131220)
             NSInteger maxNumber = _imagePickerController.maximumNumberOfPhotosToBeSelected;
             if (0 < maxNumber) {
-                self.navigationController.navigationBar.topItem.prompt = [NSString stringWithFormat:@"(%d/%d)", [self.selectImageDict count], maxNumber];
+                self.navigationController.navigationBar.topItem.prompt = [NSString stringWithFormat:@"(%lu/%ld)", (unsigned long)[self.selectImageDict count], (long)maxNumber];
             } else {
-                self.navigationController.navigationBar.topItem.prompt = [NSString stringWithFormat:@"(%d/%d)", [self.selectImageDict count], self.assets.count];
+                self.navigationController.navigationBar.topItem.prompt = [NSString stringWithFormat:@"(%lu/%lu)", (unsigned long)[self.selectImageDict count], (unsigned long)self.assets.count];
             }
         }
     }

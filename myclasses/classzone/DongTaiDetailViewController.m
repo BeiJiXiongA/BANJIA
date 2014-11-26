@@ -175,7 +175,7 @@ ShareContentDelegate>
     if (fromclass)
     {
         NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
-        int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+        int userAdmin = [[dict objectForKey:@"admin"] intValue];
         if (userAdmin == 2 || [[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]] || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
         {
             UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"删除",@"举报", nil];
@@ -394,7 +394,7 @@ ShareContentDelegate>
     cell.timeLabel.lineBreakMode = NSLineBreakByWordWrapping | NSLineBreakByTruncatingTail;
     
     cell.nameLabel.text = nameStr;
-    cell.timeLabel.text = [Tools showTime:[NSString stringWithFormat:@"%d",[[[diaryDetailDict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]];
+    cell.timeLabel.text = [Tools showTime:[NSString stringWithFormat:@"%ld",(long)[[[diaryDetailDict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]];
     
     cell.locationLabel.frame = CGRectMake(50, cell.headerImageView.frame.origin.y+cell.headerImageView.frame.size.height-16, SCREEN_WIDTH-80, 20);
     
@@ -532,7 +532,7 @@ ShareContentDelegate>
     cell.praiseButton.frame = CGRectMake((SCREEN_WIDTH-10)/3, buttonY, (SCREEN_WIDTH-10)/3, buttonHeight);
     if ([[diaryDetailDict objectForKey:@"likes_num"] integerValue] > 0)
     {
-        [cell.praiseButton setTitle:[NSString stringWithFormat:@"      %d",[[diaryDetailDict objectForKey:@"likes_num"] integerValue]] forState:UIControlStateNormal];
+        [cell.praiseButton setTitle:[NSString stringWithFormat:@"      %ld",(long)[[diaryDetailDict objectForKey:@"likes_num"] integerValue]] forState:UIControlStateNormal];
     }
     else
     {
@@ -554,7 +554,7 @@ ShareContentDelegate>
      cell.commentButton.frame = CGRectMake((SCREEN_WIDTH-10)/3*2, buttonY, (SCREEN_WIDTH-10)/3, buttonHeight);
     if ([[diaryDetailDict objectForKey:@"comments_num"] integerValue] > 0)
     {
-        [cell.commentButton setTitle:[NSString stringWithFormat:@"      %d",[[diaryDetailDict objectForKey:@"comments_num"] integerValue]] forState:UIControlStateNormal];
+        [cell.commentButton setTitle:[NSString stringWithFormat:@"      %ld",(long)[[diaryDetailDict objectForKey:@"comments_num"] integerValue]] forState:UIControlStateNormal];
         cell.commentButton.iconImageView.frame = CGRectMake(31, iconTop, iconH, iconH);
     }
     else
@@ -1039,7 +1039,7 @@ ShareContentDelegate>
                 if (fromclass)
                 {
                     NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
-                    int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+                    int userAdmin = [[dict objectForKey:@"admin"] intValue];
                     if (userAdmin == 2 || [[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]] || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
                     {
                         moreButton.hidden = NO;
@@ -1198,7 +1198,7 @@ ShareContentDelegate>
     else if (actionSheet.tag == 3333)
     {
         NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
-        int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+        int userAdmin = [[dict objectForKey:@"admin"] intValue];
         if (userAdmin == 2 || [[[diaryDetailDict objectForKey:@"by"] objectForKey:@"_id"] isEqualToString:[Tools user_id]] || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
         {
             if (buttonIndex == 0)

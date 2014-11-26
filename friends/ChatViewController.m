@@ -244,7 +244,7 @@ MLEmojiLabelDelegate>
     NSArray *cacheChatArray = [db findChatLogWithUid:[Tools user_id]
                                           andOtherId:toID
                                         andTableName:CHATTABLE
-                                               start:[messageArray count] count:10];
+                                               start:(int)[messageArray count] count:10];
     if ([cacheChatArray count] > 0)
     {
         for (int i=0; i<[cacheChatArray count]; i++)
@@ -431,7 +431,7 @@ MLEmojiLabelDelegate>
         NSArray *cacheChatArray = [db findChatLogWithUid:[Tools user_id]
                                               andOtherId:toID
                                             andTableName:CHATTABLE
-                                                   start:[messageArray count] count:10];
+                                                   start:(int)[messageArray count] count:10];
         if ([cacheChatArray count] > 0)
         {
             //取出本地的十条历史消息并且显示
@@ -495,7 +495,7 @@ MLEmojiLabelDelegate>
     NSArray *cacheChatArray = [db findChatLogWithUid:[Tools user_id]
                                           andOtherId:toID
                                         andTableName:CHATTABLE
-                                               start:[messageArray count] count:10];
+                                               start:(int)[messageArray count] count:10];
     if ([cacheChatArray count] > 0)
     {
         for (int i=0; i<[cacheChatArray count]; i++)
@@ -631,7 +631,7 @@ MLEmojiLabelDelegate>
                     [chatDict setObject:[dict objectForKey:@"_id"] forKey:@"mid"];
                     [chatDict setObject:[Tools user_id] forKey:@"userid"];
                     [chatDict setObject:[dict objectForKey:@"msg"] forKey:@"content"];
-                    [chatDict setObject:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"t"] integerValue]] forKey:@"time"];
+                    [chatDict setObject:[NSString stringWithFormat:@"%ld",(long)[[dict objectForKey:@"t"] integerValue]] forKey:@"time"];
                     [chatDict setObject:imageUrl?imageUrl:@"" forKey:@"ficon"];
                     [chatDict setObject:@"1" forKey:@"readed"];
                     [chatDict setObject:@"0" forKey:@"l"];
@@ -924,7 +924,7 @@ MLEmojiLabelDelegate>
                 NSArray *cacheChatArray = [db findChatLogWithUid:[Tools user_id]
                                                       andOtherId:toID
                                                     andTableName:CHATTABLE
-                                                           start:[messageArray count] count:10];
+                                                           start:(int)[messageArray count] count:10];
                 if ([cacheChatArray count] > 0 && [cacheChatArray count] >= unReadedNumber)
                 {
                     for (int i=0; i<[cacheChatArray count]; i++)
@@ -1206,7 +1206,7 @@ MLEmojiLabelDelegate>
     }
     else if (actionSheet.tag == Phone_Num_Ac_Tag)
     {
-        DDLOG(@"button index %d",buttonIndex);
+        DDLOG(@"button index %ld",(long)buttonIndex);
         if(buttonIndex == 0)
         {
             [Tools dialPhoneNumber:openStr inView:self.bgView];
@@ -1218,7 +1218,7 @@ MLEmojiLabelDelegate>
     }
     else if(actionSheet.tag == Url_Ac_tag)
     {
-        DDLOG(@"button index %d",buttonIndex);
+        DDLOG(@"button index %ld",(long)buttonIndex);
         if(buttonIndex == 0)
         {
             //打开连接
@@ -1233,7 +1233,7 @@ MLEmojiLabelDelegate>
     }
     else if(actionSheet.tag == Email_Ac_tag)
     {
-        DDLOG(@"button index %d",buttonIndex);
+        DDLOG(@"button index %ld",(long)buttonIndex);
         if(buttonIndex == 0)
         {
             //打开连接

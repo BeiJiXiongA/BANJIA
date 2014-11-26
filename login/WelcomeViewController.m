@@ -502,7 +502,7 @@ UITextFieldDelegate>
                 DDLOG(@"newchat responsedict %@",responseDict);
                 if ([[responseDict objectForKey:@"code"] intValue] == 1)
                 {
-                    [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",[[responseDict objectForKey:@"data"] integerValue]] forKey:NewChatMsgNum];
+                    [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%ld",(long)[[responseDict objectForKey:@"data"] intValue]] forKey:NewChatMsgNum];
                     [[NSUserDefaults standardUserDefaults] synchronize];
                     
                     [homeViewController viewWillAppear:NO];

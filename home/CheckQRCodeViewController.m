@@ -291,7 +291,7 @@
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
                                                                       @"c_id":@"",
-                                                                      @"number":[NSString stringWithFormat:@"%d",[searchContent integerValue]]
+                                                                      @"number":[NSString stringWithFormat:@"%ld",(long)[searchContent integerValue]]
                                                                       } API:SEARCHCLASS];
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];

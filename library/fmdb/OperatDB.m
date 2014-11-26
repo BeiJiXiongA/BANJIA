@@ -35,7 +35,7 @@
         defaultValue:(NSString *)defaultValue
         andTableName:(NSString *)tableName
 {
-    NSString *altertableStr = [NSString stringWithFormat:@"ALTER TABLE %@ ADD '%@' VARCHAR(%d) default '%@'",tableName,column,charlength,defaultValue];
+    NSString *altertableStr = [NSString stringWithFormat:@"ALTER TABLE %@ ADD '%@' VARCHAR(%ld) default '%@'",tableName,column,(long)charlength,defaultValue];
     BOOL res = [_db executeUpdate:altertableStr];
     if (res)
     {

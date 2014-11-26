@@ -39,7 +39,7 @@
     
     CGFloat inputWidth;
     CGFloat pageControlHei;
-    int page;
+    long page;
     
     UIButton *emoButton;
     UIButton *sendButton;

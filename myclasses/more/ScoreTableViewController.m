@@ -165,12 +165,12 @@ EGORefreshTableDelegate>
     
     if ([role isEqualToString:@"teachers"])
     {
-        [cell.timeLabel cnv_setUILabelText:[NSString stringWithFormat:@"共有%d人参加考试",[[dict objectForKey:@"members_num"] integerValue]] andKeyWord:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"members_num"] integerValue]]];
+        [cell.timeLabel cnv_setUILabelText:[NSString stringWithFormat:@"共有%ld人参加考试",(long)[[dict objectForKey:@"members_num"] integerValue]] andKeyWord:[NSString stringWithFormat:@"%ld",(long)[[dict objectForKey:@"members_num"] integerValue]]];
     }
     else
     {
         
-        [cell.timeLabel cnv_setUILabelText:[NSString stringWithFormat:@"总成绩%d分",[[dict objectForKey:@"total"] integerValue]] andKeyWord:[NSString stringWithFormat:@"%d",[[dict objectForKey:@"total"] integerValue]]];
+        [cell.timeLabel cnv_setUILabelText:[NSString stringWithFormat:@"总成绩%ld分",(long)[[dict objectForKey:@"total"] integerValue]] andKeyWord:[NSString stringWithFormat:@"%ld",(long)[[dict objectForKey:@"total"] integerValue]]];
     }
     cell.timeLabel.font = [UIFont systemFontOfSize:12];
     [cell.timeLabel cnv_setUIlabelTextColor:TIMECOLOR andKeyWordColor:RGB(51, 204, 102, 0.8)];

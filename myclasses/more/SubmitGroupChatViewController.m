@@ -71,7 +71,7 @@
     nameTextField.placeholder = @"群聊名称";
     if ([selectArray count] > 3)
     {
-        nameTextField.text = [NSString stringWithFormat:@"%@等(%d人)",[nameStr substringToIndex:[nameStr length]-1],[selectArray count]+1];
+        nameTextField.text = [NSString stringWithFormat:@"%@等(%lu人)",[nameStr substringToIndex:[nameStr length]-1],[selectArray count]+1];
     }
     else
     {
@@ -84,7 +84,7 @@
     tipLabel2.font = [UIFont systemFontOfSize:18];
     tipLabel2.textColor = TITLE_COLOR;
     tipLabel2.backgroundColor = self.bgView.backgroundColor;
-    tipLabel2.text = [NSString stringWithFormat:@"您邀请了%d名班级成员",[selectArray count]];
+    tipLabel2.text = [NSString stringWithFormat:@"您邀请了%lu名班级成员",(unsigned long)[selectArray count]];
     [self.bgView addSubview:tipLabel2];
     
     UIButton *submitButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -128,7 +128,7 @@
     }
     
     NSString *textFieldStr = nameTextField.text;
-    NSString *countStr = [NSString stringWithFormat:@"(%d人)",[selectArray count]+1];
+    NSString *countStr = [NSString stringWithFormat:@"(%lu人)",[selectArray count]+1];
     NSRange range = [textFieldStr rangeOfString:countStr];
     
     if (range.length == 0)

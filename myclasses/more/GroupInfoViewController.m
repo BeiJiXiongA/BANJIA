@@ -12,6 +12,7 @@
 #import "LimitCell.h"
 #import "PersonDetailViewController.h"
 #import "QRCodeGenerator.h"
+#import "UIActionSheet+Blocks.h"
 
 @interface GroupInfoViewController ()<UIAlertViewDelegate,UITableViewDataSource,UITableViewDelegate>
 {
@@ -310,9 +311,9 @@
         [qrImageView setImage:image];
         [cell.contentView addSubview:qrImageView];
         
-        UILongPressGestureRecognizer *longPressTgr = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(SaveGroupQRImage)];
+        UITapGestureRecognizer *tapPressTgr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(SaveGroupQRImage)];
         qrImageView.userInteractionEnabled = YES;
-        [qrImageView addGestureRecognizer:longPressTgr];
+        [qrImageView addGestureRecognizer:tapPressTgr];
         
         UILabel *tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, qrImageView.frame.size.height+qrImageView.frame.origin.y-5, SCREEN_WIDTH-40, 25)];
         tipLabel.text = @"让你的好友扫一扫二维码即可加入群聊";
@@ -417,6 +418,28 @@
 
 #pragma mark - 保存群聊二维码
 
+-(void)SaveGroupQRImage
+{
+    [UIActionSheet showInView:self.bgView withTitle:@"提示" cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@[@"保存到相册"] tapBlock:^(UIActionSheet *actionSheet, NSInteger buttonIndex) {
+        if (buttonIndex == 0)
+        {
+            UIImage *image = [ImageTools getQrImageWithString:[NSString stringWithFormat:@"%@?groupid=%@",@"http://www.banjiaedu.com/welcome/mobile",groupID] width:480];
+            UIImageWriteToSavedPhotosAlbum( image, self, @selector ( image:didFinishSavingWithError:contextInfo:) , nil ) ;
+        }
+    }];
+}
+
+-(void)image:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo
+{
+    if (error != NULL)
+    {
+        DDLOG(@"save image error %@",error);
+    }
+    else
+    {
+        [Tools showTips:@"群二维码保存成功！" toView:self.bgView];
+    }
+}
 
 -(void)switchViewChange:(KLSwitch *)sw
 {
@@ -530,7 +553,7 @@
                 }
                 [Tools showTips:@"踢出成功!" toView:groupInfoTableView];
                 [groupUsers removeObject:dict];
-                int count = [groupUsers count];
+                int count = (int)[groupUsers count];
                 row = count%columperrow==0?(count/columperrow):(count/columperrow+1);
                 [groupInfoTableView reloadData];
             }

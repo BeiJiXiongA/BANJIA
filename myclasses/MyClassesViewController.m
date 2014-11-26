@@ -327,12 +327,11 @@ UIActionSheetDelegate>
         }
     }
 }
--(void)countOfNewMsgWithType:(NSString *)msgType andTag:(NSString *)tagStr
-{
-    db = [[OperatDB alloc] init];
-    NSMutableArray *array = [db findSetWithDictionary:@{@"uid":[Tools user_id],@"tag":tagStr} andTableName:@"notice"];
-    DDLOG(@"new %@==%d",msgType,[array count]);
-}
+//-(void)countOfNewMsgWithType:(NSString *)msgType andTag:(NSString *)tagStr
+//{
+//    db = [[OperatDB alloc] init];
+//    NSMutableArray *array = [db findSetWithDictionary:@{@"uid":[Tools user_id],@"tag":tagStr} andTableName:@"notice"];
+//}
 
 -(void)getCacheData
 {
@@ -387,7 +386,7 @@ UIActionSheetDelegate>
                         }
                         else if ([dict2 objectForKey:@"s_level"])
                         {
-                            NSString *schoolLevel = [NSString stringWithFormat:@"%d",[s_level integerValue]];
+                            NSString *schoolLevel = [NSString stringWithFormat:@"%ld",(long)[s_level integerValue]];
                             if ([schoolLevel length] > 0)
                             {
                                 [dict setObject:schoolLevel forKey:@"s_level"];
@@ -529,7 +528,7 @@ UIActionSheetDelegate>
                             }
                             else if ([dict2 objectForKey:@"s_level"])
                             {
-                                NSString *schoolLevel = [NSString stringWithFormat:@"%d",[[dict2 objectForKey:@"s_level"] integerValue]];
+                                NSString *schoolLevel = [NSString stringWithFormat:@"%ld",(long)[[dict2 objectForKey:@"s_level"] integerValue]];
                                 if ([schoolLevel length] > 0)
                                 {
                                     [dict setObject:schoolLevel forKey:@"s_level"];
@@ -875,7 +874,7 @@ UIActionSheetDelegate>
     NSDictionary *classDict = [[dict objectForKey:@"classes"] objectAtIndex:indexPath.row];
     NSString *classID = [classDict objectForKey:@"_id"];
     
-    [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",[[classDict objectForKey:@"notice"] integerValue]] forKey:[NSString  stringWithFormat:@"%@-notice",classID]];
+    [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%ld",(long)[[classDict objectForKey:@"notice"] integerValue]] forKey:[NSString  stringWithFormat:@"%@-notice",classID]];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
     XDTabViewController *tabViewController = [XDTabViewController sharedTabViewController];

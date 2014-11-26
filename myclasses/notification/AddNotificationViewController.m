@@ -100,7 +100,7 @@ SelectClasses>
     //        countLabel.font = [UIFont systemFontOfSize:12];
     countLabel.font = [UIFont fontWithName:@"Futura" size:14];
     countLabel.textColor = HEADER_BLUER;
-    countLabel.text = [NSString stringWithFormat:@"%d/200",[contentTextView.text length]];
+    countLabel.text = [NSString stringWithFormat:@"%lu/200",(unsigned long)[contentTextView.text length]];
     [self.bgView addSubview:countLabel];
     
     UILabel *objectLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, contentTextView.frame.size.height+contentTextView.frame.origin.y+20, 80, 30)];
@@ -338,7 +338,7 @@ SelectClasses>
     if ([textView.text length] > 0)
     {
         contentHolder.text = @"";
-        countLabel.text = [NSString stringWithFormat:@"%d/200",[contentTextView.text length]];
+        countLabel.text = [NSString stringWithFormat:@"%lu/200",(unsigned long)[contentTextView.text length]];
         if ([contentTextView.text length] > 200)
         {
             countLabel.textColor = [UIColor redColor];

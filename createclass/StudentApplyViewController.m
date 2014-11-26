@@ -536,7 +536,7 @@ UITableViewDelegate>
 {
     NSDictionary *studentDict = [studentsArray objectAtIndex:button.tag];
     NSArray *tmpParentArray = [studentDict objectForKey:@"parents"];
-    DDLOG(@"tmpParentArray %d",[tmpParentArray count]);
+    DDLOG(@"tmpParentArray %lu",(unsigned long)[tmpParentArray count]);
      NSMutableDictionary *pDict = [[NSMutableDictionary alloc] initWithCapacity:0];
     for (int i=0; i<[tmpParentArray count]; i++)
     {

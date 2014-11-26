@@ -483,7 +483,7 @@
                     if ([[responseDict objectForKey:@"data"] objectForKey:@"count"]||
                         [[responseDict objectForKey:@"data"] objectForKey:@"ucfriendsnum"])
                     {
-                        [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"]objectForKey:@"count"] integerValue]] forKey:NewClassNum];
+                        [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%ld",(long)[[[responseDict objectForKey:@"data"]objectForKey:@"count"] integerValue]] forKey:NewClassNum];
                         [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",[[[responseDict objectForKey:@"data"] objectForKey:@"ucfriendsnum"] intValue]] forKey:UCFRIENDSUM];
                         [[NSUserDefaults standardUserDefaults] synchronize];
                         
@@ -527,7 +527,7 @@
                 DDLOG(@"newchat responsedict %@",responseDict);
                 if ([[responseDict objectForKey:@"code"] intValue] == 1)
                 {
-                    [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d",[[responseDict objectForKey:@"data"] integerValue]] forKey:NewChatMsgNum];
+                    [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%ld",(long)[[responseDict objectForKey:@"data"] integerValue]] forKey:NewChatMsgNum];
                     [[NSUserDefaults standardUserDefaults] synchronize];
                     
                     [[NSNotificationCenter defaultCenter] postNotificationName:RELOAD_SIDE_MENU object:nil];

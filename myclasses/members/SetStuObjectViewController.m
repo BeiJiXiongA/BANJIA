@@ -244,7 +244,7 @@ AddObjectDel>
     cell.button1.clipsToBounds = YES;
     cell.button1.tag = indexPath.row*2;
     [cell.button1 addTarget:self action:@selector(cellButtonClick:) forControlEvents:UIControlEventTouchUpInside];
-    DDLOG(@"setstu object row %d",indexPath.row);
+    DDLOG(@"setstu object row %ld",(long)indexPath.row);
     
     if (indexPath.row * 2 > [objectArray count]-1)
     {
@@ -349,26 +349,26 @@ AddObjectDel>
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if ([[selectDict objectForKey:[NSString stringWithFormat:@"%d",indexPath.row]] length] > 0)
+    if ([[selectDict objectForKey:[NSString stringWithFormat:@"%ld",(long)indexPath.row]] length] > 0)
     {
-        [selectDict removeObjectForKey:[NSString stringWithFormat:@"%d",indexPath.row]];
+        [selectDict removeObjectForKey:[NSString stringWithFormat:@"%ld",(long)indexPath.row]];
     }
     else
     {
-        [selectDict setObject:[objectArray objectAtIndex:indexPath.row] forKey:[NSString stringWithFormat:@"%d",indexPath.row]];
+        [selectDict setObject:[objectArray objectAtIndex:indexPath.row] forKey:[NSString stringWithFormat:@"%ld",(long)indexPath.row]];
     }
     [objectTabelView reloadData];
 }
 
 -(void)operateObject:(UIButton *)button
 {
-    if ([[selectDict objectForKey:[NSString stringWithFormat:@"%d",button.tag/1000]] length] > 0)
+    if ([[selectDict objectForKey:[NSString stringWithFormat:@"%ld",button.tag/1000]] length] > 0)
     {
-        [selectDict removeObjectForKey:[NSString stringWithFormat:@"%d",button.tag/1000]];
+        [selectDict removeObjectForKey:[NSString stringWithFormat:@"%ld",button.tag/1000]];
     }
     else
     {
-        [selectDict setObject:[objectArray objectAtIndex:button.tag/1000] forKey:[NSString stringWithFormat:@"%d",button.tag/1000]];
+        [selectDict setObject:[objectArray objectAtIndex:button.tag/1000] forKey:[NSString stringWithFormat:@"%ld",button.tag/1000]];
     }
     [objectTabelView reloadData];
 }

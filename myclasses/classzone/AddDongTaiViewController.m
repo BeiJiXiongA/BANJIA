@@ -688,11 +688,11 @@ int count = 0;
     int row = 0;
     if (([alreadySelectAssets count]+1)%4 == 0)
     {
-        row = ([alreadySelectAssets count]+1)/4;
+        row = ((int)[alreadySelectAssets count]+1)/4;
     }
     else
     {
-        row = ([alreadySelectAssets count]+1)/4+1;
+        row = ((int)[alreadySelectAssets count]+1)/4+1;
     }
     [normalPhotosArray removeAllObjects];
     if ([alreadySelectAssets count] > 0)
@@ -906,10 +906,8 @@ int count = 0;
         for (int i=0; i<[normalPhotosArray count]; ++i)
         {
             UIImage *image = [normalPhotosArray objectAtIndex:i];
-            DDLOG(@"image size = %@",NSStringFromCGSize(image.size));
             
             NSData *imageData = UIImageJPEGRepresentation(image, 0.8f);
-            DDLOG(@"size======%d",[imageData length]);
             
             [request addData:imageData withFileName:[NSString stringWithFormat:@"%d.jpeg",i+1] andContentType:@"image/jpeg" forKey:[NSString stringWithFormat:@"file%d",i+1]];
         }

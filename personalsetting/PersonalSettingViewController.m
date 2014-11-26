@@ -1207,7 +1207,7 @@ static int loginID;
                     reg_method = @"";
                 }
                 
-                gf = [[[responseDict objectForKey:@"data"] objectForKey:@"jf"] integerValue];
+                gf = [[[responseDict objectForKey:@"data"] objectForKey:@"jf"] intValue];
                 [personalSettiongTableView reloadData];
             }
             else
