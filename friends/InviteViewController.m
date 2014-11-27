@@ -1617,6 +1617,11 @@ UISearchBarDelegate>
     NSString *msgBody;
     if (fromClass)
     {
+        if (!InviteClassMember)
+        {
+            return ;
+        }
+        
         NSMutableString *inviteBody = [[NSMutableString alloc] initWithString:InviteClassMember];
         
         NSString *classNum = [[NSUserDefaults standardUserDefaults] objectForKey:@"classnum"];

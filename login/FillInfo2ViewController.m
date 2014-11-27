@@ -398,6 +398,8 @@
                     [self uploadImage:self.headerImageView.image];
                 }
                 
+                [self getNewVersion];
+                
                 SideMenuViewController *sideMenuViewController = [[SideMenuViewController alloc] init];
                 HomeViewController *homeViewController = [[HomeViewController alloc] init];
                 KKNavigationController *homeNav = [[KKNavigationController alloc] initWithRootViewController:homeViewController];
@@ -426,6 +428,72 @@
     }
 
 }
+
+-(void)getNewVersion
+{
+    if ([Tools NetworkReachable])
+    {
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"type":@"iOS",
+                                                                      @"build":[[NSUserDefaults standardUserDefaults] objectForKey:@"currentVersion"]
+                                                                      } API:MB_NEWVERSION];
+        [request setCompletionBlock:^{
+            NSString *responseString = [request responseString];
+            NSDictionary *responseDict = [Tools JSonFromString:responseString];
+            DDLOG(@"newversion responsedict %@",responseString);
+            if ([[responseDict objectForKey:@"code"] intValue]== 1)
+            {
+                if ([[responseDict objectForKey:@"data"] isKindOfClass:[NSDictionary class]])
+                {
+                    if ([[responseDict objectForKey:@"data"] objectForKey:@"iOS_url"])
+                    {
+                        [[NSUserDefaults standardUserDefaults] setObject:[[responseDict objectForKey:@"data"] objectForKey:@"iOS_url"] forKey:@"iOS_url"];
+                        [[NSUserDefaults standardUserDefaults] synchronize];
+                        
+                        //                        UIAlertView *al = [[UIAlertView alloc] initWithTitle:@"新版本提示" message:@"有新版本哦，快去更新吧，加了好多功能的！" delegate:self cancelButtonTitle:@"一会在更新" otherButtonTitles:@"用最新的", nil];
+                        //                        al.tag = NewVersionTag;
+                        //                        [al show];
+                        
+                    }
+                    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+                    NSDictionary *template = [[responseDict objectForKey:@"data"] objectForKey:@"template"];
+                    NSString *item1 = [template objectForKey:@"tem1"];
+                    
+                    if (![[ud objectForKey:InviteClassMemberKey] isEqualToString:item1])
+                    {
+                        [ud setObject:item1 forKey:ShareContentKey];
+                        [ud synchronize];
+                    }
+                    
+                    NSString *item2 = [template objectForKey:@"tem2"];
+                    if (![[ud objectForKey:InviteClassMemberKey] isEqualToString:item2])
+                    {
+                        [ud setObject:item2 forKey:InviteClassMemberKey];
+                        [ud synchronize];
+                    }
+                    
+                    NSString *item3 = [template objectForKey:@"tem3"];
+                    if (![[ud objectForKey:InviteParentKey] isEqualToString:item3])
+                    {
+                        [ud setObject:item3 forKey:InviteParentKey];
+                        [ud synchronize];
+                    }
+                }
+            }
+            else
+            {
+                [Tools dealRequestError:responseDict fromViewController:nil];
+            }
+        }];
+        
+        [request setFailedBlock:^{
+        }];
+        [request startAsynchronous];
+    }
+    
+}
+
 
 - (IBAction)headerTap:(UITapGestureRecognizer *)sender
 {

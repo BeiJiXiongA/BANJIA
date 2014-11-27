@@ -75,7 +75,8 @@
     UIButton *createClassButton1 = [UIButton buttonWithType:UIButtonTypeCustom];
     [createClassButton1 setTitle:@"创建" forState:UIControlStateNormal];
     createClassButton1.frame = CGRectMake(SCREEN_WIDTH-70, self.backButton.frame.origin.y, 60, NAV_RIGHT_BUTTON_HEIGHT);
-    [createClassButton1 setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
+//    [createClassButton1 setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
+    [createClassButton1 setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
     [createClassButton1 addTarget:self action:@selector(createClassClick) forControlEvents:UIControlEventTouchUpInside];
     createClassButton1.backgroundColor = [UIColor clearColor];
     [self.navigationBarView addSubview:createClassButton1];

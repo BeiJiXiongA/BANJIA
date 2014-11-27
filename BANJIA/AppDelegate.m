@@ -133,7 +133,7 @@
     [MobClick startWithAppkey:@"53c5f0ec56240be9ed07306e" reportPolicy:SEND_INTERVAL channelId:@"123"];
     NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
     [MobClick setAppVersion:version];
-    
+
     
     if (![[NSUserDefaults standardUserDefaults] objectForKey:@"first"])
     {

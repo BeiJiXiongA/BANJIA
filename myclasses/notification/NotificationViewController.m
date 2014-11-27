@@ -720,6 +720,14 @@ EGORefreshTableDelegate>
                         [[XDTabViewController sharedTabViewController] viewWillAppear:NO];
                     }
                 }
+                else
+                {
+                    NSString *requestUrlStr = [NSString stringWithFormat:@"%@=%@=%@",GETNOTIFICATIONS,[Tools user_id],classID];
+                    NSString *key = [requestUrlStr MD5Hash];
+                    [FTWCache setObject:[responseString dataUsingEncoding:NSUTF8StringEncoding] forKey:key];
+                    [readedArray removeAllObjects];
+                    [unreadedArray removeAllObjects];
+                }
                 
                 page = [[[responseDict objectForKey:@"data"] objectForKey:@"page"] intValue];
                 month = [NSString stringWithFormat:@"%@",[[responseDict objectForKey:@"data"] objectForKey:@"month"]];

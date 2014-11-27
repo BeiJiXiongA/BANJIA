@@ -1994,7 +1994,7 @@ ShareContentDelegate>
         
         cell.commentsTableView.frame = CGRectMake(0, 0, 0, 0);
         
-        cell.nameLabel.frame = CGRectMake(50, cell.headerImageView.frame.origin.y-6, [nameStr length]*18>170?170:([nameStr length]*18), 25);
+        cell.nameLabel.frame = CGRectMake(50, cell.headerImageView.frame.origin.y-6, [nameStr length]*18>150?150:([nameStr length]*18), 25);
         cell.nameLabel.text = nameStr;
         cell.nameLabel.font = NAMEFONT;
         cell.nameLabel.textColor = DongTaiNameColor;
@@ -2002,7 +2002,7 @@ ShareContentDelegate>
         NSString *timeStr = [Tools showTimeOfToday:[NSString stringWithFormat:@"%d",[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]];
         NSString *c_name = [dict objectForKey:@"c_name"];
         cell.timeLabel.text = c_name;
-        cell.timeLabel.frame = CGRectMake(SCREEN_WIDTH-200-25, 2, 200, 35);
+        cell.timeLabel.frame = CGRectMake(SCREEN_WIDTH-100-25, 2, 100, 35);
         cell.timeLabel.textAlignment = NSTextAlignmentRight;
         cell.timeLabel.numberOfLines = 2;
         cell.timeLabel.lineBreakMode = NSLineBreakByWordWrapping;

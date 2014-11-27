@@ -3982,13 +3982,13 @@
 					"\"$(SRCROOT)/library/WeChatSDK_64/QQContect/TencentOpenAPI.framework\"",
 					"$(PROJECT_DIR)/library/LibzBar",
 				);
-				ONLY_ACTIVE_ARCH = YES;
+				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "-all_load";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "ac438152-d5cc-4711-9077-56feeae999de";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
-				VALID_ARCHS = "armv7s armv7 arm64";
+				VALID_ARCHS = "armv7s armv7";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -4064,7 +4064,7 @@
 				PROVISIONING_PROFILE = "98A54D58-3225-4CB8-B5D6-13F9FFE6A365";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
-				VALID_ARCHS = "armv7s armv7 arm64";
+				VALID_ARCHS = "armv7s armv7";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

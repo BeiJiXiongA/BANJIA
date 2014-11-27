@@ -396,9 +396,6 @@ diaryIndexPath;
                 cell.commentContentLabel.text = [NSString stringWithFormat:@"%d人觉得很赞",(int)[praiseArray count]];
                 cell.selectionStyle = UITableViewCellSelectionStyleNone;
                 
-                cell.openPraiseButton.frame = CGRectMake(SCREEN_WIDTH-70, 3, 130, 130);
-                cell.openPraiseButton.backgroundColor = [UIColor blackColor];
-                cell.openPraiseButton.hidden = NO;
                 
                 for (UIView *v in cell.praiseView.subviews)
                 {
@@ -597,11 +594,6 @@ diaryIndexPath;
             cell.commentContentLabel.text = [NSString stringWithFormat:@"%d人觉得很赞",(int)[praiseArray count]];
             cell.commentContentLabel.textColor = COMMENTCOLOR;
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
-            
-            cell.openPraiseButton.frame = CGRectMake(SCREEN_WIDTH-70, 3, 30, 30);
-            cell.openPraiseButton.backgroundColor = [UIColor greenColor];
-            [cell.openPraiseButton addTarget:self action:@selector(openThisPraise) forControlEvents:UIControlEventTouchUpInside];
-            cell.openPraiseButton.hidden = NO;
             
             for (UIView *v in cell.praiseView.subviews)
             {
