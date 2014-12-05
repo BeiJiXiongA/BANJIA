@@ -147,7 +147,7 @@ ZBarReaderDelegate>
         if (indexPath.row == 3)
         {
             [cell.iconImageView setImage:[UIImage imageNamed:@"icon_school"]];
-            cell.contentLabel.text = @"按学校搜索";
+            cell.contentLabel.text = @"按区域搜索";
         }
         else if (indexPath.row == 5)
         {

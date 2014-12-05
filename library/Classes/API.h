@@ -17,9 +17,9 @@
 //#define MEDIAURL      @"http://media.banjiaedu.com"
 
 //测试服务器                                                                                         
-#define HOST_URL       @"http://mytest.banjiaedu.com"
-#define IMAGEURL       @"http://imgtest.banjiaedu.com"
-#define MEDIAURL       @"http://mediatest.banjiaedu.com"
+#define HOST_URL       @"http://test.banjiaedu.com"
+#define IMAGEURL       @"http://testimg.banjiaedu.com"
+#define MEDIAURL       @"http://testmedia.banjiaedu.com"
 
 //头像地址 人(host)\ur\(uid)\(img_icon||img_bk).(你想要啥格式就写啥)
 

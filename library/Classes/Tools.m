@@ -654,8 +654,8 @@ extern NSString *CTSettingCopyMyPhoneNumber();
     if (resultTime > MINUTE*3 || resultTime < 0)
     {
         long sec = (long)[time longLongValue];
-        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc]init];
-        [dateFormatter setDateFormat:@"MM-dd hh:mm"];
+        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+        [dateFormatter setDateFormat:@"hh:mm"];
         NSDate *datetimeDate = [NSDate dateWithTimeIntervalSince1970:sec];
         resultStr = [dateFormatter stringFromDate:datetimeDate];
     }
