@@ -805,7 +805,6 @@
                     AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
                 }
             }
-            DDLOG(@"%@",[[NSUserDefaults standardUserDefaults] objectForKey:NewNoticeAlert]);
             if([[NSUserDefaults standardUserDefaults] objectForKey:NewNoticeAlert])
             {
                 if ([[[NSUserDefaults standardUserDefaults] objectForKey:NewNoticeAlert] integerValue] == 1)

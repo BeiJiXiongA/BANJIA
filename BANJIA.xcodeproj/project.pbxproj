@@ -117,7 +117,6 @@
 		38534E2A1A10AC6E00202849 /* zbar-help.html in Resources */ = {isa = PBXBuildFile; fileRef = 38534E241A10AC6E00202849 /* zbar-help.html */; };
 		38534E2B1A10AC6E00202849 /* zbar-helpicons.png in Resources */ = {isa = PBXBuildFile; fileRef = 38534E251A10AC6E00202849 /* zbar-helpicons.png */; };
 		38534E2C1A10AC6E00202849 /* zbar-samples.png in Resources */ = {isa = PBXBuildFile; fileRef = 38534E261A10AC6E00202849 /* zbar-samples.png */; };
-		38534E311A10B27700202849 /* libzbar.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 38534E301A10B27700202849 /* libzbar.a */; };
 		38549740194975FD00BBDA4F /* eraser.png in Resources */ = {isa = PBXBuildFile; fileRef = 38549734194975FD00BBDA4F /* eraser.png */; };
 		38549741194975FD00BBDA4F /* eraser@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 38549735194975FD00BBDA4F /* eraser@2x.png */; };
 		38549742194975FD00BBDA4F /* input.png in Resources */ = {isa = PBXBuildFile; fileRef = 38549736194975FD00BBDA4F /* input.png */; };
@@ -211,6 +210,7 @@
 		388665F31986150A00D8CDF2 /* CheckQRCodeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 388665F21986150A00D8CDF2 /* CheckQRCodeViewController.m */; };
 		38892B3319E8BA9C0047A013 /* TTTAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 38892B3219E8BA9C0047A013 /* TTTAttributedLabel.m */; };
 		38892B3619E8BAB30047A013 /* MLEmojiLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 38892B3519E8BAB30047A013 /* MLEmojiLabel.m */; };
+		388D76481A358B520086D5BB /* libzbar.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 388D76471A358B520086D5BB /* libzbar.a */; };
 		388E1B3319B00BB70085B685 /* AdHeaderCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 388E1B3219B00BB70085B685 /* AdHeaderCell.m */; };
 		388E1B4619B01CE40085B685 /* TOWebViewControllerLocalizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 388E1B3519B01CE40085B685 /* TOWebViewControllerLocalizable.strings */; };
 		388E1B4719B01CE40085B685 /* TOActivityChrome.m in Sources */ = {isa = PBXBuildFile; fileRef = 388E1B3D19B01CE40085B685 /* TOActivityChrome.m */; };
@@ -781,7 +781,6 @@
 		38534E241A10AC6E00202849 /* zbar-help.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "zbar-help.html"; sourceTree = "<group>"; };
 		38534E251A10AC6E00202849 /* zbar-helpicons.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "zbar-helpicons.png"; sourceTree = "<group>"; };
 		38534E261A10AC6E00202849 /* zbar-samples.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "zbar-samples.png"; sourceTree = "<group>"; };
-		38534E301A10B27700202849 /* libzbar.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libzbar.a; sourceTree = "<group>"; };
 		38549734194975FD00BBDA4F /* eraser.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = eraser.png; sourceTree = "<group>"; };
 		38549735194975FD00BBDA4F /* eraser@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "eraser@2x.png"; sourceTree = "<group>"; };
 		38549736194975FD00BBDA4F /* input.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = input.png; sourceTree = "<group>"; };
@@ -899,6 +898,7 @@
 		38892B3219E8BA9C0047A013 /* TTTAttributedLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TTTAttributedLabel.m; sourceTree = "<group>"; };
 		38892B3419E8BAB30047A013 /* MLEmojiLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLEmojiLabel.h; sourceTree = "<group>"; };
 		38892B3519E8BAB30047A013 /* MLEmojiLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLEmojiLabel.m; sourceTree = "<group>"; };
+		388D76471A358B520086D5BB /* libzbar.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libzbar.a; path = Headers/libzbar.a; sourceTree = "<group>"; };
 		388E1B3119B00BB70085B685 /* AdHeaderCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AdHeaderCell.h; sourceTree = "<group>"; };
 		388E1B3219B00BB70085B685 /* AdHeaderCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AdHeaderCell.m; sourceTree = "<group>"; };
 		388E1B3619B01CE40085B685 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/TOWebViewControllerLocalizable.strings; sourceTree = "<group>"; };
@@ -1496,10 +1496,10 @@
 			files = (
 				3899BC0D196CE8470037C586 /* libiconv.dylib in Frameworks */,
 				386D94D71A0CCD6200C451BD /* RennSDK.framework in Frameworks */,
+				388D76481A358B520086D5BB /* libzbar.a in Frameworks */,
 				386D94D31A0CCD6200C451BD /* ShareSDKCoreService.framework in Frameworks */,
 				3899BC0B196CE8380037C586 /* CoreMedia.framework in Frameworks */,
 				3862855719D3C0E3004B5E76 /* libPushSDK.a in Frameworks */,
-				38534E311A10B27700202849 /* libzbar.a in Frameworks */,
 				386D94DA1A0CCD6200C451BD /* libTCWeiboSDK.a in Frameworks */,
 				38BD38BC190A43D900BC01F7 /* AVFoundation.framework in Frameworks */,
 				386D94CA1A0CCD6200C451BD /* QQConnection.framework in Frameworks */,
@@ -1721,8 +1721,8 @@
 		38534E081A10AC6E00202849 /* LibzBar */ = {
 			isa = PBXGroup;
 			children = (
+				388D76471A358B520086D5BB /* libzbar.a */,
 				38534E091A10AC6E00202849 /* Headers */,
-				38534E301A10B27700202849 /* libzbar.a */,
 				38534E221A10AC6E00202849 /* Resources */,
 			);
 			path = LibzBar;
@@ -3957,6 +3957,7 @@
 					"$(PROJECT_DIR)/library/WeChatSDK_64",
 					"\"$(SRCROOT)/library/WeChatSDK_64/QQContect/TencentOpenAPI.framework\"",
 					"$(PROJECT_DIR)/library/LibzBar",
+					"$(PROJECT_DIR)/library/LibzBar/Headers",
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "-all_load";
@@ -4009,6 +4010,7 @@
 					"$(PROJECT_DIR)/library/WeChatSDK_64",
 					"\"$(SRCROOT)/library/WeChatSDK_64/QQContect/TencentOpenAPI.framework\"",
 					"$(PROJECT_DIR)/library/LibzBar",
+					"$(PROJECT_DIR)/library/LibzBar/Headers",
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "-all_load";
