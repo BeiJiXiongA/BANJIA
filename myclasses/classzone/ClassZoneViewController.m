@@ -1170,7 +1170,16 @@ ShareContentDelegate>
         cell.nameLabel.font = NAMEFONT;
         cell.nameLabel.textColor = DongTaiNameColor;
         
-        NSString *timeStr = [Tools showTimeOfToday:[NSString stringWithFormat:@"%ld",(long)[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]];
+        NSString *timeStr;
+        if (isApply)
+        {
+            timeStr = [Tools showTime:[NSString stringWithFormat:@"%ld",(long)[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]] andFromat:@"MM-dd hh:mm"];
+        }
+        else
+        {
+           timeStr = [Tools showTimeOfToday:[NSString stringWithFormat:@"%ld",(long)[[[dict objectForKey:@"created"] objectForKey:@"sec"] integerValue]]];
+        }
+        
         NSString *c_name = [dict objectForKey:@"c_name"];
         cell.timeLabel.text = c_name;
         cell.timeLabel.frame = CGRectMake(SCREEN_WIDTH-[c_name length]*18-30, 2, [c_name length]*18, 35);

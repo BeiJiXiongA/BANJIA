@@ -744,13 +744,16 @@ extern NSString *CTSettingCopyMyPhoneNumber();
             {
                 NSDictionary *dict = [sourceArray objectAtIndex:j];
                 NSString *first = [NSString stringWithFormat:@"%c",[[ChineseToPinyin pinyinFromChiniseString:[dict objectForKey:key]] characterAtIndex:0]];
-                char ch1 = [first characterAtIndex:0];
-                char ch2 = [[letters objectAtIndex:i] characterAtIndex:0];
-                if ([[letters objectAtIndex:i]isEqualToString:first] ||
-                    ch1 == ch2 || (ch1+32) == ch2)
+                if([first length] > 0)
                 {
-                    [array addObject:dict];
-                    count++;
+                    char ch1 = [first characterAtIndex:0];
+                    char ch2 = [[letters objectAtIndex:i] characterAtIndex:0];
+                    if ([[letters objectAtIndex:i]isEqualToString:first] ||
+                        ch1 == ch2 || (ch1+32) == ch2)
+                    {
+                        [array addObject:dict];
+                        count++;
+                    }
                 }
             }
         }

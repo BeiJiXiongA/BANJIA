@@ -202,12 +202,13 @@ int count = 0;
             break;
         case kCLErrorLocationUnknown:
             errorString = @"定位信息不可用";
+            break;
         default:
             errorString = @"位置错误";
             break;
     }
     [locationProgressView stopAnimating];
-    [Tools showAlertView:errorString delegateViewController:nil];
+    [Tools showTips:errorString toView:self.bgView];
 }
 
 - (void) setupLocationManager {

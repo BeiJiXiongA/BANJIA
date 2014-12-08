@@ -379,6 +379,8 @@ UIAlertViewDelegate>
         NSString *msgBody;
         NSMutableString *inviteBody = [[NSMutableString alloc] initWithString:InviteParent];
         
+        DDLOG(@"++++==+++%@",inviteBody);
+        
         NSString *parentString = [NSString stringWithFormat:@"%@的%@",name,[relateString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
         [inviteBody replaceOccurrencesOfString:@"#parent" withString:parentString options:NSRegularExpressionSearch range:NSMakeRange(0, [inviteBody length])];
         
