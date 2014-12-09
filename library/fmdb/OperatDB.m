@@ -322,7 +322,7 @@
     NSMutableString *query = [NSMutableString stringWithFormat:@"SELECT * FROM %@ WHERE (fid='%@' AND tid='%@' and direct='t') OR (fid='%@' AND tid='%@' and direct='f') ORDER BY mid desc limit %d,%d",tableName,uid,otherid,otherid,uid,start,count];
     NSString *queryStr = [query substringToIndex:[query length]];
     FMResultSet *resultSet = [_db executeQuery:queryStr];
-//    DDLOG(@"chat log query %@",queryStr);
+    DDLOG(@"chat log query %@",queryStr);
     while ([resultSet next])
     {
         [msgArray addObject:[resultSet resultDictionary]];

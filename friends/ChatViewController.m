@@ -20,7 +20,7 @@
 #import "ScoreDetailViewController.h"
 #import "ScoreMemListViewController.h"
 #import "EGORefreshTableHeaderView.h"
-#import "Downloader.h"
+#import "Downloader.h"  //amr123
 #import "ChangePhoneViewController.h"
 
 
@@ -54,7 +54,7 @@ AVAudioPlayerDelegate,
 ChatDelegate,
 ReturnFunctionDelegate,
 MessageDelegate,
-DownloaderDelegate,
+DownloaderDelegate, //amr123
 updateGroupInfoDelegate,
 EGORefreshTableHeaderDelegate,
 MLEmojiLabelDelegate>
@@ -262,7 +262,6 @@ MLEmojiLabelDelegate>
             {
                 [messageArray insertObject:[cacheChatArray objectAtIndex:i] atIndex:0];
             }
-            
         }
         [self reloadTableView];
     }
@@ -745,7 +744,8 @@ MLEmojiLabelDelegate>
                                   withParaDict:@{@"userid":[Tools user_id],@"mid":[[responseDict objectForKey:@"data"] objectForKey:@"_id"]}
                                   andTableName:CHATTABLE]) &&
                                 ([db updeteKey:@"by" toValue:[fullChatDict objectForKey:@"by"] withParaDict:@{@"userid":[Tools user_id],@"mid":[[responseDict objectForKey:@"data"] objectForKey:@"_id"]} andTableName:CHATTABLE]) &&
-                               ([db updeteKey:@"readed" toValue:@"1" withParaDict:@{@"userid":[Tools user_id],@"mid":[[responseDict objectForKey:@"data"] objectForKey:@"_id"]} andTableName:CHATTABLE]))
+                               ([db updeteKey:@"readed" toValue:@"1" withParaDict:@{@"userid":[Tools user_id],@"mid":[[responseDict objectForKey:@"data"] objectForKey:@"_id"]} andTableName:CHATTABLE])&&
+                               ([db updeteKey:@"tid" toValue:[Tools user_id] withParaDict:@{@"userid":[Tools user_id],@"mid":[[responseDict objectForKey:@"data"] objectForKey:@"_id"]} andTableName:CHATTABLE]))
                             {
                                 DDLOG(@"update full chat log success!");
                             }
@@ -836,13 +836,25 @@ MLEmojiLabelDelegate>
                 {
                     NSRange range = [fname rangeOfString:@"("];
                     NSRange range1 = [fname rangeOfString:@"人"];
-                    if ([fname length] > 8 && range.length > 0 && range1.length > 0)
+                    
+                    NSString *newName = [NSString stringWithFormat:@"%@(%d人)",[fname substringToIndex:range.location],[users count]];
+                    if (![newName isEqualToString:fname])
                     {
-                        self.titleLabel.text = [NSString stringWithFormat:@"%@...%@",[fname substringToIndex:4],[fname substringFromIndex:range.location]];
+                        if([db deleteRecordWithDict:@{@"uid":toID} andTableName:USERICONTABLE])
+                        {
+                            if ([db insertRecord:@{@"uid":toID,@"username":newName,@"uicon":@"",@"unum":@""} andTableName:USERICONTABLE])
+                            {
+                                DDLOG(@"success  %@",[ImageTools iconDictWithUserID:toID]);
+                            }
+                        }
+                    }
+                    if ([newName length] > 10 && range.length > 0 && range1.length > 0)
+                    {
+                        self.titleLabel.text = [NSString stringWithFormat:@"%@...%@",[newName substringToIndex:7],[newName substringFromIndex:range.location]];
                     }
                     else
                     {
-                        self.titleLabel.text = fname;
+                        self.titleLabel.text = newName;
                     }
                 }
                 
@@ -899,18 +911,7 @@ MLEmojiLabelDelegate>
                 }
                 
                 name = [[responseDict objectForKey:@"data"] objectForKey:@"name"];
-                NSDictionary *userIconDict = @{@"uid":toID,@"username":name,@"uicon":@"",@"unum":@""};
-                if ([[db findSetWithDictionary:@{@"uid":toID} andTableName:USERICONTABLE] count] > 0)
-                {
-                    if ([db deleteRecordWithDict:@{@"uid":toID} andTableName:USERICONTABLE])
-                    {
-                        [db insertRecord:userIconDict andTableName:USERICONTABLE];
-                    }
-                }
-                else
-                {
-                    [db insertRecord:userIconDict andTableName:USERICONTABLE];
-                }
+                
                 if ([[[responseDict objectForKey:@"data"] objectForKey:@"opt"] count] > 0)
                 {
                     g_a_f = [[[responseDict objectForKey:@"data"] objectForKey:@"opt"] objectForKey:@"g_a_f"];
@@ -1554,7 +1555,7 @@ MLEmojiLabelDelegate>
     else
     {
         [[Downloader defaultDownloader] adiDownloadWithUrl:[NSString stringWithFormat:@"%@%@",MEDIAURL,subUrl]];
-        [Downloader defaultDownloader].downloaderDel = self;
+        [Downloader defaultDownloader].downloaderDel = self;   //amr123
     }
 }
 
@@ -1889,10 +1890,12 @@ MLEmojiLabelDelegate>
                 
                 if ([[db findSetWithDictionary:@{@"mid":messageID,@"userid":[Tools user_id]} andTableName:CHATTABLE] count] == 0)
                 {
-                    [db insertRecord:chatDict andTableName:CHATTABLE];
+                    if ([db insertRecord:chatDict andTableName:CHATTABLE])
+                    {
+                        [self dealNewChatMsg:chatDict];
+                        DDLOG(@"chat msg insert database success!");
+                    }
                 }
-                
-                [self dealNewChatMsg:chatDict];
             }
             else
             {
@@ -1966,7 +1969,7 @@ MLEmojiLabelDelegate>
     NSString *fileExtetion = [filePath pathExtension];
     NSRange range = [filePath rangeOfString:fileExtetion];
     NSString *pathStr = [filePath substringToIndex:range.location-1];
-    [VoiceConverter wavToAmr:filePath amrSavePath:[NSString stringWithFormat:@"%@.amr",pathStr]];
+    [VoiceConverter wavToAmr:filePath amrSavePath:[NSString stringWithFormat:@"%@.amr",pathStr]]; //amr123
     [self sendSound:length andFilePath:[NSString stringWithFormat:@"%@.amr",pathStr]];
     
     if ([[NSFileManager defaultManager] removeItemAtPath:filePath error:nil])

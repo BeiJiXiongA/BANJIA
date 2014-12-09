@@ -70,7 +70,7 @@
 
 -(void)msgLongTgr:(UILongPressGestureRecognizer *)longTgr
 {
-    DDLOG(@"%d---%d",longTgr.state,[self becomeFirstResponder]);
+    DDLOG(@"%ld---%d",longTgr.state,[self becomeFirstResponder]);
     if (longTgr.state != UIGestureRecognizerStateBegan ||
         ![self becomeFirstResponder])
         return;

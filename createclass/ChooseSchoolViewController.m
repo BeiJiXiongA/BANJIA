@@ -541,7 +541,7 @@ UISearchBarDelegate>
         ClassesViewController *classesViewController = [[ClassesViewController alloc] init];
         classesViewController.schoolName = [dict objectForKey:@"name"];
         classesViewController.schoollID = [dict objectForKey:@"_id"];
-        classesViewController.schoolLevel = [NSString stringWithFormat:@"%d",[[dict objectForKey:@"level"] integerValue]];
+        classesViewController.schoolLevel = [NSString stringWithFormat:@"%ld",(long)[[dict objectForKey:@"level"] integerValue]];
         [self.navigationController pushViewController:classesViewController animated:YES];
     }
     else if (tableView.tag == HOTSCHOOLTABLEVIEW)
@@ -552,7 +552,7 @@ UISearchBarDelegate>
             ClassesViewController *classesViewController = [[ClassesViewController alloc] init];
             classesViewController.schoolName = [dict objectForKey:@"s_name"];
             classesViewController.schoollID = [dict objectForKey:@"s_id"];
-            classesViewController.schoolLevel = [NSString stringWithFormat:@"%d",[[dict objectForKey:@"level"] integerValue]];
+            classesViewController.schoolLevel = [NSString stringWithFormat:@"%ld",(long)[[dict objectForKey:@"level"] integerValue]];
             [self.navigationController pushViewController:classesViewController animated:YES];
         }
         else if(indexPath.section == 1)
@@ -561,7 +561,7 @@ UISearchBarDelegate>
             ClassesViewController *classesViewController = [[ClassesViewController alloc] init];
             classesViewController.schoolName = [dict objectForKey:@"name"];
             classesViewController.schoollID = [dict objectForKey:@"_id"];
-            classesViewController.schoolLevel = [NSString stringWithFormat:@"%d",[[dict objectForKey:@"level"] integerValue]];
+            classesViewController.schoolLevel = [NSString stringWithFormat:@"%ld",(long)[[dict objectForKey:@"level"] integerValue]];
             [self.navigationController pushViewController:classesViewController animated:YES];
         }
     }

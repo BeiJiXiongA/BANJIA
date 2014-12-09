@@ -30,6 +30,10 @@
     
     return 1;
 }
-    
++ (int) changeStu
+{
+   return changeState();
+}
+
     
 @end

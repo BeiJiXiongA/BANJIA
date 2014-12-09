@@ -399,7 +399,6 @@ voiceView;
     pageControl.currentPageIndicatorTintColor = [UIColor redColor];
     [faceView addSubview:pageControl];
     
-    
     self.backgroundColor = TITLE_COLOR;
 }
 

@@ -183,11 +183,11 @@
     NSRange range1 = [fname rangeOfString:@"人"];
     if ([fname length] > 13 && range.length > 0 && range1.length > 0)
     {
-        cell.memNameLabel.text = [NSString stringWithFormat:@"%@...%@",[fname substringToIndex:8],[fname substringFromIndex:range.location]];
+        cell.memNameLabel.text = [NSString stringWithFormat:@"%@...(%d人)",[fname substringToIndex:8],[[dict objectForKey:@"users_num"] intValue]];
     }
     else
     {
-        cell.memNameLabel.text = [dict objectForKey:@"name"];
+        cell.memNameLabel.text = [NSString stringWithFormat:@"%@...(%d人)",[fname substringToIndex:range.location],[[dict objectForKey:@"users_num"] intValue]];
     }
 
     cell.memNameLabel.font = [UIFont systemFontOfSize:16];
@@ -208,7 +208,11 @@
         NSString *msgContent = [[msgDict objectForKey:@"content"] emojizedString];
         if ([[msgContent pathExtension] isEqualToString:@"png"] || [[msgContent pathExtension] isEqualToString:@"jpg"])
         {
-            cell.remarkLabel.text = [NSString stringWithFormat:@"%@:%@",byName,@"图片"];
+            cell.remarkLabel.text = [NSString stringWithFormat:@"%@:%@",byName,@"[图片]"];
+        }
+        else if([msgContent rangeOfString:@"amr"].length > 0)
+        {
+            cell.contentLabel.text = [NSString stringWithFormat:@"%@:%@",byName,@"[语音]"];
         }
         else
         {
@@ -253,7 +257,18 @@
     NSDictionary *dict = [groupChatArray objectAtIndex:indexPath.row];
     ChatViewController  *chat = [[ChatViewController alloc] init];
     chat.isGroup = YES;
-    chat.name = [dict objectForKey:@"name"];
+    NSString *fname = [dict objectForKey:@"name"];
+    NSRange range = [fname rangeOfString:@"("];
+    NSRange range1 = [fname rangeOfString:@"人"];
+    if ([fname length] > 10 && range.length > 0 && range1.length > 0)
+    {
+        chat.name = [NSString stringWithFormat:@"%@...(%d人)",[fname substringToIndex:7],[[dict objectForKey:@"users_num"] intValue]];
+    }
+    else
+    {
+        chat.name = [NSString stringWithFormat:@"%@...(%d人)",[fname substringToIndex:range.location],[[dict objectForKey:@"users_num"] intValue]];
+    }
+    
     chat.toID = [dict objectForKey:@"_id"];
     chat.imageUrl = @"";
     chat.unReadedNumber = [self findCountOfUserId:[dict objectForKey:@"_id"]];

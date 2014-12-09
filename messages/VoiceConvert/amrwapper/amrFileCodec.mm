@@ -8,6 +8,7 @@
 
 #include "amrFileCodec.h"
 int amrEncodeMode[] = {4750, 5150, 5900, 6700, 7400, 7950, 10200, 12200}; // amr 编码方式
+BOOL isRecord = NO;
 // 从WAVE文件中跳过WAVE文件头，直接到PCM音频数据
 void SkipToPCMAudioData(FILE* fpwave)
 {
@@ -123,7 +124,6 @@ int EncodeWAVEFileToAMRFile(const char* pchWAVEFilename, const char* pchAMRFileN
 {
 	FILE* fpwave;
 	FILE* fpamr;
-	
 	/* input speech vector */
 	short speech[160];
 	
@@ -145,7 +145,7 @@ int EncodeWAVEFileToAMRFile(const char* pchWAVEFilename, const char* pchAMRFileN
 	{
 		return 0;
 	}
-	
+
 	// 创建并初始化amr文件
 	fpamr = fopen(pchAMRFileName, "wb");
 	if (fpamr == NULL)
@@ -158,23 +158,58 @@ int EncodeWAVEFileToAMRFile(const char* pchWAVEFilename, const char* pchAMRFileN
 	
 	/* skip to pcm audio data*/
 	SkipToPCMAudioData(fpwave);
-	
+    
 	enstate = Encoder_Interface_init(dtx);
-	
-	while(1)
-	{
-		// read one pcm frame
-		if (!ReadPCMFrame(speech, fpwave, nChannels, nBitsPerSample)) break;
-		
-		frames++;
-		
-		/* call encoder */
-		byte_counter = Encoder_Interface_Encode(enstate, req_mode, speech, amrFrame, 0);
-		
-		bytes += byte_counter;
-		fwrite(amrFrame, sizeof (unsigned char), byte_counter, fpamr );
-	}
-	
+
+// 此处采用定时访问文件流的方式对文件流数据进行读取
+
+    
+    
+//	while(1)
+//	{
+//		// read one pcm frame
+//        if (isRecord) {
+//            [NSThread sleepForTimeInterval:0.016];
+//        }
+//        int size = ReadPCMFrame(speech, fpwave, nChannels, nBitsPerSample);
+//        if (!size) break;
+//        
+//        frames++;
+//		/* call encoder */
+//		byte_counter = Encoder_Interface_Encode(enstate, req_mode, speech, amrFrame, 0);
+//		
+//		bytes += byte_counter;
+//		fwrite(amrFrame, sizeof (unsigned char), byte_counter, fpamr );
+//	}
+    
+// 此处采用了 只要文件流中的新入数据够一个buffer的容量，就将其读出
+// 若果在没有点击结束录音的情况下，当读取到的size的值小于一个buffer（此处为160）的大小时，就让文件流指针回到读取前的位置，等待新的数据来，够一个buffer后再进行处理
+// 如果用户确定取消了录音，就一直读取数据知道size 值为0。PS：最后的size可能不够一个buffer，但是依然要处理
+	while (1) {
+        int size = ReadPCMFrame(speech, fpwave, nChannels, nBitsPerSample);
+        if (isRecord) {
+            if (size < 160) {
+                fseek(fpwave,size-160,SEEK_CUR);
+            }
+            else
+            {
+                frames++;
+                byte_counter = Encoder_Interface_Encode(enstate, req_mode, speech, amrFrame, 0);
+                bytes += byte_counter;
+                fwrite(amrFrame, sizeof (unsigned char), byte_counter, fpamr );
+            }
+        }
+        else
+        {
+            if (size) {
+                frames++;
+                byte_counter = Encoder_Interface_Encode(enstate, req_mode, speech, amrFrame, 0);
+                bytes += byte_counter;
+                fwrite(amrFrame, sizeof (unsigned char), byte_counter, fpamr );
+            }
+            else break;
+        }
+    }
 	Encoder_Interface_exit(enstate);
 	
 	fclose(fpamr);
@@ -182,7 +217,6 @@ int EncodeWAVEFileToAMRFile(const char* pchWAVEFilename, const char* pchAMRFileN
 	
 	return frames;
 }
-
 
 
 
@@ -302,7 +336,11 @@ int ReadAMRFrame(FILE* fpamr, unsigned char frameBuffer[], int stdFrameSize, uns
 	
 	return 1;
 }
-
+int changeState()
+{
+    isRecord = !isRecord;
+    return 0;
+}
 // 将AMR文件解码成WAVE文件
 int DecodeAMRFileToWAVEFile(const char* pchAMRFileName, const char* pchWAVEFilename)
 {
@@ -369,7 +407,6 @@ int DecodeAMRFileToWAVEFile(const char* pchAMRFileName, const char* pchWAVEFilen
 		nFrameCount++;
 		fwrite(pcmFrame, sizeof(short), PCM_FRAME_SIZE, fpwave);
 	}
-	NSLog(@"frame = %d", nFrameCount);
 	Decoder_Interface_exit(destate);
 	
 	fclose(fpwave);

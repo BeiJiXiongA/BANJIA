@@ -142,18 +142,30 @@ updateGroupInfoDelegate>
         }
         NSDictionary *dict = [tmpArray objectAtIndex:indexPath.row];
         
-        NSString *fname = [dict objectForKey:@"fname"];
-        NSRange range = [fname rangeOfString:@"("];
-        NSRange range1 = [fname rangeOfString:@"人"];
-        if ([fname length] > 13 && range.length > 0 && range1.length > 0)
-        {
-            cell.memNameLabel.text = [NSString stringWithFormat:@"%@...%@",[fname substringToIndex:8],[fname substringFromIndex:range.location]];
-        }
-        else
-        {
-            cell.memNameLabel.text = [dict objectForKey:@"fname"];
-        }
+        NSDictionary *userIconDIct = [ImageTools iconDictWithUserID:[dict objectForKey:@"fid"]];
         
+        
+        if(userIconDIct && ![[userIconDIct objectForKey:@"username"] isEqual:[NSNull null]])
+        {
+            [Tools fillImageView:cell.headerImageView withImageFromURL:[userIconDIct objectForKey:@"uicon"] imageWidth:68 andDefault:HEADERICON];
+            cell.memNameLabel.text = [userIconDIct objectForKey:@"username"];
+            
+            NSString *fname = [userIconDIct objectForKey:@"username"];
+            if (![fname isEqual:[NSNull null]])
+            {
+                NSRange range = [fname rangeOfString:@"("];
+                NSRange range1 = [fname rangeOfString:@"人"];
+                if ([fname length] > 10 && range.length > 0 && range1.length > 0)
+                {
+                    cell.memNameLabel.text = [NSString stringWithFormat:@"%@...%@",[fname substringToIndex:7],[fname substringFromIndex:range.location]];
+                }
+                else
+                {
+                    cell.memNameLabel.text = fname;
+                }
+            }
+        }
+
         cell.memNameLabel.frame = CGRectMake(60, 10, 220, 30);
         [cell.headerImageView setImage:[UIImage imageNamed:@"headpic.jpg"]];
         cell.headerImageView.layer.cornerRadius = 5;
@@ -300,7 +312,23 @@ updateGroupInfoDelegate>
     {
         ChatViewController  *chat = [[ChatViewController alloc] init];
         chat.isGroup = YES;
-        chat.name = [dict objectForKey:@"fname"];
+        
+        NSDictionary *userIconDIct = [ImageTools iconDictWithUserID:[dict objectForKey:@"fid"]];
+        if(userIconDIct)
+        {
+            NSString *fname = [userIconDIct objectForKey:@"username"];
+            NSRange range = [fname rangeOfString:@"("];
+            NSRange range1 = [fname rangeOfString:@"人"];
+            if ([fname length] > 10 && range.length > 0 && range1.length > 0)
+            {
+                chat.name = [NSString stringWithFormat:@"%@...%@",[fname substringToIndex:7],[fname substringFromIndex:range.location]];
+            }
+            else
+            {
+                chat.name = fname;
+            }
+        }
+
         chat.toID = [dict objectForKey:@"fid"];
         chat.imageUrl = @"";
         [self.navigationController pushViewController:chat animated:YES];
