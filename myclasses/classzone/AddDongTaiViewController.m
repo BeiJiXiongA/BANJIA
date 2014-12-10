@@ -791,11 +791,11 @@ int count = 0;
     int row = 0;
     if (([alreadySelectAssets count]+1)%4 == 0)
     {
-        row = ([normalPhotosArray count]+1)/4;
+        row = ((int)[normalPhotosArray count]+1)/4;
     }
     else
     {
-        row = ([normalPhotosArray count]+1)/4+1;
+        row = ((int)[normalPhotosArray count]+1)/4+1;
     }
     for (int i=0; i<[normalPhotosArray count]; i++)
     {

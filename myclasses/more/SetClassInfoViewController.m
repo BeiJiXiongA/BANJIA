@@ -101,7 +101,7 @@
 //        countLabel.font = [UIFont systemFontOfSize:12];
         countLabel.font = [UIFont fontWithName:@"Futura" size:14];
         countLabel.textColor = COMMENTCOLOR;
-        countLabel.text = [NSString stringWithFormat:@"%d/50",[infoStr length]];
+        countLabel.text = [NSString stringWithFormat:@"%lu/50",(unsigned long)[infoStr length]];
         [self.bgView addSubview:countLabel];
     }
 }
@@ -129,7 +129,7 @@
         {
             placeHolderTextView.text = @"填写班级介绍";
         }
-        countLabel.text = [NSString stringWithFormat:@"%d/50",[infoTextView.text length]];
+        countLabel.text = [NSString stringWithFormat:@"%lu/50",(unsigned long)[infoTextView.text length]];
         if ([textView.text length] > 50)
         {
             countLabel.textColor = [UIColor redColor];

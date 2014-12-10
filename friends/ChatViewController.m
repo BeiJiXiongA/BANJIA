@@ -20,7 +20,7 @@
 #import "ScoreDetailViewController.h"
 #import "ScoreMemListViewController.h"
 #import "EGORefreshTableHeaderView.h"
-#import "Downloader.h"  //amr123
+//#import "Downloader.h"  //amr123
 #import "ChangePhoneViewController.h"
 
 
@@ -54,7 +54,7 @@ AVAudioPlayerDelegate,
 ChatDelegate,
 ReturnFunctionDelegate,
 MessageDelegate,
-DownloaderDelegate, //amr123
+//DownloaderDelegate, //amr123
 updateGroupInfoDelegate,
 EGORefreshTableHeaderDelegate,
 MLEmojiLabelDelegate>
@@ -838,16 +838,19 @@ MLEmojiLabelDelegate>
                     NSRange range1 = [fname rangeOfString:@"人"];
                     
                     NSString *newName = [NSString stringWithFormat:@"%@(%d人)",[fname substringToIndex:range.location],[users count]];
-                    if (![newName isEqualToString:fname])
+                    if([[db findSetWithDictionary:@{@"uid":toID} andTableName:USERICONTABLE] count] > 0 &&
+                       [db deleteRecordWithDict:@{@"uid":toID} andTableName:USERICONTABLE])
                     {
-                        if([db deleteRecordWithDict:@{@"uid":toID} andTableName:USERICONTABLE])
+                        if ([db insertRecord:@{@"uid":toID,@"username":newName,@"uicon":@"",@"unum":@""} andTableName:USERICONTABLE])
                         {
-                            if ([db insertRecord:@{@"uid":toID,@"username":newName,@"uicon":@"",@"unum":@""} andTableName:USERICONTABLE])
-                            {
-                                DDLOG(@"success  %@",[ImageTools iconDictWithUserID:toID]);
-                            }
+                            DDLOG(@"success  %@",[ImageTools iconDictWithUserID:toID]);
                         }
                     }
+                    else if ([db insertRecord:@{@"uid":toID,@"username":newName,@"uicon":@"",@"unum":@""} andTableName:USERICONTABLE])
+                    {
+                        DDLOG(@"success  %@",[ImageTools iconDictWithUserID:toID]);
+                    }
+                    
                     if ([newName length] > 10 && range.length > 0 && range1.length > 0)
                     {
                         self.titleLabel.text = [NSString stringWithFormat:@"%@...%@",[newName substringToIndex:7],[newName substringFromIndex:range.location]];
@@ -1554,8 +1557,8 @@ MLEmojiLabelDelegate>
     }
     else
     {
-        [[Downloader defaultDownloader] adiDownloadWithUrl:[NSString stringWithFormat:@"%@%@",MEDIAURL,subUrl]];
-        [Downloader defaultDownloader].downloaderDel = self;   //amr123
+//        [[Downloader defaultDownloader] adiDownloadWithUrl:[NSString stringWithFormat:@"%@%@",MEDIAURL,subUrl]];
+//        [Downloader defaultDownloader].downloaderDel = self;   //amr123
     }
 }
 
@@ -1969,7 +1972,7 @@ MLEmojiLabelDelegate>
     NSString *fileExtetion = [filePath pathExtension];
     NSRange range = [filePath rangeOfString:fileExtetion];
     NSString *pathStr = [filePath substringToIndex:range.location-1];
-    [VoiceConverter wavToAmr:filePath amrSavePath:[NSString stringWithFormat:@"%@.amr",pathStr]]; //amr123
+//    [VoiceConverter wavToAmr:filePath amrSavePath:[NSString stringWithFormat:@"%@.amr",pathStr]]; //amr123
     [self sendSound:length andFilePath:[NSString stringWithFormat:@"%@.amr",pathStr]];
     
     if ([[NSFileManager defaultManager] removeItemAtPath:filePath error:nil])

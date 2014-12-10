@@ -131,7 +131,7 @@
         NSInteger maxNumber = _imagePickerController.maximumNumberOfPhotosToBeSelected;
         if (0 < maxNumber)
         {
-            self.navigationController.navigationBar.topItem.prompt = [NSString stringWithFormat:@"(%d/%d)", [self.alreadySelectedAssets count], maxNumber];
+            self.navigationController.navigationBar.topItem.prompt = [NSString stringWithFormat:@"(%lu/%ld)", (unsigned long)[self.alreadySelectedAssets count], (long)maxNumber];
         }
     }
 
@@ -223,7 +223,7 @@
         NSInteger maxNumber = _imagePickerController.maximumNumberOfPhotosToBeSelected;
         if (0 < maxNumber)
         {
-            self.navigationController.navigationBar.topItem.prompt = [NSString stringWithFormat:@"(%lu/%d)", (unsigned long)[self.alreadySelectedAssets count], maxNumber];
+            self.navigationController.navigationBar.topItem.prompt = [NSString stringWithFormat:@"(%lu/%ld)", (unsigned long)[self.alreadySelectedAssets count], (long)maxNumber];
         }
     }
 }
@@ -252,7 +252,7 @@
         NSInteger maxNumber = _imagePickerController.maximumNumberOfPhotosToBeSelected;
         if (0 < maxNumber)
         {
-            self.navigationController.navigationBar.topItem.prompt = [NSString stringWithFormat:@"(%d/%d)", [self.alreadyKeyArray count], maxNumber];
+            self.navigationController.navigationBar.topItem.prompt = [NSString stringWithFormat:@"(%lu/%ld)", (unsigned long)[self.alreadyKeyArray count], maxNumber];
         }
     }
 }

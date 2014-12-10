@@ -411,7 +411,7 @@ SetClassInfoDel>
         markView.hidden = YES;
         OperatDB *db = [[OperatDB alloc] init];
         NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
-        int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+        int userAdmin = [[dict objectForKey:@"admin"] intValue];
         if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] intValue] == 2 || indexPath.row == 2)
         {
             markView.hidden = NO;
@@ -431,7 +431,7 @@ SetClassInfoDel>
     {
         OperatDB *db = [[OperatDB alloc] init];
         NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
-        int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+        int userAdmin = [[dict objectForKey:@"admin"] intValue];
         if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
         {
             SetClassInfoViewController *setClassInfoViewController = [[SetClassInfoViewController alloc] init];
@@ -455,7 +455,7 @@ SetClassInfoDel>
     {
         OperatDB *db = [[OperatDB alloc] init];
         NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
-        int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+        int userAdmin = [[dict objectForKey:@"admin"] intValue];
         if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
         {
             SetClassInfoViewController *setClassInfoViewController = [[SetClassInfoViewController alloc] init];
@@ -469,7 +469,7 @@ SetClassInfoDel>
     {
         OperatDB *db = [[OperatDB alloc] init];
         NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
-        int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+        int userAdmin = [[dict objectForKey:@"admin"] intValue];
         if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
         {
             SearchSchoolViewController  *searchSchoolInfoViewController = [[SearchSchoolViewController alloc] init];
@@ -530,7 +530,7 @@ SetClassInfoDel>
 {
     OperatDB *db = [[OperatDB alloc] init];
     NSDictionary *dict = [[db findSetWithDictionary:@{@"classid":classID,@"uid":[Tools user_id]} andTableName:CLASSMEMBERTABLE] firstObject];
-    int userAdmin = [[dict objectForKey:@"admin"] integerValue];
+    int userAdmin = [[dict objectForKey:@"admin"] intValue];
     if (userAdmin == 2 || [[[NSUserDefaults standardUserDefaults] objectForKey:@"admin"] integerValue] == 2)
     {
         NSString *title;

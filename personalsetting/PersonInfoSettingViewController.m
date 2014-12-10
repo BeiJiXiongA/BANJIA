@@ -327,10 +327,12 @@ EditNameDone>
     cell.iconImageView.userInteractionEnabled = YES;
     [cell.iconImageView addGestureRecognizer:iconTag];
     
+    cell.relateButton.hidden = YES;
+    
     cell.iconImageView.hidden = YES;
     cell.nametf.hidden = YES;
     
-    cell.nametf.frame = CGRectMake(SCREEN_WIDTH - 270, 10, 250, 28);
+    cell.nametf.frame = CGRectMake(SCREEN_WIDTH - 280, 10, 260, 28);
     cell.nametf.textColor = TITLE_COLOR;
     cell.nametf.textAlignment = NSTextAlignmentRight;
     cell.nametf.font = [UIFont systemFontOfSize:16];
@@ -368,6 +370,9 @@ EditNameDone>
     else if(indexPath.row == 1)
     {
         cell.nametf.hidden = NO;
+        
+        
+//        cell.nametf.backgroundColor = [UIColor redColor];
         
         if ([userName length] > 0)
         {
@@ -407,10 +412,7 @@ EditNameDone>
             cell.nametf.text = @"保密";
         }
     }
-    cell.relateButton.frame = CGRectMake(45, 15, 40, 26);
-    cell.relateButton.titleLabel.font = [UIFont systemFontOfSize:16];
-    [cell.relateButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    cell.relateButton.tag = indexPath.row+333;
+
     
     if (indexPath.row < 4)
     {

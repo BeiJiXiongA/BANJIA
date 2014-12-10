@@ -10,7 +10,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <sys/stat.h>
 #include "interf_dec.h"
 #include "interf_enc.h"
 
@@ -73,5 +72,4 @@ int EncodeWAVEFileToAMRFile(const char* pchWAVEFilename, const char* pchAMRFileN
 // 将AMR文件解码成WAVE文件
 int DecodeAMRFileToWAVEFile(const char* pchAMRFileName, const char* pchWAVEFilename);
 
-int changeState();
 #endif

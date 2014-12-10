@@ -942,7 +942,7 @@ UISearchBarDelegate>
 
 -(void)buttonClicked:(UIButton *)button
 {
-    int sectionIndex = (button.tag-4433)/SectionTag;
+    int sectionIndex = (int)(button.tag-4433)/(int)SectionTag;
     int rowIndex = (button.tag - 4433) % SectionTag;
     NSDictionary *groupDict = [memberArray objectAtIndex:sectionIndex];
     NSArray *groupArray = [groupDict objectForKey:@"array"];

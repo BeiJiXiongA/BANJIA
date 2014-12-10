@@ -11,7 +11,7 @@
 #import "NSString+Emojize.h"
 #import "Header.h"
 #import "ChatVoiceRecorderVC.h"
-#import "VoiceConverter.h" //amr123
+//#import "VoiceConverter.h" //amr123
 #import "MCSoundBoard.h"
 
 @protocol ReturnFunctionDelegate;

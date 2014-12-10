@@ -346,6 +346,12 @@
 		3899BC34196E3E830037C586 /* corner_3@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3899BC30196E3E830037C586 /* corner_3@2x.png */; };
 		3899BC35196E3E830037C586 /* corner_4@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3899BC31196E3E830037C586 /* corner_4@2x.png */; };
 		3899BC38196E75020037C586 /* DiaryTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 3899BC37196E75020037C586 /* DiaryTools.m */; };
+		389B013D1A38419100C57963 /* Downloader.m in Sources */ = {isa = PBXBuildFile; fileRef = 389B012A1A38419100C57963 /* Downloader.m */; };
+		389B013E1A38419100C57963 /* amrFileCodec.mm in Sources */ = {isa = PBXBuildFile; fileRef = 389B012E1A38419100C57963 /* amrFileCodec.mm */; };
+		389B013F1A38419100C57963 /* wav.mm in Sources */ = {isa = PBXBuildFile; fileRef = 389B01301A38419100C57963 /* wav.mm */; };
+		389B01401A38419100C57963 /* libopencore-amrnb.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 389B01391A38419100C57963 /* libopencore-amrnb.a */; };
+		389B01411A38419100C57963 /* libopencore-amrwb.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 389B013A1A38419100C57963 /* libopencore-amrwb.a */; };
+		389B01421A38419100C57963 /* VoiceConverter.mm in Sources */ = {isa = PBXBuildFile; fileRef = 389B013C1A38419100C57963 /* VoiceConverter.mm */; };
 		389B0C3918FFB72C006D7020 /* telephone1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 389B0C3818FFB72C006D7020 /* telephone1@2x.png */; };
 		389B595F1A36A74B006DD8CE /* QQConnection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 389B593A1A36A74B006DD8CE /* QQConnection.framework */; };
 		389B59601A36A74B006DD8CE /* QZoneConnection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 389B593B1A36A74B006DD8CE /* QZoneConnection.framework */; };
@@ -371,12 +377,6 @@
 		389B59741A36A74B006DD8CE /* ShareSDKShareActionSheet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 389B595E1A36A74B006DD8CE /* ShareSDKShareActionSheet.framework */; };
 		389B59761A36A899006DD8CE /* Social.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 389B59751A36A899006DD8CE /* Social.framework */; };
 		389B59781A36A8A0006DD8CE /* Accounts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 389B59771A36A8A0006DD8CE /* Accounts.framework */; };
-		389B598A1A36A98E006DD8CE /* amrFileCodec.mm in Sources */ = {isa = PBXBuildFile; fileRef = 389B597C1A36A98E006DD8CE /* amrFileCodec.mm */; };
-		389B598B1A36A98E006DD8CE /* wav.mm in Sources */ = {isa = PBXBuildFile; fileRef = 389B597E1A36A98E006DD8CE /* wav.mm */; };
-		389B598C1A36A98E006DD8CE /* libopencore-amrnb.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 389B59801A36A98E006DD8CE /* libopencore-amrnb.a */; };
-		389B598D1A36A98E006DD8CE /* libopencore-amrwb.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 389B59811A36A98E006DD8CE /* libopencore-amrwb.a */; };
-		389B598E1A36A98E006DD8CE /* VoiceConverter.mm in Sources */ = {isa = PBXBuildFile; fileRef = 389B59891A36A98E006DD8CE /* VoiceConverter.mm */; };
-		389B59911A36A9AD006DD8CE /* Downloader.m in Sources */ = {isa = PBXBuildFile; fileRef = 389B59901A36A9AD006DD8CE /* Downloader.m */; };
 		389BEE5619B9624C004F1489 /* t2@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 389BEE5519B9624C004F1489 /* t2@2x.png */; };
 		389BEE5819B9664F004F1489 /* f@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 389BEE5719B9664F004F1489 /* f@2x.png */; };
 		389BEE5A19B96B15004F1489 /* icon_rr@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 389BEE5919B96B15004F1489 /* icon_rr@2x.png */; };
@@ -1171,6 +1171,20 @@
 		3899BC31196E3E830037C586 /* corner_4@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "corner_4@2x.png"; sourceTree = "<group>"; };
 		3899BC36196E75020037C586 /* DiaryTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DiaryTools.h; sourceTree = "<group>"; };
 		3899BC37196E75020037C586 /* DiaryTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DiaryTools.m; sourceTree = "<group>"; };
+		389B01291A38419100C57963 /* Downloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Downloader.h; sourceTree = "<group>"; };
+		389B012A1A38419100C57963 /* Downloader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Downloader.m; sourceTree = "<group>"; };
+		389B012D1A38419100C57963 /* amrFileCodec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = amrFileCodec.h; sourceTree = "<group>"; };
+		389B012E1A38419100C57963 /* amrFileCodec.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = amrFileCodec.mm; sourceTree = "<group>"; };
+		389B012F1A38419100C57963 /* wav.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = wav.h; sourceTree = "<group>"; };
+		389B01301A38419100C57963 /* wav.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = wav.mm; sourceTree = "<group>"; };
+		389B01331A38419100C57963 /* interf_dec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = interf_dec.h; sourceTree = "<group>"; };
+		389B01341A38419100C57963 /* interf_enc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = interf_enc.h; sourceTree = "<group>"; };
+		389B01361A38419100C57963 /* dec_if.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dec_if.h; sourceTree = "<group>"; };
+		389B01371A38419100C57963 /* if_rom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = if_rom.h; sourceTree = "<group>"; };
+		389B01391A38419100C57963 /* libopencore-amrnb.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libopencore-amrnb.a"; sourceTree = "<group>"; };
+		389B013A1A38419100C57963 /* libopencore-amrwb.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libopencore-amrwb.a"; sourceTree = "<group>"; };
+		389B013B1A38419100C57963 /* VoiceConverter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VoiceConverter.h; sourceTree = "<group>"; };
+		389B013C1A38419100C57963 /* VoiceConverter.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = VoiceConverter.mm; sourceTree = "<group>"; };
 		389B0C3818FFB72C006D7020 /* telephone1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "telephone1@2x.png"; sourceTree = "<group>"; };
 		389B593A1A36A74B006DD8CE /* QQConnection.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = QQConnection.framework; sourceTree = "<group>"; };
 		389B593B1A36A74B006DD8CE /* QZoneConnection.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = QZoneConnection.framework; sourceTree = "<group>"; };
@@ -1202,20 +1216,6 @@
 		389B595E1A36A74B006DD8CE /* ShareSDKShareActionSheet.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ShareSDKShareActionSheet.framework; sourceTree = "<group>"; };
 		389B59751A36A899006DD8CE /* Social.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Social.framework; path = System/Library/Frameworks/Social.framework; sourceTree = SDKROOT; };
 		389B59771A36A8A0006DD8CE /* Accounts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accounts.framework; path = System/Library/Frameworks/Accounts.framework; sourceTree = SDKROOT; };
-		389B597B1A36A98E006DD8CE /* amrFileCodec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = amrFileCodec.h; sourceTree = "<group>"; };
-		389B597C1A36A98E006DD8CE /* amrFileCodec.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = amrFileCodec.mm; sourceTree = "<group>"; };
-		389B597D1A36A98E006DD8CE /* wav.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = wav.h; sourceTree = "<group>"; };
-		389B597E1A36A98E006DD8CE /* wav.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = wav.mm; sourceTree = "<group>"; };
-		389B59801A36A98E006DD8CE /* libopencore-amrnb.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libopencore-amrnb.a"; sourceTree = "<group>"; };
-		389B59811A36A98E006DD8CE /* libopencore-amrwb.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libopencore-amrwb.a"; sourceTree = "<group>"; };
-		389B59831A36A98E006DD8CE /* interf_dec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = interf_dec.h; sourceTree = "<group>"; };
-		389B59841A36A98E006DD8CE /* interf_enc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = interf_enc.h; sourceTree = "<group>"; };
-		389B59861A36A98E006DD8CE /* dec_if.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dec_if.h; sourceTree = "<group>"; };
-		389B59871A36A98E006DD8CE /* if_rom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = if_rom.h; sourceTree = "<group>"; };
-		389B59881A36A98E006DD8CE /* VoiceConverter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VoiceConverter.h; sourceTree = "<group>"; };
-		389B59891A36A98E006DD8CE /* VoiceConverter.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = VoiceConverter.mm; sourceTree = "<group>"; };
-		389B598F1A36A9AD006DD8CE /* Downloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Downloader.h; sourceTree = "<group>"; };
-		389B59901A36A9AD006DD8CE /* Downloader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Downloader.m; sourceTree = "<group>"; };
 		389BEE5519B9624C004F1489 /* t2@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "t2@2x.png"; sourceTree = "<group>"; };
 		389BEE5719B9664F004F1489 /* f@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "f@2x.png"; sourceTree = "<group>"; };
 		389BEE5919B96B15004F1489 /* icon_rr@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_rr@2x.png"; sourceTree = "<group>"; };
@@ -1508,8 +1508,8 @@
 				389B59731A36A74B006DD8CE /* ShareSDKFlatShareViewUI.framework in Frameworks */,
 				389C32E818EF8AD200DA05E8 /* MediaPlayer.framework in Frameworks */,
 				389B59691A36A74B006DD8CE /* TencentOpenAPI.framework in Frameworks */,
-				389B598C1A36A98E006DD8CE /* libopencore-amrnb.a in Frameworks */,
-				389B598D1A36A98E006DD8CE /* libopencore-amrwb.a in Frameworks */,
+				389B01401A38419100C57963 /* libopencore-amrnb.a in Frameworks */,
+				389B01411A38419100C57963 /* libopencore-amrwb.a in Frameworks */,
 				389C32E618EF8AC800DA05E8 /* CoreLocation.framework in Frameworks */,
 				389B59641A36A74B006DD8CE /* WeChatConnection.framework in Frameworks */,
 				389C32E418EF8ABD00DA05E8 /* CoreMotion.framework in Frameworks */,
@@ -2426,9 +2426,9 @@
 		3893934E18EEF55C0014F169 /* messages */ = {
 			isa = PBXGroup;
 			children = (
-				389B598F1A36A9AD006DD8CE /* Downloader.h */,
-				389B59901A36A9AD006DD8CE /* Downloader.m */,
-				389B59791A36A98E006DD8CE /* VoiceConvert */,
+				389B01291A38419100C57963 /* Downloader.h */,
+				389B012A1A38419100C57963 /* Downloader.m */,
+				389B012B1A38419100C57963 /* VoiceConvert */,
 				38AE044319A31A1900F90B79 /* AFNetworking */,
 				38C044B819A1F64E00F500BA /* ChatRecorderView.h */,
 				38C044B919A1F64E00F500BA /* ChatRecorderView.m */,
@@ -2654,6 +2654,65 @@
 			path = libqrencode;
 			sourceTree = "<group>";
 		};
+		389B012B1A38419100C57963 /* VoiceConvert */ = {
+			isa = PBXGroup;
+			children = (
+				389B012C1A38419100C57963 /* amrwapper */,
+				389B01311A38419100C57963 /* include */,
+				389B01381A38419100C57963 /* lib */,
+				389B013B1A38419100C57963 /* VoiceConverter.h */,
+				389B013C1A38419100C57963 /* VoiceConverter.mm */,
+			);
+			path = VoiceConvert;
+			sourceTree = "<group>";
+		};
+		389B012C1A38419100C57963 /* amrwapper */ = {
+			isa = PBXGroup;
+			children = (
+				389B012D1A38419100C57963 /* amrFileCodec.h */,
+				389B012E1A38419100C57963 /* amrFileCodec.mm */,
+				389B012F1A38419100C57963 /* wav.h */,
+				389B01301A38419100C57963 /* wav.mm */,
+			);
+			path = amrwapper;
+			sourceTree = "<group>";
+		};
+		389B01311A38419100C57963 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				389B01321A38419100C57963 /* opencore-amrnb */,
+				389B01351A38419100C57963 /* opencore-amrwb */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		389B01321A38419100C57963 /* opencore-amrnb */ = {
+			isa = PBXGroup;
+			children = (
+				389B01331A38419100C57963 /* interf_dec.h */,
+				389B01341A38419100C57963 /* interf_enc.h */,
+			);
+			path = "opencore-amrnb";
+			sourceTree = "<group>";
+		};
+		389B01351A38419100C57963 /* opencore-amrwb */ = {
+			isa = PBXGroup;
+			children = (
+				389B01361A38419100C57963 /* dec_if.h */,
+				389B01371A38419100C57963 /* if_rom.h */,
+			);
+			path = "opencore-amrwb";
+			sourceTree = "<group>";
+		};
+		389B01381A38419100C57963 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				389B01391A38419100C57963 /* libopencore-amrnb.a */,
+				389B013A1A38419100C57963 /* libopencore-amrwb.a */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
 		389B59381A36A74B006DD8CE /* ShareSDK */ = {
 			isa = PBXGroup;
 			children = (
@@ -2758,57 +2817,6 @@
 				389B595E1A36A74B006DD8CE /* ShareSDKShareActionSheet.framework */,
 			);
 			path = UI;
-			sourceTree = "<group>";
-		};
-		389B59791A36A98E006DD8CE /* VoiceConvert */ = {
-			isa = PBXGroup;
-			children = (
-				389B597A1A36A98E006DD8CE /* amrwapper */,
-				389B597F1A36A98E006DD8CE /* lib */,
-				389B59821A36A98E006DD8CE /* opencore-amrnb */,
-				389B59851A36A98E006DD8CE /* opencore-amrwb */,
-				389B59881A36A98E006DD8CE /* VoiceConverter.h */,
-				389B59891A36A98E006DD8CE /* VoiceConverter.mm */,
-			);
-			path = VoiceConvert;
-			sourceTree = "<group>";
-		};
-		389B597A1A36A98E006DD8CE /* amrwapper */ = {
-			isa = PBXGroup;
-			children = (
-				389B597B1A36A98E006DD8CE /* amrFileCodec.h */,
-				389B597C1A36A98E006DD8CE /* amrFileCodec.mm */,
-				389B597D1A36A98E006DD8CE /* wav.h */,
-				389B597E1A36A98E006DD8CE /* wav.mm */,
-			);
-			path = amrwapper;
-			sourceTree = "<group>";
-		};
-		389B597F1A36A98E006DD8CE /* lib */ = {
-			isa = PBXGroup;
-			children = (
-				389B59801A36A98E006DD8CE /* libopencore-amrnb.a */,
-				389B59811A36A98E006DD8CE /* libopencore-amrwb.a */,
-			);
-			path = lib;
-			sourceTree = "<group>";
-		};
-		389B59821A36A98E006DD8CE /* opencore-amrnb */ = {
-			isa = PBXGroup;
-			children = (
-				389B59831A36A98E006DD8CE /* interf_dec.h */,
-				389B59841A36A98E006DD8CE /* interf_enc.h */,
-			);
-			path = "opencore-amrnb";
-			sourceTree = "<group>";
-		};
-		389B59851A36A98E006DD8CE /* opencore-amrwb */ = {
-			isa = PBXGroup;
-			children = (
-				389B59861A36A98E006DD8CE /* dec_if.h */,
-				389B59871A36A98E006DD8CE /* if_rom.h */,
-			);
-			path = "opencore-amrwb";
 			sourceTree = "<group>";
 		};
 		38A24C9A197CE06400C718BA /* UIImage-Helpers */ = {
@@ -3581,7 +3589,6 @@
 				387AF46219AC9251003C20F1 /* StatusBarTips.m in Sources */,
 				3893924918EEF1A30014F169 /* ASIDataCompressor.m in Sources */,
 				3893924218EEF1A30014F169 /* ALAsset+AGIPC.m in Sources */,
-				389B598B1A36A98E006DD8CE /* wav.mm in Sources */,
 				3806883A19852B1E00529FE7 /* UIImage+MultiFormat.m in Sources */,
 				3856ADFF19A6C3A90078CFCA /* EmptyTools.m in Sources */,
 				3846AAAF197FCF430061B6CA /* GroupInfoViewController.m in Sources */,
@@ -3632,6 +3639,7 @@
 				389393A718EEF5620014F169 /* InfoCell.m in Sources */,
 				3893926618EEF1A40014F169 /* NSString+MD5.m in Sources */,
 				3893926518EEF1A40014F169 /* MyTextField.m in Sources */,
+				389B013D1A38419100C57963 /* Downloader.m in Sources */,
 				3893926018EEF1A30014F169 /* KKNavigationController.m in Sources */,
 				3893924F18EEF1A30014F169 /* ASINetworkQueue.m in Sources */,
 				3846AAAC197F47290061B6CA /* ScoreTableViewController.m in Sources */,
@@ -3643,7 +3651,6 @@
 				3893924818EEF1A30014F169 /* ASIAuthenticationDialog.m in Sources */,
 				389393B218EEF5620014F169 /* SettingStateLimitViewController.m in Sources */,
 				389393D018EEF56A0014F169 /* AuthCell.m in Sources */,
-				389B59911A36A9AD006DD8CE /* Downloader.m in Sources */,
 				38B492A01921F27700C0098D /* SearchSchoolViewController.m in Sources */,
 				3899BC26196CF1760037C586 /* qrinput.c in Sources */,
 				389392E118EEF1A40014F169 /* JDSideMenu.m in Sources */,
@@ -3687,7 +3694,6 @@
 				38419A4319B6C0DF00B27C04 /* ImageItem.m in Sources */,
 				3893929A18EEF1A40014F169 /* NSString+Emojize.m in Sources */,
 				389392E218EEF1A40014F169 /* UIViewController+JDSideMenu.m in Sources */,
-				389B598E1A36A98E006DD8CE /* VoiceConverter.mm in Sources */,
 				389393D618EEF56A0014F169 /* PersonInfoSettingViewController.m in Sources */,
 				38D5559819CC1D9A0043B3EB /* LocationViewController.m in Sources */,
 				38AE045E19A31A1900F90B79 /* AFURLResponseSerialization.m in Sources */,
@@ -3710,12 +3716,13 @@
 				3893932618EEF2030014F169 /* SideMenuViewController.m in Sources */,
 				389DCA751A15C7FD00A43B46 /* PlaceHolderTextView.m in Sources */,
 				389DCA721A158E8100A43B46 /* UIActionSheet+Blocks.m in Sources */,
+				389B013E1A38419100C57963 /* amrFileCodec.mm in Sources */,
 				389393AC18EEF5620014F169 /* OjectCell.m in Sources */,
 				38AE045B19A31A1900F90B79 /* AFSecurityPolicy.m in Sources */,
 				389393B418EEF5620014F169 /* SubGroupViewController.m in Sources */,
+				389B01421A38419100C57963 /* VoiceConverter.mm in Sources */,
 				3893932718EEF2030014F169 /* WelcomeViewController.m in Sources */,
 				3893933D18EEF53D0014F169 /* TeacherApplyViewController.m in Sources */,
-				389B598A1A36A98E006DD8CE /* amrFileCodec.mm in Sources */,
 				389393BC18EEF5620014F169 /* NotificationViewController.m in Sources */,
 				389393D718EEF56A0014F169 /* RelatedCell.m in Sources */,
 				38B1AEB9195C2134004C704F /* ClassesListViewController.m in Sources */,
@@ -3773,6 +3780,7 @@
 				3880844F19FA1A9A00412871 /* UserIconTools.m in Sources */,
 				389393BA18EEF5620014F169 /* NotificationDetailCell.m in Sources */,
 				38B775B519259A3800047FF8 /* SelectCityViewController.m in Sources */,
+				389B013F1A38419100C57963 /* wav.mm in Sources */,
 				389393B318EEF5620014F169 /* StudentDetailViewController.m in Sources */,
 				3852D068193D6077000437E6 /* ReportViewController.m in Sources */,
 				38892B3619E8BAB30047A013 /* MLEmojiLabel.m in Sources */,
@@ -3969,13 +3977,13 @@
 					"$(PROJECT_DIR)/library/LibzBar",
 					"$(PROJECT_DIR)/library/LibzBar/Headers",
 				);
-				ONLY_ACTIVE_ARCH = YES;
+				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "-all_load";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "e2a7e8d2-6c4f-4ea9-9469-f2bdf12b61e0";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
-				VALID_ARCHS = "armv7s armv7 arm64";
+				VALID_ARCHS = "armv7s armv7";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -4028,7 +4036,7 @@
 				PROVISIONING_PROFILE = "ecfe7edf-f2a7-42b3-858b-67f4b819979c";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
-				VALID_ARCHS = "armv7s armv7 arm64";
+				VALID_ARCHS = "armv7s armv7";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

@@ -451,7 +451,7 @@ ChatVCDelegate>
     {
         NSString *tid = [[[newMessageArray objectAtIndex:i] allValues] firstObject];
         NSDictionary *userIconDIct = [ImageTools iconDictWithUserID:tid];
-        if (!userIconDIct && [tid length] == [[Tools user_id] length])
+        if (!userIconDIct)
         {
             [newMessageArray removeObjectAtIndex:i];
         }
