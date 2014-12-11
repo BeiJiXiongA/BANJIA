@@ -20,7 +20,7 @@
 #import "ScoreDetailViewController.h"
 #import "ScoreMemListViewController.h"
 #import "EGORefreshTableHeaderView.h"
-//#import "Downloader.h"  //amr123
+#import "Downloader.h"  //amr123
 #import "ChangePhoneViewController.h"
 
 
@@ -54,7 +54,7 @@ AVAudioPlayerDelegate,
 ChatDelegate,
 ReturnFunctionDelegate,
 MessageDelegate,
-//DownloaderDelegate, //amr123
+DownloaderDelegate, //amr123
 updateGroupInfoDelegate,
 EGORefreshTableHeaderDelegate,
 MLEmojiLabelDelegate>
@@ -1557,8 +1557,8 @@ MLEmojiLabelDelegate>
     }
     else
     {
-//        [[Downloader defaultDownloader] adiDownloadWithUrl:[NSString stringWithFormat:@"%@%@",MEDIAURL,subUrl]];
-//        [Downloader defaultDownloader].downloaderDel = self;   //amr123
+        [[Downloader defaultDownloader] adiDownloadWithUrl:[NSString stringWithFormat:@"%@%@",MEDIAURL,subUrl]];
+        [Downloader defaultDownloader].downloaderDel = self;   //amr123
     }
 }
 
@@ -1972,7 +1972,7 @@ MLEmojiLabelDelegate>
     NSString *fileExtetion = [filePath pathExtension];
     NSRange range = [filePath rangeOfString:fileExtetion];
     NSString *pathStr = [filePath substringToIndex:range.location-1];
-//    [VoiceConverter wavToAmr:filePath amrSavePath:[NSString stringWithFormat:@"%@.amr",pathStr]]; //amr123
+    [VoiceConverter wavToAmr:filePath amrSavePath:[NSString stringWithFormat:@"%@.amr",pathStr]]; //amr123
     [self sendSound:length andFilePath:[NSString stringWithFormat:@"%@.amr",pathStr]];
     
     if ([[NSFileManager defaultManager] removeItemAtPath:filePath error:nil])
