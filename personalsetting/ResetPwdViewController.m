@@ -156,7 +156,10 @@
     
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],@"token":[Tools client_token],@"opwd":oldPwdTextField.text,@"npwd":newPwdTextField.text}
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
+                                                                      @"token":[Tools client_token],
+                                                                      @"opwd":oldPwdTextField.text,
+                                                                      @"npwd":newPwdTextField.text}
                                                                 API:MB_RESETPWD];
         [request setCompletionBlock:^{
             

@@ -53,7 +53,7 @@ int ReadPCMFrame(short speech[], FILE* fpwave, int nChannels, int nBitsPerSample
 {
 	int nRead = 0;
 	int x = 0, y=0;
-	unsigned short ush1=0, ush2=0, ush=0;
+//	unsigned short ush1=0, ush2=0, ush=0;
 	
 	// 原始PCM音频帧数据
 	unsigned char  pcmFrame_8b1[PCM_FRAME_SIZE];
@@ -200,7 +200,7 @@ void WriteWAVEFileHeader(FILE* fpwave, int nFrame)
 	+ sizeof(XCHUNKHEADER)               // fmt 
 	+ sizeof(WAVEFORMATX)           // WAVEFORMATX
 	+ sizeof(XCHUNKHEADER)               // DATA
-	+ nFrame*160*sizeof(short);    // 
+	+ nFrame*160*sizeof(short);    //
 	strcpy(tag, "WAVE");
 	memcpy(riff.chRiffFormat, tag, 4);
 	fwrite(&riff, 1, sizeof(RIFFHEADER), fpwave);
@@ -306,6 +306,8 @@ int ReadAMRFrame(FILE* fpamr, unsigned char frameBuffer[], int stdFrameSize, uns
 // 将AMR文件解码成WAVE文件
 int DecodeAMRFileToWAVEFile(const char* pchAMRFileName, const char* pchWAVEFilename)
 {
+
+    
 	FILE* fpamr = NULL;
 	FILE* fpwave = NULL;
 	char magic[8];
@@ -317,8 +319,10 @@ int DecodeAMRFileToWAVEFile(const char* pchAMRFileName, const char* pchWAVEFilen
 	unsigned char amrFrame[MAX_AMR_FRAME_SIZE];
 	short pcmFrame[PCM_FRAME_SIZE];
 	
-	NSString * path = [[NSBundle mainBundle] pathForResource:  @"test" ofType: @"amr"]; 
-	fpamr = fopen([path cStringUsingEncoding:NSASCIIStringEncoding], "rb");
+//	NSString * path = [[NSBundle mainBundle] pathForResource:  @"test" ofType: @"amr"]; 
+//	fpamr = fopen([path cStringUsingEncoding:NSASCIIStringEncoding], "rb");
+    fpamr = fopen(pchAMRFileName, "rb");
+    
 	if ( fpamr==NULL ) return 0;
 	
 	// 检查amr文件头
@@ -330,12 +334,14 @@ int DecodeAMRFileToWAVEFile(const char* pchAMRFileName, const char* pchWAVEFilen
 	}
 	
 	// 创建并初始化WAVE文件
-	NSArray *paths               = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-	NSString *documentPath       = [paths objectAtIndex:0];
-	NSString *docFilePath        = [documentPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%s", pchWAVEFilename]];
-	NSLog(@"documentPath=%@", documentPath);
-	
-	fpwave = fopen([docFilePath cStringUsingEncoding:NSASCIIStringEncoding], "wb");
+//	NSArray *paths               = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+//	NSString *documentPath       = [paths objectAtIndex:0];
+//	NSString *docFilePath        = [documentPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%s", pchWAVEFilename]];
+//	NSLog(@"documentPath=%@", documentPath);
+//	
+//	fpwave = fopen([docFilePath cStringUsingEncoding:NSASCIIStringEncoding], "wb");
+    fpwave = fopen(pchWAVEFilename,"wb");
+    
 	WriteWAVEFileHeader(fpwave, nFrameCount);
 	
 	/* init decoder */
@@ -369,7 +375,8 @@ int DecodeAMRFileToWAVEFile(const char* pchAMRFileName, const char* pchWAVEFilen
 	fclose(fpwave);
 	
 	// 重写WAVE文件头
-	fpwave = fopen([docFilePath cStringUsingEncoding:NSASCIIStringEncoding], "r+");
+//	fpwave = fopen([docFilePath cStringUsingEncoding:NSASCIIStringEncoding], "r+");
+    fpwave = fopen(pchWAVEFilename, "r+");
 	WriteWAVEFileHeader(fpwave, nFrameCount);
 	fclose(fpwave);
 	

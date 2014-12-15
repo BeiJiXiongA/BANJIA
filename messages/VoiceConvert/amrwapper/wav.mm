@@ -39,24 +39,26 @@ void WavWriter::writeInt16(int value) {
 }
 
 void WavWriter::writeHeader(int length) {
-	writeString("RIFF");
-	writeInt32(4 + 8 + 16 + 8 + length);
-	writeString("WAVE");
-
-	writeString("fmt ");
-	writeInt32(16);
-
-	int bytesPerFrame = bitsPerSample/8*channels;
-	int bytesPerSec = bytesPerFrame*sampleRate;
-	writeInt16(1);             // Format
-	writeInt16(channels);      // Channels
-	writeInt32(sampleRate);    // Samplerate
-	writeInt32(bytesPerSec);   // Bytes per sec
-	writeInt16(bytesPerFrame); // Bytes per frame
-	writeInt16(bitsPerSample); // Bits per sample
-
-	writeString("data");
-	writeInt32(length);
+    writeString("RIFF");
+    writeInt32(4 + 8 + 20 + 8 + length);  //将16改为20
+    writeString("WAVE");
+    
+    writeString("fmt ");
+    writeInt32(20);
+    
+    int bytesPerFrame = bitsPerSample/8*channels;
+    int bytesPerSec = bytesPerFrame*sampleRate;
+    writeInt16(1);             // Format
+    writeInt16(channels);      // Channels
+    writeInt32(sampleRate);    // Samplerate
+    writeInt32(bytesPerSec);   // Bytes per sec
+    writeInt16(bytesPerFrame); // Bytes per frame
+    writeInt16(bitsPerSample); // Bits per sample
+    
+    writeInt32(0);             //这儿需要字节对齐  nExSize
+    
+    writeString("data");
+    writeInt32(length);
 }
 
 WavWriter::WavWriter(const char *filename, int sampleRate, int bitsPerSample, int channels) 

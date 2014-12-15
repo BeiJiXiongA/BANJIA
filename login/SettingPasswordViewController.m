@@ -277,7 +277,9 @@
     
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"phone":phoneNumTextfield.text} API:CHECKPHONE];
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:
+                                          @{@"phone":phoneNumTextfield.text}
+                                                                API:CHECKPHONE];
         
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
@@ -383,7 +385,10 @@
     }
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"phone":[Tools getPhoneNumFromString:phoneNumTextfield.text],@"auth_code":codeTextField.text} API:MB_CHECKOUT];
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:
+                                          @{@"phone":[Tools getPhoneNumFromString:phoneNumTextfield.text],
+                                            @"auth_code":codeTextField.text}
+                                        API:MB_CHECKOUT];
         
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];

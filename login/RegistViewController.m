@@ -312,7 +312,9 @@
     
     if ([Tools NetworkReachable])
     {
-        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"phone":[Tools getPhoneNumFromString:phoneNumTextfield.text]} API:MB_REG];
+        __weak ASIHTTPRequest *request = [Tools postRequestWithDict:
+                                          @{@"phone":[Tools getPhoneNumFromString:phoneNumTextfield.text]}
+                                                                API:MB_REG];
         
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];

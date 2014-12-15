@@ -2901,9 +2901,14 @@ ShareContentDelegate>
             default:
                 break;
         }
+        
+        [actionSheet dismissWithClickedButtonIndex:[actionSheet numberOfButtons]-1 animated:NO];
+        
         ShareTools *shareTools = [[ShareTools alloc] init];
         shareTools.shareContentDel = self;
         [shareTools shareTo:shareType andShareContent:content andImage:attchment andMediaType:SSPublishContentMediaTypeNews description:content andUrl:url];
+        
+        
     }
 }
 -(void)shareSuccess

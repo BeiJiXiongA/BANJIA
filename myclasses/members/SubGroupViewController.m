@@ -165,6 +165,10 @@ updateGroupInfoDelegate>
                 }
             }
         }
+        else
+        {
+            cell.memNameLabel.text = [dict objectForKey:@"fname"];
+        }
 
         cell.memNameLabel.frame = CGRectMake(60, 10, 220, 30);
         [cell.headerImageView setImage:[UIImage imageNamed:@"headpic.jpg"]];
