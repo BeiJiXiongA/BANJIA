@@ -135,20 +135,21 @@ voiceView;
         recordButton = [UIButton buttonWithType:UIButtonTypeCustom];
         recordButton.frame = CGRectMake(left, INPUTBUTTONT, inputWidth, DEFAULTTEXTHEIGHT);
         [recordButton setTitleColor:TITLE_COLOR forState:UIControlStateNormal];
-        [recordButton setTitleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
         recordButton.layer.cornerRadius = 5;
         recordButton.clipsToBounds = YES;
-//        [recordButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:@"btnbg"] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateHighlighted];
-//        [recordButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
         [recordButton setTitle:@"按下录音" forState:UIControlStateNormal];
-        [recordButton setBackgroundImage:[UIImage imageNamed:@"recordBtn"] forState:UIControlStateNormal];
-        
-        UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPress:)];
-        longPress.minimumPressDuration = 0.2;
-        recordButton.userInteractionEnabled = YES;
-        [recordButton addGestureRecognizer:longPress];
+        recordButton.layer.borderColor = [UIColor darkGrayColor].CGColor;
+        recordButton.layer.borderWidth = 0.2;
         recordButton.hidden = YES;
+        recordButton.backgroundColor = [UIColor whiteColor];
         [inputBgView addSubview:recordButton];
+        
+        [recordButton addTarget:self action:@selector(startRecordSound:) forControlEvents:UIControlEventTouchDown];
+        [recordButton addTarget:self action:@selector(willCancelSendSound:) forControlEvents:UIControlEventTouchDragOutside];
+        [recordButton addTarget:self action:@selector(goOnRecord:) forControlEvents:UIControlEventTouchDragInside];
+        
+        [recordButton addTarget:self action:@selector(cancelSendSound:) forControlEvents:UIControlEventTouchUpOutside];
+        [recordButton addTarget:self action:@selector(sendSound:) forControlEvents:UIControlEventTouchUpInside];
 
         moreButton = [UIButton buttonWithType:UIButtonTypeCustom];
         moreButton.frame = CGRectMake( SCREEN_WIDTH - 40, INPUTBUTTONT, INPUTBUTTONH, INPUTBUTTONH);
@@ -404,56 +405,24 @@ voiceView;
 
 #pragma mark - 录音
 
--(void)longPress:(UILongPressGestureRecognizer *)longPress
-{
-    if (longPress.state == UIGestureRecognizerStateBegan)
-    {
-        [[NSNotificationCenter defaultCenter] postNotificationName:STARTRECORD object:nil];
-        [recordButton setTitle:@"录音开始" forState:UIControlStateNormal];
-        [recordButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:@"touchDown"] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
-        [self showVoiceView];
-        
-        self.originWav = [VoiceRecorderBaseVC getCurrentTimeString];
-        //开始录音
-        [recorderVC beginRecordByFileName:self.originWav];
-    }
-    else if (longPress.state == UIGestureRecognizerStateEnded ||
-             longPress.state == UIGestureRecognizerStateCancelled)
-    {
-        [[NSNotificationCenter defaultCenter] postNotificationName:STOPRECORD object:nil];
-        [recordButton setTitle:@"按下录音" forState:UIControlStateNormal];
-        [recordButton setBackgroundImage:[UIImage imageNamed:@"recordBtn"] forState:UIControlStateNormal];
-        [recorderVC.recorder stop];
-        [self hideVoiceView];
-    }
-}
-
 -(void)updateVoiceLength:(int)voiceLength
 {
     DDLOG(@"voice length %d",voiceLength);
     if (voiceLength < 60)
     {
-        voiceView.text = [NSString stringWithFormat:@"%d/60",voiceLength];
-        voiceView.textColor = [UIColor whiteColor];
+        voiceView.timeLabel.text = [NSString stringWithFormat:@"%d/60",voiceLength];
     }
     else
     {
-        voiceView.text = @"开始发送";
-        voiceView.textColor = [UIColor redColor];
+//        voiceView.text = @"开始发送";
+//        voiceView.textColor = [UIColor redColor];
     }
 }
 
 -(void)showVoiceView
 {
     UIViewController *topVC = [self appRootViewController];
-    voiceView = [[UILabel alloc] init];
-    voiceView.frame = CGRectMake(CENTER_POINT.x-70, CENTER_POINT.y-50, 140, 100);
-    voiceView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
-    voiceView.layer.cornerRadius = 5;
-    voiceView.clipsToBounds = YES;
-    voiceView.font = [UIFont systemFontOfSize:35];
-    voiceView.textColor = [UIColor whiteColor];
-    voiceView.textAlignment = NSTextAlignmentCenter;
+    voiceView = [[VoiceView alloc] initWithFrame:CGRectMake(CENTER_POINT.x-90, CENTER_POINT.y-90, 180, 160)];
     [topVC.view addSubview:voiceView];
     [self updateVoiceLength:0];
 }
@@ -691,6 +660,57 @@ voiceView;
     }
 }
 
+#pragma mark - 关于录音
+
+-(void)startRecordSound:(UIButton *)button
+{
+    //TouchDown
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:STARTRECORD object:nil];
+    [recordButton setTitle:@"正在录音" forState:UIControlStateNormal];
+    recordButton.backgroundColor = [UIColor lightGrayColor];
+    [self showVoiceView];
+    
+    self.originWav = [VoiceRecorderBaseVC getCurrentTimeString];
+    //开始录音
+    [recorderVC beginRecordByFileName:self.originWav];
+}
+
+-(void)willCancelSendSound:(UIButton *)button
+{
+    //DragOutSide
+    DDLOG(@"松开取消发送");
+    [voiceView willCancelSendSound];
+}
+
+-(void)goOnRecord:(UIButton *)button
+{
+    //DragInSide
+    DDLOG(@"继续录音");
+    [voiceView goOnRecordSound];
+}
+
+-(void)cancelSendSound:(UIButton *)button
+{
+    //TouchUpOutSide
+    DDLOG(@"取消发送");
+    recordButton.backgroundColor = [UIColor whiteColor];
+    [recordButton setTitle:@"按下录音" forState:UIControlStateNormal];
+    [recorderVC cancelRecord];
+    [self hideVoiceView];
+}
+
+-(void)sendSound:(UIButton *)button
+{
+    //TouchUpInside
+    DDLOG(@"发送录音");
+    [[NSNotificationCenter defaultCenter] postNotificationName:STOPRECORD object:nil];
+    recordButton.backgroundColor = [UIColor whiteColor];
+    [recordButton setTitle:@"按下录音" forState:UIControlStateNormal];
+    [recorderVC.recorder stop];
+    [self hideVoiceView];
+}
+
 -(void)soundButtonClick
 {
     if (sound)
@@ -714,7 +734,7 @@ voiceView;
 {
     if ([self.returnFunDel respondsToSelector:@selector(selectPic:)])
     {
-        [self.returnFunDel selectPic:button.tag];
+        [self.returnFunDel selectPic:(int)button.tag];
     }
 }
 
@@ -901,6 +921,14 @@ voiceView;
 //            [self.returnFunDel showTips:[NSString stringWithFormat:@"录音时间不能多于%d秒",MAX_SOUND_LENGTH]];
 //        }
 //    }
+}
+
+-(void)cancelRecordWithPath:(NSString *)filePath andFileName:(NSString *)fileName
+{
+    if ([self.returnFunDel respondsToSelector:@selector(cancelRecordWithPath:andFileName:)])
+    {
+        [self.returnFunDel cancelRecordWithPath:filePath andFileName:fileName];
+    }
 }
 
 -(void)VoiceRecorderBaseVCRecordFinish:(NSString *)_filePath fileName:(NSString *)_fileName

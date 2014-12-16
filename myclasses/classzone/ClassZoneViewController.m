@@ -415,6 +415,11 @@ ShareContentDelegate>
     {
         [self.navigationController popViewControllerAnimated:YES];
     }
+    else if(!isApply && [[[NSUserDefaults standardUserDefaults] objectForKey:@"role"] isEqualToString:@"visitor"])
+    {
+        
+        [self.navigationController popViewControllerAnimated:YES];
+    }
     else
     {
         [[XDTabViewController sharedTabViewController] dismissViewControllerAnimated:YES completion:nil];

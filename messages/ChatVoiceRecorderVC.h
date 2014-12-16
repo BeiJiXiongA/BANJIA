@@ -22,6 +22,9 @@
 //开始录音
 - (void)beginRecordByFileName:(NSString*)_fileName;
 
+//取消录音
+- (void)cancelRecord;
+
 @end
 
 @protocol RecordDelegate <NSObject>
@@ -29,5 +32,7 @@
 -(void)recordFinished:(NSString *)filePath andFileName:(NSString *)fileName voiceLength:(int)length;
 
 -(void)updateVoiceLength:(int)voiceLength;
+
+-(void)cancelRecordWithPath:(NSString *)filePath andFileName:(NSString *)fileName;
 
 @end

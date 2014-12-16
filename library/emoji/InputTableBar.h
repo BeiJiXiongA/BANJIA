@@ -13,6 +13,7 @@
 #import "ChatVoiceRecorderVC.h"
 #import "VoiceConverter.h" //amr123
 #import "MCSoundBoard.h"
+#import "VoiceView.h"
 
 @protocol ReturnFunctionDelegate;
 
@@ -64,7 +65,7 @@
 
 @property (nonatomic, assign) NSInteger maxTextLength;
 
-@property (nonatomic, strong) UILabel *voiceView;
+@property (nonatomic, strong) VoiceView *voiceView;
 
 -(NSMutableString *)analyString:(NSString *)inputString;
 
@@ -88,5 +89,7 @@
 -(void)recordFinished:(NSString *)filePath andFileName:(NSString *)fileName voiceLength:(int)length;
 
 -(void)showTips:(NSString *)tipString;
+
+-(void)cancelRecordWithPath:(NSString *)filePath andFileName:(NSString *)fileName;
 
 @end

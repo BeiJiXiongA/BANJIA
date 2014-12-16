@@ -118,12 +118,12 @@
 #pragma mark - 更新音频峰值
 - (void)updateMeters
 {
-    if (recorder.isRecording){
-    
+    if (recorder.isRecording)
+    {
         //更新峰值
 //        [recorder updateMeters];
 //        [recorderView updateMetersByAvgPower:[recorder averagePowerForChannel:0]];
-////        NSLog(@"峰值:%f",[recorder averagePowerForChannel:0]);
+//        NSLog(@"峰值:%f",[recorder averagePowerForChannel:0]);
 //        
 //        //倒计时
 //        if (curCount >= maxRecordTime - 10 && curCount < maxRecordTime) {
@@ -133,6 +133,7 @@
 //            //时间到
 //            [self touchEnded:curTouchPoint];
 //        }
+        
         curCount += 1;
         
         if (curCount == MAX_SOUND_LENGTH)
@@ -143,100 +144,8 @@
         {
             [self.recordDel updateVoiceLength:curCount];
         }
-        
-        
-//        if (curCount <= 1)
-//        {
-//            
-//        }
     }
 }
-
-//#pragma mark - 移除触摸观察者
-//- (void)removeScreenTouchObserver{
-//    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"nScreenTouch" object:nil];//移除nScreenTouch事件
-//}
-//#pragma mark - 添加触摸观察者
-//- (void)addScreenTouchObserver{
-//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onScreenTouch:) name:@"nScreenTouch" object:nil];
-//}
-//-(void)onScreenTouch:(NSNotification *)notification {
-//    UIEvent *event=[notification.userInfo objectForKey:@"data"];
-//    NSSet *allTouches = event.allTouches;
-//    
-//    //如果未触摸或只有单点触摸
-//    if ((curTouchPoint.x == CGPointZero.x && curTouchPoint.y == CGPointZero.y) || allTouches.count == 1)
-//        [self transferTouch:[allTouches anyObject]];
-//    else{
-//        //遍历touch,找到最先触摸的那个touch
-//        for (UITouch *touch in allTouches){
-//            CGPoint prePoint = [touch previousLocationInView:nil];
-//    
-//            if (prePoint.x == curTouchPoint.x && prePoint.y == curTouchPoint.y)
-//                [self transferTouch:touch];
-//        }
-//    }
-//}
-////传递触点
-//- (void)transferTouch:(UITouch*)_touch{
-//    CGPoint point = [_touch locationInView:nil];
-//    switch (_touch.phase) {
-//        case UITouchPhaseBegan:
-//            [self touchBegan:point];
-//            break;
-//        case UITouchPhaseMoved:
-//            [self touchMoved:point];
-//            break;
-//        case UITouchPhaseCancelled:
-//        case UITouchPhaseEnded:
-//            [self touchEnded:point];
-//            break;
-//        default:
-//            break;
-//    }
-//}
-//#pragma mark - 触摸开始
-//- (void)touchBegan:(CGPoint)_point{
-//    curTouchPoint = _point;
-//}
-//#pragma mark - 触摸移动
-//- (void)touchMoved:(CGPoint)_point{
-//    curTouchPoint = _point;
-//    //判断是否移动到取消区域
-//    canNotSend = _point.y < kCancelOriginY ? YES : NO;
-//    
-//    //设置取消动画
-//    [recorderView prepareToDelete:canNotSend];
-//}
-//#pragma mark - 触摸结束
-//- (void)touchEnded:(CGPoint)_point
-//{
-//    //停止计时器
-//    [self stopTimer];
-//    
-//    curTouchPoint = CGPointZero;
-//    [self removeScreenTouchObserver];
-//    
-//    [UIView hideViewByCompletion:^(BOOL finish){
-//    
-//        //停止录音
-//        if (recorder.isRecording)
-//            [recorder stop];
-//        
-//        if (canNotSend)
-//        {
-//            //取消发送，删除文件
-//            [VoiceRecorderBaseVC deleteFileAtPath:recordFilePath];
-//        }
-//        else
-//        {
-//            //回调录音文件路径
-//            if ([self.vrbDelegate respondsToSelector:@selector(VoiceRecorderBaseVCRecordFinish:fileName:)])
-//                [self.vrbDelegate VoiceRecorderBaseVCRecordFinish:recordFilePath fileName:recordFileName];
-//        }
-//    }];
-//}
-
 
 #pragma mark - AVAudioRecorder Delegate Methods
 - (void)audioRecorderDidFinishRecording:(AVAudioRecorder *)recorder successfully:(BOOL)flag
@@ -250,6 +159,18 @@
     }
     curCount = 0;
 }
+
+- (void)cancelRecord
+{
+    [self stopTimer];
+    if ([self.recordDel respondsToSelector:@selector(cancelRecordWithPath:andFileName:)] && curCount >= 1)
+    {
+        NSLog(@"录音停止%.1f",curCount);
+        [self.recordDel cancelRecordWithPath:recordFilePath andFileName:recordFileName];
+    }
+    curCount = 0;
+}
+
 - (void)audioRecorderBeginInterruption:(AVAudioRecorder *)recorder{
     NSLog(@"录音开始");
     [self stopTimer];

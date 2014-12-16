@@ -1972,8 +1972,11 @@ MLEmojiLabelDelegate>
     NSString *fileExtetion = [filePath pathExtension];
     NSRange range = [filePath rangeOfString:fileExtetion];
     NSString *pathStr = [filePath substringToIndex:range.location-1];
-    [VoiceConverter wavToAmr:filePath amrSavePath:[NSString stringWithFormat:@"%@.amr",pathStr]]; //amr123
-    [self sendSound:length andFilePath:[NSString stringWithFormat:@"%@.amr",pathStr]];
+    if (length > 1)
+    {
+        [VoiceConverter wavToAmr:filePath amrSavePath:[NSString stringWithFormat:@"%@.amr",pathStr]]; //amr123
+        [self sendSound:length andFilePath:[NSString stringWithFormat:@"%@.amr",pathStr]];
+    }
     
     if ([[NSFileManager defaultManager] removeItemAtPath:filePath error:nil])
     {
@@ -1986,7 +1989,21 @@ MLEmojiLabelDelegate>
     {
         DDLOG(@"删除源amr文件成功！");
     }
+}
+
+-(void)cancelRecordWithPath:(NSString *)filePath andFileName:(NSString *)fileName
+{
+    if ([[NSFileManager defaultManager] removeItemAtPath:filePath error:nil])
+    {
+        DDLOG(@"删除wav源文件成功！");
+    }
     
+    NSRange extentionRange = [filePath rangeOfString:[filePath pathExtension]];
+    NSString *amrPath = [NSString stringWithFormat:@"%@.amr",[filePath substringToIndex:extentionRange.location-1]];
+    if ([[NSFileManager defaultManager] removeItemAtPath:amrPath error:nil])
+    {
+        DDLOG(@"删除源amr文件成功！");
+    }
 }
 
 #pragma mark - emojilabeldelegate
