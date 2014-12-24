@@ -149,10 +149,12 @@ UITableViewDelegate>
     classNameTextField.font = [UIFont systemFontOfSize:18];
     [self.bgView addSubview:classNameTextField];
     
-    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
+    UIImage *btnImage = [ImageTools createImageWithColor:RGB(57, 188, 173, 1)];
     UIButton *createButton = [UIButton buttonWithType:UIButtonTypeCustom];
     createButton.backgroundColor = self.bgView.backgroundColor;
     createButton.frame = CGRectMake(40,classNameTextField.frame.size.height+classNameTextField.frame.origin.y+35, SCREEN_WIDTH-80, 40);
+    createButton.layer.cornerRadius = 5;
+    createButton.clipsToBounds = YES;
     [createButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     [createButton addTarget:self action:@selector(createClass) forControlEvents:UIControlEventTouchUpInside];
     [createButton setTitle:@"确定" forState:UIControlStateNormal];

@@ -370,7 +370,9 @@ UIAlertViewDelegate>
             cell.praiseButton.hidden = NO;
             [cell.praiseButton setTitle:@"创建" forState:UIControlStateNormal];
             [cell.praiseButton addTarget:self action:@selector(createClassClick) forControlEvents:UIControlEventTouchUpInside];
-            [cell.praiseButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(10, 10, 10, 10)] forState:UIControlStateNormal];
+            [cell.praiseButton setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
+            cell.praiseButton.layer.cornerRadius = 5;
+            cell.praiseButton.clipsToBounds = YES;
             cell.bgView.frame = cell.praiseButton.frame;
         }
     }

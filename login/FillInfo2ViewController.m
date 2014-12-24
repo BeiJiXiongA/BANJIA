@@ -151,8 +151,9 @@
     pwdTextField.font = [UIFont systemFontOfSize:16];
     
     pwdTextField.secureTextEntry = YES;
-    [self.startButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
-    
+    [self.startButton setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
+    self.startButton.layer.cornerRadius = 5;
+    self.startButton.clipsToBounds = YES;
     CGFloat originY = self.sexButton.frame.size.height+self.sexButton.frame.origin.y+27;
     if ([[Tools client_token] length] > 0)
     {

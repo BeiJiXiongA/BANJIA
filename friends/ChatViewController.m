@@ -216,15 +216,6 @@ MLEmojiLabelDelegate>
         fromImageStr = HEADERICON;
     }
    
-    edittingTableView = NO;
-    editButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    editButton.frame = CGRectMake(SCREEN_WIDTH - 60, 5, 50, NAV_RIGHT_BUTTON_HEIGHT);
-    [editButton setTitle:@"编辑" forState:UIControlStateNormal];
-    editButton.backgroundColor = [UIColor clearColor];
-    [editButton setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
-    [editButton addTarget:self action:@selector(editTableView) forControlEvents:UIControlEventTouchUpInside];
-//    [self.navigationBarView addSubview:editButton];
-    
     messageArray = [[NSMutableArray alloc] initWithCapacity:0];
     
     imagePickerController = [[UIImagePickerController alloc] init];
@@ -837,7 +828,7 @@ MLEmojiLabelDelegate>
                     NSRange range = [fname rangeOfString:@"("];
                     NSRange range1 = [fname rangeOfString:@"人"];
                     
-                    NSString *newName = [NSString stringWithFormat:@"%@(%d人)",[fname substringToIndex:range.location],[users count]];
+                    NSString *newName = [NSString stringWithFormat:@"%@(%lu人)",[fname substringToIndex:range.location],(unsigned long)[users count]];
                     if([[db findSetWithDictionary:@{@"uid":toID} andTableName:USERICONTABLE] count] > 0 &&
                        [db deleteRecordWithDict:@{@"uid":toID} andTableName:USERICONTABLE])
                     {

@@ -89,7 +89,9 @@
     [submitButton setTitle:@"确定" forState:UIControlStateNormal];
     [submitButton addTarget:self action:@selector(submitReport) forControlEvents:UIControlEventTouchUpInside];
     [self.bgView addSubview:submitButton];
-    [submitButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+    submitButton.layer.cornerRadius = 5;
+    submitButton.clipsToBounds = YES;
+    [submitButton setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
     
 }
 #pragma mark - keyboard

@@ -62,13 +62,15 @@
     
     [self.bgView addSubview:label];
     
-    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
+    UIImage *btnImage = [ImageTools createImageWithColor:RGB(57, 188, 173, 1)];
     
     UIButton *studentButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [studentButton setTitle:@"我是老师" forState:UIControlStateNormal];
     studentButton.frame = CGRectMake(39, UI_NAVIGATION_BAR_HEIGHT+170, SCREEN_WIDTH-78, 42);
     [studentButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     studentButton.titleLabel.font = [UIFont systemFontOfSize:16];
+    studentButton.layer.cornerRadius = 5;
+    studentButton.clipsToBounds = YES;
     [studentButton addTarget:self action:@selector(applyForJoinClass:) forControlEvents:UIControlEventTouchUpInside];
     studentButton.tag = 3000;
     [self.bgView addSubview:studentButton];
@@ -80,6 +82,8 @@
     [parentButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     [parentButton addTarget:self action:@selector(applyForJoinClass:) forControlEvents:UIControlEventTouchUpInside];
     parentButton.tag = 2000;
+    parentButton.layer.cornerRadius = 5;
+    parentButton.clipsToBounds = YES;
     [self.bgView addSubview:parentButton];
     
     UIButton *teacherButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -89,6 +93,8 @@
     teacherButton.titleLabel.font = [UIFont systemFontOfSize:16];
     [teacherButton addTarget:self action:@selector(applyForJoinClass:) forControlEvents:UIControlEventTouchUpInside];
     teacherButton.tag = 1000;
+    teacherButton.layer.cornerRadius = 5;
+    teacherButton.clipsToBounds = YES;
     [teacherButton setBackgroundImage:btnImage forState:UIControlStateNormal];
     [self.bgView addSubview:teacherButton];
     

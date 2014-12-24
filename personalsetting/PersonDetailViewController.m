@@ -308,7 +308,7 @@ MFMailComposeViewControllerDelegate>
         
         //        cell.nameLabel.textColor = TITLE_COLOR;
         
-        CGSize nameSize = [Tools getSizeWithString:personName andWidth:100 andFont:[UIFont boldSystemFontOfSize:18]];
+        CGSize nameSize = [Tools getSizeWithString:personName andWidth:150 andFont:[UIFont boldSystemFontOfSize:18]];
         cell.nameLabel.frame = CGRectMake(DetailHeaderHeight+30, 60, nameSize.width, 20);
         
         cell.nameLabel.text = personName;
@@ -407,13 +407,17 @@ MFMailComposeViewControllerDelegate>
             
             cell.button1.frame = CGRectMake(10, 10, 145, 43.5);
             [cell.button1 setTitle:ADDFRIEND forState:UIControlStateNormal];
-            [cell.button1 setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
-            
+            cell.button1.layer.cornerRadius = 5;
+            cell.button1.clipsToBounds = YES;
+            [cell.button1 setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
             [cell.button1 addTarget:self action:@selector(addFriend) forControlEvents:UIControlEventTouchUpInside];
             
             cell.button2.frame = CGRectMake(165, 10, 145, 43.5);
             [cell.button2 setTitle:CHATTO forState:UIControlStateNormal];
-            [cell.button2 setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+            
+            cell.button2.layer.cornerRadius = 5;
+            cell.button2.clipsToBounds = YES;
+            [cell.button2 setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
             
             cell.button1.iconImageView.frame = CGRectMake(ALEFT, ATOP, CHATW, CHATH);
             [cell.button1.iconImageView setImage:[UIImage imageNamed:@"add_friend"]];

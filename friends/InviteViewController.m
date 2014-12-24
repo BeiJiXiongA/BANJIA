@@ -278,7 +278,6 @@ UISearchBarDelegate>
     [mySearchBar setBackgroundImage:searchBarBgImage];
     
     mySearchBar.contentMode = UIControlContentHorizontalAlignmentLeft;
-//    mySearchBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"searchBG"]];
     mySearchBar.backgroundColor = UIColorFromRGB(0xcbc7cc);
     [bgScrollView addSubview:mySearchBar];
     
@@ -348,22 +347,28 @@ UISearchBarDelegate>
     
     selectButton = [UIButton buttonWithType:UIButtonTypeCustom];
     selectButton.frame = CGRectMake(SCREEN_WIDTH-75, 5, 70, 40);
-    [selectButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+    [selectButton setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
+    selectButton.layer.cornerRadius = 5;
+    selectButton.clipsToBounds = YES;
     selectButton.titleLabel.font = [UIFont systemFontOfSize:16];
     [selectButton addTarget:self action:@selector(inviteClick) forControlEvents:UIControlEventTouchUpInside];
     [selectView addSubview:selectButton];
     
     
     inviteTencentButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [inviteTencentButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+    [inviteTencentButton setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
+    inviteTencentButton.layer.cornerRadius = 5;
+    inviteTencentButton.clipsToBounds = YES;
     inviteTencentButton.frame = CGRectMake(CENTER_POINT.x-80+SCREEN_WIDTH*((TencentTableViewTag-fromClassTableViewIndex)%tableViewTagBase), bgScrollView.frame.size.height/2-35, 160, 42);
     [inviteTencentButton setTitle:@"邀请QQ好友" forState:UIControlStateNormal];
     [inviteTencentButton addTarget:self action:@selector(shareToQQFriendClickHandler:) forControlEvents:UIControlEventTouchUpInside];
     
     
     UIButton *inviteWeiXinButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [inviteWeiXinButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+    [inviteWeiXinButton setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
     inviteWeiXinButton.frame = CGRectMake(CENTER_POINT.x-80+SCREEN_WIDTH*((WeiXinTag-fromClassTableViewIndex)%tableViewTagBase), bgScrollView.frame.size.height/2-35, 160, 42);
+    inviteWeiXinButton.layer.cornerRadius = 5;
+    inviteWeiXinButton.clipsToBounds = YES;
     [inviteWeiXinButton setTitle:@"邀请微信好友" forState:UIControlStateNormal];
     [inviteWeiXinButton addTarget:self action:@selector(inviteWeiXin) forControlEvents:UIControlEventTouchUpInside];
     
@@ -445,7 +450,6 @@ UISearchBarDelegate>
                 btn.titleLabel.font = [UIFont systemFontOfSize:16];
                 [btn setTitleShadowColor:[UIColor clearColor] forState:UIControlStateNormal];
                 [btn setBackgroundImage:[UIImage imageNamed:@"searchbarbg1"] forState:UIControlStateNormal];
-                [btn setBackgroundImage:[UIImage imageNamed:@"searchbarbg1"] forState:UIControlStateHighlighted];
             }
         }
         

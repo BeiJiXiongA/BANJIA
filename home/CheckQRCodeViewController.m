@@ -178,7 +178,6 @@
     
     [cancelButton setTitle:@"取消" forState:UIControlStateNormal];
     
-    //    [cancelButton setImage:[UIImage imageNamed:@"outer_nav_backbtn_s"] forState:UIControlStateNormal];
     
     [cancelButton.titleLabel setFont:[UIFont boldSystemFontOfSize:20]];
     

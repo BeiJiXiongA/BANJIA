@@ -1093,7 +1093,9 @@ ShareContentDelegate>
                 cell.praiseButton.hidden = NO;
                 cell.praiseButton.frame = CGRectMake(37, bgImageViewHeight+18, SCREEN_WIDTH-74, 42);
                 [cell.praiseButton setTitle:@"申请加入" forState:UIControlStateNormal];
-                [cell.praiseButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+                [cell.praiseButton setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
+                cell.praiseButton.layer.cornerRadius = 5;
+                cell.praiseButton.clipsToBounds = YES;
                 [cell.praiseButton addTarget:self action:@selector(applyJoin) forControlEvents:UIControlEventTouchUpInside];
                 cell.praiseButton.titleLabel.font = [UIFont systemFontOfSize:18];
                 [cell.praiseButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];

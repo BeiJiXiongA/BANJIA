@@ -52,7 +52,6 @@
     
     sec = 60;
     
-//    UIImage*inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 3, 20, 2.3)];
     
     phoneNumTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(29, 104+UI_NAVIGATION_BAR_HEIGHT, SCREEN_WIDTH-29-24.5, 42)];
     phoneNumTextfield.delegate = self;
@@ -71,7 +70,7 @@
     phoneNumTextfield.numericFormatter = [AKNumericFormatter formatterWithMask:@"***********" placeholderCharacter:'*'];
     [self.bgView addSubview:phoneNumTextfield];
     
-    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
+    UIImage *btnImage = [ImageTools createImageWithColor:RGB(57, 188, 173, 1)];
     getCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
     getCodeButton.frame = CGRectMake(SCREEN_WIDTH-100, phoneNumTextfield.frame.origin.y+5, 70, 32);
     [getCodeButton setBackgroundImage:btnImage forState:UIControlStateNormal];

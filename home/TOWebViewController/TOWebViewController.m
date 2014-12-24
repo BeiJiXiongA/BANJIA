@@ -290,7 +290,6 @@ static const float kAfterInteractiveMaxProgressValue    = 0.9f;
     UIImageView *navigationBarBg = [[UIImageView alloc] init];
     navigationBarBg.backgroundColor = UIColorFromRGB(0xfcfcfc);
     navigationBarBg.frame = CGRectMake(0, 0, UI_SCREEN_WIDTH, UI_NAVIGATION_BAR_HEIGHT);
-//    navigationBarBg.image = [UIImage imageNamed:@"nav_bar_bg"];
     [navigationBarView addSubview:navigationBarBg];
     
     UILabel  *titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(self.view.frame.size.width/2-90, YSTART + 6, 180, 36)];

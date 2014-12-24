@@ -57,7 +57,9 @@
     UIButton *createSchoolButton = [UIButton buttonWithType:UIButtonTypeCustom];
     createSchoolButton.frame = CGRectMake(SCREEN_WIDTH-10-110, 5, 100, 30);
     [createSchoolButton setTitle:@"创建新学校" forState:UIControlStateNormal];
-    [createSchoolButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(10, 10, 10, 10)] forState:UIControlStateNormal];
+    [createSchoolButton setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
+    createSchoolButton.layer.cornerRadius = 5;
+    createSchoolButton.clipsToBounds = YES;
     [createSchoolButton addTarget:self action:@selector(createSchool) forControlEvents:UIControlEventTouchUpInside];
     [createSchoolView addSubview:createSchoolButton];
     
@@ -77,7 +79,9 @@
     UIButton *createSchoolButton1 = [UIButton buttonWithType:UIButtonTypeCustom];
     createSchoolButton1.frame = CGRectMake(SCREEN_WIDTH/2-60, UI_NAVIGATION_BAR_HEIGHT+150, 120, 40);
     [createSchoolButton1 setTitle:@"创建新学校" forState:UIControlStateNormal];
-    [createSchoolButton1 setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(10, 10, 10, 10)] forState:UIControlStateNormal];
+    [createSchoolButton1 setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
+    createSchoolButton1.layer.cornerRadius = 5;
+    createSchoolButton1.clipsToBounds = YES;
     [createSchoolButton1 addTarget:self action:@selector(createSchool) forControlEvents:UIControlEventTouchUpInside];
     if ([schoolArray count] <= 0)
     {

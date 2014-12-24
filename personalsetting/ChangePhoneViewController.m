@@ -63,10 +63,12 @@
     phoneNumTextfield.numericFormatter = [AKNumericFormatter formatterWithMask:PHONE_FORMAT placeholderCharacter:'*'];
     [self.bgView addSubview:phoneNumTextfield];
     
-    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
+    UIImage *btnImage = [ImageTools createImageWithColor:RGB(57, 188, 173, 1)];
     getCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
     getCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, phoneNumTextfield.frame.origin.y+6, 58, 30);
     [getCodeButton setBackgroundImage:btnImage forState:UIControlStateNormal];
+    getCodeButton.layer.cornerRadius = 5;
+    getCodeButton.clipsToBounds = YES;
     [getCodeButton setTitle:@"短信验证" forState:UIControlStateNormal];
     getCodeButton.titleLabel.font = [UIFont boldSystemFontOfSize:13];
     [getCodeButton addTarget:self action:@selector(getVerifyCode) forControlEvents:UIControlEventTouchUpInside];
@@ -87,6 +89,8 @@
     
     changeButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [changeButton setBackgroundImage:btnImage forState:UIControlStateNormal];
+    changeButton.layer.cornerRadius = 5;
+    changeButton.clipsToBounds = YES;
     changeButton.frame = CGRectMake(30, codeTextField.frame.origin.y+codeTextField.frame.size.height + 25, SCREEN_WIDTH-60, 40);
     [changeButton setTitle:@"提交手机号" forState:UIControlStateNormal];
     [changeButton addTarget:self action:@selector(verify) forControlEvents:UIControlEventTouchUpInside];

@@ -111,8 +111,8 @@ updateGroupInfoDelegate>
         cell.button2.hidden = NO;
         [cell.button1 setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         [cell.button2 setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        [cell.button1 setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
-        [cell.button2 setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
+        [cell.button1 setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
+        [cell.button2 setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
         cell.button1.frame = CGRectMake(SCREEN_WIDTH-120, 10, 50, 30);
         cell.button2.frame = CGRectMake(SCREEN_WIDTH-60, 10, 50, 30);
 
@@ -122,6 +122,11 @@ updateGroupInfoDelegate>
         [cell.button2 setTitle:@"忽略" forState:UIControlStateNormal];
         cell.button2.tag = indexPath.row+1000;
         [cell.button2 addTarget:self action:@selector(refuseFriend:) forControlEvents:UIControlEventTouchUpInside];
+        
+        cell.button1.layer.cornerRadius = 5;
+        cell.button1.clipsToBounds = YES;
+        cell.button2.layer.cornerRadius = 5;
+        cell.button2.clipsToBounds = YES;
 
         CGFloat cellHeight = [tableView rectForRowAtIndexPath:indexPath].size.height;
         UIImageView *lineImageView = [[UIImageView alloc] init];

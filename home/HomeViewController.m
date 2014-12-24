@@ -333,14 +333,18 @@ ShareContentDelegate>
     
     joinClassButton = [UIButton buttonWithType:UIButtonTypeCustom];
     joinClassButton.frame = CGRectMake(22, 80, SCREEN_WIDTH-64, 36);
-    [joinClassButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+    [joinClassButton setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
+    joinClassButton.layer.cornerRadius = 5;
+    joinClassButton.clipsToBounds = YES;
     [joinClassButton addTarget:self action:@selector(joinClass) forControlEvents:UIControlEventTouchUpInside];
     [joinClassButton setTitle:@"加入班级" forState:UIControlStateNormal];
     [tipView addSubview:joinClassButton];
     
     createClassButton = [UIButton buttonWithType:UIButtonTypeCustom];
     createClassButton.frame = CGRectMake(22, 130, SCREEN_WIDTH-64, 35.5);
-    [createClassButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+    [createClassButton setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
+    createClassButton.layer.cornerRadius = 5;
+    createClassButton.clipsToBounds = YES;
     [createClassButton addTarget:self action:@selector(createClass) forControlEvents:UIControlEventTouchUpInside];
     [createClassButton setTitle:@"创建班级" forState:UIControlStateNormal];
     [tipView addSubview:createClassButton];
@@ -396,13 +400,17 @@ ShareContentDelegate>
         
         tipJoinClassButton = [UIButton buttonWithType:UIButtonTypeCustom];
         tipJoinClassButton.frame = CGRectMake(5, 5, SCREEN_WIDTH-72, 37);
-        [tipJoinClassButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+        [tipJoinClassButton setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
+        tipJoinClassButton.layer.cornerRadius = 5;
+        tipJoinClassButton.clipsToBounds = YES;
         [tipJoinClassButton setTitle:@"加入班级" forState:UIControlStateNormal];
         [buttonView addSubview:tipJoinClassButton];
         
         tipCreateClassButton = [UIButton buttonWithType:UIButtonTypeCustom];
         tipCreateClassButton.frame = CGRectMake(5, 47, SCREEN_WIDTH-72, 37);
-        [tipCreateClassButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+        [tipCreateClassButton setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
+        tipCreateClassButton.layer.cornerRadius = 5;
+        tipCreateClassButton.clipsToBounds = YES;
         [tipCreateClassButton setTitle:@"创建班级" forState:UIControlStateNormal];
         [buttonView addSubview:tipCreateClassButton];
         
@@ -840,7 +848,7 @@ ShareContentDelegate>
         __weak ASIHTTPRequest *request = [Tools postRequestWithDict:@{@"u_id":[Tools user_id],
                                                                       @"token":[Tools client_token],
                                                                       @"c_id":@"",
-                                                                      @"number":[NSString stringWithFormat:@"%d",[searchContent integerValue]]
+                                                                      @"number":[NSString stringWithFormat:@"%ld",(long)[searchContent integerValue]]
                                                                       } API:SEARCHCLASS];
         [request setCompletionBlock:^{
             [Tools hideProgress:self.bgView];
@@ -1920,7 +1928,6 @@ ShareContentDelegate>
         cell.timeLabel.textColor = COMMENTCOLOR;
         
          cell.iconImageView.frame = CGRectMake(20, 17, 12, 12);
-//        [cell.iconImageView setImage:[UIImage imageNamed:@"unreadicon"]];
         cell.iconImageView.layer.cornerRadius = 6;
         cell.iconImageView.clipsToBounds = YES;
         cell.iconImageView.backgroundColor = RGB(228, 76, 76, 1);

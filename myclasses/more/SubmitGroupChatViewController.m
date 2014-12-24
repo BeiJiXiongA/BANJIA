@@ -71,7 +71,7 @@
     nameTextField.placeholder = @"群聊名称";
     if ([selectArray count] > 3)
     {
-        nameTextField.text = [NSString stringWithFormat:@"%@等(%lu人)",[nameStr substringToIndex:[nameStr length]-1],[selectArray count]+1];
+        nameTextField.text = [NSString stringWithFormat:@"%@等(%u人)",[nameStr substringToIndex:[nameStr length]-1],[selectArray count]+1];
     }
     else
     {
@@ -91,7 +91,9 @@
     submitButton.frame = CGRectMake(left, UI_NAVIGATION_BAR_HEIGHT+140, SCREEN_WIDTH-left*2, 40);
     [submitButton setTitle:@"完成" forState:UIControlStateNormal];
     [submitButton addTarget:self action:@selector(createClick) forControlEvents:UIControlEventTouchUpInside];
-    [submitButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+    [submitButton setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
+    submitButton.layer.cornerRadius = 5;
+    submitButton.clipsToBounds = YES;
     [self.bgView addSubview:submitButton];
 }
 

@@ -588,7 +588,6 @@ diaryIndexPath;
             [cell.nameButton setTitle:@"" forState:UIControlStateNormal];
             
             cell.nameButton.frame = CGRectMake(12, CommentSpace, 18, 18);
-//            [cell.nameButton setImage:[UIImage imageNamed:@"praised"] forState:UIControlStateNormal];
             cell.nameButton.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"praised"]];
             cell.commentContentLabel.frame = CGRectMake(35, cell.nameButton.frame.origin.y, SCREEN_WIDTH-50, PraiseCellHeight);
             cell.commentContentLabel.text = [NSString stringWithFormat:@"%d人觉得很赞",(int)[praiseArray count]];

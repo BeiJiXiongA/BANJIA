@@ -76,10 +76,11 @@
     phoneNumTextfield.text = phoneNum;
     [self.bgView addSubview:phoneNumTextfield];
     
-    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
     getCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
     getCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, phoneNumTextfield.frame.origin.y+5, 58, 32);
-    [getCodeButton setBackgroundImage:btnImage forState:UIControlStateNormal];
+    [getCodeButton setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
+    getCodeButton.layer.cornerRadius = 5;
+    getCodeButton.clipsToBounds = YES;
     [getCodeButton setTitle:@"短信验证" forState:UIControlStateNormal];
     getCodeButton.titleLabel.font = [UIFont boldSystemFontOfSize:13];
     [getCodeButton addTarget:self action:@selector(getCheckCode) forControlEvents:UIControlEventTouchUpInside];
@@ -99,8 +100,10 @@
     
     UIButton *checkCodeButton = [UIButton buttonWithType:UIButtonTypeCustom];
     checkCodeButton.frame = CGRectMake(SCREEN_WIDTH-91, codeTextField.frame.origin.y+5, 58, 32);
-    [checkCodeButton setBackgroundImage:btnImage forState:UIControlStateNormal];
+    [checkCodeButton setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
     [checkCodeButton setTitle:@"验证" forState:UIControlStateNormal];
+    checkCodeButton.layer.cornerRadius = 5;
+    checkCodeButton.clipsToBounds = YES;
     checkCodeButton.titleLabel.font = [UIFont boldSystemFontOfSize:13];
     [checkCodeButton addTarget:self action:@selector(verify) forControlEvents:UIControlEventTouchUpInside];
 //    [self.bgView addSubview:checkCodeButton];
@@ -130,8 +133,10 @@
     
     startButton = [UIButton buttonWithType:UIButtonTypeCustom];
     startButton.frame = CGRectMake(40, verifyTextField.frame.origin.y + verifyTextField.frame.size.height+20, SCREEN_WIDTH-80, 42);
-    [startButton setBackgroundImage:btnImage forState:UIControlStateNormal];
+    [startButton setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
     [startButton setTitle:@"提交" forState:UIControlStateNormal];
+    startButton.layer.cornerRadius = 5;
+    startButton.clipsToBounds = YES;
     [startButton addTarget:self action:@selector(verify) forControlEvents:UIControlEventTouchUpInside];
     [self.bgView addSubview:startButton];
     

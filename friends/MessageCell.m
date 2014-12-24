@@ -109,7 +109,7 @@
     
     self.messageContentLabel.hidden = NO;
     self.timeLabel.hidden = YES;
-    self.messageContentLabel.disableThreeCommon = YES;
+//    self.messageContentLabel.disableThreeCommon = YES;
     
     self.messageContentLabel.textColor = CHAT_CONTENT_COLOR;
     self.messageContentLabel.backgroundColor = [UIColor clearColor];

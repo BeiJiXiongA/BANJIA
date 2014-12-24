@@ -190,7 +190,7 @@ UIScrollViewDelegate>
     
 //    [self getAdmins];
     
-    UIImage *btnImage  =[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
+    UIImage *btnImage  = [ImageTools createImageWithColor:RGB(57, 188, 173, 1)];
     studentButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [studentButton setTitle:@"提交" forState:UIControlStateNormal];
     studentButton.enabled = NO;
@@ -391,7 +391,9 @@ UIScrollViewDelegate>
                 [[NSUserDefaults standardUserDefaults] synchronize];
                 
                 studentButton.enabled = YES;
-                [studentButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+                [studentButton setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
+                studentButton.layer.cornerRadius = 5;
+                studentButton.clipsToBounds = YES;
             }
             else
             {

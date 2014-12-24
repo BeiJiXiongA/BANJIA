@@ -378,7 +378,7 @@ UIActionSheetDelegate>
     lineImageView1.backgroundColor = LineBackGroudColor;
     [phoneNumView addSubview:lineImageView1];
     
-    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
+    UIImage *btnImage = [ImageTools createImageWithColor:RGB(57, 188, 173, 1)];
     
     if ([[Tools phone_num] length] > 0)
     {
@@ -729,28 +729,6 @@ UIActionSheetDelegate>
 
 -(void)selectRelate
 {
-//    if (showRelate)
-//    {
-//        [UIView animateWithDuration:0.2 animations:^{
-//            
-//            relateTableView.frame = CGRectMake(relateButton.frame.origin.x, relateButton.frame.size.height+relateButton.frame.origin.y, relateButton.frame.size.width, 0);
-//            [arrowImageView setImage:[UIImage imageNamed:@"arrow_down"]];
-//        }];
-//        [mainScrollView addGestureRecognizer:tap];
-//    }
-//    else
-//    {
-//        [UIView animateWithDuration:0.2 animations:^{
-//            relateTableView.frame = CGRectMake(relateButton.frame.origin.x, relateButton.frame.size.height+relateButton.frame.origin.y, relateButton.frame.size.width, [relateArray count]*40);
-//            [arrowImageView setImage:[UIImage imageNamed:@"arrow_up"]];
-//        }];
-//        [mainScrollView removeGestureRecognizer:tap];
-//    }
-//    [studentNumField resignFirstResponder];
-//    [mySearchBar resignFirstResponder];
-//    showRelate = !showRelate;
-//    [relateTableView reloadData];
-    
     UIActionSheet *ac = [[UIActionSheet alloc] initWithTitle:@"" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"爸爸",@"妈妈",@"爷爷",@"奶奶",@"姥爷",@"姥姥",@"家长", nil];
     ac.tag = RelateActionTag;
     [ac showInView:self.bgView];

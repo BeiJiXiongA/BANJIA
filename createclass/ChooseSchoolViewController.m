@@ -74,7 +74,9 @@ UISearchBarDelegate>
     [navCreateSchoolButton setTitle:@"创建" forState:UIControlStateNormal];
     navCreateSchoolButton.frame = CGRectMake(SCREEN_WIDTH - 60, self.backButton.frame.origin.y, 50, NAV_RIGHT_BUTTON_HEIGHT);
     [navCreateSchoolButton addTarget:self action:@selector(createSchoolClick) forControlEvents:UIControlEventTouchUpInside];
-    [navCreateSchoolButton setBackgroundImage:[UIImage imageNamed:NAVBTNBG] forState:UIControlStateNormal];
+    [navCreateSchoolButton setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
+    navCreateSchoolButton.layer.cornerRadius = 5;
+    navCreateSchoolButton.clipsToBounds = YES;
     [self.navigationBarView addSubview:navCreateSchoolButton];
     
     tmpArray = [[NSMutableArray alloc] initWithCapacity:0];
@@ -110,12 +112,7 @@ UISearchBarDelegate>
             break;  
         }   
     }
-//    UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 3, 20, 2)];
-//    
-//    UIImageView *inputImageView = [[UIImageView alloc] initWithFrame:mySearchBar.frame];
-//    inputImageView.image = inputImage;
-//    [self.bgView insertSubview:inputImageView belowSubview:mySearchBar];
-
+    
     tipLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, mySearchBar.frame.size.height+mySearchBar.frame.origin.y+10, SCREEN_WIDTH-30, 40)];
     tipLabel.backgroundColor = [UIColor clearColor];
     tipLabel.text = [NSString stringWithFormat:@"我们在数据库里没有查到您输入的学校，班级小组会尽快为您核实信息。"];
@@ -157,13 +154,6 @@ UISearchBarDelegate>
     searchResultTableView.hidden = YES;
     
     [self getHotSchools];
-    
-//    UIButton *regionSearch = [UIButton buttonWithType:UIButtonTypeCustom];
-//    [regionSearch setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(10, 10, 10, 10)] forState:UIControlStateNormal];
-//    regionSearch.frame = CGRectMake(50, SCREEN_HEIGHT-50, SCREEN_WIDTH-100, 40);
-//    [regionSearch addTarget:self action:@selector(regionsearch) forControlEvents:UIControlEventTouchUpInside];
-//    [regionSearch setTitle:@"按区域搜索" forState:UIControlStateNormal];
-//    [self.bgView addSubview:regionSearch];
 }
 
 - (void)didReceiveMemoryWarning

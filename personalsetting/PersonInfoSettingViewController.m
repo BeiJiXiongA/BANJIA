@@ -132,9 +132,11 @@ EditNameDone>
     toolBar.frame = CGRectMake(0, SCREEN_HEIGHT-290, SCREEN_WIDTH, 45);
     [dateView addSubview:toolBar];
     
-    UIImage *btnBgImage = [Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
+    UIImage *btnBgImage = [ImageTools createImageWithColor:RGB(57, 188, 173, 1)];
     dateCancelButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [dateCancelButton setTitle:@"取消" forState:UIControlStateNormal];
+    dateCancelButton.layer.cornerRadius = 5;
+    dateCancelButton.clipsToBounds = YES;
     [dateCancelButton setBackgroundImage:btnBgImage forState:UIControlStateNormal];
     [dateCancelButton addTarget:self action:@selector(dateCancel) forControlEvents:UIControlEventTouchUpInside];
     dateCancelButton.frame = CGRectMake(10, 5, 60, 35);
@@ -144,6 +146,8 @@ EditNameDone>
     dateDoneButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [dateDoneButton setTitle:@"完成" forState:UIControlStateNormal];
     [dateDoneButton setBackgroundImage:btnBgImage forState:UIControlStateNormal];
+    dateDoneButton.layer.cornerRadius = 5;
+    dateDoneButton.clipsToBounds = YES;
     [dateDoneButton addTarget:self action:@selector(dateDone) forControlEvents:UIControlEventTouchUpInside];
     dateDoneButton.frame = CGRectMake(SCREEN_WIDTH-70, 5, 60, 35);
     [toolBar addSubview:dateDoneButton];

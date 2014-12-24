@@ -126,8 +126,6 @@ UIActionSheetDelegate>
     [moreButton addTarget:self action:@selector(moreOpen) forControlEvents:UIControlEventTouchUpInside];
     [self.navigationBarView addSubview:moreButton];
     
-//    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"navbtn"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
-    
     addButton = [UIButton buttonWithType:UIButtonTypeCustom];
     addButton = [UIButton buttonWithType:UIButtonTypeCustom];
     addButton.backgroundColor = [UIColor clearColor];
@@ -151,14 +149,18 @@ UIActionSheetDelegate>
     
     joinClassButton = [UIButton buttonWithType:UIButtonTypeCustom];
     joinClassButton.frame = CGRectMake(21, 80, SCREEN_WIDTH-62, 40);
-    [joinClassButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+    [joinClassButton setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
+    joinClassButton.layer.cornerRadius = 5;
+    joinClassButton.clipsToBounds = YES;
     [joinClassButton addTarget:self action:@selector(joinClass) forControlEvents:UIControlEventTouchUpInside];
     [joinClassButton setTitle:@"加入班级" forState:UIControlStateNormal];
     [tipView addSubview:joinClassButton];
     
     createClassButton = [UIButton buttonWithType:UIButtonTypeCustom];
     createClassButton.frame = CGRectMake(21, 130, SCREEN_WIDTH-62, 40);
-    [createClassButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+    [createClassButton setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
+    createClassButton.layer.cornerRadius = 5;
+    createClassButton.clipsToBounds = YES;
     [createClassButton addTarget:self action:@selector(createClass) forControlEvents:UIControlEventTouchUpInside];
     [createClassButton setTitle:@"创建班级" forState:UIControlStateNormal];
     [tipView addSubview:createClassButton];

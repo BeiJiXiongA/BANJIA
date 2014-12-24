@@ -61,7 +61,9 @@
     }
     
     UIButton *doneButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [doneButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+    [doneButton setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
+    doneButton.layer.cornerRadius = 5;
+    doneButton.clipsToBounds = YES;
     [doneButton setTitle:@"确定" forState:UIControlStateNormal];
     [doneButton addTarget:self action:@selector(editDone) forControlEvents:UIControlEventTouchUpInside];
     doneButton.frame = CGRectMake(41.5, UI_NAVIGATION_BAR_HEIGHT + 120, SCREEN_WIDTH-83, 42.5);

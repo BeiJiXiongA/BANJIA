@@ -19,13 +19,9 @@
         thumImageView.backgroundColor = [UIColor whiteColor];
         [self.contentView addSubview:thumImageView];
         
-//        UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
-        
         deleteButton = [UIButton buttonWithType:UIButtonTypeCustom];
         deleteButton.frame = CGRectMake(0, 0, 60, 20);
         [deleteButton setImage:[UIImage imageNamed:@"icon_del"] forState:UIControlStateNormal];
-//        [deleteButton setTitle:@"删除" forState:UIControlStateNormal];
-//        [deleteButton setBackgroundImage:btnImage forState:UIControlStateNormal];
         [self.contentView addSubview:deleteButton];
     }
     return self;

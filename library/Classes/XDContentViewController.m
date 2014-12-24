@@ -132,7 +132,6 @@
     _navigationBarBg = [[UIImageView alloc] init];
     _navigationBarBg.backgroundColor = NavigationBgColor;
     _navigationBarBg.frame = CGRectMake(0, 0, UI_SCREEN_WIDTH, UI_NAVIGATION_BAR_HEIGHT);
-//    _navigationBarBg.image = [UIImage imageNamed:@"nav_bar_bg"];
     
     [_navigationBarView addSubview:_navigationBarBg];
     

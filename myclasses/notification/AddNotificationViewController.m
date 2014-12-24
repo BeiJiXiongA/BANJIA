@@ -128,7 +128,9 @@ SelectClasses>
     
     UIButton *sendButton1 = [UIButton buttonWithType:UIButtonTypeCustom];
     sendButton1.backgroundColor = [UIColor clearColor];
-    [sendButton1 setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+    [sendButton1 setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
+    sendButton1.layer.cornerRadius = 5;
+    sendButton1.clipsToBounds = YES;
     sendButton1.frame = CGRectMake((SCREEN_WIDTH-300)/2, inputImageView.frame.size.height+inputImageView.frame.origin.y+10, 300, 42);
     [sendButton1 setTitle:@"发布" forState:UIControlStateNormal];
     [sendButton1 addTarget:self action:@selector(sendnotice) forControlEvents:UIControlEventTouchUpInside];

@@ -128,9 +128,7 @@ return shared##className; \
 
 #pragma mark - 用户信息
 #define HEADERDEFAULT  @"header_pic.jpg"
-#define HEADERBG     @"headerbg"
 #define HEADERICON   @"defaultheader"
-#define NAVBTNBG    @"navbtn"
 #define NAVCOLOR    TITLE_COLOR
 #define CornerMore   @"corner_more"
 #define CORNERMORERIGHT  50

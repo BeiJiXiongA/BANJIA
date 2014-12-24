@@ -291,9 +291,6 @@ MFMailComposeViewControllerDelegate>
         else
         {
             cell.markLabel.text = [NSString stringWithFormat:@"当前版本%@",[Tools client_ver]];
-            
-//            cell.accessoryView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"discovery_arrow"]];
-//            [cell.accessoryView setFrame:CGRectMake(SCREEN_WIDTH-20, 12.5, 10, 15)];
         }
         
     }

@@ -26,4 +26,6 @@
 
 +(void)setImageView:(UIImageView *)imageView withAsset:(ALAsset *)asset andDefault:(NSString *)defaultName;
 
++ (UIImage *) createImageWithColor: (UIColor *) color;
+
 @end

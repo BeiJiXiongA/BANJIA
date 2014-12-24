@@ -134,7 +134,6 @@ UITextFieldDelegate>
     versionLabel.textAlignment = NSTextAlignmentLeft;
 //    [headerView addSubview:versionLabel];
     
-//    UIImage *inputImage = [Tools getImageFromImage:[UIImage imageNamed:@"input"] andInsets:UIEdgeInsetsMake(20, 2, 20, 2)];
     
     phoneNumTextfield = [[MyTextField alloc] initWithFrame:CGRectMake(28, headerView.frame.size.height+headerView.frame.origin.y+space, SCREEN_WIDTH-56, 43)];
     phoneNumTextfield.backgroundColor = [UIColor whiteColor];
@@ -178,8 +177,10 @@ UITextFieldDelegate>
     [loginButton addTarget:self action:@selector(login) forControlEvents:UIControlEventTouchUpInside];
     loginButton.titleLabel.textAlignment = NSTextAlignmentLeft;
     [loginButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [loginButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
-    [loginButton setTintColor:[[UIColor whiteColor]colorWithAlphaComponent:0.3]];
+    [loginButton setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
+    [loginButton setTintColor:[[UIColor whiteColor] colorWithAlphaComponent:0.3]];
+    loginButton.layer.cornerRadius = 5;
+    loginButton.clipsToBounds = YES;
     [self.bgView addSubview:loginButton];
     
     UIButton *forgetPwdButton = [UIButton buttonWithType:UIButtonTypeCustom];

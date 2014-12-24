@@ -1218,7 +1218,9 @@ MsgDelegate>
                 [cell.button2 setTitle:@"邀请家长" forState:UIControlStateNormal];
                 cell.button2.titleLabel.font = [UIFont systemFontOfSize:14];
                 cell.button2.frame = CGRectMake(SCREEN_WIDTH-90, 7.5, 70, 35);
-                [cell.button2 setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+                [cell.button2 setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
+                cell.button2.layer.cornerRadius = 5;
+                cell.button2.clipsToBounds = YES;
                 cell.button2.tag = (indexPath.section-2) * 3333 +indexPath.row;
                 [cell.button2 addTarget:self action:@selector(inviteButtonClick:) forControlEvents:UIControlEventTouchUpInside];
                 [cell.button2 setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];

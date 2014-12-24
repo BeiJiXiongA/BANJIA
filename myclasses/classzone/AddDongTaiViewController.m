@@ -382,9 +382,6 @@ int count = 0;
     [mainScrollView addSubview:latelyLabel];
     latelyLabel.hidden = YES;
 
-    
-//    UIImage *btnImage = [Tools getImageFromImage:[UIImage imageNamed:@"btn_bg"] andInsets:UIEdgeInsetsMake(1, 1, 1, 1)];
-    
     locationBgView = [[UIView alloc] init];
     locationBgView.frame = CGRectMake(lateImageView.frame.origin.x, imageScrollView.frame.origin.y+imageScrollView.frame.size.height+spaceHeight, lateImageView.frame.size.width, 45);
     locationBgView.backgroundColor = [UIColor whiteColor];

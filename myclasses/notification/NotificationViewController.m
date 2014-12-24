@@ -542,7 +542,6 @@ EGORefreshTableDelegate>
         }
         
         cell.contentLabel.text = [noticeContent stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-//        cell.contentLabel.font = DongTaiContentFont;
         cell.contentLabel.textColor = CONTENTCOLOR;
         cell.contentLabel.contentMode = UIViewContentModeTop;
         
@@ -550,7 +549,6 @@ EGORefreshTableDelegate>
         {
             cell.iconImageView.hidden = NO;
             cell.iconImageView.frame = CGRectMake(20, 17, 12, 12);
-            //        [cell.iconImageView setImage:[UIImage imageNamed:@"unreadicon"]];
             cell.iconImageView.layer.cornerRadius = 6;
             cell.iconImageView.clipsToBounds = YES;
             cell.iconImageView.backgroundColor = RGB(228, 76, 76, 1);

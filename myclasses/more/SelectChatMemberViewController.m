@@ -204,7 +204,9 @@ UISearchBarDelegate>
     [buttomView addSubview:chatMemberScrollView];
     
     submitButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [submitButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+    [submitButton setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
+    submitButton.layer.cornerRadius = 5;
+    submitButton.clipsToBounds = YES;
     submitButton.frame = CGRectMake(SCREEN_WIDTH-65, 13, 60, 34);
     submitButton.titleLabel.font = [UIFont systemFontOfSize:14];
     [submitButton addTarget:self action:@selector(submitChat) forControlEvents:UIControlEventTouchUpInside];

@@ -44,7 +44,9 @@
     
     UIButton *bindButton = [UIButton buttonWithType:UIButtonTypeCustom];
     bindButton.frame = CGRectMake(50, tipLabel.frame.size.height+tipLabel.frame.origin.y, SCREEN_WIDTH-100, 40);
-    [bindButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(5, 5, 5, 5)] forState:UIControlStateNormal];
+    [bindButton setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
+    bindButton.layer.cornerRadius = 5;
+    bindButton.clipsToBounds = YES;
     [bindButton setTitle:@"绑定" forState:UIControlStateNormal];
     [bindButton addTarget:self action:@selector(bindSchool) forControlEvents:UIControlEventTouchUpInside];
     [self.bgView addSubview:bindButton];

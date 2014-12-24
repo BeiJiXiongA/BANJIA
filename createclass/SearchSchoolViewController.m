@@ -9,7 +9,6 @@
 #import "SearchSchoolViewController.h"
 #import "TrendsCell.h"
 #import <CoreLocation/CoreLocation.h>
-//#import "DemoViewController.h"
 #import "SelectSchoolLevelViewController.h"
 #import "SchoolListViewController.h"
 #import "SelectCityViewController.h"
@@ -18,7 +17,6 @@
 @interface SearchSchoolViewController ()<
 UITableViewDataSource,
 UITableViewDelegate,
-//SelectArea,
 SelectSchoolLevelDel,
 UITextFieldDelegate,
 SelectCitydelegate,
@@ -445,7 +443,9 @@ CLLocationManagerDelegate>
             cell.praiseButton.hidden = NO;
             [cell.praiseButton setTitle:@"搜索" forState:UIControlStateNormal];
             [cell.praiseButton addTarget:self action:@selector(searchSchool) forControlEvents:UIControlEventTouchUpInside];
-            [cell.praiseButton setBackgroundImage:[Tools getImageFromImage:[UIImage imageNamed:NAVBTNBG] andInsets:UIEdgeInsetsMake(10, 10, 10, 10)] forState:UIControlStateNormal];
+            [cell.praiseButton setBackgroundImage:[ImageTools createImageWithColor:RGB(57, 188, 173, 1)] forState:UIControlStateNormal];
+            cell.praiseButton.layer.cornerRadius = 5;
+            cell.praiseButton.clipsToBounds = YES;
             cell.bgView.frame = cell.praiseButton.frame;
         }
     }
